@@ -6,16 +6,13 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getAlertStats } from './get_alert_stats';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
-let logger: MockedLogger;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  logger = loggerMock.create();
 });
 
 function mockSearchResponse({
@@ -64,7 +61,7 @@ describe('getAlertStats', () => {
       _all: { total: { store: { size_in_bytes: 1024000 } } },
     } as any);
 
-    const result = await getAlertStats(esClient, logger);
+    const result = await getAlertStats(esClient);
 
     expect(result).toEqual({
       alerts_count: 42,
@@ -81,7 +78,7 @@ describe('getAlertStats', () => {
     mockSearchResponse({});
     esClient.indices.stats.mockRejectedValueOnce(new Error('index not found'));
 
-    const result = await getAlertStats(esClient, logger);
+    const result = await getAlertStats(esClient);
 
     expect(result.alerts_index_size_bytes).toBeNull();
   });
@@ -99,7 +96,7 @@ describe('getAlertStats', () => {
       _all: { total: { store: { size_in_bytes: 0 } } },
     } as any);
 
-    const result = await getAlertStats(esClient, logger);
+    const result = await getAlertStats(esClient);
 
     expect(result).toEqual({
       alerts_count: 0,
@@ -109,6 +106,28 @@ describe('getAlertStats', () => {
       alerts_episode_count: 0,
       alerts_min_timestamp: null,
       alerts_index_size_bytes: 0,
+    });
+  });
+
+  it('returns defaults when aggregations are undefined', async () => {
+    esClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    } as any);
+    esClient.indices.stats.mockResponseOnce({ _all: {} } as any);
+
+    const result = await getAlertStats(esClient);
+
+    expect(result).toEqual({
+      alerts_count: 0,
+      alerts_count_by_kind: {},
+      alerts_count_by_source: {},
+      alerts_count_by_type: {},
+      alerts_episode_count: 0,
+      alerts_min_timestamp: null,
+      alerts_index_size_bytes: null,
     });
   });
 
@@ -128,7 +147,7 @@ describe('getAlertStats', () => {
     } as any);
     esClient.indices.stats.mockResponseOnce({ _all: {} } as any);
 
-    const result = await getAlertStats(esClient, logger);
+    const result = await getAlertStats(esClient);
 
     expect(result.alerts_count).toBe(5);
   });

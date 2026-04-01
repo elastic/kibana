@@ -8,7 +8,7 @@ import type { TermsBucket } from './types';
 
 export const TERMS_SIZE = 100;
 
-export const bucketsToRecord = (buckets: TermsBucket[]): Record<string, number> => {
+export const bucketsToRecord = (buckets: TermsBucket[] = []): Record<string, number> => {
   return buckets.reduce<Record<string, number>>((acc, { key, doc_count: count }) => {
     acc[key] = count;
     return acc;

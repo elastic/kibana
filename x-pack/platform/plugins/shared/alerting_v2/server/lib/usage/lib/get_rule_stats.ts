@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   RULE_SAVED_OBJECT_TYPE,
@@ -14,21 +14,17 @@ import {
 import { TERMS_SIZE, bucketsToRecord } from './constants';
 import type { RuleStatsAggregations, RuleStatsResults } from './types';
 
-export async function getRuleStats(
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<RuleStatsResults> {
+export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleStatsResults> {
   const [ruleStats, notificationPolicyCount] = await Promise.all([
-    fetchRuleAggregations(esClient, logger),
-    fetchNotificationPolicyCount(esClient, logger),
+    fetchRuleAggregations(esClient),
+    fetchNotificationPolicyCount(esClient),
   ]);
 
   return { ...ruleStats, count_notification_policies: notificationPolicyCount };
 }
 
 async function fetchRuleAggregations(
-  esClient: ElasticsearchClient,
-  logger: Logger
+  esClient: ElasticsearchClient
 ): Promise<Omit<RuleStatsResults, 'count_notification_policies'>> {
   const response = await esClient.search({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -208,33 +204,30 @@ async function fetchRuleAggregations(
   const total =
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
 
-  const aggs = response.aggregations as unknown as RuleStatsAggregations;
+  const aggs = response.aggregations as unknown as RuleStatsAggregations | undefined;
 
   return {
     count_total: total,
-    count_enabled: aggs.count_enabled.doc_count,
-    count_by_kind: bucketsToRecord(aggs.count_by_kind.buckets),
-    count_by_schedule: bucketsToRecord(aggs.count_by_schedule.buckets),
-    count_by_lookback: bucketsToRecord(aggs.count_by_lookback.buckets),
-    count_with_query_condition: aggs.count_with_query_condition.doc_count,
-    count_with_recovery_policy: aggs.count_with_recovery_policy.doc_count,
-    count_by_recovery_policy_type: bucketsToRecord(aggs.count_by_recovery_policy_type.buckets),
-    count_with_recovery_query_condition: aggs.count_with_recovery_query_condition.doc_count,
-    count_by_pending_timeframe: bucketsToRecord(aggs.count_by_pending_timeframe.buckets),
-    count_by_recovering_timeframe: bucketsToRecord(aggs.count_by_recovering_timeframe.buckets),
-    count_with_grouping: aggs.count_with_grouping.doc_count,
-    avg_grouping_fields_count: aggs.avg_grouping_fields_count.value,
-    count_with_no_data: aggs.count_with_no_data.doc_count,
-    count_by_no_data_behavior: bucketsToRecord(aggs.count_by_no_data_behavior.buckets),
-    count_by_no_data_timeframe: bucketsToRecord(aggs.count_by_no_data_timeframe.buckets),
-    min_created_at: aggs.min_created_at.value_as_string ?? null,
+    count_enabled: aggs?.count_enabled.doc_count ?? 0,
+    count_by_kind: bucketsToRecord(aggs?.count_by_kind.buckets),
+    count_by_schedule: bucketsToRecord(aggs?.count_by_schedule.buckets),
+    count_by_lookback: bucketsToRecord(aggs?.count_by_lookback.buckets),
+    count_with_query_condition: aggs?.count_with_query_condition.doc_count ?? 0,
+    count_with_recovery_policy: aggs?.count_with_recovery_policy.doc_count ?? 0,
+    count_by_recovery_policy_type: bucketsToRecord(aggs?.count_by_recovery_policy_type.buckets),
+    count_with_recovery_query_condition: aggs?.count_with_recovery_query_condition.doc_count ?? 0,
+    count_by_pending_timeframe: bucketsToRecord(aggs?.count_by_pending_timeframe.buckets),
+    count_by_recovering_timeframe: bucketsToRecord(aggs?.count_by_recovering_timeframe.buckets),
+    count_with_grouping: aggs?.count_with_grouping.doc_count ?? 0,
+    avg_grouping_fields_count: aggs?.avg_grouping_fields_count.value ?? null,
+    count_with_no_data: aggs?.count_with_no_data.doc_count ?? 0,
+    count_by_no_data_behavior: bucketsToRecord(aggs?.count_by_no_data_behavior.buckets),
+    count_by_no_data_timeframe: bucketsToRecord(aggs?.count_by_no_data_timeframe.buckets),
+    min_created_at: aggs?.min_created_at.value_as_string ?? null,
   };
 }
 
-async function fetchNotificationPolicyCount(
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<number> {
+async function fetchNotificationPolicyCount(esClient: ElasticsearchClient): Promise<number> {
   const response = await esClient.count({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     query: {

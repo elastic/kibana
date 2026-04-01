@@ -6,16 +6,13 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getNotificationPolicyStats } from './get_notification_policy_stats';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
-let logger: MockedLogger;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  logger = loggerMock.create();
 });
 
 function mockSearchResponse({
@@ -55,7 +52,7 @@ describe('getNotificationPolicyStats', () => {
   it('returns stats from aggregations', async () => {
     mockSearchResponse({});
 
-    const result = await getNotificationPolicyStats(esClient, logger);
+    const result = await getNotificationPolicyStats(esClient);
 
     expect(result).toEqual({
       notification_policies_count: 5,
@@ -75,7 +72,7 @@ describe('getNotificationPolicyStats', () => {
       throttleIntervalBuckets: [],
     });
 
-    const result = await getNotificationPolicyStats(esClient, logger);
+    const result = await getNotificationPolicyStats(esClient);
 
     expect(result.notification_policies_avg_group_by_fields_count).toBeNull();
     expect(result.notification_policies_count_by_throttle_interval).toEqual({});
@@ -91,7 +88,27 @@ describe('getNotificationPolicyStats', () => {
       throttleIntervalBuckets: [],
     });
 
-    const result = await getNotificationPolicyStats(esClient, logger);
+    const result = await getNotificationPolicyStats(esClient);
+
+    expect(result).toEqual({
+      notification_policies_count: 0,
+      notification_policies_unique_workflow_count: 0,
+      notification_policies_count_with_matcher: 0,
+      notification_policies_count_with_group_by: 0,
+      notification_policies_avg_group_by_fields_count: null,
+      notification_policies_count_by_throttle_interval: {},
+    });
+  });
+
+  it('returns defaults when aggregations are undefined', async () => {
+    esClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    } as any);
+
+    const result = await getNotificationPolicyStats(esClient);
 
     expect(result).toEqual({
       notification_policies_count: 0,
@@ -118,7 +135,7 @@ describe('getNotificationPolicyStats', () => {
       },
     } as any);
 
-    const result = await getNotificationPolicyStats(esClient, logger);
+    const result = await getNotificationPolicyStats(esClient);
 
     expect(result.notification_policies_count).toBe(7);
   });

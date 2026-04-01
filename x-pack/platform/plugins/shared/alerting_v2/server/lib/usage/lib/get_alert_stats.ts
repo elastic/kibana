@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
 import { TERMS_SIZE, bucketsToRecord } from './constants';
 import type { AlertStatsAggregations, AlertStatsResults } from './types';
 
-export async function getAlertStats(
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<AlertStatsResults> {
+export async function getAlertStats(esClient: ElasticsearchClient): Promise<AlertStatsResults> {
   const [searchResponse, statsResponse] = await Promise.all([
     esClient.search({
       index: ALERT_EVENTS_DATA_STREAM,
@@ -47,17 +44,17 @@ export async function getAlertStats(
       ? searchResponse.hits.total
       : searchResponse.hits.total?.value ?? 0;
 
-  const aggs = searchResponse.aggregations as unknown as AlertStatsAggregations;
+  const aggs = searchResponse.aggregations as unknown as AlertStatsAggregations | undefined;
 
   const sizeBytes = statsResponse?._all?.total?.store?.size_in_bytes ?? null;
 
   return {
     alerts_count: total,
-    alerts_count_by_kind: bucketsToRecord(aggs.count_by_kind.buckets),
-    alerts_count_by_source: bucketsToRecord(aggs.count_by_source.buckets),
-    alerts_count_by_type: bucketsToRecord(aggs.count_by_type.buckets),
-    alerts_episode_count: aggs.episode_count.value,
-    alerts_min_timestamp: aggs.min_timestamp.value_as_string ?? null,
+    alerts_count_by_kind: bucketsToRecord(aggs?.count_by_kind.buckets),
+    alerts_count_by_source: bucketsToRecord(aggs?.count_by_source.buckets),
+    alerts_count_by_type: bucketsToRecord(aggs?.count_by_type.buckets),
+    alerts_episode_count: aggs?.episode_count.value ?? 0,
+    alerts_min_timestamp: aggs?.min_timestamp.value_as_string ?? null,
     alerts_index_size_bytes: sizeBytes,
   };
 }

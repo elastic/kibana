@@ -6,16 +6,13 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getRuleStats } from './get_rule_stats';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
-let logger: MockedLogger;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  logger = loggerMock.create();
 });
 
 function mockRuleSearchResponse({
@@ -102,7 +99,7 @@ describe('getRuleStats', () => {
     mockRuleSearchResponse({});
     mockNotificationPolicyCountResponse(8);
 
-    const result = await getRuleStats(esClient, logger);
+    const result = await getRuleStats(esClient);
 
     expect(result).toEqual({
       count_total: 20,
@@ -130,7 +127,7 @@ describe('getRuleStats', () => {
     mockRuleSearchResponse({});
     mockNotificationPolicyCountResponse(0);
 
-    await getRuleStats(esClient, logger);
+    await getRuleStats(esClient);
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledTimes(1);
@@ -158,7 +155,40 @@ describe('getRuleStats', () => {
     });
     mockNotificationPolicyCountResponse(0);
 
-    const result = await getRuleStats(esClient, logger);
+    const result = await getRuleStats(esClient);
+
+    expect(result).toEqual({
+      count_total: 0,
+      count_enabled: 0,
+      count_by_kind: {},
+      count_by_schedule: {},
+      count_by_lookback: {},
+      count_with_query_condition: 0,
+      count_with_recovery_policy: 0,
+      count_by_recovery_policy_type: {},
+      count_with_recovery_query_condition: 0,
+      count_by_pending_timeframe: {},
+      count_by_recovering_timeframe: {},
+      count_with_grouping: 0,
+      avg_grouping_fields_count: null,
+      count_with_no_data: 0,
+      count_by_no_data_behavior: {},
+      count_by_no_data_timeframe: {},
+      count_notification_policies: 0,
+      min_created_at: null,
+    });
+  });
+
+  it('returns defaults when aggregations are undefined', async () => {
+    esClient.search.mockResponseOnce({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    } as any);
+    mockNotificationPolicyCountResponse(0);
+
+    const result = await getRuleStats(esClient);
 
     expect(result).toEqual({
       count_total: 0,
@@ -209,7 +239,7 @@ describe('getRuleStats', () => {
     } as any);
     mockNotificationPolicyCountResponse(0);
 
-    const result = await getRuleStats(esClient, logger);
+    const result = await getRuleStats(esClient);
 
     expect(result.count_total).toBe(3);
   });

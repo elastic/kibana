@@ -25,9 +25,9 @@ export function telemetryTaskRunner(
         try {
           const esClient = getEsClient();
           const [stats, notificationPolicyStats, alertStats] = await Promise.all([
-            getRuleStats(esClient, logger),
-            getNotificationPolicyStats(esClient, logger),
-            getAlertStats(esClient, logger),
+            getRuleStats(esClient),
+            getNotificationPolicyStats(esClient),
+            getAlertStats(esClient),
           ]);
 
           const updatedState: LatestTaskStateSchema = {
