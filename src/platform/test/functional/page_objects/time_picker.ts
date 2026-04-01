@@ -334,7 +334,7 @@ export class TimePickerPageObject extends FtrService {
       'value'
     );
 
-    let selectedUnit;
+    let selectedUnit: string | undefined;
     const select = await this.testSubjects.find('dateRangePickerAutoRefreshIntervalUnit');
     const options = await this.find.allDescendantDisplayedByCssSelector('option', select);
     await Promise.all(
