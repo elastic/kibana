@@ -96,7 +96,7 @@ stack: ga 9.4
 ```
 
 `xpack.securitySolution.maxEndpointScriptFileSize`
-:    The maximum file size in bytes for scripts uploaded to the {{elastic-defend}} script library. Default is `26214400` (25MB).
+:    The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
 
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}
