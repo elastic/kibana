@@ -19,6 +19,7 @@ import { CommandSnippet } from './command_snippet';
 import { DataIngestStatus } from './data_ingest_status';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useKubernetesFlow } from './use_kubernetes_flow';
+import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
@@ -52,11 +53,18 @@ export const KubernetesPanel: React.FC = () => {
 
   const [dataReceived, setDataReceived] = useState(false);
 
-  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+  const hasPreExistingDataEarly = usePreExistingDataCheck({
+    flow: 'kubernetes',
+    onboardingId: data?.onboardingId,
+  });
+
+  const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'kubernetes',
     onboardingId: data?.onboardingId,
   });
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
 
   useEffect(() => {
     if (data) {
@@ -146,7 +154,7 @@ export const KubernetesPanel: React.FC = () => {
           defaultMessage: 'Monitor your Kubernetes cluster',
         }
       ),
-      status: (dataReceived
+      status: (dataReceived || hasPreExistingDataEarly
         ? 'complete'
         : isMonitoringStepActive
         ? 'current'

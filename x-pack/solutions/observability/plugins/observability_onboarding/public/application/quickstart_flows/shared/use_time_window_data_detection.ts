@@ -106,7 +106,9 @@ export function useTimeWindowDataDetection({
   ]);
 
   useEffect(() => {
-    if (hasDataResponse?.hasData === true && !dataReceivedTelemetrySent) {
+    if (dataReceivedTelemetrySent) return;
+
+    if (hasDataResponse?.hasData === true) {
       setDataReceivedTelemetrySent(true);
       analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
         flow_type: flowType,
@@ -114,8 +116,23 @@ export function useTimeWindowDataDetection({
         step: 'logs-ingest',
         step_status: 'complete',
       });
+    } else if (hasDataResponse?.hasPreExistingData === true) {
+      setDataReceivedTelemetrySent(true);
+      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        flow_type: flowType,
+        flow_id: onboardingId,
+        step: 'logs-ingest',
+        step_status: 'pre_existing_data',
+      });
     }
-  }, [analytics, hasDataResponse?.hasData, dataReceivedTelemetrySent, flowType, onboardingId]);
+  }, [
+    analytics,
+    hasDataResponse?.hasData,
+    hasDataResponse?.hasPreExistingData,
+    dataReceivedTelemetrySent,
+    flowType,
+    onboardingId,
+  ]);
 
   // Treat both "hasData === false" and fetch failures (where hasDataResponse
   // is undefined but the request completed) as "no data yet" for the purpose
@@ -127,6 +144,7 @@ export function useTimeWindowDataDetection({
   const isTroubleshootingVisible =
     isMonitoringActive &&
     noDataConfirmed &&
+    !hasDataResponse?.hasPreExistingData &&
     checkDataStartTime !== null &&
     Date.now() - checkDataStartTime > troubleshootingDelay;
 

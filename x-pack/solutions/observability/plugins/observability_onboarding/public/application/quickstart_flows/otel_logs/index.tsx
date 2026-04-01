@@ -32,6 +32,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -97,15 +98,17 @@ export const OtelLogsPanel: React.FC = () => {
 
   const [selectedTab, setSelectedTab] = useState('linux');
 
-  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+  const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_host' });
+
+  const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: !!setupData,
     onboardingFlowType: 'otel_logs',
     onboardingId: setupData?.onboardingId,
   });
 
-  // Set sessionStartTime when monitoring begins (first blur) rather than on
-  // mount, to narrow the time-window and reduce false positives from other
-  // OTel collectors already ingesting data on the same cluster.
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
+
+  // Set sessionStartTime when monitoring begins, not on mount.
   const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
   useEffect(() => {
     if (isMonitoringStepActive && sessionStartTime === null) {
@@ -122,6 +125,8 @@ export const OtelLogsPanel: React.FC = () => {
     onboardingId: setupData?.onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_host/has-data',
   });
+
+  const hasPreExistingDataFinal = hasPreExistingData || hasPreExistingDataEarly;
 
   const isMetricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
@@ -427,14 +432,14 @@ export const OtelLogsPanel: React.FC = () => {
                   defaultMessage: 'Visualize your data',
                 }
               ),
-              status: (hasData || hasPreExistingData
+              status: (hasData || hasPreExistingDataFinal
                 ? 'complete'
                 : isMonitoringStepActive
                 ? 'current'
                 : 'incomplete') as EuiStepStatus,
               children: isMonitoringStepActive ? (
                 <>
-                  {!(hasPreExistingData && !hasData) && (
+                  {!(hasPreExistingDataFinal && !hasData) && (
                     <ProgressIndicator
                       title={
                         hasData
@@ -483,20 +488,21 @@ export const OtelLogsPanel: React.FC = () => {
                     </>
                   )}
 
-                  {(hasData === true || hasPreExistingData) && visualizeActionLinks.length > 0 && (
-                    <>
-                      <EuiSpacer />
-                      <GetStartedPanel
-                        onboardingFlowType="otel_logs"
-                        dataset="otel_logs"
-                        integration="system_otel"
-                        onboardingId={setupData?.onboardingId ?? ''}
-                        newTab={false}
-                        isLoading={false}
-                        actionLinks={visualizeActionLinks}
-                      />
-                    </>
-                  )}
+                  {(hasData === true || hasPreExistingDataFinal) &&
+                    visualizeActionLinks.length > 0 && (
+                      <>
+                        <EuiSpacer />
+                        <GetStartedPanel
+                          onboardingFlowType="otel_logs"
+                          dataset="otel_logs"
+                          integration="system_otel"
+                          onboardingId={setupData?.onboardingId ?? ''}
+                          newTab={false}
+                          isLoading={false}
+                          actionLinks={visualizeActionLinks}
+                        />
+                      </>
+                    )}
                 </>
               ) : null,
             },

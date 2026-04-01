@@ -34,6 +34,7 @@ import { type ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
+import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { DataIngestStatus, type ActionLink } from '../kubernetes/data_ingest_status';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
@@ -89,11 +90,18 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   const [dataReceived, setDataReceived] = useState(false);
 
-  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+  const hasPreExistingDataEarly = usePreExistingDataCheck({
+    flow: 'kubernetes',
+    onboardingId: data?.onboardingId,
+  });
+
+  const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'kubernetes_otel',
     onboardingId: data?.onboardingId,
   });
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
   const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {};
 
   useEffect(() => {
@@ -501,7 +509,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                 defaultMessage: 'Visualize your data',
               }
             ),
-            status: (dataReceived
+            status: (dataReceived || hasPreExistingDataEarly
               ? 'complete'
               : isMonitoringStepActive
               ? 'current'

@@ -80,7 +80,9 @@ export function DataIngestStatus({
   }, [isReady, hasPreExistingData, refetch, status]);
 
   useEffect(() => {
-    if (hasData === true && !dataReceivedTelemetrySent) {
+    if (dataReceivedTelemetrySent) return;
+
+    if (hasData === true) {
       setDataReceivedTelemetrySent(true);
       analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
         flow_type: onboardingFlowType,
@@ -88,21 +90,38 @@ export function DataIngestStatus({
         step: 'logs-ingest',
         step_status: 'complete',
       });
+    } else if (hasPreExistingData) {
+      setDataReceivedTelemetrySent(true);
+      analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        flow_type: onboardingFlowType,
+        flow_id: onboardingId,
+        step: 'logs-ingest',
+        step_status: 'pre_existing_data',
+      });
     }
-  }, [analytics, hasData, dataReceivedTelemetrySent, onboardingFlowType, onboardingId]);
+  }, [
+    analytics,
+    hasData,
+    hasPreExistingData,
+    dataReceivedTelemetrySent,
+    onboardingFlowType,
+    onboardingId,
+  ]);
 
   // Notify parent when all required data types have arrived (not just any data).
   // This drives the step status to 'complete' and must wait for metrics
   // if any action link requires them.
   useEffect(() => {
-    if (isReady && !dataReceivedNotified) {
+    if ((isReady || hasPreExistingData) && !dataReceivedNotified) {
       onDataReceived?.();
       setDataReceivedNotified(true);
     }
-  }, [isReady, onDataReceived, dataReceivedNotified]);
+  }, [isReady, hasPreExistingData, onDataReceived, dataReceivedNotified]);
 
   const isTroubleshootingVisible =
-    hasData === false && Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
+    hasData === false &&
+    !hasPreExistingData &&
+    Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
 
   const filteredActionLinks = hasPreExistingData
     ? actionLinks
