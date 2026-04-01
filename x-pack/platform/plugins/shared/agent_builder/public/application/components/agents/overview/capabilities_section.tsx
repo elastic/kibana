@@ -51,20 +51,17 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
     </EuiTitle>
     <EuiSpacer size="l" />
     <EuiFlexGroup gutterSize="m" alignItems="stretch">
-      {isExperimentalFeaturesEnabled && (
-        <EuiFlexItem grow={1}>
-          <CapabilityCard
-            count={skillsCount}
-            title={overviewLabels.skillsLabel(skillsCount)}
-            description={overviewLabels.skillsDescription}
-            emptyDescription={overviewLabels.skillsOnboardingDescription}
-            image={skillsImage}
-            href={skillsHref}
-            onClick={onNavigateToSkills}
-          />
-        </EuiFlexItem>
-      )}
-
+      <EuiFlexItem grow={1}>
+        <CapabilityCard
+          count={skillsCount}
+          title={overviewLabels.skillsLabel(skillsCount)}
+          description={overviewLabels.skillsDescription}
+          emptyDescription={overviewLabels.skillsOnboardingDescription}
+          image={skillsImage}
+          href={skillsHref}
+          onClick={onNavigateToSkills}
+        />
+      </EuiFlexItem>
       {isExperimentalFeaturesEnabled && (
         <EuiFlexItem grow={1}>
           <CapabilityCard

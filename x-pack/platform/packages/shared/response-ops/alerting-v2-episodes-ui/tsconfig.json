@@ -27,6 +27,8 @@
     "@kbn/react-query",
     "@kbn/data-plugin",
     "@kbn/discover-utils",
-    "@kbn/alerting-v2-constants"
+    "@kbn/es-query",
+    "@kbn/react-hooks",
+    "@kbn/alerting-v2-constants",
   ]
 }
