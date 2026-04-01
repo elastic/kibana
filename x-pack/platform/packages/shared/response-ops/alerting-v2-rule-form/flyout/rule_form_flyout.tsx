@@ -78,8 +78,8 @@ export const RuleFormFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton fill isLoading={isLoading} form={RULE_FORM_ID} type="submit">
               <FormattedMessage
-                id="xpack.alertingV2.ruleForm.saveButtonLabel"
-                defaultMessage="Save"
+                id="xpack.alertingV2.ruleForm.createRuleButtonLabel"
+                defaultMessage="Create rule"
               />
             </EuiButton>
           </EuiFlexItem>
