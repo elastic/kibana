@@ -210,10 +210,8 @@ export const hasOnlyReadAuthEditableChanges = (
     const existingValue = normalizedExistingRule[key as keyof typeof normalizedExistingRule];
 
     // If values are different, check if this field is read auth editable
-    if (!isEqual(existingValue, updateValue)) {
-      if (!isReadAuthEditField(key)) {
-        return false;
-      }
+    if (!isEqual(existingValue, updateValue) && !isReadAuthEditField(key)) {
+      return false;
     }
   }
 

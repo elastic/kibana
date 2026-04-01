@@ -78,7 +78,7 @@ export const patchRule = async ({
   // even when the client did not send them. Filter to fields that are both defined and
   // actually changed so RBAC decisions are based on effective user changes.
   const rulePatchDefinedFields: Record<string, unknown> = {};
-  let allKeysUpdateable = true;
+  let allKeysUpdatable = true;
 
   for (const [key, value] of Object.entries(rulePatchObjWithoutIds)) {
     if (
@@ -86,7 +86,7 @@ export const patchRule = async ({
       (!isEqual(value, (existingRule as Record<string, unknown>)[key]) || isReadAuthEditField(key))
     ) {
       rulePatchDefinedFields[key] = value;
-      allKeysUpdateable = allKeysUpdateable && isReadAuthEditField(key);
+      allKeysUpdatable = allKeysUpdatable && isReadAuthEditField(key);
     }
   }
 
@@ -101,10 +101,10 @@ export const patchRule = async ({
    * method provided by the alerting rules client to update the rule fields individually. Otherwise the user
    * will need `all` privileges for rules.
    */
-  if (!isEmpty(rulePatchDefinedFields) && allKeysUpdateable) {
+  if (!isEmpty(rulePatchDefinedFields) && allKeysUpdatable) {
     // We remove the `enabled` field from the `updateReadAuthEditRuleFields` as it only modifies `RuleParams` type fields
     // `enabled` is modified later if it exists in the PATCH object
-    const { enabled: unusedField, ...fieldsToPatch } = rulePatchDefinedFields;
+    const { enabled: _, ...fieldsToPatch } = rulePatchDefinedFields;
 
     const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> =
       await updateReadAuthEditRuleFields({

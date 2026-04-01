@@ -57,7 +57,7 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
  * @param rulesAuthz - The user's detection rules authorization context
  * @param editActions - The bulk edit actions being requested
  */
-const throwRulesAuthError = async (
+const validateRulesAuth = async (
   rulesAuthz: DetectionRulesAuthz,
   editActions: BulkActionEditPayload[]
 ) => {
@@ -191,7 +191,7 @@ export const validateBulkEditRule = async ({
   ruleCustomizationStatus,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
-  await throwRulesAuthError(rulesAuthz, edit);
+  await validateRulesAuth(rulesAuthz, edit);
 
   // Prebuilt rule customization checks
   if (immutable) {
