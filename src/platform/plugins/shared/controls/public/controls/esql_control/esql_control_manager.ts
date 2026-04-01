@@ -326,8 +326,8 @@ export function initializeESQLControlManager(
       previousTimeRange = undefined;
       hasInitialFetch = false;
       availableOptions$.next(lastSaved?.available_options ?? []);
-      if (lastSaved && isQueryESQLControl(lastSaved as OptionsListESQLControlState)) {
-        esqlQuery$.next((lastSaved as unknown as QueryESQLControl).esql_query);
+      if (lastSaved && isQueryESQLControl(lastSaved)) {
+        esqlQuery$.next(lastSaved.esql_query);
       }
     },
     getLatestState: (): OptionsListESQLControlState => {
