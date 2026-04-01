@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe.only('dashboard filtering', function () {
+  describe('dashboard filtering', function () {
     const populateDashboard = async () => {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
