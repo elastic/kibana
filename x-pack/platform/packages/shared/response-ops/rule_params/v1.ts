@@ -120,13 +120,7 @@ const ruleParamsSchemaInstance = ruleParamsSchemaDiscriminatedUnion();
 const variantsWithoutRuleTypeId = Object.values(ruleParamsSchemasWithRuleTypeId) as unknown as [
   Type<Record<string, unknown>>
 ];
-/*
-export const ruleParamsSchema = () => ruleParamsSchemaInstance;
 
-export const ruleParamsSchemaWithDefaultValue = schema.oneOf(variantsWithoutRuleTypeId, {
-  defaultValue: {},
-  meta: { description: 'The parameters for the rule.' },
-}); */
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: { description: 'The parameters for the rule.' },
 });
