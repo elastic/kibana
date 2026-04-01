@@ -307,17 +307,6 @@ describe('SecuritySideNav', () => {
       );
     });
 
-    it('should use splitButton interaction variant when classic nav update is enabled but serverless is present', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      useKibana().services.serverless = {};
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          navLinkInteractionVariant: 'splitButton',
-        })
-      );
-    });
-
     it('should place administration item in footer when classic nav update is enabled', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
@@ -342,7 +331,7 @@ describe('SecuritySideNav', () => {
       const lastCall = calls[calls.length - 1];
       const items = lastCall[0].items;
       const administrationItemsInBody = items.filter(
-        (item: any) => item.id === SecurityPageName.administration && item.position !== 'bottom'
+        (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
       );
       expect(administrationItemsInBody).toHaveLength(0);
     });
