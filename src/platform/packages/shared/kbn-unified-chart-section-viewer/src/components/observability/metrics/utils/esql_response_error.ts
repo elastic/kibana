@@ -51,10 +51,6 @@ export const extractEsqlEmbeddedError = (response: object): EsqlEmbeddedError | 
   };
 };
 
-export const extractEsqlResponseErrorCause = (
-  response: object
-): EsqlResponseErrorCause | undefined => extractEsqlEmbeddedError(response)?.cause;
-
 export class EsqlResponseError extends Error {
   public readonly type?: string;
   public readonly reason?: string;
