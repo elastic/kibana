@@ -19,6 +19,7 @@ import type { ESQLDataGroupNode } from '../blocks';
 import { CascadedDocumentsProvider } from '../cascaded_documents_provider';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import { createElement, type ReactNode } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { CascadedDocumentsFetcher } from '../../../../data_fetching/cascaded_documents_fetcher';
 
 jest.mock('../telemetry', () => ({
@@ -227,6 +228,10 @@ describe('data_fetching related hooks', () => {
         esqlVariables: undefined,
         timeRange: undefined,
         viewModeToggle: undefined,
+        expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
+        expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
+        getExpandedDocSetter: () => jest.fn(),
+        getRenderDocumentViewMetaSetter: () => undefined,
         cascadeGroupingChangeHandler: jest.fn(),
         onUpdateESQLQuery: jest.fn(),
         openInNewTab: jest.fn(),

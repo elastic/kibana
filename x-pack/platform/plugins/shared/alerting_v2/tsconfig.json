@@ -75,7 +75,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/kql",
     "@kbn/scout",
-    "@kbn/alerting-v2-constants"
+    "@kbn/alerting-v2-constants",
   ],
   "exclude": ["target/**/*"]
 }

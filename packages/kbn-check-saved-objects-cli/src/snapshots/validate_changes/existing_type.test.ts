@@ -281,6 +281,20 @@ describe('validateChangesExistingType', () => {
       expect(log).toHaveBeenCalledWith(expect.stringContaining('title (type: keyword'));
     });
 
+    it('should throw when a name or title field is downgraded from text to keyword', () => {
+      // Downgrading from a valid type (text) to an invalid one (keyword) is a newly introduced
+      // problem even though the field key was already present in the baseline.
+      const from = buildRecord({ 'properties.name.type': 'text' });
+      const to = buildRecord({ 'properties.name.type': 'keyword' });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: importableExportableType, log })
+      ).toThrowError(
+        /The SO type 'my-type' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\)/
+      );
+      expect(log).not.toHaveBeenCalled();
+    });
+
     it('should not validate types not searchable via the management page', () => {
       const internalType: SavedObjectsType = {
         name: 'my-type',
