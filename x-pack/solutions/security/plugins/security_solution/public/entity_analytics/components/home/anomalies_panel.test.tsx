@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { EntityAnalyticsRecentAnomalies } from './anomalies_placeholder_panel';
+import { EntityAnalyticsRecentAnomalies } from './anomalies_panel';
 import { TestProviders } from '../../../common/mock';
 
-describe('AnomaliesPlaceholderPanel', () => {
-  it('should render the placeholder panel', () => {
+describe('AnomaliesPanel', () => {
+  it('should render the panel', () => {
     render(
       <TestProviders>
         <EntityAnalyticsRecentAnomalies />
