@@ -15,14 +15,15 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isTerminalStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 
 export interface WorkflowExecutionListFooterProps {
   showFooter: boolean;
-  nonTerminalLoadedCount: number;
+  loadedExecutions: readonly WorkflowExecutionListItemDto[];
   canCancelLoadedNonTerminal: boolean;
   isCancelLoadedNonTerminalInProgress: boolean;
   onConfirmCancelLoadedNonTerminal: () => Promise<void>;
@@ -30,7 +31,7 @@ export interface WorkflowExecutionListFooterProps {
 
 export const WorkflowExecutionListFooter = ({
   showFooter,
-  nonTerminalLoadedCount,
+  loadedExecutions,
   canCancelLoadedNonTerminal,
   isCancelLoadedNonTerminalInProgress,
   onConfirmCancelLoadedNonTerminal,
@@ -38,6 +39,11 @@ export const WorkflowExecutionListFooter = ({
   const styles = useMemoCss(componentStyles);
   const [isFooterCancelModalVisible, setIsFooterCancelModalVisible] = useState(false);
   const footerCancelModalTitleId = useGeneratedHtmlId();
+
+  const nonTerminalLoadedCount = useMemo(
+    () => loadedExecutions.filter((e) => !isTerminalStatus(e.status)).length,
+    [loadedExecutions]
+  );
 
   const openFooterCancelModal = useCallback(() => {
     if (nonTerminalLoadedCount > 0) {

@@ -267,11 +267,9 @@ describe('WorkflowExecutionList', () => {
       };
       renderComponent({ executions: withRunning, onConfirmCancelLoadedNonTerminal });
       fireEvent.click(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton'));
-      expect(
-        await screen.findByTestId('workflowExecutionListFooterCancelModal')
-      ).toBeInTheDocument();
-      const dialog = screen.getByRole('dialog');
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel all' }));
+      const modal = await screen.findByTestId('workflowExecutionListFooterCancelModal');
+      expect(modal).toBeInTheDocument();
+      fireEvent.click(within(modal).getByRole('button', { name: 'Cancel all' }));
       await waitFor(() => expect(onConfirmCancelLoadedNonTerminal).toHaveBeenCalled());
     });
   });

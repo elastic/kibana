@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isTerminalStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
+import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { ExecutionListFilters } from './workflow_execution_list_filters';
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
@@ -64,13 +64,6 @@ export const WorkflowExecutionList = ({
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
-
-  const nonTerminalLoadedCount = useMemo(() => {
-    if (!executions?.results.length) {
-      return 0;
-    }
-    return executions.results.filter((e) => !isTerminalStatus(e.status)).length;
-  }, [executions]);
 
   const showListFooter = Boolean(
     !isInitialLoading && !error && executions && executions.results.length > 0
@@ -233,7 +226,7 @@ export const WorkflowExecutionList = ({
       <EuiFlexItem grow={false}>
         <WorkflowExecutionListFooter
           showFooter={showListFooter}
-          nonTerminalLoadedCount={nonTerminalLoadedCount}
+          loadedExecutions={executions?.results ?? []}
           canCancelLoadedNonTerminal={canCancelLoadedNonTerminal}
           isCancelLoadedNonTerminalInProgress={isCancelLoadedNonTerminalInProgress}
           onConfirmCancelLoadedNonTerminal={onConfirmCancelLoadedNonTerminal}
