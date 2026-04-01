@@ -35,7 +35,7 @@ export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape 
 
     // Remove the contain property from the data cascade rows when full screen mode is active
     // to ensure the full screen grid can take up the entire screen.
-    '&:has(.euiDataGrid--fullScreen) [role="row"]': {
+    '&:has(.euiDataGrid--fullScreen) [role="row"][data-row-type]': {
       contain: 'none',
     },
 
