@@ -92,6 +92,7 @@ export const Chart = ({
         <>
           <LensWrapperMemo
             lensProps={lensProps}
+            esqlQuery={esqlQuery}
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}

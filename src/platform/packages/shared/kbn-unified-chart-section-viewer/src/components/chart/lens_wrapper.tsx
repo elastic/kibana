@@ -9,6 +9,8 @@
 import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
@@ -17,6 +19,7 @@ import type { UnifiedMetricsGridProps } from '../../types';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
+  esqlQuery?: string;
   titleHighlight?: string;
   onViewDetails?: () => void;
   onCopyToDashboard?: () => void;
@@ -31,6 +34,7 @@ export type LensWrapperProps = {
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 export function LensWrapper({
   lensProps,
+  esqlQuery,
   services,
   onBrushEnd,
   onFilter,
@@ -105,6 +109,24 @@ export function LensWrapper({
       : undefined,
   });
 
+  const handleOnLoad = useCallback(
+    (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => {
+      if (!isLoading && adapters?.requests && esqlQuery) {
+        const requestTitle = i18n.translate('metricsExperience.inspectorEsqlRequestTitle', {
+          defaultMessage: 'Table',
+        });
+        const request = adapters.requests.start(requestTitle, {
+          description: i18n.translate('metricsExperience.inspectorEsqlRequestDescription', {
+            defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+          }),
+        });
+        request.json({ query: esqlQuery });
+        request.ok({ json: {} });
+      }
+    },
+    [esqlQuery]
+  );
+
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
   return (
@@ -122,6 +144,7 @@ export function LensWrapper({
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
+          onLoad={handleOnLoad}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />
