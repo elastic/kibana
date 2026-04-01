@@ -81,12 +81,16 @@ describe('createEntitySourcesService', () => {
           generic: [],
         },
         correlationMap: new Map(),
+        watchlistsByEuid: new Map(),
       })
       .mockResolvedValueOnce({
-        user: ['user:2'],
-        host: ['host:1'],
-        service: [],
-        generic: [],
+        entityIdsByType: {
+          user: ['user:2'],
+          host: ['host:1'],
+          service: [],
+          generic: [],
+        },
+        watchlistsByEuid: new Map(),
       });
     mockPlainIndexSync.mockResolvedValue(undefined);
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
@@ -105,7 +109,7 @@ describe('createEntitySourcesService', () => {
     expect(mockWatchlistGet).toHaveBeenCalledWith('watchlist-1');
     expect(mockGetEntitySourceIds).toHaveBeenCalledWith('watchlist-1');
     expect(mockListEntitySources).toHaveBeenCalledWith({});
-    expect(mockGetIndexForWatchlist).toHaveBeenCalledWith('VIP Users', namespace);
+    expect(mockGetIndexForWatchlist).toHaveBeenCalledWith(namespace);
 
     expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
     expect(mockListEntityStoreEntities).toHaveBeenNthCalledWith(1, {
@@ -127,6 +131,7 @@ describe('createEntitySourcesService', () => {
           generic: [],
         },
         correlationMap: expect.any(Map),
+        watchlistsByEuid: expect.any(Map),
       },
       {
         sourceId: 'source-c',
@@ -136,6 +141,7 @@ describe('createEntitySourcesService', () => {
           service: [],
           generic: [],
         },
+        watchlistsByEuid: expect.any(Map),
       },
     ]);
 

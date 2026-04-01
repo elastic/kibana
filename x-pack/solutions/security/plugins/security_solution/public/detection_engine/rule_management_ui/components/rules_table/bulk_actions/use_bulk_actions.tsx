@@ -51,6 +51,7 @@ import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
+import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
 import { useUpsellingMessage } from '../../../../../common/hooks/use_upselling';
 import { useLicense } from '../../../../../common/hooks/use_license';
@@ -96,6 +97,8 @@ export const useBulkActions = ({
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
+  const { scheduler } = useGapAutoFillSchedulerContext();
+  const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
   const {
     timelinePrivileges: { crud: canCreateTimelines },
     rulesPrivileges: {
@@ -121,8 +124,9 @@ export const useBulkActions = ({
       ...(filterOptions?.gapFillStatuses?.length && {
         gapFillStatuses: filterOptions.gapFillStatuses,
       }),
+      ...(activeSchedulerId && { schedulerId: activeSchedulerId }),
     };
-  }, [kql, filterOptions]);
+  }, [kql, filterOptions, activeSchedulerId]);
 
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
@@ -481,6 +485,7 @@ export const useBulkActions = ({
                   filterOptions,
                   gapRange: globalQuery.gapRange,
                   gapFillStatuses: filterOptions.gapFillStatuses,
+                  schedulerId: activeSchedulerId,
                 }
               : { selectedRuleIds }),
             dryRunResult,
@@ -804,6 +809,7 @@ export const useBulkActions = ({
       showBulkFillRuleGapsRuleLimitError,
       completeBulkEditForm,
       filterOptions,
+      activeSchedulerId,
     ]
   );
 

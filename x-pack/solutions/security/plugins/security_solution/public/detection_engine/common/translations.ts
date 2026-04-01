@@ -1014,6 +1014,13 @@ export const GAP_FILL_STATUS_FILLED = i18n.translate(
   }
 );
 
+export const GAP_FILL_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.error',
+  {
+    defaultMessage: 'Error',
+  }
+);
+
 export const SOLVABLE_CONFLICT_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictLabel',
   {
