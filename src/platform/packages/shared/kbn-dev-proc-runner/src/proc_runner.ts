@@ -20,7 +20,11 @@ const MINUTE = 60 * SECOND;
 const noop = () => {};
 
 interface RunOptions extends ProcOptions {
-  wait: true | RegExp;
+  /**
+   * When omitted or `false`, start the process and return without waiting for a log line or exit.
+   * `true` waits for the process to exit; a `RegExp` waits for a matching log line.
+   */
+  wait?: true | RegExp | false;
   waitTimeout?: number | false;
   onEarlyExit?: (msg: string) => void;
 }

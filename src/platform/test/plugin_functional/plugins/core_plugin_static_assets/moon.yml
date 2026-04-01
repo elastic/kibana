@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-plugin-static-assets-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-plugin-static-assets-plugin'
+  title: '@kbn/core-plugin-static-assets-plugin'
   description: Moon project for @kbn/core-plugin-static-assets-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/core_plugin_static_assets
+  sourceRoot: src/platform/test/plugin_functional/plugins/core_plugin_static_assets
 dependsOn:
   - '@kbn/core'
 tags:

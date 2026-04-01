@@ -139,7 +139,7 @@ exports[`extend index management ilm summary extension should render a phase def
           >
             Edit policy in ILM
             <span
-              class="emotion-EuiExternalLinkIcon"
+              class="css-1j75qc1"
               data-euiicon-type="popout"
               role="presentation"
             />
@@ -309,7 +309,7 @@ exports[`extend index management ilm summary extension should render a step info
           >
             Edit policy in ILM
             <span
-              class="emotion-EuiExternalLinkIcon"
+              class="css-1j75qc1"
               data-euiicon-type="popout"
               role="presentation"
             />
@@ -475,7 +475,7 @@ exports[`extend index management ilm summary extension should render an error pa
           >
             Edit policy in ILM
             <span
-              class="emotion-EuiExternalLinkIcon"
+              class="css-1j75qc1"
               data-euiicon-type="popout"
               role="presentation"
             />
@@ -642,7 +642,7 @@ exports[`extend index management ilm summary extension should render the tab whe
           >
             Edit policy in ILM
             <span
-              class="emotion-EuiExternalLinkIcon"
+              class="css-1j75qc1"
               data-euiicon-type="popout"
               role="presentation"
             />

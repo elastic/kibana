@@ -74,6 +74,7 @@
     "@kbn/charts-theme",
     "@kbn/grok-ui",
     "@kbn/scout",
+    "@kbn/scout-synthtrace",
     "@kbn/test",
     "@kbn/zod",
     "@kbn/kibana-utils-plugin",

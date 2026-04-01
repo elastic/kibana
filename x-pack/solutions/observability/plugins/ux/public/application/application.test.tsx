@@ -25,7 +25,7 @@ jest.mock('../services/rest/data_view', () => ({
 }));
 
 jest.mock('../components/app/rum_dashboard/rum_home', () => ({
-  RumHome: () => <p>Home Mock</p>,
+  RumHome: jest.fn(() => <p>Home Mock</p>),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -131,10 +131,18 @@ export const mockApmPluginContextValue = {
 };
 
 describe('renderUxApp', () => {
-  it('has an error boundary for the UXAppRoot', async () => {
+  it('has an error boundary for the UXAppRoot', () => {
+    // Suppress React's expected error output when a component throws
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    jest.mocked(RumHome).mockImplementation(() => {
+      throw new Error('Oh no, an unexpected error!');
+    });
+
     const wrapper = mount(<UXAppRoot {...(mockApmPluginContextValue as any)} />);
 
-    wrapper.find(RumHome).simulateError(new Error('Oh no, an unexpected error!'));
+    errorSpy.mockRestore();
+    jest.mocked(RumHome).mockImplementation(() => <p>Home Mock</p>);
 
     expect(wrapper.find(RumHome)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-doc-viewer-examples'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-doc-viewer-examples'
+  title: '@kbn/unified-doc-viewer-examples'
   description: Moon project for @kbn/unified-doc-viewer-examples
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: examples/unified_doc_viewer
+  sourceRoot: examples/unified_doc_viewer
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
