@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -34,6 +33,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
@@ -42,6 +42,8 @@ import { SparkPlot } from '../../../../spark_plot';
 import { SeveritySelector } from '../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { OCCURRENCES_COLUMN, OCCURRENCES_TOOLTIP_NAME } from './translations';
+import { AssetImage } from '../../../../asset_image';
+import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 
 interface QueryDetailsFlyoutProps {
   item: SignificantEventItem;
@@ -94,12 +96,14 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.query.severity_score);
   };
   const handleSaveQuery = async () => {
+    const trimmedEsql = query.trim();
     await onSave(
       {
         ...item.query,
         title: title.trim(),
         description: description.trim(),
-        esql: { query: query.trim() },
+        esql: { query: trimmedEsql },
+        type: deriveQueryType(trimmedEsql),
         severity_score: severityScore,
       },
       item.stream_name
@@ -107,10 +111,13 @@ export function QueryDetailsFlyout({
     setIsEditMode(false);
   };
 
+  const queryType = item.query.type ?? QUERY_TYPE_MATCH;
+  const hasDetectedOccurrences = item.occurrences?.some((point) => point.y > 0) ?? false;
+
   const infoListItems = [
     {
       title: TYPE_LABEL,
-      description: <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>,
+      description: <QueryTypeBadge type={queryType} />,
     },
     {
       title: QUERY_LABEL,
@@ -234,14 +241,31 @@ export function QueryDetailsFlyout({
               </EuiFlexItem>
               <EuiFlexItem>
                 <InfoPanel title={OCCURRENCES_COLUMN}>
-                  <SparkPlot
-                    id={`query-details-occurrences-${item.query.id}`}
-                    name={OCCURRENCES_TOOLTIP_NAME}
-                    type="bar"
-                    timeseries={item.occurrences}
-                    annotations={[]}
-                    height={160}
-                  />
+                  {hasDetectedOccurrences ? (
+                    <SparkPlot
+                      id={`query-details-occurrences-${item.query.id}`}
+                      name={OCCURRENCES_TOOLTIP_NAME}
+                      type="bar"
+                      timeseries={item.occurrences}
+                      annotations={[]}
+                      height={160}
+                    />
+                  ) : (
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="s"
+                      alignItems="center"
+                      justifyContent="center"
+                      css={{ height: '100%', minHeight: '200px', padding: '30px' }}
+                    >
+                      <AssetImage type="barChart" size="xs" />
+                      <EuiText color="subdued" size="s" textAlign="center">
+                        {queryType === QUERY_TYPE_STATS
+                          ? NO_OCCURRENCES_STATS_DESCRIPTION
+                          : NO_OCCURRENCES_DESCRIPTION}
+                      </EuiText>
+                    </EuiFlexGroup>
+                  )}
                 </InfoPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -351,11 +375,6 @@ const TYPE_LABEL = i18n.translate(
   { defaultMessage: 'Type' }
 );
 
-const QUERY_TYPE_BADGE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryTypeBadgeLabel',
-  { defaultMessage: 'Query' }
-);
-
 const EDIT_QUERY_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.editQueryTitle',
   { defaultMessage: 'Edit query' }
@@ -436,4 +455,20 @@ const DELETE_MODAL_BODY = i18n.translate(
 const DELETE_CONFIRM_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteConfirmButtonLabel',
   { defaultMessage: 'Delete query' }
+);
+
+const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesDescription',
+  {
+    defaultMessage:
+      "We currently don't detect any events. You can leave it, as it might happen later or modify the query.",
+  }
+);
+
+const NO_OCCURRENCES_STATS_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesStatsDescription',
+  {
+    defaultMessage:
+      'No threshold breaches detected. The condition may not have been met in the observed time range.',
+  }
 );

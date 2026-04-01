@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { EsqlQuery, StreamQuery } from '../../queries';
+import type { EsqlQuery, QueryType, StreamQuery } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 
 /**
@@ -52,9 +52,21 @@ interface SignificantEventsGetResponse {
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
   'occurrences' | 'change_points' | 'esql'
->;
+> & {
+  /**
+   * For STATS queries only: how many threshold breaches were detected
+   * during the preview window. Absent for match-type queries.
+   */
+  firing_count?: number;
+  /**
+   * True when the STATS preview hit PREVIEW_STATS_LIMIT and the
+   * firing_count / sparkline data may be incomplete.
+   */
+  truncated?: boolean;
+};
 
 interface GeneratedSignificantEventQuery {
+  type: QueryType;
   title: string;
   esql: EsqlQuery;
   severity_score: number;

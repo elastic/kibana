@@ -14,7 +14,7 @@ import type {
   SignificantEventsQueriesGenerationResult,
   TaskResult,
 } from '@kbn/streams-schema';
-import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
+import { deriveQueryType, OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
@@ -302,6 +302,7 @@ export async function persistQueries(
     queries.map((query) => ({
       index: {
         id: v4(),
+        type: query.type ?? deriveQueryType(query.esql.query),
         esql: query.esql,
         title: query.title,
         description: query.description,

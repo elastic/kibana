@@ -10,7 +10,13 @@ import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import {
+  type StreamQuery,
+  type Streams,
+  type QueryType,
+  QUERY_TYPE_STATS,
+  deriveQueryType,
+} from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -20,6 +26,7 @@ import {
   type QueryUnlinkRequest,
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
+
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
 import type { QUERY_FEATURE_TYPE } from '../fields';
 import {
@@ -34,6 +41,7 @@ import {
   QUERY_KQL_BODY,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
+  QUERY_TYPE,
   RULE_BACKED,
   RULE_ID,
   STREAM_NAME,
@@ -135,6 +143,7 @@ type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_DESCRIPTION]: string;
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
+  [QUERY_TYPE]?: string;
 };
 
 export type StoredQueryLink = QueryLinkStorageFields & {
@@ -150,7 +159,7 @@ interface QueryBulkDeleteOperation {
 
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
-function fromStorage(link: StoredQueryLink): QueryLink {
+function fromStorage(link: StoredQueryLink, logger?: Logger): QueryLink {
   const storageFields: QueryLinkStorageFields & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
@@ -162,6 +171,19 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
   };
+
+  const esql = storageFields[QUERY_ESQL_QUERY];
+  const storedType = storageFields[QUERY_TYPE];
+  const derivedType = deriveQueryType(esql);
+  const type: QueryType =
+    storedType === 'match' || storedType === 'stats' ? storedType : derivedType;
+
+  if (storedType && storedType !== derivedType) {
+    logger?.warn(
+      `Query ${storageFields[ASSET_ID]}: stored type "${storedType}" disagrees with derived type "${derivedType}" — using stored type. Investigate and re-sync if needed.`
+    );
+  }
+
   return {
     ...storageFields,
     stream_name: link[STREAM_NAME],
@@ -169,13 +191,11 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     rule_id: storageFields[RULE_ID],
     query: {
       id: storageFields[ASSET_ID],
+      type,
       title: storageFields[QUERY_TITLE],
       description: storageFields[QUERY_DESCRIPTION],
-      /**
-       * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
-       */
       esql: {
-        query: storageFields[QUERY_ESQL_QUERY],
+        query: esql,
       },
       severity_score: storageFields[QUERY_SEVERITY_SCORE],
       evidence: storageFields[QUERY_EVIDENCE],
@@ -193,6 +213,7 @@ function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest
     [QUERY_DESCRIPTION]: query.description,
     [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_SEVERITY_SCORE]: query.severity_score,
+    [QUERY_TYPE]: query.type,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
@@ -212,6 +233,7 @@ function toQueryLinkFromQuery({
   stream: string;
   ruleBacked?: boolean;
 }): QueryLink {
+  const effectiveRuleBacked = query.type === QUERY_TYPE_STATS ? false : ruleBacked;
   const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
     'asset.uuid': assetUuid,
@@ -219,7 +241,7 @@ function toQueryLinkFromQuery({
     'asset.id': query.id,
     query,
     stream_name: stream,
-    rule_backed: ruleBacked,
+    rule_backed: effectiveRuleBacked,
     rule_id: computeRuleId(assetUuid, query.esql.query),
   };
 }
@@ -253,7 +275,7 @@ export class QueryClient {
     });
 
     const existingQueryLinks = assetsResponse.hits.hits.map((hit) => {
-      return fromStorage(hit._source);
+      return fromStorage(hit._source, this.dependencies.logger);
     });
 
     const nextQueryLinks = links.map((link) => {
@@ -311,7 +333,7 @@ export class QueryClient {
 
     assetsResponse.hits.hits.forEach((hit) => {
       const name = hit._source[STREAM_NAME];
-      const asset = fromStorage(hit._source);
+      const asset = fromStorage(hit._source, this.dependencies.logger);
       queriesPerName[name].push(asset);
     });
 
@@ -339,7 +361,7 @@ export class QueryClient {
       },
     });
 
-    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source, this.dependencies.logger));
   }
 
   /**
@@ -352,6 +374,10 @@ export class QueryClient {
 
   /**
    * Returns the count of all query links across streams that do not have a backing Kibana rule.
+   *
+   * Pre-migration docs lacking QUERY_TYPE are safe here: STATS queries were
+   * introduced alongside the type field, so any doc without it is a match query.
+   * syncQueries backfills the type for all docs it touches.
    */
   async getUnbackedQueriesCount(): Promise<number> {
     const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
@@ -362,6 +388,7 @@ export class QueryClient {
       query: {
         bool: {
           filter,
+          must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
         },
       },
     });
@@ -395,7 +422,7 @@ export class QueryClient {
       },
     });
 
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source, this.dependencies.logger));
   }
 
   async findQueries(
@@ -431,7 +458,7 @@ export class QueryClient {
       },
     });
 
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source, this.dependencies.logger));
   }
 
   private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
@@ -519,8 +546,6 @@ export class QueryClient {
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
       } else if (!currentLink.rule_backed) {
-        // Unbacked queries have no rule, so breaking-change handling doesn't apply.
-        // Preserve the link as-is and update only the query content.
         allNextQueryLinks.push({ ...currentLink, query });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
@@ -542,9 +567,10 @@ export class QueryClient {
     );
 
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
+    const ruleBackedFilter = (link: QueryLink) => link.rule_backed;
     await this.installQueries(
-      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange],
-      nextQueriesUpdatedWithoutBreakingChange,
+      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(ruleBackedFilter),
+      nextQueriesUpdatedWithoutBreakingChange.filter(ruleBackedFilter),
       definition
     );
 
@@ -667,24 +693,33 @@ export class QueryClient {
   public async promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<{ promoted: number }> {
+  ): Promise<{ promoted: number; skipped_stats: number }> {
     const streamName = definition.name;
 
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping promoteQueries because significant events feature is disabled.`
       );
-      return { promoted: 0 };
+      return { promoted: 0, skipped_stats: 0 };
     }
 
     const unbacked = await this.getUnbackedQueries(streamName);
     const idSet = new Set(queryIds);
-    const toPromote = unbacked
-      .filter((link) => idSet.has(link.query.id))
+    const candidates = unbacked.filter((link) => idSet.has(link.query.id));
+
+    const statsSkipped = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
+    if (statsSkipped.length > 0) {
+      this.dependencies.logger.debug(
+        `Skipping ${statsSkipped.length} STATS queries from promotion (not yet supported as rules).`
+      );
+    }
+
+    const toPromote = candidates
+      .filter((link) => link.query.type !== QUERY_TYPE_STATS)
       .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
 
     if (toPromote.length === 0) {
-      return { promoted: 0 };
+      return { promoted: 0, skipped_stats: statsSkipped.length };
     }
 
     await this.installQueries(toPromote, [], definition);
@@ -709,7 +744,7 @@ export class QueryClient {
       throwOnFail: true,
     });
 
-    return { promoted: toPromote.length };
+    return { promoted: toPromote.length, skipped_stats: statsSkipped.length };
   }
 
   private async installQueries(

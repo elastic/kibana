@@ -24,8 +24,10 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
@@ -65,6 +67,7 @@ import {
   NOT_PROMOTED_TOOLTIP_CONTENT,
   OCCURRENCES_COLUMN,
   OCCURRENCES_TOOLTIP_NAME,
+  THRESHOLD_BREACHES_TOOLTIP_NAME,
   OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
   OPEN_IN_DISCOVER_ACTION_TITLE,
   PROMOTED_BADGE_LABEL,
@@ -87,6 +90,7 @@ import {
 } from './translations';
 import { PromoteAction } from './promote_action';
 import { QueryDetailsFlyout } from './query_details_flyout';
+import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 import { formatLastOccurredAt } from './utils';
 
 const DEFAULT_PAGINATION = { index: 0, size: 10 };
@@ -125,6 +129,15 @@ export function QueriesTable() {
     perPage: pagination.size,
     status: ['active', 'draft'],
   });
+  useEffect(() => {
+    if (!queriesData?.queries) return;
+    setSelectedQuery((prev) => {
+      if (!prev) return prev;
+      const refreshed = queriesData.queries.find((item) => item.query.id === prev.query.id);
+      return refreshed ?? null;
+    });
+  }, [queriesData]);
+
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
   const {
     data: streamsData,
@@ -145,10 +158,15 @@ export function QueriesTable() {
     [queryClient]
   );
 
-  const promoteAllMutation = useMutation<{ promoted: number }, Error>({
+  const promoteAllMutation = useMutation<{ promoted: number; skipped_stats: number }, Error>({
     mutationFn: promoteAll,
-    onSuccess: async ({ promoted }) => {
-      toasts.addSuccess(getPromoteAllSuccessToast(promoted));
+    onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
+      const toast = getPromoteAllSuccessToast(promoted, skippedStats);
+      if (toast.isInfoOnly) {
+        toasts.add({ title: toast.text, color: 'primary' });
+      } else {
+        toasts.addSuccess(toast.text);
+      }
       await invalidateQueriesData();
     },
     onError: (error) => {
@@ -266,7 +284,7 @@ export function QueriesTable() {
           return (
             <SparkPlot
               id={`sparkplot-${item.query.id}`}
-              name={OCCURRENCES_TOOLTIP_NAME}
+              name={item.query.type === QUERY_TYPE_STATS ? THRESHOLD_BREACHES_TOOLTIP_NAME : OCCURRENCES_TOOLTIP_NAME}
               type="bar"
               timeseries={item.occurrences}
               annotations={[]}
@@ -276,6 +294,16 @@ export function QueriesTable() {
             />
           );
         },
+      },
+      {
+        field: 'query.type',
+        name: i18n.translate('xpack.streams.queriesTable.typeColumn', {
+          defaultMessage: 'Type',
+        }),
+        width: '80px',
+        render: (_: unknown, item: SignificantEventQueryRow) => (
+          <QueryTypeBadge type={item.query.type ?? QUERY_TYPE_MATCH} />
+        ),
       },
       {
         field: 'stream_name',

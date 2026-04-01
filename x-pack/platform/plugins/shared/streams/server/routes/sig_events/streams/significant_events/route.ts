@@ -59,6 +59,7 @@ const previewSignificantEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<SignificantEventsPreviewResponse> => {
     const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -83,6 +84,7 @@ const previewSignificantEventsRoute = createServerRoute({
       },
       {
         scopedClusterClient,
+        logger,
       }
     );
   },
@@ -223,8 +225,6 @@ const generateSignificantEventsRoute = createServerRoute({
         {
           definition,
           connectorId,
-          start: params.query.from.valueOf(),
-          end: params.query.to.valueOf(),
           systemPrompt: significantEventsPromptOverride,
         },
         {

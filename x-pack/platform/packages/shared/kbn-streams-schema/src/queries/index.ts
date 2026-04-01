@@ -25,7 +25,15 @@ interface StreamQueryBase {
   description: string;
 }
 
+export const QUERY_TYPE_MATCH = 'match' as const;
+export const QUERY_TYPE_STATS = 'stats' as const;
+
+export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
+
+export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
+
 export interface StreamQuery extends StreamQueryBase {
+  type: QueryType;
   esql: EsqlQuery;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
@@ -39,6 +47,7 @@ const streamQueryBaseSchema = z.object({
 }) satisfies z.Schema<StreamQueryBase>;
 
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
+  type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   esql: esqlQuerySchema,

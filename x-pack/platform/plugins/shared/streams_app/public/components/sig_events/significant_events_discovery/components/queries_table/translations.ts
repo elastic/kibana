@@ -7,11 +7,47 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getPromoteAllSuccessToast = (count: number) =>
-  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess', {
-    defaultMessage: 'Promoted {count} {count, plural, one {query} other {queries}}',
-    values: { count },
-  });
+export const getPromoteAllSuccessToast = (
+  promoted: number,
+  skippedStats: number
+): { text: string; isInfoOnly: boolean } => {
+  if (promoted === 0 && skippedStats > 0) {
+    return {
+      text: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllNonePromoted',
+        {
+          defaultMessage:
+            'No queries promoted — {skippedStats} STATS {skippedStats, plural, one {query was} other {queries were}} skipped (not yet supported as rules)',
+          values: { skippedStats },
+        }
+      ),
+      isInfoOnly: true,
+    };
+  }
+  if (skippedStats > 0) {
+    return {
+      text: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccessWithSkipped',
+        {
+          defaultMessage:
+            'Promoted {promoted} {promoted, plural, one {query} other {queries}} ({skippedStats} STATS {skippedStats, plural, one {query} other {queries}} skipped — not yet supported as rules)',
+          values: { promoted, skippedStats },
+        }
+      ),
+      isInfoOnly: false,
+    };
+  }
+  return {
+    text: i18n.translate(
+      'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess',
+      {
+        defaultMessage: 'Promoted {promoted} {promoted, plural, one {query} other {queries}}',
+        values: { promoted },
+      }
+    ),
+    isInfoOnly: false,
+  };
+};
 
 export const PROMOTE_ALL_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllErrorTitle',
@@ -56,13 +92,18 @@ export const LAST_OCCURRED_COLUMN = i18n.translate(
 export const OCCURRENCES_COLUMN = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesColumn',
   {
-    defaultMessage: 'Occurrences',
+    defaultMessage: 'Activity',
   }
 );
 
 export const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesTooltipName',
   { defaultMessage: 'Occurrences' }
+);
+
+export const THRESHOLD_BREACHES_TOOLTIP_NAME = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.thresholdBreachesTooltipName',
+  { defaultMessage: 'Threshold breaches' }
 );
 
 export const PROMOTED_BADGE_LABEL = i18n.translate(
@@ -199,6 +240,16 @@ export const getPromoteQuerySuccessToast = (queryTitle: string) =>
     defaultMessage: 'Promoted "{queryTitle}". It moved to the Scanning section.',
     values: { queryTitle },
   });
+
+export const PROMOTE_QUERY_ALREADY_PROMOTED = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryAlreadyPromoted',
+  { defaultMessage: 'Query is already promoted' }
+);
+
+export const STATS_PROMOTE_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.statsPromoteDisabledTooltip',
+  { defaultMessage: 'STATS queries cannot be promoted to rules yet' }
+);
 
 export const SAVE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.saveQueryErrorToastTitle',
