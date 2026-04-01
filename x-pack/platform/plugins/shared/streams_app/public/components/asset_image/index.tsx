@@ -106,6 +106,13 @@ const imageSets = {
       defaultMessage: 'Suggest AI partitioning image for the streams app',
     }),
   },
+  sigEventsOnboarding: {
+    light: () => import('./sig_events_onboarding_light.svg'),
+    dark: () => import('./sig_events_onboarding_dark.svg'),
+    alt: i18n.translate('xpack.streams.sigEventsDiscovery.onboardingEmptyPrompt.image', {
+      defaultMessage: 'Enable Significant events illustration',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

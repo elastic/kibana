@@ -146,10 +146,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   data-test-subj="significant_events_view_insights_toast_button"
                   onClick={() => {
                     toasts.remove(toast);
-                    router.push('/_discovery/{tab}', {
-                      path: { tab: 'significant_events' },
-                      query: {},
-                    });
+                    router.push('/_discovery', {});
                   }}
                 >
                   {INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON}
