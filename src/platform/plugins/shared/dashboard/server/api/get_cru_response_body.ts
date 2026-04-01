@@ -61,7 +61,7 @@ export function getDashboardCRUResponseBody(
         },
       }),
     },
-    meta: getMeta(savedObject as SavedObject),
+    meta: getMeta(savedObject),
     ...(operation === 'read' && warnings?.length && { warnings }),
   };
 }

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { AsCodeMeta } from './schema';
 
-export function getMeta(savedObject: SavedObject): AsCodeMeta {
+export function getMeta(savedObject: SavedObject | SavedObjectsUpdateResponse): AsCodeMeta {
   return {
     ...(savedObject.created_at && { created_at: savedObject.created_at }),
     ...(savedObject.created_by && { created_by: savedObject.created_by }),

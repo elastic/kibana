@@ -9,7 +9,7 @@
 
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import type { MarkdownAttributes } from './markdown_saved_object';
+import type { MarkdownAttributes } from '../markdown_saved_object';
 
 // CRU is Create, Read, Update
 export function getMarkdownCRUResponseBody(
@@ -18,6 +18,6 @@ export function getMarkdownCRUResponseBody(
   return {
     id: savedObject.id,
     data: savedObject.attributes as MarkdownAttributes,
-    meta: getMeta(savedObject as SavedObject),
+    meta: getMeta(savedObject),
   };
 }
