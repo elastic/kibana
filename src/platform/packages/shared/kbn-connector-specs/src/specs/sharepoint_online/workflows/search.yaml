@@ -9,6 +9,7 @@ inputs:
   - name: query
     type: string
     required: true
+    description: "KQL search query string. Examples: 'contoso product', 'filename:budget filetype:xlsx', 'author:jane AND filetype:docx'."
   - name: entity_types
     type: array
     default:
@@ -17,7 +18,7 @@ inputs:
       - "listItem"
       - "drive"
       - "driveItem"
-    description: "Entity types to search. Valid values: site, list, listItem, drive, driveItem"
+    description: "Entity types to search. Valid values: site, list, listItem, drive, driveItem. Note: not all combinations can be mixed in a single request. The different combinations could be: (driveItem, listItem), (site, list), (drive)."
   - name: region
     type: choice
     default: "NAM"
@@ -32,9 +33,11 @@ inputs:
   - name: from
     type: number
     required: false
+    description: "Pagination offset. Defaults to 0."
   - name: size
     type: number
     required: false
+    description: "Number of results to return. Must be between 1 and 500."
 steps:
   - name: search-sharepoint
     type: sharepoint-online.search
