@@ -10,6 +10,7 @@ import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { deriveAlertDelayModeFromStateTransition } from '../utils/rule_request_mappers';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 
@@ -57,20 +58,12 @@ const optionIdForMode = (mode: DelayMode): string => {
 const DEFAULT_PENDING_COUNT = 2;
 const DEFAULT_PENDING_TIMEFRAME = '2m';
 
-const deriveMode = (stateTransition?: {
-  pendingTimeframe?: string | null;
-  pendingCount?: number | null;
-}): DelayMode => {
-  if (stateTransition?.pendingTimeframe != null) return 'duration';
-  if (stateTransition?.pendingCount != null) return 'breaches';
-  return 'immediate';
-};
-
 export const AlertDelayField = () => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
   const stateTransition = useWatch({ control, name: 'stateTransition' });
   const selectedMode = useWatch({ control, name: 'stateTransitionAlertDelayMode' });
-  const displayMode: DelayMode = selectedMode ?? deriveMode(stateTransition);
+  const displayMode: DelayMode =
+    selectedMode ?? deriveAlertDelayModeFromStateTransition(stateTransition);
 
   const onModeChange = useCallback(
     (optionId: string) => {

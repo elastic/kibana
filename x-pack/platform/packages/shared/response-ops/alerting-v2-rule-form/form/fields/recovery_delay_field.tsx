@@ -10,6 +10,7 @@ import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { deriveRecoveryDelayModeFromStateTransition } from '../utils/rule_request_mappers';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 
@@ -57,20 +58,12 @@ const optionIdForMode = (mode: DelayMode): string => {
 const DEFAULT_RECOVERING_COUNT = 2;
 const DEFAULT_RECOVERING_TIMEFRAME = '2m';
 
-const deriveMode = (stateTransition?: {
-  recoveringTimeframe?: string | null;
-  recoveringCount?: number | null;
-}): DelayMode => {
-  if (stateTransition?.recoveringTimeframe != null) return 'duration';
-  if (stateTransition?.recoveringCount != null) return 'breaches';
-  return 'immediate';
-};
-
 export const RecoveryDelayField = () => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
   const stateTransition = useWatch({ control, name: 'stateTransition' });
   const selectedMode = useWatch({ control, name: 'stateTransitionRecoveryDelayMode' });
-  const displayMode: DelayMode = selectedMode ?? deriveMode(stateTransition);
+  const displayMode: DelayMode =
+    selectedMode ?? deriveRecoveryDelayModeFromStateTransition(stateTransition);
 
   const onModeChange = useCallback(
     (optionId: string) => {
