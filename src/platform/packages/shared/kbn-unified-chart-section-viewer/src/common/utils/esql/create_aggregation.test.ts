@@ -8,7 +8,7 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
+import { createMetricAggregation, createTimeBucketAggregation, resolveConflictingFieldTypes } from './create_aggregation';
 
 describe('createMetricAggregation', () => {
   describe('with resolved metric name (column escaping)', () => {
@@ -112,5 +112,258 @@ describe('createTimeBucketAggregation', () => {
       timestampField: '@timestamp',
     });
     expect(result).toBe('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+  });
+});
+
+describe('resolveConflictingFieldTypes', () => {
+  describe('single type', () => {
+    it('should return the type when only one type is present', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should return undefined for empty array', () => {
+      const result = resolveConflictingFieldTypes([]);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('duplicate types', () => {
+    it('should return the type when duplicates are present', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+  });
+
+  describe('float family (double, float, half_float, scaled_float)', () => {
+    it('should resolve double + float to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve float + double to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve double + half_float to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve float + half_float to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.HALF_FLOAT]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve double + scaled_float to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.SCALED_FLOAT]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve float + half_float + scaled_float to double', () => {
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.FLOAT,
+        ES_FIELD_TYPES.HALF_FLOAT,
+        ES_FIELD_TYPES.SCALED_FLOAT,
+      ]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+  });
+
+  describe('integer family (long, integer, short, byte)', () => {
+    it('should resolve long + integer to long', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER]);
+      expect(result).toBe(ES_FIELD_TYPES.LONG);
+    });
+
+    it('should resolve integer + long to long', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.INTEGER, ES_FIELD_TYPES.LONG]);
+      expect(result).toBe(ES_FIELD_TYPES.LONG);
+    });
+
+    it('should resolve long + short to long', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.SHORT]);
+      expect(result).toBe(ES_FIELD_TYPES.LONG);
+    });
+
+    it('should resolve long + byte to long', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.BYTE]);
+      expect(result).toBe(ES_FIELD_TYPES.LONG);
+    });
+
+    it('should resolve integer + short + byte to long', () => {
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.INTEGER,
+        ES_FIELD_TYPES.SHORT,
+        ES_FIELD_TYPES.BYTE,
+      ]);
+      expect(result).toBe(ES_FIELD_TYPES.LONG);
+    });
+  });
+
+  describe('mixed numeric families', () => {
+    it('should resolve double + long to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve float + integer to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.INTEGER]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve long + double to double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve mixed float and integer family to double', () => {
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.DOUBLE,
+        ES_FIELD_TYPES.FLOAT,
+        ES_FIELD_TYPES.LONG,
+        ES_FIELD_TYPES.INTEGER,
+      ]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+  });
+
+  describe('incompatible types', () => {
+    it('should return undefined for keyword + double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for text + long', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.LONG]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for date + double', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBeUndefined();
+    });
+  });
+});
+
+describe('createMetricAggregation with conflicting types', () => {
+  describe('with resolved metric name and multiple types', () => {
+    it('should cast double+float to double', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        instrument: 'gauge',
+        metricName: 'http.request.duration',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(http.request.duration))');
+    });
+
+    it('should cast long+integer to long', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
+        instrument: 'counter',
+        metricName: 'requests.count',
+      });
+      expect(result).toBe('SUM(RATE(TO_LONG(requests.count)))');
+    });
+
+    it('should cast float+double+half_float to double with AVG', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.FLOAT, ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.HALF_FLOAT],
+        instrument: 'gauge',
+        metricName: 'system.load.1m',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(system.load.`1m`))');
+    });
+
+    it('should not cast when types are compatible duplicates', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        metricName: 'cpu.usage',
+      });
+      expect(result).toBe('AVG(cpu.usage)');
+    });
+
+    it('should cast mixed float and integer types to double', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+        instrument: 'gauge',
+        metricName: 'metric.value',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(metric.value))');
+    });
+
+    it('should handle field names with special chars in cast', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        instrument: 'gauge',
+        metricName: 'system.load.1m',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(system.load.`1m`))');
+    });
+  });
+
+  describe('with placeholder and multiple types', () => {
+    it('should cast double+float with placeholder', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+        instrument: 'gauge',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('AVG(TO_DOUBLE(??metricName))');
+    });
+
+    it('should cast counter with placeholder', () => {
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
+        instrument: 'counter',
+        placeholderName: 'metricName',
+      });
+      expect(result).toBe('SUM(RATE(TO_LONG(??metricName)))');
+    });
+  });
+
+  describe('incompatible types with multiple field types', () => {
+    it('should proceed with primary type when incompatible types are detected', () => {
+      // When types are incompatible (e.g., keyword + double), no cast is applied
+      // The query will execute and let ES|QL surface the verification_exception
+      const result = createMetricAggregation({
+        type: [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        metricName: 'field.name',
+      });
+      // Uses the primary type without casting, will fail at query time
+      expect(result).toBe('AVG(field.name)');
+    });
+  });
+
+  describe('backward compatibility with single type', () => {
+    it('should work with single type (not in array)', () => {
+      const result = createMetricAggregation({
+        type: ES_FIELD_TYPES.DOUBLE,
+        instrument: 'gauge',
+        metricName: 'cpu.usage',
+      });
+      expect(result).toBe('AVG(cpu.usage)');
+    });
+
+    it('should work with legacy histogram and single type', () => {
+      const result = createMetricAggregation({
+        type: ES_FIELD_TYPES.HISTOGRAM,
+        instrument: 'histogram',
+        metricName: 'histogram.metric',
+      });
+      expect(result).toBe('PERCENTILE(TO_TDIGEST(histogram.metric), 95)');
+    });
+
+    it('should work with counter and single type', () => {
+      const result = createMetricAggregation({
+        type: ES_FIELD_TYPES.HISTOGRAM,
+        instrument: 'counter',
+        metricName: 'requests.count',
+      });
+      expect(result).toBe('SUM(RATE(requests.count))');
+    });
   });
 });

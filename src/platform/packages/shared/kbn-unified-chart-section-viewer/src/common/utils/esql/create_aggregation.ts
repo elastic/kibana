@@ -14,30 +14,145 @@ import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import { isLegacyHistogram } from '../legacy_histogram';
 
 /**
+ * Resolves conflicting field types to a single compatible type for casting.
+ * When multiple field types are present (e.g., from different backing indices),
+ * selects the widest compatible numeric type based on a precedence order.
+ *
+ * Precedence rules:
+ * - double > float / half_float / scaled_float
+ * - long > integer / short / byte
+ * - double > long (mixed numeric types)
+ *
+ * @param fieldTypes - Array of field types (may contain duplicates or compatible types)
+ * @returns The selected field type, or undefined if types are incompatible or non-numeric
+ */
+export function resolveConflictingFieldTypes(
+  fieldTypes: ES_FIELD_TYPES[]
+): ES_FIELD_TYPES | undefined {
+  if (fieldTypes.length <= 1) {
+    return fieldTypes[0];
+  }
+
+  // Filter out duplicates
+  const uniqueTypes = Array.from(new Set(fieldTypes));
+  if (uniqueTypes.length === 1) {
+    return uniqueTypes[0];
+  }
+
+  // Numeric type precedence for auto-casting
+  const FLOAT_FAMILY = ['float', 'half_float', 'scaled_float'];
+  const INT_FAMILY = ['integer', 'short', 'byte'];
+
+  // Check if all types are in the float family (double is the widest)
+  if (uniqueTypes.every((type) => type === 'double' || FLOAT_FAMILY.includes(type as string))) {
+    return 'double' as ES_FIELD_TYPES;
+  }
+
+  // Check if all types are in the integer family (long is the widest)
+  if (uniqueTypes.every((type) => type === 'long' || INT_FAMILY.includes(type as string))) {
+    return 'long' as ES_FIELD_TYPES;
+  }
+
+  // Mixed numeric: if we have both float and integer families, prefer double
+  const hasFloatTypes = uniqueTypes.some(
+    (type) => type === 'double' || FLOAT_FAMILY.includes(type as string)
+  );
+  const hasIntTypes = uniqueTypes.some(
+    (type) => type === 'long' || INT_FAMILY.includes(type as string)
+  );
+  if (hasFloatTypes && hasIntTypes) {
+    return 'double' as ES_FIELD_TYPES;
+  }
+
+  // Incompatible types (e.g., keyword + double, text + long)
+  return undefined;
+}
+
+/**
+ * Gets the appropriate casting function name for a field type.
+ * @param fieldType - The target field type
+ * @returns The TO_* function name (e.g., 'TO_DOUBLE', 'TO_LONG'), or undefined if no cast is needed
+ */
+function getCastFunctionForType(fieldType: ES_FIELD_TYPES | undefined): string | undefined {
+  if (!fieldType) {
+    return undefined;
+  }
+
+  // Map field types to their ES|QL casting functions
+  switch (fieldType) {
+    case 'double':
+      return 'TO_DOUBLE';
+    case 'float':
+      return 'TO_DOUBLE'; // Cast floats to double for consistency
+    case 'half_float':
+      return 'TO_DOUBLE';
+    case 'scaled_float':
+      return 'TO_DOUBLE';
+    case 'long':
+      return 'TO_LONG';
+    case 'integer':
+      return 'TO_LONG';
+    case 'short':
+      return 'TO_LONG';
+    case 'byte':
+      return 'TO_LONG';
+    default:
+      return undefined;
+  }
+}
+
+/**
  * Builds an ES|QL aggregation expression AST node using `synth.exp` template
  * literals. Accepts any expression node -- a resolved column (`synth.col`) or
  * an unresolved placeholder (`synth.dpar`) -- and wraps it in the correct
  * aggregation function based on the field type and instrument.
+ *
+ * When multiple field types are present (from fieldTypes array), applies casting
+ * to resolve the ambiguity if the types are compatible.
  */
 function buildAggregationNode(
-  type: ES_FIELD_TYPES,
+  types: ES_FIELD_TYPES | ES_FIELD_TYPES[],
   instrument: MappingTimeSeriesMetricType,
   field: ESQLAstExpression,
   customFunction?: string
 ) {
+  // Normalize to array for consistent handling
+  const fieldTypesArray = Array.isArray(types) ? types : [types];
+  const primaryType = fieldTypesArray[0];
+
+  // If we have multiple types, check if they differ and need casting
+  let castedField = field;
+  if (fieldTypesArray.length > 1) {
+    // Get unique types to determine if there's actual conflict
+    const uniqueTypes = Array.from(new Set(fieldTypesArray));
+
+    // Only apply casting if there are actually different types
+    if (uniqueTypes.length > 1) {
+      const resolvedType = resolveConflictingFieldTypes(fieldTypesArray);
+      if (resolvedType) {
+        const castFunction = getCastFunctionForType(resolvedType);
+        if (castFunction) {
+          castedField = synth.exp`${synth.kwd(castFunction)}(${field})`;
+        }
+      }
+      // If types are incompatible, we'll proceed with the primary type
+      // and let the query execution surface the error to the user
+    }
+  }
+
   if (customFunction) {
-    return synth.exp`${synth.kwd(customFunction)}(${field})`;
+    return synth.exp`${synth.kwd(customFunction)}(${castedField})`;
   }
-  if (isLegacyHistogram(type, instrument)) {
-    return synth.exp`PERCENTILE(TO_TDIGEST(${field}), ${95})`;
+  if (isLegacyHistogram(primaryType, instrument)) {
+    return synth.exp`PERCENTILE(TO_TDIGEST(${castedField}), ${95})`;
   }
-  if (type === 'exponential_histogram' || type === 'tdigest') {
-    return synth.exp`PERCENTILE(${field}, ${95})`;
+  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') {
+    return synth.exp`PERCENTILE(${castedField}, ${95})`;
   }
   if (instrument === 'counter') {
-    return synth.exp`SUM(RATE(${field}))`;
+    return synth.exp`SUM(RATE(${castedField}))`;
   }
-  return synth.exp`AVG(${field})`;
+  return synth.exp`AVG(${castedField})`;
 }
 
 /**
@@ -48,10 +163,13 @@ function buildAggregationNode(
  * - `SUM(RATE(...))` for counter instruments
  * - `AVG(...)` for other metric types
  *
+ * When multiple field types are present (from different backing indices with conflicting mappings),
+ * the aggregation will wrap the field in an appropriate casting function (e.g., TO_DOUBLE) to resolve the ambiguity.
+ *
  * When `metricName` is provided the column is resolved and properly escaped.
  * Otherwise a `??placeholderName` parameter placeholder is emitted.
  *
- * @param type - The ES field type (e.g., 'histogram', 'exponential_histogram', 'tdigest').
+ * @param type - The ES field type(s). Can be a single type or array of types (for conflicting mappings).
  * @param instrument - The metric instrument type (e.g., 'counter', 'histogram', 'gauge').
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
@@ -65,7 +183,7 @@ export function createMetricAggregation({
   placeholderName = 'metricName',
   customFunction,
 }: {
-  type: ES_FIELD_TYPES;
+  type: ES_FIELD_TYPES | ES_FIELD_TYPES[];
   instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;

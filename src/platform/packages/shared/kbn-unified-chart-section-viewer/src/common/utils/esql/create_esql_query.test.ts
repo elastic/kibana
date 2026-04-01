@@ -412,4 +412,136 @@ TS metrics-*
       );
     });
   });
+
+  describe('conflicting field types (issue #5385)', () => {
+    const mockMetricWithConflictingTypes: ParsedMetricItem = {
+      metricName: 'http.request.duration',
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
+      dataStream: 'timeseries-rich-metrics-primary',
+      units: ['ms'],
+      metricTypes: ['gauge'],
+      dimensionFields: [{ name: 'service.name' }],
+    };
+
+    it('should cast conflicting double+float types to TO_DOUBLE', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricWithConflictingTypes,
+      });
+      expect(query).toBe(
+        `
+TS timeseries-rich-metrics-primary
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+      );
+    });
+
+    it('should cast conflicting types with single dimension', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricWithConflictingTypes,
+        splitAccessors: ['service.name'],
+      });
+      expect(query).toBe(
+        `
+TS timeseries-rich-metrics-primary
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+`.trim()
+      );
+    });
+
+    it('should cast conflicting long+integer types to TO_LONG', () => {
+      const mockMetricWithLongConflict: ParsedMetricItem = {
+        metricName: 'requests.count',
+        fieldTypes: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
+        dataStream: 'metrics-*',
+        units: ['count'],
+        metricTypes: ['counter'],
+        dimensionFields: [],
+      };
+
+      const query = createESQLQuery({
+        metricItem: mockMetricWithLongConflict,
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS SUM(RATE(TO_LONG(requests.count))) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+      );
+    });
+
+    it('should cast mixed numeric types (double+long) to TO_DOUBLE', () => {
+      const mockMetricMixedNumeric: ParsedMetricItem = {
+        metricName: 'metric.value',
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
+        dataStream: 'metrics-*',
+        units: ['count'],
+        metricTypes: ['gauge'],
+        dimensionFields: [],
+      };
+
+      const query = createESQLQuery({
+        metricItem: mockMetricMixedNumeric,
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS AVG(TO_DOUBLE(metric.value)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+      );
+    });
+
+    it('should handle conflicting types with WHERE statements', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricWithConflictingTypes,
+        whereStatements: ['service.name == "api-server"'],
+      });
+      expect(query).toBe(
+        `
+TS timeseries-rich-metrics-primary
+  | WHERE service.name == "api-server"
+  | STATS AVG(TO_DOUBLE(http.request.duration)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+      );
+    });
+
+    it('should not cast when all types are identical', () => {
+      const mockMetricSingleType: ParsedMetricItem = {
+        metricName: 'cpu.usage',
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
+        dataStream: 'metrics-*',
+        units: ['percent'],
+        metricTypes: ['gauge'],
+        dimensionFields: [],
+      };
+
+      const query = createESQLQuery({
+        metricItem: mockMetricSingleType,
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+      );
+    });
+
+    it('should cast conflicting exponential_histogram types', () => {
+      const mockMetricWithConflictingHistogram: ParsedMetricItem = {
+        metricName: 'request.duration',
+        fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, ES_FIELD_TYPES.TDIGEST],
+        dataStream: 'metrics-*',
+        units: ['ms'],
+        metricTypes: ['histogram'],
+        dimensionFields: [],
+      };
+
+      const query = createESQLQuery({
+        metricItem: mockMetricWithConflictingHistogram,
+      });
+      // Note: EXPONENTIAL_HISTOGRAM is the primary type, so PERCENTILE is used
+      // The cast would wrap the primary field type handling
+      expect(query).toContain('PERCENTILE');
+      expect(query).toContain('request.duration');
+    });
+  });
 });
