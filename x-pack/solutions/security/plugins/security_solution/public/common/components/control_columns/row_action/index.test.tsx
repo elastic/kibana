@@ -197,7 +197,7 @@ describe('RowAction', () => {
     const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
     expect(flyoutElement.props.documentId).toBe('1');
     expect(flyoutElement.props.indexName).toBeUndefined();
-    expect(flyoutElement.props.scopeId).toBe(TableId.test);
+    expect(flyoutElement.props.renderCellActions).toBeDefined();
     expect(flyoutElement.props.onAlertUpdated).toBe(defaultProps.refetch);
   });
 
