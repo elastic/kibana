@@ -8,8 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { EuiText, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 
 interface EmptyBranchDropTargetProps {
   parentId: string;
@@ -47,23 +46,25 @@ export const EmptyBranchDropTarget = ({ parentId, branch, onDrop }: EmptyBranchD
     <div
       ref={ref}
       css={css`
-        border: 1px dashed
-          ${isDraggedOver
-            ? euiTheme.colors.borderStrongAccentSecondary
-            : euiTheme.colors.borderBasePlain};
-        border-radius: ${euiTheme.border.radius.medium};
-        padding: ${euiTheme.size.s} ${euiTheme.size.m};
-        text-align: center;
-        transition: border-color 150ms ease-in-out, background-color 150ms ease-in-out;
-        ${isDraggedOver ? `background-color: ${euiTheme.colors.backgroundBaseSubdued};` : ''}
+        position: relative;
+        height: ${euiTheme.size.s};
       `}
     >
-      <EuiText size="xs" color="subdued">
-        {i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.emptyBranchDropTarget',
-          { defaultMessage: 'Drop a processor here' }
-        )}
-      </EuiText>
+      {isDraggedOver && (
+        <div
+          css={css`
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: ${euiTheme.size.xxs};
+            background-color: ${euiTheme.colors.borderStrongAccentSecondary};
+            border-radius: 1px;
+            pointer-events: none;
+          `}
+        />
+      )}
     </div>
   );
 };
