@@ -34,7 +34,7 @@ import {
 import { groupIsNotCollapsed } from '../../utils';
 
 /**
- * Shared visualization options for pie/donut charts including legend, value display, and label positioning
+ * Shared visualization options for pie charts including legend, value display, and label positioning
  */
 const pieStateSharedSchema = {
   legend: schema.maybe(
@@ -49,7 +49,7 @@ const pieStateSharedSchema = {
         meta: {
           id: 'pieLegend',
           title: 'Legend',
-          description: 'Legend configuration for pie/donut chart',
+          description: 'Legend configuration for pie chart',
         },
       }
     )
@@ -62,34 +62,28 @@ const pieStateSharedSchema = {
         position: schema.maybe(
           schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
             meta: {
-              description: 'Renders the pie/donut chart slice labels inside or outside the pie',
+              description: 'Renders pie chart slice labels inside or outside the pie',
             },
           })
         ),
       },
       {
         meta: {
-          description:
-            'Label configuration for pie/donut chart slice labels inside or outside the pie',
+          description: 'Label configuration for pie chart slice labels inside or outside the pie',
         },
       }
     )
   ),
   donut_hole: schema.maybe(
     schema.oneOf(
-      [
-        schema.literal('none'),
-        schema.literal('small'),
-        schema.literal('medium'),
-        schema.literal('large'),
-      ],
-      { meta: { description: 'Donut hole size: none (pie), small, medium, or large' } }
+      [schema.literal('none'), schema.literal('s'), schema.literal('m'), schema.literal('l')],
+      { meta: { description: 'Donut hole size: none (pie), or s/m/l' } }
     )
   ),
 };
 
 /**
- * Color configuration for primary metric in pie/donut chart
+ * Color configuration for primary metric in pie chart
  */
 const partitionStatePrimaryMetricOptionsSchema = {
   color: schema.maybe(staticColorSchema),
@@ -103,12 +97,7 @@ const partitionStateBreakdownByOptionsSchema = {
   collapse_by: schema.maybe(collapseBySchema),
 };
 
-/**
- * Pie/donut chart type
- */
-const pieTypeSchema = schema.oneOf([schema.literal('pie'), schema.literal('donut')], {
-  meta: { description: 'Chart type: pie or donut' },
-});
+const pieTypeSchema = schema.literal('pie');
 
 function validateForMultipleMetrics({
   metrics,
@@ -131,7 +120,7 @@ function validateForMultipleMetrics({
 }
 
 /**
- * Pie/donut chart configuration for standard (non-ES|QL) queries
+ * Pie chart configuration for standard (non-ES|QL) queries
  */
 export const pieStateSchemaNoESQL = schema.object(
   {
@@ -166,15 +155,15 @@ export const pieStateSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'pieNoESQL',
-      title: 'Pie/Donut Chart (DSL)',
-      description: 'Pie/donut chart configuration for standard queries',
+      title: 'Pie Chart (DSL)',
+      description: 'Pie chart configuration for standard queries',
     },
     validate: validateForMultipleMetrics,
   }
 );
 
 /**
- * Pie/donut chart configuration for ES|QL queries
+ * Pie chart configuration for ES|QL queries
  */
 export const pieStateSchemaESQL = schema.object(
   {
@@ -204,21 +193,21 @@ export const pieStateSchemaESQL = schema.object(
   {
     meta: {
       id: 'pieESQL',
-      title: 'Pie/Donut Chart (ES|QL)',
-      description: 'Pie/donut chart configuration for ES|QL queries',
+      title: 'Pie Chart (ES|QL)',
+      description: 'Pie chart configuration for ES|QL queries',
     },
     validate: validateForMultipleMetrics,
   }
 );
 
 /**
- * Complete pie/donut chart configuration supporting both standard and ES|QL queries
+ * Complete pie chart configuration supporting both standard and ES|QL queries
  */
 export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL], {
   meta: {
     id: 'pieChart',
-    title: 'Pie/Donut Chart',
-    description: 'Pie/donut chart state: standard query or ES|QL query',
+    title: 'Pie Chart',
+    description: 'Pie chart state: standard query or ES|QL query',
   },
 });
 

@@ -230,6 +230,9 @@ export class ToolsControl extends Component<Props, State> {
         panelPaddingSize="none"
         anchorPosition="leftUp"
         data-test-subj="mapToolsControlPopover"
+        aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlPopoverAriaLabel', {
+          defaultMessage: 'Tools',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={this._getDrawPanels()} />
       </EuiPopover>

@@ -30,7 +30,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { PageLoader } from '../../common/components/page_loader';
 import { PageScope } from '../../data_view_manager/constants';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_placeholder_panel';
+import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import {
@@ -141,14 +141,14 @@ export const EntityAnalyticsHomePage = () => {
                 responsive={false}
                 gutterSize="l"
               >
-                <EuiFlexItem grow={2}>
+                <EuiFlexItem grow={1}>
                   <EuiPanel hasBorder>
                     <DynamicRiskLevelPanel watchlistId={selectedWatchlistId} />
                   </EuiPanel>
                 </EuiFlexItem>
-                <EuiFlexItem grow={3}>
+                <EuiFlexItem grow={2}>
                   <EuiPanel hasBorder>
-                    <EntityAnalyticsRecentAnomalies />
+                    <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
                   </EuiPanel>
                 </EuiFlexItem>
               </EuiFlexGroup>

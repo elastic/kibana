@@ -30,7 +30,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  apiTest('should retrieve a paginated list of markdown panels', async ({ apiClient }) => {
+  apiTest('should retrieve a paginated list of markdown library items', async ({ apiClient }) => {
     const response = await apiClient.get(SEARCH_ENDPOINT, {
       headers: {
         ...COMMON_HEADERS,
@@ -73,7 +73,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest(
-    'should allow users to paginate through the list of markdown panels',
+    'should allow users to paginate through the list of markdown library items',
     async ({ apiClient }) => {
       const response = await apiClient.get(`${SEARCH_ENDPOINT}?page=2&per_page=10`, {
         headers: {

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import { unflattenObject } from '@kbn/object-utils';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -109,7 +110,7 @@ export const bulkUpdateEntityDocs = (
         retry_on_conflict: RETRY_ON_CONFLICT,
       },
     },
-    { doc },
+    { doc: unflattenObject(doc) },
   ]);
 
   return esClient.bulk({ operations, refresh: true });

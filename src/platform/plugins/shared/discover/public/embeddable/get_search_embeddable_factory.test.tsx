@@ -21,6 +21,7 @@ import { act, render, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
@@ -86,6 +87,7 @@ describe('saved search embeddable', () => {
       columns: [],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -126,9 +128,10 @@ describe('saved search embeddable', () => {
   };
 
   const finalizeApiMock = (
-    api: Omit<SearchEmbeddableApi, 'uuid' | 'type' | 'parentApi' | 'phase$'>
+    api: EmbeddableApiRegistration<SearchEmbeddableState, SearchEmbeddableApi>
   ) => ({
     ...api,
+    applySerializedState: () => undefined,
     uuid,
     type: factory.type,
     parentApi: mockedDashboardApi,
@@ -146,9 +149,10 @@ describe('saved search embeddable', () => {
   };
 
   const finalizeEditableApiMock = (
-    api: Omit<SearchEmbeddableApi, 'uuid' | 'type' | 'parentApi' | 'phase$'>
+    api: EmbeddableApiRegistration<SearchEmbeddableState, SearchEmbeddableApi>
   ) => ({
     ...api,
+    applySerializedState: () => undefined,
     uuid,
     type: factory.type,
     parentApi: mockedEditableDashboardApi,
