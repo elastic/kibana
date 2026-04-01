@@ -83,6 +83,12 @@ export const parseAndTransformRuleActions = (
   ];
 };
 
+const ALLOWED_BULK_ACTIONS_WITH_READ_AUTH: Array<BulkActionEditForRuleParams['type']> = [
+  'set_investigation_fields',
+  'delete_investigation_fields',
+  'add_investigation_fields',
+];
+
 /**
  * Returns a type-safe boolean for bulk edit actions that asserts if all elements are able to be edited with read auth
  * @param actions
@@ -90,17 +96,5 @@ export const parseAndTransformRuleActions = (
  */
 export const isOnlyActionsWithReadAuth = (
   actions: BulkActionEditForRuleParams[]
-): actions is BulkActionEditWithReadPrivileges[] => {
-  for (const action of actions) {
-    if (
-      !(
-        action.type === 'set_investigation_fields' ||
-        action.type === 'delete_investigation_fields' ||
-        action.type === 'add_investigation_fields'
-      )
-    ) {
-      return false;
-    }
-  }
-  return true;
-};
+): actions is BulkActionEditWithReadPrivileges[] =>
+  actions.every(({ type }) => ALLOWED_BULK_ACTIONS_WITH_READ_AUTH.includes(type));
