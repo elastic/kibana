@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
+import { useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import useAsync from 'react-use/lib/useAsync';
 
-export interface UseAlertingRulesIndexOptions {
+export interface UseAlertingRulesCacheOptions {
   ruleIds: string[];
   services: {
     http: HttpStart;
@@ -21,14 +21,15 @@ export interface UseAlertingRulesIndexOptions {
 type Rule = FindRulesResponse['items'][number];
 
 /**
- * Provides a rules index by id, fetching uncached rules
- * with the minimum number of bulk requests possible
+ * Provides a rules cache by id, fetching uncached rules
+ * with the minimum number of bulk requests possible.
+ * Returns rulesCache as state so consumers re-render when rules are loaded.
  */
-export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesIndexOptions) => {
-  const cacheRef = useRef<Record<string, Rule>>({});
+export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
+  const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
 
   const { loading, error } = useAsync(async () => {
-    const uncachedIds = ruleIds.filter((id) => !cacheRef.current[id]);
+    const uncachedIds = ruleIds.filter((id) => !rulesCache[id]);
 
     if (uncachedIds.length === 0) {
       return;
@@ -40,13 +41,17 @@ export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesInd
         query: { ids: uncachedIds },
       }
     );
-    rulesResponse.items.forEach((rule) => {
-      cacheRef.current[rule.id] = rule;
+    setRulesCache((prev) => {
+      const next = { ...prev };
+      rulesResponse.items.forEach((rule) => {
+        next[rule.id] = rule;
+      });
+      return next;
     });
   }, [ruleIds, services.http]);
 
   return {
-    rulesIndex: cacheRef.current,
+    rulesCache,
     loading,
     error,
   };
