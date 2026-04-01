@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
             threat_query: '*:*',
             threat_index: ['ti_test_1'],
             query: '*:*',
-            index: ['test-da*,', 'test-data-1', 'test-data-2'],
+            index: ['test-da*', 'test-data-1', 'test-data-2'],
             from: 'now-35m',
             interval: '30m',
             enabled: true,
