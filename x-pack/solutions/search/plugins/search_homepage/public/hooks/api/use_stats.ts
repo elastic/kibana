@@ -11,7 +11,7 @@ import type { StatsResponse } from '../../../server/types';
 import { useKibana } from '../use_kibana';
 
 export interface SizeStats {
-  shouldDefaultGettingStartedPage: boolean;
+  hasNoDocuments: boolean;
   size: StatsResponse['sizeStats']['size'];
 }
 
@@ -23,7 +23,7 @@ export const useStats = (): UseQueryResult<SizeStats> => {
     queryFn: async () => {
       const response = await http.get<StatsResponse>('/internal/search_homepage/stats');
       return {
-        shouldDefaultGettingStartedPage: response.sizeStats.documents === 0,
+        hasNoDocuments: response.sizeStats.documents === 0,
         size: response.sizeStats.size,
       };
     },

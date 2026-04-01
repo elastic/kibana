@@ -41,7 +41,7 @@ describe('GettingStartedRedirectGate', () => {
     jest.clearAllMocks();
     sessionStorage.clear();
     mockUseStats.mockReturnValue({
-      data: { shouldDefaultGettingStartedPage: false, size: 0 },
+      data: { hasNoDocuments: false, size: 0 },
       isLoading: false,
       isError: false,
     });
@@ -75,7 +75,7 @@ describe('GettingStartedRedirectGate', () => {
     // cluster has data so only trial triggers redirect
     mockUseGetLicenseInfo.mockReturnValue({ isTrial: true });
     mockUseStats.mockReturnValue({
-      data: { shouldDefaultGettingStartedPage: false, size: 100 },
+      data: { hasNoDocuments: false, size: 100 },
       isLoading: false,
       isError: false,
     });
@@ -88,7 +88,7 @@ describe('GettingStartedRedirectGate', () => {
   it('redirects when user is not on trial but has 0 documents', async () => {
     mockUseGetLicenseInfo.mockReturnValue({ isTrial: false });
     mockUseStats.mockReturnValue({
-      data: { shouldDefaultGettingStartedPage: true, size: 0 },
+      data: { hasNoDocuments: true, size: 0 },
       isLoading: false,
       isError: false,
     });
@@ -101,7 +101,7 @@ describe('GettingStartedRedirectGate', () => {
   it('renders home page when user is not on trial and has documents', () => {
     mockUseGetLicenseInfo.mockReturnValue({ isTrial: false });
     mockUseStats.mockReturnValue({
-      data: { shouldDefaultGettingStartedPage: false, size: 100 },
+      data: { hasNoDocuments: false, size: 100 },
       isLoading: false,
       isError: false,
     });
@@ -121,7 +121,7 @@ describe('GettingStartedRedirectGate', () => {
     // isTrial is ignored in serverless; empty cluster reinforces redirect
     mockUseGetLicenseInfo.mockReturnValue({ isTrial: false });
     mockUseStats.mockReturnValue({
-      data: { shouldDefaultGettingStartedPage: true, size: 0 },
+      data: { hasNoDocuments: true, size: 0 },
       isLoading: false,
       isError: false,
     });

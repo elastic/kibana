@@ -28,11 +28,9 @@ export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
   const shouldVisitGettingStartedPage =
     !visitedGettingStartedPage || visitedGettingStartedPage === 'false'; // visit if null or value is false
 
-  const isServerless = cloud?.isCloudEnabled && cloud?.isServerlessEnabled;
   const shouldRedirect =
     storageStats !== undefined &&
-    ((isServerless ? cloud?.isInTrial() : isTrial) ||
-      storageStats.shouldDefaultGettingStartedPage) &&
+    ((cloud?.isCloudEnabled ? cloud?.isInTrial() : isTrial) || storageStats.hasNoDocuments) &&
     shouldVisitGettingStartedPage;
 
   useEffect(() => {

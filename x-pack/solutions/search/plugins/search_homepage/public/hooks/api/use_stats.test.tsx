@@ -55,15 +55,15 @@ describe('useStats', () => {
     expect(mockHttpGet).toHaveBeenCalledWith('/internal/search_homepage/stats');
     expect(result.current.data).toEqual({
       size: '10.5 GB',
-      shouldDefaultGettingStartedPage: false,
+      hasNoDocuments: false,
     });
 
     expect(cachedData).toEqual({
       size: '10.5 GB',
-      shouldDefaultGettingStartedPage: false,
+      hasNoDocuments: false,
     });
   });
-  it('should return shouldDefaultGettingStartedPage to true when has document', async () => {
+  it('should return hasNoDocuments to true when has document', async () => {
     const mockResponse = {
       sizeStats: {
         size: '0 GB',
@@ -81,12 +81,12 @@ describe('useStats', () => {
     expect(mockHttpGet).toHaveBeenCalledWith('/internal/search_homepage/stats');
     expect(result.current.data).toEqual({
       size: '0 GB',
-      shouldDefaultGettingStartedPage: true,
+      hasNoDocuments: true,
     });
 
     expect(cachedData).toEqual({
       size: '0 GB',
-      shouldDefaultGettingStartedPage: true,
+      hasNoDocuments: true,
     });
   });
 });
