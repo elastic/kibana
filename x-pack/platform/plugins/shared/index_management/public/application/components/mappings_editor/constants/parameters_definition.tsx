@@ -67,24 +67,9 @@ const indexOptionsConfig = {
   label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
     defaultMessage: 'Index options',
   }),
-  helpText: () => (
-    <FormattedMessage
-      id="xpack.idxMgmt.mappingsEditor.indexOptionsHelpText"
-      defaultMessage="Information to store in the index. {docsLink}"
-      values={{
-        docsLink: (
-          <EuiLink href={documentationService.getIndexOptionsLink()} target="_blank">
-            {i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.configuration.indexOptionsdDocumentationLink',
-              {
-                defaultMessage: 'Learn more.',
-              }
-            )}
-          </EuiLink>
-        ),
-      }}
-    />
-  ),
+  helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsHelpText', {
+    defaultMessage: 'Information to store in the index.',
+  }),
   type: FIELD_TYPES.SUPER_SELECT,
 };
 
