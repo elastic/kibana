@@ -319,6 +319,8 @@ export class StreamsPlugin
             .then((response) => response._source)
             .catch((error) => {
               if (isNotFoundError(error)) {
+                // This is an expected error that gets thrown when the settings
+                // document doesn't exist, which is the case on the initial startup.
                 return;
               }
               throw error;
