@@ -38,7 +38,6 @@ export function isComingFromContainerView(
 ): boolean {
   return Boolean(
     incomingState?.originatingApp &&
-      incomingState.originatingApp !== VISUALIZE_APP_ID &&
       incomingState?.originatingPath &&
       !incomingState.originatingPath.includes('/list/')
   );
@@ -92,13 +91,11 @@ export function setBreadcrumbsTitle(
     originatingAppName,
     incomingBreadcrumbs,
     redirectToOrigin,
-    isFromLegacyEditor,
     currentDocTitle,
   }: {
     originatingAppName: string | undefined;
     incomingBreadcrumbs: EmbeddableEditorBreadcrumb[] | undefined;
     redirectToOrigin: ((props?: RedirectToOriginProps | undefined) => void) | undefined;
-    isFromLegacyEditor: boolean;
     currentDocTitle: string;
   }
 ) {

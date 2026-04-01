@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { VisualizeConstants } from '@kbn/visualizations-common';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
@@ -15,7 +16,7 @@ const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcr
   defaultMessage: 'Edit visualization',
 });
 
-const getVisualizeLibraryCrumbs = (originatingAppName?: string) => {
+const getLandingBreadcrumbs = (originatingAppName?: string) => {
   if (originatingAppName) {
     return [];
   }
@@ -51,7 +52,7 @@ export function getCreateBreadcrumbs({
   }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...getVisualizeLibraryCrumbs(originatingAppName),
+    ...getLandingBreadcrumbs(originatingAppName),
     {
       text: i18n.translate('visualizations.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -90,7 +91,7 @@ export function getEditBreadcrumbs(
   }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...getVisualizeLibraryCrumbs(originatingAppName),
+    ...getLandingBreadcrumbs(originatingAppName),
     {
       text: title,
     },

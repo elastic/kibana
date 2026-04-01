@@ -322,7 +322,6 @@ export const LensTopNavMenu = ({
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
-  initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
   indexPatternService,

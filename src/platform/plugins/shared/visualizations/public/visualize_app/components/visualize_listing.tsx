@@ -302,6 +302,7 @@ export const VisualizeListing = () => {
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
+
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
@@ -341,15 +342,10 @@ export const VisualizeListing = () => {
   });
   useUnmount(() => closeNewVisModal.current());
 
-  const getVisualizeListItemLink = useMemo(() => {
-    const linkFn = getVisualizeListItemLinkFn(application, kbnUrlStateStorage);
-    return (item: VisualizeUserContent) => {
-      if (item.editor && 'editApp' in item.editor && item.editor.editApp) {
-        return undefined;
-      }
-      return linkFn(item);
-    };
-  }, [application, kbnUrlStateStorage]);
+  const getVisualizeListItemLink = useMemo(
+    () => getVisualizeListItemLinkFn(application, kbnUrlStateStorage),
+    [application, kbnUrlStateStorage]
+  );
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);

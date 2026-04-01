@@ -168,8 +168,6 @@ export function App({
     initialContext && 'vizEditorOriginatingAppUrl' in initialContext
       ? initialContext.vizEditorOriginatingAppUrl
       : undefined;
-  const initialContextIsEmbedded = Boolean(legacyEditorAppName);
-
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
   }, [setIndicateNoData]);
@@ -282,7 +280,6 @@ export function App({
           (initialContext && 'breadcrumbs' in initialContext
             ? initialContext.breadcrumbs
             : undefined),
-        isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
         originatingAppName: getOriginatingAppName(),
       }
     );
@@ -505,7 +502,6 @@ export function App({
           isCurrentStateDirty={!isLensEqualWrapper(persistedDoc)}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
-          initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           indexPatternService={indexPatternService}
