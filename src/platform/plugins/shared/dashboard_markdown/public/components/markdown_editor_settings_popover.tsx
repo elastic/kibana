@@ -49,6 +49,7 @@ export function MarkdownEditorSettingsPopover({ settings, updateSettings }: Prop
           />
         </EuiToolTip>
       }
+      anchorPosition="downRight"
       aria-label={settingsDisplayName}
       repositionOnScroll
       panelPaddingSize="m"
