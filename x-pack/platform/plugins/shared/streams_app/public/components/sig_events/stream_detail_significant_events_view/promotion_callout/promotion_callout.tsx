@@ -83,7 +83,7 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
     >
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <AssetImage type="significantEventsEmptyState" size={32} />
+          <AssetImage type="significantEventsEmptyState" size={62} />
         </EuiFlexItem>
 
         <EuiFlexItem grow>

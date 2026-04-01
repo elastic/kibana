@@ -6,7 +6,7 @@
  */
 
 import {
-  EuiBasicTable,
+  type CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,17 +16,16 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiInMemoryTable,
+  EuiLink,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
-  type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import React, { useCallback, useState } from 'react';
-
-const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
+import React, { useEffect, useState } from 'react';
 import {
   DISCOVERY_QUERIES_QUERY_KEY,
   type SignificantEventQueryRow,
@@ -36,7 +35,10 @@ import { usePromotableQueries } from '../../../../hooks/sig_events/use_promotabl
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { getFormattedError } from '../../../../util/errors';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { KnowledgeIndicatorQueryDetailsContent } from '../knowledge_indicator_details_flyout/knowledge_indicator_query_details_content';
 import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
 
 interface SuggestedRulesFlyoutProps {
   streamName: string;
@@ -45,6 +47,7 @@ interface SuggestedRulesFlyoutProps {
 
 export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'suggestedRulesFlyout' });
+  const detailsFlyoutTitleId = useGeneratedHtmlId({ prefix: 'suggestedRulesDetailsFlyout' });
   const {
     core: {
       notifications: { toasts },
@@ -53,22 +56,33 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
   const queryClient = useQueryClient();
 
   const { count, queries, queryIds, refetch, isLoading } = usePromotableQueries(streamName);
-
-  const [pagination, setPagination] = useState({ index: 0, size: 20 });
-
-  const onTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<SignificantEventQueryRow>) => {
-      if (!page) return;
-      setPagination(page);
-    },
-    []
-  );
-
-  const pageOfQueries = queries.slice(
-    pagination.index * pagination.size,
-    (pagination.index + 1) * pagination.size
-  );
+  const [selectedQueryRow, setSelectedQueryRow] = useState<SignificantEventQueryRow | null>(null);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
   const { promote, removeQuery } = useQueriesApi();
+
+  const toggleDetailsFlyout = (item: SignificantEventQueryRow) => {
+    setSelectedQueryRow((previous) => (previous?.query.id === item.query.id ? null : item));
+  };
+
+  useEffect(() => {
+    /**
+     * Ensuring stable pagination when queries get
+     * deleted from the table
+     */
+    setPagination((currentPagination) => {
+      const pageCount = Math.ceil(queries.length / currentPagination.pageSize);
+      const maxPageIndex = Math.max(pageCount - 1, 0);
+
+      if (currentPagination.pageIndex <= maxPageIndex) {
+        return currentPagination;
+      }
+
+      return {
+        ...currentPagination,
+        pageIndex: maxPageIndex,
+      };
+    });
+  }, [queries.length]);
 
   const invalidateQueriesData = async () =>
     Promise.all([
@@ -79,20 +93,13 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
   const createRulesMutation = useMutation<{ promoted: number }, Error>({
     mutationFn: () => promote({ queryIds }),
     onSuccess: async ({ promoted }) => {
-      toasts.addSuccess(
-        i18n.translate('xpack.streams.suggestedRulesFlyout.createRulesSuccess', {
-          defaultMessage: '{count, plural, one {# rule} other {# rules}} created successfully.',
-          values: { count: promoted },
-        })
-      );
+      toasts.addSuccess(CREATE_RULES_SUCCESS_MESSAGE(promoted));
       await invalidateQueriesData();
       onClose();
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.streams.suggestedRulesFlyout.createRulesError', {
-          defaultMessage: 'Failed to create rules',
-        }),
+        title: CREATE_RULES_ERROR_TITLE,
       });
     },
   });
@@ -105,9 +112,7 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.streams.suggestedRulesFlyout.deleteQueryError', {
-          defaultMessage: 'Failed to delete query',
-        }),
+        title: DELETE_QUERY_ERROR_TITLE,
       });
     },
   });
@@ -117,33 +122,35 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
       field: 'expand',
       name: '',
       width: '40px',
-      render: () => (
+      render: (_: unknown, item: SignificantEventQueryRow) => (
         <EuiButtonIcon
-          iconType="expand"
-          aria-label={i18n.translate('xpack.streams.suggestedRulesFlyout.expandAriaLabel', {
-            defaultMessage: 'Expand row',
-          })}
-          isDisabled
+          iconType={selectedQueryRow?.query.id === item.query.id ? 'minimize' : 'expand'}
+          aria-label={
+            selectedQueryRow?.query.id === item.query.id ? MINIMIZE_ARIA_LABEL : EXPAND_ARIA_LABEL
+          }
+          onClick={() => toggleDetailsFlyout(item)}
+          data-test-subj="suggestedRulesFlyoutExpandButton"
         />
       ),
     },
     {
       field: 'query.title',
-      name: i18n.translate('xpack.streams.suggestedRulesFlyout.rulesColumn', {
-        defaultMessage: 'Rules',
-      }),
+      name: RULES_COLUMN_LABEL,
       truncateText: true,
       render: (_: unknown, item: SignificantEventQueryRow) => (
         <EuiText size="s">
-          <strong>{item.query.title}</strong>
+          <EuiLink
+            onClick={() => toggleDetailsFlyout(item)}
+            data-test-subj="suggestedRulesFlyoutQueryTitleLink"
+          >
+            <strong>{item.query.title}</strong>
+          </EuiLink>
         </EuiText>
       ),
     },
     {
       field: 'query.severity_score',
-      name: i18n.translate('xpack.streams.suggestedRulesFlyout.severityColumn', {
-        defaultMessage: 'Severity',
-      }),
+      name: SEVERITY_COLUMN_LABEL,
       width: '120px',
       render: (_: unknown, item: SignificantEventQueryRow) => (
         <SeverityBadge score={item.query.severity_score} />
@@ -154,17 +161,17 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
       width: '40px',
       actions: [
         {
-          name: i18n.translate('xpack.streams.suggestedRulesFlyout.deleteAction', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate(
-            'xpack.streams.suggestedRulesFlyout.deleteActionDescription',
-            { defaultMessage: 'Remove this suggested rule' }
-          ),
+          name: DELETE_ACTION_LABEL,
+          description: DELETE_ACTION_DESCRIPTION,
           icon: 'trash',
           type: 'icon',
           color: 'danger',
-          onClick: (item: SignificantEventQueryRow) => deleteQueryMutation.mutate(item),
+          onClick: (item: SignificantEventQueryRow) => {
+            if (selectedQueryRow?.query.id === item.query.id) {
+              setSelectedQueryRow(null);
+            }
+            deleteQueryMutation.mutate(item);
+          },
           'data-test-subj': 'suggestedRulesFlyoutDeleteButton',
         },
       ],
@@ -172,106 +179,202 @@ export function SuggestedRulesFlyout({ streamName, onClose }: SuggestedRulesFlyo
   ];
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      aria-labelledby={flyoutTitleId}
-      type="overlay"
-      ownFocus={false}
-      size="m"
-      data-test-subj="streamsAppSuggestedRulesFlyout"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id={flyoutTitleId}>
-                {i18n.translate('xpack.streams.suggestedRulesFlyout.title', {
-                  defaultMessage: 'Suggested rules',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate('xpack.streams.suggestedRulesFlyout.description', {
-                  defaultMessage:
-                    'We generate rules based on the queries that are of critical importance for this stream. You can review and discard results.',
-                })}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
+    <>
+      <EuiFlyout
+        onClose={onClose}
+        aria-labelledby={flyoutTitleId}
+        ownFocus={true}
+        size="40%"
+        session="start"
+        data-test-subj="streamsAppSuggestedRulesFlyout"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2 id={flyoutTitleId}>{FLYOUT_TITLE}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <p>{FLYOUT_DESCRIPTION}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.streams.suggestedRulesFlyout.showing', {
-                defaultMessage: 'Showing {count, plural, one {# Rule} other {# Rules}}',
-                values: { count },
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiBasicTable
-              tableCaption={i18n.translate('xpack.streams.suggestedRulesFlyout.tableCaption', {
-                defaultMessage: 'Suggested rules',
-              })}
-              columns={columns}
-              itemId={(item) => item.query.id}
-              items={pageOfQueries}
-              loading={isLoading || deleteQueryMutation.isLoading}
-              noItemsMessage={
-                !isLoading
-                  ? i18n.translate('xpack.streams.suggestedRulesFlyout.noItems', {
-                      defaultMessage: 'No suggested rules found.',
-                    })
-                  : ''
-              }
-              pagination={{
-                pageIndex: pagination.index,
-                pageSize: pagination.size,
-                totalItemCount: count,
-                pageSizeOptions: [...PAGE_SIZE_OPTIONS],
-              }}
-              onChange={onTableChange}
-              data-test-subj="suggestedRulesTable"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
+        <EuiFlyoutBody>
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {SHOWING_RULES_LABEL(count)}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiInMemoryTable<SignificantEventQueryRow>
+                tableCaption={TABLE_CAPTION}
+                columns={columns}
+                itemId={(item) => item.query.id}
+                items={queries}
+                loading={isLoading || deleteQueryMutation.isLoading}
+                noItemsMessage={!isLoading ? NO_ITEMS_MESSAGE : ''}
+                pagination={{
+                  pageIndex: pagination.pageIndex,
+                  pageSize: pagination.pageSize,
+                  pageSizeOptions: [...PAGE_SIZE_OPTIONS],
+                }}
+                onTableChange={({ page }: CriteriaWithPagination<SignificantEventQueryRow>) => {
+                  if (!page) {
+                    return;
+                  }
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onClose}
-              disabled={createRulesMutation.isLoading}
-              data-test-subj="suggestedRulesFlyoutCancelButton"
-            >
-              {i18n.translate('xpack.streams.suggestedRulesFlyout.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="primary"
-              onClick={() => createRulesMutation.mutate()}
-              isLoading={createRulesMutation.isLoading}
-              isDisabled={queryIds.length === 0}
-              data-test-subj="suggestedRulesFlyoutCreateButton"
-            >
-              {i18n.translate('xpack.streams.suggestedRulesFlyout.createRulesButton', {
-                defaultMessage: 'Create rules',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+                  setPagination({
+                    pageIndex: page.index,
+                    pageSize: page.size,
+                  });
+                }}
+                data-test-subj="suggestedRulesTable"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
+
+        {selectedQueryRow ? (
+          <EuiFlyout
+            onClose={() => setSelectedQueryRow(null)}
+            aria-labelledby={detailsFlyoutTitleId}
+            ownFocus={false}
+            session="inherit"
+            data-test-subj="suggestedRulesFlyoutDetailsFlyout"
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="m">
+                <h2 id={detailsFlyoutTitleId}>{selectedQueryRow.query.title}</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <KnowledgeIndicatorQueryDetailsContent
+                query={selectedQueryRow.query}
+                occurrences={selectedQueryRow.occurrences}
+              />
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        ) : null}
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onClose}
+                disabled={createRulesMutation.isLoading}
+                data-test-subj="suggestedRulesFlyoutCancelButton"
+              >
+                {CANCEL_BUTTON_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="primary"
+                onClick={() => createRulesMutation.mutate()}
+                isLoading={createRulesMutation.isLoading}
+                isDisabled={queryIds.length === 0}
+                data-test-subj="suggestedRulesFlyoutCreateButton"
+              >
+                {CREATE_RULES_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </>
   );
 }
+
+const CREATE_RULES_SUCCESS_MESSAGE = (count: number) =>
+  i18n.translate('xpack.streams.suggestedRulesFlyout.createRulesSuccess', {
+    defaultMessage: '{count, plural, one {# rule} other {# rules}} created successfully.',
+    values: { count },
+  });
+
+const CREATE_RULES_ERROR_TITLE = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.createRulesError',
+  {
+    defaultMessage: 'Failed to create rules',
+  }
+);
+
+const DELETE_QUERY_ERROR_TITLE = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.deleteQueryError',
+  {
+    defaultMessage: 'Failed to delete query',
+  }
+);
+
+const MINIMIZE_ARIA_LABEL = i18n.translate('xpack.streams.suggestedRulesFlyout.minimizeAriaLabel', {
+  defaultMessage: 'Collapse row details',
+});
+
+const EXPAND_ARIA_LABEL = i18n.translate('xpack.streams.suggestedRulesFlyout.expandAriaLabel', {
+  defaultMessage: 'Expand row details',
+});
+
+const RULES_COLUMN_LABEL = i18n.translate('xpack.streams.suggestedRulesFlyout.rulesColumn', {
+  defaultMessage: 'Rules',
+});
+
+const SEVERITY_COLUMN_LABEL = i18n.translate('xpack.streams.suggestedRulesFlyout.severityColumn', {
+  defaultMessage: 'Severity',
+});
+
+const DELETE_ACTION_LABEL = i18n.translate('xpack.streams.suggestedRulesFlyout.deleteAction', {
+  defaultMessage: 'Delete',
+});
+
+const DELETE_ACTION_DESCRIPTION = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.deleteActionDescription',
+  {
+    defaultMessage: 'Remove this suggested rule',
+  }
+);
+
+const FLYOUT_TITLE = i18n.translate('xpack.streams.suggestedRulesFlyout.title', {
+  defaultMessage: 'Suggested rules',
+});
+
+const FLYOUT_DESCRIPTION = i18n.translate('xpack.streams.suggestedRulesFlyout.description', {
+  defaultMessage:
+    'We generate rules based on the queries that are of critical importance for this stream. You can review and discard results.',
+});
+
+const SHOWING_RULES_LABEL = (count: number) =>
+  i18n.translate('xpack.streams.suggestedRulesFlyout.showing', {
+    defaultMessage: 'Showing {count, plural, one {# Rule} other {# Rules}}',
+    values: { count },
+  });
+
+const TABLE_CAPTION = i18n.translate('xpack.streams.suggestedRulesFlyout.tableCaption', {
+  defaultMessage: 'Suggested rules',
+});
+
+const NO_ITEMS_MESSAGE = i18n.translate('xpack.streams.suggestedRulesFlyout.noItems', {
+  defaultMessage: 'No suggested rules found.',
+});
+
+const CANCEL_BUTTON_LABEL = i18n.translate('xpack.streams.suggestedRulesFlyout.cancelButton', {
+  defaultMessage: 'Cancel',
+});
+
+const CREATE_RULES_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.createRulesButton',
+  {
+    defaultMessage: 'Create rules',
+  }
+);
+
+const DETAILS_CLOSE_ARIA_LABEL = i18n.translate(
+  'xpack.streams.suggestedRulesFlyout.detailsCloseAriaLabel',
+  {
+    defaultMessage: 'Close details',
+  }
+);

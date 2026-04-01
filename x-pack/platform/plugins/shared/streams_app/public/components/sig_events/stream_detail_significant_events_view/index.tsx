@@ -153,6 +153,25 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   );
   const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
 
+  const toggleSelectedKnowledgeIndicator = useCallback((knowledgeIndicator: KnowledgeIndicator) => {
+    setSelectedKnowledgeIndicator((currentKnowledgeIndicator) => {
+      if (!currentKnowledgeIndicator) {
+        return knowledgeIndicator;
+      }
+
+      const currentId =
+        currentKnowledgeIndicator.kind === 'feature'
+          ? currentKnowledgeIndicator.feature.uuid
+          : currentKnowledgeIndicator.query.id;
+      const nextId =
+        knowledgeIndicator.kind === 'feature'
+          ? knowledgeIndicator.feature.uuid
+          : knowledgeIndicator.query.id;
+
+      return currentId === nextId ? null : knowledgeIndicator;
+    });
+  }, []);
+
   const isRulesSelected = useMemo(
     () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
     [typeFilterOptions]
@@ -255,7 +274,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 rules={ruleKnowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
-                onViewDetails={setSelectedKnowledgeIndicator}
+                selectedKnowledgeIndicator={selectedKnowledgeIndicator}
+                onViewDetails={toggleSelectedKnowledgeIndicator}
               />
             ) : (
               <KnowledgeIndicatorsTable
@@ -265,7 +285,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 searchTerm={debouncedTableSearchValue}
                 selectedTypes={selectedKnowledgeIndicatorTypes}
                 statusFilter={knowledgeIndicatorStatusFilter}
-                onViewDetails={setSelectedKnowledgeIndicator}
+                selectedKnowledgeIndicator={selectedKnowledgeIndicator}
+                onViewDetails={toggleSelectedKnowledgeIndicator}
               />
             )}
           </EuiPanel>

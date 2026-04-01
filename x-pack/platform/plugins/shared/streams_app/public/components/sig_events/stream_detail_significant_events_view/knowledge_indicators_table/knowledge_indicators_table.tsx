@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,7 @@ interface KnowledgeIndicatorsTableProps {
   searchTerm: string;
   selectedTypes: string[];
   statusFilter: 'active' | 'excluded';
+  selectedKnowledgeIndicator: KnowledgeIndicator | null;
   onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
@@ -53,6 +55,7 @@ export function KnowledgeIndicatorsTable({
   searchTerm,
   selectedTypes,
   statusFilter,
+  selectedKnowledgeIndicator,
   onViewDetails,
 }: KnowledgeIndicatorsTableProps) {
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
@@ -142,34 +145,25 @@ export function KnowledgeIndicatorsTable({
               ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
               : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
 
-          if (knowledgeIndicator.kind === 'feature') {
-            return (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="expand"
-                    aria-label={VIEW_DETAILS_ARIA_LABEL}
-                    onClick={() => onViewDetails(knowledgeIndicator)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <span>{title}</span>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          }
+          const isExpanded =
+            (knowledgeIndicator.kind === 'feature' &&
+              selectedKnowledgeIndicator?.kind === 'feature' &&
+              selectedKnowledgeIndicator.feature.uuid === knowledgeIndicator.feature.uuid) ||
+            (knowledgeIndicator.kind === 'query' &&
+              selectedKnowledgeIndicator?.kind === 'query' &&
+              selectedKnowledgeIndicator.query.id === knowledgeIndicator.query.id);
 
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  iconType="expand"
-                  aria-label={VIEW_DETAILS_ARIA_LABEL}
+                  iconType={isExpanded ? 'minimize' : 'expand'}
+                  aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
                   onClick={() => onViewDetails(knowledgeIndicator)}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <span>{title}</span>
+                <EuiLink onClick={() => onViewDetails(knowledgeIndicator)}>{title}</EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -236,7 +230,7 @@ export function KnowledgeIndicatorsTable({
         ),
       },
     ],
-    [definition, occurrencesByQueryId, onViewDetails]
+    [definition, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicator]
   );
 
   return (
@@ -384,6 +378,13 @@ const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicatorsTable.viewDetailsAriaLabel',
   {
     defaultMessage: 'View details',
+  }
+);
+
+const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorsTable.minimizeDetailsAriaLabel',
+  {
+    defaultMessage: 'Collapse details',
   }
 );
 
