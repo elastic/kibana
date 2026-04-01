@@ -469,6 +469,15 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
   }
 
+  public async bulkCancelWorkflowExecutions(workflowId: string, spaceId: string): Promise<void> {
+    const workflow = await this.getWorkflow(workflowId, spaceId);
+    if (!workflow) {
+      throw new WorkflowNotFoundError(workflowId);
+    }
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.bulkCancelWorkflowExecutions({ spaceId, workflowId });
+  }
+
   public async resumeWorkflowExecution(
     executionId: string,
     spaceId: string,
