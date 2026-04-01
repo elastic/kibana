@@ -11,12 +11,7 @@ import type {
   OptionsListSearchTechnique,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  EsqlControlType,
-  PublishesESQLVariable,
-  QueryESQLControl,
-  StaticESQLControl,
-} from '@kbn/esql-types';
+import type { PublishesESQLVariable, QueryESQLControl, StaticESQLControl } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
   HasType,
@@ -30,9 +25,7 @@ import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../t
 import type { initializeLabelManager } from '../control_labels';
 
 export type ESQLControlApi<State> = DefaultEmbeddableApi<
-  State extends { control_type: EsqlControlType.STATIC_VALUES }
-    ? StaticESQLControl
-    : QueryESQLControl
+  State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl
 > &
   PublishesESQLVariable &
   HasEditCapabilities &

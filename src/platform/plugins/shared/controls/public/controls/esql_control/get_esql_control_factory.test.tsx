@@ -77,7 +77,7 @@ describe('ESQLControlApi', () => {
       available_options: ['option1', 'option2'],
       variable_name: 'variable1',
       variable_type: 'values',
-      control_type: 'STATIC_VALUES',
+      control_type: EsqlControlType.STATIC_VALUES,
     };
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),

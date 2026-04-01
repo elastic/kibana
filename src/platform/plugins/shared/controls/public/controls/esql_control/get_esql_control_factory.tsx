@@ -17,7 +17,6 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiPublishesESQLVariables,
   isStaticESQLControl,
-  type EsqlControlType,
   type QueryESQLControl,
   type StaticESQLControl,
 } from '@kbn/esql-types';
@@ -40,11 +39,9 @@ import type {
 } from './types';
 
 export const getESQLControlFactory = <
-  State extends OptionsListESQLControlState
+  State extends OptionsListESQLControlState = OptionsListESQLControlState
 >(): EmbeddableFactory<
-  State extends { control_type: EsqlControlType.STATIC_VALUES }
-    ? StaticESQLControl
-    : QueryESQLControl,
+  State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
   ESQLControlApi<State>
 > => {
   return {
