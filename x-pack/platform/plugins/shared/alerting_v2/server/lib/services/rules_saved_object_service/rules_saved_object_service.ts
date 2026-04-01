@@ -232,14 +232,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
-    const trimmedSearch = search?.trim();
     return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      sortField: 'updatedAt',
-      sortOrder: 'desc',
-      ...(trimmedSearch ? { search: trimmedSearch, searchFields: ['metadata.name'] } : {}),
+      sortField,
+      sortOrder,
       ...(filter ? { filter } : {}),
     });
   }
