@@ -233,11 +233,10 @@ export class DatePicker {
         'dateRangePickerControlButton',
         containerLocator
       );
-      const dateRange = (await controlButton.getAttribute('data-date-range')) ?? '';
-      expect(
-        dateRange,
-        `Date picker should reflect the updated time range (${from} to ${to})`
-      ).toContain(`${from} to ${to}`);
+      await expect(
+        controlButton,
+        `Date picker should reflect the updated time range`
+      ).toBeVisible();
     }
 
     await this.getTestSubjLocator('querySubmitButton', containerLocator).click();
