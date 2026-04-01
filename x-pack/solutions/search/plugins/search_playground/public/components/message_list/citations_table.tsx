@@ -71,7 +71,9 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
                 data-test-subj={`expandButton-${citation.metadata._id}`}
                 onClick={() => toggleDetails(citation)}
                 iconType={
-                  itemIdToExpandedRowMapValues[citation.metadata._id] ? 'arrowDown' : 'arrowRight'
+                  itemIdToExpandedRowMapValues[citation.metadata._id]
+                    ? 'chevronSingleDown'
+                    : 'chevronSingleRight'
                 }
               >
                 {i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.snippet', {

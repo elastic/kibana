@@ -329,6 +329,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
+    readonly endpointExceptions: string;
     readonly trustedApps: string;
     readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
@@ -585,6 +586,12 @@ export interface DocLinks {
     agentReleaseProcess: string;
     fipsIngest: string;
     edotCollector: string;
+    agentPolicyLimitCpu: string;
+    agentDownloadTimeout: string;
+    elasticAgentStandaloneDownload: string;
+    elasticAgentStandaloneLoggingConfig: string;
+    agentPolicyLogLevel: string;
+    elasticAgentLogFileRetention: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

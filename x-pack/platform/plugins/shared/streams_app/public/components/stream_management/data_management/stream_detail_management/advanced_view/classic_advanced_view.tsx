@@ -26,6 +26,8 @@ export function ClassicAdvancedView({
   } = useStreamsPrivileges();
   const aiFeatures = useAIFeatures();
 
+  const isReplicated = definition.replicated === true;
+
   return (
     <>
       {significantEvents?.enabled && significantEvents?.available ? (
@@ -38,9 +40,16 @@ export function ClassicAdvancedView({
           <EuiSpacer />
         </>
       ) : null}
-      <UnmanagedElasticsearchAssets definition={definition} refreshDefinition={refreshDefinition} />
-      <EuiSpacer />
-      <DeleteStreamPanel definition={definition} />
+      {!isReplicated && (
+        <>
+          <UnmanagedElasticsearchAssets
+            definition={definition}
+            refreshDefinition={refreshDefinition}
+          />
+          <EuiSpacer />
+          <DeleteStreamPanel definition={definition} />
+        </>
+      )}
       <EuiSpacer />
     </>
   );
