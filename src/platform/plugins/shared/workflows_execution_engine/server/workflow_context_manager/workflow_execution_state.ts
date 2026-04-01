@@ -119,6 +119,16 @@ export class WorkflowExecutionState {
     } else {
       this.updateStep(step.id, step);
     }
+
+    const currentStep = this.stepExecutions.get(step.id);
+
+    if (currentStep?.output || currentStep?.error || currentStep?.input) {
+      this.stepMetadataCache.cacheMetadata(step.id, {
+        input: currentStep?.input,
+        output: currentStep?.output,
+        error: currentStep?.error,
+      });
+    }
   }
 
   public async flushStepChanges(): Promise<void> {
