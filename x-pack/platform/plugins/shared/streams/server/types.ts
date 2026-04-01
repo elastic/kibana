@@ -34,6 +34,10 @@ import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/serv
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
 import type { MemoryTriggerRegistry } from './lib/memory/triggers';
 
@@ -45,11 +49,13 @@ export interface StreamsServer {
   actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
+  licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
   memoryTriggerRegistry?: MemoryTriggerRegistry;
   ensureMemorySkillRegistered?: () => void;
   ensureMemoryTasksScheduled?: () => Promise<void>;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -66,6 +72,7 @@ export interface StreamsPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -81,4 +88,5 @@ export interface StreamsPluginStartDependencies {
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
