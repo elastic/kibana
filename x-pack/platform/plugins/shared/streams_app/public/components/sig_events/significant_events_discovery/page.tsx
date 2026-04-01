@@ -14,8 +14,7 @@ import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useUnbackedQueriesCount } from '../../../hooks/sig_events/use_unbacked_queries_count';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useDiscoverySettings } from './context';
 import { FeedbackButton } from '../../feedback_button';
 import { RedirectTo } from '../../redirect_to';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -46,11 +45,6 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsAppParams('/_discovery/{tab}');
 
   const router = useStreamsAppRouter();
-  const {
-    dependencies: {
-      start: { streams },
-    },
-  } = useKibana();
 
   const {
     features: { significantEventsDiscovery },
@@ -58,15 +52,7 @@ export function SignificantEventsDiscoveryPage() {
   const { euiTheme } = useEuiTheme();
   const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
 
-  const settingsFetch = useStreamsAppFetch(
-    async ({ signal }) =>
-      streams.streamsRepositoryClient.fetch('GET /internal/streams/_significant_events/settings', {
-        signal,
-      }),
-    [streams.streamsRepositoryClient]
-  );
-
-  const isMemoryEnabled = !settingsFetch.loading && settingsFetch.value?.useMemory === true;
+  const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -163,6 +149,9 @@ export function SignificantEventsDiscoveryPage() {
   }
 
   if (tab === 'memory' && !isMemoryEnabled) {
+    if (isSettingsLoading) {
+      return <EuiLoadingElastic size="xxl" />;
+    }
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
