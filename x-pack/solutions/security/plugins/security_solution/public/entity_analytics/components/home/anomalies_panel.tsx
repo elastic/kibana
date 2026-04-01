@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { RecentAnomaliesChart } from '../recent_anomalies/recent_anomalies_chart';
+import { useKibana } from '../../../common/lib/kibana';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+
+const useRecentAnomaliesMlExplorerUrl = () => {
+  const { from, to } = useGlobalTime();
+  const { services } = useKibana();
+
+  return useMlHref(
+    services.ml,
+    services.http.basePath.get(),
+    {
+      page: ML_PAGES.ANOMALY_EXPLORER,
+      pageState: {
+        timeRange: { from, to },
+      },
+    },
+    [from, to]
+  );
+};
+
+export const EntityAnalyticsRecentAnomalies: React.FC<{ watchlistId?: string }> = ({
+  watchlistId,
+}) => {
+  const anomalyExplorerUrl = useRecentAnomaliesMlExplorerUrl();
+  const spaceId = useSpaceId();
+  return (
+    <EuiFlexItem data-test-subj="recent-anomalies-panel">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.recentAnomalies"
+                defaultMessage="Recent anomalies"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton color={'primary'} fill={false} iconType={'anomalySwimLane'}>
+            <EuiLink href={anomalyExplorerUrl} external={false} target="_blank">
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.recentAnomalies.viewAllInAnomalyExplorer"
+                defaultMessage="View all in Anomaly Explorer"
+              />
+            </EuiLink>
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size={'m'} />
+      <RecentAnomaliesChart watchlistId={watchlistId} spaceId={spaceId} />
+    </EuiFlexItem>
+  );
+};
