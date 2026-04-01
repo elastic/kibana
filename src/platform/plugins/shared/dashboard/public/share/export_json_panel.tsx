@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -29,61 +29,13 @@ import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
 import { CodeEditor } from '@kbn/code-editor';
-import type { DashboardState } from '../../server';
-import { sanitizeDashboard } from './sanitize_dashboard';
+import type { ExportJsonLoadState } from './export_json_types';
 import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
 import { coreServices, shareService } from '../services/kibana_services';
 
 export interface ExportJsonPanelProps {
-  dashboardState: DashboardState;
-  onLoadStateChange?: (loadState: ExportJsonLoadState) => void;
-}
-
-export type ExportJsonLoadState =
-  | { status: 'loading' }
-  | { status: 'success'; data: DashboardState; warnings: string[] }
-  | { status: 'error'; errorMessage: string };
-
-function useSanitizedExportSource({
-  dashboardState,
-  onLoadStart,
-}: {
-  dashboardState: DashboardState;
-  onLoadStart?: () => void;
-}): { loadState: ExportJsonLoadState; retry: () => void } {
-  const [loadState, setLoadState] = useState<ExportJsonLoadState>({ status: 'loading' });
-  const [requestNonce, setRequestNonce] = useState(0);
-
-  const retry = useCallback(() => {
-    setRequestNonce((n) => n + 1);
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    setLoadState({ status: 'loading' });
-    onLoadStart?.();
-
-    sanitizeDashboard(dashboardState)
-      .then(({ data, warnings }) => {
-        if (!isMounted) return;
-        const warningMessages = warnings.map(({ message }) => message);
-        setLoadState({ status: 'success', data, warnings: warningMessages });
-      })
-      .catch((e) => {
-        if (!isMounted) return;
-        const errorMessage = e instanceof Error ? e.message : String(e);
-        setLoadState({
-          status: 'error',
-          errorMessage,
-        });
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [dashboardState, requestNonce, onLoadStart]);
-
-  return { loadState, retry };
+  loadState: ExportJsonLoadState;
+  onRetry: () => void;
 }
 
 function WarningsCallout({
@@ -363,30 +315,27 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
   );
 }
 
-export const ExportJsonPanel = ({ dashboardState, onLoadStateChange }: ExportJsonPanelProps) => {
+export const ExportJsonPanel = ({ loadState, onRetry }: ExportJsonPanelProps) => {
   const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
 
-  const onLoadStart = useCallback(() => {
+  useEffect(() => {
+    if (loadState.status !== 'loading') return;
     setIsWarningsExpanded(false);
     setShowWarningsCallout(true);
-  }, []);
-
-  const { loadState, retry } = useSanitizedExportSource({ dashboardState, onLoadStart });
-
-  useEffect(() => {
-    onLoadStateChange?.(loadState);
-  }, [loadState, onLoadStateChange]);
+  }, [loadState.status]);
 
   const warnings = loadState.status === 'success' ? loadState.warnings : [];
-  const sanitizedState = loadState.status === 'success' ? loadState.data : undefined;
+  const jsonValue = useMemo(
+    () => (loadState.status === 'success' ? JSON.stringify(loadState.data, null, 2) : ''),
+    [loadState]
+  );
 
-  const jsonValue = useMemo(() => JSON.stringify(sanitizedState, null, 2), [sanitizedState]);
-
-  const openInConsoleRequest = useMemo(() => {
-    return buildCreateDashboardRequestForConsole(jsonValue);
-  }, [jsonValue]);
+  const openInConsoleRequest = useMemo(
+    () => buildCreateDashboardRequestForConsole(jsonValue),
+    [jsonValue]
+  );
 
   return (
     <EuiFlexItem grow css={{ minHeight: 0 }}>
@@ -409,7 +358,7 @@ export const ExportJsonPanel = ({ dashboardState, onLoadStateChange }: ExportJso
           ) : loadState.status === 'success' ? (
             <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
           ) : (
-            <ErrorState errorMessage={loadState.errorMessage} onRetry={retry} />
+            <ErrorState errorMessage={loadState.errorMessage} onRetry={onRetry} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBetaBadge,
@@ -26,10 +26,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
 
-import type { ExportJsonLoadState } from './export_json_panel';
 import { ExportJsonPanel } from './export_json_panel';
 import { buildExportJsonFilename } from './export_json_share_utils';
 import type { buildExportSharingData } from '../dashboard_app/top_nav/share/share_options_utils';
+import { useSanitizedDashboardState } from './use_sanitized_dashboard_state';
 
 const flyoutBodyCss = css`
   ${euiFullHeight()}
@@ -51,18 +51,19 @@ export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) =
   );
 
   const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
+  const { title, exportJson } = typedSharingData;
 
-  const [dashboardState] = useState(() => typedSharingData.exportJson());
-  const [loadState, setLoadState] = useState<ExportJsonLoadState>({ status: 'loading' });
+  const dashboardState = useMemo(() => exportJson(), [exportJson]);
+  const { loadState, retry } = useSanitizedDashboardState({ dashboardState });
 
   const onDownload = useCallback(async () => {
     if (loadState.status !== 'success') return;
 
-    const filename = buildExportJsonFilename(typedSharingData.title, '.json');
+    const filename = buildExportJsonFilename(title, '.json');
     const content = JSON.stringify(loadState.data, null, 2);
     await downloadFileAs(filename, { content, type: 'application/json' });
     closeFlyout();
-  }, [closeFlyout, loadState, typedSharingData.title]);
+  }, [closeFlyout, loadState, title]);
 
   return (
     <React.Fragment>
@@ -97,7 +98,7 @@ export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) =
 
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
         <EuiFlexGroup css={{ height: '100%' }} direction="column">
-          <ExportJsonPanel dashboardState={dashboardState} onLoadStateChange={setLoadState} />
+          <ExportJsonPanel loadState={loadState} onRetry={retry} />
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
