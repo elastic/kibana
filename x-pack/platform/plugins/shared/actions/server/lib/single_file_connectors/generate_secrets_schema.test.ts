@@ -223,7 +223,7 @@ describe('generateSecretsSchema', () => {
       );
     });
 
-    it('does not validate for auth types with no URL fields', () => {
+    it('does not validate for auth types with no allowedHosts validation configured', () => {
       const validator = generateSecretsSchema({ types: ['basic'] }, mockConfigUtils);
 
       validator.customValidator!(

@@ -7,13 +7,10 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 
-import {
-  generateSecretsSchemaFromSpec,
-  getMeta,
-  getSchemaForAuthType,
-} from '@kbn/connector-specs/src/lib';
+import { generateSecretsSchemaFromSpec, getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
 import type { ActionTypeSecrets, ValidatorType } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
 
 export const generateSecretsSchema = (
   authSpec: ConnectorSpec['auth'],
@@ -26,13 +23,9 @@ export const generateSecretsSchema = (
   const allowedHostsFieldsByAuthType = new Map<string, string[]>();
   for (const authTypeDef of authSpec?.types ?? []) {
     const { schema: authTypeSchema, id: authTypeId } = getSchemaForAuthType(authTypeDef);
-    for (const [key, fieldSchema] of Object.entries(authTypeSchema.shape)) {
-      const meta = getMeta(fieldSchema);
-      if (meta?.validate?.allowedHosts) {
-        const keys = allowedHostsFieldsByAuthType.get(authTypeId) ?? [];
-        keys.push(key);
-        allowedHostsFieldsByAuthType.set(authTypeId, keys);
-      }
+    const keys = getAllowedHostsKeysFromShape(authTypeSchema.shape);
+    if (keys.length) {
+      allowedHostsFieldsByAuthType.set(authTypeId, keys);
     }
   }
 
@@ -46,12 +39,7 @@ export const generateSecretsSchema = (
       const allowedHostsFields = allowedHostsFieldsByAuthType.get(authType);
       if (!allowedHostsFields) return;
 
-      for (const key of allowedHostsFields) {
-        const value = secretsRecord[key];
-        if (typeof value === 'string') {
-          configurationUtilities.ensureUriAllowed(value);
-        }
-      }
+      validateAllowedHostsKeys(secretsRecord, allowedHostsFields, configurationUtilities);
     },
   };
 };

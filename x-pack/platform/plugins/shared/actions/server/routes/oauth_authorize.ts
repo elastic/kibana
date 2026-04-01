@@ -120,9 +120,7 @@ export const oauthAuthorizeRoute = (
 
           const urlsToValidate: string[] = [];
           let earsAuthorizationUrl: string | undefined;
-          if (oauthConfig.authTypeId === 'oauth_authorization_code') {
-            urlsToValidate.push(oauthConfig.authorizationUrl, oauthConfig.tokenUrl);
-          } else if (oauthConfig.authTypeId === 'ears') {
+          if (oauthConfig.authTypeId === 'ears') {
             const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
             earsAuthorizationUrl = resolveEarsUrl(
               authorizeEndpoint,
@@ -130,8 +128,7 @@ export const oauthAuthorizeRoute = (
             );
             urlsToValidate.push(earsAuthorizationUrl);
           } else {
-            const _exhaustiveCheck: never = oauthConfig;
-            throw new Error(`Unsupported OAuth authTypeId: ${String(_exhaustiveCheck)}`);
+            urlsToValidate.push(oauthConfig.authorizationUrl, oauthConfig.tokenUrl);
           }
 
           try {
@@ -199,7 +196,7 @@ export const oauthAuthorizeRoute = (
               state: state.state,
               pkceChallenge: codeChallenge,
             });
-          } else if (oauthConfig.authTypeId === 'oauth_authorization_code') {
+          } else {
             authorizationUrl = oauthService.buildAuthorizationUrl({
               baseAuthorizationUrl: oauthConfig.authorizationUrl,
               clientId: oauthConfig.clientId,
@@ -208,9 +205,6 @@ export const oauthAuthorizeRoute = (
               state: state.state,
               codeChallenge,
             });
-          } else {
-            const _exhaustiveCheck: never = oauthConfig;
-            throw new Error(`Unsupported OAuth authTypeId: ${String(_exhaustiveCheck)}`);
           }
 
           return res.ok({
