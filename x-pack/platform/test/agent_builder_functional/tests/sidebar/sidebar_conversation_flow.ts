@@ -26,15 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       llmProxy = await createLlmProxy(log);
       await createConnector(llmProxy, supertest);
-      // Navigate to home — sidebar tests must NOT be on the agent builder app
-      // to avoid clashing with full-screen conversation components sharing the same data-test-subj
-      await agentBuilder.navigateToHome();
-      // Open the sidebar and reset to a fresh conversation — the sidebar persists
-      // the last agent and conversation ID so we always clear state before starting
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
-      await agentBuilder.openEmbeddableMenu();
-      await agentBuilder.clickEmbeddableNewChatButton();
     });
 
     after(async () => {
@@ -51,6 +42,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('shows initial state', async () => {
+      await agentBuilder.prepareEmbeddableSidebar();
+
       // The menu button should be visible (part of the embeddable header)
       await testSubjects.existOrFail('agentBuilderEmbeddableMenuButton');
 
@@ -62,6 +55,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_INPUT = 'hello from the sidebar';
       const MOCKED_RESPONSE = 'This is the sidebar response';
       const MOCKED_TITLE = 'Sidebar Flow Test';
+
+      await agentBuilder.prepareEmbeddableSidebarWithNewChat();
 
       await setupAgentDirectAnswer({
         proxy: llmProxy,
@@ -83,6 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can start a new chat from the menu', async () => {
+      await agentBuilder.prepareEmbeddableSidebar();
+
       // Open the menu popover
       await agentBuilder.openEmbeddableMenu();
 
@@ -102,8 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'Response after new chat';
       const MOCKED_TITLE = 'Post New Chat Conversation';
 
-      await agentBuilder.openEmbeddableMenu();
-      await agentBuilder.clickEmbeddableNewChatButton();
+      await agentBuilder.prepareEmbeddableSidebarWithNewChat();
 
       await setupAgentDirectAnswer({
         proxy: llmProxy,

@@ -57,9 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('starts with the default agent selected', async () => {
-      await agentBuilder.navigateToHome();
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
+      await agentBuilder.prepareEmbeddableSidebar();
       await agentBuilder.openEmbeddableMenu();
 
       const agentRow = await testSubjects.find('agentBuilderEmbeddableAgentRow');
@@ -71,11 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('switching agent resets to a new conversation', async () => {
-      await agentBuilder.navigateToHome();
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
-      await agentBuilder.openEmbeddableMenu();
-      await agentBuilder.clickEmbeddableNewChatButton();
+      await agentBuilder.prepareEmbeddableSidebarWithNewChat();
 
       // Switch to the custom agent
       await agentBuilder.openEmbeddableMenu();
@@ -103,11 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'response from the custom agent';
       const MOCKED_TITLE = 'Custom Agent Conversation';
 
-      await agentBuilder.navigateToHome();
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
-      await agentBuilder.openEmbeddableMenu();
-      await agentBuilder.clickEmbeddableNewChatButton();
+      await agentBuilder.prepareEmbeddableSidebarWithNewChat();
 
       // Switch to the custom agent
       await agentBuilder.openEmbeddableMenu();
@@ -148,11 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can switch back to the default agent', async () => {
-      await agentBuilder.navigateToHome();
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
-      await agentBuilder.openEmbeddableMenu();
-      await agentBuilder.clickEmbeddableNewChatButton();
+      await agentBuilder.prepareEmbeddableSidebarWithNewChat();
 
       // Switch to the custom agent first
       await agentBuilder.openEmbeddableMenu();

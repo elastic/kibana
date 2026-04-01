@@ -66,9 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('shows existing conversations in the menu', async () => {
-      await agentBuilder.navigateToHome();
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
+      await agentBuilder.prepareEmbeddableSidebar();
       await agentBuilder.openEmbeddableMenu();
 
       // Both conversations should appear in the list
@@ -83,9 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can switch to an existing conversation and see its messages', async () => {
-      await agentBuilder.navigateToHome();
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
+      await agentBuilder.prepareEmbeddableSidebar();
 
       // Select the first conversation by ID
       await agentBuilder.openEmbeddableMenu();
@@ -109,9 +105,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('search filters the conversation list', async () => {
-      await agentBuilder.navigateToHome();
-      await agentBuilder.openEmbeddableSidebar();
-      await agentBuilder.waitForEmbeddableSidebarOpen();
+      await agentBuilder.prepareEmbeddableSidebar();
       await agentBuilder.openEmbeddableMenu();
 
       // Type part of the first conversation's title in the search box

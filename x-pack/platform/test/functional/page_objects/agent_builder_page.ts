@@ -755,6 +755,28 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   /**
+   * Standard starting point for all embeddable sidebar tests.
+   * Navigates to home, opens the sidebar, and waits for it to be ready.
+   * Must be called from any page except the agent builder app, to avoid
+   * data-test-subj clashes with full-screen components.
+   */
+  async prepareEmbeddableSidebar() {
+    await this.navigateToHome();
+    await this.openEmbeddableSidebar();
+    await this.waitForEmbeddableSidebarOpen();
+  }
+
+  /**
+   * Opens the sidebar and resets it to a blank new chat.
+   * Use when the test needs a clean empty conversation ready for input.
+   */
+  async prepareEmbeddableSidebarWithNewChat() {
+    await this.prepareEmbeddableSidebar();
+    await this.openEmbeddableMenu();
+    await this.clickEmbeddableNewChatButton();
+  }
+
+  /**
    * Open the embeddable conversation sidebar by clicking the nav control button
    */
   async openEmbeddableSidebar() {
