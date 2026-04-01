@@ -15,15 +15,19 @@ import {
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { css } from '@emotion/react';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
+import { FlyoutContentId } from '../../common/constants';
 
 export const FULL_TRACE_WATERFALL_RENDER_DELAY_MS = 150;
 
@@ -42,8 +46,9 @@ export interface FullScreenWaterfallProps {
   skipOpenAnimation?: boolean;
   onNodeClick: (nodeSpanId: string) => void;
   onErrorClick: FullTraceWaterfallOnErrorClick;
-  onCloseFlyout: () => void;
-  onExitFullScreen: () => void;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
+  onExitFullScreen: EuiFlyoutProps['onClose'];
+  skipNextEventReport?: boolean;
 }
 
 export const FullScreenWaterfall = ({
@@ -63,12 +68,20 @@ export const FullScreenWaterfall = ({
   onErrorClick,
   onCloseFlyout,
   onExitFullScreen,
+  skipNextEventReport,
 }: FullScreenWaterfallProps) => {
-  const { discoverShared } = getUnifiedDocViewerServices();
+  const historyKey = useFlyoutHistoryKey();
+  const { analytics, discoverShared } = getUnifiedDocViewerServices();
   const FullTraceWaterfall = discoverShared.features.registry.getById(
     'observability-full-trace-waterfall'
   )?.render;
   const { euiTheme } = useEuiTheme();
+
+  useDocViewerViewedEvent({
+    reportEvent: analytics.reportEvent,
+    contentId: FlyoutContentId.TRACE_TIMELINE,
+    skipNextReport: skipNextEventReport,
+  });
 
   /*
    * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
@@ -177,6 +190,7 @@ export const FullScreenWaterfall = ({
     <EuiFlyout
       data-test-subj="traceWaterfallFlyout"
       session="start"
+      historyKey={historyKey}
       size="m"
       onClose={onExitFullScreen}
       ownFocus={false}
@@ -242,11 +256,12 @@ export const FullScreenWaterfall = ({
           traceId={traceId}
           dataView={dataView}
           dataTestSubj="traceWaterfallDocumentFlyout"
-          onCloseFlyout={() => {
+          onCloseFlyout={(event) => {
             setHighlightedSpanId(undefined);
-            onCloseFlyout();
+            onCloseFlyout(event);
           }}
           activeSection={activeSection}
+          skipNextEventReport={skipNextEventReport}
         />
       ) : null}
     </EuiFlyout>

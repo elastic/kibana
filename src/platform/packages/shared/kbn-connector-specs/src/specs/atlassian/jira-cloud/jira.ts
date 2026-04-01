@@ -10,6 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../../..';
+import getProjectsWorkflow from './workflows/get_projects.yaml';
+import getResourceWorkflow from './workflows/get_resource.yaml';
+import searchIssuesWithJqlWorkflow from './workflows/search_issues_with_jql.yaml';
+import searchUsersWorkflow from './workflows/search_users.yaml';
 
 const buildBaseUrl = (ctx: ActionContext) =>
   `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
@@ -162,4 +166,10 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
   },
+  agentBuilderWorkflows: [
+    getProjectsWorkflow,
+    getResourceWorkflow,
+    searchIssuesWithJqlWorkflow,
+    searchUsersWorkflow,
+  ],
 };

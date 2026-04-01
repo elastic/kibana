@@ -37,5 +37,6 @@ export const transformAttackDiscoveryAlertFromApi = (
     users: api.users,
     assignees: api.assignees,
     tags: api.tags,
+    index: api.index,
   };
 };

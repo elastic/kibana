@@ -7,8 +7,6 @@
 
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
-import { from } from 'rxjs';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CoreStart } from '@kbn/core/public';
 import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
@@ -21,12 +19,7 @@ export function createFlyout(
   plugins: FileUploadStartDependencies,
   props: OpenFileUploadLiteContext
 ) {
-  const {
-    http,
-    overlays,
-    application: { currentAppId$ },
-    ...startServices
-  } = coreStart;
+  const { http, overlays, ...startServices } = coreStart;
 
   const LazyFlyoutContents = lazy(async () => {
     const { FileDataVisualizerLite } = await import('../file_upload_lite');
@@ -69,13 +62,6 @@ export function createFlyout(
       size: '500px',
     }
   );
-
-  // Close the flyout when user navigates out of the current plugin
-  currentAppId$
-    .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-    .subscribe(() => {
-      flyoutSession.close();
-    });
 }
 
 const LoadingContents: FC = () => (
