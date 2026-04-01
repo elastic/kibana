@@ -5,16 +5,33 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
-import type { ESBoolQuery } from '../../../../common/typed_json';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { GenericBuckets } from '../../../../common/search_strategy';
+import type { ESBoolQuery, ESQuery, ESTermQuery } from '../../../../common/typed_json';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useGlobalTime } from '../../containers/use_global_time';
+import { useUiSetting } from '../../lib/kibana';
 import { useQueryInspector } from '../page/manage_query';
+
+const ENTITY_ID_FIELD = 'entity.id';
+
+const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
+  if (type === EntityType.host || type === 'host') {
+    return 'host';
+  }
+  if (type === EntityType.user || type === 'user') {
+    return 'user';
+  }
+  return undefined;
+};
 
 export interface AlertCountByRuleByStatusItem {
   ruleName: string;
@@ -26,6 +43,7 @@ export interface UseAlertCountByRuleByStatusProps {
   additionalFilters?: ESBoolQuery[];
   field: string;
   value: string;
+  entityType?: string;
   queryId: string;
   statuses: Status[];
   skip?: boolean;
@@ -43,6 +61,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   additionalFilters,
   field,
   value,
+  entityType,
   queryId,
   statuses,
   skip = false,
@@ -52,6 +71,33 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const isEntityIdField = field === ENTITY_ID_FIELD;
+  const storeEntityType = toStoreEntityType(entityType);
+
+  const shouldFetchFromEntityStore =
+    isEntityIdField && entityStoreV2Enabled && storeEntityType != null;
+
+  const entityFromStore = useEntityFromStore({
+    entityId: value,
+    entityType: storeEntityType ?? 'host',
+    skip: skip || !shouldFetchFromEntityStore,
+  });
+
+  const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
+
+  const euidApi = useEntityStoreEuidApi();
+  const identityFieldsForQuery = useMemo<Record<string, string>>(
+    () =>
+      euidApi?.euid?.getEntityIdentifiersFromDocument(storeEntityType ?? 'generic', entityRecord) ??
+      {},
+    [euidApi?.euid, entityRecord, storeEntityType]
+  );
+
+  const skipAlertsQuery =
+    skip ||
+    (shouldFetchFromEntityStore && (entityFromStoreLoading || identityFieldsForQuery == null));
 
   const {
     loading: isLoading,
@@ -68,8 +114,9 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       field,
       value,
       statuses,
+      identityFields: identityFieldsForQuery,
     }),
-    skip,
+    skip: skipAlertsQuery,
     queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
     indexName: signalIndexName,
   });
@@ -83,9 +130,10 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
         field,
         value,
         statuses,
+        identityFields: identityFieldsForQuery,
       })
     );
-  }, [setAlertsQuery, from, to, field, value, statuses, additionalFilters]);
+  }, [setAlertsQuery, from, to, field, value, statuses, additionalFilters, identityFieldsForQuery]);
 
   useEffect(() => {
     if (!data) {
@@ -126,6 +174,7 @@ export const buildRuleAlertsByEntityQuery = ({
   field,
   value,
   statuses,
+  identityFields,
 }: {
   additionalFilters?: ESBoolQuery[];
   from: string;
@@ -133,57 +182,73 @@ export const buildRuleAlertsByEntityQuery = ({
   statuses: string[];
   field: string;
   value: string;
-}) => ({
-  size: 0,
-  _source: false,
-  fields: [KIBANA_RULE_ID],
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
+  identityFields?: Record<string, string>;
+}) => {
+  const entityTermFilters: ESTermQuery[] =
+    identityFields != null && Object.keys(identityFields).length > 0
+      ? Object.entries(identityFields).map(([entityField, entityValue]) => ({
+          term: {
+            [entityField]: entityValue,
+          },
+        }))
+      : [
+          {
+            term: {
+              [field]: value,
+            },
+          },
+        ];
+
+  const filterClauses: Array<ESBoolQuery | ESQuery> = [
+    ...additionalFilters,
+    {
+      range: {
+        '@timestamp': {
+          gte: from,
+          lte: to,
+        },
+      },
+    },
+    ...(statuses?.length > 0
+      ? [
+          {
+            terms: {
+              'kibana.alert.workflow_status': statuses,
+            },
+          },
+        ]
+      : []),
+    ...entityTermFilters,
+  ];
+
+  return {
+    size: 0,
+    _source: false,
+    fields: [KIBANA_RULE_ID],
+    query: {
+      bool: {
+        filter: filterClauses,
+      },
+    },
+    aggs: {
+      [ALERTS_BY_RULE_AGG]: {
+        terms: {
+          field: 'kibana.alert.rule.name',
+          size: 100,
+        },
+        aggs: {
+          ruleUuid: {
+            top_hits: {
+              _source: false,
+              fields: [KIBANA_RULE_ID],
+              size: 1,
             },
           },
         },
-        ...(statuses?.length > 0
-          ? [
-              {
-                terms: {
-                  'kibana.alert.workflow_status': statuses,
-                },
-              },
-            ]
-          : []),
-        {
-          term: {
-            [field]: value,
-          },
-        },
-      ],
-    },
-  },
-  aggs: {
-    [ALERTS_BY_RULE_AGG]: {
-      terms: {
-        field: 'kibana.alert.rule.name',
-        size: 100,
-      },
-      aggs: {
-        ruleUuid: {
-          top_hits: {
-            _source: false,
-            fields: [KIBANA_RULE_ID],
-            size: 1,
-          },
-        },
       },
     },
-  },
-});
+  };
+};
 
 interface RuleUuidData extends GenericBuckets {
   ruleUuid: {

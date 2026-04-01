@@ -25,6 +25,7 @@ function createMockType(name: string, schemaFields: string[]): SavedObjectsType 
     name,
     namespaceType: 'agnostic',
     hidden: false,
+    management: { importableAndExportable: true },
     mappings: { dynamic: false, properties: {} },
     modelVersions: {
       1: {
@@ -159,9 +160,8 @@ describe('validateChangesNewType', () => {
     );
   });
 
-  it('should throw if new mapping fields have index: false', () => {
+  it('should throw if mapping fields have index: false', () => {
     const to = buildNewType('my-type', {
-      modelVersions: [buildModelVersion({ newMappings: ['myField.type'] })],
       mappings: {
         'properties.myField.type': 'keyword',
         'properties.myField.index': false,
@@ -173,9 +173,8 @@ describe('validateChangesNewType', () => {
     );
   });
 
-  it('should throw if new mapping fields have enabled: false', () => {
+  it('should throw if mapping fields have enabled: false', () => {
     const to = buildNewType('my-type', {
-      modelVersions: [buildModelVersion({ newMappings: ['myField.type'] })],
       mappings: {
         'properties.myField.type': 'object',
         'properties.myField.enabled': false,
@@ -184,6 +183,32 @@ describe('validateChangesNewType', () => {
 
     expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrowError(
       /The SO type 'my-type' has new mapping fields with 'enabled: false': myField/
+    );
+  });
+
+  it('should throw if a top-level mapping field has enabled: false (type:object pattern)', () => {
+    const to = buildNewType('my-type', {
+      mappings: {
+        'properties.state_transition.type': 'object',
+        'properties.state_transition.enabled': false,
+      },
+    });
+
+    expect(() => callValidate(to, createMockType('my-type', ['state_transition']))).toThrowError(
+      /The SO type 'my-type' has new mapping fields with 'enabled: false': state_transition/
+    );
+  });
+
+  it('should throw if a nested mapping field has enabled: false', () => {
+    const to = buildNewType('my-type', {
+      mappings: {
+        'properties.parent.properties.child.type': 'object',
+        'properties.parent.properties.child.enabled': false,
+      },
+    });
+
+    expect(() => callValidate(to, createMockType('my-type', ['parent.child']))).toThrowError(
+      /The SO type 'my-type' has new mapping fields with 'enabled: false': parent.child/
     );
   });
 
@@ -201,6 +226,60 @@ describe('validateChangesNewType', () => {
     );
   });
 
+  it('should not throw when name and title fields are of type text', () => {
+    const to = buildNewType('my-type', {
+      mappings: {
+        'properties.name.type': 'text',
+        'properties.title.type': 'text',
+      },
+    });
+
+    expect(() => callValidate(to, createMockType('my-type', ['name', 'title']))).not.toThrow();
+  });
+
+  it('should not throw when name has a keyword subfield for sortability', () => {
+    const to = buildNewType('my-type', {
+      mappings: {
+        'properties.name.type': 'text',
+        'properties.name.fields.keyword.type': 'keyword',
+        'properties.name.fields.keyword.ignore_above': 2048,
+      },
+    });
+
+    expect(() => callValidate(to, createMockType('my-type', ['name']))).not.toThrow();
+  });
+
+  it('should not throw for types not searchable via the management page, even if name field has non-text type', () => {
+    const to = buildNewType('my-internal-type', {
+      mappings: { 'properties.name.type': 'keyword' },
+    });
+    // importableAndExportable: false is the exemption criterion — the management find route
+    // only searches types with importableAndExportable: true
+    const internalType = {
+      ...createMockType('my-internal-type', ['name']),
+      management: { importableAndExportable: false },
+    } as unknown as SavedObjectsType;
+
+    expect(() => callValidate(to, internalType)).not.toThrow();
+  });
+
+  it('should throw for hidden types that are also importable/exportable, if name field has non-text type', () => {
+    // Hidden types that are also importableAndExportable: true DO appear in the management
+    // find route (via includedHiddenTypes), so they are subject to the same validation.
+    const to = buildNewType('my-hidden-exportable-type', {
+      mappings: { 'properties.name.type': 'keyword' },
+    });
+    const hiddenExportableType = {
+      ...createMockType('my-hidden-exportable-type', ['name']),
+      hidden: true,
+      management: { importableAndExportable: true },
+    } as unknown as SavedObjectsType;
+
+    expect(() => callValidate(to, hiddenExportableType)).toThrow(
+      /The SO type 'my-hidden-exportable-type' has 'name' or 'title' fields with incorrect types/
+    );
+  });
+
   it('should not throw when mapping has nested fields that match schema (path format normalization)', () => {
     const snapshot = loadSnapshot('nested_mapping_fields.json');
 
@@ -211,5 +290,117 @@ describe('validateChangesNewType', () => {
         schemaFields: ['topLevel', 'parent.child'],
       })
     ).not.toThrow();
+  });
+
+  it('should throw when a mapping field has enabled: false even when schema uses arrayOf(object(...))', () => {
+    const to = buildNewType('my-type', {
+      mappings: {
+        'properties.artifacts.type': 'object',
+        'properties.artifacts.enabled': false,
+      },
+    });
+
+    const registeredType = {
+      name: 'my-type',
+      namespaceType: 'agnostic',
+      hidden: false,
+      mappings: { dynamic: false, properties: {} },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            create: schema.object({
+              artifacts: schema.maybe(
+                schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }))
+              ),
+            }),
+            forwardCompatibility: schema.object(
+              {
+                artifacts: schema.maybe(
+                  schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }))
+                ),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
+        },
+      },
+    } as unknown as SavedObjectsType;
+
+    expect(() => callValidate(to, registeredType)).toThrowError(
+      /The SO type 'my-type' has new mapping fields with 'enabled: false': artifacts/
+    );
+  });
+
+  it('should throw when a mapping field is not declared in the arrayOf(object(...)) item schema', () => {
+    const to = buildNewType('my-array-type', {
+      mappings: {
+        'properties.destinations.properties.id.type': 'keyword',
+        'properties.destinations.properties.foo.type': 'keyword',
+      },
+    });
+
+    const registeredType = {
+      name: 'my-array-type',
+      namespaceType: 'agnostic',
+      hidden: false,
+      mappings: { dynamic: false, properties: {} },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            create: schema.object({
+              destinations: schema.arrayOf(schema.object({ id: schema.string() })),
+            }),
+            forwardCompatibility: schema.object(
+              { destinations: schema.arrayOf(schema.object({ id: schema.string() })) },
+              { unknowns: 'ignore' }
+            ),
+          },
+        },
+      },
+    } as unknown as SavedObjectsType;
+
+    expect(() => callValidate(to, registeredType)).toThrowError(
+      /The SO type 'my-array-type' has mapping fields not present in the latest model version schema: destinations.foo/
+    );
+  });
+
+  it('should not throw when mapping has array-of-object sub-fields covered by arrayOf(object(...))', () => {
+    const to = buildNewType('my-array-type', {
+      mappings: {
+        'properties.destinations.properties.id.type': 'keyword',
+        'properties.destinations.properties.type.type': 'keyword',
+      },
+    });
+
+    const registeredType = {
+      name: 'my-array-type',
+      namespaceType: 'agnostic',
+      hidden: false,
+      mappings: { dynamic: false, properties: {} },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            create: schema.object({
+              destinations: schema.arrayOf(
+                schema.object({ id: schema.string(), type: schema.string() })
+              ),
+            }),
+            forwardCompatibility: schema.object(
+              {
+                destinations: schema.arrayOf(
+                  schema.object({ id: schema.string(), type: schema.string() })
+                ),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
+        },
+      },
+    } as unknown as SavedObjectsType;
+
+    expect(() => callValidate(to, registeredType)).not.toThrow();
   });
 });
