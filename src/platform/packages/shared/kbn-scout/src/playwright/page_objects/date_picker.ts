@@ -139,7 +139,7 @@ export class DatePicker {
     await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
     await this.page.keyboard.press('Escape');
     // and later change start date
-    await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
+    await getTestSubjLocator('superDatePickerstartDatePopoverButton').click();
     await this.openAbsoluteTab();
     const inputTo = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputTo.clear();
@@ -233,10 +233,11 @@ export class DatePicker {
         'dateRangePickerControlButton',
         containerLocator
       );
-      await expect(
-        controlButton,
-        `Date picker should reflect the updated time range`
-      ).toBeVisible();
+      const dateRange = (await controlButton.getAttribute('data-date-range')) ?? '';
+      expect(
+        dateRange,
+        `Date picker should reflect the updated time range (${from} to ${to})`
+      ).toContain(`${from} to ${to}`);
     }
 
     await this.getTestSubjLocator('querySubmitButton', containerLocator).click();
@@ -314,6 +315,7 @@ export class DatePicker {
     containerLocator?: Locator;
   }) {
     if (await this.isNewDateRangePicker(containerLocator)) {
+      await this.openCustomRangePanel(containerLocator);
       await this.typeAbsoluteRangeNewPicker({ from, to, validateDates, containerLocator });
     } else {
       await this.typeAbsoluteRangeLegacy({ from, to, validateDates, containerLocator });
