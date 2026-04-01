@@ -10,7 +10,10 @@ import {
   applyWhenConditionTrueSetFields,
   getDocument,
 } from '../../../../common/domain/euid/commons';
-import { applyFieldEvaluations } from '../../../../common/domain/euid/field_evaluations';
+import {
+  applyFieldEvaluations,
+  getFieldEvaluationsFromDefinition,
+} from '../../../../common/domain/euid/field_evaluations';
 import { getEntityDefinitionWithoutId } from '../../../../common/domain/definitions/registry';
 
 const USER_ENTITY_TYPE = 'user' as const;
@@ -27,9 +30,9 @@ export function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
 } {
   const doc = cloneDeep(getDocument(hit));
   const def = getEntityDefinitionWithoutId(USER_ENTITY_TYPE);
-  const { identityField } = def;
-  if ('fieldEvaluations' in identityField && identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+  const fieldEvaluations = getFieldEvaluationsFromDefinition(def);
+  if (fieldEvaluations.length > 0) {
+    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     Object.assign(doc, evaluated);
   }
   if (def.whenConditionTrueSetFieldsPreAgg?.length) {

@@ -1,0 +1,101 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-endpoint.events.security-default",
+    "id": "scout-idp-user-a",
+    "index": ".ds-logs-endpoint.events.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:06:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "endpoint",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": [
+          "iam"
+        ],
+        "kind": "event",
+        "module": "endpoint",
+        "outcome": "success",
+        "type": [
+          "user"
+        ]
+      },
+      "host": {
+        "id": "test-host-a",
+        "name": "test-host-a",
+        "hostname": "test-host-a",
+        "ip": [
+          "10.0.0.1"
+        ],
+        "os": {
+          "name": "Windows",
+          "type": "windows"
+        }
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a",
+        "domain": "SCOUT-TEST"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-endpoint.events.security-default",
+    "id": "scout-idp-user-b",
+    "index": ".ds-logs-endpoint.events.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:07:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "endpoint",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": [
+          "iam"
+        ],
+        "kind": "event",
+        "module": "endpoint",
+        "outcome": "success",
+        "type": [
+          "user"
+        ]
+      },
+      "host": {
+        "id": "test-host-b",
+        "name": "test-host-b",
+        "hostname": "test-host-b",
+        "ip": [
+          "10.0.0.2"
+        ],
+        "os": {
+          "name": "Windows",
+          "type": "windows"
+        }
+      },
+      "user": {
+        "id": "test-user-b",
+        "name": "test-user-b",
+        "domain": "SCOUT-TEST"
+      }
+    }
+  }
+}
