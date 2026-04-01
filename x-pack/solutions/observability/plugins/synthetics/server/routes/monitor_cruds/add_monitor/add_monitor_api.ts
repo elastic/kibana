@@ -195,6 +195,20 @@ export class AddEditMonitorAPI {
 
     if (!locations && !privateLocations && prevLocations) {
       locationsVal = prevLocations;
+
+      const prevPrivateLocations = prevLocations.filter((loc) => !loc.isServiceManaged);
+      if (prevPrivateLocations.length > 0) {
+        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
+        const namespacesForLookup = [
+          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
+        ].filter(Boolean);
+        const internalClient =
+          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
+          internalClient,
+          namespacesForLookup
+        );
+      }
     } else {
       const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, internal);
 

@@ -123,8 +123,10 @@ export const assertCanUpdateMonitorInAllSpaces = async (
 ) => {
   const { request, response, server, spaceId } = routeContext;
 
-  const uniqueSpaces = [...new Set(spaceIds)].filter((s) => s !== ALL_SPACES_ID);
-  if (uniqueSpaces.length <= 1 && uniqueSpaces[0] === spaceId) {
+  const uniqueSpaces = [...new Set(spaceIds)];
+  const hasAllSpaces = uniqueSpaces.includes(ALL_SPACES_ID);
+
+  if (!hasAllSpaces && uniqueSpaces.length <= 1 && uniqueSpaces[0] === spaceId) {
     return;
   }
   if (uniqueSpaces.length === 0) {
