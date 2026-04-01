@@ -56,10 +56,34 @@ describe('Outputs handler', () => {
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
 
+  it('should return ok on post output using remote_elasticsearch in serverless', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+
+    const res = await postOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'remote_elasticsearch' } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
   it('should return ok on put output using remote_elasticsearch in stateful', async () => {
     jest
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await putOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'remote_elasticsearch' }, params: { outputId: 'output1' } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  it('should return ok on put output using remote_elasticsearch in serverless', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
     const res = await putOutputHandlerWithErrorHandler(
       mockContext,
