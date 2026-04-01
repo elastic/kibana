@@ -97,9 +97,9 @@ describe('endpointAttachmentTransformer', () => {
     it('isType detects both legacy and unified', () => {
       expect(endpointAttachmentTransformer.isType(legacyAttributes as never)).toBe(true);
       expect(endpointAttachmentTransformer.isType(unifiedAttributes as never)).toBe(true);
-      expect(
-        endpointAttachmentTransformer.isType({ type: AttachmentType.alert } as never)
-      ).toBe(false);
+      expect(endpointAttachmentTransformer.isType({ type: AttachmentType.alert } as never)).toBe(
+        false
+      );
     });
 
     it('isUnifiedType detects only unified', () => {
