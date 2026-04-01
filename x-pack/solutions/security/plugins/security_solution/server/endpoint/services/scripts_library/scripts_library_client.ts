@@ -99,7 +99,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         .create({ index: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME })
         .then(() => {
           this.logger.debug(
-            `Index [${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME}] craeted for use with scripts library`
+            `Index [${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME}] created for use with scripts library`
           );
         })
         .catch((error) => {
