@@ -43,13 +43,13 @@ const PER_EPISODE_STRATEGIES = new Set<string>([
 const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
 const STRATEGIES_REQUIRING_INTERVAL = new Set<string>(['per_status_interval', 'time_interval']);
 
-type ValidationPayload = {
+interface ValidationPayload {
   value: {
     groupingMode?: string | null;
     throttle?: { strategy?: string; interval?: string } | null;
   };
   issues: z.core.$ZodRawIssue[];
-};
+}
 
 const validateStrategyInterval = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
