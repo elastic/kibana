@@ -42,7 +42,10 @@ export function getContextSchemaForStep(
 ): typeof DynamicStepContextSchema {
   const stepId = getStepId(stepName);
   const stepNode = workflowGraph.getStepNode(stepId);
-  const predecessors = stepNode ? workflowGraph.getAllPredecessors(stepNode.id) : [];
+  if (!stepNode) {
+    return baseSchema;
+  }
+  const predecessors = workflowGraph.getAllPredecessors(stepNode.id);
 
   const extension: Record<string, z.ZodType> = {};
 

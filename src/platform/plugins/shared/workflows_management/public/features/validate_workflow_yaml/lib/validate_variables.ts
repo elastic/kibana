@@ -37,7 +37,7 @@ function fallbackForOffsetValue(
   return undefined;
 }
 
-const ROOT_CACHE_KEY = '__root__';
+const ROOT_CACHE_KEY: unique symbol = Symbol('root');
 
 export function validateVariables(
   variableItems: VariableItem[],
@@ -52,7 +52,7 @@ export function validateVariables(
     getWorkflowContextSchema(workflowDefinition, yamlDocument)
   ) as typeof DynamicStepContextSchema;
 
-  const stepSchemaCache = new Map<string, typeof DynamicStepContextSchema>();
+  const stepSchemaCache = new Map<string | symbol, typeof DynamicStepContextSchema>();
 
   for (const variableItem of variableItems) {
     const { yamlPath: path, offset } = variableItem;

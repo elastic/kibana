@@ -92,7 +92,7 @@ export function useMonacoMarkersChangedInterceptor({
           startColumn: marker.startColumn,
           endLineNumber: marker.endLineNumber,
           endColumn: marker.endColumn,
-          id: `${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
+          id: `${effectiveOwner}-${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
           owner: effectiveOwner,
           source: marker.source,
           hoverMessage: null,

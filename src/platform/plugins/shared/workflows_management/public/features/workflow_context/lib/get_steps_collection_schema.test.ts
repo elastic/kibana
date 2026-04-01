@@ -340,6 +340,41 @@ describe('getStepsCollectionSchema', () => {
     expect(innerSchema).toBeUndefined();
   });
 
+  it('should produce the same schema when precomputedPredecessors are passed', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        { name: 'step-1', type: 'console', with: { message: 'hi' } },
+        { name: 'step-2', type: 'console', with: { message: 'hello' } },
+        { name: 'step-3', type: 'console', with: { message: 'hey' } },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+
+    const withoutPrecomputed = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-3'
+    );
+
+    const stepNode = workflowGraph.getStepNode('step-3')!;
+    const predecessors = workflowGraph.getAllPredecessors(stepNode.id);
+    const withPrecomputed = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-3',
+      predecessors
+    );
+
+    expect(Object.keys(withPrecomputed.shape).sort()).toEqual(
+      Object.keys(withoutPrecomputed.shape).sort()
+    );
+    expect(Object.keys(withPrecomputed.shape).sort()).toEqual(['step-1', 'step-2']);
+  });
+
   it('should use step names as is', () => {
     const definition = {
       version: '1' as const,
