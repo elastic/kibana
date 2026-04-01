@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { sortedCommandDefinitions } from './command_definitions';
-import type { CommandMatchResult, ActiveCommand } from './types';
+import type { CommandMatchResult, ActiveCommand, CommandDefinition } from './types';
 
 /**
  * Determines if the character at the given position is at a word boundary.
@@ -32,10 +31,13 @@ const INACTIVE_RESULT: CommandMatchResult = {
  * The algorithm checks every registered command, finds the last word-boundary
  * occurrence of each sequence, and picks the one nearest to the cursor position.
  */
-export const matchCommand = (textBeforeCursor: string): CommandMatchResult => {
+export const matchCommand = (
+  textBeforeCursor: string,
+  definitions: readonly CommandDefinition[]
+): CommandMatchResult => {
   let best: ActiveCommand | null = null;
 
-  for (const command of sortedCommandDefinitions) {
+  for (const command of definitions) {
     const { sequence } = command;
     const lastIndex = textBeforeCursor.lastIndexOf(sequence);
 
