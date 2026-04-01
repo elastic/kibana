@@ -15,7 +15,7 @@
  *
  * This utility normalises both forms so callers don't need to care.
  */
-export const assembleFullQuery = (base?: string, condition?: string): string => {
+export const assembleFullQuery = (base?: string | null, condition?: string | null): string => {
   const b = base?.trim() ?? '';
   const c = condition?.trim() ?? '';
   if (!b) return '';
