@@ -26,19 +26,21 @@ export const createInferenceEndpointExecutor = ({
   esClient: ElasticsearchClient;
 }): InferenceEndpointExecutor => {
   return {
-    async invoke({ body, signal, timeout }): Promise<Readable> {
+    async invoke({ body, signal, timeout = 180_000 }): Promise<Readable> {
       const response = await esClient.transport.request(
         {
           method: 'POST',
           path: `/_inference/chat_completion/${encodeURIComponent(inferenceId)}/_stream`,
+          querystring: {
+            // timeout for the inference call performed by the endpoint
+            timeout: `${Math.ceil(timeout / 60000)}m`,
+          },
           body,
         },
         {
           asStream: true,
+          requestTimeout: timeout,
           ...(signal ? { signal } : {}),
-          ...(typeof timeout === 'number' && Number.isFinite(timeout)
-            ? { requestTimeout: timeout }
-            : {}),
         }
       );
       return response as unknown as Readable;

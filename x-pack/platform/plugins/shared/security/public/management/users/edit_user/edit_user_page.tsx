@@ -82,7 +82,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
 
   const getReturnToUserListButton = () => {
     return (
-      <EuiButton iconType="arrowLeft" onClick={backToUsers} data-test-subj="editUserBackButton">
+      <EuiButton
+        iconType="chevronSingleLeft"
+        onClick={backToUsers}
+        data-test-subj="editUserBackButton"
+      >
         <FormattedMessage
           id="xpack.security.management.users.userForm.backToUsersButton"
           defaultMessage="Back to users"

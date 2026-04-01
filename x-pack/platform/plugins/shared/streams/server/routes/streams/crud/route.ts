@@ -12,6 +12,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-sett
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
+import { classicIngestHasEsLevelChanges } from '../../../lib/streams/state_management/streams/helpers';
 import { readStream } from './read_stream';
 import { createClassicStreamRoute } from './create_classic_stream_route';
 import { validateClassicStreamRoute } from './validate_classic_stream_route';
@@ -119,6 +120,17 @@ export const editStreamRoute = createServerRoute({
   }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
+    // Replicated data streams are managed by the source cluster via CCR.
+    // Only Kibana-side data (description, dashboards, queries) can be updated.
+    if (Streams.ClassicStream.UpsertRequest.is(params.body)) {
+      const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
+      if (dataStream?.replicated && classicIngestHasEsLevelChanges(params.body.stream.ingest)) {
+        throw badData(
+          'Cannot modify Elasticsearch-managed settings (processing, lifecycle, settings, field overrides, failure store) of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+        );
+      }
+    }
+
     if (
       Streams.WiredStream.UpsertRequest.is(params.body) &&
       !(await streamsClient.isStreamsEnabled())
@@ -167,6 +179,14 @@ export const deleteStreamRoute = createServerRoute({
     const { streamsClient } = await getScopedClients({
       request,
     });
+
+    // Replicated data streams are managed by the source cluster via CCR and cannot be deleted locally
+    const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
+    if (dataStream?.replicated) {
+      throw badData(
+        'Cannot delete a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+      );
+    }
 
     return await streamsClient.deleteStream(params.path.name);
   },
