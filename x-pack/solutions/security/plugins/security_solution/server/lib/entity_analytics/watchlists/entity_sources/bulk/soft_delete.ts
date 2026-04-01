@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
+import type { EntityType } from '@kbn/entity-store/common';
+import type { WatchlistsByEuid } from '../../entities/service';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { removeWatchlistAttributeFromStore } from '../sync/entity_store_sync';
 
 export interface StaleEntity {
   docId: string;
@@ -75,16 +79,20 @@ export const bulkRemoveSourceOperationsFactory =
 
 export const applyBulkRemoveSource = async ({
   esClient,
+  crudClient,
   logger,
   staleEntities,
   sourceType,
-  targetIndex,
+  watchlistsByEuid,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
   staleEntities: StaleEntity[];
   sourceType: string;
-  targetIndex: string;
+  watchlistsByEuid: WatchlistsByEuid;
+  watchlist: { name: string; id: string; index: string };
 }): Promise<void> => {
   if (staleEntities.length === 0) {
     return;
@@ -92,16 +100,38 @@ export const applyBulkRemoveSource = async ({
 
   const chunkSize = 500;
   const buildOps = bulkRemoveSourceOperationsFactory(logger);
+  const hardDeletedEuids: string[] = [];
 
   for (let start = 0; start < staleEntities.length; start += chunkSize) {
     const chunk = staleEntities.slice(start, start + chunkSize);
-    const operations = buildOps({ staleEntities: chunk, sourceType, targetIndex });
+    const operations = buildOps({ staleEntities: chunk, sourceType, targetIndex: watchlist.index });
     if (operations.length > 0) {
       const resp = await esClient.bulk({ refresh: 'wait_for', body: operations });
       const errors = getErrorFromBulkResponse(resp);
       if (errors.length > 0) {
         logger.error(`[WatchlistSync] Bulk remove-source errors: ${errorsMsg(errors)}`);
       }
+
+      for (let i = 0; i < chunk.length; i++) {
+        const item = resp.items[i];
+        const result = item?.update?.result;
+        if (result === 'deleted') {
+          hardDeletedEuids.push(chunk[i].docId);
+        }
+      }
     }
+  }
+
+  if (hardDeletedEuids.length > 0) {
+    await removeWatchlistAttributeFromStore({
+      crudClient,
+      logger,
+      entityRefs: hardDeletedEuids.map((euid) => ({
+        euid,
+        type: euid.split(':')[0] as EntityType,
+        currentWatchlists: watchlistsByEuid.get(euid),
+      })),
+      watchlistId: watchlist.id,
+    });
   }
 };

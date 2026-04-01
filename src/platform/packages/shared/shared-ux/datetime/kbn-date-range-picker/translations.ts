@@ -98,7 +98,7 @@ export const documentationPanelTexts = {
   }),
   intro: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.intro', {
     defaultMessage:
-      'Type `to` to split start and end dates, otherwise the input will consider it just a one day range.',
+      'Type `to` to split start and end dates, otherwise the input will consider it relative to now.',
   }),
   absoluteHeading: i18n.translate(
     'sharedUXPackages.dateRangePicker.documentationPanel.absoluteHeading',
@@ -106,7 +106,7 @@ export const documentationPanelTexts = {
   ),
   absoluteBody: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.absoluteBody', {
     defaultMessage:
-      'Use formats like `Dec 1, 2025, 00:00` (default), `2025-12-01` (ISO 8601), `Fri, 1 Dec 2025 00:00:00 GMT` (RFC 2822), `1760665383890` (unix timestamp), `1st of January, 2025` or just `Jan 1st, 2025`.',
+      'Use formats like `Dec 1, 2025, 00:00` (default), `2025-12-01` (ISO 8601), `Fri, 1 Dec 2025 00:00:00 GMT` (RFC 2822), or `1760665383890` (unix timestamp).',
   }),
   relativeHeading: i18n.translate(
     'sharedUXPackages.dateRangePicker.documentationPanel.relativeHeading',
@@ -256,35 +256,52 @@ export const settingsPanelTexts = {
     'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel',
     { defaultMessage: 'Round relative time ranges' }
   ),
-  roundRelativeTimeDescription: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeDescription',
-    { defaultMessage: 'Relative ranges round to the nearest full unit (minute, hour, etc.)' }
+  timePrecisionLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionLabel',
+    { defaultMessage: 'Time precision' }
+  ),
+  timePrecisionSeconds: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionSeconds',
+    { defaultMessage: 'Seconds' }
+  ),
+  timePrecisionMilliseconds: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionMilliseconds',
+    { defaultMessage: 'Milliseconds' }
+  ),
+  timePrecisionNone: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionNone',
+    { defaultMessage: 'Minutes' }
   ),
   timeFormatHeading: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading',
     { defaultMessage: 'Time format and zone' }
   ),
-  timeFormatDescription: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription',
-    {
+  timeFormatDescription: (timeZoneLabel: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription', {
       defaultMessage:
-        'Time zone and format can be set by the space administrator in Advanced settings and affect all the users of this space.',
-    }
+        'Time zone is set to {timeZoneLabel} by your administrator. This applies to all users in this space.',
+      values: { timeZoneLabel },
+    }),
+  timeZoneBrowserLocale: (abbreviation: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.timeZoneBrowserLocale', {
+      defaultMessage: "your browser's locale ({abbreviation})",
+      values: { abbreviation },
+    }),
+  relativeTimeRangeHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.relativeTimeRangeHeading',
+    { defaultMessage: 'Relative time range' }
+  ),
+  absoluteTimeRangeHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.absoluteTimeRangeHeading',
+    { defaultMessage: 'Absolute time range' }
+  ),
+  timePrecisionPrompt: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionPrompt',
+    { defaultMessage: 'Show timestamps with precision of:' }
   ),
   advancedSettingsLink: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.advancedSettingsLink',
     { defaultMessage: 'Advanced settings' }
-  ),
-  newTimePickerHeading: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerHeading',
-    { defaultMessage: 'New time picker' }
-  ),
-  newTimePickerDescription: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerDescription',
-    {
-      defaultMessage:
-        'Don\'t like new time picker UX? Opt out from it in advanced settings under "".',
-    }
   ),
 };
 

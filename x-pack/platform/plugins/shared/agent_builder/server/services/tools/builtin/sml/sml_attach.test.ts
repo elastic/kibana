@@ -87,6 +87,25 @@ describe('createSmlAttachTool', () => {
     expect((result.results[0] as ErrorResult).data.message).toContain('chunk-1');
   });
 
+  it('returns error when attachment_id does not match indexed document', async () => {
+    const smlDoc = createSmlDoc({ origin_id: 'expected-origin' });
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    const tool = createSmlAttachTool({ getSmlService });
+    const result = (await tool.handler(
+      {
+        items: [
+          { chunk_id: 'chunk-1', attachment_id: 'wrong-origin', attachment_type: 'visualization' },
+        ],
+      },
+      mockContext as unknown as ToolHandlerContext
+    )) as { results: unknown[] };
+    expect(result.results).toHaveLength(1);
+    expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
+    expect((result.results[0] as ErrorResult).data.message).toContain('do not match');
+    expect(mockGetTypeDefinition).not.toHaveBeenCalled();
+  });
+
   it('returns error when document not found', async () => {
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map());
@@ -185,7 +204,7 @@ describe('createSmlAttachTool', () => {
         data: { layers: [] },
         origin: 'ref-1',
       },
-      expect.any(String)
+      'agent'
     );
   });
 
@@ -213,7 +232,7 @@ describe('createSmlAttachTool', () => {
   });
 
   it('handles multiple items with mix of authorized and unauthorized', async () => {
-    const smlDoc = createSmlDoc({ id: 'chunk-2' });
+    const smlDoc = createSmlDoc({ id: 'chunk-2', origin_id: 'ref-2' });
     const typeDef = {
       id: 'visualization',
       list: jest.fn(),
@@ -255,6 +274,7 @@ describe('createSmlAttachTool', () => {
       id: 'chunk-real',
       title: 'Real Document Title',
       type: 'dashboard',
+      origin_id: 'ref-real',
     });
     const toAttachment = jest.fn().mockResolvedValue({ type: 'dashboard', data: {} });
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-real', true]]));
