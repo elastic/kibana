@@ -98,6 +98,24 @@ export const URL_REQUIRED = i18n.translate('xpack.evals.remotesListPage.errors.u
   defaultMessage: 'URL is required.',
 });
 
+export const URL_SCHEME_REQUIRED = i18n.translate(
+  'xpack.evals.remotesListPage.errors.urlSchemeRequired',
+  {
+    defaultMessage: 'URL must use HTTPS.',
+  }
+);
+
+export const URL_INVALID = i18n.translate('xpack.evals.remotesListPage.errors.urlInvalid', {
+  defaultMessage: 'Invalid URL format.',
+});
+
+export const URL_HOST_REQUIRED = i18n.translate(
+  'xpack.evals.remotesListPage.errors.urlHostRequired',
+  {
+    defaultMessage: 'URL must be an Elastic Cloud deployment (.cloud.es.io or .elastic.cloud).',
+  }
+);
+
 export const API_KEY_REQUIRED = i18n.translate(
   'xpack.evals.remotesListPage.errors.apiKeyRequired',
   {
@@ -137,8 +155,16 @@ export const API_KEY_HELP_STEP3 = i18n.translate('xpack.evals.remotesListPage.ap
 });
 
 export const FIELD_URL_HELP = i18n.translate('xpack.evals.remotesListPage.fields.urlHelp', {
-  defaultMessage: 'e.g. https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud',
+  defaultMessage:
+    'Elastic Cloud Kibana URL. Must use HTTPS and end with .cloud.es.io or .elastic.cloud.',
 });
+
+export const FIELD_URL_PLACEHOLDER = i18n.translate(
+  'xpack.evals.remotesListPage.fields.urlPlaceholder',
+  {
+    defaultMessage: 'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud',
+  }
+);
 
 export const TEST_CONNECTION_BUTTON = i18n.translate(
   'xpack.evals.remotesListPage.testConnectionButton',

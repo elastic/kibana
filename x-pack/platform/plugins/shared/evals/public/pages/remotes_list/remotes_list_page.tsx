@@ -67,6 +67,28 @@ interface FlyoutState {
   remote?: EvalsRemoteSummary;
 }
 
+const ALLOWED_CLOUD_SUFFIXES = ['.cloud.es.io', '.elastic.cloud'] as const;
+
+const getUrlValidationError = (value: string): string | null => {
+  if (!value) return null;
+  if (!/^https:\/\//i.test(value)) {
+    return i18n.URL_SCHEME_REQUIRED;
+  }
+
+  try {
+    const url = new URL(value);
+
+    const hostname = url.hostname.toLowerCase();
+    if (!ALLOWED_CLOUD_SUFFIXES.some((suffix) => hostname.endsWith(suffix))) {
+      return i18n.URL_HOST_REQUIRED;
+    }
+
+    return null;
+  } catch {
+    return i18n.URL_INVALID;
+  }
+};
+
 export const RemotesListPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useRemotes();
@@ -81,6 +103,11 @@ export const RemotesListPage: React.FC = () => {
   const [displayName, setDisplayName] = useState('');
   const [url, setUrl] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{
+    displayName?: string;
+    url?: string;
+    apiKey?: string;
+  }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{
     success: boolean;
@@ -119,6 +146,7 @@ export const RemotesListPage: React.FC = () => {
     setDisplayName('');
     setUrl('');
     setApiKey('');
+    setFieldErrors({});
     setFormError(null);
     setTestResult(null);
     setFlyout({ mode: 'create' });
@@ -128,6 +156,7 @@ export const RemotesListPage: React.FC = () => {
     setDisplayName(remote.displayName);
     setUrl(remote.url);
     setApiKey('');
+    setFieldErrors({});
     setFormError(null);
     setTestResult(null);
     setFlyout({ mode: 'edit', remote });
@@ -135,27 +164,53 @@ export const RemotesListPage: React.FC = () => {
 
   const closeFlyout = () => {
     setFlyout(null);
+    setFieldErrors({});
     setFormError(null);
     setTestResult(null);
   };
 
+  const urlValidationError = useMemo(() => getUrlValidationError(url.trim()), [url]);
+
   const canTest =
     flyout?.mode === 'edit' && flyout.remote
-      ? Boolean(url.trim())
-      : Boolean(url.trim() && apiKey.trim());
+      ? Boolean(url.trim() && !urlValidationError)
+      : Boolean(url.trim() && apiKey.trim() && !urlValidationError);
 
   const onTestConnection = async () => {
     setTestResult(null);
+    setFormError(null);
+    setFieldErrors({});
+
+    const errors: typeof fieldErrors = {};
+    const trimmedUrl = url.trim();
+    const trimmedApiKey = apiKey.trim();
+
+    if (!trimmedUrl) {
+      errors.url = i18n.URL_REQUIRED;
+    } else if (urlValidationError) {
+      errors.url = urlValidationError;
+    }
+
+    const requireApiKey = !(flyout?.mode === 'edit' && flyout.remote);
+    if (requireApiKey && !trimmedApiKey) {
+      errors.apiKey = i18n.API_KEY_REQUIRED;
+    }
+
+    if (Object.values(errors).some(Boolean)) {
+      setFieldErrors(errors);
+      return;
+    }
+
     try {
       const body: { url?: string; apiKey?: string; remoteId?: string } = {};
 
       if (flyout?.mode === 'edit' && flyout.remote) {
         body.remoteId = flyout.remote.id;
-        if (url.trim()) body.url = url.trim();
-        if (apiKey.trim()) body.apiKey = apiKey.trim();
+        if (trimmedUrl) body.url = trimmedUrl;
+        if (trimmedApiKey) body.apiKey = trimmedApiKey;
       } else {
-        body.url = url.trim();
-        body.apiKey = apiKey.trim();
+        body.url = trimmedUrl;
+        body.apiKey = trimmedApiKey;
       }
 
       const result = await testConnection.mutateAsync(body);
@@ -170,26 +225,34 @@ export const RemotesListPage: React.FC = () => {
 
   const onSave = async () => {
     setFormError(null);
+    setFieldErrors({});
 
-    if (!displayName.trim()) {
-      setFormError(i18n.DISPLAY_NAME_REQUIRED);
-      return;
+    const errors: typeof fieldErrors = {};
+    const trimmedDisplayName = displayName.trim();
+    const trimmedUrl = url.trim();
+    const trimmedApiKey = apiKey.trim();
+
+    if (!trimmedDisplayName) errors.displayName = i18n.DISPLAY_NAME_REQUIRED;
+    if (!trimmedUrl) {
+      errors.url = i18n.URL_REQUIRED;
+    } else if (urlValidationError) {
+      errors.url = urlValidationError;
     }
-    if (!url.trim()) {
-      setFormError(i18n.URL_REQUIRED);
+
+    const requireApiKey = flyout?.mode === 'create';
+    if (requireApiKey && !trimmedApiKey) errors.apiKey = i18n.API_KEY_REQUIRED;
+
+    if (Object.values(errors).some(Boolean)) {
+      setFieldErrors(errors);
       return;
     }
 
     try {
       if (flyout?.mode === 'create') {
-        if (!apiKey.trim()) {
-          setFormError(i18n.API_KEY_REQUIRED);
-          return;
-        }
         await createRemote.mutateAsync({
-          displayName: displayName.trim(),
-          url: url.trim(),
-          apiKey: apiKey.trim(),
+          displayName: trimmedDisplayName,
+          url: trimmedUrl,
+          apiKey: trimmedApiKey,
         });
         closeFlyout();
         return;
@@ -197,11 +260,11 @@ export const RemotesListPage: React.FC = () => {
 
       if (flyout?.mode === 'edit' && flyout.remote) {
         const updates: { displayName?: string; url?: string; apiKey?: string } = {
-          displayName: displayName.trim(),
-          url: url.trim(),
+          displayName: trimmedDisplayName,
+          url: trimmedUrl,
         };
-        if (apiKey.trim()) {
-          updates.apiKey = apiKey.trim();
+        if (trimmedApiKey) {
+          updates.apiKey = trimmedApiKey;
         }
         await updateRemote.mutateAsync({ remoteId: flyout.remote.id, updates });
         closeFlyout();
@@ -286,25 +349,61 @@ export const RemotesListPage: React.FC = () => {
             ) : null}
 
             <EuiForm component="form">
-              <EuiFormRow label={i18n.FIELD_DISPLAY_NAME_LABEL} fullWidth>
+              <EuiFormRow
+                label={i18n.FIELD_DISPLAY_NAME_LABEL}
+                fullWidth
+                isInvalid={Boolean(fieldErrors.displayName)}
+                error={fieldErrors.displayName}
+              >
                 <EuiFieldText
                   fullWidth
                   value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  isInvalid={Boolean(fieldErrors.displayName)}
+                  onChange={(e) => {
+                    setDisplayName(e.target.value);
+                    if (fieldErrors.displayName) {
+                      setFieldErrors((prev) => ({ ...prev, displayName: undefined }));
+                    }
+                  }}
                 />
               </EuiFormRow>
-              <EuiFormRow label={i18n.FIELD_URL_LABEL} helpText={i18n.FIELD_URL_HELP} fullWidth>
-                <EuiFieldText fullWidth value={url} onChange={(e) => setUrl(e.target.value)} />
+              <EuiFormRow
+                label={i18n.FIELD_URL_LABEL}
+                helpText={i18n.FIELD_URL_HELP}
+                fullWidth
+                isInvalid={Boolean(fieldErrors.url)}
+                error={fieldErrors.url}
+              >
+                <EuiFieldText
+                  fullWidth
+                  value={url}
+                  placeholder={i18n.FIELD_URL_PLACEHOLDER}
+                  isInvalid={Boolean(fieldErrors.url)}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    if (fieldErrors.url) {
+                      setFieldErrors((prev) => ({ ...prev, url: undefined }));
+                    }
+                  }}
+                />
               </EuiFormRow>
               <EuiFormRow
                 label={i18n.FIELD_API_KEY_LABEL}
                 helpText={flyout.mode === 'edit' ? i18n.FIELD_API_KEY_EDIT_HELP : undefined}
                 fullWidth
+                isInvalid={Boolean(fieldErrors.apiKey)}
+                error={fieldErrors.apiKey}
               >
                 <EuiFieldPassword
                   fullWidth
                   value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  isInvalid={Boolean(fieldErrors.apiKey)}
+                  onChange={(e) => {
+                    setApiKey(e.target.value);
+                    if (fieldErrors.apiKey) {
+                      setFieldErrors((prev) => ({ ...prev, apiKey: undefined }));
+                    }
+                  }}
                   placeholder={flyout.mode === 'edit' ? i18n.API_KEY_PLACEHOLDER : undefined}
                 />
               </EuiFormRow>
