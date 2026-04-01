@@ -68,6 +68,14 @@ const AI_RULE_CREATION_MENU_TOUR_FINISH = i18n.translate(
   }
 );
 
+const RULE_CREATION_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.ariaLabel',
+  {
+    defaultMessage:
+      'Create a rule either using the agent or manually using the rule creation form ',
+  }
+);
+
 const AI_RULE_CREATION_MENU_TOUR_INITIAL_STATE = {
   currentTourStep: 1,
   isTourActive: true,
@@ -215,6 +223,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
       ) : null}
       <EuiPopover
         id={contextMenuPopoverId}
+        aria-label={RULE_CREATION_POPOVER_ARIA_LABEL}
         button={createRuleButton}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
