@@ -40,7 +40,7 @@ The API key is scoped to the calling user's privileges and expires after 30 days
 
 ### Setup UI
 
-Navigate to `/app/elasticConsole` in Kibana. Click **Generate credentials** to create an API key. The page will:
+Navigate to `/app/sreAgent` in Kibana. Click **Generate credentials** to create an API key. The page will:
 
 1. Attempt to auto-deliver credentials to a local agent at `http://localhost:14642/config`
 2. Fall back to displaying the credentials for manual copy if no local agent is found

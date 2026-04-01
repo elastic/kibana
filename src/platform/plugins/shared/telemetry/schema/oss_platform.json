@@ -2753,7 +2753,7 @@
             }
           }
         },
-        "elasticConsole": {
+        "sreAgent": {
           "properties": {
             "appId": {
               "type": "keyword",

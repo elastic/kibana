@@ -20,7 +20,7 @@ export class ElasticConsolePlugin implements Plugin {
 
   setup(core: CoreSetup) {
     core.application.register({
-      id: 'elasticConsole',
+      id: 'sreAgent',
       title: 'SRE Agent',
       visibleIn: [],
       async mount(params: AppMountParameters) {
