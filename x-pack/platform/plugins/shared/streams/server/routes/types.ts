@@ -50,6 +50,7 @@ export interface RouteHandlerScopedClients {
   taskClient: TaskClient<StreamsTaskType>;
   modelSettingsClient: ModelSettingsConfigClient;
   streamsSettingsStorageClient: StreamsSettingsStorageClient;
+  isSecurityEnabled: boolean;
 }
 
 export interface RouteDependencies {

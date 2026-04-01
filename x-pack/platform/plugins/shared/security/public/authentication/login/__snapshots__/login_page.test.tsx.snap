@@ -61,7 +61,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
               Open in new window
               <span
                 color="inherit"
-                data-euiicon-type="popout"
+                data-euiicon-type="external"
               />
             </span>
           </a>
@@ -133,7 +133,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
               Open in new window
               <span
                 color="inherit"
-                data-euiicon-type="popout"
+                data-euiicon-type="external"
               />
             </span>
           </a>
