@@ -6,12 +6,9 @@
  */
 
 import {
-  getAgentPolicyAdvancedSettings,
   zodStringWithDurationValidation,
   zodStringWithYamlValidation,
 } from './agent_policy_settings';
-
-const AGENT_POLICY_ADVANCED_SETTINGS = getAgentPolicyAdvancedSettings();
 
 describe('agent_policy_settings', () => {
   describe('zodStringWithDurationValidation', () => {
