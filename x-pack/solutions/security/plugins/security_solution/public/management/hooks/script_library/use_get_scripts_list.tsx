@@ -55,13 +55,12 @@ const buildSearchTermKql = (searchTerms: string[]): string => {
 
 export const useGetEndpointScriptsList = (
   query: AugmentedListScriptsRequestQuery,
-  options: UseQueryOptions<EndpointScriptListApiResponse, IHttpFetchError<ResponseErrorBody>> = {},
-  queryKey?: string[]
+  options: UseQueryOptions<EndpointScriptListApiResponse, IHttpFetchError<ResponseErrorBody>> = {}
 ): UseQueryResult<EndpointScriptListApiResponse, IHttpFetchError<ResponseErrorBody>> => {
   const http = useHttp();
 
   return useQuery<EndpointScriptListApiResponse, IHttpFetchError<ResponseErrorBody>>({
-    queryKey: queryKey ?? ['get-scripts-library', query],
+    queryKey: ['get-scripts-library', query],
     ...options,
     keepPreviousData: true,
     queryFn: async () => {

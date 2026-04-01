@@ -45,10 +45,9 @@ export const useWithScriptLibraryData = (
   } = useGetEndpointScriptsList(
     { page: 1, pageSize: 1 },
     {
-      enabled: options.enabled ?? false,
+      ...options,
       refetchOnWindowFocus: false,
-    },
-    ['script-library-has-data']
+    }
   );
   const doesDataExist = useMemo(() => (hasDataResponse?.total ?? 0) > 0, [hasDataResponse?.total]);
 
@@ -67,49 +66,12 @@ export const useWithScriptLibraryData = (
     }
   }, [isLoadingHasData, isMounted, isPageInitializing]);
 
-  // Keep the `doesDataExist` updated based on state transitions
-  // Re-check if data exists when:
-  // 1. List data becomes empty after previously having data (deletion)
-  // 2. List data becomes non-empty after being empty (creation)
-  // 3. No filters are applied (os, fileType and category are empty)
-  // 4. We're on page 1
+  // Re-check if data exists when list is empty and not loading
   useEffect(() => {
-    const hasFilters = Boolean(
-      queryParams?.os?.length ||
-        queryParams?.fileType?.length ||
-        queryParams?.category?.length ||
-        queryParams?.searchTerms?.length
-    );
-    const isOnFirstPage = queryParams?.page === 1;
-
-    if (
-      isMounted() &&
-      !isLoadingListData &&
-      !isLoadingHasData &&
-      !listDataError &&
-      !hasFilters &&
-      isOnFirstPage &&
-      // Flow when the last item on the list gets deleted, and list goes back to being empty
-      ((listData && listData.total === 0 && doesDataExist) ||
-        // Flow when the list starts off empty and the first item is added
-        (listData && listData.total > 0 && !doesDataExist))
-    ) {
+    if (isMounted() && !isLoadingListData && !listDataError && listData && listData.total === 0) {
       verifyDataExists();
     }
-  }, [
-    doesDataExist,
-    isLoadingHasData,
-    isLoadingListData,
-    isMounted,
-    listData,
-    listDataError,
-    queryParams?.os,
-    queryParams?.fileType,
-    queryParams?.category,
-    queryParams?.searchTerms,
-    queryParams?.page,
-    verifyDataExists,
-  ]);
+  }, [isMounted, isLoadingListData, listDataError, listData, verifyDataExists]);
 
   return useMemo(
     () => ({
