@@ -133,6 +133,8 @@ import {
   registerEntityStoreSnapshotTask,
   registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
+import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
+import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -162,6 +164,12 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
+import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
+import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
+import {
+  initializeEndpointExceptionsPerPolicyOptInStatus,
+  REFERENCE_DATA_SAVED_OBJECT_TYPE,
+} from './endpoint/lib/reference_data';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -319,6 +327,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
       });
+      if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+        registerWatchlistMaintainer({
+          entityStore: plugins.entityStore,
+          getStartServices: core.getStartServices,
+          logger: this.logger,
+        });
+      }
     } else {
       registerRiskScoringTask({
         getStartServices: core.getStartServices,
@@ -338,11 +353,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
     if (!experimentalFeatures.entityStoreDisabled) {
+      plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
+      plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
+
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
@@ -425,6 +444,24 @@ export class Plugin implements ISecuritySolutionPlugin {
           recommendedEndpoints: [],
         });
       }
+      
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'defend_insights',
+        featureName: 'Automatic Troubleshooting',
+        featureDescription: 'Automatic Troubleshooting inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'attack_discovery',
+        featureName: 'Attack Discovery',
+        featureDescription: 'Attack Discovery inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -524,6 +561,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
+      endpointAppContextService: this.endpointAppContextService,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -598,6 +636,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
+    registerEndpointExceptionsRoutes(router, this.endpointContext);
     registerScriptsLibraryRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
@@ -727,6 +766,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.taskManager) {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
+        isServerless: this.isServerless,
       });
 
       this.trialCompanionMilestoneService.setup({
@@ -761,6 +801,18 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger, productFeaturesService } = this;
+
+    initializeEndpointExceptionsPerPolicyOptInStatus(
+      new SavedObjectsClient(
+        core.savedObjects.createInternalRepository([REFERENCE_DATA_SAVED_OBJECT_TYPE])
+      ),
+      config.experimentalFeatures,
+      logger
+    ).catch((error) => {
+      this.logger.error(
+        `Error initializing Endpoint Exceptions per-policy opt-in status: ${error}`
+      );
+    });
 
     this.ruleMonitoringService.start(core, plugins);
 

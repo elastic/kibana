@@ -257,7 +257,7 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => z.infer<any>"
+          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; condition?: string | undefined; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
         "lineNumber": 205,
@@ -370,7 +370,7 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => z.infer<any>"
+          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
         "lineNumber": 215,
@@ -415,7 +415,7 @@
           "\nMaps a `RuleResponse` (API shape, snake_case) to `Partial<FormValues>` (form shape, camelCase).\n\nOnly fields present in the response are included so the form defaults fill in the rest.\nUse this when populating the edit form with an existing rule's data."
         ],
         "signature": [
-          "(rule: z.infer<any>) => Partial<",
+          "(rule: Record<any, any>) => Partial<",
           {
             "pluginId": "@kbn/alerting-v2-rule-form",
             "scope": "public",
@@ -434,12 +434,12 @@
           {
             "parentPluginId": "@kbn/alerting-v2-rule-form",
             "id": "def-public.mapRuleResponseToFormValues.$1",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "rule",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "Record<any, any>"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
             "lineNumber": 238,
@@ -1092,7 +1092,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
             "lineNumber": 67,
@@ -1578,7 +1578,7 @@
             "label": "recovery_policy",
             "description": [],
             "signature": [
-              "{ type: z.infer<any>; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined"
+              "{ type: any; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
             "lineNumber": 131,

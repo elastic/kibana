@@ -124,7 +124,11 @@ export const getClassicStreamsStatusRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+
+    if (!isSecurityEnabled) {
+      return { can_manage: true };
+    }
 
     const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
 
