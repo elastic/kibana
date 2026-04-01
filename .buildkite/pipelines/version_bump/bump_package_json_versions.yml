@@ -1,0 +1,4 @@
+steps:
+  - name: 'Bump package.json versions'
+    key: bump-package-json-versions
+    command: .buildkite/scripts/steps/version_bump/bump_package_json_versions.sh

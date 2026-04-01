@@ -1,0 +1,7 @@
+steps:
+  - name: Trigger ES Build/Verify/Promote
+    key: trigger-es-build
+    trigger: kibana-elasticsearch-snapshot-build
+    async: false
+    build:
+      branch: '$BRANCH'
