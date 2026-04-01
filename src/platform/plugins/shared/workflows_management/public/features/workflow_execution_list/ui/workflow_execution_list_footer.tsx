@@ -22,7 +22,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isTerminalStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 
 export interface WorkflowExecutionListFooterProps {
-  showFooter: boolean;
   loadedExecutions: readonly WorkflowExecutionListItemDto[];
   canCancelLoadedNonTerminal: boolean;
   isCancelLoadedNonTerminalInProgress: boolean;
@@ -30,7 +29,6 @@ export interface WorkflowExecutionListFooterProps {
 }
 
 export const WorkflowExecutionListFooter = ({
-  showFooter,
   loadedExecutions,
   canCancelLoadedNonTerminal,
   isCancelLoadedNonTerminalInProgress,
@@ -40,16 +38,16 @@ export const WorkflowExecutionListFooter = ({
   const [isFooterCancelModalVisible, setIsFooterCancelModalVisible] = useState(false);
   const footerCancelModalTitleId = useGeneratedHtmlId();
 
-  const nonTerminalLoadedCount = useMemo(
-    () => loadedExecutions.filter((e) => !isTerminalStatus(e.status)).length,
+  const isCancelActiveEnabled = useMemo(
+    () => loadedExecutions.some((e) => !isTerminalStatus(e.status)),
     [loadedExecutions]
   );
 
   const openFooterCancelModal = useCallback(() => {
-    if (nonTerminalLoadedCount > 0) {
+    if (isCancelActiveEnabled) {
       setIsFooterCancelModalVisible(true);
     }
-  }, [nonTerminalLoadedCount]);
+  }, [isCancelActiveEnabled]);
 
   const closeFooterCancelModal = useCallback(() => {
     if (!isCancelLoadedNonTerminalInProgress) {
@@ -74,7 +72,7 @@ export const WorkflowExecutionListFooter = ({
             {
               defaultMessage:
                 'Cancel {count, plural, one {# active execution} other {# active executions}}?',
-              values: { count: nonTerminalLoadedCount },
+              values: { count: isCancelActiveEnabled },
             }
           )}
           titleProps={{ id: footerCancelModalTitleId }}
@@ -106,29 +104,27 @@ export const WorkflowExecutionListFooter = ({
           </p>
         </EuiConfirmModal>
       ) : null}
-      {showFooter ? (
-        <EuiFlexItem grow={false} css={styles.footerSection}>
-          <EuiHorizontalRule margin="s" />
-          <EuiButton
-            color="warning"
-            iconType="cross"
-            size="s"
-            fullWidth
-            disabled={
-              !canCancelLoadedNonTerminal ||
-              nonTerminalLoadedCount === 0 ||
-              isCancelLoadedNonTerminalInProgress
-            }
-            onClick={openFooterCancelModal}
-            data-test-subj="workflowExecutionListFooterCancelNonTerminalButton"
-          >
-            <FormattedMessage
-              id="workflows.workflowExecutionList.footerCancelNonTerminal.button"
-              defaultMessage="Cancel all active"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem grow={false} css={styles.footerSection}>
+        <EuiHorizontalRule margin="s" />
+        <EuiButton
+          color="warning"
+          iconType="cross"
+          size="s"
+          fullWidth
+          disabled={
+            !isCancelActiveEnabled ||
+            !canCancelLoadedNonTerminal ||
+            isCancelLoadedNonTerminalInProgress
+          }
+          onClick={openFooterCancelModal}
+          data-test-subj="workflowExecutionListFooterCancelNonTerminalButton"
+        >
+          <FormattedMessage
+            id="workflows.workflowExecutionList.footerCancelNonTerminal.button"
+            defaultMessage="Cancel all active"
+          />
+        </EuiButton>
+      </EuiFlexItem>
     </>
   );
 };

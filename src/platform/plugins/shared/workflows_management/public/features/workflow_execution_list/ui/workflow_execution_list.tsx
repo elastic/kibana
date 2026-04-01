@@ -65,10 +65,6 @@ export const WorkflowExecutionList = ({
   const styles = useMemoCss(componentStyles);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
 
-  const showListFooter = Boolean(
-    !isInitialLoading && !error && executions && executions.results.length > 0
-  );
-
   const availableExecutedByOptions = useMemo(() => {
     if (!executions?.results) return [];
     const uniqueUsers = new Set<string>();
@@ -225,7 +221,6 @@ export const WorkflowExecutionList = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <WorkflowExecutionListFooter
-          showFooter={showListFooter}
           loadedExecutions={executions?.results ?? []}
           canCancelLoadedNonTerminal={canCancelLoadedNonTerminal}
           isCancelLoadedNonTerminalInProgress={isCancelLoadedNonTerminalInProgress}
