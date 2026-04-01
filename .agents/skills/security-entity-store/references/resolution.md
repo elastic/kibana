@@ -1,8 +1,8 @@
 # Entity Resolution
 
-Links multiple entity records representing the same real-world identity. **FIELDS architecture** (chosen February 2026).
+Links multiple entity records representing the same real-world identity. Resolution data is stored as fields on entity documents — no new indices required.
 
-## Architecture: FIELDS
+## Architecture
 
 - **No new indices** — works on existing Entity Store v2 shared index
 - **Target Entity** = entity WITHOUT `resolved_to` (also called "golden entity")

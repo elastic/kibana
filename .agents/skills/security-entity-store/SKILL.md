@@ -61,7 +61,7 @@ x-pack/solutions/security/plugins/entity_store/
 - **[references/euid.md](references/euid.md)** — EUID algorithm: how entity.id is constructed per entity type, HC/MC branches, namespace mapping, QA scenarios
 - **[references/errors.md](references/errors.md)** — All 12 error classes with conditions
 - **[references/maintainers.md](references/maintainers.md)** — Maintainers framework: registration, context, lifecycle
-- **[references/resolution.md](references/resolution.md)** — Entity Resolution: FIELDS architecture, ResolutionClient, ESQL patterns
+- **[references/resolution.md](references/resolution.md)** — Entity Resolution: architecture, ResolutionClient, ESQL patterns
 - **[references/contracts.md](references/contracts.md)** — Plugin contracts and request handler context
 - **[references/v1-legacy.md](references/v1-legacy.md)** — v1 architecture (transforms, enrich, painless), index naming, API routes, migration path. **Only read when debugging pre-9.4 deployments or support tickets.**
 
