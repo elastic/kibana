@@ -47,7 +47,7 @@ describe('GettingStartedRedirectGate', () => {
     });
     mockUseGetLicenseInfo.mockReturnValue({ isTrial: true });
     mockUseKibana.mockReturnValue({
-      services: { cloud: undefined, isServerless: false },
+      services: { cloud: undefined, isCloudEnabled: undefined },
     });
   });
 
@@ -114,8 +114,7 @@ describe('GettingStartedRedirectGate', () => {
   it('redirects when serverless user is on trial and has 0 documents', async () => {
     mockUseKibana.mockReturnValue({
       services: {
-        cloud: { isInTrial: () => true },
-        isServerless: true,
+        cloud: { isInTrial: () => true, isCloudEnabled: true },
       },
     });
     // isTrial is ignored in serverless; empty cluster reinforces redirect
