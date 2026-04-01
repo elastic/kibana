@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
 import { TERMS_SIZE, bucketsToRecord } from './constants';
 import type { AlertStatsAggregations, AlertStatsResults } from './types';
 
