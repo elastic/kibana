@@ -140,68 +140,179 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     expect(ui.getConfirmModalConfirmButton()).toBeDisabled();
   });
 
-  it('should show a success toast and call `onSuccess` after a successful import', async () => {
-    await render();
+  describe('when handling server response', () => {
+    const LIST_CONFLICT_ERROR = {
+      error: {
+        status_code: 409,
+        message:
+          'Found that list_id: "endpoint_list" already exists. Import of list_id: "endpoint_list" skipped.',
+      },
+      list_id: 'endpoint_list',
+    };
 
-    await ui.uploadFile([currentListId]);
-    await userEvent.click(ui.getImportButton());
-    await userEvent.click(ui.getConfirmModalConfirmButton());
+    const ITEM_CONFLICT_ERROR = {
+      error: {
+        status_code: 409,
+        message:
+          'Found that item_id: "0d82595f-f79d-48c8-8522-7715e1640884" already exists. Import of item_id: "0d82595f-f79d-48c8-8522-7715e1640884" skipped.',
+      },
+      list_id: 'endpoint_list',
+      item_id: '0d82595f-f79d-48c8-8522-7715e1640884',
+    };
 
-    expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      text: '2 artifacts imported.',
-      title: 'Artifact list imported successfully',
-      toastLifeTimeMs: 60_000,
-    });
-    expect(props.onSuccess).toHaveBeenCalled();
-  });
+    const ITEM_ENDPOINT_ARTIFACT_ERROR = {
+      error: {
+        status_code: 403,
+        message:
+          "EndpointArtifactError: This artifact can't be imported because it belongs to a space you don't have access to. Update the artifact in its original space and try again.",
+      },
+      list_id: 'endpoint_list',
+      item_id: '1a0200db-3dd7-46f4-bb4d-f23904559c32',
+    };
 
-  it('should show an error toast and close the modal if another list is being imported', async () => {
-    await render();
+    it('should show a success toast and call `onSuccess` after a successful import', async () => {
+      await render();
 
-    await ui.uploadFile(['some-other-list-id']);
-    await userEvent.click(ui.getImportButton());
-    await userEvent.click(ui.getConfirmModalConfirmButton());
+      await ui.uploadFile([currentListId]);
+      await userEvent.click(ui.getImportButton());
+      await userEvent.click(ui.getConfirmModalConfirmButton());
 
-    expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
-      expect.objectContaining(
-        new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
-      ),
-      { title: artifactListPageLabels.pageImportErrorToastTitle }
-    );
-    expect(ui.queryConfirmModal()).not.toBeInTheDocument();
-  });
-
-  it('should show an error toast if not only the current artifact type is included in the import file', async () => {
-    await render();
-
-    await ui.uploadFile(['some-other-list-id', currentListId]);
-    await userEvent.click(ui.getImportButton());
-    await userEvent.click(ui.getConfirmModalConfirmButton());
-
-    expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
-      expect.objectContaining(
-        new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
-      ),
-      { title: artifactListPageLabels.pageImportErrorToastTitle }
-    );
-    expect(ui.queryConfirmModal()).not.toBeInTheDocument();
-  });
-
-  it('should show an error toast if the import API fails', async () => {
-    mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => {
-      throw new Error('Fail message from server');
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Artifacts imported',
+        text: 'All artifacts were imported successfully.',
+        toastLifeTimeMs: 60_000,
+      });
+      expect(props.onSuccess).toHaveBeenCalled();
     });
 
-    await render();
+    it('should not care about list conflict in response', async () => {
+      mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => ({
+        errors: [LIST_CONFLICT_ERROR],
+        success: false,
+        success_count: 2,
+        success_exception_lists: false,
+        success_count_exception_lists: 0,
+        success_exception_list_items: true,
+        success_count_exception_list_items: 2,
+      }));
 
-    await ui.uploadFile([currentListId]);
-    await userEvent.click(ui.getImportButton());
-    await userEvent.click(ui.getConfirmModalConfirmButton());
+      await render();
 
-    expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
-      expect.objectContaining(new Error('Fail message from server')),
-      { title: 'Artifact list import failed', toastMessage: 'Fail message from server' }
-    );
-    expect(ui.queryConfirmModal()).not.toBeInTheDocument();
+      await ui.uploadFile([currentListId]);
+      await userEvent.click(ui.getImportButton());
+      await userEvent.click(ui.getConfirmModalConfirmButton());
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Artifacts imported',
+        text: 'All artifacts were imported successfully.',
+        toastLifeTimeMs: 60_000,
+      });
+      expect(props.onSuccess).toHaveBeenCalled();
+    });
+
+    it('should show a warning toast when some of the items were not imported', async () => {
+      mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => ({
+        errors: [LIST_CONFLICT_ERROR, ITEM_CONFLICT_ERROR, ITEM_ENDPOINT_ARTIFACT_ERROR],
+        success: false,
+        success_count: 3,
+        success_exception_lists: false,
+        success_count_exception_lists: 0,
+        success_exception_list_items: false,
+        success_count_exception_list_items: 3, // there are some successful imports
+      }));
+
+      await render();
+
+      await ui.uploadFile([currentListId]);
+      await userEvent.click(ui.getImportButton());
+      await userEvent.click(ui.getConfirmModalConfirmButton());
+
+      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith({
+        title: 'Import completed with errors',
+        toastLifeTimeMs: 60_000,
+      });
+      expect(props.onSuccess).toHaveBeenCalled();
+    });
+
+    it('should call `showErrorList` when the `View errors` button is pressed in the warning toast', async () => {});
+
+    it('should show a danger toast when none of the items were imported', async () => {
+      mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => ({
+        errors: [LIST_CONFLICT_ERROR, ITEM_CONFLICT_ERROR, ITEM_ENDPOINT_ARTIFACT_ERROR],
+        success: false,
+        success_count: 3,
+        success_exception_lists: false,
+        success_count_exception_lists: 0,
+        success_exception_list_items: false,
+        success_count_exception_list_items: 0, // there are no successful imports
+      }));
+
+      await render();
+
+      await ui.uploadFile([currentListId]);
+      await userEvent.click(ui.getImportButton());
+      await userEvent.click(ui.getConfirmModalConfirmButton());
+
+      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: "Artifacts weren't imported",
+        toastLifeTimeMs: 60_000,
+      });
+      expect(props.onSuccess).toHaveBeenCalled();
+    });
+
+    it('should call `showErrorList` when the `View errors` button is pressed in the error toast', async () => {});
+
+    it('should show an error toast and close the modal if another list is being imported', async () => {
+      await render();
+
+      await ui.uploadFile(['some-other-list-id']);
+      await userEvent.click(ui.getImportButton());
+      await userEvent.click(ui.getConfirmModalConfirmButton());
+
+      expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
+        expect.objectContaining(
+          new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
+        ),
+        { title: artifactListPageLabels.pageImportErrorToastTitle }
+      );
+      expect(ui.queryConfirmModal()).not.toBeInTheDocument();
+    });
+
+    it('should show an error toast if not only the current artifact type is included in the import file', async () => {
+      await render();
+
+      await ui.uploadFile(['some-other-list-id', currentListId]);
+      await userEvent.click(ui.getImportButton());
+      await userEvent.click(ui.getConfirmModalConfirmButton());
+
+      expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
+        expect.objectContaining(
+          new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
+        ),
+        { title: artifactListPageLabels.pageImportErrorToastTitle }
+      );
+      expect(ui.queryConfirmModal()).not.toBeInTheDocument();
+    });
+
+    it('should show an error toast if the import API fails', async () => {
+      mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => {
+        throw new Error('Fail message from server');
+      });
+
+      await render();
+
+      await ui.uploadFile([currentListId]);
+      await userEvent.click(ui.getImportButton());
+      await userEvent.click(ui.getConfirmModalConfirmButton());
+
+      expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
+        expect.objectContaining(new Error('Fail message from server')),
+        {
+          title: artifactListPageLabels.pageImportErrorToastTitle,
+          toastMessage: 'Fail message from server',
+        }
+      );
+      expect(ui.queryConfirmModal()).not.toBeInTheDocument();
+    });
   });
 });

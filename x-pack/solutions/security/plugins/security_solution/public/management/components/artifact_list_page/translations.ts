@@ -50,19 +50,25 @@ export const artifactListPageLabels = Object.freeze({
   pageImportSuccessToastTitle: i18n.translate(
     'xpack.securitySolution.artifactListPage.importSuccessToastTitle',
     {
-      defaultMessage: 'Artifact list imported successfully',
+      defaultMessage: 'Artifacts imported',
     }
   ),
-  getPageImportSuccessToastText: (successCount: number): string =>
-    i18n.translate('xpack.securitySolution.artifactListPage.importSuccessToastText', {
-      defaultMessage:
-        '{successCount} {successCount, plural, one {artifact} other {artifacts}} imported.',
-      values: { successCount },
-    }),
+  pageImportSuccessToastText: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importSuccessToastText',
+    {
+      defaultMessage: 'All artifacts were imported successfully.',
+    }
+  ),
+  pageImportCompletedWithErrorsToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importCompletedWithErrorsToastTitle',
+    {
+      defaultMessage: 'Import completed with errors',
+    }
+  ),
   pageImportErrorToastTitle: i18n.translate(
     'xpack.securitySolution.artifactListPage.importErrorToastTitle',
     {
-      defaultMessage: 'Artifact list import failed',
+      defaultMessage: "Artifacts weren't imported",
     }
   ),
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(

@@ -84,22 +84,36 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
             setShowConfirmModal(false);
           },
           onSuccess: (response) => {
-            toasts.addSuccess({
-              title: labels.pageImportSuccessToastTitle,
-              text: `${labels.getPageImportSuccessToastText?.(
-                response.success_count_exception_list_items
-              )}${
-                response.errors.length
-                  ? ` ${response.errors.length} errors happened: ${response.errors
-                      .map(
-                        (item, index) =>
-                          `(${index + 1}) item (${item.item_id}): ${item.error.message}.`
-                      )
-                      .join(' -- ')}`
-                  : ''
-              }`,
-              toastLifeTimeMs: 60_000,
-            });
+            if (response.success_exception_list_items === true) {
+              toasts.addSuccess({
+                title: labels.pageImportSuccessToastTitle,
+                text: labels.pageImportSuccessToastText,
+                toastLifeTimeMs: 60_000,
+              });
+            } else {
+              const itemErrors = response.errors.filter(
+                (error) =>
+                  !(
+                    error.error.status_code === 409 &&
+                    error.error.message.match(/Found that list_id: "\w+" already exists/)
+                  )
+              );
+
+              if (itemErrors.length > 0 && response.success_count_exception_list_items > 0) {
+                toasts.addWarning({
+                  title: labels.pageImportCompletedWithErrorsToastTitle,
+                  toastLifeTimeMs: 60_000,
+                });
+              }
+
+              if (itemErrors.length > 0 && response.success_count_exception_list_items === 0) {
+                toasts.addDanger({
+                  title: labels.pageImportErrorToastTitle,
+                  toastLifeTimeMs: 60_000,
+                });
+              }
+            }
+
             setShowConfirmModal(false);
             onSuccess();
           },
