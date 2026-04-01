@@ -77,6 +77,10 @@ jest.mock('../../../hooks/tools/use_tools', () => ({
   useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
 }));
 
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: () => false,
+}));
+
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: () => {},
 }));
