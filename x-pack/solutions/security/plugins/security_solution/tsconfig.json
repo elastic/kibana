@@ -291,6 +291,7 @@
     "@kbn/anonymization-common",
     "@kbn/workflows-extensions",
     "@kbn/controls-schemas",
-    "@kbn/search-inference-endpoints"
+    "@kbn/search-inference-endpoints",
+    "@kbn/shared-ux-column-presets",
   ]
 }
