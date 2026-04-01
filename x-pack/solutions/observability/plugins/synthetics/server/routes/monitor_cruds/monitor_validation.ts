@@ -39,6 +39,7 @@ import {
   DEFAULT_FIELDS,
   HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
+import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
 
 type MonitorCodecType =
   | typeof ICMPFieldsCodec
@@ -459,6 +460,22 @@ export function validateLocation(
       return INVALID_PRIVATE_LOCATION_ERROR(invalidLocation);
     }
   }
+
+  if (hasPrivateLocationsConfigured && monitorFields.spaces && monitorFields.spaces.length > 0) {
+    for (const locationName of monitorFields.privateLocations ?? []) {
+      const loc = locationName.toLowerCase();
+      const matchedLocation = privateLocations.find(
+        (privateLocation) =>
+          privateLocation.label.toLowerCase() === loc || privateLocation.id.toLowerCase() === loc
+      );
+      if (matchedLocation) {
+        if (!privateLocationCoversAllMonitorSpaces(monitorFields.spaces, matchedLocation.spaces)) {
+          return PRIVATE_LOCATION_SPACE_COVERAGE_ERROR(matchedLocation.label);
+        }
+      }
+    }
+  }
+
   const hasEmptyLocations =
     monitorFields.locations &&
     monitorFields.locations.length === 0 &&
@@ -532,6 +549,16 @@ const INVALID_PUBLIC_LOCATION_ERROR = (location: string) =>
   i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicLocationError', {
     defaultMessage:
       'Invalid location: "{location}". Remove it or replace it with a valid location.',
+    values: {
+      location,
+    },
+  });
+
+const PRIVATE_LOCATION_SPACE_COVERAGE_ERROR = (location: string) =>
+  i18n.translate('xpack.synthetics.server.projectMonitors.privateLocationSpaceCoverageError', {
+    defaultMessage:
+      'Private location "{location}" is not available in all spaces this monitor is shared to. ' +
+      'Either share the private location to all monitor spaces, or remove those spaces from the monitor.',
     values: {
       location,
     },

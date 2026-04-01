@@ -19,10 +19,15 @@ import {
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
+import {
+  assertCanUpdateMonitorInAllSpaces,
+  validateMonitorPrivateLocationSpaces,
+} from './monitor_locations_utils';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -126,6 +131,29 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         return response.badRequest({
           body: { message: nameError, attributes: { details: nameError } },
         });
+      }
+
+      const monitorSpaces = normalizedMonitor[ConfigKey.KIBANA_SPACES] ?? [];
+      if (monitorSpaces.length > 0) {
+        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(routeContext, monitorSpaces);
+        if (spaceAuthError) {
+          return spaceAuthError;
+        }
+      }
+
+      if (addMonitorAPI.allPrivateLocations && addMonitorAPI.allPrivateLocations.length > 0) {
+        const plSpaceError = validateMonitorPrivateLocationSpaces(
+          normalizedMonitor,
+          addMonitorAPI.allPrivateLocations
+        );
+        if (plSpaceError) {
+          return response.badRequest({
+            body: {
+              message: plSpaceError.message,
+              attributes: plSpaceError.attributes,
+            },
+          });
+        }
       }
 
       const { errors, newMonitor } = await addMonitorAPI.syncNewMonitor({
