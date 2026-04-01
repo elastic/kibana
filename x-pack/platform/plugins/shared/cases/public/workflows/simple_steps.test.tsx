@@ -14,14 +14,19 @@ import {
   assignCaseStepDefinition,
   closeCaseStepDefinition,
   deleteCasesStepDefinition,
+  deleteObservableStepDefinition,
   findSimilarCasesStepDefinition,
   findCasesStepDefinition,
+  getAllAttachmentsStepDefinition,
+  getCasesByAlertIdStepDefinition,
+  getCasesStepDefinition,
   setCategoryStepDefinition,
   setDescriptionStepDefinition,
   setSeverityStepDefinition,
   setStatusStepDefinition,
   setTitleStepDefinition,
   unassignCaseStepDefinition,
+  updateObservableStepDefinition,
 } from './simple_steps';
 
 describe('new cases public step definitions', () => {
@@ -42,6 +47,11 @@ describe('new cases public step definitions', () => {
     addObservablesStepDefinition,
     addTagsStepDefinition,
     setCategoryStepDefinition,
+    getCasesByAlertIdStepDefinition,
+    getAllAttachmentsStepDefinition,
+    updateObservableStepDefinition,
+    deleteObservableStepDefinition,
+    getCasesStepDefinition,
   ];
 
   it.each(steps)('returns expected metadata for %s', (definition) => {

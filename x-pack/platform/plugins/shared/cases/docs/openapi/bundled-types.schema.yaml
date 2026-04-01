@@ -196,17 +196,17 @@ paths:
                 type: array
                 maxItems: 10000
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      description: The case identifier.
-                    title:
-                      type: string
-                      description: The case title.
+                  $ref: '#/components/schemas/related_case'
                 example:
                   - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                     title: security_case
+                    description: Investigating suspicious activity
+                    status: open
+                    createdAt: '2020-02-19T23:06:33.798Z'
+                    totals:
+                      alerts: 1
+                      events: 0
+                      userComments: 0
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -2524,6 +2524,54 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/searchFieldsType'
+    attachment_totals:
+      title: Attachment totals
+      description: Counts of alerts, events, and user comments attached to a case.
+      type: object
+      required:
+        - alerts
+        - events
+        - userComments
+      properties:
+        alerts:
+          type: integer
+          description: Number of alert attachments on the case.
+        events:
+          type: integer
+          description: Number of event attachments on the case.
+        userComments:
+          type: integer
+          description: Number of user comment attachments on the case.
+    related_case:
+      title: Related case
+      description: |
+        Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - status
+        - createdAt
+        - totals
+      properties:
+        id:
+          type: string
+          description: The case identifier.
+        title:
+          type: string
+          description: The case title.
+        description:
+          type: string
+          description: The case description.
+        status:
+          $ref: '#/components/schemas/case_status'
+        createdAt:
+          type: string
+          format: date-time
+          description: When the case was created.
+        totals:
+          $ref: '#/components/schemas/attachment_totals'
     closure_types:
       type: string
       description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).

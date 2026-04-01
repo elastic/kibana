@@ -7,31 +7,33 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { deleteCasesStepCommonDefinition } from '../../../common/workflows/steps/delete_cases';
+import { deleteObservableStepCommonDefinition } from '../../../common/workflows/steps/delete_observable';
 import type { CasesClient } from '../../client';
-import { DELETE_CASES_FAILED_MESSAGE } from './translations';
-import { getCasesClientFromStepsContext, getErrorMessage } from './utils';
+import { getCasesClientFromStepsContext } from './utils';
 
-export const deleteCasesStepDefinition = (
+export const deleteObservableStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
-    ...deleteCasesStepCommonDefinition,
+    ...deleteObservableStepCommonDefinition,
     handler: async (context) => {
-      const { case_ids } = context.input;
+      const { case_id, observable_id } = context.input;
 
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        await casesClient.cases.delete(case_ids);
+        await casesClient.cases.deleteObservable(case_id, observable_id);
 
-        const output = deleteCasesStepCommonDefinition.outputSchema.parse({
-          case_ids,
-        });
-
-        return { output };
-      } catch (error) {
         return {
-          error: new Error(DELETE_CASES_FAILED_MESSAGE(case_ids, getErrorMessage(error))),
+          output: {
+            case_id,
+            observable_id,
+          },
+        };
+      } catch (_error) {
+        return {
+          error: new Error(
+            `Observable "${observable_id}" could not be deleted from case "${case_id}".`
+          ),
         };
       }
     },

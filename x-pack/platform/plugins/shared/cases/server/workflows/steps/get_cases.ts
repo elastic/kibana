@@ -7,31 +7,26 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { deleteCasesStepCommonDefinition } from '../../../common/workflows/steps/delete_cases';
+import { getCasesStepCommonDefinition } from '../../../common/workflows/steps/get_cases';
 import type { CasesClient } from '../../client';
-import { DELETE_CASES_FAILED_MESSAGE } from './translations';
-import { getCasesClientFromStepsContext, getErrorMessage } from './utils';
+import { getCasesClientFromStepsContext } from './utils';
 
-export const deleteCasesStepDefinition = (
+export const getCasesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
-    ...deleteCasesStepCommonDefinition,
+    ...getCasesStepCommonDefinition,
     handler: async (context) => {
-      const { case_ids } = context.input;
-
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        await casesClient.cases.delete(case_ids);
+        const result = await casesClient.cases.bulkGet({ ids: context.input.case_ids });
 
-        const output = deleteCasesStepCommonDefinition.outputSchema.parse({
-          case_ids,
-        });
+        const output = getCasesStepCommonDefinition.outputSchema.parse(result);
 
         return { output };
-      } catch (error) {
+      } catch (_error) {
         return {
-          error: new Error(DELETE_CASES_FAILED_MESSAGE(case_ids, getErrorMessage(error))),
+          error: new Error(`Cases could not be retrieved for the provided IDs.`),
         };
       }
     },

@@ -246,3 +246,77 @@ export const findCasesOutputFixture = {
   per_page: 20,
   total: 1,
 };
+
+export const alertIdFixture = 'alert-id-1';
+
+export const getCasesByAlertIdInputFixture = {
+  alert_id: alertIdFixture,
+  owner: 'securitySolution',
+};
+
+export const getCasesByAlertIdOutputFixture = {
+  cases: [
+    {
+      id: caseIdFixture,
+      title: 'Another horrible breach!!',
+      description: 'Security banana Issue',
+      status: 'open',
+      createdAt: '2020-02-19T23:06:33.798Z',
+      totals: { alerts: 1, events: 0, userComments: 0 },
+    },
+  ],
+};
+
+export const userCommentFixture = {
+  id: 'comment-1',
+  type: 'user' as const,
+  comment: 'Investigating now',
+  owner: 'securitySolution',
+  created_at: '2020-02-19T23:06:33.798Z',
+  created_by: {
+    full_name: 'Leslie Knope',
+    username: 'lknope',
+    email: 'leslie.knope@elastic.co',
+  },
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+  version: 'WzQ3LDFc',
+};
+
+export const getAllAttachmentsInputFixture = {
+  case_id: caseIdFixture,
+};
+
+export const getAllAttachmentsOutputFixture = {
+  attachments: [userCommentFixture],
+};
+
+export const observableIdFixture = 'obs-1';
+
+export const updateObservableInputFixture = {
+  case_id: caseIdFixture,
+  observable_id: observableIdFixture,
+  value: '10.0.0.42',
+  description: 'Updated source IP',
+};
+
+export const deleteObservableInputFixture = {
+  case_id: caseIdFixture,
+  observable_id: observableIdFixture,
+};
+
+export const deleteObservableOutputFixture = {
+  case_id: caseIdFixture,
+  observable_id: observableIdFixture,
+};
+
+export const getCasesInputFixture = {
+  case_ids: [caseIdFixture, 'case-2'],
+};
+
+export const getCasesOutputFixture = {
+  cases: [createCaseResponseFixture],
+  errors: [],
+};

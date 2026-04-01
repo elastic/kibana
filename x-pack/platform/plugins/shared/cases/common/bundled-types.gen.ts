@@ -738,6 +738,51 @@ export type SearchFieldsTypeArray = z.infer<typeof SearchFieldsTypeArray>;
 export const SearchFieldsTypeArray = z.array(SearchFieldsType);
 
 /**
+ * Counts of alerts, events, and user comments attached to a case.
+ */
+export type AttachmentTotals = z.infer<typeof AttachmentTotals>;
+export const AttachmentTotals = z.object({
+  /**
+   * Number of alert attachments on the case.
+   */
+  alerts: z.number().int(),
+  /**
+   * Number of event attachments on the case.
+   */
+  events: z.number().int(),
+  /**
+   * Number of user comment attachments on the case.
+   */
+  userComments: z.number().int(),
+});
+
+/**
+  * Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
+
+  */
+export type RelatedCase = z.infer<typeof RelatedCase>;
+export const RelatedCase = z.object({
+  /**
+   * The case identifier.
+   */
+  id: z.string(),
+  /**
+   * The case title.
+   */
+  title: z.string(),
+  /**
+   * The case description.
+   */
+  description: z.string(),
+  status: CaseStatus,
+  /**
+   * When the case was created.
+   */
+  createdAt: z.string().datetime(),
+  totals: AttachmentTotals,
+});
+
+/**
  * Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
  */
 export type ClosureTypes = z.infer<typeof ClosureTypes>;

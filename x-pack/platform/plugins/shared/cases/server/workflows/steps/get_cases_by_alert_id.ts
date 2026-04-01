@@ -7,31 +7,35 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { deleteCasesStepCommonDefinition } from '../../../common/workflows/steps/delete_cases';
+import { getCasesByAlertIdStepCommonDefinition } from '../../../common/workflows/steps/get_cases_by_alert_id';
 import type { CasesClient } from '../../client';
-import { DELETE_CASES_FAILED_MESSAGE } from './translations';
-import { getCasesClientFromStepsContext, getErrorMessage } from './utils';
+import { getCasesClientFromStepsContext } from './utils';
 
-export const deleteCasesStepDefinition = (
+export const getCasesByAlertIdStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
-    ...deleteCasesStepCommonDefinition,
+    ...getCasesByAlertIdStepCommonDefinition,
     handler: async (context) => {
-      const { case_ids } = context.input;
-
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        await casesClient.cases.delete(case_ids);
+        const relatedCases = await casesClient.cases.getCasesByAlertID({
+          alertID: context.input.alert_id,
+          options: {
+            owner: context.input.owner,
+          },
+        });
 
-        const output = deleteCasesStepCommonDefinition.outputSchema.parse({
-          case_ids,
+        const output = getCasesByAlertIdStepCommonDefinition.outputSchema.parse({
+          cases: relatedCases,
         });
 
         return { output };
-      } catch (error) {
+      } catch (_error) {
         return {
-          error: new Error(DELETE_CASES_FAILED_MESSAGE(case_ids, getErrorMessage(error))),
+          error: new Error(
+            `Cases could not be retrieved for alert ID "${context.input.alert_id}".`
+          ),
         };
       }
     },
