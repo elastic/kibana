@@ -37,7 +37,7 @@ const setLocation = (url: string) => {
 };
 
 describe('resolveRelativeLinksPlugin', () => {
-  it('resolves bare relative links against the current URL', () => {
+  it('resolves document relative links against the current URL', () => {
     setLocation('http://localhost:5601/app/dashboards');
     const tree = createTree(createLinkNode('discover'));
     resolveRelativeLinksPlugin()()(tree);
@@ -45,7 +45,7 @@ describe('resolveRelativeLinksPlugin', () => {
     expect(getLink(tree).url).toBe('/app/discover');
   });
 
-  it('resolves bare relative links within a space', () => {
+  it('resolves document relative links within a space', () => {
     setLocation('http://localhost:5601/s/my-space/app/dashboards');
     const tree = createTree(createLinkNode('discover'));
     resolveRelativeLinksPlugin()()(tree);
@@ -53,7 +53,7 @@ describe('resolveRelativeLinksPlugin', () => {
     expect(getLink(tree).url).toBe('/s/my-space/app/discover');
   });
 
-  it('preserves hash fragments in bare relative links', () => {
+  it('preserves hash fragments in document relative links', () => {
     setLocation('http://localhost:5601/s/cool-space/app/dashboards');
     const tree = createTree(createLinkNode('discover#/view/my-saved-search'));
     resolveRelativeLinksPlugin()()(tree);

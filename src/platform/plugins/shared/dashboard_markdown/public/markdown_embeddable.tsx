@@ -225,7 +225,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           },
         });
 
-        // Insert before the link validator so bare relative links like
+        // Insert before the link validator so document relative links like
         // [discover](discover) get resolved before validation rejects them.
         const linkValidatorIndex = parsingPluginList.findIndex(
           // parsingPluginList is an array of Plugins or PluginTuples

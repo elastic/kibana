@@ -99,7 +99,7 @@ describe('MarkdownEmbeddable', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
-  it('resolves bare relative links against current URL', async () => {
+  it('resolves document relative links against current URL', async () => {
     await renderEmbeddable({
       initialState: { content: '[go to discover](discover)' },
     });

@@ -24,9 +24,9 @@ function isLink(node: Node): node is Link {
 }
 
 /**
- * Test if the URL is a bare relative URL that doesn't inherently tell the browser where to go
+ * Test if the URL is a document relative URL that doesn't inherently tell the browser where to go
  */
-function isBareRelativeUrl(url: string): boolean {
+function isDocumentRelativeUrl(url: string): boolean {
   if (!url) return false;
   if (url.startsWith('/') || url.startsWith('#') || url.startsWith('?')) return false;
   // Return false if the url starts with a protocol/scheme. Catches http:, https:, mailto:, etc.
@@ -35,7 +35,7 @@ function isBareRelativeUrl(url: string): boolean {
 }
 
 /**
- * Resolves bare relative URLs the same way a browser would natively resolve
+ * Resolves document relative URLs the same way a browser would natively resolve
  * a bare relatve link such as <a href="discover"> against the current page URL.
  */
 function resolveAgainstCurrentUrl(url: string): string {
@@ -44,13 +44,13 @@ function resolveAgainstCurrentUrl(url: string): string {
 }
 
 /**
- * This parsing plugin resolves bare relative links and gives them a full URL. The default EUI link validation plugin
- * strips bare relative links, so we want to run this plugin before that happens.
+ * This parsing plugin resolves document relative links and gives them a full URL. The default EUI link validation plugin
+ * strips document relative links, so we want to run this plugin before that happens.
  */
 export function resolveRelativeLinksPlugin() {
   return () => {
     const visitor = (node: Node) => {
-      if (isLink(node) && isBareRelativeUrl(node.url)) {
+      if (isLink(node) && isDocumentRelativeUrl(node.url)) {
         node.url = resolveAgainstCurrentUrl(node.url);
       }
       if (isParent(node)) {
