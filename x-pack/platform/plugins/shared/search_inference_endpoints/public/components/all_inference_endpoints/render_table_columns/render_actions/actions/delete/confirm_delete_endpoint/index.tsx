@@ -115,7 +115,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
             </EuiButtonEmpty>
           ) : listOfUsages.length === 0 ? (
             <RenderMessageWithIcon
-              icon="checkInCircleFilled"
+              icon="checkCircleFill"
               color="success"
               label={i18n.NO_USAGE_FOUND_LABEL}
             />

@@ -81,7 +81,7 @@ export const CopyInput: React.FC<CopyInputProps> = ({
                   copy();
                   onCopySuccess?.();
                 }}
-                iconType="copyClipboard"
+                iconType="copy"
                 size="m"
                 color={'text'}
                 aria-describedby={hasScreenReaderHint ? screenReaderHintId : undefined}

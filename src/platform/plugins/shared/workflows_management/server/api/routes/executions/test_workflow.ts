@@ -16,7 +16,8 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerTestWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/test',
@@ -84,8 +85,18 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
             request,
           });
 
+          audit.logWorkflowTest(request, {
+            workflowExecutionId,
+            workflowId,
+          });
+
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          audit.logWorkflowTest(request, {
+            workflowExecutionId: '',
+            workflowId: request.body.workflowId,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })
