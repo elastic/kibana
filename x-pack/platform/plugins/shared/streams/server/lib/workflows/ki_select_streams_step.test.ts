@@ -13,12 +13,6 @@ jest.mock('../../routes/utils/resolve_connector_id', () => ({
   resolveConnectorId: jest.fn().mockResolvedValue('connector-1'),
 }));
 
-jest.mock('../tasks/is_stale', () => ({
-  isStale: jest.fn().mockReturnValue(false),
-}));
-
-const { isStale } = jest.requireMock('../tasks/is_stale') as { isStale: jest.Mock };
-
 type TaskForTest = PersistedTask<FeaturesIdentificationTaskParams>;
 
 const makeTask = (
@@ -90,7 +84,6 @@ describe('kiSelectStreamsStep handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    isStale.mockReturnValue(false);
     mockGetScopedClients.mockResolvedValue({
       streamsClient: mockStreamsClient,
       taskClient: mockTaskClient,
@@ -180,8 +173,7 @@ describe('kiSelectStreamsStep handler', () => {
     expect(output.scheduled).toEqual([]);
   });
 
-  it('skips stale in-progress tasks (task manager handles them)', async () => {
-    isStale.mockReturnValue(true);
+  it('counts stale in-progress tasks as already running', async () => {
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('stale-stream')]);
     mockTaskClient.findByType.mockResolvedValue([
       makeTask('stale-stream', {
@@ -192,9 +184,8 @@ describe('kiSelectStreamsStep handler', () => {
 
     const { output } = await handler(makeContext());
 
-    expect(output.alreadyRunning).toEqual([]);
+    expect(output.alreadyRunning).toHaveLength(1);
     expect(output.scheduled).toEqual([]);
-    expect(output.upToDate).toEqual([]);
   });
 
   it('marks recently completed tasks as up-to-date', async () => {

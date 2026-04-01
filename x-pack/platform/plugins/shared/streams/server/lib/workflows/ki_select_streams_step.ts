@@ -20,7 +20,7 @@ import {
 import type { PersistedTask } from '../tasks/types';
 import type { TaskClient } from '../tasks/task_client';
 import type { StreamsTaskType } from '../tasks/task_definitions';
-import { isStale } from '../tasks/is_stale';
+
 import { resolveConnectorId } from '../../routes/utils/resolve_connector_id';
 import {
   KI_SELECT_STREAMS_STEP_TYPE,
@@ -92,9 +92,6 @@ const classifyStreams = ({
     streamsWithTask.add(streamName);
 
     if (task.status === TaskStatus.InProgress || task.status === TaskStatus.BeingCanceled) {
-      if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
-        continue;
-      }
       alreadyRunning.push({ streamName, scheduledAt: task.created_at || null });
     } else {
       const lastActivityAt =
