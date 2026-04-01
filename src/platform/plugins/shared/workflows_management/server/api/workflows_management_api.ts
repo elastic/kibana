@@ -22,6 +22,7 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionEventDispatchMetadata,
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowYaml,
@@ -61,6 +62,11 @@ export interface DeleteWorkflowsResponse {
     id: string;
     error: string;
   }>;
+  /**
+   * Workflow ids successfully soft-deleted in Elasticsearch. Used server-side for audit logging;
+   * bulk delete route omits this field from the HTTP JSON body so the public API shape is unchanged.
+   */
+  successfulIds?: string[];
 }
 
 export interface GetWorkflowExecutionLogsParams {
@@ -219,9 +225,10 @@ export class WorkflowsManagementApi {
   public async deleteWorkflows(
     workflowIds: string[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
-    return this.workflowsService.deleteWorkflows(workflowIds, spaceId);
+    return this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
   }
 
   public async runWorkflow(
@@ -256,15 +263,19 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>,
     request: KibanaRequest,
-    triggeredBy: string
+    triggeredBy: string,
+    metadata?: WorkflowExecutionEventDispatchMetadata
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
-    const context = {
+    const context: Record<string, unknown> = {
       event,
       spaceId,
       inputs: manualInputs,
       triggeredBy,
     };
+    if (metadata) {
+      context.metadata = metadata;
+    }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const scheduleResponse = await workflowsExecutionEngine.scheduleWorkflow(
       workflow,
@@ -335,6 +346,7 @@ export class WorkflowsManagementApi {
     workflowYaml: string,
     stepId: string,
     workflowId: string | undefined,
+    executionContext: Record<string, unknown> | undefined,
     contextOverride: Record<string, any>,
     spaceId: string,
     request: KibanaRequest
@@ -360,6 +372,7 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
+      executionContext,
       contextOverride,
       request
     );

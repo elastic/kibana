@@ -19,6 +19,7 @@ export const forkStreamsRoute = createServerRoute({
     description: 'Forks a wired stream and creates a child stream',
     summary: 'Fork a stream',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -64,6 +65,7 @@ export const resyncStreamsRoute = createServerRoute({
     description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date',
     summary: 'Resync streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -122,7 +124,11 @@ export const getClassicStreamsStatusRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+
+    if (!isSecurityEnabled) {
+      return { can_manage: true };
+    }
 
     const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
 

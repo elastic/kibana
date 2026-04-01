@@ -18,6 +18,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
 import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
+import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -155,6 +156,13 @@ export class AssetManagerClient {
           frequency: historySnapshot.frequency,
         }),
 
+        scheduleStatusReportTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
         installEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
@@ -231,7 +239,14 @@ export class AssetManagerClient {
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
         this.logger.debug(`Deleting global state because last engine was uninstalled`);
-        await this.globalStateClient.delete();
+        await Promise.all([
+          this.globalStateClient.delete(),
+          stopStatusReportTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+        ]);
       }
 
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
@@ -340,16 +355,9 @@ export class AssetManagerClient {
       }
 
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      await Promise.all([
-        this.engineDescriptorClient.init(type),
-        // Install all shared assets (component templates for ALL types, index templates, pipeline)
-        // before creating indices, to ensure complete mappings.
-        installSharedElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger,
-          namespace: this.namespace,
-        }),
-      ]);
+      // Those 3 operations have to happen in order: 1. Init engine; 2. Install
+      // Indices & Data Streams; 3. Update engine.
+      await this.engineDescriptorClient.init(type);
       await installIndicesAndDataStreams(this.esClient, this.namespace, this.logger);
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
       this.logger.debug(`Installed definition: ${type}`);

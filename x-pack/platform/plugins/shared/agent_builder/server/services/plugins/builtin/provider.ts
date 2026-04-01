@@ -11,7 +11,6 @@ import type { BuiltinPluginRegistry } from './registry';
 import type { ReadonlyPluginProvider } from '../plugin_provider';
 
 const emptyUnmanagedAssets: UnmanagedPluginAssets = {
-  commands: [],
   agents: [],
   hooks: [],
   mcp_servers: [],
