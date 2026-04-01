@@ -139,16 +139,6 @@ export const useTopNavLinks = ({
       items.push(createRuleV2);
     }
 
-    if (showCreateRuleV2) {
-      const createRuleV2 = getCreateRuleMenuItem({
-        discoverParams,
-        services,
-        tabId: currentTab.id,
-        getState,
-      });
-      items.push(createRuleV2);
-    }
-
     if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,

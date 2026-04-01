@@ -9819,10 +9819,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/yaml-rule-editor@link:x-pack/platform/packages/shared/response-ops/yaml-rule-editor":
-  version "0.0.0"
-  uid ""
-
 "@kbn/yaml-loader@link:src/platform/packages/shared/kbn-yaml-loader":
   version "0.0.0"
   uid ""

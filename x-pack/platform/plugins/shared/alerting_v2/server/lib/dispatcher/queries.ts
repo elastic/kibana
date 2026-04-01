@@ -22,7 +22,7 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
 
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _index
       | WHERE (_index LIKE ${ALERT_ACTIONS_BACKING_INDEX}) OR (_index LIKE ${ALERT_EVENTS_BACKING_INDEX} and type == ${alertEventType})
-      | EVAL
+      | EVAL 
           rule_id = COALESCE(rule.id, rule_id),
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status
@@ -85,7 +85,7 @@ export const getLastNotifiedTimestampsQuery = (
   const values = notificationGroupIds.map((id) => esql.str(id));
   const whereClause = esql.exp`action_type == "notified" AND notification_group_id IN (${values})`;
 
-  return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+  return esql`FROM ${ALERT_ACTIONS_DATA_STREAM} 
     | WHERE ${whereClause}
     | STATS last_notified = MAX(@timestamp) BY notification_group_id
     | KEEP notification_group_id, last_notified
