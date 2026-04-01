@@ -78,6 +78,7 @@ describe('searchEmbeddableTransforms', () => {
           sort: [['@timestamp', 'desc']],
           grid: { columns: { '@timestamp': { width: 200 } } },
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
           kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
@@ -95,6 +96,7 @@ describe('searchEmbeddableTransforms', () => {
                 sort: [['@timestamp', 'desc']],
                 grid: { columns: { '@timestamp': { width: 200 } } },
                 hideChart: false,
+                hideTable: false,
                 isTextBasedQuery: false,
                 kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({
@@ -242,6 +244,7 @@ describe('searchEmbeddableTransforms', () => {
               rows_per_page: 100,
               sample_size: 1000,
               data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+
             },
           ],
         };

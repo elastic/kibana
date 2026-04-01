@@ -52,6 +52,7 @@ describe('Serialization utils', () => {
     columns: ['_source'],
     grid: {},
     hideChart: false,
+    hideTable: false,
     sampleSize: 100,
     isTextBasedQuery: false,
     tabs: [
@@ -66,6 +67,7 @@ describe('Serialization utils', () => {
           columns: ['_source'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           sampleSize: 100,
           isTextBasedQuery: false,
         },

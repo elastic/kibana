@@ -86,6 +86,7 @@ describe('saved search embeddable', () => {
       columns: [],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
