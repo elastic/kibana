@@ -18,7 +18,7 @@ import type { SupportedHostOsType } from '../../../../common/endpoint/constants'
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointScriptListApiResponse } from '../../../../common/endpoint/types';
 
-export type AugmentedListScriptsRequestQuery = Exclude<ListScriptsRequestQuery, 'kuery'> & {
+export type AugmentedListScriptsRequestQuery = ListScriptsRequestQuery & {
   os?: SupportedHostOsType[];
   fileType?: ScriptLibraryAllowedFileType[];
   category?: ScriptTagKey[];
@@ -69,7 +69,8 @@ export const useGetEndpointScriptsList = (
       const fileTypeFiltersKQl = buildDisjunctionKql('fileType', query.fileType ?? []);
       const categoryFiltersKQl = buildDisjunctionKql('tags', query.category ?? []);
       const searchTermKQl = buildSearchTermKql(query.searchTerms ?? []);
-      const kuery = buildConjunctionKql([
+      // not using the query.kuery yet, but when we do we will need to add it to the augmentedKQL as well, and decide how it should interact with the new existing filters (probably just `${augmentedKQL} AND ${query.kuery}`)
+      const augmentedKQL = buildConjunctionKql([
         osFiltersKQl,
         fileTypeFiltersKQl,
         categoryFiltersKQl,
@@ -83,7 +84,7 @@ export const useGetEndpointScriptsList = (
           pageSize: query?.pageSize ?? 10,
           sortField: query?.sortField,
           sortDirection: query?.sortDirection,
-          kuery: kuery.length > 0 ? kuery : undefined, // Pass the constructed KQL query to the API
+          kuery: augmentedKQL.length > 0 ? augmentedKQL : undefined,
         },
       });
     },
