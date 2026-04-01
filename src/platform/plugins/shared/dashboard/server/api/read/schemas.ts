@@ -8,20 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { asCodeMetaSchema, asCodeResolveSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import {
-  baseMetaSchema,
-  createdMetaSchema,
-  resolveMetaSchema,
-  updatedMetaSchema,
-} from '../meta_schemas';
 import { warningsSchema } from '../warnings_schema';
 
 export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
+    meta: asCodeMetaSchema,
+    resolve: asCodeResolveSchema,
     warnings: schema.maybe(warningsSchema),
   });
 }

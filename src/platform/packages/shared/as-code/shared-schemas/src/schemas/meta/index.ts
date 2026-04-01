@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
-
-export const createRequestBodySchema = markdownAttributesSchema;
-
-export const createResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: markdownAttributesSchema,
-  meta: asCodeMetaSchema,
-});
+export { getMeta } from './get_meta';
+export { asCodeMetaSchema } from './schema';

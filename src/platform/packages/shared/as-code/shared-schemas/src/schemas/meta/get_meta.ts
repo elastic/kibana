@@ -7,29 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { MarkdownAttributes } from './markdown_saved_object';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { AsCodeMeta } from './schema';
 
-export function getMarkdownMeta(
-  savedObject: SavedObject<MarkdownAttributes> | SavedObjectsUpdateResponse<MarkdownAttributes>
-) {
+export function getMeta(savedObject: SavedObject): AsCodeMeta {
   return {
-    error: savedObject.error,
     ...(savedObject.created_at && { created_at: savedObject.created_at }),
     ...(savedObject.created_by && { created_by: savedObject.created_by }),
+    managed: savedObject.managed,
+    owner: savedObject.accessControl?.owner,
     updated_at: savedObject.updated_at,
     updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
-  };
-}
-
-// CRU is Create, Read, Update
-export function getMarkdownCRUResponseBody(
-  savedObject: SavedObject<MarkdownAttributes> | SavedObjectsUpdateResponse<MarkdownAttributes>
-) {
-  return {
-    id: savedObject.id,
-    data: savedObject.attributes as MarkdownAttributes,
-    meta: getMarkdownMeta(savedObject),
   };
 }

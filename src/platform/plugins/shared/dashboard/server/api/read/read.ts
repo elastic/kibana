@@ -10,7 +10,7 @@
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { getDashboardCRUResponseBody } from '../saved_object_utils';
+import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { DashboardReadResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
@@ -41,8 +41,7 @@ export async function read(
   );
   return {
     ...response,
-    meta: {
-      ...response.meta,
+    resolve: {
       alias_target_id,
       alias_purpose,
       outcome,

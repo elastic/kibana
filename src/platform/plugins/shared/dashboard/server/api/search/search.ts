@@ -9,11 +9,11 @@
 
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
 import { transformDashboardOut } from '../transforms';
-import { getDashboardMeta } from '../saved_object_utils';
 
 export async function search(
   requestCtx: RequestHandlerContext,
@@ -65,7 +65,7 @@ export async function search(
           }),
           title: title ?? '',
         },
-        meta: getDashboardMeta(so),
+        meta: getMeta(so),
       };
     }),
     page: soResponse.page,
