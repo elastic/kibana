@@ -265,3 +265,10 @@ export type { StreamsOasDefinitions } from './src/oas_definitions';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
+
+export {
+  STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+} from './src/inference_feature_ids';
