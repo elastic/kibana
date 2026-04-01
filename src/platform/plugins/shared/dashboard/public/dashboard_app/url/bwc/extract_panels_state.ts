@@ -41,11 +41,10 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   panels?: DashboardState['panels'];
   savedObjectReferences?: Reference[];
 } {
-  const panels = Array.isArray(state.panels) ? state.panels : [];
-
-  if (panels.length === 0) {
+  if (!state.panels) {
     return {};
   }
+  const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());

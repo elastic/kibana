@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useFormContext, type FieldErrors } from 'react-hook-form';
-import type { FormValues } from '../form/types';
+import type { FormValues } from './types';
 
 /**
  * Recursively extracts all error messages from a nested FieldErrors object.
@@ -36,10 +36,17 @@ const extractErrorMessages = (errors: FieldErrors): string[] => {
 
 export const ErrorCallOut = () => {
   const {
-    formState: { errors, isSubmitted },
+    formState: { errors, isSubmitted, submitCount },
   } = useFormContext<FormValues>();
+  const calloutRef = useRef<HTMLDivElement>(null);
 
   const shouldShowCallout = isSubmitted && Object.keys(errors).length > 0;
+
+  useEffect(() => {
+    if (shouldShowCallout && calloutRef.current) {
+      calloutRef.current.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [shouldShowCallout, submitCount]);
 
   if (!shouldShowCallout) {
     return null;
@@ -47,19 +54,21 @@ export const ErrorCallOut = () => {
 
   return (
     <>
-      <EuiCallOut
-        announceOnMount={true}
-        title={i18n.translate('xpack.alertingV2.ruleForm.formErrorsTitle', {
-          defaultMessage: 'Please address the highlighted errors.',
-        })}
-        color="danger"
-      >
-        <ul>
-          {extractErrorMessages(errors).map((error) => (
-            <li key={error}>{error}</li>
-          ))}
-        </ul>
-      </EuiCallOut>
+      <div ref={calloutRef}>
+        <EuiCallOut
+          announceOnMount={true}
+          title={i18n.translate('xpack.alertingV2.ruleForm.formErrorsTitle', {
+            defaultMessage: 'Please address the highlighted errors.',
+          })}
+          color="danger"
+        >
+          <ul>
+            {extractErrorMessages(errors).map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        </EuiCallOut>
+      </div>
       <EuiSpacer size="m" />
     </>
   );
