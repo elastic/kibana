@@ -96,10 +96,6 @@ export interface DocumentFlyoutWrapperProps {
    */
   indexName: string | undefined;
   /**
-   * Security scope used for alert actions.
-   */
-  scopeId: string;
-  /**
    * A function that renders cell actions for the overview tab.
    */
   renderCellActions: CellActionRenderer;
@@ -115,13 +111,7 @@ export interface DocumentFlyoutWrapperProps {
  * It is currently used in Analyzer when opening a document from the detail panel.
  */
 export const DocumentFlyoutWrapper = memo(
-  ({
-    documentId,
-    indexName,
-    scopeId,
-    renderCellActions,
-    onAlertUpdated,
-  }: DocumentFlyoutWrapperProps) => {
+  ({ documentId, indexName, renderCellActions, onAlertUpdated }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
@@ -169,7 +159,6 @@ export const DocumentFlyoutWrapper = memo(
       return (
         <DocumentFlyout
           hit={hit}
-          scopeId={scopeId}
           renderCellActions={renderCellActions}
           onAlertUpdated={handleAlertUpdated}
         />

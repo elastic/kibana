@@ -16,7 +16,6 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { createStore } from 'redux';
 import { AlertFlyoutHeader } from '.';
-import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 import type { StartServices } from '../../types';
 
 const mockDocumentHeader = jest.fn((_props: unknown) => <div>{'MockDocumentHeader'}</div>);
@@ -150,7 +149,6 @@ describe('AlertFlyoutHeader', () => {
     expect(mockDocumentHeader).toHaveBeenCalledWith(
       expect.objectContaining({
         hit,
-        scopeId: ONE_DISCOVER_SCOPE_ID,
         onAlertUpdated: expect.any(Function),
       })
     );

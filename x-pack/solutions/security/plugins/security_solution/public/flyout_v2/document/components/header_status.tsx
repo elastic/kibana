@@ -32,10 +32,6 @@ interface HeaderStatusProps {
    */
   hit: DataTableRecord;
   /**
-   * Scope identifier used by cell actions and status updates
-   */
-  scopeId: string;
-  /**
    * Optional cell action renderer for the status value
    */
   renderCellActions?: CellActionRenderer;
@@ -45,13 +41,12 @@ interface HeaderStatusProps {
   onAlertUpdated?: () => void;
 }
 
+/**
+ * Renders the alert status control in the document flyout header.
+ * Supports inline status updates and optional cell actions for the status value.
+ */
 export const HeaderStatus = memo(
-  ({
-    hit,
-    scopeId,
-    renderCellActions = noopCellActionRenderer,
-    onAlertUpdated,
-  }: HeaderStatusProps) => {
+  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }: HeaderStatusProps) => {
     const eventId = hit.raw._id ?? hit.id;
     const statusFieldInfo = useMemo<StatusPopoverButtonFieldInfo | null>(() => {
       const workflowStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
@@ -85,13 +80,13 @@ export const HeaderStatus = memo(
           : renderCellActions({
               field: ALERT_WORKFLOW_STATUS,
               value: statusFieldInfo.values[0],
-              scopeId,
+              scopeId: '',
               children: (
                 <StatusPopoverButton
                   eventId={eventId}
-                  contextId={scopeId}
+                  contextId=""
                   enrichedFieldInfo={statusFieldInfo}
-                  scopeId={scopeId}
+                  scopeId=""
                   onStatusUpdated={onAlertUpdated}
                 />
               ),

@@ -108,12 +108,11 @@ export const AlertHeaderTitle = memo(() => {
       ) : (
         <HeaderStatus
           hit={hit}
-          scopeId={scopeId}
           renderCellActions={renderStatusCellActions}
           onAlertUpdated={onStatusUpdated}
         />
       ),
-    [hit, isRulePreview, onStatusUpdated, renderStatusCellActions, scopeId]
+    [hit, isRulePreview, onStatusUpdated, renderStatusCellActions]
   );
 
   const assignees = useMemo(

@@ -34,10 +34,6 @@ export interface HeaderProps {
    */
   hit: DataTableRecord;
   /**
-   * Security scope used for alert actions.
-   */
-  scopeId: string;
-  /**
    * Optional cell action renderer for status interactions.
    */
   renderCellActions?: CellActionRenderer;
@@ -53,7 +49,7 @@ export interface HeaderProps {
  * and alert-only summary blocks (status and risk score).
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ hit, scopeId, renderCellActions = noopCellActionRenderer, onAlertUpdated }) => {
+  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }) => {
     const { services } = useKibana();
     const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
     const ruleId = useMemo(
@@ -91,7 +87,6 @@ export const Header: FC<HeaderProps> = memo(
               <EuiFlexItem>
                 <HeaderStatus
                   hit={hit}
-                  scopeId={scopeId}
                   renderCellActions={renderCellActions}
                   onAlertUpdated={onAlertUpdated}
                 />

@@ -49,8 +49,8 @@ jest.mock('./components/risk_score', () => ({
 }));
 
 jest.mock('./components/header_status', () => ({
-  HeaderStatus: ({ hit, scopeId }: { hit: DataTableRecord; scopeId: string }) => (
-    <div data-test-subj="mockHeaderStatus" data-hit-id={hit.id} data-scope-id={scopeId} />
+  HeaderStatus: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mockHeaderStatus" data-hit-id={hit.id} />
   ),
 }));
 
@@ -114,13 +114,13 @@ const renderHeader = (props: Parameters<typeof Header>[0]) =>
 
 describe('<DocumentHeader />', () => {
   it('should pass the hit to the severity component', () => {
-    const { getByTestId } = renderHeader({ hit: alertHit, scopeId: 'test-scope' });
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId('mockDocumentSeverity')).toHaveAttribute('data-hit-id', '1');
   });
 
   it('should render the inline timestamp when present', () => {
-    const { getByTestId } = renderHeader({ hit: alertHit, scopeId: 'test-scope' });
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId('mockPreferenceFormattedDate')).toHaveTextContent(
       '2023-01-01T00:00:00.000Z'
@@ -128,14 +128,14 @@ describe('<DocumentHeader />', () => {
   });
 
   it('should pass the hit to the header title', () => {
-    const { getByTestId } = renderHeader({ hit: alertHit, scopeId: 'test-scope' });
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-hit-id', '1');
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-event-kind', 'signal');
   });
 
   it('should resolve and pass titleHref for alerts with a rule id', () => {
-    const { getByTestId } = renderHeader({ hit: alertHit, scopeId: 'test-scope' });
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute(
       'data-title-href',
@@ -144,13 +144,13 @@ describe('<DocumentHeader />', () => {
   });
 
   it('should not pass titleHref when there is no rule id', () => {
-    const { getByTestId } = renderHeader({ hit: eventHit, scopeId: 'test-scope' });
+    const { getByTestId } = renderHeader({ hit: eventHit });
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-title-href', '');
   });
 
   it('should render the risk score block for alerts with a risk score', () => {
-    const { getByTestId } = renderHeader({ hit: alertHit, scopeId: 'test-scope' });
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
@@ -159,10 +159,7 @@ describe('<DocumentHeader />', () => {
   });
 
   it('should render the summary blocks for alerts without a risk score', () => {
-    const { getByTestId } = renderHeader({
-      hit: alertHitNoRiskScore,
-      scopeId: 'test-scope',
-    });
+    const { getByTestId } = renderHeader({ hit: alertHitNoRiskScore });
 
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
@@ -170,14 +167,14 @@ describe('<DocumentHeader />', () => {
     expect(getByTestId('mockRiskScore')).toBeInTheDocument();
   });
 
-  it('should pass the scope id through to the status block', () => {
-    const { getByTestId } = renderHeader({ hit: alertHit, scopeId: 'alerts-page' });
+  it('should render the status block for alerts', () => {
+    const { getByTestId } = renderHeader({ hit: alertHit });
 
-    expect(getByTestId('mockHeaderStatus')).toHaveAttribute('data-scope-id', 'alerts-page');
+    expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
   });
 
   it('should not render the summary block for non-alert documents', () => {
-    const { queryByTestId } = renderHeader({ hit: eventHit, scopeId: 'test-scope' });
+    const { queryByTestId } = renderHeader({ hit: eventHit });
 
     expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
   });

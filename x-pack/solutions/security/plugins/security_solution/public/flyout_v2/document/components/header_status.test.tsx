@@ -47,7 +47,7 @@ const alertHit = createMockHit({
 const renderComponent = (props: Partial<Parameters<typeof HeaderStatus>[0]> = {}) =>
   render(
     <IntlProvider locale="en">
-      <HeaderStatus hit={alertHit} scopeId="alerts-page" {...props} />
+      <HeaderStatus hit={alertHit} {...props} />
     </IntlProvider>
   );
 
@@ -57,10 +57,7 @@ describe('<HeaderStatus />', () => {
 
     expect(getByTestId(STATUS_TITLE_TEST_ID)).toHaveTextContent('Status');
     expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-event-id', 'es-alert-1');
-    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute(
-      'data-context-id',
-      'alerts-page'
-    );
+    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-context-id', '');
   });
 
   it('wraps the status button with the provided cell action renderer', () => {
@@ -83,7 +80,7 @@ describe('<HeaderStatus />', () => {
       'kibana.alert.workflow_status'
     );
     expect(getByTestId('wrappedCellActions')).toHaveAttribute('data-value', 'open');
-    expect(getByTestId('wrappedCellActions')).toHaveAttribute('data-scope-id', 'alerts-page');
+    expect(getByTestId('wrappedCellActions')).toHaveAttribute('data-scope-id', '');
   });
 
   it('calls the alert update callback after a status change', () => {

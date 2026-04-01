@@ -14,7 +14,6 @@ import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
 export interface AlertFlyoutHeaderProps extends Pick<DocViewRenderProps, 'hit' | 'dataView'> {
   /**
@@ -112,7 +111,6 @@ export const AlertFlyoutHeader = ({
     children: (
       <Header
         hit={headerHit}
-        scopeId={ONE_DISCOVER_SCOPE_ID}
         renderCellActions={noopCellActionRenderer}
         onAlertUpdated={handleAlertUpdated}
       />

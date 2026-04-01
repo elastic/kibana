@@ -18,10 +18,6 @@ export interface DocumentFlyoutProps {
    */
   hit: DataTableRecord;
   /**
-   * Security scope used for alert actions.
-   */
-  scopeId: string;
-  /**
    * Cell action renderer for the analyzer
    */
   renderCellActions: CellActionRenderer;
@@ -36,15 +32,10 @@ export interface DocumentFlyoutProps {
  * Alert privilege checks are handled by DocumentFlyoutWrapper before this renders.
  */
 export const DocumentFlyout = memo(
-  ({ hit, scopeId, renderCellActions, onAlertUpdated }: DocumentFlyoutProps) => (
+  ({ hit, renderCellActions, onAlertUpdated }: DocumentFlyoutProps) => (
     <>
       <EuiFlyoutHeader>
-        <Header
-          hit={hit}
-          scopeId={scopeId}
-          renderCellActions={renderCellActions}
-          onAlertUpdated={onAlertUpdated}
-        />
+        <Header hit={hit} renderCellActions={renderCellActions} onAlertUpdated={onAlertUpdated} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <OverviewTab hit={hit} renderCellActions={renderCellActions} />

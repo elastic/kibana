@@ -193,8 +193,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 <DocumentFlyoutWrapper
                   documentId={eventData._id}
                   indexName={eventData.ecs._index}
-                  scopeId={timelineId}
-                  dataView={dataView}
                   renderCellActions={cellActionRenderer}
                   onAlertUpdated={refetch}
                 />
@@ -242,7 +240,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         store,
         history,
         timelineId,
-        dataView,
         refetch,
         openFlyout,
         telemetry,

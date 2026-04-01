@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
@@ -46,7 +45,6 @@ const renderDocumentFlyoutWrapper = (
       <DocumentFlyoutWrapper
         documentId="doc-id"
         indexName="my-index"
-        scopeId="alerts-page"
         renderCellActions={jest.fn()}
         {...props}
       />
@@ -72,22 +70,6 @@ describe('DocumentFlyoutWrapper', () => {
       id: 'doc-id',
       index: 'my-index',
       dataView: mockDataView,
-      skip: false,
-    });
-  });
-
-  it('uses the provided data view instead of the default scoped one', () => {
-    const providedDataView = {
-      hasMatchedIndices: () => true,
-      getIndexPattern: () => 'timeline-*',
-    } as DataView;
-
-    renderDocumentFlyoutWrapper({ dataView: providedDataView });
-
-    expect(useEsDocSearch).toHaveBeenCalledWith({
-      id: 'doc-id',
-      index: 'my-index',
-      dataView: providedDataView,
       skip: false,
     });
   });

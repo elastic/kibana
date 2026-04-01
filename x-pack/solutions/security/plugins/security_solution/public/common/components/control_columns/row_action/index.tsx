@@ -123,7 +123,6 @@ const RowActionComponent = ({
             <DocumentFlyoutWrapper
               documentId={eventId}
               indexName={indexName ?? undefined}
-              scopeId={tableId}
               renderCellActions={cellActionRenderer}
               onAlertUpdated={refetch}
             />
