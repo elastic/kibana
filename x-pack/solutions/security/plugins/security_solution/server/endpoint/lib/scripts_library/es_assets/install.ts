@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ScriptsFileDataIndexTemplate, ScriptsFileMetadataIndexTemplate } from './index_template';
+import { SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME } from '../constants';
 import { catchAndWrapError } from '../../../utils';
 
 interface InstallScriptsLibraryIndexTemplatesOptions {
@@ -25,4 +26,9 @@ export const installScriptsLibraryIndexTemplates = async ({
     .catch(catchAndWrapError);
 
   await esClient.indices.putIndexTemplate(ScriptsFileDataIndexTemplate).catch(catchAndWrapError);
+
+  // ensure template mappings are used by precreating data index
+  await esClient.indices
+    .create({ index: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME })
+    .catch(catchAndWrapError);
 };
