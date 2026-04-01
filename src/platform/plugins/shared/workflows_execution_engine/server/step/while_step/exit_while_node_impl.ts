@@ -23,7 +23,7 @@ export class ExitWhileNodeImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public run(): void {
+  public async run(): Promise<void> {
     const whileState = this.stepExecutionRuntime.getCurrentStepState() as
       | WhileStepState
       | undefined;
@@ -45,13 +45,14 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       };
 
       const renderedCondition =
-        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+        await this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
           this.node.condition,
           whileAdditionalContext
         );
+      const baseContext = await this.stepExecutionRuntime.contextManager.getContextAsync();
       const conditionResult = evaluateCondition(
         renderedCondition,
-        { ...this.stepExecutionRuntime.contextManager.getContext(), ...whileAdditionalContext },
+        { ...baseContext, ...whileAdditionalContext },
         this.node.stepId
       );
       if (conditionResult) {

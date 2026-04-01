@@ -68,12 +68,12 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     );
   }
 
-  private getInput(): { workflowId: string; inputs: Record<string, unknown> } {
+  private async getInput(): Promise<{ workflowId: string; inputs: Record<string, unknown> }> {
     const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
     const renderedWith =
-      this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+      (await this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
         step.with || {}
-      ) as Record<string, unknown>;
+      )) as Record<string, unknown>;
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
@@ -117,7 +117,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     // First iteration only: start step and run validation
     stepExecutionRuntime.startStep();
 
-    const { workflowId, inputs } = this.getInput();
+    const { workflowId, inputs } = await this.getInput();
 
     // Persist resolved inputs for observability in the execution UI
     stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });

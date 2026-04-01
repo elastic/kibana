@@ -31,7 +31,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
         const ctx = this.stepExecutionRuntime.contextManager;
         this.stepExecutionRuntime.setInput({
           ...(withConfig.message !== undefined && {
-            message: ctx.renderValueAccordingToContext(withConfig.message),
+            message: await ctx.renderValueAccordingToContextAsync(withConfig.message),
           }),
           ...(withConfig.schema !== undefined && { schema: withConfig.schema }),
         });

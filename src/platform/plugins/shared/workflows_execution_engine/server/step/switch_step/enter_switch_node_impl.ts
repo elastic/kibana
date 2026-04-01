@@ -25,9 +25,9 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
   public async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
     const successors = this.getValidatedSuccessors();
-    const renderedExpression = this.evaluateExpression();
+    const renderedExpression = await this.evaluateExpression();
     const caseBranches = this.getCaseBranches(successors);
-    const matchingCase = this.findMatchingCase(caseBranches, renderedExpression);
+    const matchingCase = await this.findMatchingCase(caseBranches, renderedExpression);
 
     if (matchingCase) {
       this.workflowContextLogger.logDebug(
@@ -67,10 +67,12 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
     return successors;
   }
 
-  private evaluateExpression(): string {
+  private async evaluateExpression(): Promise<string> {
     const { expression } = this.node.configuration;
     const renderedExpression =
-      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
+      await this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
+        expression
+      );
     this.stepExecutionRuntime.setInput({
       rawExpression: expression,
       expression: renderedExpression,
@@ -86,17 +88,22 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
       .sort((a, b) => a.index - b.index);
   }
 
-  private findMatchingCase(
+  private async findMatchingCase(
     caseBranches: EnterCaseBranchNode[],
     renderedExpression: string
-  ): EnterCaseBranchNode | undefined {
-    return caseBranches.find((c) => {
+  ): Promise<EnterCaseBranchNode | undefined> {
+    for (const c of caseBranches) {
       const renderedMatch =
         typeof c.match === 'string'
-          ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(c.match)
+          ? await this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
+              c.match
+            )
           : c.match;
-      return String(renderedMatch) === String(renderedExpression);
-    });
+      if (String(renderedMatch) === String(renderedExpression)) {
+        return c;
+      }
+    }
+    return undefined;
   }
 
   private getDefaultBranch(

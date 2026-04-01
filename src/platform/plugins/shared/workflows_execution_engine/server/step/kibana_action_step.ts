@@ -48,9 +48,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     super(step, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
-  public getInput() {
+  public async getInput(): Promise<Record<string, unknown>> {
     const stepWith = this.node.configuration?.with || {};
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -163,7 +163,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     debug: boolean = false
   ): Promise<any> {
     // Get current space ID from workflow context
-    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
+    const spaceId = (await this.stepExecutionRuntime.contextManager.getContextAsync()).workflow
+      .spaceId;
 
     // Extract and remove fetcher configuration from params (it's only for our internal use)
     const { fetcher: fetcherOptions, ...cleanParams } = params;

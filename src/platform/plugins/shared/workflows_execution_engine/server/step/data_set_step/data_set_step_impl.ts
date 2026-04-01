@@ -36,9 +36,9 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
     super(dataSetStep, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
-  public override getInput(): Record<string, unknown> {
+  public override async getInput(): Promise<Record<string, unknown>> {
     const withData = this.node.configuration.with || {};
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(withData);
   }
 
   protected override async _run(input: unknown): Promise<RunStepResult> {

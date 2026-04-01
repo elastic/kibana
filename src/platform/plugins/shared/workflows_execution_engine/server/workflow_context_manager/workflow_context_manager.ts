@@ -163,6 +163,117 @@ export class WorkflowContextManager {
   }
 
   /**
+   * Async variant of {@link getContext} for the execution engine. Use when context building may await I/O (e.g. metadata cache).
+   * @example
+   * ```typescript
+   * const stepContext = await contextManager.getContextAsync();
+   * ```
+   */
+  public async getContextAsync(): Promise<StepContext> {
+    const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
+    const predecessorStepIds = new Set(allPredecessors.map((node) => node.stepId));
+    return this.getContextTempAsync(predecessorStepIds);
+  }
+
+  private async getContextTempAsync(accessedStepIds: Set<string>): Promise<StepContext> {
+    return this.getContextTemp(accessedStepIds);
+  }
+
+  /**
+   * Async variant of {@link renderValueAccordingToContext}.
+   * @example
+   * ```typescript
+   * const rendered = await contextManager.renderValueAccordingToContextAsync('{{workflow.name}}');
+   * ```
+   */
+  public async renderValueAccordingToContextAsync<T>(
+    obj: T,
+    additionalContext?: Record<string, unknown>
+  ): Promise<T> {
+    const accessedStepIds = this.getStepIdsFromRenderingContext(obj);
+    const context = await this.getContextTempAsync(accessedStepIds);
+    return this.templateEngine.render(obj, { ...context, ...additionalContext });
+  }
+
+  /**
+   * Async variant of {@link evaluateExpressionInContext}.
+   */
+  public async evaluateExpressionInContextAsync(template: string): Promise<unknown> {
+    const accessedStepIds = this.getStepIdsFromRenderingContext(template);
+    const context = await this.getContextTempAsync(accessedStepIds);
+    return this.templateEngine.evaluateExpression(template, context);
+  }
+
+  /**
+   * Async variant of {@link evaluateBooleanExpressionInContext}.
+   */
+  public async evaluateBooleanExpressionInContextAsync(
+    condition: string | boolean | undefined,
+    additionalContext?: Record<string, unknown>
+  ): Promise<boolean> {
+    const renderedCondition = await this.renderValueAccordingToContextAsync(
+      condition,
+      additionalContext
+    );
+
+    if (typeof renderedCondition === 'boolean') {
+      return renderedCondition;
+    }
+    if (typeof renderedCondition === 'undefined') {
+      return false;
+    }
+
+    if (typeof renderedCondition === 'string') {
+      try {
+        const fullContext = await this.getContextAsync();
+        return evaluateKql(renderedCondition, fullContext);
+      } catch (error) {
+        if (error instanceof KQLSyntaxError) {
+          throw new Error(
+            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
+              error
+            )}`
+          );
+        }
+        throw error;
+      }
+    }
+
+    throw new Error(
+      `Invalid condition.` +
+        `Got ${JSON.stringify(
+          condition
+        )} (type: ${typeof condition}), but expected boolean or string. ` +
+        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
+    );
+  }
+
+  /**
+   * Async variant of {@link readContextPath}.
+   */
+  public async readContextPathAsync(
+    propertyPath: string
+  ): Promise<{ pathExists: boolean; value: unknown }> {
+    const propertyPathSegments = parseJsPropertyAccess(propertyPath);
+    let result: unknown = await this.getContextAsync();
+
+    for (const segment of propertyPathSegments) {
+      if (result === null || result === undefined || typeof result !== 'object') {
+        return { pathExists: false, value: undefined };
+      }
+
+      const resultAsRecord = result as Record<string, unknown>;
+      if (!(segment in resultAsRecord)) {
+        return { pathExists: false, value: undefined };
+      }
+
+      result = resultAsRecord[segment];
+    }
+
+    return { pathExists: true, value: result };
+  }
+
+  /**
    * Recursively resolves template expressions in any value (string, object, array, or primitive).
    *
    * This method traverses the input value and replaces all template expressions (e.g., `{{workflow.id}}`,

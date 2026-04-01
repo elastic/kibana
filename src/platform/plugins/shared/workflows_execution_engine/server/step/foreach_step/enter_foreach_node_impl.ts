@@ -37,7 +37,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     this.stepExecutionRuntime.setInput({
       foreach: Array.isArray(foreachConfig) ? JSON.stringify(foreachConfig) : foreachConfig,
     });
-    const evaluatedItems = this.getItems();
+    const evaluatedItems = await this.getItems();
 
     if (evaluatedItems.length === 0) {
       this.workflowLogger.logDebug(
@@ -94,9 +94,9 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  private getItems(): unknown[] {
+  private async getItems(): Promise<unknown[]> {
     const expression = this.node.configuration.foreach;
-    let resolvedValue = this.processForeachConfiguration();
+    let resolvedValue = await this.processForeachConfiguration();
 
     if (typeof resolvedValue === 'string') {
       try {
@@ -124,7 +124,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     return resolvedValue;
   }
 
-  private processForeachConfiguration(): unknown {
+  private async processForeachConfiguration(): Promise<unknown> {
     const expression = this.node.configuration.foreach;
 
     if (!expression) {
@@ -138,9 +138,9 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     }
 
     if (isTemplateExpression(expression)) {
-      return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
+      return this.stepExecutionRuntime.contextManager.evaluateExpressionInContextAsync(expression);
     }
 
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(expression);
   }
 }

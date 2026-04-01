@@ -48,10 +48,13 @@ export class EnterIfNodeImpl implements NodeImplementation {
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
     const renderedCondition =
-      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
+      await this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
+        thenNode.condition
+      );
+    const stepContext = await this.stepExecutionRuntime.contextManager.getContextAsync();
     const evaluatedConditionResult = evaluateCondition(
       renderedCondition,
-      this.stepExecutionRuntime.contextManager.getContext(),
+      stepContext,
       this.node.stepId
     );
     this.stepExecutionRuntime.setInput({

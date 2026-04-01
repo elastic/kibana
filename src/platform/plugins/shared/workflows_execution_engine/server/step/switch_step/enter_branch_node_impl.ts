@@ -19,11 +19,13 @@ export class EnterBranchNodeImpl implements NodeImplementation {
     private stepExecutionRuntime: StepExecutionRuntime
   ) {}
 
-  public run(): void {
+  public async run(): Promise<void> {
     if (this.node.type === 'enter-case-branch') {
       const renderedMatch =
         typeof this.node.match === 'string'
-          ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(this.node.match)
+          ? await this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
+              this.node.match
+            )
           : this.node.match;
       this.wfExecutionRuntimeManager.enterScope(`case_${String(renderedMatch)}`);
     } else {

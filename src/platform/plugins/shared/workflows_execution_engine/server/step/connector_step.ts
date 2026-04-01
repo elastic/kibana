@@ -44,8 +44,8 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
     super(step, stepExecutionRuntime, connectorExecutor, workflowState);
   }
 
-  public getInput() {
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+  public async getInput(): Promise<Record<string, unknown>> {
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
       this.step.with || {}
     );
   }
@@ -101,7 +101,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       }
 
       const connectorIdRendered =
-        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+        await this.stepExecutionRuntime.contextManager.renderValueAccordingToContextAsync(
           step['connector-id']
         );
 
