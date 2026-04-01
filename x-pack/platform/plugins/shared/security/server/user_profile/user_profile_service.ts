@@ -12,6 +12,7 @@ import type {
 import pLimit from 'p-limit';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
   UserProfileBulkGetParams,
@@ -102,20 +103,6 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
       realm_domain: rawUserProfile.user.realm_domain,
     },
   };
-}
-
-function decodeApiKeyId(authorizationHeader: string | string[] | undefined): string | undefined {
-  if (typeof authorizationHeader !== 'string') {
-    return undefined;
-  }
-  const prefix = 'apikey ';
-  if (!authorizationHeader.toLowerCase().startsWith(prefix)) {
-    return undefined;
-  }
-  const encodedApiKey = authorizationHeader.slice(prefix.length);
-  const decoded = Buffer.from(encodedApiKey, 'base64').toString();
-  const [id] = decoded.split(':');
-  return id;
 }
 
 export class UserProfileService {
@@ -302,7 +289,7 @@ export class UserProfileService {
     request: UserProfileGetCurrentParams['request']
   ): Promise<string | undefined> {
     try {
-      const id = decodeApiKeyId(request.headers.authorization);
+      const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
       if (!id) {
         this.logger.debug(`Failed to decode API key ID from Authorization header.`);
         return undefined;

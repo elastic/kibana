@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -662,23 +663,7 @@ export class ActionsPlugin
       request: KibanaRequest
     ): Promise<string | undefined> => {
       try {
-        const decodeApiKeyId = (
-          authorizationHeader: string | string[] | undefined
-        ): string | undefined => {
-          if (typeof authorizationHeader !== 'string') {
-            return undefined;
-          }
-          const prefix = 'apikey ';
-          if (!authorizationHeader.toLowerCase().startsWith(prefix)) {
-            return undefined;
-          }
-          const encodedApiKey = authorizationHeader.slice(prefix.length);
-          const decoded = Buffer.from(encodedApiKey, 'base64').toString();
-          const [id] = decoded.split(':');
-          return id;
-        };
-
-        const id = decodeApiKeyId(request.headers.authorization);
+        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
         if (!id) {
           this.logger.debug(`Failed to decode API key ID from Authorization header.`);
           return undefined;
