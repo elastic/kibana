@@ -25,7 +25,7 @@
       "usageCollection",
       "fieldsMetadata"
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "serverless", "globalSearch", "spaces", "workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": ["agentBuilder", "cloud", "serverless", "globalSearch", "spaces", "searchInferenceEndpoints", "workflowsExtensions", "workflowsManagement"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }

@@ -81,6 +81,7 @@
     "@kbn/logging-mocks",
     "@kbn/core-ui-settings-server",
     "@kbn/agent-builder-plugin",
+    "@kbn/search-inference-endpoints",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/datemath",

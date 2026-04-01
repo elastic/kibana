@@ -33,17 +33,53 @@ import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
 } from '@kbn/streams-plugin/common';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import {
+  DEFAULT_INDEX_PATTERNS,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { useGenAIConnectors } from '../../../../../hooks/use_genai_connectors';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
 const NOT_SET_VALUE = '';
 
-const toFormValue = (saved: string | undefined): string => saved ?? NOT_SET_VALUE;
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+
+function toFormValue(saved: string | undefined): string {
+  return saved ?? NOT_SET_VALUE;
+}
 
 const GEN_AI_SETTINGS_PATH = '/ai/genAiSettings';
 
-export const SettingsTab = () => {
+function buildConnectorSelectOptions(connectors: { id: string; name: string }[] | undefined) {
+  return [
+    {
+      value: NOT_SET_VALUE,
+      text: i18n.translate('xpack.streams.significantEventsDiscovery.settings.useDefaultOption', {
+        defaultMessage: 'Use default (genAiSettings:defaultAIConnector)',
+      }),
+    },
+    ...(connectors ?? []).map((c) => ({ value: c.id, text: c.name })),
+  ];
+}
+
+function isSavedConnectorStale(
+  savedId: string | undefined,
+  connectors: { id: string }[] | undefined
+): boolean {
+  if (!savedId || connectors === undefined) {
+    return false;
+  }
+  return !connectors.some((c) => c.id === savedId);
+}
+
+export function SettingsTab() {
   const {
     dependencies: {
       start: { streams },
@@ -56,21 +92,37 @@ export const SettingsTab = () => {
   });
 
   const { signal: abortSignal } = useAbortController();
-  const genAiConnectors = useGenAIConnectors({
-    streamsRepositoryClient: streams.streamsRepositoryClient,
-    uiSettings: core.uiSettings,
+
+  const kiExtractionConnectors = useLoadConnectors({
+    http: core.http,
+    settings: core.settings,
+    featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+    toasts: core.notifications.toasts,
   });
 
-  const defaultConnectorFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      if (!genAiConnectors.defaultConnector) return undefined;
-      return streams.streamsRepositoryClient.fetch(
-        'GET /internal/streams/connectors/{connectorId}',
-        { signal, params: { path: { connectorId: genAiConnectors.defaultConnector } } }
-      );
-    },
-    [streams.streamsRepositoryClient, genAiConnectors.defaultConnector]
+  const kiQueryGenerationConnectors = useLoadConnectors({
+    http: core.http,
+    settings: core.settings,
+    featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+    toasts: core.notifications.toasts,
+  });
+
+  const discoveryConnectors = useLoadConnectors({
+    http: core.http,
+    settings: core.settings,
+    featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+    toasts: core.notifications.toasts,
+  });
+
+  const defaultConnectorSetting = core.uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const defaultConnectorOnly = core.uiSettings.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
   );
+  const defaultConnector =
+    defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR
+      ? defaultConnectorSetting
+      : undefined;
 
   const settingsFetch = useStreamsAppFetch(
     async ({ signal }) =>
@@ -80,8 +132,8 @@ export const SettingsTab = () => {
     [streams.streamsRepositoryClient]
   );
 
-  const [knowledgeIndicatorExtraction, setKnowledgeIndicatorExtraction] = useState<string>('');
-  const [ruleGeneration, setRuleGeneration] = useState<string>('');
+  const [kiExtraction, setKiExtraction] = useState<string>('');
+  const [kiQueryGeneration, setKiQueryGeneration] = useState<string>('');
   const [discovery, setDiscovery] = useState<string>('');
   const [indexPatterns, setIndexPatterns] = useState<string>('');
   const [continuousKiExtraction, setContinuousKiExtraction] = useState({
@@ -107,8 +159,8 @@ export const SettingsTab = () => {
   useEffect(() => {
     if (!settingsFetch.value) return;
     const v = settingsFetch.value;
-    setKnowledgeIndicatorExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
-    setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
+    setKiExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
+    setKiQueryGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
     setContinuousKiExtraction(savedCE);
@@ -118,8 +170,8 @@ export const SettingsTab = () => {
     if (!settingsFetch.value) return false;
     const v = settingsFetch.value;
     return (
-      knowledgeIndicatorExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
-      ruleGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
+      kiExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
+      kiQueryGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
       discovery !== toFormValue(v.connectorIdDiscovery) ||
       indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS) ||
       continuousKiExtraction.enabled !== savedCE.enabled ||
@@ -139,8 +191,8 @@ export const SettingsTab = () => {
   const handleCancel = useCallback(() => {
     if (!settingsFetch.value) return;
     const v = settingsFetch.value;
-    setKnowledgeIndicatorExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
-    setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
+    setKiExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
+    setKiQueryGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
     setContinuousKiExtraction(savedCE);
@@ -162,8 +214,8 @@ export const SettingsTab = () => {
           signal: abortSignal,
           params: {
             body: {
-              connectorIdKnowledgeIndicatorExtraction: knowledgeIndicatorExtraction,
-              connectorIdRuleGeneration: ruleGeneration,
+              connectorIdKnowledgeIndicatorExtraction: kiExtraction,
+              connectorIdRuleGeneration: kiQueryGeneration,
               connectorIdDiscovery: discovery,
               indexPatterns,
               ...(ceChanged ? { continuousKiExtraction } : {}),
@@ -180,8 +232,8 @@ export const SettingsTab = () => {
   }, [
     streams.streamsRepositoryClient,
     abortSignal,
-    knowledgeIndicatorExtraction,
-    ruleGeneration,
+    kiExtraction,
+    kiQueryGeneration,
     discovery,
     indexPatterns,
     continuousKiExtraction,
@@ -189,28 +241,55 @@ export const SettingsTab = () => {
     settingsFetch,
   ]);
 
-  const connectorOptions = [
-    {
-      value: NOT_SET_VALUE,
-      text: i18n.translate('xpack.streams.significantEventsDiscovery.settings.useDefaultOption', {
-        defaultMessage: 'Use default (genAiSettings:defaultAIConnector)',
-      }),
-    },
-    ...(genAiConnectors.connectors ?? []).map((c) => ({ value: c.connectorId, text: c.name })),
-  ];
+  const kiExtractionConnectorSelectOptions = useMemo(
+    () => buildConnectorSelectOptions(kiExtractionConnectors.data),
+    [kiExtractionConnectors.data]
+  );
+  const kiQueryGenerationConnectorSelectOptions = useMemo(
+    () => buildConnectorSelectOptions(kiQueryGenerationConnectors.data),
+    [kiQueryGenerationConnectors.data]
+  );
+  const discoveryConnectorSelectOptions = useMemo(
+    () => buildConnectorSelectOptions(discoveryConnectors.data),
+    [discoveryConnectors.data]
+  );
+
+  const connectorsLoading =
+    kiExtractionConnectors.isLoading ||
+    kiQueryGenerationConnectors.isLoading ||
+    discoveryConnectors.isLoading;
+
+  const showStaleSavedConnectorCallout = useMemo(() => {
+    const v = settingsFetch.value;
+    if (!v) {
+      return false;
+    }
+    return (
+      isSavedConnectorStale(
+        v.connectorIdKnowledgeIndicatorExtraction,
+        kiExtractionConnectors.data
+      ) ||
+      isSavedConnectorStale(v.connectorIdRuleGeneration, kiQueryGenerationConnectors.data) ||
+      isSavedConnectorStale(v.connectorIdDiscovery, discoveryConnectors.data)
+    );
+  }, [
+    settingsFetch.value,
+    kiExtractionConnectors.data,
+    kiQueryGenerationConnectors.data,
+    discoveryConnectors.data,
+  ]);
 
   if (settingsFetch.loading && !settingsFetch.value) {
     return <EuiLoadingElastic />;
   }
 
-  const hasDefaultConnector = Boolean(genAiConnectors.defaultConnector);
+  const hasDefaultConnector = Boolean(defaultConnector);
   const anyUsesDefault =
-    knowledgeIndicatorExtraction === NOT_SET_VALUE ||
-    ruleGeneration === NOT_SET_VALUE ||
+    kiExtraction === NOT_SET_VALUE ||
+    kiQueryGeneration === NOT_SET_VALUE ||
     discovery === NOT_SET_VALUE;
-  const showNoDefaultCallout = !genAiConnectors.loading && !hasDefaultConnector && anyUsesDefault;
-  const defaultConnectorName =
-    hasDefaultConnector && anyUsesDefault ? defaultConnectorFetch.value?.name : undefined;
+  const showNoDefaultCallout =
+    !connectorsLoading && !hasDefaultConnector && !defaultConnectorOnly && anyUsesDefault;
 
   return (
     <>
@@ -225,6 +304,33 @@ export const SettingsTab = () => {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
+          {showStaleSavedConnectorCallout && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                title={i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.staleConnectorTitle',
+                  {
+                    defaultMessage: 'Saved model is no longer available for this task',
+                  }
+                )}
+                color="warning"
+                iconType="warning"
+                data-test-subj="streams-settings-stale-connector-callout"
+              >
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.staleConnectorDescription',
+                    {
+                      defaultMessage:
+                        'A previously selected connector is not in the current list for this feature (for example after Model Settings changed). Choose a model below or use the default, then save.',
+                    }
+                  )}
+                </p>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
           {showNoDefaultCallout && (
             <>
               <EuiCallOut
@@ -278,16 +384,6 @@ export const SettingsTab = () => {
                           'You can pick one default LLM for all tasks, or specify each per step.',
                       }
                     )}
-                    {defaultConnectorName && (
-                      <>
-                        {' '}
-                        {i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.defaultConnectorLabel',
-                          { defaultMessage: 'Default connector:' }
-                        )}{' '}
-                        <EuiBadge color="hollow">{defaultConnectorName}</EuiBadge>
-                      </>
-                    )}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -306,10 +402,10 @@ export const SettingsTab = () => {
                 >
                   <EuiSelect
                     data-test-subj="streams-settings-connector-knowledge-indicator-extraction"
-                    options={connectorOptions}
-                    value={knowledgeIndicatorExtraction}
-                    onChange={(e) => setKnowledgeIndicatorExtraction(e.target.value)}
-                    isLoading={genAiConnectors.loading}
+                    options={kiExtractionConnectorSelectOptions}
+                    value={kiExtraction}
+                    onChange={(e) => setKiExtraction(e.target.value)}
+                    isLoading={connectorsLoading}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -324,10 +420,10 @@ export const SettingsTab = () => {
                 >
                   <EuiSelect
                     data-test-subj="streams-settings-connector-rule-generation"
-                    options={connectorOptions}
-                    value={ruleGeneration}
-                    onChange={(e) => setRuleGeneration(e.target.value)}
-                    isLoading={genAiConnectors.loading}
+                    options={kiQueryGenerationConnectorSelectOptions}
+                    value={kiQueryGeneration}
+                    onChange={(e) => setKiQueryGeneration(e.target.value)}
+                    isLoading={connectorsLoading}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -345,10 +441,10 @@ export const SettingsTab = () => {
                 >
                   <EuiSelect
                     data-test-subj="streams-settings-connector-discovery"
-                    options={connectorOptions}
+                    options={discoveryConnectorSelectOptions}
                     value={discovery}
                     onChange={(e) => setDiscovery(e.target.value)}
-                    isLoading={genAiConnectors.loading}
+                    isLoading={connectorsLoading}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -608,7 +704,7 @@ export const SettingsTab = () => {
                     size="s"
                     onClick={handleSave}
                     isLoading={isSaving}
-                    isDisabled={genAiConnectors.loading}
+                    isDisabled={connectorsLoading}
                   >
                     {i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',
@@ -623,4 +719,4 @@ export const SettingsTab = () => {
       )}
     </>
   );
-};
+}

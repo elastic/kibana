@@ -33,6 +33,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -45,6 +49,7 @@ export interface StreamsServer {
   inference: InferenceServerStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -63,6 +68,7 @@ export interface StreamsPluginSetupDependencies {
   globalSearch?: GlobalSearchPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -77,4 +83,5 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   spaces?: SpacesPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }

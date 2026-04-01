@@ -110,6 +110,7 @@
     "@kbn/std",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/inference-connectors",
     "@kbn/streams-ai",
     "@kbn/cps",
   ]
