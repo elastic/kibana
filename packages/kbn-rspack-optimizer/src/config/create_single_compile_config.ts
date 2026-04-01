@@ -123,6 +123,7 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
   'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
   'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
+  'packages/kbn-rspack-optimizer/src/plugins/xpack_banner_plugin.ts',
   'packages/kbn-swc-config/src/browser.ts',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
