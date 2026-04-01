@@ -341,6 +341,9 @@ export function UnifiedDocViewerFlyout({
               {...docViewRenderProps}
             />
           </EuiFlyoutBody>
+          {renderCustomFooter && (
+            <EuiFlyoutFooter>{renderCustomFooter(docViewRenderProps)}</EuiFlyoutFooter>
+          )}
         </EuiFlyout>
       </EuiPortal>
     </FlyoutHistoryKeyContext.Provider>
