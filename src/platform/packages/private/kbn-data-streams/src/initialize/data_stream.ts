@@ -10,6 +10,7 @@
 import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { prettyPrintAndSortKeys } from '@kbn/utils';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
@@ -40,7 +41,10 @@ function lifecycleDefinitionChanged({
   );
   const desiredLifecycle = normalizeLifecycle(dataStream.template.lifecycle);
 
-  return JSON.stringify(currentLifecycle) !== JSON.stringify(desiredLifecycle);
+  const stringifyLifecycle = (lifecycle: api.IndicesDataStreamLifecycle | undefined) =>
+    lifecycle ? prettyPrintAndSortKeys(lifecycle) : undefined;
+
+  return stringifyLifecycle(currentLifecycle) !== stringifyLifecycle(desiredLifecycle);
 }
 
 async function applyDataStreamLifecycle({

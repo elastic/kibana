@@ -17,7 +17,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { topNavStrings } from '../../_dashboard_app_strings';
 import type { DashboardLocatorParams } from '../../../../common';
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { logger } from '../../../services/logger';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';

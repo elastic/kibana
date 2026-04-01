@@ -12,7 +12,7 @@ import { postTemplate, patchTemplate } from '../api/api';
 import { casesQueriesKeys } from '../../../containers/constants';
 import { MAX_TOTAL_IMPORT_TEMPLATES } from '../constants';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ParsedTemplateEntry } from './use_parse_yaml';
 
 interface ImportResult {

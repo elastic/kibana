@@ -32,5 +32,5 @@ export const NewItemIndicator = ({ isHighlighted }: NewItemIndicatorProps) => {
     stroke-width: 2px;
     paint-order: stroke;
   `;
-  return <EuiIcon css={styles} color="primary" type="dot" size="m" />;
+  return <EuiIcon css={styles} color="primary" type="dot" size="m" aria-hidden={true} />;
 };

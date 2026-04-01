@@ -76,7 +76,7 @@ describe('getExecutorServices', () => {
   };
   const ruleMonitoringService = ruleMonitoringServiceMock.create();
   const ruleResultService = ruleResultServiceMock.create();
-  (ruleMonitoringService.getLastRunMetricsSetters as jest.Mock).mockReturnValue({});
+  (ruleMonitoringService.getSetters as jest.Mock).mockReturnValue({});
   (ruleResultService.getLastRunSetters as jest.Mock).mockReturnValue({});
 
   beforeEach(() => {

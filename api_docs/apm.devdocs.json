@@ -6525,9 +6525,7 @@
           "Type",
           "<number, string, unknown>; }>, ",
           "PartialC",
-          "<{ maxTraceItems: ",
-          "Type",
-          "<number, number, unknown>; serviceName: ",
+          "<{ serviceName: ",
           "StringC",
           "; entryTransactionId: ",
           "StringC",
@@ -6551,7 +6549,7 @@
             "section": "def-common.Transaction",
             "text": "Transaction"
           },
-          " | undefined; }, ",
+          " | undefined; traceDocsTotal: number; maxTraceItems: number; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}\": ",
           {
