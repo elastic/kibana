@@ -376,25 +376,44 @@ export const OutputSOForwardCompatSchemaV9 = schema.object({
   preset: schema.maybe(schema.string()),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  version: schema.maybe(schema.string()),
-  compression: schema.maybe(schema.string()),
-  timeout: schema.maybe(schema.number()),
-  broker_timeout: schema.maybe(schema.number()),
-  required_acks: schema.maybe(schema.number()),
-  client_id: schema.maybe(schema.string()),
-  username: schema.maybe(schema.string()),
-  password: schema.maybe(schema.string()),
-  partition: schema.maybe(schema.string()),
-  topic: schema.maybe(schema.string()),
-  topics: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })),
-  headers: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 })),
-  hash: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  round_robin: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  random: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  sasl: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  auth_type: schema.maybe(schema.string()),
-  connection_type: schema.maybe(schema.string()),
-  compression_level: schema.maybe(schema.number()),
+  version: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  compression: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  timeout: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+  broker_timeout: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+  required_acks: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+  client_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  username: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  password: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  partition: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  topic: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  topics: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 }),
+    ])
+  ),
+  headers: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 100 }),
+    ])
+  ),
+  hash: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })])
+  ),
+  round_robin: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })])
+  ),
+  random: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })])
+  ),
+  sasl: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })])
+  ),
+  auth_type: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  connection_type: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  compression_level: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
 });
 
 export const OutputSchema = schema.oneOf([
