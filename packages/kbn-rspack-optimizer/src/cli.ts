@@ -46,15 +46,10 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --test-plugins to have no value');
       }
 
-      const noCache = flags['no-cache'] ?? false;
-      if (typeof noCache !== 'boolean') {
-        throw createFlagError('expected --no-cache to have no value');
-      }
-
-      const noHmr = flags['no-hmr'] ?? false;
-      if (typeof noHmr !== 'boolean') {
-        throw createFlagError('expected --no-hmr to have no value');
-      }
+      // cache and hmr are declared as positive booleans defaulting to true.
+      // getopts interprets --no-cache as cache=false and --no-hmr as hmr=false.
+      const cache = flags.cache as boolean;
+      const hmr = flags.hmr as boolean;
 
       const profile = flags.profile ?? false;
       if (typeof profile !== 'boolean') {
@@ -100,7 +95,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         outputRoot,
         watch,
         dist,
-        cache: !noCache,
+        cache,
         examples,
         testPlugins,
         themeTags: themes,
@@ -108,7 +103,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         plugins,
         log,
         profile: false,
-        hmr: noHmr ? false : undefined,
+        hmr: hmr ? undefined : false,
       });
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -130,8 +125,8 @@ export function runRspackCli(options: CliOptions = {}): void {
           'dist',
           'examples',
           'test-plugins',
-          'no-cache',
-          'no-hmr',
+          'cache',
+          'hmr',
           'profile',
           'profile-stats-only',
         ],
@@ -145,8 +140,8 @@ export function runRspackCli(options: CliOptions = {}): void {
           dist: false,
           examples: false,
           'test-plugins': false,
-          'no-cache': false,
-          'no-hmr': false,
+          cache: true,
+          hmr: true,
           profile: false,
           'profile-stats-only': false,
         },
