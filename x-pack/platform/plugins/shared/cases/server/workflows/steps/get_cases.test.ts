@@ -20,9 +20,7 @@ describe('getCasesStepDefinition', () => {
 
     expect(definition.id).toBe('cases.getCases');
     expect(typeof definition.handler).toBe('function');
-    expect(
-      definition.inputSchema.safeParse({ case_ids: ['case-1', 'case-2'] }).success
-    ).toBe(true);
+    expect(definition.inputSchema.safeParse({ case_ids: ['case-1', 'case-2'] }).success).toBe(true);
   });
 
   it('calls cases.bulkGet with correct params and returns cases and errors', async () => {
@@ -35,9 +33,7 @@ describe('getCasesStepDefinition', () => {
     } as unknown as CasesClient);
     const definition = getCasesStepDefinition(getCasesClient);
 
-    const result = await definition.handler(
-      createContext({ case_ids: ['case-1', 'case-2'] })
-    );
+    const result = await definition.handler(createContext({ case_ids: ['case-1', 'case-2'] }));
 
     expect(bulkGet).toHaveBeenCalledWith({ ids: ['case-1', 'case-2'] });
     expect(result).toEqual({
@@ -51,7 +47,9 @@ describe('getCasesStepDefinition', () => {
   it('includes errors for unfound case IDs in the output', async () => {
     const bulkGet = jest.fn().mockResolvedValue({
       cases: [createCaseResponseFixture],
-      errors: [{ error: 'Not Found', message: 'case not found', status: 404, caseId: 'case-missing' }],
+      errors: [
+        { error: 'Not Found', message: 'case not found', status: 404, caseId: 'case-missing' },
+      ],
     });
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { bulkGet },
@@ -65,7 +63,9 @@ describe('getCasesStepDefinition', () => {
     expect(result).toEqual({
       output: {
         cases: [createCaseResponseFixture],
-        errors: [{ error: 'Not Found', message: 'case not found', status: 404, caseId: 'case-missing' }],
+        errors: [
+          { error: 'Not Found', message: 'case not found', status: 404, caseId: 'case-missing' },
+        ],
       },
     });
   });

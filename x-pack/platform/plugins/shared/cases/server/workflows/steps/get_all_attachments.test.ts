@@ -33,9 +33,7 @@ describe('getAllAttachmentsStepDefinition', () => {
 
     expect(definition.id).toBe('cases.getAllAttachments');
     expect(typeof definition.handler).toBe('function');
-    expect(
-      definition.inputSchema.safeParse({ case_id: 'case-1' }).success
-    ).toBe(true);
+    expect(definition.inputSchema.safeParse({ case_id: 'case-1' }).success).toBe(true);
   });
 
   it('calls attachments.getAll with correct params and returns all attachments', async () => {

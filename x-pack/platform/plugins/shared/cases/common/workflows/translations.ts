@@ -594,4 +594,3 @@ export const GET_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
       'This step retrieves up to 1000 cases in a single request. Any IDs that could not be fetched are reported in the errors array. Use this to avoid N sequential get operations in fan-out workflows.',
   }
 );
-

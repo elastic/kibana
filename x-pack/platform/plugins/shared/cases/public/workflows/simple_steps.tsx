@@ -126,4 +126,3 @@ export const deleteObservableStepDefinition = createPublicCaseStepDefinition({
 export const getCasesStepDefinition = createPublicCaseStepDefinition({
   ...getCasesStepCommonDefinition,
 });
-
