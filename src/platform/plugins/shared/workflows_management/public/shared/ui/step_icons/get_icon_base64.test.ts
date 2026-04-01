@@ -389,7 +389,7 @@ describe('getIconBase64 – error handling', () => {
       throw new Error('render failed');
     });
 
-    const BrokenComponent: React.FC<{ width: number; height: number }> = () => null;
+    const BrokenComponent: React.FC = () => null;
     const result = await getIconBase64({
       actionTypeId: '.another-broken-connector',
       icon: BrokenComponent,
