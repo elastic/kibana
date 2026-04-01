@@ -80,7 +80,11 @@ export function SloAlertsWrapper({
 
   const handleGoToAlertsClick = () => {
     const kuery = slos
-      .map((slo) => `(slo.id:"${slo.slo_id}" and slo.instanceId:"${slo.slo_instance_id}")`)
+      .map((slo) =>
+        slo.slo_instance_id !== ALL_VALUE
+          ? `(slo.id:"${slo.slo_id}" and slo.instanceId:"${slo.slo_instance_id}")`
+          : `(slo.id:"${slo.slo_id}")`
+      )
       .join(' or ');
 
     navigateToUrl(
