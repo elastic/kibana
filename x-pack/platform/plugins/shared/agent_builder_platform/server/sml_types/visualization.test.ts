@@ -404,11 +404,12 @@ describe('visualizationSmlType', () => {
 
       expect(LensConfigBuilder).toHaveBeenCalled();
       expect(toAPIFormatMock).toHaveBeenCalled();
-      expect(result!.data.visualization).toEqual({
+      const data = result!.data as Record<string, unknown>;
+      expect(data.visualization).toEqual({
         type: 'lnsPie',
         layers: [{ id: 'layer1' }],
       });
-      expect(result!.data.chart_type).toBe('lnsPie');
+      expect(data.chart_type).toBe('lnsPie');
     });
   });
 });

@@ -328,10 +328,10 @@
         "label": "allCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; manageTemplates: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/utils/cases_permissions.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1224,7 +1224,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; assign: boolean; manageTemplates: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/utils/cases_permissions.ts",
         "lineNumber": 8,

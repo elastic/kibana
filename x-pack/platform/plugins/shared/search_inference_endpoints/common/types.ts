@@ -6,14 +6,22 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
 
-export enum APIRoutes {
-  GET_INFERENCE_ENDPOINTS = '/internal/inference_endpoints/endpoints',
-  INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
-  GET_INFERENCE_SERVICES = 'internal/inference_endpoints/_inference/_services',
-  GET_INFERENCE_SETTINGS = '/internal/search_inference_endpoints/settings',
-  PUT_INFERENCE_SETTINGS = '/internal/search_inference_endpoints/settings',
-  GET_INFERENCE_FEATURES = '/internal/search_inference_endpoints/features',
+/** Route path constants (const object so imported paths stay type-narrowed as `string`). */
+export const APIRoutes = {
+  GET_INFERENCE_ENDPOINTS: '/internal/inference_endpoints/endpoints',
+  INFERENCE_ENDPOINT: '/internal/inference_endpoint/endpoints/{type}/{id}',
+  GET_INFERENCE_SERVICES: 'internal/inference_endpoints/_inference/_services',
+  GET_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
+  PUT_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
+  GET_INFERENCE_FEATURES: '/internal/search_inference_endpoints/features',
+  GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+} as const;
+
+export interface InferenceConnectorsResponse {
+  connectors: InferenceConnector[];
 }
 
 export interface SearchInferenceEndpointsConfigType {
@@ -56,6 +64,8 @@ export interface InferenceFeatureResponse {
   taskType: string;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
+  isBeta?: boolean;
+  isTechPreview?: boolean;
 }
 
 export type InferenceEndpointWithMetadata = InferenceAPIConfigResponse & {

@@ -66,7 +66,7 @@ export class ItemsGridPagination extends Component {
       <EuiButtonEmpty
         size="s"
         color="text"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.onButtonClick}
       >

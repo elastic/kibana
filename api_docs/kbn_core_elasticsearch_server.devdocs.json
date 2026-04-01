@@ -1213,7 +1213,7 @@
           "\nRepresents an Elasticsearch cluster API client created by the platform.\nIt allows to call API on behalf of the internal Kibana user and\nthe actual user that is derived from the request headers (via `asScoped(...)`).\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 56,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1228,7 +1228,11 @@
               "\nA {@link ElasticsearchClient | client} used to query the Elasticsearch cluster on behalf of\nthe Kibana internal user. Intended primarily for administrative and infrastructure-level\noperations (e.g., index management, bootstrapping, health checks) rather than user-facing\ndata queries.\n\nIn CPS-enabled Serverless environments, requests made through this client are always bound\nto `'origin-only'` routing - they will never fan out to other CPS-connected projects."
             ],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -1311,10 +1315,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -2219,7 +2219,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 64,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2235,7 +2235,7 @@
               "{ (request: ",
               "ScopeableUrlRequest",
               ", opts: ",
-              "SpaceNPRERouting",
+              "AsScopedOptions",
               "): ",
               "IScopedClusterClient",
               "; (request: ",
@@ -2245,7 +2245,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 75,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2261,7 +2261,7 @@
                   "ScopeableUrlRequest"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 75,
+                "lineNumber": 65,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2275,10 +2275,10 @@
                 "label": "opts",
                 "description": [],
                 "signature": [
-                  "SpaceNPRERouting"
+                  "AsScopedOptions"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 75,
+                "lineNumber": 65,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2300,7 +2300,7 @@
               "{ (request: ",
               "ScopeableUrlRequest",
               ", opts: ",
-              "SpaceNPRERouting",
+              "AsScopedOptions",
               "): ",
               "IScopedClusterClient",
               "; (request: ",
@@ -2310,7 +2310,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 76,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2328,7 +2328,7 @@
                   "ScopeableRequest"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 87,
+                "lineNumber": 77,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2355,7 +2355,7 @@
           "IClusterClient"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 90,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2373,7 +2373,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 96,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2833,7 +2833,11 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
             ],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -2916,10 +2920,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -3839,7 +3839,11 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\nwith the internal Kibana user as primary auth and the current user as secondary auth\n(using the `es-secondary-authorization` header).\n\nNote that only a subset of Elasticsearch APIs support secondary authentication, and that only those endpoints\nshould be called with this client."
             ],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -3922,10 +3926,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -4845,7 +4845,11 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
             ],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -4928,10 +4932,6 @@
               ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -5846,45 +5846,6 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.SpaceNPRERouting",
-        "type": "Interface",
-        "tags": [],
-        "label": "SpaceNPRERouting",
-        "description": [
-          "\n{@link AsScopedOptions} variant that routes requests to the NPRE configured for the current\nKibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped` so the space\ncan be extracted from the URL pathname."
-        ],
-        "signature": [
-          "SpaceNPRERouting",
-          " extends ",
-          "AsScopedOptions"
-        ],
-        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 46,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.SpaceNPRERouting.projectRouting",
-            "type": "string",
-            "tags": [],
-            "label": "projectRouting",
-            "description": [],
-            "signature": [
-              "\"space\""
-            ],
-            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 53,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-elasticsearch-server",
         "id": "def-server.UnauthorizedErrorHandlerNotHandledResult",
         "type": "Interface",
         "tags": [],
@@ -6168,7 +6129,11 @@
           "\nClient used to query the elasticsearch cluster.\n"
         ],
         "signature": [
-          "{ create: { <TDocument = unknown>(this: That, params: ",
+          "{ child: (opts: ",
+          "ClientOptions",
+          ") => ",
+          "default",
+          "; create: { <TDocument = unknown>(this: That, params: ",
           "CreateRequest",
           "<TDocument>, options?: ",
           "TransportRequestOptionsWithOutMeta",
@@ -6251,10 +6216,6 @@
           ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
           "default",
           "; helpers: ",
-          "default",
-          "; child: (opts: ",
-          "ClientOptions",
-          ") => ",
           "default",
           "; asyncSearch: ",
           "default",

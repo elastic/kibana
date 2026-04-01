@@ -5,6 +5,7 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -21,6 +22,7 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -51,6 +53,7 @@ steps:
     key: osquery-cypress-burn
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

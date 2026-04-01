@@ -15,16 +15,15 @@ import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-serv
  * - All built-in skills when `enable_elastic_capabilities` is true
  * - Additional skills from assigned plugins via `additionalSkillIds`
  *
- * Populates the writable skills store and returns the merged list.
+ * Returns the merged, deduplicated list.
  */
-export const selectSkills = async ({
+export const resolveAgentSkills = async ({
   skills,
-  skillsStore,
   agentConfiguration,
   additionalSkillIds,
 }: {
-  skills: SkillsService;
-  skillsStore: WritableSkillsStore;
+  // Allows SkillRegistry to be passed as well
+  skills: Pick<SkillsService, 'bulkGet' | 'list'>;
   agentConfiguration: AgentConfiguration;
   additionalSkillIds?: string[];
 }): Promise<InternalSkillDefinition[]> => {
@@ -54,9 +53,26 @@ export const selectSkills = async ({
     }
   }
 
-  const result = [...merged.values()];
-  for (const skill of result) {
+  return [...merged.values()];
+};
+
+/**
+ * Resolves agent skills and populates the writable skills store.
+ */
+export const selectSkills = async ({
+  skills,
+  skillsStore,
+  agentConfiguration,
+  additionalSkillIds,
+}: {
+  skills: SkillsService;
+  skillsStore: WritableSkillsStore;
+  agentConfiguration: AgentConfiguration;
+  additionalSkillIds?: string[];
+}): Promise<InternalSkillDefinition[]> => {
+  const agentSkills = await resolveAgentSkills({ skills, agentConfiguration, additionalSkillIds });
+  for (const skill of agentSkills) {
     skillsStore.add(skill);
   }
-  return result;
+  return agentSkills;
 };
