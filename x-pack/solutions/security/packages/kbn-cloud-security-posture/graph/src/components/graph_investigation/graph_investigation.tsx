@@ -259,9 +259,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
+    const emptyEntityIds = useMemo(() => [], []);
     const { searchFilters, setSearchFilters, entityIdsForApi } = useGraphFilters(
       scopeId,
-      entityIds ?? [],
+      entityIds ?? emptyEntityIds,
       dataView?.id ?? ''
     );
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
