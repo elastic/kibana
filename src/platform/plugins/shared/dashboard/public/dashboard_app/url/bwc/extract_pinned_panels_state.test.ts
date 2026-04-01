@@ -128,6 +128,7 @@ describe('extractDashboardState', () => {
         controlGroupInput: {
           controls: [
             {
+              uid: 'control1',
               controlConfig: {
                 dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
                 fieldName: 'machine.os.keyword',
@@ -142,6 +143,7 @@ describe('extractDashboardState', () => {
       });
       expect(dashboardState.pinned_panels).toEqual([
         {
+          id: 'control1',
           config: {
             data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
             field_name: 'machine.os.keyword',

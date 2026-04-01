@@ -46,12 +46,12 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
       if ('controlConfig' in control) {
         // >8.18 to <9.4 controls had `config` stored under `controlConfig`
         const { controlConfig, ...rest } = control;
-        return { ...rest, config: controlConfig };
+        control = { ...rest, config: controlConfig };
       }
       // < 9.4 `id` is stored as `uid`
       if (control.uid) {
         const { uid, ...rest } = control;
-        return { id: uid, ...rest };
+        control = { id: uid, ...rest };
       }
       return control; // otherwise, we are dealing with state >=9.4
     });

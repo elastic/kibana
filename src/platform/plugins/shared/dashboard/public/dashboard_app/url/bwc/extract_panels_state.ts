@@ -57,16 +57,11 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
     if (panel.panels) {
+      // this is a section, since it has its own panels
       const { panels: sectionPanels, savedObjectReferences: sectionPanelReferences } =
         extractPanelsState({ panels: panel.panels });
       savedObjectReferences.push(...(sectionPanelReferences ?? []));
       panel.panels = sectionPanels;
-
-      // < 9.4 `id` is stored as `uid`
-      if (panel.panels.uid) {
-        panel.panels.id = panel.panels.uid;
-        delete panel.panels.uid;
-      }
     }
 
     // < 8.17 panels state stored panelConfig as embeddableConfig
