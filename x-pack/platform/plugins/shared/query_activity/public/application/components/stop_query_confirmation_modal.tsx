@@ -51,7 +51,7 @@ export const StopQueryConfirmationModal: React.FC<StopQueryConfirmationModalProp
             <p>
               {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.body', {
                 defaultMessage:
-                  'Canceling this query is an irreversible action, which may take a few moments to execute after the cancelation request is sent.',
+                  'Canceling this query can’t be undone. It can take a few seconds before the query stops.',
               })}
             </p>
             <p>
