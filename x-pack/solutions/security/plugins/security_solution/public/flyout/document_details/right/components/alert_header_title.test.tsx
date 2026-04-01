@@ -9,7 +9,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
-import { STATUS_TITLE_TEST_ID } from './test_ids';
 import { AlertHeaderTitle } from './alert_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
@@ -29,6 +28,7 @@ import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
   RISK_SCORE_VALUE_TEST_ID,
+  STATUS_TITLE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
