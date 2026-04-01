@@ -6355,10 +6355,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-catalog-plugin@link:x-pack/platform/plugins/shared/data_catalog":
-  version "0.0.0"
-  uid ""
-
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
@@ -6388,10 +6384,6 @@
   uid ""
 
 "@kbn/data-service@link:src/platform/packages/shared/kbn-data-service":
-  version "0.0.0"
-  uid ""
-
-"@kbn/data-sources-plugin@link:x-pack/platform/plugins/shared/data_sources":
   version "0.0.0"
   uid ""
 
@@ -6460,10 +6452,6 @@
   uid ""
 
 "@kbn/deeplinks-analytics@link:src/platform/packages/shared/deeplinks/analytics":
-  version "0.0.0"
-  uid ""
-
-"@kbn/deeplinks-data-sources@link:src/platform/packages/shared/deeplinks/data_sources":
   version "0.0.0"
   uid ""
 

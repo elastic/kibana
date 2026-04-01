@@ -55,8 +55,6 @@ export interface UsageStats {
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
-
-  'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:aiAgent:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;

@@ -1342,31 +1342,6 @@
       }
     }
   },
-  "data_connector": {
-    "dynamic": false,
-    "properties": {
-      "kscIds": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "toolIds": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "workflowIds": {
-        "type": "keyword"
-      }
-    }
-  },
   "data_stream-config": {
     "dynamic": false,
     "properties": {
