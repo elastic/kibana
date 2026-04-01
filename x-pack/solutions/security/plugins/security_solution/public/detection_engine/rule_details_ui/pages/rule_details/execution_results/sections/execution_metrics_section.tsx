@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
-import { RuleDurationFormat } from '../../execution_log_table/rule_duration_format';
+import { humanizeDuration } from '../utils';
 
 interface ExecutionMetricsSectionProps {
-  gapSeconds: number | null | undefined;
-  scheduleDelayMs: number | null | undefined;
-  executionDurationMs: number | null | undefined;
+  gapSeconds: number | null;
+  scheduleDelayMs: number | null;
+  executionDurationMs: number | null;
 }
 
 export const ExecutionMetricsSection: React.FC<ExecutionMetricsSectionProps> = ({
@@ -65,35 +65,23 @@ export const ExecutionMetricsSection: React.FC<ExecutionMetricsSectionProps> = (
             <FieldLabel label={i18n.FLYOUT_GAP_DURATION} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutGapDuration">
-              {gapSeconds != null && gapSeconds > 0 ? (
-                <RuleDurationFormat duration={gapSeconds * 1000} />
-              ) : (
-                '—'
-              )}
+              {gapSeconds !== null && gapSeconds > 0 ? humanizeDuration(gapSeconds * 1000) : '—'}
             </EuiText>
           </EuiFlexItem>
-          {scheduleDelayMs != null && (
-            <>
-              <SectionSeparator />
-              <EuiFlexItem>
-                <FieldLabel label={i18n.FLYOUT_SCHEDULING_DELAY} />
-                <EuiSpacer size="xs" />
-                <EuiText size="s" data-test-subj="executionDetailsFlyoutSchedulingDelay">
-                  <RuleDurationFormat duration={scheduleDelayMs} />
-                </EuiText>
-              </EuiFlexItem>
-            </>
-          )}
+          <SectionSeparator />
+          <EuiFlexItem>
+            <FieldLabel label={i18n.FLYOUT_SCHEDULING_DELAY} />
+            <EuiSpacer size="xs" />
+            <EuiText size="s" data-test-subj="executionDetailsFlyoutSchedulingDelay">
+              {scheduleDelayMs !== null ? humanizeDuration(scheduleDelayMs) : '—'}
+            </EuiText>
+          </EuiFlexItem>
           <SectionSeparator />
           <EuiFlexItem>
             <FieldLabel label={i18n.COLUMN_DURATION} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutExecutionDuration">
-              {executionDurationMs != null ? (
-                <RuleDurationFormat duration={executionDurationMs} />
-              ) : (
-                '—'
-              )}
+              {executionDurationMs !== null ? humanizeDuration(executionDurationMs) : '—'}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

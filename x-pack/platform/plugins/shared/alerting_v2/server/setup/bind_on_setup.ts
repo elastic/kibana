@@ -14,6 +14,7 @@ import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
+import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
@@ -42,6 +43,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     container.get(CoreSetup('capabilities')).registerProvider(() => ({
       alertingVTwo: {},
     }));
+
+    container.get(CoreSetup('uiSettings')).registerGlobal(dispatcherUiSettings);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
