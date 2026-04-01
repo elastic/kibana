@@ -48,6 +48,13 @@ const mockContext = (overrides: Partial<QueryActivityAppContextValue> = {}) =>
         get: jest.fn(() => undefined),
       },
     } as any,
+    docLinks: {
+      links: {
+        management: {
+          queryActivity: 'https://www.elastic.co/guide/en/kibana/current/query-activity.html',
+        },
+      },
+    } as any,
     capabilities: {
       canCancelTasks: true,
       canViewTasks: true,
