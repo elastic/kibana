@@ -6,3 +6,5 @@
  */
 
 export const OBSERVABILITY_AI_ASSISTANT_FEATURE_ID = 'observabilityAIAssistant';
+export const AI_ASSISTANT_MODEL_SETTINGS_PARENT_FEATURE_ID = 'ai_assistant';
+export const OBSERVABILITY_AI_ASSISTANT_MODEL_SETTINGS_FEATURE_ID = 'observability_ai_assistant';

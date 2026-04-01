@@ -7,6 +7,7 @@
 import { boomify, notImplemented } from '@hapi/boom';
 import { isInferenceError } from '@kbn/inference-common';
 import { toBooleanRt } from '@kbn/io-ts-utils';
+import { MODEL_SETTINGS_FEATURE_FLAG_ID } from '@kbn/search-inference-endpoints/common/constants';
 import * as t from 'io-ts';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
@@ -22,6 +23,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../functions/context/utils/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import { validateConnectorIdAgainstObservabilityModelSettings } from './resolve_inference_connector_id';
 import type { Instruction } from '../../../common/types';
 import {
   assistantScopeType,
@@ -85,7 +87,8 @@ const chatCompletePublicRt = t.intersection([
 async function initializeChatRequest({
   context,
   request,
-  plugins: { cloud, inference },
+  logger,
+  plugins,
   params: {
     body: { connectorId, scopes },
   },
@@ -93,6 +96,19 @@ async function initializeChatRequest({
 }: ObservabilityAIAssistantRouteHandlerResources & {
   params: { body: { connectorId: string; scopes: AssistantScope[] } };
 }) {
+  const { cloud, inference } = plugins;
+  const modelSettingsEnabled = await (
+    await context.core
+  ).uiSettings.client.get<boolean>(MODEL_SETTINGS_FEATURE_FLAG_ID);
+  if (modelSettingsEnabled) {
+    await validateConnectorIdAgainstObservabilityModelSettings({
+      plugins,
+      request,
+      logger,
+      connectorId,
+    });
+  }
+
   try {
     await withAssistantSpan('guard_against_invalid_connector', async () => {
       const inferenceStart = await inference.start();
