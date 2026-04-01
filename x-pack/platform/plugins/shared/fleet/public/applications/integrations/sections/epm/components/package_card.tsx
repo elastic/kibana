@@ -264,10 +264,19 @@ export function PackageCard({
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
         title={
-          <CardTitle
-            title={wrapTitleWithDeprecated({ title, deprecated: isDeprecated })}
-            titleBadge={titleBadge}
-          />
+          titleLineClamp ? (
+            <EuiToolTip content={title} position="top" display="block">
+              <CardTitle
+                title={wrapTitleWithDeprecated({ title, deprecated: isDeprecated })}
+                titleBadge={titleBadge}
+              />
+            </EuiToolTip>
+          ) : (
+            <CardTitle
+              title={wrapTitleWithDeprecated({ title, deprecated: isDeprecated })}
+              titleBadge={titleBadge}
+            />
+          )
         }
         titleSize={titleSize}
         description={showDescription ? description : ''}
