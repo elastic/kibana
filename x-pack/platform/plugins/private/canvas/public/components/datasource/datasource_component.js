@@ -171,7 +171,11 @@ export class DatasourceComponent extends PureComponent {
             size="s"
             data-test-subj="canvasChangeDatasourceButton"
           >
-            <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" aria-hidden={true} />
+            <EuiIcon
+              type={stateDatasource.image}
+              className="canvasDataSource__triggerButtonIcon"
+              aria-hidden
+            />
             {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />

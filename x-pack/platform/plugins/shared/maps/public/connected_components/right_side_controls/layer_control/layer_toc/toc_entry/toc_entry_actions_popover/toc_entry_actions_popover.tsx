@@ -138,7 +138,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       },
       {
         name: getVisibilityToggleLabel(this.props.layer.isVisible()),
-        icon: <EuiIcon type={getVisibilityToggleIcon(this.props.layer.isVisible())} size="m" aria-hidden={true} />,
+        icon: (
+          <EuiIcon
+            type={getVisibilityToggleIcon(this.props.layer.isVisible())}
+            size="m"
+            aria-hidden={true}
+          />
+        ),
         'data-test-subj': 'layerVisibilityToggleButton',
         toolTipContent: null,
         onClick: () => {
