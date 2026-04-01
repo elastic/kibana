@@ -41,7 +41,9 @@ jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenSystemFlyout = jest.fn();
-const mockDocumentFlyoutWrapper = jest.fn(() => <div>{'MockDocumentFlyoutWrapper'}</div>);
+const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
+  <div>{'MockDocumentFlyoutWrapper'}</div>
+));
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
   return {

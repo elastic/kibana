@@ -34,6 +34,7 @@ import {
   STATUS_BUTTON_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
+import { createExpandableFlyoutApiMock } from '../../../../common/mock/expandable_flyout';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/expandable-flyout');
@@ -89,8 +90,9 @@ describe('<AlertHeaderTitle />', () => {
     jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
     jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
       closeFlyout: closeFlyoutMock,
-    } as ReturnType<typeof useExpandableFlyoutApi>);
+    });
     jest.mocked(useRefetchByScope).mockReturnValue({ refetch: refetchMock });
   });
 
