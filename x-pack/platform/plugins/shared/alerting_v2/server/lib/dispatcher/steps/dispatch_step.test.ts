@@ -78,7 +78,6 @@ describe('DispatchStep', () => {
       'default',
       expect.objectContaining({
         id: 'g1',
-        ruleId: group.ruleId,
         policyId: 'p1',
         groupKey: group.groupKey,
         episodes: group.episodes,
@@ -191,5 +190,162 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockLogger.debug).not.toHaveBeenCalled();
+  });
+
+  it('continues dispatching remaining groups when one group fails', async () => {
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new DispatchStep(loggerService, mockWfm);
+
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow
+      .mockResolvedValueOnce('exec-1')
+      .mockRejectedValueOnce(new Error('network timeout'))
+      .mockResolvedValueOnce('exec-3');
+
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
+    });
+
+    const groups = Array.from({ length: 3 }, (_, i) =>
+      createNotificationGroup({
+        id: `g${i}`,
+        policyId: 'p1',
+        destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      })
+    );
+
+    const state = createDispatcherPipelineState({
+      dispatch: groups,
+      policies: new Map([['p1', policy]]),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    expect(mockWfm.getWorkflow).toHaveBeenCalledTimes(3);
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(3);
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith('network timeout', expect.anything());
+  });
+
+  it('logs error when scheduleWorkflow throws', async () => {
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new DispatchStep(loggerService, mockWfm);
+
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockRejectedValue(new Error('service unavailable'));
+
+    const group = createNotificationGroup({
+      id: 'g1',
+      policyId: 'p1',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([['p1', policy]]),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'service unavailable',
+      expect.objectContaining({
+        error: expect.objectContaining({ message: 'service unavailable' }),
+      })
+    );
+  });
+
+  it('continues dispatching remaining destinations when one destination fails', async () => {
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new DispatchStep(loggerService, mockWfm);
+
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow
+      .mockRejectedValueOnce(new Error('workflow-1 failed'))
+      .mockResolvedValueOnce('exec-2');
+
+    const group = createNotificationGroup({
+      id: 'g1',
+      policyId: 'p1',
+      destinations: [
+        { type: 'workflow', id: 'workflow-1' },
+        { type: 'workflow', id: 'workflow-2' },
+      ],
+    });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([['p1', policy]]),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(2);
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('dispatches multiple groups concurrently with a max concurrency of 3', async () => {
+    jest.useFakeTimers();
+    const { loggerService } = createLoggerService();
+    const step = new DispatchStep(loggerService, mockWfm);
+
+    let inFlight = 0;
+    let maxInFlight = 0;
+
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          inFlight++;
+          maxInFlight = Math.max(maxInFlight, inFlight);
+          setTimeout(() => {
+            inFlight--;
+            resolve('exec-id');
+          }, 10);
+        })
+    );
+
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
+    });
+
+    const groups = Array.from({ length: 5 }, (_, i) =>
+      createNotificationGroup({
+        id: `g${i}`,
+        policyId: 'p1',
+        destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      })
+    );
+
+    const state = createDispatcherPipelineState({
+      dispatch: groups,
+      policies: new Map([['p1', policy]]),
+    });
+
+    const executePromise = step.execute(state);
+
+    await jest.advanceTimersByTimeAsync(100);
+
+    const result = await executePromise;
+
+    expect(result.type).toBe('continue');
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(5);
+    expect(maxInFlight).toBeLessThanOrEqual(3);
+
+    jest.useRealTimers();
   });
 });
