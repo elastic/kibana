@@ -917,9 +917,6 @@ describe('update', () => {
             "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
-            "patchCaseStats": Object {
-              "syncedAlertCount": 0,
-            },
             "settings": Object {
               "extractObservables": true,
               "syncAlerts": true,
@@ -968,9 +965,6 @@ describe('update', () => {
             "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
-            "patchCaseStats": Object {
-              "syncedAlertCount": 0,
-            },
             "settings": Object {
               "extractObservables": true,
               "syncAlerts": true,
@@ -2302,7 +2296,7 @@ describe('update', () => {
         expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalled();
       });
 
-      it('returns zero per-case synced alert count when no alerts are synced', async () => {
+      it('omits patchCaseStats when no alerts are synced', async () => {
         const result = await bulkUpdate(
           {
             cases: [
@@ -2317,13 +2311,7 @@ describe('update', () => {
           casesClientMock
         );
 
-        expect(result[0]).toEqual(
-          expect.objectContaining({
-            patchCaseStats: {
-              syncedAlertCount: 0,
-            },
-          })
-        );
+        expect(result[0]).not.toHaveProperty('patchCaseStats');
       });
     });
   });

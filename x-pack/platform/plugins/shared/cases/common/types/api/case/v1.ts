@@ -542,7 +542,7 @@ export const PatchCaseStatsRt = rt.strict({
 
 export const CaseWithPatchStatsRt = rt.intersection([
   CaseRt,
-  rt.strict({ patchCaseStats: PatchCaseStatsRt }),
+  rt.partial({ patchCaseStats: PatchCaseStatsRt }),
 ]);
 
 export const PatchCasesResponseRt = rt.array(CaseWithPatchStatsRt);

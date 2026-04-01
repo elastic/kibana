@@ -387,7 +387,7 @@ export const updateCases = async ({
 }: {
   cases: CaseUpdateRequest[];
   signal?: AbortSignal;
-}): Promise<Array<CaseUI & { patchCaseStats: PatchCaseStats }>> => {
+}): Promise<Array<CaseUI & { patchCaseStats?: PatchCaseStats }>> => {
   if (cases.length === 0) {
     return [];
   }
@@ -400,7 +400,7 @@ export const updateCases = async ({
 
   const decodedResponse = decodeCasesWithBulkUpdateStatsResponse(response);
   return convertArrayToCamelCase(decodedResponse) as Array<
-    CaseUI & { patchCaseStats: PatchCaseStats }
+    CaseUI & { patchCaseStats?: PatchCaseStats }
   >;
 };
 

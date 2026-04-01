@@ -608,6 +608,7 @@ export const bulkUpdate = async (
           events: 0,
         };
 
+        const syncedAlertCount = syncedAlertCountCountByCaseId.get(updatedCase.id) ?? 0;
         const updatedCaseWithStats: CaseWithPatchStats = {
           ...flattenCaseSavedObject({
             savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
@@ -615,9 +616,7 @@ export const bulkUpdate = async (
             totalAlerts,
             totalEvents,
           }),
-          patchCaseStats: {
-            syncedAlertCount: syncedAlertCountCountByCaseId.get(updatedCase.id) ?? 0,
-          },
+          ...(syncedAlertCount > 0 ? { patchCaseStats: { syncedAlertCount } } : {}),
         };
 
         flattenCases.push(updatedCaseWithStats);
