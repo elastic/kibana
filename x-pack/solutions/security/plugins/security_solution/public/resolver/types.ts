@@ -9,6 +9,7 @@ import type React from 'react';
 import type { AnyAction, Dispatch, Middleware, Store } from 'redux';
 import type { BBox } from 'rbush';
 import type { Provider } from 'react-redux';
+import type { CellActionRenderer } from '../flyout_v2/shared/components/cell_actions';
 import type {
   NewResolverTree,
   ResolverEntityIndex,
@@ -846,6 +847,11 @@ export interface ResolverProps {
    * A flag to update data from an external source
    */
   shouldUpdate: boolean;
+
+  /**
+   * Renderer used by Resolver panels for field cell actions.
+   */
+  renderCellActions: CellActionRenderer;
 }
 
 /**

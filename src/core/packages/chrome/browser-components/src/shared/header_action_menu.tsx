@@ -8,42 +8,23 @@
  */
 
 import type { FC } from 'react';
-import React, { useRef, useLayoutEffect, useState } from 'react';
-import type { Observable } from 'rxjs';
-import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
+import React, { useRef, useLayoutEffect } from 'react';
+import type { UnmountCallback } from '@kbn/core-mount-utils-browser';
+import { useCurrentActionMenu } from './chrome_hooks';
 
-interface HeaderActionMenuProps {
-  mounter: { mount: MountPoint | undefined };
-}
-
-export const useHeaderActionMenuMounter = (
-  actionMenu$: Observable<MountPoint<HTMLElement> | undefined>
-) => {
-  // useObservable relies on useState under the hood. The signature is type SetStateAction<S> = S | ((prevState: S) => S);
-  // As we got a Observable<Function> here, React's setState setter assume he's getting a `(prevState: S) => S` signature,
-  // therefore executing the mount method, causing everything to crash.
-  // piping the observable before calling `useObservable` causes the effect to always having a new reference, as
-  // the piped observable is a new instance on every render, causing infinite loops.
-  // this is why we use `useLayoutEffect` manually here.
-  const [mounter, setMounter] = useState<{ mount: MountPoint | undefined }>({ mount: undefined });
-  useLayoutEffect(() => {
-    const s = actionMenu$.subscribe((value) => {
-      setMounter({ mount: value });
-    });
-    return () => s.unsubscribe();
-  }, [actionMenu$]);
-
-  return mounter;
-};
-
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
+/**
+ * Renders the currently mounted header action menu set via {@link ChromeStart.setHeaderActionMenu}.
+ * @deprecated Use {@link HeaderAppMenu} instead. See kibana-team#2651.
+ */
+export const HeaderActionMenu: FC = () => {
+  const mount = useCurrentActionMenu();
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 
   useLayoutEffect(() => {
-    if (mounter.mount && elementRef.current) {
+    if (mount && elementRef.current) {
       try {
-        unmountRef.current = mounter.mount(elementRef.current);
+        unmountRef.current = mount(elementRef.current);
       } catch (e) {
         // TODO: use client-side logger when feature is implemented
         // eslint-disable-next-line no-console
@@ -56,7 +37,7 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
         unmountRef.current = null;
       }
     };
-  }, [mounter]);
+  }, [mount]);
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;
 };

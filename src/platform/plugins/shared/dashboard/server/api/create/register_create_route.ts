@@ -9,6 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
 import {
   createRequestParamsSchema,
@@ -16,6 +17,7 @@ import {
   getCreateResponseBodySchema,
 } from './schemas';
 import { create } from './create';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -28,6 +30,13 @@ export function registerCreateRoute(
     ...routeConfig,
   });
 
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(isDashboardAppRequest);
+  });
+
   createRoute.addVersion(
     {
       version: routeVersion,
@@ -37,16 +46,32 @@ export function registerCreateRoute(
           body: getCreateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
-          200: {
+          201: {
             body: () => getCreateResponseBodySchema(isDashboardAppRequest),
+            description: 'Indicates the dashboard is created successfully',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          409: {
+            description: 'Indicates that a dashboard with the given ID already exists.',
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.body, req.params, isDashboardAppRequest);
-        return res.ok({ body: result });
+        const result = await create(
+          ctx,
+          getCachedDashboardStateSchema(),
+          req.body,
+          req.params,
+          isDashboardAppRequest
+        );
+        return res.created({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
@@ -57,10 +82,10 @@ export function registerCreateRoute(
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest({ body: e });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );

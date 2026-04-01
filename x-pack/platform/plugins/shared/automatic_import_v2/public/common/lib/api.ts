@@ -107,10 +107,23 @@ export const getAllIntegrations = async ({
     signal: abortSignal,
   });
 
+export interface DeleteIntegrationRequest {
+  integrationId: string;
+}
+
+export const deleteIntegration = async ({
+  http,
+  integrationId,
+}: RequestDeps & DeleteIntegrationRequest): Promise<void> =>
+  http.delete<void>(`${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(integrationId)}`, {
+    version: '1',
+  });
+
 export interface UploadSamplesRequest {
   integrationId: string;
   dataStreamId: string;
-  samples: string[];
+  samples?: string[];
+  sourceIndex?: string;
   originalSource: OriginalSource;
 }
 
@@ -120,6 +133,7 @@ export const uploadSamplesToDataStream = async ({
   integrationId,
   dataStreamId,
   samples,
+  sourceIndex,
   originalSource,
 }: RequestDeps & UploadSamplesRequest): Promise<UploadSamplesToDataStreamResponse> =>
   http.post<UploadSamplesToDataStreamResponse>(
@@ -128,7 +142,11 @@ export const uploadSamplesToDataStream = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}/upload`,
     {
       version: '1',
-      body: JSON.stringify({ samples, originalSource }),
+      body: JSON.stringify({
+        ...(samples ? { samples } : {}),
+        ...(sourceIndex ? { sourceIndex } : {}),
+        originalSource,
+      }),
       signal: abortSignal,
     }
   );

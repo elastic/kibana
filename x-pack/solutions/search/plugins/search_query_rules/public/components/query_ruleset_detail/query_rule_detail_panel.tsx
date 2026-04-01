@@ -106,7 +106,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiButton
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     color="primary"
                     data-test-subj="queryRulesetDetailAddRuleButton"
                     onClick={() => {

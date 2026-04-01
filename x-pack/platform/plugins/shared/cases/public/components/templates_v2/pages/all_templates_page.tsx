@@ -6,19 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiBasicTable,
-  EuiSkeletonText,
-  EuiText,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBasicTable, EuiSkeletonText } from '@elastic/eui';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
-import * as i18n from '../../templates/translations';
+import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import * as i18n from '../translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
 import { useTemplatesPagination } from '../hooks/use_templates_pagination';
@@ -29,19 +22,22 @@ import { useTemplatesActions } from '../hooks/use_templates_actions';
 import { TemplatesListHeader } from '../components/templates_list_header';
 import { TemplatesTableFilters } from '../components/templates_table_filters';
 import { TemplatesInfoPanel } from '../components/templates_info_panel';
-import { TemplatesBulkActions } from '../components/templates_bulk_actions';
+import { TemplatesTableSettings } from '../components/templates_table_settings';
 import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_prompt';
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export const AllTemplatesPage: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
+  useCasesTemplatesBreadcrumbs();
+  const { owner } = useCasesContext();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
 
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
     useTemplatesState();
 
-  const { data, isLoading, refetch } = useGetTemplates({ queryParams });
+  const { data, isLoading, refetch } = useGetTemplates({
+    queryParams: { ...queryParams, owner },
+  });
   const { data: tags = [], isLoading: isLoadingTags } = useGetTemplateTags();
   const { data: creators = [], isLoading: isLoadingCreators } = useGetTemplateCreators();
   const { pagination, onTableChange } = useTemplatesPagination({
@@ -62,21 +58,21 @@ export const AllTemplatesPage: React.FC = () => {
   const {
     handleEdit,
     handleClone,
-    handleSetAsDefault,
     handleExport,
     handleDelete,
     confirmDelete,
     cancelDelete,
     templateToDelete,
+    handleIsEnabledChange,
   } = useTemplatesActions({ onDeleteSuccess: handleDeleteSuccess });
 
   const { columns } = useTemplatesColumns({
     onEdit: handleEdit,
     onClone: handleClone,
-    onSetAsDefault: handleSetAsDefault,
     onExport: handleExport,
     onDelete: handleDelete,
     disableActions: selectedTemplates.length > 0,
+    onIsEnabledChange: handleIsEnabledChange,
   });
 
   const tableRowProps = useCallback(
@@ -118,55 +114,15 @@ export const AllTemplatesPage: React.FC = () => {
         <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />
       ) : (
         <>
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="s"
-            css={css`
-              border-bottom: ${euiTheme.border.thin};
-              padding-top: ${euiTheme.size.s};
-              padding-bottom: ${euiTheme.size.s};
-            `}
-          >
-            <EuiFlexItem
-              grow={false}
-              data-test-subj="templates-table-count"
-              css={css`
-                border-right: ${euiTheme.border.thin};
-                padding-right: ${euiTheme.size.s};
-                padding-bottom: ${euiTheme.size.s};
-                padding-top: ${euiTheme.size.s};
-              `}
-            >
-              <EuiText size="xs" color="subdued">
-                {i18n.SHOWING}{' '}
-                <strong>
-                  {rangeStart}
-                  {'-'}
-                  {rangeEnd}
-                </strong>{' '}
-                {i18n.SHOWING_TEMPLATES(totalTemplates)}
-              </EuiText>
-            </EuiFlexItem>
-            <TemplatesBulkActions
-              selectedTemplates={selectedTemplates}
-              onActionSuccess={handleBulkActionSuccess}
-            />
-            {hasFilters && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={handleClearFilters}
-                  size="xs"
-                  iconSide="left"
-                  iconType="cross"
-                  flush="left"
-                  data-test-subj="templates-clear-filters-link-icon"
-                >
-                  {i18n.CLEAR_FILTERS}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <TemplatesTableSettings
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            totalTemplates={totalTemplates}
+            selectedTemplates={selectedTemplates}
+            onBulkActionSuccess={handleBulkActionSuccess}
+            hasFilters={hasFilters}
+            onClearFilters={handleClearFilters}
+          />
           <EuiBasicTable
             columns={columns}
             data-test-subj="templates-table"

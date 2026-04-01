@@ -83,7 +83,11 @@ export function registerRefreshTokenRoute({
           fetchOptions.dispatcher = insecureAgent;
         }
 
-        const earsResponse = await fetch(`${earsUrl}/${provider}/oauth/refresh`, fetchOptions);
+        const earsBaseUrl = earsUrl.replace(/\/$/, '');
+        const earsResponse = await fetch(
+          `${earsBaseUrl}/v1/${provider}/oauth/refresh`,
+          fetchOptions
+        );
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();

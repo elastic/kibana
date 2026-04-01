@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
@@ -1022,6 +1022,130 @@ describe('PackagePolicyInputPanel', () => {
       });
       await waitFor(async () => {
         expect(await renderResult.findByText('Collect sample logs')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('For single input and streams', () => {
+    beforeEach(() => {
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+    });
+
+    const singleStream: RegistryStreamWithDataStream[] = [
+      {
+        input: 'logfile',
+        title: 'Stream 1',
+        template_path: 'stream.yml.hbs',
+        vars: [
+          {
+            name: 'paths',
+            type: 'text',
+            title: 'Paths',
+            multi: false,
+            required: false,
+            show_user: true,
+          },
+        ],
+        description: 'Test stream',
+        data_stream: {
+          ...mockPackageInputStreams[0].data_stream,
+        },
+      },
+    ];
+
+    const singleStreamPolicyInput = {
+      ...packagePolicyInput,
+      streams: [packagePolicyInput.streams[0]],
+    } as NewPackagePolicyInput;
+
+    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={singleStream}
+          packagePolicyInput={singleStreamPolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+          isSingleInputAndStreams={true}
+        />
+      );
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+        ).toBeInTheDocument();
+        expect(
+          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('should consolidate advanced sections when all stream vars are advanced', async () => {
+      const advancedOnlyStream: RegistryStreamWithDataStream[] = [
+        {
+          input: 'logfile',
+          title: 'Stream 1',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'processors',
+              type: 'yaml',
+              title: 'Processors',
+              multi: false,
+              required: false,
+              show_user: false,
+            },
+          ],
+          description: 'Test stream with only advanced vars',
+          data_stream: {
+            ...mockPackageInputStreams[0].data_stream,
+          },
+        },
+      ];
+
+      const inputWithVars: RegistryInput = {
+        ...mockPackageInput,
+        vars: [
+          {
+            name: 'api_key',
+            type: 'text',
+            title: 'API Key',
+            required: true,
+            show_user: true,
+          },
+        ],
+      };
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={inputWithVars}
+          packageInputStreams={advancedOnlyStream}
+          packagePolicyInput={singleStreamPolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+          isSingleInputAndStreams={true}
+        />
+      );
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('PackagePolicy.InputConfig.streams')
+        ).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(renderResult.getByText('Advanced options'));
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Processors')).toBeInTheDocument();
       });
     });
   });

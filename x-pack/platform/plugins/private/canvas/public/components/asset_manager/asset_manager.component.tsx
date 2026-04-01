@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -24,6 +23,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -78,6 +78,7 @@ export interface Props {
 export const AssetManager: FC<Props> = (props) => {
   const { assets, onClose, onAddAsset } = props;
   const [isLoading, setIsLoading] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   const assetsTotal = Math.round(
     assets.reduce((total, { value }) => total + value.length, 0) / 1024
@@ -112,9 +113,10 @@ export const AssetManager: FC<Props> = (props) => {
       onClose={() => onClose()}
       className="canvasAssetManager canvasModal--fixedSize"
       maxWidth="1000px"
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader className="canvasAssetManager__modalHeader">
-        <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
+        <EuiModalHeaderTitle id={modalTitleId} className="canvasAssetManager__modalHeaderTitle">
           {strings.getModalTitle()}
         </EuiModalHeaderTitle>
         <EuiFlexGroup className="canvasAssetManager__fileUploadWrapper">
@@ -172,11 +174,4 @@ export const AssetManager: FC<Props> = (props) => {
       </EuiModalFooter>
     </EuiModal>
   );
-};
-
-AssetManager.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  assets: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
 };

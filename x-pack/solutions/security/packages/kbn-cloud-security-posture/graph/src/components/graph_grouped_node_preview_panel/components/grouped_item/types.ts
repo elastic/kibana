@@ -54,6 +54,8 @@ export interface EntityItem extends EntitySpecificFields {
   type?: string;
   subType?: string;
   availableInEntityStore?: boolean;
+  /** Raw ECS source fields that identify this entity (e.g., { 'user.id': 'admin' }). Multi-value fields are arrays. */
+  sourceFields?: Record<string, string | string[]>;
 }
 
 export type EntityOrEventItem = EventItem | AlertItem | EntityItem;

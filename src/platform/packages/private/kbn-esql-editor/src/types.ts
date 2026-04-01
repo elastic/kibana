@@ -16,6 +16,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type {
   ESQLControlVariable,
   ESQLQueryStats,
@@ -88,8 +89,6 @@ export interface ESQLEditorProps {
   enableResourceBrowser?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
-  /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
-  openVisorOnSourceCommands?: boolean;
 }
 
 interface ESQLVariableService {
@@ -115,6 +114,7 @@ export interface ESQLEditorDeps {
   kql: KqlPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   esql?: EsqlPluginStartBase;
 }
 

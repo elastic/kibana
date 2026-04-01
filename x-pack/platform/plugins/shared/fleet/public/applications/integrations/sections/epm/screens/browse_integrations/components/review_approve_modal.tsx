@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiComboBox,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
@@ -29,11 +30,18 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverValid from 'semver/functions/valid';
-import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
+
+import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
+
+import type {
+  AIV2Telemetry,
+  DataStreamResponse,
+  DataStreamResultsFlyoutComponent,
+} from './manage_integrations_table';
 
 type ReviewDataStream = DataStreamResponse;
 
@@ -81,6 +89,10 @@ const DataCollectionMethodsCell: React.FC<{
       {hiddenCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewCollectionMethodsExpandAriaLabel',
+              { defaultMessage: 'Show all data collection methods' }
+            )}
             anchorPosition="downLeft"
             button={
               <EuiBadge
@@ -126,12 +138,12 @@ export const ReviewApproveModal: React.FC<{
   onClose: () => void;
   onEdit: (integrationId: string) => void;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (integrationId: string, version: string) => Promise<void>;
-  DataStreamResultsFlyoutComponent?: React.ComponentType<{
-    integrationId: string;
-    dataStream: ReviewDataStream;
-    onClose: () => void;
-  }>;
+  onApproveAndDeploy: (
+    integrationId: string,
+    version: string,
+    categories: string[]
+  ) => Promise<void>;
+  DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
 }> = ({
   isOpen,
   integrationId,
@@ -141,6 +153,7 @@ export const ReviewApproveModal: React.FC<{
   onApproveAndDeploy,
   DataStreamResultsFlyoutComponent,
 }) => {
+  const { automaticImportVTwo } = useStartServices();
   const [isLoadingReviewDetails, setIsLoadingReviewDetails] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
@@ -149,6 +162,31 @@ export const ReviewApproveModal: React.FC<{
   const [isVersionTouched, setIsVersionTouched] = useState(false);
   const [selectedDataStreamForFlyout, setSelectedDataStreamForFlyout] =
     useState<ReviewDataStream | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<EuiComboBoxOptionOption[]>([]);
+
+  const { data: categoriesData } = useGetCategoriesQuery({ prerelease: false });
+  const categoryOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      (categoriesData?.items ?? [])
+        .filter((item) => item.parent_id === undefined)
+        .map((item) => ({
+          label: item.title,
+          value: item.id,
+        })),
+    [categoriesData]
+  );
+
+  const hasAtLeastOneCategory = useMemo(
+    () =>
+      selectedCategories.some((opt) => {
+        const value = opt.value;
+        if (typeof value === 'string') {
+          return value.length > 0;
+        }
+        return Boolean(value);
+      }),
+    [selectedCategories]
+  );
 
   const loadReviewDetails = useCallback(async () => {
     setIsLoadingReviewDetails(true);
@@ -178,6 +216,7 @@ export const ReviewApproveModal: React.FC<{
       setIsVersionTouched(false);
       setReviewError(null);
       setSelectedDataStreamForFlyout(null);
+      setSelectedCategories([]);
       loadReviewDetails();
     }
   }, [isOpen, loadReviewDetails]);
@@ -188,6 +227,14 @@ export const ReviewApproveModal: React.FC<{
     }
     onClose();
   }, [isApproving, onClose]);
+
+  const handleCancelClick = useCallback(() => {
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_approve_modal_cancel_clicked',
+      {}
+    );
+    closeModal();
+  }, [automaticImportVTwo, closeModal]);
 
   const normalizedVersion = reviewVersion.trim();
   const isVersionValid = Boolean(semverValid(normalizedVersion));
@@ -215,10 +262,27 @@ export const ReviewApproveModal: React.FC<{
       return;
     }
 
+    const categoryIds = selectedCategories.map((opt) => opt.value as string).filter(Boolean);
+    if (categoryIds.length === 0) {
+      setReviewError(
+        i18n.translate(
+          'xpack.fleet.epmList.manageIntegrations.actions.reviewCategoryRequiredError',
+          {
+            defaultMessage: 'Select at least one category before approving.',
+          }
+        )
+      );
+      return;
+    }
+
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_approve_modal_approve_clicked',
+      {}
+    );
     setIsApproving(true);
     setReviewError(null);
     try {
-      await onApproveAndDeploy(integrationId, version);
+      await onApproveAndDeploy(integrationId, version, categoryIds);
       onClose();
     } catch (error) {
       setReviewError(
@@ -231,7 +295,14 @@ export const ReviewApproveModal: React.FC<{
     } finally {
       setIsApproving(false);
     }
-  }, [integrationId, onApproveAndDeploy, onClose, reviewVersion]);
+  }, [
+    automaticImportVTwo,
+    integrationId,
+    onApproveAndDeploy,
+    onClose,
+    reviewVersion,
+    selectedCategories,
+  ]);
 
   const tableRows: ReviewTableRow[] = (reviewDetails?.dataStreams ?? []).map((dataStream) => ({
     id: dataStream.dataStreamId,
@@ -285,6 +356,7 @@ export const ReviewApproveModal: React.FC<{
     return (
       <DataStreamResultsFlyoutComponent
         integrationId={integrationId}
+        integrationName={reviewDetails?.title ?? ''}
         dataStream={selectedDataStreamForFlyout}
         onClose={() => setSelectedDataStreamForFlyout(null)}
       />
@@ -368,6 +440,36 @@ export const ReviewApproveModal: React.FC<{
                 isInvalid={isVersionInputInvalid}
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryLabel"
+                  defaultMessage="Category"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryHelp"
+                  defaultMessage="Select at least one category."
+                />
+              }
+            >
+              <EuiComboBox
+                data-test-subj="manageIntegrationReviewModalCategories"
+                aria-label={i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryAriaLabel',
+                  { defaultMessage: 'Select categories' }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryPlaceholder',
+                  { defaultMessage: 'Select categories' }
+                )}
+                selectedOptions={selectedCategories}
+                options={categoryOptions}
+                onChange={(options) => setSelectedCategories(options)}
+              />
+            </EuiFormRow>
           </>
         )}
         {reviewError && (
@@ -380,7 +482,10 @@ export const ReviewApproveModal: React.FC<{
         )}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} data-test-subj="manageIntegrationReviewModalCancel">
+        <EuiButtonEmpty
+          onClick={handleCancelClick}
+          data-test-subj="manageIntegrationReviewModalCancel"
+        >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCancel"
             defaultMessage="Cancel"
@@ -390,12 +495,12 @@ export const ReviewApproveModal: React.FC<{
           onClick={handleApproveAndDeploy}
           fill
           isLoading={isApproving}
-          isDisabled={isLoadingReviewDetails || !isVersionValid}
+          isDisabled={isLoadingReviewDetails || !isVersionValid || !hasAtLeastOneCategory}
           data-test-subj="manageIntegrationReviewApproveDeployButton"
         >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalApprove"
-            defaultMessage="Approve & deploy"
+            defaultMessage="Approve"
           />
         </EuiButton>
       </EuiModalFooter>

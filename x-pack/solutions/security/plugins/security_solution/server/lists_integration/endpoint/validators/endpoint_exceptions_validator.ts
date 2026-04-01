@@ -11,6 +11,7 @@ import type {
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -21,15 +22,15 @@ export class EndpointExceptionsValidator extends BaseValidator {
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
-    return this.validateHasEndpointExceptionsPrivileges('canReadEndpointExceptions');
+    return this.validateHasPrivilege('canReadEndpointExceptions');
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
-    await this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+    await this.validateHasPrivilege('canWriteEndpointExceptions');
 
-    if (!this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
-      // With disabled FF, Endpoint Exceptions are ONLY global, so we need to make sure the user
-      // also has the new Global Artifacts privilege
+    if (!(await this.endpointAppContext.isEndpointExceptionsPerPolicyEnabled())) {
+      // Without the user opting in, Endpoint Exceptions are ONLY global,
+      // so we need to make sure the user also has the new Global Artifacts privilege
       try {
         await this.validateHasPrivilege('canManageGlobalArtifacts');
       } catch (error) {
@@ -42,10 +43,24 @@ export class EndpointExceptionsValidator extends BaseValidator {
     }
   }
 
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanCreateGlobalArtifacts(item);
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
+  }
+
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
 
-    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (await this.endpointAppContext.isEndpointExceptionsPerPolicyEnabled()) {
       await this.validateCanCreateByPolicyArtifacts(item);
       await this.validateByPolicyItem(item);
     }
@@ -64,7 +79,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
 
     await this.validateHasWritePrivilege();
 
-    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (await this.endpointAppContext.isEndpointExceptionsPerPolicyEnabled()) {
       try {
         await this.validateCanCreateByPolicyArtifacts(updatedItem);
       } catch (noByPolicyAuthzError) {

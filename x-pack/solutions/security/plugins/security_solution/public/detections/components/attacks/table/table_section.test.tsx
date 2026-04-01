@@ -13,7 +13,11 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { TestProviders } from '../../../../common/mock';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
+import {
+  TABLE_SECTION_TEST_ID,
+  ATTACKS_TABLE_SORT_STORAGE_KEY,
+  TableSection,
+} from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
@@ -24,7 +28,14 @@ import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { useGroupStats } from './grouping_settings/use_group_stats';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+import { useLocalStorage } from '../../../../common/components/local_storage';
 
+jest.mock('../../../../common/components/local_storage', () => ({
+  useLocalStorage: jest.fn(),
+}));
+jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -75,6 +86,8 @@ const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
 const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 const mockUseGroupStats = useGroupStats as jest.Mock;
 
+const reportEvent = jest.fn();
+
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
   pageFilters: [],
@@ -86,6 +99,18 @@ const defaultProps: Parameters<typeof TableSection>[0] = {
 
 describe('<TableSection />', () => {
   beforeEach(() => {
+    (useLocalStorage as jest.Mock).mockReturnValue([
+      [{ latestTimestamp: { order: 'desc' } }],
+      jest.fn(),
+    ]);
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent,
+        },
+      },
+    });
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
     });
@@ -153,6 +178,31 @@ describe('<TableSection />', () => {
           isLoading: true,
         })
       );
+    });
+  });
+
+  it('should report telemetry when openAttackDetailsFlyout is called', async () => {
+    mockUseAttackGroupHandler.mockReturnValue({
+      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
+      isLoading: false,
+    });
+
+    render(
+      <TestProviders>
+        <TableSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalled();
+    });
+
+    const { openAttackDetailsFlyout } = mockUseGetDefaultGroupTitleRenderers.mock.calls[0][0];
+    openAttackDetailsFlyout('group-1', {});
+
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
+      id: 'attack-1',
+      source: 'attacks_page_table',
     });
   });
 
@@ -489,6 +539,21 @@ describe('<TableSection />', () => {
   });
 
   describe('enforced groups', () => {
+    it('initializes useLocalStorage with correct key and default value', () => {
+      render(
+        <TestProviders>
+          <TableSection {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(useLocalStorage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: ATTACKS_TABLE_SORT_STORAGE_KEY,
+          defaultValue: [{ latestTimestamp: { order: 'desc' } }],
+        })
+      );
+    });
+
     it('should pass all grouping settings including enforcedGroups', async () => {
       render(
         <TestProviders>

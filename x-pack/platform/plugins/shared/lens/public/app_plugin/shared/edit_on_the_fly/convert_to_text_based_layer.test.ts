@@ -10,7 +10,9 @@ import type {
   TypedLensSerializedState,
   DatasourceStates,
   IndexPattern,
+  IndexPatternField,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 import type { ConvertibleLayer, EsqlConversionData } from './esql_conversion_types';
@@ -24,13 +26,38 @@ describe('convertFormBasedToTextBasedLayer', () => {
     name: 'test-index',
     timeFieldName: '@timestamp',
     fields: [
-      { name: '@timestamp', type: 'date', aggregatable: true, searchable: true },
-      { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
-    ],
+      {
+        name: '@timestamp',
+        type: 'date',
+        aggregatable: true,
+        searchable: true,
+        displayName: '@timestamp',
+      },
+      {
+        name: 'bytes',
+        type: 'number',
+        aggregatable: true,
+        searchable: true,
+        displayName: 'bytes',
+      },
+      {
+        displayName: 'Records',
+        customLabel: 'Records',
+        name: 'records',
+        type: 'document',
+        aggregatable: true,
+        searchable: true,
+      },
+    ] satisfies IndexPatternField[],
     getFieldByName: (name: string) =>
       ({
-        '@timestamp': { name: '@timestamp', type: 'date' },
-        bytes: { name: 'bytes', type: 'number' },
+        '@timestamp': { name: '@timestamp', type: 'date', displayName: '@timestamp' },
+        bytes: { name: 'bytes', type: 'number', displayName: 'bytes' },
+        records: {
+          name: 'records',
+          displayName: 'Records',
+          type: 'document',
+        },
       }[name]),
     getFormatterForField: () => ({ id: 'number', params: {} }),
     hasRestrictions: false,
@@ -51,7 +78,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
       },
       col2: {
         operationType: 'count',
-        sourceField: '___records___',
+        sourceField: 'records',
         label: 'Count of records',
         dataType: 'number',
         isBucketed: false,
@@ -128,7 +155,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
       id,
       label,
       operationType: (overrides.operationType as string) ?? 'count',
-      sourceField: (overrides.sourceField as string) ?? '___records___',
+      sourceField: (overrides.sourceField as string) ?? 'records',
       dataType,
       interval: undefined as never,
       ...overrides,
@@ -200,7 +227,10 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
     expect(result).toBeDefined();
     expect(result?.state.datasourceStates.textBased).toBeDefined();
-    expect(result?.state.query).toEqual({ esql: defaultConvertibleLayers[0].query });
+    // Conversion formats the query with the composer before adding to state
+    expect(result?.state.query).toEqual({
+      esql: esql(defaultConvertibleLayers[0].query).print('wrapping'),
+    });
   });
 
   it('preserves original column IDs in visualization state', () => {
@@ -216,11 +246,18 @@ describe('convertFormBasedToTextBasedLayer', () => {
     expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns).toEqual([
       {
         columnId: 'col2',
+        customLabel: true,
         fieldName: 'bucket_0_0',
         label: 'Count of records',
         meta: { type: 'number' },
       },
-      { columnId: 'col1', fieldName: '@timestamp', label: '@timestamp', meta: { type: 'date' } },
+      {
+        columnId: 'col1',
+        customLabel: true,
+        fieldName: '@timestamp',
+        label: '@timestamp',
+        meta: { type: 'date' },
+      },
     ]);
   });
 
@@ -241,19 +278,53 @@ describe('convertFormBasedToTextBasedLayer', () => {
   });
 
   describe('column properties preservation', () => {
+    const createDatasourceStatesWithColumnFormat = (format: { id: string; params?: object }) => {
+      const formBasedLayerWithFormat = {
+        ...mockFormBasedLayer,
+        columns: {
+          ...mockFormBasedLayer.columns,
+          col2: {
+            ...mockFormBasedLayer.columns.col2,
+            params: { format },
+          },
+        },
+      } as typeof mockFormBasedLayer;
+      const formBasedStateWithFormat = {
+        ...mockFormBasedState,
+        layers: { [layerId]: formBasedLayerWithFormat },
+      } as FormBasedPrivateState;
+      return { formBased: { state: formBasedStateWithFormat, isLoading: false } };
+    };
+
     it.each([
-      ['custom labels', { customLabel: true }, { customLabel: true }],
+      ['custom labels', { customLabel: true }, { customLabel: true }, mockDatasourceStates],
       [
         'format',
-        { format: { id: 'bytes', params: { decimals: 2 } } },
-        { params: { format: { id: 'bytes', params: { decimals: 2 } } } },
+        {
+          format: { id: 'bytes', params: { decimals: 2 } },
+        },
+        {
+          params: { format: { id: 'bytes', params: { decimals: 2 } } },
+          label: 'Count of records',
+        },
+        createDatasourceStatesWithColumnFormat({ id: 'bytes', params: { decimals: 2 } }),
       ],
       [
         'custom label and format',
-        { customLabel: true, format: { id: 'bytes', params: { decimals: 1 } } },
-        { customLabel: true, params: { format: { id: 'bytes', params: { decimals: 1 } } } },
+        {
+          customLabel: true,
+          format: { id: 'bytes', params: { decimals: 1 } },
+        },
+        {
+          customLabel: true,
+          params: {
+            format: { id: 'bytes', params: { decimals: 1 } },
+          },
+          label: 'My Label',
+        },
+        createDatasourceStatesWithColumnFormat({ id: 'bytes', params: { decimals: 1 } }),
       ],
-    ])('preserves %s', (_, inputOverrides, expectedOverrides) => {
+    ])('preserves %s', (_, inputOverrides, expectedOverrides, datasourceStates) => {
       const layers = [
         createConvertibleLayer('FROM test-index | STATS my_count = COUNT(*)', {
           my_count: createColumnMapping('col2', 'My Label', 'number', inputOverrides),
@@ -264,17 +335,40 @@ describe('convertFormBasedToTextBasedLayer', () => {
         layersToConvert: layers,
         attributes: mockAttributes,
         visualizationState: mockVisualizationState,
-        datasourceStates: mockDatasourceStates,
+        datasourceStates,
         framePublicAPI: createFrameAPI(),
       });
 
       expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]).toEqual({
         columnId: 'col2',
+        customLabel: true,
         fieldName: 'my_count',
         label: 'My Label',
         meta: { type: 'number' },
         ...expectedOverrides,
       });
+    });
+
+    it('does not set format on text-based column when user did not set format on form-based column', () => {
+      const layers = [
+        createConvertibleLayer('FROM test-index | STATS my_count = COUNT(*)', {
+          my_count: createColumnMapping('col2', 'Count', 'number', {
+            format: { id: 'bytes', params: {} },
+          }),
+        }),
+      ];
+      // mockFormBasedState has col2 without params.format, so user never set format
+
+      const result = convertFormBasedToTextBasedLayer({
+        layersToConvert: layers,
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      });
+
+      const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
+      expect(column).not.toHaveProperty('params');
     });
 
     it('does not include params when format is undefined', () => {
@@ -294,62 +388,6 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
       const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
       expect(column).not.toHaveProperty('params');
-      expect(column).not.toHaveProperty('customLabel');
-    });
-  });
-
-  describe('field format fallback', () => {
-    const fieldFormatMap = { bytes: { id: 'currency', params: { pattern: '$0,0.00' } } };
-
-    it('uses data view field format when column has no format', () => {
-      const layers = [
-        createConvertibleLayer('FROM test-index | STATS total_bytes = SUM(bytes)', {
-          total_bytes: createColumnMapping('col2', 'Total Bytes', 'number', {
-            operationType: 'sum',
-            sourceField: 'bytes',
-          }),
-        }),
-      ];
-
-      const result = convertFormBasedToTextBasedLayer({
-        layersToConvert: layers,
-        attributes: mockAttributes,
-        visualizationState: mockVisualizationState,
-        datasourceStates: mockDatasourceStates,
-        framePublicAPI: createFrameAPI(fieldFormatMap),
-      });
-
-      expect(
-        result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]?.params
-      ).toEqual({
-        format: { id: 'currency', params: { pattern: '$0,0.00' } },
-      });
-    });
-
-    it('prefers column format over data view field format', () => {
-      const layers = [
-        createConvertibleLayer('FROM test-index | STATS total_bytes = SUM(bytes)', {
-          total_bytes: createColumnMapping('col2', 'Total Bytes', 'number', {
-            operationType: 'sum',
-            sourceField: 'bytes',
-            format: { id: 'bytes', params: { decimals: 2 } },
-          }),
-        }),
-      ];
-
-      const result = convertFormBasedToTextBasedLayer({
-        layersToConvert: layers,
-        attributes: mockAttributes,
-        visualizationState: mockVisualizationState,
-        datasourceStates: mockDatasourceStates,
-        framePublicAPI: createFrameAPI(fieldFormatMap),
-      });
-
-      expect(
-        result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]?.params
-      ).toEqual({
-        format: { id: 'bytes', params: { decimals: 2 } },
-      });
     });
   });
 });

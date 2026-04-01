@@ -28,16 +28,14 @@ describe('Mosaic Schema', () => {
     it('validates minimal configuration with single outer grouping', () => {
       const input: MosaicState = {
         ...baseMosaicConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: true,
-          },
-        ],
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -45,38 +43,17 @@ describe('Mosaic Schema', () => {
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.type).toBe('mosaic');
-      expect(validated.metrics[0].operation).toBe('count');
+      expect(validated.metric.operation).toBe('count');
       expect(validated.group_by).toHaveLength(1);
     });
 
     it('should throw if no grouping is defined', () => {
       const input = {
         ...baseMosaicConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: true,
-          },
-        ],
-      };
-
-      expect(() => mosaicStateSchema.validate(input)).toThrow();
-    });
-
-    it('should throw if multiple metrics are defined', () => {
-      const input = {
-        ...baseMosaicConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: true,
-          },
-          {
-            operation: 'sum',
-            field: 'sales',
-            empty_as_null: false,
-          },
-        ],
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
       };
 
       expect(() => mosaicStateSchema.validate(input)).toThrow();
@@ -85,17 +62,15 @@ describe('Mosaic Schema', () => {
     it('validates configuration with both outer and inner grouping', () => {
       const input: MosaicState = {
         ...baseMosaicConfig,
-        metrics: [
-          {
-            operation: 'sum',
-            empty_as_null: false,
-            field: 'sales',
-          },
-        ],
+        metric: {
+          operation: 'sum',
+          empty_as_null: false,
+          field: 'sales',
+        },
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -111,7 +86,7 @@ describe('Mosaic Schema', () => {
       };
 
       const validated = mosaicStateSchema.validate(input);
-      expect(validated.metrics[0].operation).toBe('sum');
+      expect(validated.metric.operation).toBe('sum');
       expect(validated.group_by).toHaveLength(1);
       expect(validated.group_breakdown_by).toHaveLength(1);
     });
@@ -119,22 +94,20 @@ describe('Mosaic Schema', () => {
     it('validates configuration with collapsed dimensions', () => {
       const input: MosaicState = {
         ...baseMosaicConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: true,
-          },
-        ],
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['region'],
             collapse_by: 'sum',
           },
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -160,53 +133,49 @@ describe('Mosaic Schema', () => {
         ...baseMosaicConfig,
         title: 'Sales Mosaic',
         description: 'Sales data visualization',
-        metrics: [
-          {
-            operation: 'sum',
-            empty_as_null: false,
-            field: 'sales',
-          },
-        ],
+        metric: {
+          operation: 'sum',
+          empty_as_null: false,
+          field: 'sales',
+        },
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
         group_breakdown_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['subcategory'],
           },
         ],
         legend: {
           nested: true,
           truncate_after_lines: 5,
-          visible: 'show',
-          size: 'small',
+          visibility: 'visible',
+          size: 's',
         },
-        value_display: {
-          mode: 'hidden',
+        values: {
+          visible: false,
         },
       };
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.value_display?.mode).toBe('hidden');
+      expect(validated.values?.visible).toBe(false);
     });
 
     it('throws on empty group_by array', () => {
       const input: MosaicState = {
         ...baseMosaicConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: true,
-          },
-        ],
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
         group_by: [],
       };
 
@@ -216,16 +185,14 @@ describe('Mosaic Schema', () => {
     it('throws on empty group_breakdown_by array', () => {
       const input: MosaicState = {
         ...baseMosaicConfig,
-        metrics: [
-          {
-            operation: 'count',
-            empty_as_null: true,
-          },
-        ],
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -239,16 +206,14 @@ describe('Mosaic Schema', () => {
       it('allows single non-collapsed dimension in group_by', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -260,28 +225,26 @@ describe('Mosaic Schema', () => {
       it('allows multiple collapsed dimensions in group_by', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
               collapse_by: 'avg',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
@@ -293,21 +256,19 @@ describe('Mosaic Schema', () => {
       it('throws when group_by has multiple non-collapsed dimensions', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
             },
           ],
@@ -321,27 +282,25 @@ describe('Mosaic Schema', () => {
       it('throws when group_by has multiple non-collapsed dimensions with some collapsed', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
@@ -355,16 +314,14 @@ describe('Mosaic Schema', () => {
       it('allows single non-collapsed dimension in group_breakdown_by', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -385,16 +342,14 @@ describe('Mosaic Schema', () => {
       it('allows multiple collapsed dimensions in group_breakdown_by', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -416,7 +371,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -428,16 +383,14 @@ describe('Mosaic Schema', () => {
       it('throws when group_breakdown_by has multiple non-collapsed dimensions', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -466,16 +419,14 @@ describe('Mosaic Schema', () => {
       it('throws when group_breakdown_by has multiple non-collapsed dimensions with some collapsed', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -496,7 +447,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -510,12 +461,10 @@ describe('Mosaic Schema', () => {
       it('throws when no grouping dimension are defined', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
         };
 
         expect(() => mosaicStateSchema.validate(input)).toThrow(
@@ -526,12 +475,10 @@ describe('Mosaic Schema', () => {
       it('allows only the group_breakdown_by definition without group_by', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'count',
-              empty_as_null: true,
-            },
-          ],
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
           group_breakdown_by: [
             {
               operation: 'date_histogram',
@@ -550,7 +497,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -562,29 +509,27 @@ describe('Mosaic Schema', () => {
       it('allows valid combination with both outer and inner having multiple collapsed dimensions', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
-          metrics: [
-            {
-              operation: 'sum',
-              empty_as_null: false,
-              field: 'sales',
-            },
-          ],
+          metric: {
+            operation: 'sum',
+            empty_as_null: false,
+            field: 'sales',
+          },
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
               collapse_by: 'avg',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
@@ -606,7 +551,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -634,12 +579,10 @@ describe('Mosaic Schema', () => {
     it('throws when no grouping dimension are defined', () => {
       const input: MosaicState = {
         ...baseESQLMosaicConfig,
-        metrics: [
-          {
-            operation: 'value',
-            column: 'foo',
-          },
-        ],
+        metric: {
+          operation: 'value',
+          column: 'foo',
+        },
       };
 
       expect(() => mosaicStateSchema.validate(input)).toThrow(
@@ -650,12 +593,10 @@ describe('Mosaic Schema', () => {
     it('allows only the group_breakdown_by definition without group_by', () => {
       const input: MosaicState = {
         ...baseESQLMosaicConfig,
-        metrics: [
-          {
-            operation: 'value',
-            column: 'foo',
-          },
-        ],
+        metric: {
+          operation: 'value',
+          column: 'foo',
+        },
         group_breakdown_by: [
           {
             operation: 'value',
@@ -675,24 +616,6 @@ describe('Mosaic Schema', () => {
       };
 
       expect(() => mosaicStateSchema.validate(input)).not.toThrow();
-    });
-
-    it('should throw if multiple metrics are defined', () => {
-      const input = {
-        ...baseESQLMosaicConfig,
-        metrics: [
-          {
-            operation: 'value',
-            column: 'sales',
-          },
-          {
-            operation: 'value',
-            column: 'sales',
-          },
-        ],
-      };
-
-      expect(() => mosaicStateSchema.validate(input)).toThrow();
     });
   });
 });

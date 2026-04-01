@@ -22,7 +22,9 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_EXCLUDED_AT,
   FEATURE_ID,
+  FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
 } from './fields';
 
@@ -46,6 +48,8 @@ export const featureStorageSettings = {
       [FEATURE_TAGS]: types.keyword(),
       [FEATURE_META]: types.object({ enabled: false }),
       [FEATURE_EXPIRES_AT]: types.date(),
+      [FEATURE_EXCLUDED_AT]: types.date(),
+      [FEATURE_FILTER]: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;

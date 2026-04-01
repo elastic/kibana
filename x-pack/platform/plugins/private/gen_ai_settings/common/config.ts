@@ -17,6 +17,7 @@ const configSchema = schema.object({
   showSpacesIntegration: schema.boolean({ defaultValue: true }),
   showAiAssistantsVisibilitySetting: schema.boolean({ defaultValue: true }),
   showChatExperienceSetting: schema.boolean({ defaultValue: true }),
+  showAnonymizationProfileSettings: schema.boolean({ defaultValue: false }),
 });
 
 export type GenAiSettingsConfigType = TypeOf<typeof configSchema>;
@@ -31,5 +32,6 @@ export const config: PluginConfigDescriptor<GenAiSettingsConfigType> = {
     showSpacesIntegration: true,
     showAiAssistantsVisibilitySetting: true,
     showChatExperienceSetting: true,
+    showAnonymizationProfileSettings: true,
   },
 };

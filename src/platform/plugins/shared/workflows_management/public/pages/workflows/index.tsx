@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +25,7 @@ import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/c
 import { useWorkflows } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
+import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { WorkflowList } from '../../features/workflow_list';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
@@ -85,6 +87,8 @@ export function WorkflowsPage() {
     [history]
   );
 
+  const [showImportFlyout, setShowImportFlyout] = useState(false);
+
   const navigateToCreateWorkflow = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { path: '/create' });
   }, [application]);
@@ -118,22 +122,40 @@ export function WorkflowsPage() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="s">
               {canCreateWorkflow && (
-                <EuiButton
-                  iconType="plusInCircle"
-                  color="primary"
-                  size="m"
-                  fill
-                  onClick={navigateToCreateWorkflow}
-                  data-test-subj="createWorkflowButton"
-                >
-                  <FormattedMessage
-                    id="workflows.createWorkflowButton"
-                    defaultMessage="Create a new workflow"
-                    ignoreTag
-                  />
-                </EuiButton>
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="download"
+                      size="m"
+                      onClick={() => setShowImportFlyout(true)}
+                      data-test-subj="importWorkflowsButton"
+                    >
+                      <FormattedMessage
+                        id="workflows.importWorkflowsButton"
+                        defaultMessage="Import"
+                        ignoreTag
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType="plusCircle"
+                      color="primary"
+                      size="m"
+                      fill
+                      onClick={navigateToCreateWorkflow}
+                      data-test-subj="createWorkflowButton"
+                    >
+                      <FormattedMessage
+                        id="workflows.createWorkflowButton"
+                        defaultMessage="Create a new workflow"
+                        ignoreTag
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </>
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -199,6 +221,9 @@ export function WorkflowsPage() {
           onCreateWorkflow={navigateToCreateWorkflow}
         />
       </EuiPageTemplate.Section>
+      {showImportFlyout ? (
+        <ImportWorkflowsFlyout onClose={() => setShowImportFlyout(false)} />
+      ) : null}
     </EuiPageTemplate>
   );
 }

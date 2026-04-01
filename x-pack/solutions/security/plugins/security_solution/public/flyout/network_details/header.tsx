@@ -13,7 +13,7 @@ import { getNetworkDetailsUrl } from '../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../common/components/links';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { FlyoutHeader } from '../shared/components/flyout_header';
-import { FlyoutTitle } from '../shared/components/flyout_title';
+import { FlyoutTitle } from '../../flyout_v2/shared/components/flyout_title';
 import { encodeIpv6 } from '../../common/lib/helpers';
 
 export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {

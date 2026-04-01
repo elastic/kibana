@@ -571,17 +571,30 @@ export const GetFileRequestSchema = {
   }),
 };
 
+const PackageRequestParamsSchema = schema.object({
+  pkgName: schema.string(),
+});
+
+const PackageVersionRequestParamsSchema = schema.object({
+  pkgName: schema.string(),
+  pkgVersion: schema.string(),
+});
+
+const GetInfoQuerySchema = schema.object({
+  ignoreUnverified: schema.maybe(schema.boolean()),
+  prerelease: schema.maybe(schema.boolean()),
+  full: schema.maybe(schema.boolean()),
+  withMetadata: schema.boolean({ defaultValue: false }),
+});
+
 export const GetInfoRequestSchema = {
-  params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
-  }),
-  query: schema.object({
-    ignoreUnverified: schema.maybe(schema.boolean()),
-    prerelease: schema.maybe(schema.boolean()),
-    full: schema.maybe(schema.boolean()),
-    withMetadata: schema.boolean({ defaultValue: false }),
-  }),
+  params: PackageVersionRequestParamsSchema,
+  query: GetInfoQuerySchema,
+};
+
+export const GetInfoWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  query: GetInfoQuerySchema,
 };
 export const GetKnowledgeBaseRequestSchema = {
   params: schema.object({
@@ -598,14 +611,36 @@ export const GetBulkAssetsRequestSchema = {
 };
 
 export const UpdatePackageRequestSchema = {
-  params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
-  }),
+  params: PackageVersionRequestParamsSchema,
   body: schema.object({
     keepPoliciesUpToDate: schema.boolean(),
   }),
 };
+
+export const UpdatePackageWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  body: UpdatePackageRequestSchema.body,
+};
+
+export const ReviewUpgradeRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({
+      meta: { description: 'Package name to review upgrade for' },
+    }),
+  }),
+  body: schema.object({
+    action: schema.oneOf([
+      schema.literal('accept'),
+      schema.literal('decline'),
+      schema.literal('pending'),
+    ]),
+    target_version: schema.string(),
+  }),
+};
+
+export const ReviewUpgradeResponseSchema = schema.object({
+  success: schema.boolean(),
+});
 
 export const GetStatsRequestSchema = {
   params: schema.object({
@@ -614,14 +649,17 @@ export const GetStatsRequestSchema = {
 };
 
 export const InstallPackageFromRegistryRequestSchema = {
-  params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
-  }),
+  params: PackageVersionRequestParamsSchema,
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
     ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
     skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+    skipDependencyCheck: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description: 'Skip dependency validation when installing a package with dependencies',
+      },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -629,6 +667,12 @@ export const InstallPackageFromRegistryRequestSchema = {
       ignore_constraints: schema.boolean({ defaultValue: false }),
     })
   ),
+};
+
+export const InstallPackageFromRegistryWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  query: InstallPackageFromRegistryRequestSchema.query,
+  body: InstallPackageFromRegistryRequestSchema.body,
 };
 
 export const ReauthorizeTransformRequestSchema = {
@@ -746,13 +790,15 @@ export const CreateCustomIntegrationRequestSchema = {
 };
 
 export const DeletePackageRequestSchema = {
-  params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
-  }),
+  params: PackageVersionRequestParamsSchema,
   query: schema.object({
     force: schema.maybe(schema.boolean()),
   }),
+};
+
+export const DeletePackageWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  query: DeletePackageRequestSchema.query,
 };
 
 export const InstallKibanaAssetsRequestSchema = {

@@ -372,10 +372,12 @@ export class LensPlugin {
             nowProvider: plugins.data.nowProvider,
             forceDSL,
             eventAnnotationService,
+            http: coreStart.http,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
         datasourceMap,
+        eventAnnotationService,
         theme: core.theme,
         uiSettings: core.uiSettings,
       };
@@ -419,7 +421,7 @@ export class LensPlugin {
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                savedObjectId: savedObject.id,
+                ref_id: savedObject.id,
               } satisfies LensByRefSerializedState,
             },
             {
@@ -427,7 +429,7 @@ export class LensPlugin {
             }
           );
         },
-        savedObjectType: LENS_EMBEDDABLE_TYPE,
+        savedObjectType: LENS_CONTENT_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
           defaultMessage: 'Lens',
         }),

@@ -299,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               error: 'Bad Request',
               message:
-                'Invalid aggregation: [type_count.max.script]: definition for this key is missing: Bad Request',
+                "Invalid aggregation: [type_count.max.script]: Additional properties are not allowed ('script' was unexpected): Bad Request",
               statusCode: 400,
             });
           }));

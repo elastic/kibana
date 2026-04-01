@@ -1293,6 +1293,115 @@
       },
       {
         "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getLegendLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "getLegendLayout",
+        "description": [],
+        "signature": [
+          "({\n  isInside,\n  position,\n  layout,\n}: { isInside?: boolean | undefined; position?: ",
+          "Position",
+          " | undefined; layout?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.LegendLayout",
+            "text": "LegendLayout"
+          },
+          " | undefined; }) => ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.LegendLayout",
+            "text": "LegendLayout"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getLegendLayout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isInside,\n  position,\n  layout,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/chart-expressions-common",
+                "id": "def-common.getLegendLayout.$1.isInside",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isInside",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/chart-expressions-common",
+                "id": "def-common.getLegendLayout.$1.position",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "position",
+                "description": [],
+                "signature": [
+                  "Position",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/chart-expressions-common",
+                "id": "def-common.getLegendLayout.$1.layout",
+                "type": "string",
+                "tags": [],
+                "label": "layout",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/chart-expressions-common",
+                    "scope": "common",
+                    "docId": "kibKbnChartExpressionsCommonPluginApi",
+                    "section": "def-common.LegendLayout",
+                    "text": "LegendLayout"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
         "id": "def-common.getOverridesFor",
         "type": "Function",
         "tags": [],
@@ -1878,20 +1987,6 @@
     "enums": [
       {
         "parentPluginId": "@kbn/chart-expressions-common",
-        "id": "def-common.LegendLayout",
-        "type": "Enum",
-        "tags": [],
-        "label": "LegendLayout",
-        "description": [],
-        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
-        "lineNumber": 20,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/chart-expressions-common",
         "id": "def-common.LegendSize",
         "type": "Enum",
         "tags": [],
@@ -1924,7 +2019,7 @@
           ".MEDIUM"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
-        "lineNumber": 33,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2022,6 +2117,20 @@
       },
       {
         "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.LegendLayout",
+        "type": "string",
+        "tags": [],
+        "label": "LegendLayout",
+        "description": [],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
         "id": "def-common.MakeOverridesSerializable",
         "type": "Type",
         "tags": [],
@@ -2075,7 +2184,7 @@
           "\"count\" | \"min\" | \"range\" | \"max\" | \"median\" | \"total\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"stdDeviation\" | \"difference\" | \"differencePercent\""
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
-        "lineNumber": 35,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2094,7 +2203,7 @@
           "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
-        "lineNumber": 25,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

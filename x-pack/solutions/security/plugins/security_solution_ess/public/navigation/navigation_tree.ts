@@ -74,7 +74,7 @@ export const createNavigationTree = (
     },
     {
       id: SecurityPageName.assetInventory,
-      icon: 'editorChecklist',
+      icon: 'listCheck',
       link: securityLink(SecurityPageName.assetInventory),
     },
     defaultNavigationTree.assets(services),
@@ -85,7 +85,7 @@ export const createNavigationTree = (
       id: 'launchpad',
       title: i18nStrings.launchPad.title,
       renderAs: 'panelOpener',
-      icon: 'launch',
+      icon: 'rocket',
       children: [
         {
           children: [
@@ -122,7 +122,7 @@ export const createNavigationTree = (
     {
       link: 'dev_tools',
       title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
+      icon: 'code',
     },
     {
       id: DATA_MANAGEMENT_NAV_ID,
@@ -203,10 +203,6 @@ export const createNavigationTree = (
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
-            {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-            },
           ],
         },
         {
@@ -223,6 +219,7 @@ export const createNavigationTree = (
           title: i18nStrings.stackManagement.ai.title,
           children: [
             { link: 'management:genAiSettings' },
+            { link: 'management:evals' },
             { link: 'management:aiAssistantManagementSelection' },
           ],
         },

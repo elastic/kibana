@@ -317,4 +317,46 @@ describe('deanonymizeMessage', () => {
       ])
     );
   });
+
+  it('emits final-string-valid deanonymization ranges for input/output when regex ordering differs from text ordering', async () => {
+    const name = 'john';
+    const email = 'john123@gmail.com';
+    const nameMask = `PER_${'a'.repeat(40)}`;
+    const emailMask = `EMAIL_${'b'.repeat(40)}`;
+
+    // Reflect regex-first processing order while PER appears first in text.
+    const anonymizations: Anonymization[] = [
+      { entity: { class_name: 'EMAIL', value: email, mask: emailMask }, rule: { type: 'RegExp' } },
+      { entity: { class_name: 'PER', value: name, mask: nameMask }, rule: { type: 'NER' } },
+    ];
+
+    const maskedContent = `my name is ${nameMask} and my email is ${emailMask}`;
+    const expectedContent = `my name is ${name} and my email is ${email}`;
+
+    const anonymizationOutput: AnonymizationOutput = {
+      messages: [{ role: MessageRole.User, content: maskedContent }],
+      anonymizations,
+    } as AnonymizationOutput;
+
+    const [chunkOut, msgOut] = await lastValueFrom(
+      from([chunkEvent(maskedContent), messageEvent(maskedContent)]).pipe(
+        deanonymizeMessage(anonymizationOutput),
+        toArray()
+      )
+    );
+
+    expect(chunkOut.content).toBe(expectedContent);
+    expect(msgOut.content).toBe(expectedContent);
+
+    const outputDeanonymizations = msgOut.deanonymized_output?.deanonymizations ?? [];
+    const inputDeanonymizations = msgOut.deanonymized_input?.[0].deanonymizations ?? [];
+
+    for (const deanonymization of [...outputDeanonymizations, ...inputDeanonymizations]) {
+      expect(deanonymization.start).toBeGreaterThanOrEqual(0);
+      expect(deanonymization.end).toBeLessThanOrEqual(expectedContent.length);
+      expect(expectedContent.slice(deanonymization.start, deanonymization.end)).toBe(
+        deanonymization.entity.value
+      );
+    }
+  });
 });
