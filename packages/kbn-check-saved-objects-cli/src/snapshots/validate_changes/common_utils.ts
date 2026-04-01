@@ -257,22 +257,38 @@ export function validateNoIndexOrEnabledFalseInAllMappings(
   throwIfIndexOrEnabledFalse(name, fieldsWithIndexFalse, fieldsWithEnabledFalse);
 }
 
-export function validateNameTitleFieldTypes(name: string, to: MigrationInfoRecord): void {
-  const invalidFields: string[] = [];
+/**
+ * Returns the invalid name/title fields for a given mapping snapshot, expressed as
+ * `{ fieldName, description }` pairs. The caller decides whether to warn or throw.
+ */
+export function getInvalidNameTitleFields(
+  to: MigrationInfoRecord
+): Array<{ fieldName: string; description: string }> {
+  const invalidFields: Array<{ fieldName: string; description: string }> = [];
 
   if ('properties.name.type' in to.mappings && to.mappings['properties.name.type'] !== 'text') {
-    invalidFields.push(`name (type: ${to.mappings['properties.name.type']}, expected: text)`);
+    invalidFields.push({
+      fieldName: 'name',
+      description: `name (type: ${to.mappings['properties.name.type']}, expected: text)`,
+    });
   }
 
   if ('properties.title.type' in to.mappings && to.mappings['properties.title.type'] !== 'text') {
-    invalidFields.push(`title (type: ${to.mappings['properties.title.type']}, expected: text)`);
+    invalidFields.push({
+      fieldName: 'title',
+      description: `title (type: ${to.mappings['properties.title.type']}, expected: text)`,
+    });
   }
 
-  if (invalidFields.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${invalidFields.join(
-        ', '
-      )}. ` + `These fields must be of type 'text' for Search API compatibility.`
-    );
-  }
+  return invalidFields;
+}
+
+/**
+ * Returns true when the SO type participates in the Saved Objects management page search.
+ * The management find route queries only types whose `management.importableAndExportable` is
+ * explicitly `true` (the registry treats the absence of the flag as `false`). Only those types
+ * need their `name`/`title` fields to be `type: text` for full-text search to work correctly.
+ */
+export function isSearchableViaManagement(registeredType: SavedObjectsType): boolean {
+  return registeredType.management?.importableAndExportable === true;
 }

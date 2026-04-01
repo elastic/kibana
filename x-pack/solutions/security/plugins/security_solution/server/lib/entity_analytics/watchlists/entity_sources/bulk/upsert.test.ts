@@ -12,7 +12,8 @@ import { bulkUpsertOperationsFactory, UPDATE_SCRIPT_SOURCE } from './upsert';
 const logger = loggingSystemMock.createLogger();
 
 describe('bulkUpsertOperationsFactory', () => {
-  const buildOps = bulkUpsertOperationsFactory(logger);
+  const watchlist = { name: 'test-watchlist', id: 'watchlist-1' };
+  const buildOps = bulkUpsertOperationsFactory(logger, watchlist);
   const targetIndex = '.entity-analytics.watchlists.test-watchlist-default';
 
   afterEach(() => {
@@ -37,6 +38,7 @@ describe('bulkUpsertOperationsFactory', () => {
       expect.objectContaining({
         entity: { id: 'user:alice', name: 'alice', type: 'user' },
         labels: { sources: ['index'], source_ids: ['source-1'] },
+        watchlist,
       })
     );
 
@@ -46,6 +48,7 @@ describe('bulkUpsertOperationsFactory', () => {
       expect.objectContaining({
         entity: { id: 'user:bob', name: 'bob', type: 'user' },
         labels: { sources: ['index'], source_ids: ['source-1'] },
+        watchlist,
       })
     );
   });

@@ -21,7 +21,6 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useKubernetesFlow } from './use_kubernetes_flow';
 import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
-import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
@@ -32,11 +31,6 @@ import type { ActionLink } from './data_ingest_status';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c';
 
 export const KubernetesPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
-      defaultMessage: 'Kubernetes: Logs & Metrics',
-    }),
-  });
   const { data, status, error, refetch } = useKubernetesFlow();
   const { onPageReady } = usePerformanceContext();
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
