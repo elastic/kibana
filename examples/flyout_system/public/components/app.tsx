@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiPageTemplate, type EuiPageTemplateProps } from '@elastic/eui';
 import type { RenderingService } from '@kbn/core-rendering-browser';
@@ -33,7 +33,7 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const bottomBorder: EuiPageTemplateProps['bottomBorder'] = 'extended';
 
   // all flyouts share the same history group using a shared `historyKey` object
-  const historyKey = Symbol('flyout-history-group');
+  const historyKey = useMemo(() => Symbol('flyout-history-group'), []);
 
   return (
     <EuiPageTemplate
