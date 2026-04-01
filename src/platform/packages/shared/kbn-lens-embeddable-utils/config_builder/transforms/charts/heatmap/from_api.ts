@@ -86,7 +86,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
         legendSize: layer.legend?.size as LegendSize,
         shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
-    } as any,
+    },
     ...(basePalette && {
       palette: {
         ...basePalette,

@@ -22,8 +22,8 @@ import {
   legendTruncateAfterLinesSchema,
 } from '../shared';
 import {
+  baseLegendVisibilitySchema,
   legendSizeSchema,
-  legendVisibilitySchemaWithAuto,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   xScaleSchema,
 } from './shared';
@@ -32,7 +32,7 @@ import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
-  visibility: legendVisibilitySchemaWithAuto,
+  visibility: baseLegendVisibilitySchema,
   size: legendSizeSchema,
 };
 
