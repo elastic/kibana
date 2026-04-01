@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { ClearAllButton } from './clear_all_button';
 import { type FilterItems, type FilterName, useScriptLibraryFilter } from './hooks';
@@ -93,6 +93,13 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
           aria-label={getTestId(`${filterName}-filter`)}
           onChange={onOptionsChange}
           options={items}
+          renderOption={(option) =>
+            filterName === 'platform' ? (
+              <EuiBadge color="hollow">{option.label}</EuiBadge>
+            ) : (
+              option.label
+            )
+          }
           data-test-subj={getTestId(`${filterName}-filter`)}
           searchable={isSearchableFilter ? true : undefined}
           searchProps={

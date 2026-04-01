@@ -26,7 +26,7 @@ export const ScriptLibrarySearchTermFilter = memo(
     const onChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        setSearchValue(e.target.value);
+        setSearchValue(value);
 
         if (!value) {
           onChangeSearch([]);
@@ -37,10 +37,10 @@ export const ScriptLibrarySearchTermFilter = memo(
     );
 
     const onSearch = useCallback(
-      (onSearchValue: string) => {
-        if (!onSearchValue) return;
+      (value: string) => {
+        if (!value) return;
 
-        const termsList = searchValue.split(',').reduce<string[]>((acc, curr) => {
+        const termsList = value.split(',').reduce<string[]>((acc, curr) => {
           if (curr.trim() !== '') {
             acc.push(curr.trim());
           }
@@ -49,7 +49,7 @@ export const ScriptLibrarySearchTermFilter = memo(
         onChangeSearch(termsList);
         setUrlSearchTermsFilter(termsList.join(','));
       },
-      [onChangeSearch, searchValue, setUrlSearchTermsFilter]
+      [onChangeSearch, setUrlSearchTermsFilter]
     );
 
     useEffect(() => {

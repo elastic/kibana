@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { useMemo } from 'react';
+
 import { OS_TITLES } from '../../../../../common/translations';
 import {
   SCRIPT_LIBRARY_ALLOWED_FILE_TYPES,
@@ -57,7 +57,7 @@ export const useScriptLibraryFilter = (
       : isPlatformFilter
       ? [...SUPPORTED_HOST_OS_TYPE].sort().map((key) => ({
           key,
-          label: (<EuiBadge color="hollow">{OS_TITLES[key]}</EuiBadge>) as unknown as string,
+          label: OS_TITLES[key],
           searchableLabel: OS_TITLES[key],
           checked: os?.includes(key) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
