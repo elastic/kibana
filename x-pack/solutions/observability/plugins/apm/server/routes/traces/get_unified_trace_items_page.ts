@@ -165,7 +165,7 @@ async function getUnifiedTraceItemsPage({
       ] as Sort,
       ...(searchAfter ? { search_after: searchAfter } : {}),
     },
-    ecsOnly ? {} : { skipProcessorEventFilter: true }
+    { skipProcessorEventFilter: !ecsOnly }
   );
 
   return {
