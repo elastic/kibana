@@ -39,7 +39,8 @@ export const useChartLayers = ({
   customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
-    const type = firstNonNullable(metricItem.fieldTypes);
+    const fieldTypes = metricItem.fieldTypes;
+    const type = firstNonNullable(fieldTypes);
     const instrument = firstNonNullable(metricItem.metricTypes);
     const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
 
@@ -47,8 +48,9 @@ export const useChartLayers = ({
       return [];
     }
 
+    const types = fieldTypes.length > 0 ? fieldTypes : [type];
     const metricField = createMetricAggregation({
-      type,
+      type: types,
       instrument,
       metricName: metricItem.metricName,
       customFunction,
