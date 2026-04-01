@@ -48,21 +48,33 @@ const line = (label: string, symbol: string, detail: string, duration?: string) 
 /** Start a ticking progress line. Returns { stop, writeResult } to finalize. */
 const startProgress = (label: string, detail?: string) => {
   const start = Date.now();
-  const msg = detail ? `${detail} ...` : '...';
+  let msg = detail ? `${detail} ...` : '...';
+
+  const render = () => {
+    write(`  ${pad(label)}${msg}`);
+  };
 
   if (isTTY) {
-    write(`  ${pad(label)}${msg}`);
+    render();
   }
 
   const timer = isTTY
     ? setInterval(() => {
         clearLine();
-        write(`  ${pad(label)}${msg} ${formatDuration(Date.now() - start)}`);
+        render();
+        write(` ${formatDuration(Date.now() - start)}`);
       }, 1_000)
     : undefined;
 
   return {
     elapsed: () => formatDuration(Date.now() - start),
+    setDetail: (detailText?: string) => {
+      msg = detailText ? `${detailText} ...` : '...';
+      if (isTTY) {
+        clearLine();
+        render();
+      }
+    },
     writeResult: (text: string) => {
       if (timer) clearInterval(timer);
       if (isTTY) clearLine();
@@ -295,10 +307,8 @@ const resolveAffectedPackageInfo = async (files: string[]): Promise<AffectedPack
 };
 
 /**
- * Compute Moon concurrency and Jest maxWorkers with a bias toward Jest.
- *
- * Moon concurrency stays low so a cache-heavy run does not starve the real Jest
- * work of CPU. Example: if we schedule 4 affected configs and 3 are cached, we
+ * Keep Moon concurrency low so cache-heavy affected runs do not starve the real
+ * Jest work of CPU. Example: if 4 configs are scheduled and 3 are cached, we
  * want the 1 uncached Jest process to keep most cores instead of reserving them
  * for Moon slots that finish immediately.
  *
@@ -318,17 +328,91 @@ interface JestPhaseResult {
   cachedCount: number;
   totalTests: number;
   failed: MoonJestTaskResult[];
+  exitCode: number;
   verboseDetail?: string;
+  failureExcerpt?: string[];
   warnings?: string[];
 }
 
+interface JestPhaseProgress {
+  completedCount: number;
+}
+
+const extractMoonFailureExcerpt = (output: string) => {
+  return output
+    .split('\n')
+    .map((lineText) => stripAnsi(lineText).trim())
+    .filter(Boolean)
+    .filter((lineText) => !lineText.startsWith('{'))
+    .slice(-8);
+};
+
+const parseMoonJestProgressProject = (rawLine: string) => {
+  const stripped = stripAnsi(rawLine).trim();
+
+  const cachedSummaryMatch = stripped.match(/^pass RunTask\((@[^:]+):jest\) \(cached/);
+  if (cachedSummaryMatch) {
+    return cachedSummaryMatch[1];
+  }
+
+  const summaryMatch = stripped.match(/^(?:pass|fail) RunTask\((@[^:]+):jest\) \(/);
+  if (summaryMatch) {
+    return summaryMatch[1];
+  }
+
+  const jsonPrefixMatch = stripped.match(/^(@[^:]+):jest \| \{/);
+  if (jsonPrefixMatch) {
+    return jsonPrefixMatch[1];
+  }
+
+  return undefined;
+};
+
+const attachOutputLineListeners = ({
+  stream,
+  onChunk,
+  onLine,
+}: {
+  stream?: NodeJS.ReadableStream | null;
+  onChunk: (chunk: string) => void;
+  onLine: (line: string) => void;
+}) => {
+  if (!stream) {
+    return;
+  }
+
+  let pending = '';
+  stream.on('data', (chunk) => {
+    const text = chunk.toString();
+    onChunk(text);
+    pending += text;
+
+    while (true) {
+      const newlineIndex = pending.indexOf('\n');
+      if (newlineIndex === -1) {
+        break;
+      }
+
+      onLine(pending.slice(0, newlineIndex));
+      pending = pending.slice(newlineIndex + 1);
+    }
+  });
+
+  stream.on('end', () => {
+    if (pending.length > 0) {
+      onLine(pending);
+    }
+  });
+};
+
 const runJestViaMoon = async (
-  changedFilesJson: string,
   changedFiles: string[],
   verbose: boolean,
-  downstream: string = 'none'
+  downstream: string = 'none',
+  onProgress?: (progress: JestPhaseProgress) => void
 ): Promise<JestPhaseResult | null> => {
   const packageInfo = await resolveAffectedPackageInfo(changedFiles);
+  const changedFilesJson = JSON.stringify({ files: changedFiles });
 
   const execa = (await import('execa')).default;
   const moonExec = await getMoonExecutablePath();
@@ -336,8 +420,9 @@ const runJestViaMoon = async (
     Math.max(packageInfo.jestDirs.length, packageInfo.dirs.length)
   );
   const cpus = Os.cpus().length;
+  const completedProjects = new Set<string>();
 
-  const result = await execa(
+  const subprocess = execa(
     moonExec,
     [
       'run',
@@ -366,21 +451,70 @@ const runJestViaMoon = async (
     }
   );
 
-  const output = result.stdout + '\n' + result.stderr;
+  let capturedStdout = '';
+  let capturedStderr = '';
+
+  const handleOutputLine = (lineText: string) => {
+    const project = parseMoonJestProgressProject(lineText);
+    if (!project || completedProjects.has(project)) {
+      return;
+    }
+
+    completedProjects.add(project);
+    onProgress?.({
+      completedCount: completedProjects.size,
+    });
+  };
+
+  attachOutputLineListeners({
+    stream: 'stdout' in subprocess ? subprocess.stdout : undefined,
+    onChunk: (chunk) => {
+      capturedStdout += chunk;
+    },
+    onLine: handleOutputLine,
+  });
+  attachOutputLineListeners({
+    stream: 'stderr' in subprocess ? subprocess.stderr : undefined,
+    onChunk: (chunk) => {
+      capturedStderr += chunk;
+    },
+    onLine: handleOutputLine,
+  });
+
+  const result = await subprocess;
+
+  const output =
+    (capturedStdout || result.stdout || '') + '\n' + (capturedStderr || result.stderr || '');
   const { tasks, parseFailures } = parseMoonJestOutput(output);
   const failed = tasks.filter((t) => !t.passed && !t.cached);
-
-  const warnings: string[] = [];
   if (tasks.length === 0 && result.exitCode !== 0) {
-    warnings.push(
+    const warnings = [
       `Moon exited with code ${result.exitCode} but no Jest task output was parsed. ` +
-        `Moon's output format may have changed — run jest directly to verify.`
-    );
-  }
-  if (parseFailures.length > 0) {
-    warnings.push(...parseFailures);
+        `The Jest task may have failed before producing JSON output — run jest directly to verify.`,
+    ];
+    if (parseFailures.length > 0) {
+      warnings.push(...parseFailures);
+    }
+
+    const cachedCount = tasks.filter((t) => t.cached).length;
+    const ranCount = tasks.length - cachedCount;
+
+    return {
+      taskCount: tasks.length,
+      cachedCount,
+      totalTests: tasks.reduce((sum, t) => sum + t.testCount, 0),
+      failed,
+      exitCode: result.exitCode ?? 0,
+      failureExcerpt:
+        tasks.length === 0 && result.exitCode !== 0 ? extractMoonFailureExcerpt(output) : undefined,
+      warnings,
+      verboseDetail: verbose
+        ? `${packageInfo.jestDirs.length} packages, ${ranCount} ran, ${cachedCount} cached, ${cpus} cpus → concurrency=${concurrency}, maxWorkers=${maxWorkers}`
+        : undefined,
+    };
   }
 
+  const warnings = parseFailures.length > 0 ? parseFailures : undefined;
   const cachedCount = tasks.filter((t) => t.cached).length;
   const ranCount = tasks.length - cachedCount;
 
@@ -389,7 +523,10 @@ const runJestViaMoon = async (
     cachedCount,
     totalTests: tasks.reduce((sum, t) => sum + t.testCount, 0),
     failed,
-    warnings: warnings.length > 0 ? warnings : undefined,
+    exitCode: result.exitCode ?? 0,
+    failureExcerpt:
+      tasks.length === 0 && result.exitCode !== 0 ? extractMoonFailureExcerpt(output) : undefined,
+    warnings,
     verboseDetail: verbose
       ? `${packageInfo.jestDirs.length} packages, ${ranCount} ran, ${cachedCount} cached, ${cpus} cpus → concurrency=${concurrency}, maxWorkers=${maxWorkers}`
       : undefined,
@@ -563,10 +700,11 @@ run(
       } else {
         // Normal path: run affected jest tasks via Moon.
         try {
-          const changedFilesJson = JSON.stringify({ files: changedFiles });
           const downstream =
             baseContext.mode === 'contract' ? baseContext.contract.downstream : 'none';
-          const result = await runJestViaMoon(changedFilesJson, changedFiles, verbose, downstream);
+          const result = await runJestViaMoon(changedFiles, verbose, downstream, (progress) => {
+            jestProgress.setDetail(`[${progress.completedCount} complete]`);
+          });
 
           const printVerbose = () => {
             if (result?.warnings) {
@@ -588,11 +726,21 @@ run(
             return parts.join(', ');
           };
 
-          if (!result || result.taskCount === 0) {
+          if (!result || (result.taskCount === 0 && result.exitCode === 0)) {
             jestProgress.writeResult(
               line('jest', '—', 'no affected configs', jestProgress.elapsed())
             );
             printVerbose();
+          } else if (result.taskCount === 0) {
+            jestProgress.writeResult(line('jest', '✗', 'failed', jestProgress.elapsed()));
+            writeln('');
+            for (const excerptLine of result.failureExcerpt ?? []) {
+              writeln(`    ${excerptLine}`);
+            }
+            writeln('    $ node scripts/jest --profile quick');
+            writeln('');
+            printVerbose();
+            errors.push(new Error('jest failed'));
           } else if (result.failed.length > 0) {
             const failCount = result.failed.length;
             jestProgress.writeResult(

@@ -342,7 +342,7 @@ describe('run_check', () => {
     expect(output).toContain('jest  ✓ 1 config ran, 5 tests');
   });
 
-  it('caps Moon concurrency at two so uncached Jest work keeps more workers', async () => {
+  it('caps Moon concurrency at two for cache-heavy affected Jest runs', async () => {
     mockGetPackages.mockReturnValue([
       { directory: '/repo/packages/foo' },
       { directory: '/repo/packages/bar' },
@@ -369,6 +369,26 @@ describe('run_check', () => {
       expect.arrayContaining(['--concurrency', '2', '--maxWorkers=4']),
       expect.any(Object)
     );
+  });
+
+  it('reports Moon Jest startup failures instead of saying no affected configs', async () => {
+    mockExeca.mockResolvedValue({
+      exitCode: 1,
+      stdout: '',
+      stderr: [
+        '@kbn/foo:jest | Error: task_runner::run_failed',
+        '@kbn/foo:jest | Broken startup before Jest JSON output',
+        'Error: task_runner::run_failed',
+      ].join('\n'),
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('jest  ✗ failed');
+    expect(output).toContain('Broken startup before Jest JSON output');
+    expect(output).not.toContain('jest  — no affected configs');
   });
 
   it('uses the repo root Jest config when no package-level config is found', async () => {
