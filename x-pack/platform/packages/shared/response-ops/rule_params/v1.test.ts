@@ -9,6 +9,7 @@ import {
   ruleParamsSchemaWithRuleTypeId,
   ruleParamsSchema,
   ruleParamsSchemaWithDefaultValue,
+  ruleParamsSchemaForUpdate,
   RULE_TYPE_ID,
 } from './v1';
 
@@ -98,10 +99,10 @@ describe('rule params schemas', () => {
     });
   });
 
-  describe('ruleParamsSchema', () => {
+  describe('ruleParamsSchemaForUpdate', () => {
     it('validates schema correctly', () => {
       expect(() =>
-        ruleParamsSchema.validate({
+        ruleParamsSchemaForUpdate.validate({
           searchType: 'searchSource',
           threshold: [0],
           thresholdComparator: '>',
@@ -114,6 +115,22 @@ describe('rule params schemas', () => {
 
     it('rejects an object that does not match any of the allowed update schemas', () => {
       expect(() =>
+        ruleParamsSchemaForUpdate.validate({
+          foo: 'bar',
+          searchType: 'searchSource',
+          threshold: [0],
+          thresholdComparator: '>',
+          size: 100,
+          timeWindowUnit: 'm',
+          timeWindowSize: 5,
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('ruleParamsSchema', () => {
+    it('validates schema correctly', () => {
+      expect(() =>
         ruleParamsSchema.validate({
           searchType: 'searchSource',
           threshold: [0],
@@ -121,9 +138,8 @@ describe('rule params schemas', () => {
           size: 100,
           timeWindowUnit: 'm',
           timeWindowSize: 5,
-          foo: 'bar',
         })
-      ).toThrow();
+      ).not.toThrow();
     });
   });
 
@@ -143,20 +159,6 @@ describe('rule params schemas', () => {
           timeWindowSize: 5,
         })
       ).not.toThrow();
-    });
-
-    it('rejects an object that does not match any of the allowed update schemas', () => {
-      expect(() =>
-        ruleParamsSchemaWithDefaultValue.validate({
-          searchType: 'searchSource',
-          threshold: [0],
-          thresholdComparator: '>',
-          size: 100,
-          timeWindowUnit: 'm',
-          timeWindowSize: 5,
-          foo: 'bar',
-        })
-      ).toThrow();
     });
   });
 });

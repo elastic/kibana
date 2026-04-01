@@ -114,7 +114,14 @@ export const IndexThresholdRuleParamsSchema = schema.object(
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   },
-  { validate: validateParams }
+  {
+    validate: validateParams,
+    meta: {
+      title: 'Index Threshold Rule Params',
+      description:
+        'The parameters for the index threshold rule. These parameters are appropriate when `rule_type_id` is `.index-threshold`.',
+    },
+  }
 );
 
 // using direct type not allowed, circular reference, so body is typed to any
