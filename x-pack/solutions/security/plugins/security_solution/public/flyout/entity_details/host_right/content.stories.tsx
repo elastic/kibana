@@ -40,7 +40,6 @@ export const Default = {
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -59,7 +58,6 @@ export const WithGraphVisualization = {
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -90,7 +88,6 @@ export const NoObservedData = {
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -120,7 +117,6 @@ export const Loading = {
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'host.name': 'test-host-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}

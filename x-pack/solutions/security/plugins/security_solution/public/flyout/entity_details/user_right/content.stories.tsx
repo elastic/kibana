@@ -40,7 +40,6 @@ export const Default = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -59,7 +58,6 @@ export const IntegrationDisabled = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -78,7 +76,6 @@ export const WithGraphVisualization = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -98,7 +95,6 @@ export const NoManagedData = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -140,7 +136,6 @@ export const NoObservedData = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
@@ -182,7 +177,6 @@ export const Loading = {
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      navigateToGraphView={() => {}}
       identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
