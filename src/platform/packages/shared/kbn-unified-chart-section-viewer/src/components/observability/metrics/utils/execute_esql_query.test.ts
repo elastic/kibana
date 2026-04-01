@@ -233,8 +233,8 @@ describe('fetchEsqlResponseOrThrow', () => {
       params: { query: '' },
     } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
 
-    await expect(fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])).rejects.toThrow(
-      EsqlResponseError
-    );
+    await expect(
+      fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])
+    ).rejects.toThrow(EsqlResponseError);
   });
 });
