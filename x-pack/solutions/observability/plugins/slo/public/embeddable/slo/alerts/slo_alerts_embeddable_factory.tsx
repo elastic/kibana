@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FetchContext } from '@kbn/presentation-publishing';
@@ -146,7 +145,6 @@ export function getAlertsEmbeddableFactory({
         api,
         Component: () => {
           const [slos] = useBatchedPublishingSubjects(sloAlertsStateManager.api.slos$);
-          const hasSlosWithAllInstances = slos.some((s) => s.slo_instance_id === ALL_VALUE);
           const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
@@ -182,7 +180,6 @@ export function getAlertsEmbeddableFactory({
                       slos={slos}
                       timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
                       reloadSubject={reload$}
-                      showAllGroupByInstances={hasSlosWithAllInstances}
                     />
                   </QueryClientProvider>
                 </PluginContext.Provider>
