@@ -19,15 +19,26 @@ import type { CorrelationMap } from './types';
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
+/** Maps EUID → current watchlist names from the entity store */
+export type WatchlistsByEuid = Map<string, string[]>;
+
 export type IdentityProvider =
   | { type: 'integration'; name: IntegrationType }
   | { type: 'index'; field: string }
   | { type: 'store'; queryRule: string };
 
-export interface IndexSourceResult {
+export interface EntityStoreQueryResult {
   entityIdsByType: EntityStoreEntityIdsByType;
-  correlationMap: CorrelationMap;
+  watchlistsByEuid: WatchlistsByEuid;
 }
+
+export type IndexSourceQueryResult = EntityStoreQueryResult & {
+  correlationMap: CorrelationMap;
+};
+
+type EntityStoreResultFor<T extends IdentityProvider['type']> = T extends 'index'
+  ? IndexSourceQueryResult
+  : EntityStoreQueryResult;
 
 interface WatchlistEntitiesServiceDeps {
   esClient: ElasticsearchClient;
@@ -39,31 +50,27 @@ export const createWatchlistEntitiesService = ({
   esClient,
   namespace,
 }: WatchlistEntitiesServiceDeps) => {
-  function listEntityStoreEntities(
-    idp: IdentityProvider & { type: 'index' }
-  ): Promise<IndexSourceResult>;
-  function listEntityStoreEntities(
-    idp: IdentityProvider & { type: 'integration' }
-  ): Promise<EntityStoreEntityIdsByType>;
-  function listEntityStoreEntities(
-    idp: IdentityProvider & { type: 'store' }
-  ): Promise<EntityStoreEntityIdsByType>;
-  async function listEntityStoreEntities(
+  async function listEntityStoreEntities<T extends IdentityProvider['type']>(
     idp: IdentityProvider
-  ): Promise<EntityStoreEntityIdsByType | IndexSourceResult> {
+  ): Promise<EntityStoreResultFor<T>> {
     const isIndexSync = idp.type === 'index';
 
-    let query: Record<string, unknown>;
-    if (idp.type === 'integration') {
-      query = { term: { 'entity.namespace': integrationToStoreNamespaceMap[idp.name] } };
-    } else if (idp.type === 'store') {
-      query = toElasticsearchQuery(fromKueryExpression(idp.queryRule));
-    } else {
-      query = { exists: { field: idp.field } };
-    }
+    const query = (() => {
+      if (idp.type === 'index') {
+        return { exists: { field: idp.field } };
+      }
+      if (idp.type === 'integration') {
+        return { term: { 'entity.namespace': integrationToStoreNamespaceMap[idp.name] } };
+      }
+      if (idp.type === 'store') {
+        return toElasticsearchQuery(fromKueryExpression(idp.queryRule));
+      }
+      throw new Error(`Unsupported identity provider: ${JSON.stringify(idp)}`);
+    })();
 
     const entityIdsByType = createEmptyEntityStoreEntityIdsByType();
     const correlationMap: CorrelationMap = new Map();
+    const watchlistsByEuid: WatchlistsByEuid = new Map();
 
     let searchAfter: SortResults | undefined;
     let fetchMore = true;
@@ -94,6 +101,11 @@ export const createWatchlistEntitiesService = ({
 
           acc.entityIdsByType[entityType].push(euid);
 
+          const watchlists = get(record, 'entity.attributes.watchlists') as string[] | undefined;
+          if (watchlists) {
+            acc.watchlistsByEuid.set(euid, watchlists);
+          }
+
           if (!isIndexSync) {
             return acc;
           }
@@ -106,14 +118,18 @@ export const createWatchlistEntitiesService = ({
           acc.correlationMap.set(String(correlationValue), { euid, entityType });
           return acc;
         },
-        { entityIdsByType, correlationMap }
+        { entityIdsByType, correlationMap, watchlistsByEuid }
       );
 
       searchAfter = hits[hits.length - 1].sort;
     }
 
     const deduped = dedup(entityIdsByType);
-    return isIndexSync ? { entityIdsByType: deduped, correlationMap } : deduped;
+    return (
+      isIndexSync
+        ? { entityIdsByType: deduped, correlationMap, watchlistsByEuid }
+        : { entityIdsByType: deduped, watchlistsByEuid }
+    ) as EntityStoreResultFor<T>;
   }
   return { listEntityStoreEntities };
 };

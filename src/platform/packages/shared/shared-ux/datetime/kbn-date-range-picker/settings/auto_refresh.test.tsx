@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import type { DateRangePickerProps } from '../date_range_picker';
 import { DateRangePickerProvider } from '../date_range_picker_context';
@@ -37,7 +37,7 @@ const renderWithProvider = (
     ...(onRefresh ? { onRefresh } : {}),
   };
 
-  return renderWithEuiTheme(
+  return renderWithKibanaRenderContext(
     <DateRangePickerProvider {...providerProps}>
       <DateRangePickerPanelNavigationProvider
         defaultPanelId={SettingsPanel.PANEL_ID}
@@ -206,7 +206,7 @@ describe('Auto-refresh settings row', () => {
       );
     };
 
-    renderWithEuiTheme(<Harness />);
+    renderWithKibanaRenderContext(<Harness />);
 
     expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(1);
 
