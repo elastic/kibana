@@ -22,7 +22,7 @@ export interface ToolRefsParams {
 export interface PluginRefsParams {
   request: KibanaRequest;
   pluginIds: string[];
-  skillIds: string[];
+  skillIds?: string[];
 }
 
 export interface SkillRefsParams {
