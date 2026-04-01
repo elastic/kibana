@@ -59,6 +59,21 @@ export class WorkflowContextManager {
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
 
+  /**
+   * Cached predecessors for this node. Since `node` is readonly and the graph is immutable
+   * during execution, the result of `getAllPredecessors` is constant for the lifetime of
+   * the instance. Computed once on first access to avoid redundant O(V+E) DAG traversals
+   * on every `getContext()` call (invoked 5-10x per step via renderValueAccordingToContext, etc.).
+   */
+  private predecessorsCache: GraphNodeUnion[] | undefined;
+
+  private get predecessors(): ReadonlyArray<GraphNodeUnion> {
+    if (!this.predecessorsCache) {
+      this.predecessorsCache = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
+    }
+    return this.predecessorsCache;
+  }
+
   public get scopeStack(): WorkflowScopeStack {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
   }
@@ -75,6 +90,47 @@ export class WorkflowContextManager {
     this.dependencies = init.dependencies;
   }
 
+  /**
+   * Pre-warms the execution state by rehydrating any evicted step outputs
+   * that will be needed by `getContext()`. Must be called before `getContext()`.
+   *
+   * This exists so that `getContext()` and all its synchronous callers
+   * (`renderValueAccordingToContext`, `evaluateBooleanExpressionInContext`, etc.)
+   * remain synchronous. When nothing has been evicted, this is a no-op with
+   * zero overhead.
+   */
+  public async ensureContextReady(): Promise<void> {
+    if (!this.workflowExecutionState.hasEvictedOutputs()) {
+      return;
+    }
+
+    const neededIds = new Set<string>();
+    const executionId = this.workflowExecutionState.getWorkflowExecution().id;
+
+    // 1. Predecessors (needed by getStepData via getContext)
+    for (const pred of this.predecessors) {
+      const latestExec = this.workflowExecutionState.getLatestStepExecution(pred.stepId);
+      if (latestExec) {
+        neededIds.add(latestExec.id);
+      }
+    }
+
+    // 2. Scope stack entries (needed by enrichStepContextAccordingToStepScope)
+    let currentScope = WorkflowScopeStack.fromStackFrames(
+      this.workflowExecutionState.getWorkflowExecution().scopeStack
+    );
+    while (!currentScope.isEmpty()) {
+      const frame = currentScope.getCurrentScope();
+      currentScope = currentScope.exitScope();
+      neededIds.add(buildStepExecutionId(executionId, frame.stepId, currentScope.stackFrames));
+    }
+
+    // data.set outputs are pinned (never evicted by evictCompletedStepOutputs),
+    // so they do not need rehydration here.
+
+    await this.workflowExecutionState.rehydrateOutputs(Array.from(neededIds));
+  }
+
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
   // src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts
   public getContext(): StepContext {
@@ -84,11 +140,7 @@ export class WorkflowContextManager {
       variables: this.getVariables(),
     };
 
-    const currentNode = this.node;
-    const currentNodeId = currentNode.id;
-
-    const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
-    allPredecessors.forEach((node) => {
+    this.predecessors.forEach((node) => {
       const stepId = node.stepId;
       const stepData = this.getStepData(stepId);
 
