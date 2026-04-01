@@ -21,8 +21,8 @@ import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
-  STATUS_TITLE_TEST_ID,
-} from './test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
+import { STATUS_TITLE_TEST_ID } from './test_ids';
 import { HeaderTitle } from '../../../../flyout_v2/document/components/header_title';
 import { HeaderStatus } from '../../../../flyout_v2/document/components/header_status';
 import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
