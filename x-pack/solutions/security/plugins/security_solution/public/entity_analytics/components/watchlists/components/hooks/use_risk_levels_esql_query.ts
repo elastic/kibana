@@ -12,7 +12,6 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
@@ -35,8 +34,7 @@ export const useRiskLevelsEsqlQuery = ({
 
   const filterQuery = useEsqlGlobalFilterQuery();
 
-  const name = watchlistId ? getWatchlistName(watchlistId) : undefined; // This is using a map due to name formatting adhering to indexPattern naming conventions
-  const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(name)}`;
+  const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(watchlistId || undefined)}`;
 
   const {
     data: riskEngineStatus,
