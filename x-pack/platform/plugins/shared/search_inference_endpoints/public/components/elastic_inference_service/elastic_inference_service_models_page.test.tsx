@@ -10,8 +10,20 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
+import type { EisInferenceEndpoint } from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_eis_models');
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+    },
+  }),
+}));
+jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+}));
+
 const mockUseEisModels = useEisModels as jest.Mock;
 
 const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
@@ -113,5 +125,33 @@ describe('ElasticInferenceServiceModelsPage', () => {
       const cards = container.querySelectorAll('[data-test-subj^="eisModelCard-"]');
       expect(cards.length).toBeGreaterThan(0);
     });
+  });
+
+  it('opens model detail flyout when clicking a card with valid model_id', () => {
+    mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+    const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
+
+    fireEvent.click(getByTestId('eisModelCard-Jina Reranker v2'));
+
+    expect(queryByTestId('modelDetailFlyout')).toBeInTheDocument();
+  });
+
+  it('does not open model detail flyout when endpoint has empty model_id', () => {
+    const endpointWithoutModelId: EisInferenceEndpoint = {
+      inference_id: 'no-model-id-endpoint',
+      task_type: 'chat_completion',
+      service: 'elastic',
+      service_settings: { model_id: '' },
+    };
+    mockUseEisModels.mockReturnValue({
+      data: [endpointWithoutModelId],
+      isLoading: false,
+      isError: false,
+    });
+    const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
+
+    fireEvent.click(getByTestId('eisModelCard-no-model-id-endpoint'));
+
+    expect(queryByTestId('modelDetailFlyout')).not.toBeInTheDocument();
   });
 });

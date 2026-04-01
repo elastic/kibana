@@ -163,7 +163,7 @@ describe('EsqlStarredQueriesService', () => {
     const buttonWithTooltip = service.renderStarredButton(query);
     const button = buttonWithTooltip.props.children.props.children;
     expect(button.props.title).toEqual('Remove ES|QL query from Starred');
-    expect(button.props.iconType).toEqual('starFilled');
+    expect(button.props.iconType).toEqual('starFill');
   });
 
   it('should display the modal when the Remove button is clicked', async () => {
