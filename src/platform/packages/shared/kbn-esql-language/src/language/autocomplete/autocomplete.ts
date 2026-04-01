@@ -182,7 +182,11 @@ export async function suggest(
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
 
       return orderingEngine.sort(
-        [...headerCommandsSuggestions, ...sourceCommandsSuggestions, ...recommendedQueriesSuggestions],
+        [
+          ...headerCommandsSuggestions,
+          ...sourceCommandsSuggestions,
+          ...recommendedQueriesSuggestions,
+        ],
         { command: '' }
       );
     }

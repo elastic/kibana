@@ -146,11 +146,7 @@ async function suggestNextActions(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
-  const suggestions: ISuggestionItem[] = [
-    pipeCompleteItem,
-    commaCompleteItem,
-    metadataSuggestion,
-  ];
+  const suggestions: ISuggestionItem[] = [pipeCompleteItem, commaCompleteItem, metadataSuggestion];
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,

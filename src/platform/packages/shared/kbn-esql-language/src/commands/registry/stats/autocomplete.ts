@@ -128,11 +128,7 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
-          ...(!isNewMultipleExpression && !isInlineStats
-            ? [
-                byCompleteItem,
-              ]
-            : []),
+          ...(!isNewMultipleExpression && !isInlineStats ? [byCompleteItem] : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
         ],
         afterCompleteSuggestions: [
