@@ -99,7 +99,6 @@ export enum SecurityPageName {
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsLanding = 'entity_analytics-landing',
   entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
-  entityAnalyticsWatchlists = 'entity_analytics-watchlists',
   entityAnalyticsOverview = 'entity_analytics-overview',
   entityAnalyticsHomePage = 'entity_analytics-home_page',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
