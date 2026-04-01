@@ -22,6 +22,7 @@ const sloItemSchema = schema.object({
 const AlertsCustomSchema = schema.object({
   slos: schema.arrayOf(sloItemSchema, {
     defaultValue: [],
+    maxSize: 100,
     meta: { description: 'List of SLOs to display alerts for' },
   }),
 });
