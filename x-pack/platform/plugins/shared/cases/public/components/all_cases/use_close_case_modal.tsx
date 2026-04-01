@@ -12,7 +12,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY,
   DEFAULT_CLOSING_REASON_OPTIONS,
-} from '@kbn/response-ops-alerts-close-reason';
+} from '@kbn/response-ops-detections-close-reason';
 
 import { CloseCaseModal } from './close_case_modal';
 import type { CloseReasonOption } from './close_case_modal';

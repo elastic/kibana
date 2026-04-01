@@ -80,7 +80,7 @@ dependsOn:
   - '@kbn/securitysolution-rules'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cloud-plugin'
-  - '@kbn/response-ops-alerts-close-reason'
+  - '@kbn/response-ops-detections-close-reason'
   - '@kbn/response-ops-alerts-table'
   - '@kbn/field-formats-plugin'
   - '@kbn/core-http-server-mocks'

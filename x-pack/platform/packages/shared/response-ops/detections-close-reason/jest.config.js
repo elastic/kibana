@@ -8,8 +8,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/alerts-close-reason'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/detections-close-reason'],
   setupFilesAfterEnv: [
-    '<rootDir>/x-pack/platform/packages/shared/response-ops/alerts-close-reason/setup_tests.ts',
+    '<rootDir>/x-pack/platform/packages/shared/response-ops/detections-close-reason/setup_tests.ts',
   ],
 };

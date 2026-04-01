@@ -13,7 +13,7 @@ import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-close-reason';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import type { AlertClosingReason } from '../../../../common/types';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';

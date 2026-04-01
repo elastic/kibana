@@ -523,13 +523,13 @@ export const bulkUpdate = async (
           if (closeReason == null) {
             return Promise.resolve();
           }
-          // The validator currently only exists for securitySolution cases
-          // For cases with any other owner that tries to update with a non-empty close reason will throw an error
-          const isValid =
-            closeReasonValidator != null &&
-            (await closeReasonValidator(closeReason, originalCase.attributes.owner));
-          if (!isValid) {
-            throw Boom.badRequest(`Invalid close reason: "${closeReason}"`);
+          // The validator is used by specific owners (e.g., securitySolution) to restrict valid close reasons.
+          // If no validator is registered, all non-empty close reasons are accepted.
+          if (closeReasonValidator != null) {
+            const isValid = await closeReasonValidator(closeReason, originalCase.attributes.owner);
+            if (!isValid) {
+              throw Boom.badRequest(`Invalid close reason: "${closeReason}"`);
+            }
           }
         })
     );

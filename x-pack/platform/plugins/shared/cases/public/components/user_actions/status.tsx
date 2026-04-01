@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
-import { getDefaultClosingReasonLabel } from '@kbn/response-ops-alerts-close-reason';
+import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';

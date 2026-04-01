@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import {
   ALERT_CLOSING_REASON_PANEL_ID,
   useBulkClosingReasonItems,
-} from '@kbn/response-ops-alerts-close-reason';
+} from '@kbn/response-ops-detections-close-reason';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
@@ -19,7 +19,7 @@ import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_
 
 jest.mock('../use_attacks_privileges');
 jest.mock('../apply_actions/use_apply_attack_workflow_status');
-jest.mock('@kbn/response-ops-alerts-close-reason');
+jest.mock('@kbn/response-ops-detections-close-reason');
 
 const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
   typeof useAttacksPrivileges

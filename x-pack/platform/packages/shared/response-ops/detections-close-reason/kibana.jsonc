@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/response-ops-alerts-close-reason",
+  "id": "@kbn/response-ops-detections-close-reason",
   "owner": "@elastic/response-ops",
   "group": "platform",
   "visibility": "shared"

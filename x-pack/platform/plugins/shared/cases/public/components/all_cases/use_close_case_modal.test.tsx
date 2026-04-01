@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { act, renderHook, screen, waitFor } from '@testing-library/react';
 
 import type { CoreStart } from '@kbn/core/public';
-import { CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY } from '@kbn/response-ops-alerts-close-reason';
+import { CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY } from '@kbn/response-ops-detections-close-reason';
 
 import { TestProviders, renderWithTestingProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';

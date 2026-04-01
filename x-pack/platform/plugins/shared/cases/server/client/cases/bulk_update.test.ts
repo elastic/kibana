@@ -2192,6 +2192,10 @@ describe('update', () => {
 
       it('does not update alerts with an invalid close reason', async () => {
         const invalidCloseReason = 'invalid_reason';
+        const clientArgsWithValidator = {
+          ...clientArgs,
+          closeReasonValidator: jest.fn().mockResolvedValue(false),
+        };
 
         await expect(
           bulkUpdate(
@@ -2205,7 +2209,7 @@ describe('update', () => {
                 },
               ],
             },
-            clientArgs,
+            clientArgsWithValidator,
             casesClientMock
           )
         ).rejects.toThrow(`Invalid close reason: "${invalidCloseReason}"`);

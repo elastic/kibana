@@ -8339,7 +8339,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-close-reason@link:x-pack/platform/packages/shared/response-ops/alerts-close-reason":
+"@kbn/response-ops-detections-close-reason@link:x-pack/platform/packages/shared/response-ops/detections-close-reason":
   version "0.0.0"
   uid ""
 
