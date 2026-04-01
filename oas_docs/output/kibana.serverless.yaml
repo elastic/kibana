@@ -61284,6 +61284,16 @@ paths:
           required: false
           schema:
             type: string
+        - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). Defaults to hybrid when inference is available.'
+          in: query
+          name: searchMode
+          required: false
+          schema:
+            enum:
+              - keyword
+              - semantic
+              - hybrid
+            type: string
       requestBody:
         content:
           application/json:
