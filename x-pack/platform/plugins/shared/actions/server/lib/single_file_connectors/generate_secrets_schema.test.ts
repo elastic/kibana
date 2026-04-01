@@ -238,6 +238,34 @@ describe('generateSecretsSchema', () => {
       expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalled();
     });
 
+    it('does not validate URL fields from non-selected auth types', () => {
+      const validator = generateSecretsSchema(
+        {
+          types: [
+            'basic',
+            {
+              type: 'oauth_authorization_code' as const,
+              defaults: {
+                authorizationUrl: 'https://provider.example.com/authorize',
+                tokenUrl: 'https://provider.example.com/token',
+              },
+            },
+          ],
+        },
+        mockConfigUtils
+      );
+
+      const parsedSecrets = validator.schema.parse({
+        authType: 'basic',
+        username: 'user',
+        password: 'pass',
+      });
+
+      validator.customValidator!(parsedSecrets as Record<string, unknown>, validatorServices);
+
+      expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalled();
+    });
+
     it('supports opting out via meta.validate.allowedHosts=false', () => {
       mockConfigUtils.ensureUriAllowed.mockImplementation((uri: string) => {
         if (uri === 'https://not-allowed.example.com/token') {

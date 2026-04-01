@@ -23,13 +23,15 @@ export const generateSecretsSchema = (
   const isPfxEnabled = settings.ssl.pfx.enabled;
   const schema = generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled });
 
-  const allowedHostsFields = new Set<string>();
+  const allowedHostsFieldsByAuthType = new Map<string, string[]>();
   for (const authTypeDef of authSpec?.types ?? []) {
-    const { schema: authTypeSchema } = getSchemaForAuthType(authTypeDef);
+    const { schema: authTypeSchema, id: authTypeId } = getSchemaForAuthType(authTypeDef);
     for (const [key, fieldSchema] of Object.entries(authTypeSchema.shape)) {
       const meta = getMeta(fieldSchema);
       if (meta?.validate?.allowedHosts) {
-        allowedHostsFields.add(key);
+        const keys = allowedHostsFieldsByAuthType.get(authTypeId) ?? [];
+        keys.push(key);
+        allowedHostsFieldsByAuthType.set(authTypeId, keys);
       }
     }
   }
@@ -37,10 +39,18 @@ export const generateSecretsSchema = (
   return {
     schema,
     customValidator: (secrets, { configurationUtilities }) => {
+      const secretsRecord = secrets as Record<string, unknown>;
+      const authType = secretsRecord.authType;
+      if (typeof authType !== 'string') return;
+
+      const allowedHostsFields = allowedHostsFieldsByAuthType.get(authType);
+      if (!allowedHostsFields) return;
+
       for (const key of allowedHostsFields) {
-        configurationUtilities.ensureUriAllowed(
-          (secrets as Record<string, unknown>)[key] as string
-        );
+        const value = secretsRecord[key];
+        if (typeof value === 'string') {
+          configurationUtilities.ensureUriAllowed(value);
+        }
       }
     },
   };
