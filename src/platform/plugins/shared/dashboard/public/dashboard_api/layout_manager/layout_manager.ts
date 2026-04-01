@@ -37,7 +37,6 @@ import {
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,
-  apiPublishesUnsavedChanges,
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
@@ -159,7 +158,10 @@ export function initializeLayoutManager(
     for (const uuid of Object.keys(currentChildren)) {
       if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
-        if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        const nextChildState = childStateToApply[uuid];
+        if (apiHasSerializableState(child)) {
+          child.applySerializedState(nextChildState);
+        }
       } else {
         // if reset resulted in panel removal, we need to update the list of children
         delete currentChildren[uuid];

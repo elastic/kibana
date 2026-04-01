@@ -84,7 +84,7 @@ function isAPIPartitionLayer(layer: unknown): layer is PartitionState {
     layer !== null &&
     'type' in layer &&
     typeof layer.type === 'string' &&
-    ['pie', 'donut', 'waffle', 'treemap', 'mosaic'].includes(layer.type)
+    ['pie', 'waffle', 'treemap', 'mosaic'].includes(layer.type)
   );
 }
 
@@ -93,7 +93,7 @@ function isESQLPartitionLayer(layer: PartitionState): layer is PartitionStateESQ
 }
 
 function isAPIPieChartLayer(layer: PartitionState): layer is PieState {
-  return layer.type === 'pie' || layer.type === 'donut';
+  return layer.type === 'pie';
 }
 
 function isAPIWaffleChartLayer(layer: PartitionState): layer is WaffleState {
@@ -327,8 +327,10 @@ function buildVisualizationState(
   const isLegacyColor = isLegacyColorPalette(colorMapping);
 
   if (isAPIPieChartLayer(config)) {
+    const pieLensShape =
+      config.donut_hole != null && config.donut_hole !== 'none' ? 'donut' : 'pie';
     return {
-      shape: config.type,
+      shape: pieLensShape,
       ...(isLegacyColor && { ...colorMapping }), // legacy colors are included outside of the layer
       layers: [
         {
@@ -676,7 +678,7 @@ function convertStateCategoryDisplayOption(
 
 function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualizationState) {
   const vizLayer = visualization.layers[0];
-  // Pie and Donut chart have the label_position and donut_hole options
+  // Pie chart has the label_position and donut_hole options
   if (isStatePieChart(visualization)) {
     return stripUndefined({
       donut_hole: donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio),
@@ -704,7 +706,7 @@ function buildVisualizationAPI(
     ? { metric: metricsArray[0] }
     : { metrics: metricsArray };
   return stripUndefined({
-    type: visualization.shape,
+    type: isStatePieChart(visualization) ? 'pie' : visualization.shape,
     ...metricsField,
     group_by: fromLensStateToAPIGroups(visualization, layer),
     ...fromLensStateToAPISecondaryGroups(visualization, layer),
