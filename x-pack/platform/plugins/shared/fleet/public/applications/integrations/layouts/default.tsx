@@ -66,9 +66,8 @@ const LanguageSelector: React.FC = () => {
               onClick={() => setIsOpen(!isOpen)}
               data-test-subj="languageSelectorButton"
             >
-              {SUPPORTED_LOCALES.find(
-                (l) => l.locale.toLowerCase() === currentLocale.toLowerCase()
-              )?.label ?? currentLocale}
+              {SUPPORTED_LOCALES.find((l) => l.locale.toLowerCase() === currentLocale.toLowerCase())
+                ?.label ?? currentLocale}
             </EuiButtonEmpty>
           }
           isOpen={isOpen}
