@@ -100,7 +100,6 @@ const useTableListViewProps = (
   const createNewVis = useCallback(() => {
     closeNewVisModal.current = showNewVisModal({
       originatingApp: VisualizeConstants.APP_ID,
-      originatingPath: window.location.hash,
       breadcrumbs: [
         {
           text: visualizeLibraryPageTitle,
