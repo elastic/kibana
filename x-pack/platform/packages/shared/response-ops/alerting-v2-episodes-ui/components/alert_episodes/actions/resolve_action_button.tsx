@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -39,25 +39,27 @@ export function ResolveActionButton({
 
   const iconType = isDeactivated ? 'check' : 'cross';
 
+  const handleClick = useCallback(() => {
+    if (!groupHash) {
+      return;
+    }
+    createAlertAction({
+      groupHash,
+      actionType,
+      body: {
+        reason: i18n.translate('xpack.alertingV2.episodesUi.resolveAction.reason', {
+          defaultMessage: 'Updated from episodes actions UI',
+        }),
+      },
+    });
+  }, [createAlertAction, groupHash, actionType]);
+
   return (
     <EuiListGroupItem
       label={label}
       size="s"
       iconType={iconType}
-      onClick={() => {
-        if (!groupHash) {
-          return;
-        }
-        createAlertAction({
-          groupHash,
-          actionType,
-          body: {
-            reason: i18n.translate('xpack.alertingV2.episodesUi.resolveAction.reason', {
-              defaultMessage: 'Updated from episodes actions UI',
-            }),
-          },
-        });
-      }}
+      onClick={handleClick}
       isDisabled={!groupHash}
       data-test-subj="alertingEpisodeActionsResolveActionButton"
     />

@@ -79,26 +79,4 @@ describe('createAlertActionRouteForType', () => {
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(result).toBe(customErrorResult);
   });
-
-  it('applies body mapper when provided', async () => {
-    const RouteClass = createAlertActionRouteForType({
-      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
-      pathSuffix: '_tag',
-      bodySchema: createTagAlertActionBodySchema,
-      mapBody: (body) => ({ ...body, tags: ['mapped'] }),
-    });
-    const { request, response, alertActionsClient } = buildDeps({ tags: ['p1'] });
-    const route = new RouteClass(request as any, response as any, alertActionsClient as any);
-
-    await route.handle();
-
-    expect(alertActionsClient.createAction).toHaveBeenCalledWith({
-      groupHash: 'group-1',
-      action: {
-        action_type: 'tag',
-        tags: ['mapped'],
-      },
-    });
-    expect(response.noContent).toHaveBeenCalledTimes(1);
-  });
 });

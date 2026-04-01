@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { type PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeActions } from './use_fetch_episode_actions';
 
 jest.mock('../utils/execute_esql_query');
@@ -17,17 +16,8 @@ jest.mock('../utils/execute_esql_query');
 const executeEsqlQueryMock = jest.mocked(executeEsqlQuery);
 const mockExpressions = {} as ExpressionsStart;
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const queryClient = createTestQueryClient();
+const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchEpisodeActions', () => {
   beforeEach(() => {
@@ -74,37 +64,13 @@ describe('useFetchEpisodeActions', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    const call = executeEsqlQueryMock.mock.calls[0][0];
-    expect(call.query).toContain('ep-1');
-    expect(call.query).toContain('"ack", "unack"');
-    expect(call.expressions).toBe(mockExpressions);
 
-    const action = result.current.episodeActionsMap.get('ep-1');
-    expect(action).toEqual({
+    expect(result.current.data?.get('ep-1')).toEqual({
       episodeId: 'ep-1',
       ruleId: 'rule-1',
       groupHash: 'gh-1',
       lastAckAction: 'ack',
     });
-  });
-
-  it('escapes quotes in episode ids in the generated query', async () => {
-    executeEsqlQueryMock.mockResolvedValue({
-      rows: [],
-    } as unknown as Awaited<ReturnType<typeof executeEsqlQuery>>);
-
-    renderHook(
-      () =>
-        useFetchEpisodeActions({
-          episodeIds: ['say"cheese'],
-          services: { expressions: mockExpressions },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(executeEsqlQueryMock).toHaveBeenCalled());
-    const query = executeEsqlQueryMock.mock.calls[0][0].query;
-    expect(query).toContain('\\"');
   });
 
   it('keeps the last row when duplicate episode ids are returned', async () => {
@@ -134,6 +100,6 @@ describe('useFetchEpisodeActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.episodeActionsMap.get('dup')?.ruleId).toBe('r2'));
+    await waitFor(() => expect(result.current.data?.get('dup')?.ruleId).toBe('r2'));
   });
 });

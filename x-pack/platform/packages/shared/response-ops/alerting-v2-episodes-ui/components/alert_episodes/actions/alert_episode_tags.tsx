@@ -20,7 +20,7 @@ export function AlertEpisodeTags({
   oneLine?: boolean;
 }) {
   const [isMoreTagsOpen, setIsMoreTagsOpen] = useState(false);
-  const onMoreTagsClick = (e: any) => {
+  const onMoreTagsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsMoreTagsOpen((isPopoverOpen) => !isPopoverOpen);
   };
@@ -30,7 +30,7 @@ export function AlertEpisodeTags({
       key="more"
       iconType="tag"
       onClick={onMoreTagsClick}
-      onClickAriaLabel={i18n.translate('xpack.observability.component.tags.moreTags.ariaLabel', {
+      onClickAriaLabel={i18n.translate('xpack.alertingV2.episodesUi.tags.moreTags.ariaLabel', {
         defaultMessage: 'more tags badge',
       })}
       color="hollow"

@@ -8,9 +8,8 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_ALERT_API_PATH } from '@kbn/alerting-v2-constants';
 import { queryKeys } from '../query_keys';
-
-const ALERTING_V2_ALERT_API_PATH = '/api/alerting/v2/alerts';
 
 interface CreateAlertActionParams {
   groupHash: string;

@@ -9,19 +9,6 @@ import { esql } from '@elastic/esql';
 
 import { ALERT_ACTIONS_DATA_STREAM } from './constants';
 
-export const tagsFromRow = (value: unknown): string[] => {
-  if (value == null) {
-    return [];
-  }
-  if (typeof value === 'string') {
-    return [value];
-  }
-  if (Array.isArray(value)) {
-    return value as string[];
-  }
-  return [];
-};
-
 export const buildGroupActionsQuery = (groupHashes: string[]): string => {
   const groupHashLiterals = groupHashes.map((h) => esql.str(h));
 

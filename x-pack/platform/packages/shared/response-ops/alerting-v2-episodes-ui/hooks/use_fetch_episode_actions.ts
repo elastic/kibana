@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { EpisodeAction } from '../types/action';
@@ -18,41 +17,31 @@ export interface UseFetchEpisodeActionsOptions {
   services: { expressions: ExpressionsStart };
 }
 
-export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) => {
-  const { data, isLoading } = useQuery({
+export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) =>
+  useQuery({
     queryKey: queryKeys.actions(episodeIds),
     queryFn: async ({ signal }) => {
       const query = buildEpisodeActionsQuery(episodeIds);
-      const result = await executeEsqlQuery({
+      return executeEsqlQuery({
         expressions: services.expressions,
         query,
         input: null,
         abortSignal: signal,
         noCache: true,
       });
-
-      return result.rows.map(
-        (row): EpisodeAction => ({
-          episodeId: row.episode_id as string,
-          ruleId: (row.rule_id as string) ?? null,
-          groupHash: (row.group_hash as string) ?? null,
-          lastAckAction: (row.last_ack_action as string) ?? null,
-        })
-      );
     },
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
-  });
-
-  const episodeActionsMap = useMemo(() => {
-    const map = new Map<string, EpisodeAction>();
-    if (data) {
-      for (const action of data) {
-        map.set(action.episodeId, action);
+    select: (result) => {
+      const map = new Map<string, EpisodeAction>();
+      for (const row of result.rows) {
+        map.set(row.episode_id, {
+          episodeId: row.episode_id,
+          ruleId: row.rule_id ?? null,
+          groupHash: row.group_hash ?? null,
+          lastAckAction: row.last_ack_action ?? null,
+        });
       }
-    }
-    return map;
-  }, [data]);
-
-  return { episodeActionsMap, isLoading };
-};
+      return map;
+    },
+  });

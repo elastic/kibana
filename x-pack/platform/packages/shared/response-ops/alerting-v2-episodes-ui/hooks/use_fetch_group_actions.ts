@@ -11,7 +11,20 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { GroupAction } from '../types/action';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { queryKeys } from '../query_keys';
-import { buildGroupActionsQuery, tagsFromRow } from '../utils/queries/build_group_actions_query';
+import { buildGroupActionsQuery } from '../utils/queries/build_group_actions_query';
+
+const tagsFromRow = (value: unknown): string[] => {
+  if (value == null) {
+    return [];
+  }
+  if (typeof value === 'string') {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value as string[];
+  }
+  return [];
+};
 
 export interface UseFetchGroupActionsOptions {
   groupHashes: string[];

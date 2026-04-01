@@ -28,9 +28,6 @@ interface CreateAlertActionRouteForTypeOptions<
   bodySchema: z.ZodType<
     Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
-  mapBody?: (
-    body: Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
-  ) => Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>;
 }
 
 export const createAlertActionRouteForType = <
@@ -39,7 +36,6 @@ export const createAlertActionRouteForType = <
   actionType,
   pathSuffix,
   bodySchema,
-  mapBody,
 }: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
   CreateAlertActionParams,
   unknown,
@@ -80,12 +76,11 @@ export const createAlertActionRouteForType = <
 
     async handle() {
       try {
-        const mappedBody = mapBody ? mapBody(this.request.body) : this.request.body;
         await this.alertActionsClient.createAction({
           groupHash: this.request.params.group_hash,
           action: {
             action_type: actionType,
-            ...mappedBody,
+            ...this.request.body,
           } as Extract<CreateAlertActionBody, { action_type: TAction }>,
         });
 

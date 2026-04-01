@@ -12,7 +12,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { AcknowledgeActionButton } from './acknowledge_action_button';
 import { SnoozeActionButton } from './snooze_action_button';
 import type { EpisodeAction, GroupAction } from '../../../types/action';
-import { ResolveActionButton } from './deactivate_action_button';
+import { ResolveActionButton } from './resolve_action_button';
 
 export interface AlertEpisodeActionsCellProps {
   episodeId?: string;

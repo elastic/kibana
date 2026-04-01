@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -39,22 +39,24 @@ export function AcknowledgeActionButton({
         defaultMessage: 'Acknowledge',
       });
 
+  const handleClick = useCallback(() => {
+    if (!episodeId || !groupHash) {
+      return;
+    }
+    createAlertAction({
+      groupHash,
+      actionType,
+      body: { episode_id: episodeId },
+    });
+  }, [createAlertAction, episodeId, groupHash, actionType]);
+
   return (
     <EuiButton
       size="s"
       color="text"
       fill={false}
       iconType={isAcknowledged ? 'crossCircle' : 'checkCircle'}
-      onClick={() => {
-        if (!episodeId || !groupHash) {
-          return;
-        }
-        createAlertAction({
-          groupHash,
-          actionType,
-          body: { episode_id: episodeId },
-        });
-      }}
+      onClick={handleClick}
       isLoading={isLoading}
       isDisabled={!episodeId || !groupHash}
       data-test-subj="alertEpisodeAcknowledgeActionButton"

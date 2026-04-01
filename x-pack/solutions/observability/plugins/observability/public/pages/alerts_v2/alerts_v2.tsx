@@ -133,7 +133,7 @@ export function AlertsV2Page() {
     [rows]
   );
 
-  const { episodeActionsMap } = useFetchEpisodeActions({ episodeIds, services });
+  const { data: episodeActionsMap } = useFetchEpisodeActions({ episodeIds, services });
   const { groupActionsMap } = useFetchGroupActions({ groupHashes, services });
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
@@ -227,7 +227,7 @@ export function AlertsV2Page() {
                     return (
                       <AlertEpisodeStatusCell
                         status={status}
-                        episodeAction={episodeActionsMap.get(episodeId)}
+                        episodeAction={episodeActionsMap?.get(episodeId)}
                         groupAction={groupActionsMap.get(groupHash)}
                       />
                     );
@@ -240,7 +240,7 @@ export function AlertsV2Page() {
                       <AlertEpisodeActionsCell
                         episodeId={episodeId}
                         groupHash={groupHash}
-                        episodeAction={episodeActionsMap.get(episodeId)}
+                        episodeAction={episodeActionsMap?.get(episodeId)}
                         groupAction={groupActionsMap.get(groupHash)}
                         http={services.http}
                       />

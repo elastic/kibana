@@ -16,7 +16,7 @@ export const buildEpisodeActionsQuery = (episodeIds: string[]): string => {
     | WHERE episode_id IN (${episodeIdLiterals})
     | WHERE action_type IN ("ack", "unack")
     | STATS
-        last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack")
+        last_ack_action = LAST(action_type, @timestamp)
       BY episode_id, rule_id, group_hash
     | KEEP episode_id, rule_id, group_hash, last_ack_action
   `.print('basic');

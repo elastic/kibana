@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -28,21 +28,38 @@ export function SnoozeActionButton({
   const closePopover = () => setIsPopoverOpen(false);
   const { mutate: createAlertAction, isLoading } = useCreateAlertAction(http);
 
+  const handleUnsnooze = useCallback(() => {
+    if (!groupHash) {
+      return;
+    }
+    createAlertAction({
+      groupHash,
+      actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+    });
+  }, [createAlertAction, groupHash]);
+
+  const handleApplySnooze = useCallback(
+    (expiry: string) => {
+      if (!groupHash) {
+        return;
+      }
+      createAlertAction({
+        groupHash,
+        actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        body: { expiry },
+      });
+      setIsPopoverOpen(false);
+    },
+    [createAlertAction, groupHash]
+  );
+
   return isSnoozed ? (
     <EuiButton
       size="s"
       color="text"
       fill={false}
       iconType="bellSlash"
-      onClick={() => {
-        if (!groupHash) {
-          return;
-        }
-        createAlertAction({
-          groupHash,
-          actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-        });
-      }}
+      onClick={handleUnsnooze}
       isDisabled={!groupHash}
       isLoading={isLoading}
       data-test-subj="alertEpisodeUnsnoozeActionButton"
@@ -79,19 +96,7 @@ export function SnoozeActionButton({
       panelPaddingSize="m"
       panelStyle={{ width: 320 }}
     >
-      <AlertEpisodeSnoozeForm
-        onApplySnooze={(expiry) => {
-          if (!groupHash) {
-            return;
-          }
-          createAlertAction({
-            groupHash,
-            actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-            body: { expiry },
-          });
-          closePopover();
-        }}
-      />
+      <AlertEpisodeSnoozeForm onApplySnooze={handleApplySnooze} />
     </EuiPopover>
   );
 }

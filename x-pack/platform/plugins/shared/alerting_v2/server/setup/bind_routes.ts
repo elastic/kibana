@@ -16,7 +16,6 @@ import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
 import { BulkDeleteRulesRoute } from '../routes/rules/bulk_delete_rules_route';
 import { BulkEnableRulesRoute } from '../routes/rules/bulk_enable_rules_route';
 import { BulkDisableRulesRoute } from '../routes/rules/bulk_disable_rules_route';
-import { CreateAlertActionRoute } from '../routes/alert_actions/create_alert_action_route';
 import { BulkCreateAlertActionRoute } from '../routes/alert_actions/bulk_create_alert_action_route';
 import { CreateAckAlertActionRoute } from '../routes/alert_actions/create_ack_alert_action_route';
 import { CreateUnackAlertActionRoute } from '../routes/alert_actions/create_unack_alert_action_route';
@@ -47,7 +46,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkDeleteRulesRoute);
   bind(Route).toConstantValue(BulkEnableRulesRoute);
   bind(Route).toConstantValue(BulkDisableRulesRoute);
-  bind(Route).toConstantValue(CreateAlertActionRoute);
   bind(Route).toConstantValue(CreateAckAlertActionRoute);
   bind(Route).toConstantValue(CreateUnackAlertActionRoute);
   bind(Route).toConstantValue(CreateTagAlertActionRoute);
