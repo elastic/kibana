@@ -8,7 +8,7 @@
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/datastreams/alert_events';
 
 export interface AlertingEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
