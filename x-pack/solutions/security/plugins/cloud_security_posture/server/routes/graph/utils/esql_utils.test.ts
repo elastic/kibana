@@ -84,10 +84,10 @@ describe('ESQL utils', () => {
   });
 
   describe('formatJsonProperty', () => {
-    it('should generate ESQL that outputs JSON property with comma prefix, or empty string if null', () => {
+    it('should generate ESQL that outputs JSON property, or empty string if null', () => {
       const result = concatJsonObjectPropertyEsqlExprSafe('name', 'entityName');
 
-      expect(result).toBe('COALESCE(CONCAT(",\\"name\\":\\"", entityName, "\\""), "")');
+      expect(result).toBe('COALESCE(CONCAT("\\"name\\":\\"", entityName, "\\""), "")');
     });
 
     it('should include the property name and variable in the output', () => {
