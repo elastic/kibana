@@ -56,35 +56,30 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({ wa
   }, [useLegacy, combinedRiskStats.severityCount, riskLevelsStats.records]);
 
   const loading = useLegacy ? combinedRiskStats.loading : riskLevelsStats.isLoading;
-  const isModuleDisabled = useLegacy
-    ? combinedRiskStats.isModuleDisabled
-    : !riskLevelsStats.hasEngineBeenInstalled;
-
-  if (isModuleDisabled && !loading) {
-    return null;
-  }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h3>
-            {hasWatchlist ? (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
-                defaultMessage="{watchlistName} risk levels"
-                values={{
-                  watchlistName: getWatchlistName(watchlistId),
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle"
-                defaultMessage="Entity risk levels"
-              />
-            )}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" css={{ minHeight: 40 }}>
+          <EuiTitle size="s">
+            <h3>
+              {hasWatchlist ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
+                  defaultMessage="{watchlistName} risk levels"
+                  values={{
+                    watchlistName: getWatchlistName(watchlistId),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle"
+                  defaultMessage="Entity risk levels"
+                />
+              )}
+            </h3>
+          </EuiTitle>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
@@ -92,7 +87,7 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({ wa
             <RiskLevelBreakdownTable severityCount={severityCount} loading={loading} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <RiskScoreDonutChart severityCount={severityCount} />
+            <RiskScoreDonutChart showLegend={false} severityCount={severityCount} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

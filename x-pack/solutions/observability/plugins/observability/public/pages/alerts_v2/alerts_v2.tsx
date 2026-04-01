@@ -28,7 +28,7 @@ import {
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/datastreams/alert_events';
 import type {
   EpisodesFilterState,
   EpisodesSortState,
