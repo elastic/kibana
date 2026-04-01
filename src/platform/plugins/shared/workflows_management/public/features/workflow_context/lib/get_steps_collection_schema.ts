@@ -19,6 +19,10 @@ import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
  * Folds an array of graph nodes into a steps schema, skipping already-seen
  * and trigger nodes. Mutates `seenStepIds` to track which step IDs have been
  * processed across multiple calls.
+ *
+ * Foreach nodes need the accumulated steps schema for their item type
+ * inference, so they force a flush of the batched shape before processing.
+ * All other nodes are batched into a single `.extend()` call.
  */
 function addNodesToStepsSchema(
   nodes: GraphNodeUnion[],
@@ -27,6 +31,14 @@ function addNodesToStepsSchema(
   stepContextSchema: typeof DynamicStepContextSchema
 ): z.ZodObject {
   let schema = stepsSchema;
+  let batch: Record<string, z.ZodTypeAny> = {};
+
+  const flushBatch = () => {
+    if (Object.keys(batch).length > 0) {
+      schema = schema.extend(batch);
+      batch = {};
+    }
+  };
 
   for (const node of nodes) {
     if (seenStepIds.has(node.stepId) || node.type === 'trigger') {
@@ -36,13 +48,14 @@ function addNodesToStepsSchema(
     seenStepIds.add(node.stepId);
 
     if (!isEnterForeach(node)) {
-      schema = schema.extend({
-        [node.stepId]: z.object({
+      batch[node.stepId] = z.lazy(() =>
+        z.object({
           output: getOutputSchemaForStepType(node).optional(),
           error: z.any().optional(),
-        }),
-      });
+        })
+      );
     } else {
+      flushBatch();
       schema = schema.extend({
         [node.stepId]: getForeachStateSchema(
           stepContextSchema.merge(z.object({ steps: schema })),
@@ -52,13 +65,15 @@ function addNodesToStepsSchema(
     }
   }
 
+  flushBatch();
   return schema;
 }
 
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
-  stepName: string
+  stepName: string,
+  precomputedPredecessors?: GraphNodeUnion[]
 ) {
   const stepId = getStepId(stepName);
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
@@ -66,12 +81,17 @@ export function getStepsCollectionSchema(
   if (!stepNode) {
     throw new Error(`Step with id ${stepId} not found in the workflow graph.`);
   }
+
+  const rawPredecessors = precomputedPredecessors
+    ? precomputedPredecessors
+    : workflowExecutionGraph.getAllPredecessors(stepNode.id);
+
   // Reverse predecessors so the earliest steps are first and will be available when we reach the later ones.
   // Deduplicate by stepId: structural nodes (enter-if/exit-if, enter-foreach/exit-foreach, etc.)
   // share the same stepId, and processing both would cause the later one to overwrite the first.
   // We keep the first occurrence per stepId since the earliest node (e.g. enter-foreach) carries
   // the configuration needed for special schema handling (like getForeachStateSchema).
-  const allPredecessors = [...workflowExecutionGraph.getAllPredecessors(stepNode.id)].reverse();
+  const allPredecessors = [...rawPredecessors].reverse();
   const dedupIds = new Set<string>();
   const predecessors = allPredecessors.filter((node) => {
     if (dedupIds.has(node.stepId)) {
