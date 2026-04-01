@@ -17,7 +17,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError, extractEsqlResponseErrorCause, formatErrorCause } from './esql_response_error';
+import { EsqlResponseError } from './esql_response_error';
 import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -218,46 +218,6 @@ describe('executeEsqlQuery', () => {
         uiSettings: mockUiSettings,
       })
     ).rejects.toThrow(EsqlResponseError);
-  });
-});
-
-describe('esql response error helpers', () => {
-  it('extracts error cause from response error object', () => {
-    const result = extractEsqlResponseErrorCause({
-      error: { type: 'remote_transport_exception', reason: 'ccs query failed' },
-    });
-
-    expect(result).toEqual({
-      type: 'remote_transport_exception',
-      reason: 'ccs query failed',
-    });
-  });
-
-  it('returns undefined when response has no error object', () => {
-    const result = extractEsqlResponseErrorCause({ columns: [], values: [] });
-    expect(result).toBeUndefined();
-  });
-
-  it('formats message from error type and reason', () => {
-    const result = formatErrorCause({
-      type: 'remote_transport_exception',
-      reason: 'ccs query failed',
-    });
-
-    expect(result).toBe('remote_transport_exception: ccs query failed');
-  });
-
-  it('formats message from root_cause when type and reason are missing', () => {
-    const result = formatErrorCause({
-      root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
-    });
-
-    expect(result).toBe('index_not_found_exception: no such index [metrics-*]');
-  });
-
-  it('formats generic message for empty error object', () => {
-    const result = formatErrorCause({});
-    expect(result).toBe('Elasticsearch returned an error');
   });
 });
 
