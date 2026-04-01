@@ -112,29 +112,27 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (definition.data_stream_exists) {
-    tabs.retention = {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-            defaultMessage:
-              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+  tabs.retention = {
+    content: (
+      <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+          defaultMessage:
+            'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+        })}
+      >
+        <span data-test-subj="retentionTab" tabIndex={0}>
+          {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+            defaultMessage: 'Retention',
           })}
-        >
-          <span data-test-subj="retentionTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Retention',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    };
-    if (processing) {
-      tabs.processing = processing;
-    }
+        </span>
+      </EuiToolTip>
+    ),
+  };
+  if (processing && !definition.replicated) {
+    tabs.processing = processing;
   }
 
   tabs.schema = {
@@ -178,7 +176,7 @@ export function ClassicStreamDetailManagement({
     tabs.significantEvents = otherTabs.significantEvents;
   }
 
-  if (definition.privileges.manage) {
+  if (definition.privileges.manage || definition.replicated) {
     tabs.advanced = {
       content: (
         <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />

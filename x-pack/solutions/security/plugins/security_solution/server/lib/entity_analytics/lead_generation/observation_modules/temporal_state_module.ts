@@ -110,9 +110,8 @@ const fetchPrivilegeEscalations = async (
           if (hit) {
             const entityField = hit._source?.entity as Record<string, unknown> | undefined;
             const attrs = entityField?.attributes as { privileged?: boolean } | undefined;
-            const wasPrivileged = attrs?.privileged === true;
 
-            if (!wasPrivileged) {
+            if (attrs !== undefined && attrs.privileged === false) {
               escalated.add(`${entityType}:${bucket.key}`);
             }
           }

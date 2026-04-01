@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { skillCreateRequestSchema, skillUpdateRequestSchema } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -43,10 +42,6 @@ const SKILL_ID_PARAMS_SCHEMA = schema.object({
     meta: { description: 'The unique identifier of the skill.' },
   }),
 });
-
-const featureFlagConfig = {
-  featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-};
 
 export function registerSkillsRoutes({
   router,
@@ -97,7 +92,7 @@ export function registerSkillsRoutes({
         return response.ok<ListSkillsResponse>({
           body: { results },
         });
-      }, featureFlagConfig)
+      })
     );
 
   // get skill by ID
@@ -140,7 +135,7 @@ export function registerSkillsRoutes({
         return response.ok<GetSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // create skill
@@ -211,7 +206,7 @@ export function registerSkillsRoutes({
         return response.ok<CreateSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // update skill
@@ -286,7 +281,7 @@ export function registerSkillsRoutes({
         return response.ok<UpdateSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // delete skill
@@ -326,6 +321,6 @@ export function registerSkillsRoutes({
         return response.ok<DeleteSkillResponse>({
           body: { success },
         });
-      }, featureFlagConfig)
+      })
     );
 }
