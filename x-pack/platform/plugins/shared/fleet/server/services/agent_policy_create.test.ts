@@ -9,6 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { createAppContextStartContractMock } from '../mocks';
+import { FleetError } from '../../common/errors';
 
 import type { AgentPolicy, PackagePolicy } from '../types';
 
@@ -101,6 +102,29 @@ describe('createAgentPolicyWithPackages', () => {
 
   afterEach(() => {
     appContextService.stop();
+  });
+
+  it('should throw after exhausting all retries when collision persists', async () => {
+    mockIsPackagePolicyNameCollisionLoser.mockResolvedValue(true);
+    mockedPackagePolicyService.delete = jest.fn().mockResolvedValue([]);
+
+    let error: FleetError | undefined;
+    try {
+      await createAgentPolicyWithPackages({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        agentPolicyService: mockedAgentPolicyService,
+        newPolicy: { name: 'Agent policy 1', namespace: 'default' },
+        withSysMonitoring: true,
+        spaceId: 'default',
+      });
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error).toBeInstanceOf(FleetError);
+    expect(error?.message).toMatch(/could not resolve name collision after 3 attempts/);
+    expect(mockedPackagePolicyService.delete).toHaveBeenCalledTimes(3);
   });
 
   it('should roll back agent policy if package policy creation failed', async () => {

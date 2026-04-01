@@ -19,6 +19,7 @@ import {
   FLEET_SERVER_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
 } from '../../common';
+import { FleetError } from '../../common/errors';
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
@@ -94,6 +95,7 @@ async function createPackagePolicy(
 
   const spaceIds = agentPolicy.space_ids ?? [options.spaceId];
   const MAX_RETRIES = 3;
+  let succeeded = false;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
@@ -119,10 +121,19 @@ async function createPackagePolicy(
       spaceIds
     );
 
-    if (!isLoser) break;
+    if (!isLoser) {
+      succeeded = true;
+      break;
+    }
 
     // Lost the name collision race — delete and retry with next incremented name
     await packagePolicyService.delete(soClient, esClient, [created.id], { user: options.user });
+  }
+
+  if (!succeeded) {
+    throw new FleetError(
+      `Failed to create package policy for '${packageToInstall}': could not resolve name collision after ${MAX_RETRIES} attempts`
+    );
   }
 }
 
