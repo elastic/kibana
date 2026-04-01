@@ -9,10 +9,12 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { TimeRange } from '@kbn/es-query';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
+  computeTargetBuckets,
   getLensMetricFormat,
   firstNonNullable,
 } from '../../../common/utils';
@@ -23,6 +25,7 @@ interface UseChartLayersParams {
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
+  timeRange?: TimeRange;
 }
 
 /**
@@ -31,6 +34,7 @@ interface UseChartLayersParams {
  * @param dimensions - An array of dimension fields to break down the series by.
  * @param metric - The metric field to be visualized.
  * @param color - The color to apply to the series.
+ * @param timeRange - Optional time range used to compute an appropriate bucket count.
  * @returns An array of LensSeriesLayer configurations.
  */
 export const useChartLayers = ({
@@ -39,6 +43,7 @@ export const useChartLayers = ({
   color,
   seriesType,
   customFunction,
+  timeRange,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const type = firstNonNullable(metricItem.fieldTypes);
@@ -56,13 +61,14 @@ export const useChartLayers = ({
       customFunction,
     });
     const hasDimensions = dimensions.length > 0;
+    const targetBuckets = computeTargetBuckets(timeRange);
 
     return [
       {
         type: 'series',
         seriesType: seriesType || hasDimensions ? 'line' : 'area',
         xAxis: {
-          field: createTimeBucketAggregation({}),
+          field: createTimeBucketAggregation({ targetBuckets }),
           type: 'dateHistogram',
         },
         yAxis: [
@@ -86,5 +92,6 @@ export const useChartLayers = ({
     metricItem.metricName,
     metricItem.units,
     seriesType,
+    timeRange,
   ]);
 };

@@ -11,7 +11,14 @@ import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api
 import { synth, BasicPrettyPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { TimeRange } from '@kbn/es-query';
+import moment from 'moment';
+import { calculateBounds } from '@kbn/data-plugin/common';
+import { calculateAuto } from '@kbn/calculate-auto';
 import { isLegacyHistogram } from '../legacy_histogram';
+
+const MAX_TARGET_BUCKETS = 100;
+const MIN_BUCKET_SIZE_SECONDS = 60;
 
 /**
  * Builds an ES|QL aggregation expression AST node using `synth.exp` template
@@ -77,6 +84,43 @@ export function createMetricAggregation({
 }
 
 /**
+ * Computes a safe number of time buckets for the given time range.
+ *
+ * Uses {@link calculateBounds} to resolve relative/absolute time ranges and
+ * {@link calculateAuto} to pick a "nice" interval from the standard rounding.
+ * The interval is clamped to a minimum of {@link MIN_BUCKET_SIZE_SECONDS} so that
+ * aggregations like RATE() (which need >= 2 data points per bucket) produce
+ * meaningful results with typical OTel/agent scrape intervals (10-60s).
+ *
+ * Falls back to {@link MAX_TARGET_BUCKETS} when the time range is undefined or
+ * cannot be resolved.
+ */
+export function computeTargetBuckets(timeRange?: TimeRange): number {
+  if (!timeRange) {
+    return MAX_TARGET_BUCKETS;
+  }
+
+  const { min, max } = calculateBounds(timeRange);
+  if (!min || !max) {
+    return MAX_TARGET_BUCKETS;
+  }
+
+  const duration = moment.duration(max.valueOf() - min.valueOf(), 'ms');
+  if (duration.asSeconds() <= 0) {
+    return MAX_TARGET_BUCKETS;
+  }
+
+  const interval = calculateAuto.near(MAX_TARGET_BUCKETS, duration);
+  const intervalSeconds = interval?.asSeconds() ?? MIN_BUCKET_SIZE_SECONDS;
+  const clampedIntervalSeconds = Math.max(intervalSeconds, MIN_BUCKET_SIZE_SECONDS);
+
+  return Math.max(
+    1,
+    Math.min(MAX_TARGET_BUCKETS, Math.floor(duration.asSeconds() / clampedIntervalSeconds))
+  );
+}
+
+/**
  * Creates the time bucketing part of an ES|QL query.
  *
  * @param targetBuckets - The desired number of buckets for the time series.
@@ -84,7 +128,7 @@ export function createMetricAggregation({
  * @returns The ES|QL BUCKET function string.
  */
 export function createTimeBucketAggregation({
-  targetBuckets = 100,
+  targetBuckets = MAX_TARGET_BUCKETS,
   timestampField = '@timestamp',
 }: {
   targetBuckets?: number;

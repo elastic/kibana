@@ -16,6 +16,7 @@ jest.mock('../../../common/utils', () => ({
   ...jest.requireActual('../../../common/utils'),
   createMetricAggregation: jest.fn(({ metricName }) => `AVG(${metricName})`),
   createTimeBucketAggregation: jest.fn(() => 'time_bucket_agg'),
+  computeTargetBuckets: jest.fn(() => 100),
 }));
 
 describe('useChartLayers', () => {
@@ -101,6 +102,29 @@ describe('useChartLayers', () => {
     const [layer] = result.current;
     expect(layer.yAxis[0]).not.toHaveProperty('format');
     expect(layer.yAxis[0]).not.toHaveProperty('formatString');
+  });
+
+  describe('time range aware bucketing', () => {
+    it('should pass timeRange through computeTargetBuckets to createTimeBucketAggregation', () => {
+      const { computeTargetBuckets, createTimeBucketAggregation } =
+        jest.requireMock('../../../common/utils');
+      computeTargetBuckets.mockReturnValue(15);
+
+      const timeRange = { from: 'now-15m', to: 'now' };
+      renderHook(() =>
+        useChartLayers({
+          metricItem: mockMetric,
+          dimensions: [],
+          color: '#000',
+          timeRange,
+        })
+      );
+
+      expect(computeTargetBuckets).toHaveBeenCalledWith(timeRange);
+      expect(createTimeBucketAggregation).toHaveBeenCalledWith({ targetBuckets: 15 });
+
+      computeTargetBuckets.mockReturnValue(100);
+    });
   });
 
   describe('when type or instrument is null or undefined', () => {
