@@ -83,12 +83,11 @@ describe('Event Logging Integration', () => {
     getWorkflow: jest.fn(),
     getWorkflowExecution: jest.fn(),
     runWorkflow: jest.fn(),
-    scheduleWorkflow: jest.fn(),
   };
 
   const baseWorkflowConfig = {
     alert_retrieval_workflow_ids: ['default-attack-discovery-alert-retrieval'],
-    alert_retrieval_mode: 'custom_query' as const,
+    default_alert_retrieval_mode: 'custom_query' as const,
     validation_workflow_id: 'default',
   };
 
@@ -194,7 +193,7 @@ describe('Event Logging Integration', () => {
         startedAt: '2024-01-01T00:00:00Z',
         stepExecutionIndex: 0,
         stepId: 'retrieve_alerts',
-        stepType: 'security.attack-discovery.defaultAlertRetrieval',
+        stepType: 'attack-discovery.defaultAlertRetrieval',
         topologicalIndex: 0,
         workflowId: 'workflow-default-alert-retrieval',
         workflowRunId: 'alert-retrieval-run-id',
@@ -243,7 +242,7 @@ describe('Event Logging Integration', () => {
         startedAt: '2024-01-01T00:00:00Z',
         stepExecutionIndex: 0,
         stepId: 'generate',
-        stepType: 'security.attack-discovery.generate',
+        stepType: 'attack-discovery.generate',
         topologicalIndex: 0,
         workflowId: 'workflow-generation',
         workflowRunId: 'generation-run-id',
@@ -284,7 +283,7 @@ describe('Event Logging Integration', () => {
         status: ExecutionStatus.COMPLETED,
         stepExecutionIndex: 0,
         stepId: 'persist_discoveries',
-        stepType: 'security.attack-discovery.persistDiscoveries',
+        stepType: 'attack-discovery.persistDiscoveries',
         topologicalIndex: 0,
         workflowId: 'workflow-validate',
         workflowRunId: 'validation-run-id',
@@ -342,17 +341,11 @@ describe('Event Logging Integration', () => {
             if (workflow.id === 'workflow-default-alert-retrieval') {
               return 'alert-retrieval-run-id';
             }
-            if (workflow.id === 'workflow-validate') {
-              return 'validation-run-id';
-            }
-            return 'unknown-run-id';
-          }
-        );
-
-        (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockImplementation(
-          async (workflow: { id: string }) => {
             if (workflow.id === 'workflow-generation') {
               return 'generation-run-id';
+            }
+            if (workflow.id === 'workflow-validate') {
+              return 'validation-run-id';
             }
             return 'unknown-run-id';
           }
@@ -625,7 +618,7 @@ describe('Event Logging Integration', () => {
         (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
           mockGenerationWorkflow
         );
-        (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
           'generation-run-id'
         );
         (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(

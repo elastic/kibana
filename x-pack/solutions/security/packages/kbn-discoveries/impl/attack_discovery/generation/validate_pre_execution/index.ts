@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { WorkflowIntegrityResult } from '../types';
+import type { DefaultWorkflowIds } from '../types';
 
 export interface PreExecutionIssue {
   check: string;
@@ -23,10 +23,10 @@ export interface PreExecutionValidationResult {
 export interface ValidatePreExecutionParams {
   alertsIndexPattern: string;
   connectorId: string;
+  defaultWorkflowIds: DefaultWorkflowIds | null;
   esClient: ElasticsearchClient;
   logger: Logger;
   resolveConnector: () => Promise<unknown>;
-  workflowIntegrityResult: WorkflowIntegrityResult | null;
   workflowsManagementApi?: unknown;
 }
 
@@ -41,14 +41,13 @@ const checkWorkflowsManagementApi = (workflowsManagementApi: unknown): PreExecut
   return null;
 };
 
-const checkWorkflowIntegrity = (
-  workflowIntegrityResult: WorkflowIntegrityResult | null
+const checkDefaultWorkflowIds = (
+  defaultWorkflowIds: DefaultWorkflowIds | null
 ): PreExecutionIssue | null => {
-  if (workflowIntegrityResult?.status === 'repair_failed') {
-    const failedKeys = workflowIntegrityResult.unrepairableErrors.map(({ key }) => key).join(', ');
+  if (defaultWorkflowIds == null) {
     return {
-      check: 'managedWorkflowEnabled',
-      message: `One or more required managed workflows are unavailable [${failedKeys}]; cannot execute workflows`,
+      check: 'defaultWorkflowIds',
+      message: 'Default workflows could not be resolved; cannot execute workflows',
       severity: 'critical',
     };
   }
@@ -119,10 +118,10 @@ const checkConnectorAccessibility = async (
 export const validatePreExecution = async ({
   alertsIndexPattern,
   connectorId,
+  defaultWorkflowIds,
   esClient,
   logger,
   resolveConnector,
-  workflowIntegrityResult,
   workflowsManagementApi,
 }: ValidatePreExecutionParams): Promise<PreExecutionValidationResult> => {
   const [alertsIndexIssue, connectorIssue] = await Promise.all([
@@ -132,7 +131,7 @@ export const validatePreExecution = async ({
 
   const issues: PreExecutionIssue[] = [
     checkWorkflowsManagementApi(workflowsManagementApi),
-    checkWorkflowIntegrity(workflowIntegrityResult),
+    checkDefaultWorkflowIds(defaultWorkflowIds),
     alertsIndexIssue,
     connectorIssue,
   ].filter((issue): issue is PreExecutionIssue => issue != null);

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, KibanaRequest, Logger } from '@kbn/core/server';
 
-import type { DefaultWorkflowIds, WorkflowIntegrityResult } from '../types';
+import { reportMisconfiguration } from '../../../lib/telemetry/report_misconfiguration';
+import type {
+  DefaultWorkflowIds,
+  WorkflowInitializationService,
+  WorkflowIntegrityResult,
+} from '../types';
 
 export interface VerifyWorkflowIntegrityResult {
   integrityResult: WorkflowIntegrityResult | null;
@@ -15,19 +20,30 @@ export interface VerifyWorkflowIntegrityResult {
 }
 
 export const verifyWorkflowIntegrity = async ({
-  checkIntegrity,
+  analytics,
   defaultWorkflowIds,
   logger,
+  request,
+  spaceId,
+  workflowInitService,
 }: {
-  checkIntegrity?: (() => Promise<WorkflowIntegrityResult>) | undefined;
+  analytics?: AnalyticsServiceSetup;
   defaultWorkflowIds: DefaultWorkflowIds | null;
   logger: Logger;
+  request: KibanaRequest;
+  spaceId: string;
+  workflowInitService?: WorkflowInitializationService;
 }): Promise<VerifyWorkflowIntegrityResult> => {
-  if (defaultWorkflowIds == null || checkIntegrity == null) {
+  if (defaultWorkflowIds == null || workflowInitService == null) {
     return { integrityResult: null, updatedIds: defaultWorkflowIds };
   }
 
-  const result = await checkIntegrity();
+  const result = await workflowInitService.verifyAndRepairWorkflows({
+    defaultWorkflowIds,
+    logger,
+    request,
+    spaceId,
+  });
 
   if (result.status === 'repair_failed') {
     const failedKeys = result.unrepairableErrors.map(({ key }) => key).join(', ');
@@ -38,12 +54,42 @@ export const verifyWorkflowIntegrity = async ({
     );
   }
 
+  if (analytics != null) {
+    for (const { key, workflowId } of result.repaired) {
+      reportMisconfiguration({
+        analytics,
+        logger,
+        params: {
+          detail: `Workflow '${key}' was modified and has been automatically restored`,
+          misconfiguration_type: 'workflow_modified',
+          space_id: spaceId,
+          workflow_id: workflowId,
+        },
+      });
+    }
+
+    for (const { key, workflowId } of result.optionalRepaired) {
+      reportMisconfiguration({
+        analytics,
+        logger,
+        params: {
+          detail: `Optional workflow '${key}' was modified and has been automatically restored`,
+          misconfiguration_type: 'workflow_modified',
+          space_id: spaceId,
+          workflow_id: workflowId,
+        },
+      });
+    }
+  }
+
   for (const { error, key, workflowId } of result.optionalWarnings) {
     logger.warn(
       `Optional workflow '${workflowId}' (${key}) could not be repaired: ${error}. Generation continues.`
     );
   }
 
+  // Merge any repaired workflow IDs into the returned DefaultWorkflowIds so the
+  // caller always uses up-to-date IDs (even for the current request).
   const updatedIds: DefaultWorkflowIds = { ...defaultWorkflowIds };
   for (const { key, workflowId } of result.repaired) {
     updatedIds[key] = workflowId;

@@ -5,32 +5,70 @@
  * 2.0.
  */
 
-import {
-  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
-  ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
-  ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
-
+import type { WorkflowInitializationService } from '../types';
 import { resolveDefaultWorkflowIds } from '.';
 
 describe('resolveDefaultWorkflowIds', () => {
-  it('returns the system-workflow ID constants without making any API calls', () => {
-    const result = resolveDefaultWorkflowIds();
+  it('returns null when workflowInitService is not provided', async () => {
+    await expect(
+      resolveDefaultWorkflowIds({
+        logger: {} as never,
+        request: {} as never,
+        spaceId: 'default',
+        workflowInitService: undefined,
+      })
+    ).resolves.toBeNull();
+  });
 
-    expect(result).toEqual({
-      default_alert_retrieval: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
-      generation: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
-      validate: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+  it('returns ids when the service resolves successfully', async () => {
+    const resolved = {
+      default_alert_retrieval: 'legacy',
+      generation: 'generation',
+      validate: 'validate',
+    };
+
+    const mockService: WorkflowInitializationService = {
+      ensureWorkflowsForSpace: jest.fn().mockResolvedValue(resolved),
+      verifyAndRepairWorkflows: jest.fn().mockResolvedValue({
+        repaired: [],
+        status: 'all_intact',
+        unrepairableErrors: [],
+      }),
+    };
+
+    await expect(
+      resolveDefaultWorkflowIds({
+        logger: {} as never,
+        request: {} as never,
+        spaceId: 'default',
+        workflowInitService: mockService,
+      })
+    ).resolves.toEqual(resolved);
+
+    expect(mockService.ensureWorkflowsForSpace).toHaveBeenCalledWith({
+      logger: {} as never,
+      request: {} as never,
+      spaceId: 'default',
     });
   });
 
-  it('returns the expected constant values', () => {
-    const result = resolveDefaultWorkflowIds();
+  it('returns null when the service resolves to null', async () => {
+    const mockService: WorkflowInitializationService = {
+      ensureWorkflowsForSpace: jest.fn().mockResolvedValue(null),
+      verifyAndRepairWorkflows: jest.fn().mockResolvedValue({
+        repaired: [],
+        status: 'all_intact',
+        unrepairableErrors: [],
+      }),
+    };
 
-    expect(result).toEqual({
-      default_alert_retrieval: 'system-attack-discovery-alert-retrieval',
-      generation: 'system-attack-discovery-generation',
-      validate: 'system-attack-discovery-validate',
-    });
+    await expect(
+      resolveDefaultWorkflowIds({
+        logger: {} as never,
+        request: {} as never,
+        spaceId: 'default',
+        workflowInitService: mockService,
+      })
+    ).resolves.toBeNull();
   });
 });

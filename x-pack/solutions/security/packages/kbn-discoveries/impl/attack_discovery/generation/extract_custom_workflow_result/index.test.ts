@@ -330,7 +330,7 @@ describe('extractCustomWorkflowResult', () => {
               alerts_context_count: 1,
             },
             stepId: 'legacy_retrieval',
-            stepType: 'security.attack-discovery.defaultAlertRetrieval',
+            stepType: 'attack-discovery.defaultAlertRetrieval',
           },
           {
             output: ['transformed-alert-1', 'transformed-alert-2'],
