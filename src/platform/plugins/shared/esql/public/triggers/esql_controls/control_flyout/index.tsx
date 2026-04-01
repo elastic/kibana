@@ -155,15 +155,12 @@ export function ESQLControlsFlyout({
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const variableExists =
       checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
+    const { available_options } = { available_options: [], ...controlState };
     setFormIsInvalid(
       !variableNameWithoutQuestionmark ||
         variableExists ||
         !areValuesValid ||
-        !(
-          controlState &&
-          'available_options' in controlState &&
-          controlState.available_options.length
-        )
+        !available_options.length
     );
   }, [
     isControlInEditMode,

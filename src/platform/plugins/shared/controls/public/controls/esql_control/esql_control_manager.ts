@@ -81,7 +81,9 @@ export const getSelectionComparators = <Type = ESQLOptionsListRuntimeState['cont
     single_select: 'referenceEquality',
     control_type: 'skip', // static
     available_options: 'deepEquality',
-    ...(controlType !== EsqlControlType.STATIC_VALUES ? { esql_query: 'referenceEquality' } : {}),
+    ...(controlType === EsqlControlType.VALUES_FROM_QUERY
+      ? { esql_query: 'referenceEquality' }
+      : {}),
   } as ComparatorsReturnType<Type>;
 };
 
@@ -92,7 +94,7 @@ export function initializeESQLControlManager(
   setDataLoading: (loading: boolean) => void
 ) {
   const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
-  /** The control_type does not change during runtime, so it is safe to declare the type of ES|QL control here */
+  /** The control_type does not change during runtime, so it is safe to declare the type based on initial state */
   const isStaticControl = isStaticESQLControl(initialState);
   const isEsqlQueryControl = !isStaticControl;
 

@@ -24,6 +24,7 @@ import {
   EsqlControlType,
   TIMEFIELD_ROUTE,
   isQueryESQLControl,
+  isStaticESQLControl,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -103,7 +104,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.control_type === EsqlControlType.STATIC_VALUES
+    isStaticESQLControl(initialState)
       ? initialState.available_options.map((option) => {
           return {
             label: option,

@@ -48,21 +48,20 @@ export function IdentifierControlForm({
   search,
 }: IdentifierControlFormProps) {
   const isMounted = useMountedState();
+  const { available_options: initialAvailableOptions } = { available_options: [], ...initialState };
 
   const [availableIdentifiersOptions, setAvailableIdentifiersOptions] = useState<
     EuiComboBoxOptionOption[]
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState && 'available_options' in initialState && initialState?.available_options
-      ? initialState.available_options.map((option) => {
-          return {
-            label: option,
-            key: option,
-            'data-test-subj': option,
-          };
-        })
-      : []
+    initialAvailableOptions.map((option) => {
+      return {
+        label: option,
+        key: option,
+        'data-test-subj': option,
+      };
+    })
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
 
