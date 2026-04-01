@@ -59,6 +59,11 @@ export const GoogleCalendar: ConnectorSpec = {
       'bearer',
       {
         type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { disabled: true },
+          },
+        },
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
