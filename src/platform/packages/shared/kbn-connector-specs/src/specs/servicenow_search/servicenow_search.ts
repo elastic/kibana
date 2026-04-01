@@ -79,6 +79,21 @@ export const ServicenowSearch: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {},
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
+            },
+            tokenUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
     ],
   },
 

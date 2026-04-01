@@ -204,6 +204,7 @@ describe('searchEmbeddableTransforms', () => {
             sort: [],
             grid: {},
             hideChart: false,
+            hideTable: false,
             isTextBasedQuery: false,
             kibanaSavedObjectMeta: {
               searchSourceJSON: '{"query":{"match_all":{}}}',
@@ -229,6 +230,7 @@ describe('searchEmbeddableTransforms', () => {
             sort: [],
             grid: {},
             hideChart: false,
+            hideTable: false,
             isTextBasedQuery: false,
             kibanaSavedObjectMeta: {
               searchSourceJSON: '{}',
@@ -260,6 +262,7 @@ describe('searchEmbeddableTransforms', () => {
             sort: [],
             grid: {},
             hideChart: false,
+            hideTable: false,
             isTextBasedQuery: false,
             kibanaSavedObjectMeta: {
               searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
@@ -277,6 +280,7 @@ describe('searchEmbeddableTransforms', () => {
                   columns: ['_source'],
                   grid: {},
                   hideChart: false,
+                  hideTable: false,
                   sampleSize: 100,
                   isTextBasedQuery: false,
                 },
