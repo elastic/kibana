@@ -28,7 +28,6 @@ export const ClearAllButton = memo(
     return (
       <EuiButtonEmpty
         iconType="cross"
-        color="danger"
         data-test-subj={dataTestSubj}
         isDisabled={isDisabled}
         onClick={onClick}
