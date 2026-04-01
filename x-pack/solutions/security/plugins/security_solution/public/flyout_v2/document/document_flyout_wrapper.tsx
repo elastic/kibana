@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
@@ -101,10 +100,6 @@ export interface DocumentFlyoutWrapperProps {
    */
   scopeId: string;
   /**
-   * Optional data view to use when the caller already knows which one produced the row.
-   */
-  dataView?: DataView;
-  /**
    * A function that renders cell actions for the overview tab.
    */
   renderCellActions: CellActionRenderer;
@@ -124,26 +119,21 @@ export const DocumentFlyoutWrapper = memo(
     documentId,
     indexName,
     scopeId,
-    dataView,
     renderCellActions,
     onAlertUpdated,
   }: DocumentFlyoutWrapperProps) => {
-    const { dataView: fallbackDataView, status: fallbackStatus } = useDataView(PageScope.default);
-    const activeDataView = dataView ?? fallbackDataView;
-    const dataViewStatus = dataView ? 'ready' : fallbackStatus;
+    const { dataView, status } = useDataView(PageScope.default);
 
-    const isDataViewLoading = dataViewStatus === 'loading' || dataViewStatus === 'pristine';
+    const isDataViewLoading = status === 'loading' || status === 'pristine';
     const isDataViewInvalid =
-      dataViewStatus === 'error' ||
-      (dataViewStatus === 'ready' && !activeDataView.hasMatchedIndices());
+      status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
 
-    const shouldSkipSearch =
-      isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !activeDataView;
+    const shouldSkipSearch = isDataViewLoading || isDataViewInvalid || !documentId || !indexName;
 
     const [requestState, hit, refetchDocument] = useEsDocSearch({
       id: documentId ?? '',
       index: indexName,
-      dataView: activeDataView,
+      dataView,
       skip: shouldSkipSearch,
     });
     const handleAlertUpdated = useCallback(() => {

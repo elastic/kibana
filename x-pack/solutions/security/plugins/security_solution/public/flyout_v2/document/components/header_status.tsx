@@ -27,9 +27,21 @@ const WORKFLOW_STATUS_FIELD_DATA = {
 } as const;
 
 interface HeaderStatusProps {
+  /**
+   * The document to display
+   */
   hit: DataTableRecord;
+  /**
+   * Scope identifier used by cell actions and status updates
+   */
   scopeId: string;
+  /**
+   * Optional cell action renderer for the status value
+   */
   renderCellActions?: CellActionRenderer;
+  /**
+   * Optional callback invoked after the alert status is updated
+   */
   onAlertUpdated?: () => void;
 }
 
@@ -41,14 +53,12 @@ export const HeaderStatus = memo(
     onAlertUpdated,
   }: HeaderStatusProps) => {
     const eventId = hit.raw._id ?? hit.id;
-    const statusValue = useMemo(() => {
-      const workflowStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
-      const value = Array.isArray(workflowStatus) ? workflowStatus[0] : workflowStatus;
-
-      return typeof value === 'string' || typeof value === 'number' ? String(value) : null;
-    }, [hit]);
-
     const statusFieldInfo = useMemo<StatusPopoverButtonFieldInfo | null>(() => {
+      const workflowStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
+      const statusValue = Array.isArray(workflowStatus)
+        ? (workflowStatus[0] as string)
+        : (workflowStatus as string);
+
       if (!eventId || !statusValue) {
         return null;
       }
@@ -57,7 +67,7 @@ export const HeaderStatus = memo(
         data: WORKFLOW_STATUS_FIELD_DATA,
         values: [statusValue],
       };
-    }, [eventId, statusValue]);
+    }, [eventId, hit]);
 
     return (
       <AlertHeaderBlock
