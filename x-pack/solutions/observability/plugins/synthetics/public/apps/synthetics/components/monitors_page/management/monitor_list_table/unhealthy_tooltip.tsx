@@ -36,11 +36,14 @@ export const UnhealthyTooltip = ({ configId }: { configId: string }) => {
                 <EuiText size="xs">
                   <strong>{s.locationLabel}</strong>
                 </EuiText>
-                <EuiText size="xs">
-                  {getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}
-                </EuiText>
+                <EuiText size="xs">{getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}</EuiText>
                 {index < unhealthyStatuses.length - 1 && (
-                  <EuiHorizontalRule margin="none" css={css`margin-block: 2px;`} />
+                  <EuiHorizontalRule
+                    margin="none"
+                    css={css`
+                      margin-block: 2px;
+                    `}
+                  />
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
