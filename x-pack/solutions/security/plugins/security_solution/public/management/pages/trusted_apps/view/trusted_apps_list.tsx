@@ -39,31 +39,31 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageLabels = {
   pageImportButtonTitle: i18n.translate(
     'xpack.securitySolution.trustedApps.pageImportButtonTitle',
     {
-      defaultMessage: 'Import trusted application list',
+      defaultMessage: 'Import trusted applications',
     }
   ),
   pageExportButtonTitle: i18n.translate(
     'xpack.securitySolution.trustedApps.pageExportButtonTitle',
     {
-      defaultMessage: 'Export trusted application list',
+      defaultMessage: 'Export trusted applications',
     }
   ),
   pageExportSuccessToastTitle: i18n.translate(
     'xpack.securitySolution.trustedApps.pageExportSuccessToastTitle',
     {
-      defaultMessage: 'Trusted application list exported successfully',
+      defaultMessage: 'Trusted applications exported successfully',
     }
   ),
   pageExportErrorToastTitle: i18n.translate(
     'xpack.securitySolution.trustedApps.pageExportErrorToastTitle',
     {
-      defaultMessage: 'Trusted application list export failed',
+      defaultMessage: 'Trusted applications export failed',
     }
   ),
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.trustedApps.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Only trusted application list can be imported on this page.',
+      defaultMessage: 'Only trusted applications can be imported on this page.',
     }
   ),
   getShowingCountLabel: (total) =>
@@ -143,7 +143,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageLabels = {
   ),
   emptyStateImportButtonLabel: i18n.translate(
     'xpack.securitySolution.trustedApps.emptyStateImportButtonLabel',
-    { defaultMessage: 'Import trusted application list' }
+    { defaultMessage: 'Import trusted applications' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.trustedApps.searchPlaceholderInfo',

@@ -30,27 +30,27 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
     defaultMessage: 'Add blocklist entry',
   }),
   pageImportButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageImportButtonTitle', {
-    defaultMessage: 'Import blocklist',
+    defaultMessage: 'Import blocklist entries',
   }),
   pageExportButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageExportButtonTitle', {
-    defaultMessage: 'Export blocklist',
+    defaultMessage: 'Export blocklist entries',
   }),
   pageExportSuccessToastTitle: i18n.translate(
     'xpack.securitySolution.blocklist.pageExportSuccessToastTitle',
     {
-      defaultMessage: 'Blocklist exported successfully',
+      defaultMessage: 'Blocklist entries exported successfully',
     }
   ),
   pageExportErrorToastTitle: i18n.translate(
     'xpack.securitySolution.blocklist.pageExportErrorToastTitle',
     {
-      defaultMessage: 'Blocklist export failed',
+      defaultMessage: 'Blocklist entries export failed',
     }
   ),
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.blocklist.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Only blocklist can be imported on this page.',
+      defaultMessage: 'Only blocklist entries can be imported on this page.',
     }
   ),
   getShowingCountLabel: (total) =>
@@ -127,7 +127,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
   ),
   emptyStateImportButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStateImportButtonLabel',
-    { defaultMessage: 'Import blocklist' }
+    { defaultMessage: 'Import blocklist entries' }
   ),
   searchPlaceholderInfo: i18n.translate('xpack.securitySolution.blocklist.searchPlaceholderInfo', {
     defaultMessage: 'Search on the fields below: name, description, value',

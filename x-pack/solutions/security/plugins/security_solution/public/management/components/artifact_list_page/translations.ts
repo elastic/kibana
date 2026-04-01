@@ -26,7 +26,7 @@ export const artifactListPageLabels = Object.freeze({
   pageImportButtonTitle: i18n.translate(
     'xpack.securitySolution.artifactListPage.importButtonTitle',
     {
-      defaultMessage: 'Import artifact list',
+      defaultMessage: 'Import artifacts',
     }
   ),
   pageExportButtonTitle: i18n.translate(
@@ -80,14 +80,13 @@ export const artifactListPageLabels = Object.freeze({
   importFlyoutDetails: i18n.translate(
     'xpack.securitySolution.artifactListPage.importFlyoutDetails',
     {
-      defaultMessage:
-        'Attention: importing your artifacts will overwrite the existing list, which results in losing all existing artifacts that can be edited by the current user.',
+      defaultMessage: 'You can import artifacts to your artifact list.',
     }
   ),
   importFlyoutImportSubmitButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
     {
-      defaultMessage: 'Import list',
+      defaultMessage: 'Import artifacts',
     }
   ),
 
@@ -112,7 +111,7 @@ export const artifactListPageLabels = Object.freeze({
   ),
   emptyStateImportButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.emptyStateImportButtonLabel',
-    { defaultMessage: 'Import list' }
+    { defaultMessage: 'Import artifacts' }
   ),
 
   // ------------------------------
