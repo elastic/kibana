@@ -20,6 +20,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
@@ -49,6 +50,7 @@ export const ServicePanelContent = ({
   entityStoreEntityId,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   return (
     <FlyoutBody>
@@ -66,7 +68,7 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {entityStoreEntityId && (
+      {entityStoreEntityId && hasEntityResolutionLicense && (
         <>
           <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />
