@@ -34,6 +34,8 @@ export {
   getDataMapWithItemAndIndex,
   getDataMapWithInvalidVariable,
 } from './data_map_validation_workflows';
+export { getLargePerfWorkflowYaml } from './large_perf_workflow';
+export { getCrazyTriageWorkflowYaml } from './crazy_triage_workflow';
 export {
   getAssignAfterUseSameLine,
   getAssignBeforeUseSameLine,
