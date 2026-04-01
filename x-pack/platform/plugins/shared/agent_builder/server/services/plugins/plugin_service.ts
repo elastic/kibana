@@ -230,7 +230,7 @@ const toSkillCreateRequest = ({
       relativePath: file.relativePath,
       content: file.content,
     })),
-    tool_ids: [],
+    tool_ids: skill.meta.allowedTools ?? [],
     plugin_id: pluginId,
   };
 };

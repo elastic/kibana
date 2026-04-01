@@ -159,7 +159,11 @@ describe('PluginsService', () => {
       skills: [
         {
           dirName: 'pdf-processor',
-          meta: { name: 'PDF Processor', description: 'Processes PDFs' },
+          meta: {
+            name: 'PDF Processor',
+            description: 'Processes PDFs',
+            allowedTools: ['tool-1', 'tool-2'],
+          },
           content: 'Skill instructions for PDF.',
           referencedFiles: [{ relativePath: 'schema.json', content: '{}' }],
         },
@@ -206,7 +210,7 @@ describe('PluginsService', () => {
             referenced_content: [
               { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
             ],
-            tool_ids: [],
+            tool_ids: ['tool-a', 'tool-b'],
             plugin_id: 'test-plugin-uuid',
           },
           {
@@ -398,6 +402,42 @@ describe('PluginsService', () => {
         );
 
         expect(result).toBe(persistedPlugin);
+      });
+    });
+
+    describe('allowed-tools propagation', () => {
+      it('maps allowedTools from skill meta to tool_ids in the create request', async () => {
+        const archive = createMockParsedArchive({
+          skills: [
+            {
+              dirName: 'with-tools',
+              meta: { name: 'With Tools', description: 'Has tools', allowedTools: ['x', 'y'] },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+            {
+              dirName: 'no-tools',
+              meta: { name: 'No Tools', description: 'No tools' },
+              content: 'Content.',
+              referencedFiles: [],
+            },
+          ],
+        });
+
+        mockParsePluginFromUrl.mockResolvedValue(archive);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(createMockPersistedPlugin());
+        mockSkillClient.bulkCreate.mockResolvedValue([]);
+
+        await start.installPlugin({
+          request: mockRequest,
+          source: { type: 'url', url: 'https://example.com/plugin.zip' },
+        });
+
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledWith([
+          expect.objectContaining({ id: 'my-plugin-with-tools', tool_ids: ['x', 'y'] }),
+          expect.objectContaining({ id: 'my-plugin-no-tools', tool_ids: [] }),
+        ]);
       });
     });
   });
