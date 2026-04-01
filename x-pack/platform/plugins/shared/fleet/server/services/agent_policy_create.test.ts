@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { createAppContextStartContractMock } from '../mocks';
 
@@ -14,15 +15,18 @@ import type { AgentPolicy, PackagePolicy } from '../types';
 import { agentPolicyService, packagePolicyService, appContextService } from '.';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { bulkInstallPackages } from './epm/packages';
-import { incrementPackageName } from './package_policies';
+import { incrementPackageName, isPackagePolicyNameCollisionLoser } from './package_policies';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import type { KibanaRequest } from '@kbn/core/server';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 const mockIncrementPackageName = incrementPackageName as jest.MockedFunction<
   typeof incrementPackageName
 >;
+const mockIsPackagePolicyNameCollisionLoser =
+  isPackagePolicyNameCollisionLoser as jest.MockedFunction<
+    typeof isPackagePolicyNameCollisionLoser
+  >;
 
 const mockEnsureDefaultEnrollmentAPIKeyForAgentPolicy =
   ensureDefaultEnrollmentAPIKeyForAgentPolicy as jest.MockedFunction<
@@ -82,14 +86,17 @@ describe('createAgentPolicyWithPackages', () => {
       (soClient: any, packageName: string, spaceIds: string[]) =>
         Promise.resolve(`${packageName}-1`)
     );
-    mockedPackagePolicyService.create.mockImplementation((soClient, esClient, newPolicy) =>
-      Promise.resolve({
-        ...newPolicy,
-      } as PackagePolicy)
-    );
-
     jest.mocked(mockedBulkInstallPackages).mockReset();
     jest.mocked(mockedPackagePolicyService.create).mockReset();
+    jest
+      .mocked(mockedPackagePolicyService.create)
+      .mockImplementation((soClient, esClient, newPolicy) =>
+        Promise.resolve({
+          ...newPolicy,
+          id: 'mock-package-policy-id',
+        } as PackagePolicy)
+      );
+    mockIsPackagePolicyNameCollisionLoser.mockResolvedValue(false);
   });
 
   afterEach(() => {

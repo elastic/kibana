@@ -23,7 +23,7 @@ import {
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
 import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
-import { incrementPackageName } from './package_policies';
+import { incrementPackageName, isPackagePolicyNameCollisionLoser } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
@@ -88,28 +88,42 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
-  newPackagePolicy.name = await incrementPackageName(
-    soClient,
-    packageToInstall,
-    agentPolicy.space_ids ?? [options.spaceId]
-  );
   if (agentPolicy.supports_agentless) {
     newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
   }
 
-  await packagePolicyService.create(
-    soClient,
-    esClient,
-    newPackagePolicy,
-    {
-      spaceId: options.spaceId,
-      user: options.user,
-      bumpRevision: false,
-      force: options.force,
-    },
-    undefined,
-    options.request
-  );
+  const spaceIds = agentPolicy.space_ids ?? [options.spaceId];
+  const MAX_RETRIES = 3;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
+
+    const created = await packagePolicyService.create(
+      soClient,
+      esClient,
+      newPackagePolicy,
+      {
+        spaceId: options.spaceId,
+        user: options.user,
+        bumpRevision: false,
+        force: options.force,
+      },
+      undefined,
+      options.request
+    );
+
+    const isLoser = await isPackagePolicyNameCollisionLoser(
+      soClient,
+      created.id,
+      newPackagePolicy.name,
+      spaceIds
+    );
+
+    if (!isLoser) break;
+
+    // Lost the name collision race — delete and retry with next incremented name
+    await packagePolicyService.delete(soClient, esClient, [created.id], { user: options.user });
+  }
 }
 
 interface CreateAgentPolicyParams {
