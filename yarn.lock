@@ -27439,10 +27439,10 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.12.12:
-  version "2.12.12"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.12.tgz#0b3b036165463455d9f880d3535e26552cb97372"
-  integrity sha512-u5tmUr6cO29q61vhOR6CDzasMvq7/WqI4eej6HmyIwjVsTpObtoAin5ac3iwK2vU/9eEo1P4FdY/0tsz7C/4fw==
+msw@2.12.13:
+  version "2.12.13"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.13.tgz#a31499607337148d059ad8b4e2977bfbabfd353d"
+  integrity sha512-9CV2mXT9+z0J26MQDfEZZkj/psJ5Er/w0w+t95FWdaGH/DTlhNZBx8vBO5jSYv8AZEnl3ouX+AaTT68KXdAIag==
   dependencies:
     "@inquirer/confirm" "^5.0.0"
     "@mswjs/interceptors" "^0.41.2"
