@@ -14,7 +14,11 @@ import type {
 } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type AggregateQuery } from '@kbn/es-query';
-import { appendFilteringWhereClauseForCascadeLayout, constructCascadeQuery } from '@kbn/esql-utils';
+import {
+  appendFilteringWhereClauseForCascadeLayout,
+  constructCascadeQuery,
+  GROUP_NOT_SET_VALUE,
+} from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -100,7 +104,7 @@ const contextRowActions: Array<
         this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue,
-        '+'
+        this.rowContext.groupValue === GROUP_NOT_SET_VALUE ? 'is_null' : '+'
       );
 
       if (!updatedQuery) {
@@ -126,7 +130,7 @@ const contextRowActions: Array<
         this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue,
-        '-'
+        this.rowContext.groupValue === GROUP_NOT_SET_VALUE ? 'is_not_null' : '-'
       );
 
       if (!updatedQuery) {
