@@ -163,7 +163,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
         defaultMessage="Log out"
       />
     ),
-    icon: <EuiIcon type="exit" size="m" />,
+    icon: <EuiIcon type="logOut" size="m" />,
     href: logoutUrl,
     'data-test-subj': 'logoutLink',
   });

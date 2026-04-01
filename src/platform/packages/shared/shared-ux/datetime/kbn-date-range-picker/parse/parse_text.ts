@@ -35,6 +35,8 @@ interface ParserConfig {
   nowKeyword: string;
   delimiters: string[];
   namedRanges: Record<string, { start: string; end: string }>;
+  /** Maps shorthand aliases to canonical named range keys (e.g. `td` → `today`). */
+  namedRangeAliases: Record<string, string>;
   unitAliases: Record<string, TimeUnit>;
   durationTemplates: { past: string[]; future: string[] };
   instantTemplates: { past: string[]; future: string[] };
@@ -54,6 +56,11 @@ const DEFAULT_CONFIG: ParserConfig = {
     'last week': { start: 'now-1w/w', end: 'now-1w/w' },
     'last month': { start: 'now-1M/M', end: 'now-1M/M' },
     'last year': { start: 'now-1y/y', end: 'now-1y/y' },
+  },
+  namedRangeAliases: {
+    td: 'today',
+    yd: 'yesterday',
+    tmr: 'tomorrow',
   },
   unitAliases: {
     ms: 'ms',
@@ -94,7 +101,7 @@ const DEFAULT_CONFIG: ParserConfig = {
     yrs: 'y',
   },
   durationTemplates: {
-    past: ['last {count} {unit}'],
+    past: ['last {count} {unit}', 'past {count} {unit}'],
     future: ['next {count} {unit}'],
   },
   instantTemplates: {
@@ -102,12 +109,42 @@ const DEFAULT_CONFIG: ParserConfig = {
     future: ['{count} {unit} from now', 'in {count} {unit}'],
   },
   absoluteFormats: [
+    // Canonical Kibana (with @ separator)
+    'MMM D, YYYY @ HH:mm:ss.SSS',
+    'MMM D, YYYY @ HH:mm:ss',
+    'MMM D, YYYY @ HH:mm',
+    'MMM D, YYYY @ HH',
+
+    // DateRangePicker default (milliseconds → minutes, with and without comma after day)
+    'MMM D, YYYY, HH:mm:ss.SSS',
+    'MMM D YYYY, HH:mm:ss.SSS',
+    'MMM D, YYYY, HH:mm:ss',
+    'MMM D YYYY, HH:mm:ss',
+    'MMM D, YYYY, HH:mm',
     'MMM D YYYY, HH:mm',
-    'MMM D, HH:mm',
-    'MMM D YYYY',
     'MMM D, YYYY',
+    'MMM D YYYY',
+    'MMM D, HH:mm',
     'MMM D',
+
+    // ISO 8601 date with simple time
+    'YYYY-MM-DD H:mm',
+
+    // US-style (M/D handles 1- and 2-digit month/day)
+    'M/D/YYYY H:mm',
+    'M/D H:mm',
+    'M/D/YYYY',
+    'M/D',
+
+    // RFC 2822 (with/without day-of-week, with/without seconds, with/without numeric offset)
     'ddd, DD MMM YYYY HH:mm:ss ZZ',
+    'ddd, DD MMM YYYY HH:mm ZZ',
+    'DD MMM YYYY HH:mm:ss ZZ',
+    'DD MMM YYYY HH:mm ZZ',
+    'ddd, DD MMM YYYY HH:mm:ss',
+    'ddd, DD MMM YYYY HH:mm',
+    'DD MMM YYYY HH:mm:ss',
+    'DD MMM YYYY HH:mm',
   ],
 };
 
@@ -135,8 +172,58 @@ const configCache = new WeakMap<ParserConfig, CompiledConfig>();
 
 const escapeRegExp = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/** The word delimiters recognised by the parser (excluding the universal dash). */
+export const PARSER_DELIMITERS: readonly string[] = DEFAULT_CONFIG.delimiters;
+
+/**
+ * Builds a reverse map from `"start|end"` bounds keys to the shortest alias
+ * that resolves to those bounds. When multiple aliases point to the same
+ * canonical named range, the shortest one wins.
+ */
+function buildBoundsToAliasMap(config: ParserConfig): ReadonlyMap<string, string> {
+  const map = new Map<string, string>();
+  for (const [alias, canonical] of Object.entries(config.namedRangeAliases)) {
+    const range = config.namedRanges[canonical];
+    if (!range) continue;
+    const key = `${range.start}|${range.end}`;
+    const existing = map.get(key);
+    if (!existing || alias.length < existing.length) {
+      map.set(key, alias);
+    }
+  }
+  return map;
+}
+
+const boundsToAlias = buildBoundsToAliasMap(DEFAULT_CONFIG);
+
+/**
+ * Returns the shorthand alias for a named range identified by its bounds,
+ * or `null` if no alias exists.
+ *
+ * @example
+ * getNamedRangeAlias('now/d', 'now/d')       // "td"
+ * getNamedRangeAlias('now-1d/d', 'now-1d/d') // "yd"
+ * getNamedRangeAlias('now-15m', 'now')        // null
+ */
+export function getNamedRangeAlias(start: string, end: string): string | null {
+  return boundsToAlias.get(`${start}|${end}`) ?? null;
+}
+
+/**
+ * Resolves a named range alias to its canonical name, or returns the
+ * input unchanged if it is not an alias.
+ *
+ * @example
+ * resolveNamedRangeAlias('td')    // "today"
+ * resolveNamedRangeAlias('yd')    // "yesterday"
+ * resolveNamedRangeAlias('today') // "today"
+ */
+export function resolveNamedRangeAlias(text: string): string {
+  return DEFAULT_CONFIG.namedRangeAliases[text.toLowerCase()] ?? text;
+}
+
 /** Builds a regex that splits text on a word delimiter surrounded by whitespace. */
-function buildDelimiterPattern(delimiter: string): RegExp | null {
+export function buildDelimiterPattern(delimiter: string): RegExp | null {
   const trimmed = delimiter.trim();
   return trimmed ? new RegExp(`^(.+?)\\s+${escapeRegExp(trimmed)}\\s+(.+)$`) : null;
 }
@@ -228,11 +315,14 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (1) Preset label match
   const preset = matchPreset(trimmed, presets);
   if (preset) {
-    return buildRange(text, preset.start, preset.end, formats, true);
+    const roundedStart = applyStartBoundRounding(preset.start, roundRelativeTime);
+    return buildRange(text, roundedStart, preset.end, formats, true);
   }
 
-  // (2) Named range ("today", "yesterday", "this week", ...)
-  const named = config.namedRanges[trimmed.toLowerCase()];
+  // (2) Named range ("today", "yesterday", "this week", ...) or alias ("td", "yd", "tmr")
+  const lower = trimmed.toLowerCase();
+  const canonicalKey = config.namedRangeAliases[lower] ?? lower;
+  const named = config.namedRanges[canonicalKey];
   if (named) {
     return buildRange(text, named.start, named.end, formats, true);
   }
@@ -365,8 +455,14 @@ function instantToDateString(
   const unixDate = unixTimestampToDate(trimmed);
   if (unixDate) return unixDate.toISOString();
 
-  // Absolute date / dateMath / ISO fallback
-  if (dateStringToDate(trimmed, formats) !== null) return trimmed;
+  // DateMath with rounding only (e.g. "now/d", "now/w") — preserve as-is.
+  // These aren't caught by the shorthand regex which expects a count.
+  if (/^now\/[smhdwMy]$/.test(trimmed)) return trimmed;
+
+  // Absolute date / ISO fallback — normalize to ISO so that
+  // timeRange.start/end and onChange always emit ISO or dateMath strings.
+  const absoluteDate = dateStringToDate(trimmed, formats);
+  if (absoluteDate !== null) return absoluteDate.toISOString();
 
   return null;
 }
@@ -385,19 +481,18 @@ function dateStringToDate(
   const strict = moment(dateString, formats, true);
   if (strict.isValid()) return strict.toDate();
 
-  if (formats.length && !moment(dateString, moment.ISO_8601, true).isValid()) {
-    const forgiving = moment(dateString, formats);
-    if (forgiving.isValid()) return forgiving.toDate();
-  }
-
-  // Only send ISO dates and datemath expressions to dateMath.parse; other
-  // strings (e.g. "2025-01-01 to") would fall through to moment(string)
-  // without an explicit format, triggering a deprecation warning.
+  // Resolve ISO dates and datemath expressions before forgiving mode, which
+  // can produce false positives with short formats like M/D.
   const isIsoDate = /^\d{4}-\d{2}-\d{2}(T|\s+\d|$)/.test(dateString);
   const isDateMath = dateString === 'now' || /^now[/|+-]/.test(dateString);
   if (isIsoDate || isDateMath) {
     const parsed = dateMath.parse(dateString, options);
     return parsed?.isValid() ? parsed.toDate() : null;
+  }
+
+  if (formats.length) {
+    const forgiving = moment(dateString, formats);
+    if (forgiving.isValid()) return forgiving.toDate();
   }
 
   return null;
