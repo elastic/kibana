@@ -66,7 +66,7 @@ describe('validateConfig()', () => {
     expect(() => {
       validateConfig(connectorType, { shouldNotBeHere: true }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Unrecognized key(s) in object: 'shouldNotBeHere'"`
+      `"error validating connector type config: ✖ Unrecognized key: \\"shouldNotBeHere\\""`
     );
   });
 
@@ -120,15 +120,17 @@ describe('validateSecrets()', () => {
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, { routingKey: false }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Field \\"routingKey\\": Expected string, received boolean"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type secrets: ✖ Invalid input: expected string, received boolean
+        → at routingKey"
+    `);
 
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Field \\"routingKey\\": Required"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at routingKey"
+    `);
   });
 });
 
@@ -153,9 +155,10 @@ describe('validateParams()', () => {
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
       validateParams(connectorType, { eventAction: 'ackynollage' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"eventAction\\": Invalid enum value. Expected 'trigger' | 'resolve' | 'acknowledge', received 'ackynollage'"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid option: expected one of \\"trigger\\"|\\"resolve\\"|\\"acknowledge\\"
+        → at eventAction"
+    `);
   });
 
   test('should validate and pass when valid timestamp has spaces', () => {
@@ -230,7 +233,7 @@ describe('validateParams()', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: error parsing timestamp \\"1963-09-55 90:23:45\\""`
+      `"error validating action params: ✖ error parsing timestamp \\"1963-09-55 90:23:45\\""`
     );
   });
 
@@ -244,7 +247,7 @@ describe('validateParams()', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: DedupKey is required when eventAction is \\"resolve\\""`
+      `"error validating action params: ✖ DedupKey is required when eventAction is \\"resolve\\""`
     );
   });
 });

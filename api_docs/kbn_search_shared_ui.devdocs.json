@@ -79,6 +79,43 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.KibanaVersionBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaVersionBadge",
+        "description": [],
+        "signature": [
+          "({ kibanaVersion, docLink, }: KibanaVersionBadgeProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/kibana_version/kibana_version_badge.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.KibanaVersionBadge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  kibanaVersion,\n  docLink,\n}",
+            "description": [],
+            "signature": [
+              "KibanaVersionBadgeProps"
+            ],
+            "path": "x-pack/solutions/search/packages/shared-ui/src/kibana_version/kibana_version_badge.tsx",
+            "lineNumber": 15,
+            "columnNumber": 71,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.SearchEmptyPrompt",
         "type": "Function",
         "tags": [],

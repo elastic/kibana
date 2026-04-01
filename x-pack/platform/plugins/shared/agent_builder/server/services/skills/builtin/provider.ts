@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition, SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ReadonlySkillProvider } from '../skill_provider';
+import type { SkillListOptions } from '../persisted/client';
 import { convertBuiltinSkill } from './converter';
 
 export const createBuiltinSkillProvider = (skills: SkillDefinition[]): ReadonlySkillProvider => {
@@ -20,6 +21,27 @@ export const createBuiltinSkillProvider = (skills: SkillDefinition[]): ReadonlyS
       const skill = skillsMap.get(skillId);
       return skill ? convertBuiltinSkill(skill) : undefined;
     },
-    list: () => [...skillsMap.values()].map(convertBuiltinSkill),
+    bulkGet: (ids) => {
+      const result = new Map<string, InternalSkillDefinition>();
+      for (const id of ids) {
+        const skill = skillsMap.get(id);
+        if (skill) {
+          result.set(id, convertBuiltinSkill(skill));
+        }
+      }
+      return result;
+    },
+    list: (options?: SkillListOptions) => {
+      const converted = [...skillsMap.values()].map(convertBuiltinSkill);
+      if (options?.summaryOnly) {
+        return converted.map((s) => ({
+          ...s,
+          content: '',
+          referencedContentCount: s.referencedContent?.length ?? 0,
+          referencedContent: [],
+        }));
+      }
+      return converted;
+    },
   };
 };

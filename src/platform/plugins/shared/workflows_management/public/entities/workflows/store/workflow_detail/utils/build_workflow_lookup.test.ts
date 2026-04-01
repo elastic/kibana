@@ -103,20 +103,25 @@ steps:
       expect(getValueFromValueNode(result.step1.propInfos['with.level'].valueNode)).toBe('info');
     });
 
-    it('should exclude steps, else, and fallback from propInfos', () => {
+    it('should exclude steps, else, and on-failure from propInfos', () => {
       const yaml = `
 steps:
   - name: step1
     type: if
+    condition: "{{ true }}"
     steps:
       - name: nested_step
         type: console
     else:
       - name: else_step
         type: console
-    fallback:
-      - name: fallback_step
-        type: console
+  - name: step2
+    type: action
+    connector-id: my-connector
+    on-failure:
+      fallback:
+        - name: fallback_step
+          type: console
     message: "test"
 `;
       const lineCounter = new LineCounter();
@@ -126,8 +131,8 @@ steps:
 
       expect(result.step1.propInfos).not.toHaveProperty('steps');
       expect(result.step1.propInfos).not.toHaveProperty('else');
-      expect(result.step1.propInfos).not.toHaveProperty('fallback');
-      expect(result.step1.propInfos).toHaveProperty('message');
+      expect(result.step2.propInfos).not.toHaveProperty('on-failure');
+      expect(result.step2.propInfos).toHaveProperty('message');
     });
 
     it('should collect deeply nested properties', () => {
@@ -201,17 +206,18 @@ steps:
       expect(result.else_step.parentStepId).toBe('if_step');
     });
 
-    it('should set parentStepId for nested steps in fallback block', () => {
+    it('should set parentStepId for nested steps in on-failure fallback block', () => {
       const yaml = `
 steps:
   - name: try_step
-    type: try
+    type: action
     steps:
       - name: try_step_content
         type: console
-    fallback:
-      - name: fallback_step
-        type: console
+    on-failure:
+      fallback:
+        - name: fallback_step
+          type: console
 `;
       const lineCounter = new LineCounter();
       const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
@@ -457,7 +463,7 @@ steps:
   });
 
   describe('complex workflow structures', () => {
-    it('should handle if-else-fallback structure', () => {
+    it('should handle if-else with on-failure on connector step', () => {
       const yaml = `
 steps:
   - name: if_step
@@ -465,16 +471,18 @@ steps:
     condition: "{{ value }}"
     steps:
       - name: true_branch
-        type: console
+        type: action
+        connector-id: my-connector
         message: "true"
+        on-failure:
+          fallback:
+            - name: error_branch
+              type: console
+              message: "error"
     else:
       - name: false_branch
         type: console
         message: "false"
-    fallback:
-      - name: error_branch
-        type: console
-        message: "error"
     timeout: 5000
 `;
       const lineCounter = new LineCounter();
@@ -487,7 +495,7 @@ steps:
       expect(result.if_step.propInfos).toHaveProperty('timeout');
       expect(result.if_step.propInfos).not.toHaveProperty('steps');
       expect(result.if_step.propInfos).not.toHaveProperty('else');
-      expect(result.if_step.propInfos).not.toHaveProperty('fallback');
+      expect(result.true_branch.propInfos).not.toHaveProperty('on-failure');
 
       expect(result.true_branch).toBeDefined();
       expect(result.false_branch).toBeDefined();

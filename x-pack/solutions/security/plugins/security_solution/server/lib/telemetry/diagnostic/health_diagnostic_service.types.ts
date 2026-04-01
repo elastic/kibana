@@ -54,6 +54,7 @@ export enum QueryType {
 
 export interface HealthDiagnosticServiceSetup {
   taskManager: TaskManagerSetupContract;
+  isServerless: boolean;
 }
 
 export interface HealthDiagnosticServiceStart {
@@ -159,4 +160,12 @@ export interface HealthDiagnosticQueryStats {
 export interface HealthDiagnosticQueryFailure {
   message: string;
   reason?: CircuitBreakerResult;
+}
+
+export class PermissionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PermissionError';
+    Object.setPrototypeOf(this, PermissionError.prototype);
+  }
 }

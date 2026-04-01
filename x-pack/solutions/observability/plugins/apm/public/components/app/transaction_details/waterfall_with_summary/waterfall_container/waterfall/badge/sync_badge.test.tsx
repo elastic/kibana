@@ -91,6 +91,14 @@ describe('Sync badge', () => {
       expect(getSyncLabel('go', false)).toBe('async');
     });
   });
+  describe('undefined agentName', () => {
+    it('returns undefined when agentName is undefined and sync is true', () => {
+      expect(getSyncLabel(undefined, true)).toBeUndefined();
+    });
+    it('returns undefined when agentName is undefined and sync is false', () => {
+      expect(getSyncLabel(undefined, false)).toBeUndefined();
+    });
+  });
 });
 
 describe('SyncBadge Component', () => {
@@ -187,6 +195,14 @@ describe('SyncBadge Component', () => {
     it('shows correct async badge for iOS/swift agent', () => {
       render(<SyncBadge sync={false} agentName="iOS/swift" />);
       expect(screen.getByText('async')).toBeInTheDocument();
+    });
+  });
+
+  describe('undefined agentName', () => {
+    it('does not render badge when agentName is undefined', () => {
+      render(<SyncBadge sync={true} agentName={undefined} />);
+      expect(screen.queryByText('blocking')).not.toBeInTheDocument();
+      expect(screen.queryByText('async')).not.toBeInTheDocument();
     });
   });
 });

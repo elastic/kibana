@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { getListArrayMock } from '../../../../../detection_engine/schemas/types/lists.mock';
 import { PatchRuleRequestBody } from './patch_rule_route.gen';
 import { getPatchRulesSchemaMock } from './patch_rule_route.mock';
@@ -18,7 +18,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id] does validate', () => {
@@ -28,7 +28,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description] does validate', () => {
@@ -39,7 +39,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description] does validate', () => {
@@ -50,7 +50,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, risk_score] does validate', () => {
@@ -61,7 +61,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from] does validate', () => {
@@ -73,7 +73,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to] does validate', () => {
@@ -86,7 +86,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to] does validate', () => {
@@ -99,7 +99,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name] does validate', () => {
@@ -113,7 +113,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name] does validate', () => {
@@ -127,7 +127,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name, severity] does validate', () => {
@@ -142,7 +142,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name, severity] does validate', () => {
@@ -157,7 +157,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name, severity, type] does validate', () => {
@@ -173,7 +173,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name, severity, type] does validate', () => {
@@ -189,7 +189,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does validate', () => {
@@ -206,7 +206,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, name, severity, type, interval] does validate', () => {
@@ -223,7 +223,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query] does validate', () => {
@@ -242,7 +242,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
@@ -261,7 +261,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
@@ -275,7 +275,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[id, description, from, to, index, name, severity, type, filters] does validate', () => {
@@ -293,7 +293,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, type, filters] does validate', () => {
@@ -311,7 +311,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('allows references to be sent as a valid value to patch with', () => {
@@ -332,7 +332,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('does not default references to an array', () => {
@@ -355,14 +355,14 @@ describe('Patch rule request schema', () => {
     expect(result.data.interval).toEqual(undefined);
   });
 
-  test('does not default max_signals', () => {
+  test('defaults max_signals to 100 when omitted (Zod v4 applies defaults within optional fields)', () => {
     const payload: PatchRuleRequestBody = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
     };
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data.max_signals).toEqual(undefined);
+    expect(result.data.max_signals).toEqual(100);
   });
 
   test('references cannot be numbers', () => {
@@ -374,7 +374,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"references.0: Expected string, received number, references.0: Expected string, received number, references.0: Expected string, received number, references.0: Expected string, received number, references.0: Expected string, received number, and 3 more"`
+      `"references.0: Invalid input: expected string, received number, references.0: Invalid input: expected string, received number, references.0: Invalid input: expected string, received number, references.0: Invalid input: expected string, received number, references.0: Invalid input: expected string, received number, and 3 more"`
     );
   });
 
@@ -388,7 +388,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", index.0: Expected string, received number, index.0: Expected string, received number, type: Invalid literal value, expected \\"saved_query\\", index.0: Expected string, received number, and 8 more"`
+      `"type: Invalid input: expected \\"eql\\", index.0: Invalid input: expected string, received number, index.0: Invalid input: expected string, received number, type: Invalid input: expected \\"saved_query\\", index.0: Invalid input: expected string, received number, and 8 more"`
     );
   });
 
@@ -400,7 +400,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('saved_id validates with type:saved_query', () => {
@@ -412,7 +412,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('saved_query type can have filters with it', () => {
@@ -424,7 +424,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language validates with kuery', () => {
@@ -436,7 +436,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language validates with lucene', () => {
@@ -448,7 +448,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language does not validate with something made up', () => {
@@ -461,7 +461,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up', type: Invalid literal value, expected \\"saved_query\\", language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up', and 9 more"`
+      `"type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", language: Invalid option: expected one of \\"kuery\\"|\\"lucene\\", type: Invalid input: expected \\"saved_query\\", language: Invalid option: expected one of \\"kuery\\"|\\"lucene\\", and 9 more"`
     );
   });
 
@@ -475,7 +475,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Number must be greater than or equal to 1"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -489,7 +489,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Number must be greater than or equal to 1"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -502,7 +502,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('meta can be patched', () => {
@@ -513,7 +513,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot patch meta as a string', () => {
@@ -525,7 +525,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"meta: Expected object, received string, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", meta: Expected object, received string, meta: Expected object, received string, and 12 more"`
+      `"meta: Invalid input: expected object, received string, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", meta: Invalid input: expected object, received string, meta: Invalid input: expected object, received string, and 12 more"`
     );
   });
 
@@ -538,7 +538,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", filters: Expected array, received string, filters: Expected array, received string, type: Invalid literal value, expected \\"saved_query\\", and 10 more"`
+      `"type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", filters: Invalid input: expected array, received string, filters: Invalid input: expected array, received string, type: Invalid input: expected \\"saved_query\\", and 10 more"`
     );
   });
 
@@ -551,7 +551,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: String must contain at least 1 character(s)"`
+      `"name: Too small: expected string to have >=1 characters"`
     );
   });
 
@@ -564,7 +564,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"description: String must contain at least 1 character(s)"`
+      `"description: Too small: expected string to have >=1 characters"`
     );
   });
 
@@ -614,7 +614,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('threat is invalid when updated with missing property framework', () => {
@@ -642,7 +642,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"threat.0.framework: Required, threat.0.framework: Required, threat.0.framework: Required, threat.0.framework: Required, threat.0.framework: Required, and 3 more"`
+      `"threat.0.framework: Invalid input: expected string, received undefined, threat.0.framework: Invalid input: expected string, received undefined, threat.0.framework: Invalid input: expected string, received undefined, threat.0.framework: Invalid input: expected string, received undefined, threat.0.framework: Invalid input: expected string, received undefined, and 3 more"`
     );
   });
 
@@ -668,7 +668,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"threat.0.tactic: Required, threat.0.tactic: Required, threat.0.tactic: Required, threat.0.tactic: Required, threat.0.tactic: Required, and 3 more"`
+      `"threat.0.tactic: Invalid input: expected object, received undefined, threat.0.tactic: Invalid input: expected object, received undefined, threat.0.tactic: Invalid input: expected object, received undefined, threat.0.tactic: Invalid input: expected object, received undefined, threat.0.tactic: Invalid input: expected object, received undefined, and 3 more"`
     );
   });
 
@@ -691,7 +691,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('validates with timeline_id and timeline_title', () => {
@@ -703,7 +703,7 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
@@ -715,7 +715,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', and 3 more"`
+      `"severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", severity: Invalid option: expected one of \\"low\\"|\\"medium\\"|\\"high\\"|\\"critical\\", and 3 more"`
     );
   });
 
@@ -736,7 +736,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('note can be patched', () => {
@@ -747,7 +747,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('You cannot patch note as an object', () => {
@@ -761,7 +761,7 @@ describe('Patch rule request schema', () => {
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"note: Expected string, received object, note: Expected string, received object, note: Expected string, received object, note: Expected string, received object, note: Expected string, received object, and 3 more"`
+        `"note: Invalid input: expected string, received object, note: Invalid input: expected string, received object, note: Invalid input: expected string, received object, note: Invalid input: expected string, received object, note: Invalid input: expected string, received object, and 3 more"`
       );
     });
   });
@@ -775,7 +775,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.id: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.id: Required, actions.0.id: Required, and 12 more"`
+      `"actions.0.id: Invalid input: expected string, received undefined, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", actions.0.id: Invalid input: expected string, received undefined, actions.0.id: Invalid input: expected string, received undefined, and 12 more"`
     );
   });
 
@@ -788,7 +788,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.params: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.params: Required, actions.0.params: Required, and 12 more"`
+      `"actions.0.params: Invalid input: expected object, received undefined, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", actions.0.params: Invalid input: expected object, received undefined, actions.0.params: Invalid input: expected object, received undefined, and 12 more"`
     );
   });
 
@@ -808,7 +808,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"actions.0.action_type_id: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.action_type_id: Required, actions.0.action_type_id: Required, and 12 more"`
+      `"actions.0.action_type_id: Invalid input: expected string, received undefined, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", actions.0.action_type_id: Invalid input: expected string, received undefined, actions.0.action_type_id: Invalid input: expected string, received undefined, and 12 more"`
     );
   });
 
@@ -831,7 +831,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
@@ -853,7 +853,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
@@ -876,7 +876,7 @@ describe('Patch rule request schema', () => {
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type', type: Invalid literal value, expected \\"eql\\", exceptions_list.0.list_id: Required, and 26 more"`
+        `"exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of \\"detection\\"|\\"rule_default\\"|\\"endpoint\\"|\\"endpoint_trusted_apps\\"|\\"endpoint_trusted_devices\\"|\\"endpoint_events\\"|\\"endpoint_host_isolation_exceptions\\"|\\"endpoint_blocklists\\", exceptions_list.0.namespace_type: Invalid option: expected one of \\"agnostic\\"|\\"single\\", type: Invalid input: expected \\"eql\\", exceptions_list.0.list_id: Invalid input: expected string, received undefined, and 26 more"`
       );
     });
 
@@ -898,7 +898,7 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
   });
 });

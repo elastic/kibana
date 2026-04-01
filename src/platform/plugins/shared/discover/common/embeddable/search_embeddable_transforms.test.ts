@@ -187,6 +187,7 @@ describe('searchEmbeddableTransforms', () => {
             sort: [],
             grid: {},
             hideChart: false,
+            hideTable: false,
             isTextBasedQuery: false,
             kibanaSavedObjectMeta: {
               searchSourceJSON: '{"query":{"match_all":{}}}',
@@ -212,6 +213,7 @@ describe('searchEmbeddableTransforms', () => {
             sort: [],
             grid: {},
             hideChart: false,
+            hideTable: false,
             isTextBasedQuery: false,
             kibanaSavedObjectMeta: {
               searchSourceJSON: '{}',
@@ -227,6 +229,58 @@ describe('searchEmbeddableTransforms', () => {
 
         expect(result.references).toEqual([]);
         expect(mockDrilldownTransforms.transformIn).toHaveBeenCalledWith(serializedState);
+      });
+
+      it('includes attributes.references so data view ref is stored on dashboard (by-value Classic mode)', () => {
+        const dataViewRef = {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          id: 'data-view-id-123',
+          type: 'index-pattern',
+        };
+        const serializedState: SearchEmbeddableByValueState = {
+          attributes: {
+            title: 'Test Search',
+            description: '',
+            columns: ['_source'],
+            sort: [],
+            grid: {},
+            hideChart: false,
+            hideTable: false,
+            isTextBasedQuery: false,
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+            },
+            tabs: [
+              {
+                id: 'tab-1',
+                label: 'Tab 1',
+                attributes: {
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON:
+                      '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                  },
+                  sort: [],
+                  columns: ['_source'],
+                  grid: {},
+                  hideChart: false,
+                  hideTable: false,
+                  sampleSize: 100,
+                  isTextBasedQuery: false,
+                },
+              },
+            ],
+            references: [dataViewRef],
+          },
+          title: 'Panel Title',
+        };
+
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
+
+        expect(result.references).toContainEqual(dataViewRef);
+        expect((result.state as StoredSearchEmbeddableByValueState).attributes).not.toHaveProperty(
+          'references'
+        );
       });
     });
   });

@@ -271,11 +271,12 @@ describe('Template Routes', () => {
         search: 'test-query',
         tags: ['security'],
         author: ['alice'],
+        owner: [],
         isDeleted: true,
       });
     });
 
-    it('coerces tags and author from comma-separated strings to arrays', async () => {
+    it('coerces tags, author, and owner from arrays', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
@@ -285,6 +286,7 @@ describe('Template Routes', () => {
           isDeleted: false,
           tags: ['security', 'network'],
           author: ['alice', 'bob'],
+          owner: ['securitySolution', 'observability'],
         },
       };
       const response = createMockResponse();
@@ -296,11 +298,12 @@ describe('Template Routes', () => {
         expect.objectContaining({
           tags: ['security', 'network'],
           author: ['alice', 'bob'],
+          owner: ['securitySolution', 'observability'],
         })
       );
     });
 
-    it('sends empty arrays for tags and author when they are not provided', async () => {
+    it('sends empty arrays for tags, author, and owner when they are not provided', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
@@ -315,6 +318,7 @@ describe('Template Routes', () => {
         expect.objectContaining({
           tags: [],
           author: [],
+          owner: [],
         })
       );
     });
@@ -353,6 +357,63 @@ describe('Template Routes', () => {
           page: 2,
           perPage: 25,
         })
+      );
+    });
+
+    it('filters out invalid templates and logs warning', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+
+      const invalidDefinition = yaml.dump({
+        name: 'Invalid Template',
+        fields: [
+          {
+            control: 'INVALID_CONTROL',
+            name: 'test_field',
+            type: 'keyword',
+          },
+        ],
+      });
+
+      const validTemplate: Template = {
+        templateId: 'valid-template',
+        name: 'Valid Template',
+        owner: 'securitySolution',
+        definition: validDefinition,
+        templateVersion: 1,
+        deletedAt: null,
+      };
+
+      const invalidTemplate: Template = {
+        templateId: 'invalid-template',
+        name: 'Invalid Template',
+        owner: 'securitySolution',
+        definition: invalidDefinition,
+        templateVersion: 1,
+        deletedAt: null,
+      };
+
+      casesClient.templates.getAllTemplates.mockResolvedValueOnce({
+        templates: [validTemplate, invalidTemplate],
+        page: 1,
+        perPage: 10,
+        total: 2,
+      });
+
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response, logger });
+
+      const body = response.ok.mock.calls[0][0].body;
+      expect(body.templates).toHaveLength(1);
+      expect(body.templates[0].templateId).toBe('valid-template');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipping invalid template "Invalid Template"')
       );
     });
   });

@@ -69,34 +69,64 @@ export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Me
 };
 
 /**
+ * Strips JSON Schema keywords that are not supported by the
+ * Bedrock Converse API. According to AWS documentation:
+ *  - `propertyNames` is not supported
+ *  - `additionalProperties` is not supported for object types
+ *  - `$schema` is not supported
+ *
+ * Also ensures object-typed schemas always have a `properties`
+ * field, which the Converse API requires for object types.
+ */
+function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T): T {
+  const {
+    propertyNames: _propertyNames,
+    additionalProperties: _additionalProperties,
+    $schema: _$schema,
+    ...rest
+  } = schemaPart as unknown as Record<string, unknown>;
+
+  // Bedrock requires `properties` on object types
+  if (rest.type === 'object' && !rest.properties) {
+    rest.properties = {};
+  }
+
+  return rest as unknown as T;
+}
+
+/**
  * Claude is prone to ignoring the "array" part of an array type,
  * so this function patches it to add a message on each
  * array property to explicitly state that the value should
- * be returned as a json array...
+ * be returned as a json array.
  *
+ * Also strips JSON Schema keywords unsupported by Bedrock
+ * (e.g. `propertyNames`, `additionalProperties`).
  */
 export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T): T {
-  if (schemaPart.type === 'object' && schemaPart.properties) {
+  const cleaned = stripUnsupportedSchemaKeywords(schemaPart);
+
+  if (cleaned.type === 'object' && cleaned.properties) {
     return {
-      ...schemaPart,
+      ...cleaned,
       properties: Object.fromEntries(
-        Object.entries(schemaPart.properties).map(([key, childSchemaPart]) => {
+        Object.entries(cleaned.properties).map(([key, childSchemaPart]) => {
           return [key, fixSchemaArrayProperties(childSchemaPart)];
         })
       ),
     };
   }
 
-  if (schemaPart.type === 'array') {
+  if (cleaned.type === 'array') {
     return {
-      ...schemaPart,
+      ...cleaned,
       // Claude is prone to ignoring the "array" part of an array type
-      description: schemaPart.description
-        ? `${schemaPart.description}. Must be provided as a JSON array`
+      description: cleaned.description
+        ? `${cleaned.description}. Must be provided as a JSON array`
         : 'Must be provided as a JSON array',
-      items: schemaPart.items ? fixSchemaArrayProperties(schemaPart.items) : {},
+      items: cleaned.items ? fixSchemaArrayProperties(cleaned.items) : {},
     };
   }
 
-  return schemaPart;
+  return cleaned;
 }

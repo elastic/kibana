@@ -21,12 +21,11 @@ export interface CreateIndexButtonProps {
 }
 
 export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIndexButtonProps) => {
-  const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
-  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
-
   const {
     core: { chrome },
   } = useAppContext();
+  const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
+  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
 
@@ -39,7 +38,7 @@ export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIn
     <>
       <EuiButton
         fill
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         key="createIndexButton"
         data-test-subj={dataTestSubj || 'createIndexButton'}
         data-telemetry-id="idxMgmt-indexList-createIndexButton"

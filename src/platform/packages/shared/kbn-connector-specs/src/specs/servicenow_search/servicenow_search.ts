@@ -43,6 +43,15 @@ import type {
   GetAttachmentInput,
   DescribeTableInput,
 } from './types';
+import describeTableWorkflow from './workflows/describe_table.yaml';
+import getAttachmentWorkflow from './workflows/get_attachment.yaml';
+import getCommentsWorkflow from './workflows/get_comments.yaml';
+import getRecordWorkflow from './workflows/get_record.yaml';
+import getRecordWithCommentsWorkflow from './workflows/get_record_with_comments.yaml';
+import listKnowledgeBasesWorkflow from './workflows/list_knowledge_bases.yaml';
+import listRecordsWorkflow from './workflows/list_records.yaml';
+import listTablesWorkflow from './workflows/list_tables.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
@@ -52,7 +61,8 @@ export const ServicenowSearch: ConnectorSpec = {
       defaultMessage: 'Search and retrieve records from ServiceNow',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -62,6 +72,21 @@ export const ServicenowSearch: ConnectorSpec = {
         defaults: {},
         overrides: {
           meta: {
+            tokenUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {},
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
+            },
             tokenUrl: {
               placeholder: 'https://your-instance.service-now.com/oauth_token.do',
             },
@@ -323,4 +348,16 @@ export const ServicenowSearch: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [
+    describeTableWorkflow,
+    getAttachmentWorkflow,
+    getCommentsWorkflow,
+    getRecordWorkflow,
+    getRecordWithCommentsWorkflow,
+    listKnowledgeBasesWorkflow,
+    listRecordsWorkflow,
+    listTablesWorkflow,
+    searchWorkflow,
+  ],
 };

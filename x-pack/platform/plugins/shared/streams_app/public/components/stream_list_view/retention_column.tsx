@@ -19,7 +19,7 @@ import {
   NO_DATA_SHORT_LABEL,
   NO_RETENTION_LABEL,
 } from './translations';
-import { getTimeSizeAndUnitLabel } from '../data_management/stream_detail_lifecycle/helpers/format_size_units';
+import { getTimeSizeAndUnitLabel } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_size_units';
 
 export function RetentionColumn({
   lifecycle,

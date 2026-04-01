@@ -1,0 +1,35 @@
+version: '1'
+name: 'sources.firecrawl.scrape'
+description: 'Scrape a single URL and extract content as markdown. Markdown is truncated to a sane default length to avoid context overflow. Only set maxMarkdownLength if you already called scrape once and got truncated output. Inputs: url (string), onlyMainContent (boolean, optional), waitFor (number, optional), maxMarkdownLength (number, optional, default 100000).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: url
+    type: string
+    description: 'The URL of the webpage to scrape.'
+  - name: onlyMainContent
+    type: boolean
+    required: false
+    default: true
+    description: 'If true, extract only the main content; if false, include more of the page.'
+  - name: waitFor
+    type: number
+    required: false
+    default: 0
+    description: 'Time in ms to wait before scraping (e.g. for JS-rendered content).'
+  - name: maxMarkdownLength
+    type: number
+    required: false
+    default: 100000
+    description: 'Max characters of markdown to return (default 100000). Only set a lower value if you already got truncated output and need to fit within a smaller context.'
+steps:
+  - name: scrape-url
+    type: firecrawl.scrape
+    connector-id: <%= firecrawl-stack-connector-id %>
+    with:
+      url: "${{ inputs.url }}"
+      onlyMainContent: ${{ inputs.onlyMainContent }}
+      waitFor: ${{ inputs.waitFor }}
+      maxMarkdownLength: ${{ inputs.maxMarkdownLength }}

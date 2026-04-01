@@ -9,7 +9,9 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { commonCustomTriggerDefinition } from '../../common/triggers/custom_trigger';
+import { commonLoopTriggerDefinition } from '../../common/triggers/loop_trigger';
 
 export const registerTriggers = (workflowsExtensions: WorkflowsExtensionsServerPluginSetup) => {
   workflowsExtensions.registerTriggerDefinition(commonCustomTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(commonLoopTriggerDefinition);
 };

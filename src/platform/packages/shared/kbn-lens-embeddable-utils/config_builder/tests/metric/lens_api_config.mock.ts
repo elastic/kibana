@@ -34,7 +34,7 @@ export const breakdownMetricAPIAttributes = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
   },
 } as MetricState;
 
@@ -73,15 +73,15 @@ export const complexMetricAPIAttributes = {
         palette: 'status',
         value: false,
       },
-      alignments: {
-        value: 'left',
+      value: {
+        alignment: 'left',
       },
     },
   ],
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
   },
 } as MetricState;
 
@@ -168,7 +168,7 @@ export const metricAPIWithTermsRankedBySecondary = {
   breakdown_by: {
     operation: 'terms',
     fields: ['extension.keyword'],
-    size: 5,
+    limit: 5,
     rank_by: {
       type: 'column',
       metric: 1,

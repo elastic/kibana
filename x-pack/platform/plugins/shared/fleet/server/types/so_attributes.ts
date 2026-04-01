@@ -25,6 +25,7 @@ import type {
   AgentUpgrade,
   FleetServerAgentComponent,
 } from '../../common/types/models';
+import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 
 import type {
   PackagePolicy,
@@ -79,6 +80,8 @@ export interface AgentPolicySOAttributes {
   agentless?: AgentlessPolicy;
   version?: string;
   has_agent_version_conditions?: boolean;
+  min_agent_version?: string | null;
+  package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface AgentSOAttributes {
@@ -165,6 +168,7 @@ export interface PackagePolicySOAttributes {
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
+  package_agent_version_condition?: string;
 }
 
 export interface OutputSoBaseAttributes {
