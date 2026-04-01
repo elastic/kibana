@@ -324,6 +324,22 @@ const componentStyles = {
         borderTop: 'none',
       },
 
+      '&.euiDataGrid--noHeader': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__content': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__virtualized': {
+        overflow: 'visible !important',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGridRow:first-of-type .euiDataGridRowCell': {
+        borderBlockStart: 'none',
+      },
+
       '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
         borderBottom: euiTheme.border.thin,
       },
