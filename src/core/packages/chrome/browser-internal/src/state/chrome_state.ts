@@ -19,6 +19,7 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeNavLink,
+  ChromeNextGlobalSearchConfig,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
@@ -65,6 +66,7 @@ export interface ChromeState {
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
   aiButton: State<ReactNode>;
+  globalSearch: State<ChromeNextGlobalSearchConfig | undefined>;
 
   /** Help system */
   help: {
@@ -109,6 +111,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
   const aiButton = createState<ReactNode>(undefined);
+  const globalSearch = createState<ChromeNextGlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
 
   // Help System
@@ -133,6 +136,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     headerBanner,
     globalFooter,
     aiButton,
+    globalSearch,
     customNavLink,
     appMenu,
     help: {

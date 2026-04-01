@@ -8,16 +8,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { useBasePath } from '../../../shared/chrome_hooks';
+import type { ToolSlots } from '@kbn/core-chrome-navigation/types';
+import { useBasePath, useIsNextChrome } from '../../../shared/chrome_hooks';
+import { useHelpLinks$ } from '../../../shared/help_links_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
+import { buildToolSlots } from './to_chrome_tool_slots';
 import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
@@ -33,12 +36,13 @@ export const Navigation = (props: ChromeNavigationProps) => {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, logoItem, activeItemId, solutionId, toolSlots } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationComponent
         items={navItems}
+        tools={toolSlots}
         logo={logoItem}
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
@@ -54,19 +58,60 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
+interface NavigationState extends NavigationItems {
+  solutionId: SolutionId;
+  toolSlots: ToolSlots;
+}
+
+const useNavigationItems = (): NavigationState | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
+  const helpLinks$ = useHelpLinks$();
+  const isNextChrome = useIsNextChrome();
 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
-    return chrome.project.getNavigation$().pipe(
-      map((nav) => ({
-        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager),
-        solutionId: nav.solutionId,
+
+    const navState$ = chrome.project.getNavigation$().pipe(
+      map((nav) => {
+        const { navItems, logoItem, activeItemId } = toNavigationItems(
+          nav.navigationTree,
+          nav.activeNodes,
+          panelStateManager
+        );
+        return {
+          solutionId: nav.solutionId,
+          // In the `next-chrome` we want to show the elastic logo instead of the default product logo
+          logoItem: isNextChrome
+            ? {
+                ...logoItem,
+                iconType: 'logoElastic' as const,
+                iconColor: 'text' as const,
+                hideLabel: true,
+              }
+            : logoItem,
+          activeItemId,
+          navItems,
+        };
+      })
+    );
+
+    const toolSlots$ = combineLatest([chrome.next.globalSearch.get$(), helpLinks$]).pipe(
+      map(([searchConfig, helpLinks]) =>
+        buildToolSlots({
+          globalSearch: searchConfig,
+          helpLinks,
+        })
+      )
+    );
+
+    return combineLatest([navState$, toolSlots$]).pipe(
+      map(([navState, toolSlots]) => ({
+        ...navState,
+        toolSlots,
       }))
     );
-  }, [chrome, basePath]);
+  }, [chrome, basePath, helpLinks$, isNextChrome]);
 
   return useObservable(items$, null);
 };

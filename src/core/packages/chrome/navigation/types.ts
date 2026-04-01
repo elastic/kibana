@@ -13,7 +13,7 @@ export type BadgeType = 'beta' | 'techPreview' | 'new';
 
 /**
  * A navigation item within a secondary/nested menu.
- * Secondary items appear when a primary menu item with sections is clicked or hovered.
+ * Secondary items appear when a top-level navigation item with sections is clicked or hovered.
  */
 export interface SecondaryMenuItem {
   /**
@@ -63,7 +63,7 @@ export interface SecondaryMenuSection {
 
 /**
  * A primary navigation menu item that appears in the main navigation sidebar.
- * Can optionally contain nested secondary menu sections.
+ * Primary items must always be navigable links.
  */
 export interface MenuItem {
   /**
@@ -97,12 +97,36 @@ export interface MenuItem {
 }
 
 /**
- * The complete navigation structure containing primary and footer menu items.
- * This is the main data structure passed to the Navigation component.
+ * A chrome tool control (search, help, profile, etc.) — not a navigation destination.
+ * Tool items can perform an action via `onClick` or expose submenu content via `sections`.
+ */
+export interface ToolItem {
+  id: string;
+  label: string;
+  iconType: IconType;
+  onClick?: () => void;
+  /**
+   * Optional submenu content shown for the tool control.
+   */
+  sections?: SecondaryMenuSection[];
+  badgeType?: BadgeType;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Optional groupings of tool controls for the sidenav header and footer toolbars.
+ */
+export interface ToolSlots {
+  headerTools?: ToolItem[];
+  footerTools?: ToolItem[];
+}
+
+/**
+ * Navigable sidenav content: primary rail and footer links.
  */
 export interface NavigationStructure {
   /**
-   * The items to be displayed in the navigation footer.
+   * The items to be displayed in the navigation footer (navigable links).
    */
   footerItems: MenuItem[];
   /**
@@ -140,9 +164,19 @@ export interface SideNavLogo {
    */
   label: string;
   /**
+   * When `true`, the label is not rendered under the icon while the navigation is expanded.
+   * The logo link still uses `label` for `aria-label` and for the collapsed-mode tooltip.
+   */
+  hideLabel?: boolean;
+  /**
    * The logo type, e.g. `appObservability`, `appSecurity`, etc.
    */
   iconType: string;
+  /**
+   * (optional) Color of the logo icon. `'default'` renders the icon in its brand colors;
+   * `'text'` renders it monochromatically using the current text color.
+   */
+  iconColor?: 'default' | 'text';
   /**
    * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */

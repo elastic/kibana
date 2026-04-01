@@ -15,6 +15,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
@@ -38,6 +39,7 @@ export const createMockChromeComponentsDeps = () => {
     customBranding: {
       customBranding$: new BehaviorSubject<CustomBranding>({}),
     },
+    featureFlags: coreFeatureFlagsMock.createStart(),
   } satisfies ChromeComponentsDeps;
 };
 

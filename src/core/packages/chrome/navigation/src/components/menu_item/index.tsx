@@ -20,6 +20,7 @@ import { NewItemIndicator } from '../new_item_indicator';
 interface MenuItemBaseProps {
   children: ReactNode;
   iconType: IconType;
+  iconColor?: 'default' | 'text';
   id?: string;
   isCurrent?: boolean;
   isHighlighted: boolean;
@@ -54,6 +55,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     {
       children,
       iconType,
+      iconColor,
       id,
       isCurrent = false,
       isHighlighted,
@@ -166,7 +168,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       <>
         <div className={iconWrapperClassName}>
           <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
-            <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+            <EuiIcon
+              aria-hidden
+              color={iconColor === 'text' ? 'text' : 'currentColor'}
+              type={iconType || 'empty'}
+            />
           </Suspense>
           {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
         </div>

@@ -13,6 +13,7 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
 export interface ChromeComponentsDeps {
   application: Pick<
@@ -22,6 +23,7 @@ export interface ChromeComponentsDeps {
   http: Pick<HttpStart, 'basePath' | 'getLoadingCount$'>;
   docLinks: DocLinksStart;
   customBranding: Pick<CustomBrandingStart, 'customBranding$'>;
+  featureFlags: Pick<FeatureFlagsStart, 'getBooleanValue' | 'getBooleanValue$'>;
 }
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);

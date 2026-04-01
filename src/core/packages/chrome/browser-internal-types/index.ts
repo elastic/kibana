@@ -16,6 +16,7 @@ import type {
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeNextHeaderConfig,
+  ChromeNextGlobalSearchConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
@@ -113,6 +114,9 @@ export interface InternalChromeStart extends ChromeStart {
     };
     aiButton: ChromeStart['next']['aiButton'] & {
       get$(): Observable<ReactNode | undefined>;
+    };
+    globalSearch: ChromeStart['next']['globalSearch'] & {
+      get$(): Observable<ChromeNextGlobalSearchConfig | undefined>;
     };
   };
 }

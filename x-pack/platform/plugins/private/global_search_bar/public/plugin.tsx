@@ -40,6 +40,14 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
     const { application, http } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
+    core.chrome.next.globalSearch.set({
+      onClick: () => {
+        // TODO: open search modal
+        // eslint-disable-next-line no-console
+        console.log('[GlobalSearch] search button clicked — modal not yet implemented');
+      },
+    });
+
     core.chrome.navControls.registerCenter({
       order: 1000,
       content: (

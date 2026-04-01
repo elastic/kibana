@@ -179,6 +179,10 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
         get$: () => state.aiButton.$,
         set: state.aiButton.set,
       },
+      globalSearch: {
+        get$: () => state.globalSearch.$,
+        set: state.globalSearch.set,
+      },
     },
 
     sidebar,

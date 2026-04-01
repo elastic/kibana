@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNextHeaderConfig } from './next_header';
+import type { ChromeNextGlobalSearchConfig } from './next_global_search';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -345,6 +346,14 @@ export interface ChromeStart {
        * Pass `undefined` to remove. Global — persists across app changes.
        */
       set(node?: ReactNode): void;
+    };
+    globalSearch: {
+      /**
+       * Set the global search configuration for the Chrome-Next sidenav.
+       * Chrome renders a search icon button in the sidenav header items; clicking it fires `onClick`.
+       * Pass `undefined` to remove the button. Global — persists across app changes.
+       */
+      set(config?: ChromeNextGlobalSearchConfig): void;
     };
   };
 

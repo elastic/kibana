@@ -13,6 +13,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeNextHeaderConfig,
+  ChromeNextGlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
@@ -29,6 +30,9 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 
 const createStartContractMock = () => {
   const nextHeaderState$ = new BehaviorSubject<ChromeNextHeaderConfig | undefined>(undefined);
+  const nextGlobalSearchState$ = new BehaviorSubject<ChromeNextGlobalSearchConfig | undefined>(
+    undefined
+  );
 
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
@@ -114,6 +118,12 @@ const createStartContractMock = () => {
       aiButton: lazyObject({
         get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
         set: jest.fn(),
+      }),
+      globalSearch: lazyObject({
+        get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
+        set: jest.fn((config?: ChromeNextGlobalSearchConfig) => {
+          nextGlobalSearchState$.next(config);
+        }),
       }),
     }),
     setGlobalFooter: jest.fn(),

@@ -69,3 +69,5 @@ export type {
   ChromeNextHeaderTab,
   ChromeNextHeaderCallout,
 } from './next_header';
+
+export type { ChromeNextGlobalSearchConfig } from './next_global_search';

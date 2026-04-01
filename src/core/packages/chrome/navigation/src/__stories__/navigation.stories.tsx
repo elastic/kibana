@@ -42,6 +42,42 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
 
 type PropsAndArgs = ComponentProps<typeof Navigation>;
 
+const CHROME_TOOLS: NonNullable<PropsAndArgs['tools']> = {
+  headerTools: [
+    {
+      id: 'search',
+      label: 'Search',
+      iconType: 'search',
+      onClick: () => {},
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      iconType: 'bell',
+      onClick: () => {},
+    },
+    {
+      id: 'quick_settings',
+      label: 'Quick settings',
+      iconType: 'gear',
+      onClick: () => {},
+    },
+  ],
+  footerTools: [
+    {
+      id: 'help',
+      label: 'Help',
+      iconType: 'question',
+      sections: [
+        {
+          id: 'help-links',
+          items: [{ id: 'documentation', label: 'Documentation', href: '/help/documentation' }],
+        },
+      ],
+    },
+  ],
+};
+
 const PreventLinkNavigation = (Story: StoryFn) => {
   usePreventLinkNavigation();
 
@@ -84,6 +120,31 @@ export const Default: StoryObj<PropsAndArgs> = {
       );
     },
   ],
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithTools: StoryObj<PropsAndArgs> = {
+  name: 'With header and footer tools',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    tools: CHROME_TOOLS,
+    logo: {
+      id: 'observability',
+      href: LOGO.href,
+      label: LOGO.label,
+      iconType: LOGO.iconType,
+      hideLabel: true,
+    },
+  },
   render: (args) => <ControlledNavigation {...args} />,
 };
 

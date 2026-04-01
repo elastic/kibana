@@ -28,18 +28,26 @@
 import type { NavigationProps as SourceNavigationProps } from '../../src/components/navigation';
 import type {
   BadgeType as SourceBadgeType,
+  MenuItem as SourceMenuItem,
+  NavigationStructure as SourceNavigationStructure,
   SecondaryMenuItem as SourceSecondaryMenuItem,
   SecondaryMenuSection as SourceSecondaryMenuSection,
   SideNavLogo as SourceSideNavLogo,
+  ToolItem as SourceToolItem,
+  ToolSlots as SourceToolSlots,
 } from '../../types';
 
 // Packaged types.
 import type {
   BadgeType as PackagedBadgeType,
+  MenuItem as PackagedMenuItem,
+  NavigationStructure as PackagedNavigationStructure,
   NavigationProps as PackagedNavigationProps,
   SecondaryMenuItem as PackagedSecondaryMenuItem,
   SecondaryMenuSection as PackagedSecondaryMenuSection,
   SideNavLogo as PackagedSideNavLogo,
+  ToolItem as PackagedToolItem,
+  ToolSlots as PackagedToolSlots,
 } from './types';
 
 // Simple types must match exactly.
@@ -55,6 +63,25 @@ const _secondaryMenuItem: PackagedSecondaryMenuItem = {} as SourceSecondaryMenuI
 const _secondaryMenuSection: PackagedSecondaryMenuSection = {} as SourceSecondaryMenuSection;
 const _sideNavLogo: PackagedSideNavLogo = {} as SourceSideNavLogo;
 
+type NormalizedSourceMenuItem = Omit<SourceMenuItem, 'iconType'> & { iconType: string };
+type NormalizedSourceToolItem = Omit<SourceToolItem, 'iconType'> & { iconType: string };
+type NormalizedSourceNavigationStructure = Omit<
+  SourceNavigationStructure,
+  'footerItems' | 'primaryItems'
+> & {
+  footerItems: NormalizedSourceMenuItem[];
+  primaryItems: NormalizedSourceMenuItem[];
+};
+type NormalizedSourceToolSlots = Omit<SourceToolSlots, 'headerTools' | 'footerTools'> & {
+  headerTools?: NormalizedSourceToolItem[];
+  footerTools?: NormalizedSourceToolItem[];
+};
+
+const _menuItem: PackagedMenuItem = {} as NormalizedSourceMenuItem;
+const _toolItem: PackagedToolItem = {} as NormalizedSourceToolItem;
+const _toolSlots: PackagedToolSlots = {} as NormalizedSourceToolSlots;
+const _navigationStructure: PackagedNavigationStructure = {} as NormalizedSourceNavigationStructure;
+
 // `NavigationProps` validation — suppressed because `MenuItem.iconType` is
 // intentionally simplified from `IconType` (string | ComponentClass) to `string`.
 // @ts-expect-error — intentional simplification; see above.
@@ -64,6 +91,10 @@ void _badgeType;
 void _secondaryMenuItem;
 void _secondaryMenuSection;
 void _sideNavLogo;
+void _menuItem;
+void _toolItem;
+void _toolSlots;
+void _navigationStructure;
 void _navigationProps;
 
 export const TYPE_VALIDATION_PASSED = true;

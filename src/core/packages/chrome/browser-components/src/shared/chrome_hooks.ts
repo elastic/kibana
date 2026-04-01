@@ -8,13 +8,10 @@
  */
 
 import { useMemo } from 'react';
-import { combineLatest, debounceTime, map } from 'rxjs';
 import type { Observable } from 'rxjs';
+import { debounceTime, map } from 'rxjs';
 import type {
   ChromeBreadcrumb,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeNavLink,
   ChromeNextHeaderConfig,
@@ -26,6 +23,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
 import { useChromeComponentsDeps } from '../context';
 
 /**
@@ -154,46 +152,6 @@ export function useNavControls(position: NavControlPosition): ChromeNavControl[]
   return useObservable(controls$, []);
 }
 
-interface HelpMenuState {
-  menuLinks: ChromeHelpMenuLink[];
-  extension: ChromeHelpExtension | undefined;
-  supportUrl: string;
-  globalExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
-}
-
-const INITIAL_HELP_MENU: HelpMenuState = {
-  menuLinks: [],
-  extension: undefined,
-  supportUrl: '',
-  globalExtensionMenuLinks: [],
-};
-
-/**
- * Returns all help menu state as a single object (single subscription).
- * Used by `HeaderHelpMenu` (instantiated from both classic and project headers).
- */
-export function useHelpMenu(): HelpMenuState {
-  const chrome = useChromeService();
-  const helpMenu$ = useMemo(
-    () =>
-      combineLatest([
-        chrome.getHelpMenuLinks$(),
-        chrome.getHelpExtension$(),
-        chrome.getHelpSupportUrl$(),
-        chrome.getGlobalHelpExtensionMenuLinks$(),
-      ]).pipe(
-        map(([menuLinks, extension, supportUrl, globalExtensionMenuLinks]) => ({
-          menuLinks,
-          extension,
-          supportUrl,
-          globalExtensionMenuLinks,
-        }))
-      ),
-    [chrome]
-  );
-  return useObservable(helpMenu$, INITIAL_HELP_MENU);
-}
-
 /**
  * Returns the current side nav collapsed state and a toggle callback.
  * Used by `GridLayoutProjectSideNav`.
@@ -290,4 +248,10 @@ export function useNextHeader(): ChromeNextHeaderConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.header.get$(), [chrome]);
   return useObservable(config$, undefined);
+}
+
+/** Returns whether the next-chrome experience is enabled via feature flag. */
+export function useIsNextChrome(): boolean {
+  const { featureFlags } = useChromeComponentsDeps();
+  return featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false);
 }

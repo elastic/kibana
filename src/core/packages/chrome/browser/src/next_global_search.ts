@@ -8,11 +8,9 @@
  */
 
 /**
- * Utility function for checking whether the menu item has a submenu.
- *
- * @param item - the menu item to check.
- * @returns `true` if the menu item has a submenu, `false` otherwise.
+ * Configuration for the global search button in the Chrome-Next sidenav.
  */
-export const getHasSubmenu = (item: { sections?: ReadonlyArray<unknown> }): boolean => {
-  return !!item.sections && item.sections.length > 0;
-};
+export interface ChromeNextGlobalSearchConfig {
+  /** Called when the search icon button in the sidenav is clicked. */
+  onClick: () => void;
+}

@@ -11,26 +11,25 @@ import React, { forwardRef } from 'react';
 import type { KeyboardEvent, Ref } from 'react';
 import type { EuiButtonIconProps } from '@elastic/eui';
 
-import type { MenuItem } from '../../../types';
+import type { ToolItem as ToolItemData } from '../../../types';
 import { IconButton } from '../icon_button';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-export interface FooterItemProps
+export interface ToolItemProps
   extends Omit<EuiButtonIconProps, 'href' | 'iconType' | 'onClick' | 'onKeyDown'>,
-    Omit<MenuItem, 'sections'> {
+    Omit<ToolItemData, 'sections'> {
   hasContent?: boolean;
-  isCurrent?: boolean;
   isHighlighted: boolean;
   isNew: boolean;
   onClick?: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
 }
 
-export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
+export const ToolItem = forwardRef<HTMLButtonElement, ToolItemProps>(
   ({ id, ...props }, ref) => (
     <IconButton
       ref={ref as Ref<HTMLElement>}
-      data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footerItem-${id}`}
+      data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-toolItem-${id}`}
       {...props}
     />
   )

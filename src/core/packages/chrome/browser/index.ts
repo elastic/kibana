@@ -62,4 +62,5 @@ export type {
   ChromeNextHeaderGlobalActions,
   ChromeNextHeaderTab,
   ChromeNextHeaderCallout,
+  ChromeNextGlobalSearchConfig,
 } from './src';
