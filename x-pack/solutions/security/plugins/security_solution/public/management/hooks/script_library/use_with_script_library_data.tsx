@@ -68,10 +68,11 @@ export const useWithScriptLibraryData = (
 
   // Re-check if data exists when list is empty and not loading
   useEffect(() => {
+    if (!doesDataExist) return;
     if (isMounted() && !isLoadingListData && !listDataError && listData && listData.total === 0) {
       verifyDataExists();
     }
-  }, [isMounted, isLoadingListData, listDataError, listData, verifyDataExists]);
+  }, [isMounted, doesDataExist, isLoadingListData, listDataError, listData, verifyDataExists]);
 
   return useMemo(
     () => ({

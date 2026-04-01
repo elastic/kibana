@@ -89,7 +89,7 @@ describe('useWithScriptLibraryData', () => {
       const mockFilteredResponse = createMockScriptListResponse(5);
       const mockUnfilteredResponse = createMockScriptListResponse(10);
 
-      mockUseGetEndpointScriptsList.mockImplementation((queryParams, _options) => {
+      mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
         const isUnfiltered = queryParams.pageSize === 1 && queryParams.page === 1;
 
         return {
@@ -281,7 +281,7 @@ describe('useWithScriptLibraryData', () => {
     it('should be true when unfiltered response total > 0', () => {
       const mockUnfilteredResponse = createMockScriptListResponse(5);
 
-      mockUseGetEndpointScriptsList.mockImplementation((queryParams, _options) => {
+      mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
         const isUnfiltered = queryParams.pageSize === 1;
 
         return {
@@ -344,7 +344,7 @@ describe('useWithScriptLibraryData', () => {
       const mockRefetchFiltered = jest.fn();
       let filteredTotal: number = 1;
 
-      mockUseGetEndpointScriptsList.mockImplementation((queryParams, _options) => {
+      mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
         const isUnfiltered = queryParams.pageSize === 1;
         return {
           ...defaultGetEndpointScriptsListResponse,
@@ -376,11 +376,14 @@ describe('useWithScriptLibraryData', () => {
     it('should refetch when filters are active and list becomes empty', async () => {
       const mockRefetchFiltered = jest.fn();
 
-      mockUseGetEndpointScriptsList.mockReturnValue({
-        ...defaultGetEndpointScriptsListResponse,
-        data: createMockScriptListResponse(0),
-        refetch: mockRefetchFiltered,
-      } as unknown as MockUseQueryResult);
+      mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
+        const isUnfiltered = queryParams.pageSize === 1;
+        return {
+          ...defaultGetEndpointScriptsListResponse,
+          data: isUnfiltered ? createMockScriptListResponse(5) : createMockScriptListResponse(0),
+          refetch: mockRefetchFiltered,
+        } as unknown as MockUseQueryResult;
+      });
 
       renderHook(() =>
         useWithScriptLibraryData({
@@ -401,11 +404,14 @@ describe('useWithScriptLibraryData', () => {
     it('should refetch when not on page 1 and list becomes empty', async () => {
       const mockRefetchFiltered = jest.fn();
 
-      mockUseGetEndpointScriptsList.mockReturnValue({
-        ...defaultGetEndpointScriptsListResponse,
-        data: createMockScriptListResponse(0),
-        refetch: mockRefetchFiltered,
-      } as unknown as MockUseQueryResult);
+      mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
+        const isUnfiltered = queryParams.pageSize === 1;
+        return {
+          ...defaultGetEndpointScriptsListResponse,
+          data: isUnfiltered ? createMockScriptListResponse(5) : createMockScriptListResponse(0),
+          refetch: mockRefetchFiltered,
+        } as unknown as MockUseQueryResult;
+      });
 
       renderHook(() =>
         useWithScriptLibraryData({
@@ -475,7 +481,7 @@ describe('useWithScriptLibraryData', () => {
     });
 
     it('should work correctly when filtered query is in loading state', () => {
-      mockUseGetEndpointScriptsList.mockImplementation((queryParams, _options) => {
+      mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
         const isUnfiltered = queryParams.pageSize === 1;
         return {
           ...defaultGetEndpointScriptsListResponse,
