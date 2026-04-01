@@ -27,7 +27,7 @@ import type { NotificationPolicyFormState } from '../types';
 import { DispatchConfigSummary } from './dispatch_config_summary';
 import { DurationInput } from './duration_input/duration_input';
 
-export const DispatchSection: React.FC = () => {
+export const DispatchSection = () => {
   const { control, setValue, getValues } = useFormContext<NotificationPolicyFormState>();
   const groupingMode = useWatch({ control, name: 'groupingMode' });
   const groupBy = useWatch({ control, name: 'groupBy' });

@@ -138,7 +138,7 @@ const getDispatchSummary = ({
   return '';
 };
 
-export const DispatchConfigSummary: React.FC<DispatchConfigSummaryProps> = (props) => {
+export const DispatchConfigSummary = (props: DispatchConfigSummaryProps) => {
   const summary = getDispatchSummary(props);
 
   if (!summary) return null;
