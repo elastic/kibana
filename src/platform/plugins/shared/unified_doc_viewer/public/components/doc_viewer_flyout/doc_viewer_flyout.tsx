@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiPortal,
   EuiPagination,
   EuiHorizontalRule,
