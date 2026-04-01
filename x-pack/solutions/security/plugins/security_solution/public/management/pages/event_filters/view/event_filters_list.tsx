@@ -85,18 +85,6 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Event filter list export failed',
     }
   ),
-  pageImportSuccessToastTitle: i18n.translate(
-    'xpack.securitySolution.eventFilters.pageImportSuccessToastTitle',
-    {
-      defaultMessage: 'Event filter list imported successfully',
-    }
-  ),
-  pageImportErrorToastTitle: i18n.translate(
-    'xpack.securitySolution.eventFilters.pageImportErrorToastTitle',
-    {
-      defaultMessage: 'Event filter list import failed',
-    }
-  ),
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.eventFilters.pageImportOnlyCurrentArtifactCanBeImportedError',
     {

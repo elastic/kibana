@@ -66,18 +66,6 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Trusted device list export failed',
     }
   ),
-  pageImportSuccessToastTitle: i18n.translate(
-    'xpack.securitySolution.trustedDevices.list.pageImportSuccessToastTitle',
-    {
-      defaultMessage: 'Trusted device list imported successfully',
-    }
-  ),
-  pageImportErrorToastTitle: i18n.translate(
-    'xpack.securitySolution.trustedDevices.list.pageImportErrorToastTitle',
-    {
-      defaultMessage: 'Trusted device list import failed',
-    }
-  ),
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.pageImportOnlyCurrentArtifactCanBeImportedError',
     {

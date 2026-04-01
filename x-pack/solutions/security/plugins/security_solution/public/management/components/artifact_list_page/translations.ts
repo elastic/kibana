@@ -183,8 +183,6 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'pageExportButtonTitle'
   | 'pageExportSuccessToastTitle'
   | 'pageExportErrorToastTitle'
-  | 'pageImportSuccessToastTitle'
-  | 'pageImportErrorToastTitle'
   | 'pageImportOnlyCurrentArtifactCanBeImportedError'
   | 'getShowingCountLabel'
   | 'cardActionEditLabel'

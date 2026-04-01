@@ -23,7 +23,7 @@ import {
 import React, { useCallback } from 'react';
 import { parseListIdsFromImportedFile } from '../../../../common/utils/exception_list_items';
 import { useToasts } from '../../../../common/lib/kibana';
-import type { ArtifactListPageLabels } from '../translations';
+import type { artifactListPageLabels } from '../translations';
 import { useImportArtifactList } from '../../../hooks/artifacts/use_import_artifact_list';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -33,7 +33,7 @@ export interface ArtifactImportFlyoutProps {
   onCancel: () => void;
   onSuccess: () => void;
   apiClient: ExceptionsListApiClient;
-  labels: ArtifactListPageLabels;
+  labels: typeof artifactListPageLabels;
   'data-test-subj'?: string;
 }
 

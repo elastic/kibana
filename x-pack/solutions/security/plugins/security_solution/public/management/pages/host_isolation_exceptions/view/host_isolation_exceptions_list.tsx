@@ -53,18 +53,6 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageLabels = Object.freeze({
       defaultMessage: 'Host isolation exception list export failed',
     }
   ),
-  pageImportSuccessToastTitle: i18n.translate(
-    'xpack.securitySolution.hostIsolationExceptions.pageImportSuccessToastTitle',
-    {
-      defaultMessage: 'Host isolation exception list imported successfully',
-    }
-  ),
-  pageImportErrorToastTitle: i18n.translate(
-    'xpack.securitySolution.hostIsolationExceptions.pageImportErrorToastTitle',
-    {
-      defaultMessage: 'Host isolation exception list import failed',
-    }
-  ),
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
