@@ -54,7 +54,7 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
   const { capabilities } = useQueryActivityAppContext();
   const canCancelTasks = capabilities.canCancelTasks;
   const tableCaption = i18n.translate('xpack.queryActivity.table.caption', {
-    defaultMessage: 'Long running queries',
+    defaultMessage: 'Long-running queries',
   });
 
   const [selectedQuery, setSelectedQuery] = useState<RunningQuery | null>(null);
