@@ -204,7 +204,7 @@ export function getDashboardApi({
     setState,
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
-      const previousSavedObjectId = savedObjectId$.value;
+      const previousDashboardId = savedObjectId$.value;
 
       const {
         description,
@@ -244,8 +244,8 @@ export function getDashboardApi({
       });
       savedObjectId$.next(saveResult.id);
       unsavedChangesManager.internalApi.onSave(saveResult.savedState, {
-        previousSavedObjectId,
-        savedObjectId: saveResult.id,
+        previousDashboardId,
+        dashboardId: saveResult.id,
       });
 
       return saveResult;
@@ -253,7 +253,7 @@ export function getDashboardApi({
     runQuickSave: async () => {
       if (isManaged) return;
       const dashboardState = getState();
-      const previousSavedObjectId = savedObjectId$.value;
+      const previousDashboardId = savedObjectId$.value;
       const saveResult = await saveDashboard({
         dashboardState,
         saveOptions: {},
@@ -263,8 +263,8 @@ export function getDashboardApi({
 
       if (saveResult?.error) return;
       unsavedChangesManager.internalApi.onSave(dashboardState, {
-        previousSavedObjectId,
-        savedObjectId: saveResult?.id ?? previousSavedObjectId,
+        previousDashboardId,
+        dashboardId: saveResult?.id ?? previousDashboardId,
       });
 
       return;

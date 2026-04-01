@@ -32,8 +32,8 @@ export const createDashboardAttachmentMountSync$ = ({
 }: DashboardAttachmentMountSyncParams): Observable<never> => {
   // Sync attachment origin when dashboard is saved.
   const savedDashboardOriginSync$ = api.onSave$.pipe(
-    tap(({ previousSavedObjectId, savedObjectId }) => {
-      if (!savedObjectId) {
+    tap(({ previousDashboardId, dashboardId }) => {
+      if (!dashboardId) {
         return;
       }
       const currentAttachment = getAttachment();
@@ -44,11 +44,11 @@ export const createDashboardAttachmentMountSync$ = ({
       //    c. The saved dashboard was previously the attachment's origin (save / save as)
       const shouldUpdate =
         !currentAttachment.origin ||
-        savedObjectId === currentAttachment.origin ||
-        previousSavedObjectId === currentAttachment.origin;
+        dashboardId === currentAttachment.origin ||
+        previousDashboardId === currentAttachment.origin;
 
       if (shouldUpdate) {
-        void updateOrigin(savedObjectId);
+        void updateOrigin(dashboardId);
       }
     }),
     ignoreElements()

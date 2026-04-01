@@ -351,7 +351,7 @@ describe('onAttachmentMount - manual changes sync', () => {
       mountHandler();
       dashboardAppClientApi$.next(mockApi);
 
-      mockApi.onSave$.next({ previousSavedObjectId: undefined, savedObjectId: 'new-dashboard-id' });
+      mockApi.onSave$.next({ previousDashboardId: undefined, dashboardId: 'new-dashboard-id' });
 
       expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
     });
@@ -362,7 +362,7 @@ describe('onAttachmentMount - manual changes sync', () => {
       mountHandler();
       dashboardAppClientApi$.next(mockApi);
 
-      mockApi.onSave$.next({ previousSavedObjectId: 'dashboard-a', savedObjectId: 'dashboard-b' });
+      mockApi.onSave$.next({ previousDashboardId: 'dashboard-a', dashboardId: 'dashboard-b' });
 
       expect(updateOrigin).toHaveBeenCalledWith('dashboard-b');
     });
@@ -374,7 +374,7 @@ describe('onAttachmentMount - manual changes sync', () => {
       mountHandler();
       dashboardAppClientApi$.next(mockApi);
 
-      mockApi.onSave$.next({ previousSavedObjectId: 'dashboard-b', savedObjectId: 'dashboard-b' });
+      mockApi.onSave$.next({ previousDashboardId: 'dashboard-b', dashboardId: 'dashboard-b' });
 
       expect(updateOrigin).not.toHaveBeenCalled();
     });

@@ -236,8 +236,8 @@ describe('unsavedChangesManager', () => {
         setState: setStateMock,
       });
       const saveEvent = {
-        previousSavedObjectId: 'dashboard-a',
-        savedObjectId: 'dashboard-b',
+        previousDashboardId: 'dashboard-a',
+        dashboardId: 'dashboard-b',
       };
 
       unsavedChangesManager.api.onSave$.subscribe((event) => {

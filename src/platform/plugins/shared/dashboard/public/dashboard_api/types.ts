@@ -63,8 +63,8 @@ export const DASHBOARD_API_TYPE = 'dashboard';
  * Interface for APIs that publish save events.
  */
 export interface DashboardSaveEvent {
-  previousSavedObjectId?: string;
-  savedObjectId?: string;
+  previousDashboardId?: string;
+  dashboardId?: string;
 }
 
 export interface PublishesOnSave {
