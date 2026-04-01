@@ -68,15 +68,23 @@ const useDiscoverTopNavShared = ({
 
 /** Embedded / by-value: top nav shows Inspect; mounts {@link useInspector}. */
 export const useDiscoverTopNavWithInspector = ({
+  onOpenSaveModal,
+  onOpenSaveAsModal,
   persistedDiscoverSession,
   onOpenSaveModal,
   onOpenSaveAsModal,
 }: {
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
   persistedDiscoverSession: DiscoverSession | undefined;
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
 }) => {
-  const shared = useDiscoverTopNavShared({ persistedDiscoverSession });
+  const shared = useDiscoverTopNavShared({
+    onOpenSaveModal,
+    onOpenSaveAsModal,
+    persistedDiscoverSession,
+  });
   const onOpenInspector = useInspector({ inspector: shared.services.inspector });
 
   const topNavMenu = useTopNavLinks({
@@ -100,6 +108,8 @@ export const useDiscoverTopNavWithInspector = ({
 
 /** Standalone tabbed Discover: Inspect is on the tab menu only — do not mount {@link useInspector}. */
 export const useDiscoverTopNavWithoutInspector = ({
+  onOpenSaveModal,
+  onOpenSaveAsModal,
   persistedDiscoverSession,
   onOpenSaveModal,
   onOpenSaveAsModal,
@@ -108,7 +118,11 @@ export const useDiscoverTopNavWithoutInspector = ({
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
 }) => {
-  const shared = useDiscoverTopNavShared({ persistedDiscoverSession });
+  const shared = useDiscoverTopNavShared({
+    onOpenSaveModal,
+    onOpenSaveAsModal,
+    persistedDiscoverSession,
+  });
 
   const topNavMenu = useTopNavLinks({
     dataView: shared.dataView,
@@ -118,6 +132,8 @@ export const useDiscoverTopNavWithoutInspector = ({
     isEsqlMode: shared.isEsqlMode,
     adHocDataViews: shared.adHocDataViews,
     hasShareIntegration: shared.hasShareIntegration,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
     persistedDiscoverSession,
     onOpenSaveModal,
     onOpenSaveAsModal,
