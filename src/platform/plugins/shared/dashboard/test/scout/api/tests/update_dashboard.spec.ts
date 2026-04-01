@@ -65,7 +65,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.id).toBe(id);
     expect(response.body.data.title).toBe(title);
   });
