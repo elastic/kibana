@@ -16,8 +16,8 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowLookup } from '../../../entities/workflows/store';
 import {
-  getValueFromValueNode,
   buildStepSelectionValues,
+  getValueFromValueNode,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { CustomPropertyItem } from '../model/types';
 
