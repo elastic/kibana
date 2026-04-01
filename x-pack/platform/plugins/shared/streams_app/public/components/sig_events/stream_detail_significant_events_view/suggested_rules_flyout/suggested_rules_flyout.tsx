@@ -371,10 +371,3 @@ const CREATE_RULES_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Create rules',
   }
 );
-
-const DETAILS_CLOSE_ARIA_LABEL = i18n.translate(
-  'xpack.streams.suggestedRulesFlyout.detailsCloseAriaLabel',
-  {
-    defaultMessage: 'Close details',
-  }
-);
