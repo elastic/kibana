@@ -6,6 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
+
+function prettyPrint(value: string): string {
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
+}
 import {
   EuiBadge,
   EuiButton,
@@ -70,6 +78,13 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
       return undefined;
     }
     const discoverParams: DiscoverAppLocatorParams = {
+      dataViewSpec: {
+        id: 'discover-observability-solution-all-logs',
+        name: 'All logs',
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+        managed: true,
+      },
       timeRange: { from: rangeFrom, to: rangeTo },
       query: { language: 'kuery', query: `trace.id:"${escapeQuotes(query.traceId)}"` },
       filters: [],
@@ -212,7 +227,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               overflowHeight="100%"
               isCopyable
             >
-              {query.query}
+              {prettyPrint(query.query)}
             </EuiCodeBlock>
           </>
         )}

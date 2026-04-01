@@ -210,6 +210,24 @@ describe('isIncludedTask', () => {
       isIncludedTask({ ...baseTask, action: 'indices:data/write/bulk' }, DEFAULT_THRESHOLD_NANOS)
     ).toBe(false);
   });
+
+  it('excludes non-cancellable tasks with no description (background async tasks)', () => {
+    expect(
+      isIncludedTask(
+        { ...baseTask, cancellable: false, description: undefined },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
+  });
+
+  it('includes non-cancellable tasks that have a description', () => {
+    expect(
+      isIncludedTask(
+        { ...baseTask, cancellable: false, description: 'FROM logs-* | LIMIT 10' },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(true);
+  });
 });
 
 describe('transformTasks', () => {

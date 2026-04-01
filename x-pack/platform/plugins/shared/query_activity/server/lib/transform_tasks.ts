@@ -135,6 +135,14 @@ export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boo
     return false;
   }
 
+  // Background async tasks (e.g. ES|QL submitted via POST /_esql/async) surface in the task
+  // list with cancellable:false and an empty description once the initial HTTP handler task
+  // has completed. They cannot be cancelled via the tasks API and have no query to display,
+  // so there is nothing useful to show the user.
+  if (!task.cancellable && !task.description) {
+    return false;
+  }
+
   return true;
 }
 
