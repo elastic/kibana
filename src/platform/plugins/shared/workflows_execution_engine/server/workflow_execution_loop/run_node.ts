@@ -81,6 +81,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       return;
     }
 
+    // Pre-warm: rehydrate any evicted step outputs that the upcoming step will need.
+    // This must happen before getContext() is called (which is synchronous).
+    await stepExecutionRuntime.contextManager.ensureContextReady();
+
     const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
     monitorAbortController = new AbortController();
 

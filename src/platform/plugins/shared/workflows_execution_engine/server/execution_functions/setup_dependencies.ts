@@ -105,10 +105,13 @@ export async function setupDependencies(
     spaceId: workflowExecution.spaceId,
   });
 
+  const evictionMinBytes = config.eviction.minPayloadSize.getValueInBytes();
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
     workflowExecutionRepository,
-    stepExecutionRepository
+    stepExecutionRepository,
+    evictionMinBytes,
+    logger
   );
 
   // Create telemetry client

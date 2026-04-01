@@ -587,10 +587,12 @@ export class WorkflowExecutionRuntimeManager {
       status: finalStatus,
     } as EsWorkflowExecution;
 
+    const outputSizeStats = this.workflowExecutionState.getOutputSizeStats();
     this.telemetryClient.reportWorkflowExecutionTerminated({
       workflowExecution: finalWorkflowExecution,
       stepExecutions,
       finalStatus,
+      outputSizeStats,
     });
   }
 }

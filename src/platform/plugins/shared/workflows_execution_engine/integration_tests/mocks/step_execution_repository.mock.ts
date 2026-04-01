@@ -20,7 +20,10 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     );
   }
 
-  public getStepExecutionsByIds(stepExecutionIds: string[]): Promise<EsWorkflowStepExecution[]> {
+  public getStepExecutionsByIds(
+    stepExecutionIds: string[],
+    _sourceIncludes?: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
     return Promise.resolve(
       stepExecutionIds
         .map((id) => this.stepExecutions.get(id) || null)

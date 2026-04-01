@@ -269,6 +269,17 @@ export class StepExecutionRuntime {
     return Object.keys(rest).length ? rest : undefined;
   }
 
+  /**
+   * Records the output byte size for this step execution.
+   * Used by the eviction system to decide whether a completed step's output
+   * is large enough to evict from memory after it has been flushed to ES.
+   * The size is computed by Layer 2 enforcement (safeOutputSize) and passed here
+   * at zero additional serialization cost.
+   */
+  public recordOutputSize(bytes: number): void {
+    this.workflowExecutionState.recordOutputSize(this.stepExecutionId, bytes);
+  }
+
   /** Modifies workflow-level execution state. Use sparingly — prefer step output for step-scoped data. */
   public updateWorkflowExecution(update: Partial<EsWorkflowExecution>): void {
     this.workflowExecutionState.updateWorkflowExecution(update);

@@ -180,6 +180,10 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
           if (outputSize > 0 && outputSize > maxBytes) {
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
+          // Record the already-computed size for eviction decisions (zero extra serialization)
+          if (outputSize > 0) {
+            this.stepExecutionRuntime.recordOutputSize(outputSize);
+          }
         }
       }
 

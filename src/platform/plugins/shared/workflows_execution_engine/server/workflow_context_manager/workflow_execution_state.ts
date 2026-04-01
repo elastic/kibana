@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { formatBytes } from '../step/errors';
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
@@ -25,10 +28,28 @@ export class WorkflowExecutionState {
    */
   private stepIdExecutionIdIndex = new Map<string, string[]>();
 
+  /**
+   * Step execution IDs whose `output` field has been evicted from in-memory state
+   * after being flushed to Elasticsearch. The output data remains in ES and can be
+   * re-fetched on demand via `rehydrateOutputs()`.
+   */
+  private readonly evictedOutputIdsAndBytes = new Map<string, number>();
+
+  /**
+   * Recorded output sizes in bytes, keyed by step execution ID.
+   * Populated by Layer 2 enforcement (safeOutputSize) via `recordOutputSize()`.
+   * Used to decide whether a completed step's output is large enough to evict.
+   * In-memory only — not persisted to Elasticsearch.
+   */
+  private readonly outputSizes = new Map<string, number>();
+
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
-    private workflowStepExecutionRepository: StepExecutionRepository
+    private workflowStepExecutionRepository: StepExecutionRepository,
+    /** Minimum output size in bytes for a step to be eligible for eviction. 0 = evict all. */
+    private readonly evictionMinBytes: number = 0,
+    private readonly logger?: Logger
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
@@ -115,14 +136,170 @@ export class WorkflowExecutionState {
     }
   }
 
+  /**
+   * Records the output byte size for a step execution.
+   * Called by Layer 2 enforcement after `safeOutputSize()` has already serialized the output,
+   * so this carries zero additional serialization cost.
+   */
+  public recordOutputSize(stepExecutionId: string, bytes: number): void {
+    this.outputSizes.set(stepExecutionId, bytes);
+  }
+
+  /**
+   * Returns aggregate output size statistics from both active and evicted steps.
+   * Uses pre-recorded sizes (no serialization) — safe to call after eviction.
+   */
+  public getOutputSizeStats(): { totalBytes: number; stepCount: number } {
+    let totalBytes = 0;
+    let stepCount = 0;
+    for (const bytes of this.outputSizes.values()) {
+      totalBytes += bytes;
+      stepCount++;
+    }
+    for (const bytes of this.evictedOutputIdsAndBytes.values()) {
+      totalBytes += bytes;
+      stepCount++;
+    }
+    return { totalBytes, stepCount };
+  }
+
+  /** Returns true if any step outputs have been evicted from memory. */
+  public hasEvictedOutputs(): boolean {
+    return this.evictedOutputIdsAndBytes.size > 0;
+  }
+
+  /**
+   * Re-fetches evicted output fields from Elasticsearch for the requested step execution IDs.
+   * Only IDs that are actually evicted are fetched; if none are evicted, this is a no-op
+   * with zero ES calls.
+   */
+  public async rehydrateOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
+    const idsToRehydrate = stepExecutionIds.filter((id) => this.evictedOutputIdsAndBytes.has(id));
+    if (idsToRehydrate.length === 0) {
+      return;
+    }
+
+    const totalBytes = idsToRehydrate.reduce(
+      (sum, id) => sum + (this.evictedOutputIdsAndBytes.get(id) ?? 0),
+      0
+    );
+
+    const startMs = performance.now();
+    // Fetch only the `output` field to minimize network transfer
+    const docs = await this.workflowStepExecutionRepository.getStepExecutionsByIds(idsToRehydrate, [
+      'id',
+      'output',
+    ]);
+
+    let restoredCount = 0;
+    for (const doc of docs) {
+      const existing = this.stepExecutions.get(doc.id);
+      if (existing) {
+        existing.output = doc.output;
+        restoredCount++;
+      }
+      this.evictedOutputIdsAndBytes.delete(doc.id);
+    }
+
+    // Defensive: remove IDs that were not found in ES so we don't retry forever
+    const missingIds = idsToRehydrate.filter((id) => this.evictedOutputIdsAndBytes.has(id));
+    for (const id of missingIds) {
+      this.evictedOutputIdsAndBytes.delete(id);
+    }
+
+    const elapsedMs = Math.round(performance.now() - startMs);
+    this.logger?.debug(
+      `Rehydrated ${restoredCount}/${idsToRehydrate.length} step output(s) (${formatBytes(
+        totalBytes
+      )}) from ES in ${elapsedMs}ms, ${this.evictedOutputIdsAndBytes.size} still evicted`
+    );
+
+    if (missingIds.length > 0) {
+      this.logger?.warn(
+        `${
+          missingIds.length
+        } evicted step output(s) not found in ES during rehydration: ${missingIds.join(', ')}`
+      );
+    }
+  }
+
+  /**
+   * Evicts large outputs from completed steps to reduce memory footprint.
+   * Only evicts steps that:
+   * - Are in a terminal state (COMPLETED or FAILED)
+   * - Have a recorded output size above the eviction threshold
+   * - Are not `data.set` steps (whose outputs are needed globally by `getVariables()`)
+   * - Have not already been evicted
+   *
+   * This is a memory-only operation — the output data remains in Elasticsearch.
+   * It does NOT modify `stepDocumentsChanges`, so the next flush will not
+   * accidentally overwrite the persisted output in ES.
+   */
+  /**
+   * Evaluates the given step execution IDs for eviction eligibility and evicts
+   * large outputs from completed steps. Only the provided candidate IDs are
+   * checked — callers should pass only the IDs that were just flushed to ES.
+   */
+  public evictCompletedStepOutputs(candidateIds: ReadonlyArray<string>): void {
+    let evictedCount = 0;
+    for (const id of candidateIds) {
+      const step = this.stepExecutions.get(id);
+      if (step && this.isEvictionCandidate(id, step)) {
+        const sizeBytes = this.outputSizes.get(id) ?? 0;
+        step.output = undefined;
+        this.evictedOutputIdsAndBytes.set(id, sizeBytes);
+        this.outputSizes.delete(id);
+        evictedCount++;
+        this.logger?.debug(
+          `Evicted output of step '${step.stepId}' (${formatBytes(sizeBytes)}) from memory`
+        );
+      }
+    }
+    if (evictedCount > 0) {
+      this.logger?.debug(
+        `Evicted ${evictedCount} step output(s), total evicted: ${this.evictedOutputIdsAndBytes.size}`
+      );
+    }
+  }
+
+  private isEvictionCandidate(stepExecutionId: string, step: EsWorkflowStepExecution): boolean {
+    if (this.evictedOutputIdsAndBytes.has(stepExecutionId)) {
+      return false;
+    }
+
+    const isTerminal =
+      step.status === ExecutionStatus.COMPLETED || step.status === ExecutionStatus.FAILED;
+    if (!isTerminal) {
+      return false;
+    }
+
+    // data.set outputs are pinned — getVariables() reads ALL data.set outputs globally
+    if (step.stepType === 'data.set') {
+      return false;
+    }
+
+    const recordedSize = this.outputSizes.get(stepExecutionId);
+    // Steps without a recorded size (control flow, steps where Layer 2 didn't measure)
+    // are assumed small and not evicted
+    if (recordedSize === undefined || recordedSize < this.evictionMinBytes) {
+      return false;
+    }
+
+    return true;
+  }
+
   public async flushStepChanges(): Promise<void> {
     if (!this.stepDocumentsChanges.size) {
       return;
     }
+    const flushedIds = Array.from(this.stepDocumentsChanges.keys());
     const stepDocumentsChanges = Array.from(this.stepDocumentsChanges.values());
 
     this.stepDocumentsChanges.clear();
     await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
+
+    // After successful persistence, evict large outputs from completed steps
+    this.evictCompletedStepOutputs(flushedIds);
   }
 
   public async flush(): Promise<void> {
