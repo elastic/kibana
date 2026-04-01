@@ -171,7 +171,7 @@ export class AddEditMonitorAPI {
     monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations']
   ) {
-    const { savedObjectsClient, syntheticsMonitorClient, request } = this.routeContext;
+    const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
     const {
       locations,

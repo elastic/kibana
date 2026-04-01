@@ -20,6 +20,7 @@ import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey } from '../../../common/runtime_types';
+import type { MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
@@ -143,7 +144,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       if (addMonitorAPI.allPrivateLocations && addMonitorAPI.allPrivateLocations.length > 0) {
         const plSpaceError = validateMonitorPrivateLocationSpaces(
-          normalizedMonitor,
+          normalizedMonitor as MonitorFields,
           addMonitorAPI.allPrivateLocations
         );
         if (plSpaceError) {

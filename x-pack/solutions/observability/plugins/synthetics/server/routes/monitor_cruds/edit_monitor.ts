@@ -282,8 +282,7 @@ export const syncEditedMonitor = async ({
   routeContext: RouteContext;
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient, monitorConfigRepository } =
-    routeContext;
+  const { server, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
 
   const monitorId = decryptedPreviousMonitor.id;
   const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
