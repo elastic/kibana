@@ -244,7 +244,6 @@ describe('searchEmbeddableTransforms', () => {
               rows_per_page: 100,
               sample_size: 1000,
               data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
-
             },
           ],
         };
