@@ -60,6 +60,13 @@ jest.mock('../../persistence/deduplication', () => ({
   ...jest.requireActual('../../persistence/deduplication'),
   deduplicateAttackDiscoveries: jest.fn(),
 }));
+jest.mock('../../persistence/transforms/transform_to_alert_documents', () => ({
+  ...jest.requireActual('../../persistence/transforms/transform_to_alert_documents'),
+  transformToBaseAlertDocument: jest.fn(
+    jest.requireActual('../../persistence/transforms/transform_to_alert_documents')
+      .transformToBaseAlertDocument
+  ),
+}));
 
 jest.mock(
   '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization',
@@ -581,7 +588,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+    const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
 
     await attackDiscoveryScheduleExecutor({
       inference: mockInference,
@@ -591,17 +598,15 @@ describe('attackDiscoveryScheduleExecutor', () => {
       telemetry: mockTelemetry,
     });
 
-    const firstCallArg = spy.mock.calls[0][0] as {
+    const firstCallArg = mockTransform.mock.calls[0][0] as {
       alertsParams: { withReplacements?: boolean };
     };
     expect(firstCallArg.alertsParams.withReplacements).toBe(false);
-
-    spy.mockRestore();
   });
 
   it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+    const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
 
     await attackDiscoveryScheduleExecutor({
       inference: mockInference,
@@ -611,12 +616,10 @@ describe('attackDiscoveryScheduleExecutor', () => {
       telemetry: mockTelemetry,
     });
 
-    const firstCallArg = spy.mock.calls[0][0] as {
+    const firstCallArg = mockTransform.mock.calls[0][0] as {
       alertsParams: { enableFieldRendering?: boolean };
     };
     expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
-
-    spy.mockRestore();
   });
 
   it('throws TaskRunError when isInvalidAnonymizationError returns true', async () => {
