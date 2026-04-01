@@ -5,20 +5,24 @@
  * 2.0.
  */
 
+import { DEFAULT_SUPPRESSION_MECHANISMS } from './constants';
 import { toCreatePayload, toUpdatePayload } from './form_utils';
+import type { NotificationPolicyFormState } from './types';
 
 describe('notification policy form utils', () => {
-  const state = {
+  const state = (): NotificationPolicyFormState => ({
     name: 'Policy',
     description: 'Description',
     matcher: '',
     groupBy: [],
-    frequency: { type: 'immediate' as const },
-    destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
-  };
+    dispatchPer: 'episode',
+    frequency: { type: 'episode_every_evaluation' },
+    destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    suppressionMechanisms: DEFAULT_SUPPRESSION_MECHANISMS,
+  });
 
   it('omits empty nullable fields from create payloads', () => {
-    expect(toCreatePayload(state)).toEqual({
+    expect(toCreatePayload(state())).toEqual({
       name: 'Policy',
       description: 'Description',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
@@ -26,7 +30,7 @@ describe('notification policy form utils', () => {
   });
 
   it('sends explicit null values for cleared nullable fields in update payloads', () => {
-    expect(toUpdatePayload(state, 'WzEsMV0=')).toEqual({
+    expect(toUpdatePayload(state(), 'WzEsMV0=')).toEqual({
       version: 'WzEsMV0=',
       name: 'Policy',
       description: 'Description',
@@ -41,10 +45,11 @@ describe('notification policy form utils', () => {
     expect(
       toUpdatePayload(
         {
-          ...state,
+          ...state(),
           matcher: 'event.severity: critical',
           groupBy: ['host.name'],
-          frequency: { type: 'throttle', interval: '5m' },
+          dispatchPer: 'group',
+          frequency: { type: 'group_throttle', repeatValue: 5, repeatUnit: 'm' },
         },
         'WzEsMV0='
       )
@@ -55,6 +60,24 @@ describe('notification policy form utils', () => {
       matcher: 'event.severity: critical',
       groupBy: ['host.name'],
       throttle: { interval: '5m' },
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    });
+  });
+
+  it('maps episode repeat frequency to throttle interval', () => {
+    expect(
+      toCreatePayload({
+        ...state(),
+        frequency: {
+          type: 'episode_status_change_repeat',
+          repeatValue: 15,
+          repeatUnit: 'm',
+        },
+      })
+    ).toEqual({
+      name: 'Policy',
+      description: 'Description',
+      throttle: { interval: '15m' },
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
     });
   });

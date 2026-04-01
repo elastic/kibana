@@ -56,6 +56,8 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="icon" type="image/svg+xml" href={favIcon} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content={colorScheme} />
+        {/* Figma capture script for design handoff */}
+        <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async />
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />

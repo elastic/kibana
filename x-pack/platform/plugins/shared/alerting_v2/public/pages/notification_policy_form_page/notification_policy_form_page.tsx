@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageHeader,
+  EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
 import type {
@@ -71,7 +72,7 @@ export const NotificationPolicyFormPage = () => {
 
   if (isEditMode && isFetchingPolicy) {
     return (
-      <>
+      <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
         {returnButton}
         <EuiPageHeader
           pageTitle={
@@ -85,13 +86,13 @@ export const NotificationPolicyFormPage = () => {
         <EuiFlexGroup justifyContent="center">
           <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
         </EuiFlexGroup>
-      </>
+      </EuiPageTemplate.Section>
     );
   }
 
   if (isEditMode && isFetchError) {
     return (
-      <>
+      <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
         {returnButton}
         <EuiPageHeader
           pageTitle={
@@ -116,7 +117,7 @@ export const NotificationPolicyFormPage = () => {
         >
           {fetchError?.message}
         </EuiCallOut>
-      </>
+      </EuiPageTemplate.Section>
     );
   }
 
@@ -158,7 +159,7 @@ const NotificationPolicyFormPageContent = ({
   const isLoading = isCreating || isUpdating;
 
   return (
-    <>
+    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -196,7 +197,15 @@ const NotificationPolicyFormPageContent = ({
           <NotificationPolicyForm />
         </FormProvider>
         <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.formPage.cancel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
@@ -208,26 +217,18 @@ const NotificationPolicyFormPageContent = ({
               {isEditMode ? (
                 <FormattedMessage
                   id="xpack.alertingV2.notificationPolicy.formPage.update"
-                  defaultMessage="Update"
+                  defaultMessage="Update policy"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.alertingV2.notificationPolicy.formPage.save"
-                  defaultMessage="Save"
+                  defaultMessage="Create policy"
                 />
               )}
             </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
-              <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.formPage.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-    </>
+    </EuiPageTemplate.Section>
   );
 };

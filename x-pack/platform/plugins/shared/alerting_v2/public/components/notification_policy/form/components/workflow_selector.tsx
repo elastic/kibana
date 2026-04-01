@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -21,14 +24,30 @@ interface SelectedWorkflow {
 export const WorkflowSelector = () => {
   const { control } = useFormContext<NotificationPolicyFormState>();
   const destinations = useWatch({ control, name: 'destinations' });
+  const uiSettings = useService(CoreStart('uiSettings'));
+  const { basePath } = useService(CoreStart('http'));
+
+  const workflowsUiEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
 
   const [selectedWorkflows, setSelectedWorkflows] = useState<SelectedWorkflow[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
-  const { data: workflowsData, isLoading } = useFetchWorkflows({ query: debouncedQuery });
+  const { data: workflowsData, isLoading } = useFetchWorkflows({
+    query: debouncedQuery,
+    enabled: workflowsUiEnabled,
+  });
+
+  const advancedSettingsHref = basePath.prepend(
+    `/app/management/kibana/settings?query=${encodeURIComponent('Elastic Workflows')}`
+  );
+
+  const createWorkflowHref = basePath.prepend('/app/workflows/create');
 
   useEffect(() => {
+    if (!workflowsUiEnabled) {
+      return;
+    }
     if (selectedWorkflows.length > 0 || destinations.length === 0 || !workflowsData) {
       return;
     }
@@ -37,7 +56,7 @@ export const WorkflowSelector = () => {
     setSelectedWorkflows(
       destinations.map((d) => ({ id: d.id, name: workflowsById.get(d.id) ?? d.id }))
     );
-  }, [destinations, workflowsData, selectedWorkflows.length]);
+  }, [destinations, workflowsData, selectedWorkflows.length, workflowsUiEnabled]);
 
   const workflowOptions = (workflowsData?.results ?? []).map((w) => ({
     label: w.name,
@@ -56,36 +75,101 @@ export const WorkflowSelector = () => {
                 defaultMessage: 'At least one destination is required',
               }),
       }}
-      render={({ field, fieldState: { error } }) => (
-        <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.notificationPolicy.form.destination', {
-            defaultMessage: 'Destinations',
-          })}
-          isInvalid={!!error}
-          error={error?.message}
-        >
-          <EuiComboBox
+      render={({ field, fieldState: { error } }) =>
+        workflowsUiEnabled ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.alertingV2.notificationPolicy.form.destination', {
+              defaultMessage: 'Workflows',
+            })}
+            labelAppend={
+              <EuiLink
+                href={createWorkflowHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                external={false}
+                data-test-subj="createWorkflowLink"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.notificationPolicy.form.destination.createWorkflow"
+                  defaultMessage="Create a workflow"
+                />
+              </EuiLink>
+            }
             fullWidth
-            async
-            isLoading={isLoading}
             isInvalid={!!error}
-            data-test-subj="destinationsInput"
-            placeholder={i18n.translate(
-              'xpack.alertingV2.notificationPolicy.form.destination.placeholder',
-              { defaultMessage: 'Search and select workflows' }
+            error={error?.message}
+          >
+            <EuiComboBox
+              fullWidth
+              async
+              isLoading={isLoading}
+              isInvalid={!!error}
+              data-test-subj="destinationsInput"
+              placeholder={i18n.translate(
+                'xpack.alertingV2.notificationPolicy.form.destination.placeholder',
+                { defaultMessage: 'Search or select a workflow' }
+              )}
+              selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
+              onSearchChange={setSearchQuery}
+              onChange={(options) => {
+                setSelectedWorkflows(
+                  options.map((o) => ({ id: o.value as string, name: o.label }))
+                );
+                field.onChange(
+                  options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
+                );
+              }}
+              options={workflowOptions}
+            />
+          </EuiFormRow>
+        ) : (
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.alertingV2.notificationPolicy.form.destination.workflowsDisabledTitle',
+              { defaultMessage: 'Workflows not enabled' }
             )}
-            selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
-            onSearchChange={setSearchQuery}
-            onChange={(options) => {
-              setSelectedWorkflows(options.map((o) => ({ id: o.value as string, name: o.label })));
-              field.onChange(
-                options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
-              );
-            }}
-            options={workflowOptions}
-          />
-        </EuiFormRow>
-      )}
+            data-test-subj="workflowsUiDisabledCallout"
+          >
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.form.destination.workflowsDisabledBody"
+                defaultMessage="Notification policies use Workflows for destinations, you'll need to enable them first. Go to {advancedSettings}, turn on {elasticWorkflows}, then {refresh}."
+                values={{
+                  advancedSettings: (
+                    <EuiLink
+                      href={advancedSettingsHref}
+                      data-test-subj="workflowsDisabledAdvancedSettingsLink"
+                    >
+                      <FormattedMessage
+                        id="xpack.alertingV2.notificationPolicy.form.destination.advancedSettingsLink"
+                        defaultMessage="Advanced Settings"
+                      />
+                    </EuiLink>
+                  ),
+                  elasticWorkflows: (
+                    <strong>
+                      {i18n.translate(
+                        'xpack.alertingV2.notificationPolicy.form.destination.elasticWorkflowsBold',
+                        { defaultMessage: 'Elastic Workflows' }
+                      )}
+                    </strong>
+                  ),
+                  refresh: (
+                    <strong>
+                      {i18n.translate(
+                        'xpack.alertingV2.notificationPolicy.form.destination.refreshPageBold',
+                        { defaultMessage: 'refresh this page' }
+                      )}
+                    </strong>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiCallOut>
+        )
+      }
     />
   );
 };

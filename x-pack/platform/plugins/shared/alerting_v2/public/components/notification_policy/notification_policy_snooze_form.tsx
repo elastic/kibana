@@ -131,7 +131,6 @@ export const NotificationPolicySnoozeForm = ({
             min={1}
             value={durationValue}
             onChange={(e) => setDurationValue(Math.max(1, parseInt(e.target.value, 10) || 1))}
-            compressed
             aria-label={i18n.translate(
               'xpack.alertingV2.notificationPolicy.snooze.durationValueAriaLabel',
               { defaultMessage: 'Snooze duration value' }
@@ -143,7 +142,6 @@ export const NotificationPolicySnoozeForm = ({
             options={UNIT_OPTIONS}
             value={durationUnit}
             onChange={(e) => setDurationUnit(e.target.value as DurationUnit)}
-            compressed
             aria-label={i18n.translate(
               'xpack.alertingV2.notificationPolicy.snooze.unitSelectAriaLabel',
               { defaultMessage: 'Snooze duration unit' }
