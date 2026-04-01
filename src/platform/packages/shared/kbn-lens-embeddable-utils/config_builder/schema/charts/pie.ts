@@ -77,13 +77,8 @@ const pieStateSharedSchema = {
   ),
   donut_hole: schema.maybe(
     schema.oneOf(
-      [
-        schema.literal('none'),
-        schema.literal('small'),
-        schema.literal('medium'),
-        schema.literal('large'),
-      ],
-      { meta: { description: 'Donut hole size: none (pie), small, medium, or large' } }
+      [schema.literal('none'), schema.literal('s'), schema.literal('m'), schema.literal('l')],
+      { meta: { description: 'Donut hole size: none (pie), or s/m/l' } }
     )
   ),
 };
