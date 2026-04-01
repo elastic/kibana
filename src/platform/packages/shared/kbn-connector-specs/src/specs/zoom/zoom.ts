@@ -124,6 +124,15 @@ export const Zoom: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://zoom.us/oauth/authorize',
+          tokenUrl: 'https://zoom.us/oauth/token',
+          scope:
+            'user:read:user meeting:read:meeting meeting:read:list_meetings meeting:read:past_meeting meeting:read:list_past_participants meeting:read:list_registrants cloud_recording:read:list_recording_files cloud_recording:read:list_user_recordings',
+        },
+      },
     ],
   },
 
