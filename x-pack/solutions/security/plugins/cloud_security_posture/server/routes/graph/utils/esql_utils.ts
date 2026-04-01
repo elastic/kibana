@@ -137,7 +137,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntitySubType = entity.sub_type
 | RENAME actorHostIp        = host.ip
 | RENAME actorLookupEntityId = entity.id
-| RENAME actorEntityEngineType = entity.engine.type
+| RENAME actorEntityEngineType = entity.EngineMetadata.Type
 
 | EVAL entity.id = targetEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -146,7 +146,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME targetEntitySubType = entity.sub_type
 | RENAME targetHostIp        = host.ip
 | RENAME targetLookupEntityId = entity.id
-| RENAME targetEntityEngineType = entity.engine.type`;
+| RENAME targetEntityEngineType = entity.EngineMetadata.Type`;
 };
 
 /**
