@@ -11,7 +11,6 @@ import { useLocation } from 'react-router-dom';
 import {
   EuiAccordion,
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -24,6 +23,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
+import { newConversationId } from '../../../../../utils/new_conversation';
 import {
   getAgentIdFromPath,
   getAgentSettingsNavItems,
@@ -47,6 +47,10 @@ const customizeLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.c
 
 const newLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.new', {
   defaultMessage: 'New',
+});
+
+const searchLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.search', {
+  defaultMessage: 'Search',
 });
 
 const searchChatsAriaLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.searchChats', {
@@ -102,6 +106,9 @@ export const ConversationSidebarView: React.FC = () => {
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
 
+  const isNewConversationRoute =
+    conversationId === newConversationId || pathname === appPaths.agent.root({ agentId });
+
   const navItems = useMemo(
     () => getAgentSettingsNavItems(agentId, featureFlags),
     [agentId, featureFlags]
@@ -154,7 +161,7 @@ export const ConversationSidebarView: React.FC = () => {
     padding: ${euiTheme.size.s} ${euiTheme.size.base};
 
     .euiAccordion__triggerWrapper {
-      padding: 0;
+      padding: 0 0 0 ${euiTheme.size.s};
     }
 
     .euiAccordion__iconButton {
@@ -171,6 +178,7 @@ export const ConversationSidebarView: React.FC = () => {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    padding-top: ${euiTheme.size.base};
   `;
 
   return (
@@ -186,7 +194,7 @@ export const ConversationSidebarView: React.FC = () => {
             {customizeLabel}
           </EuiText>
         }
-        arrowDisplay="left"
+        arrowDisplay="right"
         forceState={isCustomizeOpen ? 'open' : 'closed'}
         onToggle={() => setIsCustomizeOpen((prev) => !prev)}
         paddingSize="none"
@@ -213,10 +221,18 @@ export const ConversationSidebarView: React.FC = () => {
             {chatsLabel}
           </EuiText>
         }
-        extraAction={
-          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
+        arrowDisplay="right"
+        forceState={isChatsOpen ? 'open' : 'closed'}
+        onToggle={() => setIsChatsOpen((prev) => !prev)}
+        buttonProps={{ 'data-test-subj': 'agentBuilderSidebarChatsToggle' }}
+        paddingSize="none"
+        css={[accordionButtonStyles, chatsAccordionStyles]}
+      >
+        <div css={conversationListStyles}>
+          <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={true}>
               <EuiButton
+                fullWidth
                 iconType="plus"
                 size="s"
                 color="text"
@@ -228,9 +244,9 @@ export const ConversationSidebarView: React.FC = () => {
                 {newLabel}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
+            <EuiFlexItem grow={true}>
+              <EuiButton
+                fullWidth
                 iconType="search"
                 size="s"
                 color="text"
@@ -238,22 +254,16 @@ export const ConversationSidebarView: React.FC = () => {
                 onClick={() => setIsSearchModalOpen(true)}
                 disabled={!hasConversations}
                 data-test-subj="agentBuilderSidebarSearchChatsButton"
-              />
+              >
+                {searchLabel}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        }
-        arrowDisplay="left"
-        forceState={isChatsOpen ? 'open' : 'closed'}
-        onToggle={() => setIsChatsOpen((prev) => !prev)}
-        buttonProps={{ 'data-test-subj': 'agentBuilderSidebarChatsToggle' }}
-        paddingSize="none"
-        css={[accordionButtonStyles, chatsAccordionStyles]}
-      >
-        <div css={conversationListStyles}>
           <EuiSpacer size="m" />
           <ConversationList
             agentId={agentId}
             currentConversationId={conversationId}
+            isNewConversationRoute={isNewConversationRoute}
             onItemClick={() => setIsCustomizeOpen(false)}
           />
         </div>
