@@ -1404,6 +1404,8 @@
       "@kbn/infra-forge/*": ["x-pack/platform/packages/private/kbn-infra-forge/*"],
       "@kbn/infra-plugin": ["x-pack/solutions/observability/plugins/infra"],
       "@kbn/infra-plugin/*": ["x-pack/solutions/observability/plugins/infra/*"],
+      "@kbn/ingest-hub-plugin": ["x-pack/platform/plugins/shared/ingest_hub"],
+      "@kbn/ingest-hub-plugin/*": ["x-pack/platform/plugins/shared/ingest_hub/*"],
       "@kbn/ingest-pipelines-plugin": ["x-pack/platform/plugins/shared/ingest_pipelines"],
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/platform/plugins/shared/ingest_pipelines/*"],
       "@kbn/ingest-pipelines-shared": ["x-pack/platform/packages/shared/ingest-pipelines"],
