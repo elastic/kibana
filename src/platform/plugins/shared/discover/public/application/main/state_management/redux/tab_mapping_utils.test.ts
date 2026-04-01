@@ -121,6 +121,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -149,6 +150,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
@@ -212,6 +214,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -240,6 +243,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
