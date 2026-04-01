@@ -43,6 +43,9 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           403: {
             description: 'forbidden',
           },
+          404: {
+            description: 'not found',
+          },
         },
       },
     },

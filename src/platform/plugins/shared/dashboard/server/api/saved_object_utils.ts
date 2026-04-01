@@ -24,7 +24,7 @@ export function getDashboardMeta(
   return {
     error: savedObject.error,
     ...(savedObject.created_at && { created_at: savedObject.created_at }),
-    ...(savedObject.created_at && { created_at: savedObject.created_at }),
+    ...(savedObject.created_by && { created_by: savedObject.created_by }),
     managed: savedObject.managed,
     owner: savedObject.accessControl?.owner,
     updated_at: savedObject.updated_at,

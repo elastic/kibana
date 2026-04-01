@@ -16,7 +16,7 @@ export function getMarkdownMeta(
   return {
     error: savedObject.error,
     ...(savedObject.created_at && { created_at: savedObject.created_at }),
-    ...(savedObject.created_at && { created_at: savedObject.created_at }),
+    ...(savedObject.created_by && { created_by: savedObject.created_by }),
     updated_at: savedObject.updated_at,
     updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
