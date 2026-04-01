@@ -52,17 +52,17 @@ export class IntegrationResolverImpl implements IntegrationResolver {
       if ('version' in query && query.version === 1) {
         return [this.resolveV1(query)];
       } else if ('version' in query && query.version === 2) {
+        // skip ESQL queries with FROM clause since either `integrations` or `index` specify on
+        // which indices or datastreams run the query.
+        if (query.type === QueryType.ESQL && /^[\s\r\n]*FROM/i.test(query.query)) {
+          return [{ kind: 'skipped', query, reason: 'unsupported_query' } as SkippedQuery];
+        }
         if ((query as HealthDiagnosticQueryV2).index) {
           // index-based v2: resolve directly, no Fleet needed
           return [{ kind: 'executable', query } as ExecutableQuery];
         }
         if (fleetUnavailable) {
           return [{ kind: 'skipped', query, reason: 'fleet_unavailable' } as SkippedQuery];
-        }
-        // skip ESQL queries with FROM clause since either `integrations` or `index` specify on
-        // which indices or datastreams run the query.
-        if (query.type === QueryType.ESQL && /^[\s\r\n]*FROM/i.test(query.query)) {
-          return [{ kind: 'skipped', query, reason: 'unsupported_query' } as SkippedQuery];
         }
         return this.resolveV2(query as HealthDiagnosticQueryV2, installedPackages);
       } else {

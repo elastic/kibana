@@ -323,6 +323,21 @@ describe('IntegrationResolverImpl', () => {
       expect(results[0].kind).toBe('executable');
     });
 
+    it('skips index-based v2 ESQL query with FROM clause', async () => {
+      const query = createMockQueryV2(QueryType.ESQL, {
+        integrations: undefined,
+        index: 'logs-test-*',
+        query: 'FROM logs-* | stats count() by user.name',
+      });
+      const results = await resolver.resolve([query]);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].kind).toBe('skipped');
+      if (results[0].kind !== 'skipped') throw new Error('type guard');
+      expect(results[0].reason).toBe('unsupported_query');
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
+
     it('resolves index-based v2 alongside integrations-based v2 in one call', async () => {
       const indexQuery = createMockQueryV2(QueryType.DSL, {
         id: 'q-index',
