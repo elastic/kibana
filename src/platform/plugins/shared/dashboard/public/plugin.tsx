@@ -119,12 +119,10 @@ export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
 }
 
-export class DashboardPlugin implements Plugin<
-  DashboardSetup,
-  DashboardStart,
-  DashboardSetupDependencies,
-  DashboardStartDependencies
-> {
+export class DashboardPlugin
+  implements
+    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
+{
   constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }
@@ -295,8 +293,9 @@ export class DashboardPlugin implements Plugin<
 
     return {
       findDashboardsService: async () => {
-        const { getDashboardContentManagementService } =
-          await import('./services/dashboard_content_management_service');
+        const { getDashboardContentManagementService } = await import(
+          './services/dashboard_content_management_service'
+        );
         return getDashboardContentManagementService().findDashboards;
       },
     };

@@ -16,10 +16,7 @@ import { getDashboardApi } from '../get_dashboard_api';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import type { DashboardCreationOptions } from '../types';
 import { transformPanels } from './transform_panels';
-import {
-  getDashboardBackupService,
-  initializeDashboardApiServices,
-} from '../../services/dashboard_api_services';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 
 export async function loadDashboardApi({
   getCreationOptions,

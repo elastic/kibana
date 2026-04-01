@@ -10,7 +10,6 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
