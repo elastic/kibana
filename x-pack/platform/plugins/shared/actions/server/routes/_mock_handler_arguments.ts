@@ -29,6 +29,7 @@ export function mockHandlerArguments(
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   const getUser = getCurrentUser ?? jest.fn().mockReturnValue(null);
+  const getCurrentProfile = jest.fn().mockResolvedValue(null);
   return [
     {
       actions: {
@@ -50,6 +51,9 @@ export function mockHandlerArguments(
           authc: {
             getCurrentUser: getUser,
           },
+        },
+        userProfile: {
+          getCurrent: getCurrentProfile,
         },
       }),
     } as unknown as ActionsRequestHandlerContext,

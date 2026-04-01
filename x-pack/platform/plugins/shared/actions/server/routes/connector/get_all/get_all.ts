@@ -46,9 +46,14 @@ export const getAllConnectorsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        const currentUser = (await context.core).security.authc.getCurrentUser();
+        const core = await context.core;
+        const currentUser = core.security.authc.getCurrentUser();
 
-        const { profile_uid: profileUid } = currentUser ?? {};
+        let profileUid = currentUser?.profile_uid;
+        if (!profileUid) {
+          const userProfile = await core.userProfile.getCurrent().catch(() => null);
+          profileUid = userProfile?.uid;
+        }
 
         const result = await actionsClient.getAll({ profileUid });
         const responseBody: GetAllConnectorsResponseV1 =
