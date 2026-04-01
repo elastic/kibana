@@ -11,15 +11,8 @@ import { apiTest as baseTest, mergeTests, sloDataFixture } from '@kbn/scout-oblt
 import { setupSloHostsDataForge, teardownSloHostsDataForge } from './slo_data_forge_lifecycle';
 import { mergeSloApiHeaders } from './slo_api_http';
 import { createSloLifecycleApi, type SloLifecycleApi } from '../services/slo_lifecycle_api_service';
-import {
-  createCompositeSloLifecycleApi,
-  type CompositeSloLifecycleApi,
-} from '../services/composite_slo_lifecycle_api_service';
 
-export type SloPluginApiServicesFixture = ApiServicesFixture & {
-  slo: SloLifecycleApi;
-  compositeSlo: CompositeSloLifecycleApi;
-};
+export type SloPluginApiServicesFixture = ApiServicesFixture & { slo: SloLifecycleApi };
 
 const apiTestWithSloServices = baseTest.extend<{}, { apiServices: SloPluginApiServicesFixture }>({
   apiServices: [
@@ -38,12 +31,7 @@ const apiTestWithSloServices = baseTest.extend<{}, { apiServices: SloPluginApiSe
       const adminCredentials = await requestAuth.getApiKey('admin');
       const headers = mergeSloApiHeaders(adminCredentials.apiKeyHeader);
       const slo = createSloLifecycleApi(apiClient, headers);
-      const compositeSlo = createCompositeSloLifecycleApi(apiClient, headers);
-      const extendedApiServices: SloPluginApiServicesFixture = {
-        ...apiServices,
-        slo,
-        compositeSlo,
-      };
+      const extendedApiServices: SloPluginApiServicesFixture = { ...apiServices, slo };
       await use(extendedApiServices);
     },
     { scope: 'worker' },
@@ -93,7 +81,6 @@ export {
   type SloTransformAssertions,
 } from './slo_transform_assertions';
 export {
-  DEFAULT_COMPOSITE_SLO,
   DEFAULT_SLO,
   TEST_SPACE_ID,
   createApmSummaryDoc,

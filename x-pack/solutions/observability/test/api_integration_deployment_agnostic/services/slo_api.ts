@@ -16,6 +16,21 @@ import type {
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
+interface SavedObject<Attributes extends Record<string, any>> {
+  attributes: Attributes;
+  id: string;
+  type: string;
+  updated_at?: string;
+  version?: string;
+}
+
+interface SavedObjectResponse {
+  page: number;
+  per_page: number;
+  total: number;
+  saved_objects: Array<SavedObject<StoredSLODefinition>>;
+}
+
 export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
