@@ -11,7 +11,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { RoleCredentials } from '../../services';
 
 const RULE_API_PATH = '/api/alerting/v2/rules';
-const NOTIFICATION_POLICY_API_PATH = '/internal/alerting/v2/notification_policies';
+const NOTIFICATION_POLICY_API_PATH = '/api/alerting/v2/notification_policies';
 const RULE_SO_TYPE = 'alerting_rule';
 const NOTIFICATION_POLICY_SO_TYPE = 'alerting_notification_policy';
 const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2_telemetry';
