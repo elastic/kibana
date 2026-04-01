@@ -72,7 +72,7 @@ describe('trace_charts_definition', () => {
       expect(result?.esqlQuery).toContain('EVAL');
       expect(result?.esqlQuery).toContain('KEEP');
       expect(result?.esqlQuery).toContain('SORT');
-      expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toContain('TBUCKET(100)');
     });
 
     it('should include METADATA directive', () => {
@@ -93,7 +93,7 @@ describe('trace_charts_definition', () => {
       });
 
       expect(result?.esqlQuery).toMatchInlineSnapshot(
-        `"SET unmapped_fields=\\"NULLIFY\\"; FROM traces-* | WHERE service.name == \\"test-service\\" | WHERE environment == \\"production\\" | WHERE TO_STRING(processor.event) == \\"transaction\\" OR TO_STRING(processor.event) == \\"span\\" OR processor.event IS NULL | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == \\"failure\\" OR TO_STRING(status.code) == \\"Error\\", all = COUNT(*) BY timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend) | EVAL error_rate = TO_DOUBLE(failure) / all | KEEP timestamp, error_rate | SORT timestamp"`
+        `"SET unmapped_fields=\\"NULLIFY\\"; FROM traces-* | WHERE service.name == \\"test-service\\" | WHERE environment == \\"production\\" | WHERE TO_STRING(processor.event) == \\"transaction\\" OR TO_STRING(processor.event) == \\"span\\" OR processor.event IS NULL | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == \\"failure\\" OR TO_STRING(status.code) == \\"Error\\", all = COUNT(*) BY timestamp = TBUCKET(100) | EVAL error_rate = TO_DOUBLE(failure) / all | KEEP timestamp, error_rate | SORT timestamp"`
       );
     });
   });
