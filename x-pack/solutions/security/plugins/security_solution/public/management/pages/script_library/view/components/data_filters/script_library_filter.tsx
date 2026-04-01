@@ -7,8 +7,8 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { ClearAllButton } from '../../../../../components/clear_all_filter_options';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { ClearAllButton } from './clear_all_button';
 import { type FilterItems, type FilterName, useScriptLibraryFilter } from './hooks';
 import { ScriptLibraryFilterPopover } from './script_library_filter_popover';
 import { FILTER_PLACEHOLDERS } from './translations';

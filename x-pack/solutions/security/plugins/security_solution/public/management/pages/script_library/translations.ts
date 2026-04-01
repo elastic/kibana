@@ -44,10 +44,6 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
     { defaultMessage: 'Upload script' }
   ),
 
-  filterClearAll: i18n.translate('xpack.securitySolution.scriptLibrary.filter.clearAll', {
-    defaultMessage: 'Clear all',
-  }),
-
   // table labels
   table: {
     noItemsMessage: i18n.translate('xpack.securitySolution.scriptLibrary.table.noItemsMessage', {

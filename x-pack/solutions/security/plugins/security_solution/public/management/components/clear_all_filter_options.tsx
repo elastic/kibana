@@ -8,7 +8,11 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
-import { SCRIPT_LIBRARY_LABELS as filterLabel } from '../../../translations';
+import { i18n } from '@kbn/i18n';
+
+const CLEAR_ALL_LABEL = i18n.translate('xpack.securitySolution.filter.options.clearAll', {
+  defaultMessage: 'Clear all',
+});
 
 export const ClearAllButton = memo(
   ({
@@ -30,10 +34,10 @@ export const ClearAllButton = memo(
         onClick={onClick}
         css={css`
           border-top: ${euiTheme.border.thin};
-          border-radius: 0;
+          border-radius: 0 0 ${euiTheme.border.radius.small} ${euiTheme.border.radius.small};
         `}
       >
-        {filterLabel.filterClearAll}
+        {CLEAR_ALL_LABEL}
       </EuiButtonEmpty>
     );
   }
