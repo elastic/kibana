@@ -163,9 +163,18 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'if-condition-validation',
 ] as const;
 
+/**
+ * Single Monaco marker owner used for all custom validations.
+ * Batching into one `setModelMarkers` call avoids 10 separate calls
+ * that each trigger interceptor + React state updates.
+ */
+export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
-  return [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
-    owner as YamlValidationResult['owner']
+  return (
+    [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
+      owner as YamlValidationResult['owner']
+    ) || owner === BATCHED_CUSTOM_MARKER_OWNER
   );
 }
 

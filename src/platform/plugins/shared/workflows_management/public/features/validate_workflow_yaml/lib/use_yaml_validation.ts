@@ -35,7 +35,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import { CUSTOM_YAML_VALIDATION_MARKER_OWNERS, type YamlValidationResult } from '../model/types';
+import { BATCHED_CUSTOM_MARKER_OWNER, type YamlValidationResult } from '../model/types';
 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,
@@ -82,9 +82,7 @@ export function useYamlValidation(
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
         }
-        CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
-          monaco.editor.setModelMarkers(model, owner, []);
-        });
+        monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, []);
         setValidationResults([]);
         setIsLoading(false);
         setError(null);
@@ -164,13 +162,7 @@ export function useYamlValidation(
 
       setValidationResults(results);
       setIsLoading(false);
-      CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
-        monaco.editor.setModelMarkers(
-          model,
-          owner,
-          markers.filter((m) => m.source === owner)
-        );
-      });
+      monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, markers);
       setError(null);
     }
 

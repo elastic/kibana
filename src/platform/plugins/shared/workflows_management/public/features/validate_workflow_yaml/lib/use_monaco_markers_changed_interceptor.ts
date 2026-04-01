@@ -15,7 +15,11 @@ import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
+import {
+  BATCHED_CUSTOM_MARKER_OWNER,
+  isYamlValidationMarkerOwner,
+  type YamlValidationResult,
+} from '../model/types';
 
 export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
@@ -71,15 +75,17 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      const errors: YamlValidationResult[] = [];
-      for (const marker of markers) {
-        if (!isYamlValidationMarkerOwner(owner)) {
-          // console.log('skipping marker for unknown owner', owner);
-          // eslint-disable-next-line no-continue
-          continue;
-        }
+      if (!isYamlValidationMarkerOwner(owner)) {
+        return;
+      }
 
-        errors.push({
+      const errors: YamlValidationResult[] = markers.map((marker) => {
+        // When markers are batched under BATCHED_CUSTOM_MARKER_OWNER, each
+        // marker's `.source` carries the original validation source name.
+        const effectiveOwner =
+          owner === BATCHED_CUSTOM_MARKER_OWNER && marker.source ? marker.source : owner;
+
+        return {
           message: marker.message,
           severity: getSeverityString(marker.severity as MarkerSeverity),
           startLineNumber: marker.startLineNumber,
@@ -87,12 +93,18 @@ export function useMonacoMarkersChangedInterceptor({
           endLineNumber: marker.endLineNumber,
           endColumn: marker.endColumn,
           id: `${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
-          owner,
+          owner: effectiveOwner,
           source: marker.source,
           hoverMessage: null,
-        } as YamlValidationResult);
-      }
+        } as YamlValidationResult;
+      });
+
       const errorsUpdater = (prevErrors: YamlValidationResult[] | null) => {
+        if (owner === BATCHED_CUSTOM_MARKER_OWNER) {
+          // Replace all custom validation errors at once
+          const prevYamlOnly = prevErrors?.filter((e) => e.owner === 'yaml');
+          return [...(prevYamlOnly ?? []), ...errors];
+        }
         const prevOtherOwners = prevErrors?.filter((e) => e.owner !== owner);
         return [...(prevOtherOwners ?? []), ...errors];
       };
