@@ -343,14 +343,14 @@ describe('MigrationDataInputFlyout', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('referenceSetsSkipButton')).toBeInTheDocument();
+        expect(getByTestId('lookupsUploadSkipButton')).toBeInTheDocument();
       });
 
       expect(getByTestId('referenceSetsUploadStepNumber')).toHaveTextContent('Current step is 2');
       expect(getByTestId('enhancementsStepNumber')).toHaveTextContent('3');
       expect(queryByTestId('enhancementTypeSelect')).not.toBeInTheDocument();
 
-      fireEvent.click(getByTestId('referenceSetsSkipButton'));
+      fireEvent.click(getByTestId('lookupsUploadSkipButton'));
 
       await waitFor(() => {
         expect(getByTestId('enhancementsStepNumber')).toHaveTextContent('Current step is 3');
@@ -359,7 +359,7 @@ describe('MigrationDataInputFlyout', () => {
       expect(getByTestId('enhancementTypeSelect')).toBeInTheDocument();
       expect(getByTestId('enhancementFilePicker')).toBeInTheDocument();
 
-      expect(queryByTestId('referenceSetsSkipButton')).not.toBeInTheDocument();
+      expect(queryByTestId('lookupsUploadSkipButton')).not.toBeInTheDocument();
       expect(queryByTestId('referenceSetsUploadDescription')).not.toBeInTheDocument();
     });
   });

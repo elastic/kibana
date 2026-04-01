@@ -113,17 +113,6 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       migrationSource,
     });
 
-    const onStepComplete = useCallback(() => {
-      setDataInputStep((currentStep) => {
-        if (migrationSource === MigrationSource.QRADAR) {
-          if (currentStep === QradarDataInputStep.ReferenceSet) {
-            return QradarDataInputStep.Enhancements;
-          }
-        }
-        return currentStep;
-      });
-    }, [migrationSource]);
-
     const onMigrationCreated = useCallback(
       (createdMigrationStats: RuleMigrationStats) => {
         setMigrationStats(createdMigrationStats);
@@ -198,7 +187,6 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                       migrationSource={migrationSource}
                       migrationStats={migrationStats}
                       missingResourcesIndexed={missingResourcesIndexed}
-                      onComplete={onStepComplete}
                       onMigrationCreated={onMigrationCreated}
                       onMissingResourcesFetched={onMissingResourcesFetched}
                       setDataInputStep={setDataInputStep}

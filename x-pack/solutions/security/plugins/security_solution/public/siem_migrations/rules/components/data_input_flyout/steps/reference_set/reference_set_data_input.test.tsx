@@ -43,7 +43,6 @@ describe('ReferenceSetDataInput', () => {
     dataInputStep: QradarDataInputStep.ReferenceSet,
     migrationSource: MigrationSource.QRADAR,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    onComplete: jest.fn(),
     setDataInputStep: jest.fn(),
     onMigrationCreated: jest.fn(),
     onMissingResourcesFetched: jest.fn(),
@@ -82,7 +81,7 @@ describe('ReferenceSetDataInput', () => {
     );
     expect(getByTestId('referenceSetsUploadDescription')).toBeInTheDocument();
     expect(getByTestId('referenceSetsUploadDescription')).toHaveTextContent(
-      `We've also found reference sets within your rules. To fully translate those rules containing these reference sets, follow the step-by-step guide to export and upload them all.`
+      `We've also found reference sets within your rules. To fully translate those rules containing these reference sets, upload them all`
     );
   });
 
@@ -113,34 +112,24 @@ describe('ReferenceSetDataInput', () => {
     expect(queryByTestId('referenceSetsUploadDescription')).not.toBeInTheDocument();
   });
 
-  it('does not render content when onComplete is not provided', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <ReferenceSetDataInput {...defaultProps} onComplete={undefined} />
-      </TestProviders>
-    );
-    expect(queryByTestId('referenceSetsUploadDescription')).not.toBeInTheDocument();
-    expect(queryByTestId('referenceSetsSkipButton')).not.toBeInTheDocument();
-  });
-
   it('renders skip button when step is current', () => {
     const { getByTestId } = render(
       <TestProviders>
         <ReferenceSetDataInput {...defaultProps} />
       </TestProviders>
     );
-    expect(getByTestId('referenceSetsSkipButton')).toBeInTheDocument();
-    expect(getByTestId('referenceSetsSkipButton')).toHaveTextContent('Skip');
+    expect(getByTestId('lookupsUploadSkipButton')).toBeInTheDocument();
+    expect(getByTestId('lookupsUploadSkipButton')).toHaveTextContent('Skip');
   });
 
-  it('calls onComplete when skip button is clicked', () => {
+  it('calls setDataInputStep with Enhancements when skip button is clicked', () => {
     const { getByTestId } = render(
       <TestProviders>
         <ReferenceSetDataInput {...defaultProps} />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('referenceSetsSkipButton'));
-    expect(defaultProps.onComplete).toHaveBeenCalledTimes(1);
+    fireEvent.click(getByTestId('lookupsUploadSkipButton'));
+    expect(defaultProps.setDataInputStep).toHaveBeenCalledWith(QradarDataInputStep.Enhancements);
   });
 
   it('does not render skip button when step is not current', () => {
@@ -149,6 +138,6 @@ describe('ReferenceSetDataInput', () => {
         <ReferenceSetDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
-    expect(queryByTestId('referenceSetsSkipButton')).not.toBeInTheDocument();
+    expect(queryByTestId('lookupsUploadSkipButton')).not.toBeInTheDocument();
   });
 });

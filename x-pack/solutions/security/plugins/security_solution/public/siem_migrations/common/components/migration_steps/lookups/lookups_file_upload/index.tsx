@@ -184,7 +184,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
                 <EuiButtonEmpty
                   onClick={onSkip}
                   aria-label={i18n.SKIP_BUTTON_ARIA_LABEL}
-                  data-test-subj="referenceSetsSkipButton"
+                  data-test-subj="lookupsUploadSkipButton"
                 >
                   {i18n.SKIP_BUTTON}
                 </EuiButtonEmpty>

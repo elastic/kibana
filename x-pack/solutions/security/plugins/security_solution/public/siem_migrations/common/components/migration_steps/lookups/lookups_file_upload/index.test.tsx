@@ -25,19 +25,19 @@ describe('LookupsFileUpload', () => {
 
   it('does not render skip button when onSkip is not provided', () => {
     const { queryByTestId } = render(<LookupsFileUpload {...props} />);
-    expect(queryByTestId('referenceSetsSkipButton')).not.toBeInTheDocument();
+    expect(queryByTestId('lookupsUploadSkipButton')).not.toBeInTheDocument();
   });
 
   it('renders skip button when onSkip is provided', () => {
     const { getByTestId } = render(<LookupsFileUpload {...props} onSkip={jest.fn()} />);
-    expect(getByTestId('referenceSetsSkipButton')).toBeInTheDocument();
-    expect(getByTestId('referenceSetsSkipButton')).toHaveTextContent('Skip');
+    expect(getByTestId('lookupsUploadSkipButton')).toBeInTheDocument();
+    expect(getByTestId('lookupsUploadSkipButton')).toHaveTextContent('Skip');
   });
 
   it('calls onSkip when skip button is clicked', () => {
     const onSkip = jest.fn();
     const { getByTestId } = render(<LookupsFileUpload {...props} onSkip={onSkip} />);
-    fireEvent.click(getByTestId('referenceSetsSkipButton'));
+    fireEvent.click(getByTestId('lookupsUploadSkipButton'));
     expect(onSkip).toHaveBeenCalledTimes(1);
   });
 });

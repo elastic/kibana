@@ -24,7 +24,6 @@ import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_statu
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { QradarDataInputStep } from '../../types';
-import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
 import { useMissingReferenceSetsListStep } from './sub_steps/missing_reference_set_list';
 import { useReferencesFileUploadStep } from './sub_steps/reference_sets_file_upload';
@@ -33,12 +32,11 @@ import { type MigrationStepProps } from '../../../../../common/types';
 interface ReferenceSetDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingReferenceSet: string[];
-  onComplete: OnResourcesCreated;
-  onSkip: () => void;
+  onComplete: () => void;
 }
 
 export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
-  ({ dataInputStep, migrationStats, missingResourcesIndexed, onComplete }) => {
+  ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
     const missingReferenceSet = useMemo(
       () => missingResourcesIndexed?.lookups,
       [missingResourcesIndexed]
@@ -48,6 +46,10 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
       () => getEuiStepStatus(QradarDataInputStep.ReferenceSet, dataInputStep),
       [dataInputStep]
     );
+
+    const onComplete = useCallback(() => {
+      setDataInputStep(QradarDataInputStep.Enhancements);
+    }, [setDataInputStep]);
 
     return (
       <EuiPanel hasShadow={false} hasBorder>
@@ -69,7 +71,7 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {dataInputStatus === 'current' && migrationStats && missingReferenceSet && onComplete && (
+          {dataInputStatus === 'current' && migrationStats && missingReferenceSet && (
             <>
               <EuiFlexItem>
                 <EuiText size="s" color="subdued" data-test-subj="referenceSetsUploadDescription">
@@ -81,7 +83,6 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
                   migrationStats={migrationStats}
                   missingReferenceSet={missingReferenceSet}
                   onComplete={onComplete}
-                  onSkip={onComplete}
                 />
               </EuiFlexItem>
             </>
@@ -96,7 +97,7 @@ ReferenceSetDataInput.displayName = 'ReferenceSetDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | typeof END;
 export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSubStepsProps>(
-  ({ migrationStats, missingReferenceSet, onComplete, onSkip }) => {
+  ({ migrationStats, missingReferenceSet, onComplete }) => {
     const { telemetry } = useKibana().services.siemMigrations.rules;
     const [subStep, setSubStep] = useState<SubStep>(1);
     const [uploadedLookups, setUploadedLookups] = useState<UploadedLookups>({});
@@ -139,7 +140,7 @@ export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSub
       migrationStats,
       missingLookups: missingReferenceSet,
       addUploadedLookups,
-      onSkip,
+      onSkip: onComplete,
     });
 
     const steps = useMemo<EuiStepProps[]>(() => [copyStep, uploadStep], [copyStep, uploadStep]);
