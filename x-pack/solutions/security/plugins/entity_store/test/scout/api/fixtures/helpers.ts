@@ -13,6 +13,7 @@ import {
   ENTITY_STORE_ROUTES,
   HISTORY_INDEX_PATTERN,
   LATEST_ALIAS,
+  LATEST_INDEX,
   UPDATES_INDEX,
 } from './constants';
 
@@ -25,7 +26,7 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
   const historyIndices = resolved.indices.map((i) => i.name);
 
-  const toDelete = [LATEST_ALIAS, UPDATES_INDEX, ...historyIndices];
+  const toDelete = [LATEST_INDEX, UPDATES_INDEX, ...historyIndices];
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 };
 

@@ -11,6 +11,7 @@ import {
   ENTITY_UPDATES,
   ENTITY_HISTORY,
   getEntitiesAlias,
+  getLatestEntitiesIndexName,
   getEntityIndexPattern,
   ENTITY_SCHEMA_VERSION_V2,
 } from '../../../../common/domain/entity_index';
@@ -64,6 +65,7 @@ export const UPDATES_INDEX = getEntityIndexPattern({
   namespace: 'default',
 });
 export const LATEST_ALIAS = getEntitiesAlias(ENTITY_LATEST, 'default');
+export const LATEST_INDEX = getLatestEntitiesIndexName('default');
 export const HISTORY_INDEX_PATTERN = `${getEntityIndexPattern({
   schemaVersion: ENTITY_SCHEMA_VERSION_V2,
   dataset: ENTITY_HISTORY,
