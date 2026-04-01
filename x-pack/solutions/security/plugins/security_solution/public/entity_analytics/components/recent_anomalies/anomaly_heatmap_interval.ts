@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useGlobalTime } from '../../../../../../../common/containers/use_global_time';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 
 /**
  * This function computes the appropriate interval (length of time, in hours) of each bucket of the heatmap in a given timerange.
