@@ -29,6 +29,7 @@ import { WorkflowsService } from '../../workflows_management_service';
 import { registerExecutionRoutes } from '../executions';
 import type { RouteDependencies } from '../types';
 import { createMockRequestHandlerContext } from '../utils/test_utils';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { registerWorkflowRoutes } from '../workflows';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -543,12 +544,14 @@ describe('Route privilege/ES-operation consistency', () => {
     } as unknown as jest.Mocked<WorkflowsRouter>;
 
     const mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') } as any;
+    const mockAudit = new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined });
 
     const deps: RouteDependencies = {
       router: mockRouter,
       api: api as any,
       logger: mockLogger,
       spaces: mockSpaces,
+      audit: mockAudit,
     };
 
     registerWorkflowRoutes(deps);
