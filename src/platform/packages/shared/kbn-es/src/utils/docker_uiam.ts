@@ -16,6 +16,9 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
   MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
@@ -99,6 +102,8 @@ export const UIAM_CONTAINERS = [
 
       '--health-cmd',
       'curl -sk http://127.0.0.1:8080/ready | grep -q "\\"overall\\": true"',
+      '--env',
+      'UIAM_SERVICE_BOUNDARY=external',
     ],
     cmdParams: ['--protocol', 'https', '--port', '8081'],
   },
@@ -190,6 +195,115 @@ export const UIAM_CONTAINERS = [
 
       '--env',
       'uiam.tokens.jwt.verify.clock.skew=PT2S',
+
+      '--env',
+      'uiam.tokens.refresh.grace_period=PT3S',
+
+      '--health-cmd',
+      'timeout 1 bash -c "</dev/tcp/localhost/8080"',
+    ],
+    cmdParams: [],
+  },
+  {
+    name: 'uiam-oauth',
+    image: process.env.UIAM_DOCKER_IMAGE || UIAM_DEFAULT_IMAGE,
+    params: [
+      '--net',
+      'elastic',
+
+      '--volume',
+      `${SERVERLESS_UIAM_ENTRYPOINT_PATH}:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z`,
+
+      '--volume',
+      `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/tmp/uiam_cosmosdb.pfx:z`,
+      '--volume',
+      `${CA_CERT_PATH}:/tmp/ca.crt:z`,
+      '--volume',
+      `${KBN_KEY_PATH}:/tmp/server.key:z`,
+      '--volume',
+      `${KBN_CERT_PATH}:/tmp/server.crt:z`,
+
+      '-p',
+      `127.0.0.1:${+new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1}:8080`, // UIAM OAuth HTTP port (no TLS for local dev)
+
+      '--entrypoint',
+      '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+      '--env',
+      'uiam.apikey.convert.validation.endpoint.enabled=false',
+      '--env',
+      'quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt',
+      '--env',
+      'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
+      '--env',
+      'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+
+      '--env',
+      'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
+      '--env',
+      'quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key',
+
+      '--env',
+      'quarkus.http.ssl.certificate.key-store-provider=JKS',
+      '--env',
+      'quarkus.http.ssl.certificate.trust-store-provider=SUN',
+      '--env',
+      `quarkus.log.category."co".level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
+      'quarkus.log.console.json.enabled=false',
+      '--env',
+      `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
+      'quarkus.otel.sdk.disabled=true',
+      '--env',
+      'quarkus.profile=dev',
+      '--env',
+      'uiam.api_keys.decoder.prefixes=essu_dev',
+      '--env',
+      'uiam.api_keys.encoder.prefix=essu_dev',
+      '--env',
+      `uiam.cosmos.account.access_key=${MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY}`,
+      '--env',
+      `uiam.cosmos.account.endpoint=${MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL}`,
+      '--env',
+      `uiam.cosmos.container.apikey=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS}`,
+      '--env',
+      `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
+      '--env',
+      `uiam.cosmos.container.users=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS}`,
+      '--env',
+      `uiam.cosmos.database=${MOCK_IDP_UIAM_COSMOS_DB_NAME}`,
+      '--env',
+      'uiam.cosmos.gateway_connection_mode=true',
+      '--env',
+      `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      '--env',
+      `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
+      '--env',
+      `uiam.tokens.jwt.signing.secret=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
+
+      '--env',
+      'uiam.tokens.jwt.verify.clock.skew=PT2S',
+
+      '--env',
+      'UIAM_SERVICE_BOUNDARY=external',
+
+      '--env',
+      `uiam.oauth.base_url=http://localhost:${
+        +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
+      }/uiam/api`,
+      '--env',
+      `UIAM_OAUTH_BASE_URL=http://localhost:${
+        +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
+      }/uiam/api`,
 
       '--env',
       'uiam.tokens.refresh.grace_period=PT3S',
@@ -298,13 +412,23 @@ export async function initializeUiamContainers(log: ToolingLog) {
     );
   }
 
-  // 2. Create collections.
-  for (const collection of [
-    MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
-    MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
-    MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
-  ]) {
-    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection})…`));
+  // 2. Create collections with their respective partition keys.
+  const collections: Array<{ name: string; partitionKeyPath: string }> = [
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS, partitionKeyPath: '/id' },
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS, partitionKeyPath: '/id' },
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION, partitionKeyPath: '/id' },
+    { name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS, partitionKeyPath: '/creator_id' },
+    {
+      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
+      partitionKeyPath: '/id',
+    },
+    {
+      name: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+      partitionKeyPath: '/client_id',
+    },
+  ];
+  for (const collection of collections) {
+    log.info(chalk.bold(`Creating a Cosmos DB collection (${collection.name})…`));
 
     const collectionRes = await fetch(
       `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls`,
@@ -315,18 +439,21 @@ export async function initializeUiamContainers(log: ToolingLog) {
           'colls',
           `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
         ),
-        body: JSON.stringify({ id: collection, partitionKey: { paths: ['/id'], kind: 'Hash' } }),
+        body: JSON.stringify({
+          id: collection.name,
+          partitionKey: { paths: [collection.partitionKeyPath], kind: 'Hash' },
+        }),
         dispatcher: fetchDispatcher,
       }
     );
 
     if (collectionRes.status === 201) {
-      log.info(chalk.green(`✓ Collection (${collection}) created successfully`));
+      log.info(chalk.green(`✓ Collection (${collection.name}) created successfully`));
     } else if (collectionRes.status === 409) {
-      log.info(chalk.yellow(`✓ Collection (${collection}) already exists`));
+      log.info(chalk.yellow(`✓ Collection (${collection.name}) already exists`));
     } else {
       throw new Error(
-        `Failed to create collection (${collection}): ${
+        `Failed to create collection (${collection.name}): ${
           collectionRes.status
         } ${await collectionRes.text()}`
       );
