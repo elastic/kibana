@@ -27,7 +27,7 @@ import {
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/datastreams/alert_events';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { pagesToDatatableRecords } from '@kbn/alerting-v2-episodes-ui/utils/pages_to_datatable_records';
 import { useAlertingRulesIndex } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';

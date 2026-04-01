@@ -11,6 +11,8 @@ import type {
   CalculatedEntityIdentity,
   EntityDefinitionWithoutId,
   EuidAttribute,
+  EuidField,
+  EuidSeparator,
   FieldEvaluationSource,
   FieldValueSchema,
 } from '../definitions/entity_schema';
@@ -234,11 +236,11 @@ export function getFieldsToBeFilteredOut(
   return toFilterOut;
 }
 
-export function isEuidField(attr: EuidAttribute) {
+export function isEuidField(attr: EuidAttribute): attr is EuidField {
   return 'field' in attr;
 }
 
-export function isEuidSeparator(attr: EuidAttribute) {
+export function isEuidSeparator(attr: EuidAttribute): attr is EuidSeparator {
   return 'sep' in attr;
 }
 

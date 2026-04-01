@@ -28,6 +28,7 @@
     "@kbn/react-query",
     "@kbn/data-plugin",
     "@kbn/discover-utils",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/alerting-v2-constants"
   ]
 }

@@ -32,11 +32,8 @@ export const TABLE_TAB_TOUR_TEST_ID = `${FLYOUT_TABLE_TEST_ID}Tour` as const;
 /* Header */
 
 const FLYOUT_HEADER_TEST_ID = `${PREFIX}Header` as const;
-export const ALERT_SUMMARY_PANEL_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AlertSumaryPanel` as const;
 export const STATUS_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}StatusTitle` as const;
 export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
-export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
-export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
 export const AGENT_ATTACHMENT_BUTTON_TEST_ID = 'newAgentBuilderAttachment' as const;
@@ -52,7 +49,6 @@ export const NOTES_LOADING_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesLoading` as c
 
 export const ASSIGNEES_EMPTY_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesEmpty` as const;
 export const ASSIGNEES_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Assignees` as const;
-export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle` as const;
 export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton` as const;
 
 /* About section */
