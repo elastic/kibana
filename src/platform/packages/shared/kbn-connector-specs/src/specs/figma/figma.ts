@@ -37,7 +37,22 @@ export const FigmaConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: [{ type: 'api_key_header', defaults: { headerField: 'X-Figma-Token' } }],
+    types: [
+      { type: 'api_key_header', defaults: { headerField: 'X-Figma-Token' } },
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { disabled: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://www.figma.com/oauth',
+          tokenUrl: 'https://api.figma.com/v1/oauth/token',
+          scope: 'current_user:read file_content:read projects:read',
+        },
+      },
+    ],
   },
 
   actions: {

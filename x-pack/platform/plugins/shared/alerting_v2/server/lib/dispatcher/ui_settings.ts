@@ -17,6 +17,7 @@ export const dispatcherUiSettings: Record<string, UiSettingsParams<boolean>> = {
     name: i18n.translate('xpack.alertingVTwo.dispatcherEnabledSettingName', {
       defaultMessage: 'Alerting v2 dispatcher',
     }),
+    scope: 'global',
     value: true,
     description: i18n.translate('xpack.alertingVTwo.dispatcherEnabledSettingDescription', {
       defaultMessage:
