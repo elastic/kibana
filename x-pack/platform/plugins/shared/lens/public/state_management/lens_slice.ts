@@ -139,7 +139,7 @@ export const getPreloadedState = ({
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      isComingFromContainerView(embeddableEditorIncomingState) ??
+      isComingFromContainerView(embeddableEditorIncomingState) ||
         (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,

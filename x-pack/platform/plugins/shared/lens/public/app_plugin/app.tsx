@@ -525,7 +525,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isComingFromContainerView(incomingState)
+            isComingFromContainerView(incomingState) || legacyEditorAppName
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

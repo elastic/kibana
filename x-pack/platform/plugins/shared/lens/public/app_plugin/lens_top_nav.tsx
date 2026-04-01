@@ -341,6 +341,7 @@ export const LensTopNavMenu = ({
     dataViewEditor,
     dataViews: dataViewsService,
   } = useKibana<LensAppServices>().services;
+
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {

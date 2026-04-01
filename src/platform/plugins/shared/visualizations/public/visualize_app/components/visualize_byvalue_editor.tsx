@@ -117,6 +117,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
+      incomingBreadcrumbs={incomingBreadcrumbs}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}
