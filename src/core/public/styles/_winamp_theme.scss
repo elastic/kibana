@@ -1,0 +1,1039 @@
+// ══════════════════════════════════════════════════════════════════════════
+// RETRO AUDIO PLAYER SKIN THEME
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── Colour Palette ────────────────────────────────────────────────────────
+$wa-purple:     rgb(42, 42, 62);         // main module body
+$wa-yellow:     rgb(168, 154, 110);      // title bar stripe / accent
+$wa-silver:     rgba(175, 186, 196, 1);  // button face
+$wa-black:      rgba(0, 0, 0, 1);
+$wa-green:      rgba(155, 255, 155, 1);  // LCD display text
+$wa-dark-green: rgba(19, 136, 11, 1);    // secondary slider track
+$wa-orange:     rgb(214, 122, 31);       // volume slider track
+
+// ── Inset border (indent) — dark top-left, light bottom-right = sunken ──
+%indent {
+  border: 1px solid white !important;
+  border-color:
+    rgba(0,0,0,1)         rgba(255,255,255,.2)
+    rgba(255,255,255,.2)  rgba(0,0,0,1) !important;
+  box-shadow: inset 1px 1px rgba(0,0,0,.4) !important;
+}
+
+// ── Raised button bevel ──────────────────────────────────────────────────
+%button-face {
+  background: $wa-silver !important;
+  box-shadow:
+    inset -2px -2px 1px rgba(0,0,0,.4),
+    inset  1px  1px 1px rgba(70,70,70,.4),
+    inset  2px  2px 1px rgba(255,255,255,1) !important;
+  border-radius: 1px !important;
+  outline: 1px solid rgba(0,0,0,.1) !important;
+  border: none !important;
+}
+
+// ── Black + green LCD display ────────────────────────────────────────────
+%lcd {
+  background: $wa-black !important;
+  color: $wa-green !important;
+  font-size: 12px !important;
+  font-family: 'Courier New', 'Lucida Console', monospace !important;
+  letter-spacing: .05em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 0 4px $wa-green, 0 0 8px rgba(155,255,155,.4) !important;
+  border: 1px solid white !important;
+  border-color:
+    rgba(0,0,0,1)         rgba(255,255,255,.2)
+    rgba(255,255,255,.2)  rgba(0,0,0,1) !important;
+  box-shadow: inset 1px 1px rgba(0,0,0,.4) !important;
+}
+
+// ── Module outer shell ───────────────────────────────────────────────────
+%module {
+  background: $wa-purple !important;
+  border: 1px solid $wa-black !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12) !important;
+}
+
+// ── Title-bar golden gradient stripe ────────────────────────────────────
+%title-stripe {
+  background: linear-gradient(
+    to bottom,
+    $wa-yellow,
+    lighten(#a89a6e, 30%),
+    rgba(42,42,62,.4),
+    $wa-yellow,
+    lighten(#a89a6e, 10%)
+  ) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BASE RESET
+// ════════════════════════════════════════════════════════════════════════
+
+*, *::before, *::after {
+  box-sizing: border-box !important;
+  border-radius: 0 !important;
+}
+
+html,
+body,
+#root,
+#kibana-body,
+.kibana-body,
+main,
+.application,
+.euiPageBackground,
+.euiBodyBackground,
+.euiBody--headerDoubleBottom {
+  background: $wa-purple !important;
+  font-family: Arial, 'Helvetica Neue', sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: $wa-silver !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// PANELS / CARDS  (= .module in reference)
+// ════════════════════════════════════════════════════════════════════════
+
+.euiPanel,
+.euiCard,
+.euiPageContent,
+.euiPageBody,
+.euiFlyout,
+.euiPopover__panel,
+.euiPopoverTitle {
+  @extend %module;
+  padding: 2px !important;
+  margin-bottom: 1px !important;
+}
+
+.euiPanel--plain,
+.euiPanel--subdued,
+.euiPanel--hasBorder,
+.euiPanel--hasShadow {
+  background: $wa-purple !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// HEADER / TITLE BAR
+// ════════════════════════════════════════════════════════════════════════
+
+.euiHeader,
+.euiHeaderApp,
+.euiNavDrawerHeader {
+  background: $wa-purple !important;
+  border-bottom: 1px solid $wa-black !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(255,255,255,.05) !important;
+  min-height: 16px !important;
+  padding: 2px 4px !important;
+  position: relative !important;
+}
+
+// Horizontal golden stripe decorations flanking the title text
+.euiHeader::before,
+.euiHeader::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 4px !important;
+  height: 6px !important;
+  border-radius: 2px !important;
+  @extend %title-stripe;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+.euiHeader::before { left: 22px !important; width: 80px !important; }
+.euiHeader::after  { right: 64px !important; width: 64px !important; }
+
+.euiHeader__text,
+.euiHeaderApp__title,
+.euiHeaderBreadcrumbs,
+.euiHeaderLogo__text {
+  color: #ffffff !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 0 3px $wa-black !important;
+  letter-spacing: .08em !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// MODAL / FLYOUT TITLE BARS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiModalHeader,
+.euiFlyout__header,
+.euiPopoverTitle {
+  background: $wa-purple !important;
+  border-bottom: 1px solid rgba(0,0,0,.7) !important;
+  padding: 2px 4px !important;
+  position: relative !important;
+  min-height: 14px !important;
+}
+
+.euiModalHeader::before,
+.euiModalHeader::after,
+.euiFlyout__header::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 3px !important;
+  height: 6px !important;
+  border-radius: 2px !important;
+  @extend %title-stripe;
+  pointer-events: none !important;
+}
+.euiModalHeader::before   { left: 20px !important;  width: 60px !important; }
+.euiModalHeader::after    { right: 30px !important;  width: 50px !important; }
+.euiFlyout__header::before { left: 20px !important;  width: 60px !important; }
+
+.euiModalHeader__title,
+.euiFlyout__header h2,
+.euiFlyout__header h3 {
+  color: #ffffff !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 0 3px $wa-black !important;
+  letter-spacing: .1em !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+// Title-bar window buttons  (.module__title__button)
+.euiHeaderSectionItemButton {
+  @extend %button-face;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border-radius: 3px !important;
+  font-size: 10px !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BUTTONS  (.button)
+// ════════════════════════════════════════════════════════════════════════
+
+.euiButton,
+.euiButtonEmpty,
+.euiButtonIcon,
+.euiIconButton,
+button {
+  @extend %button-face;
+  color: $wa-black !important;
+  font-size: 11px !important;
+  font-family: Arial, sans-serif !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: .05em !important;
+  padding: 4px 10px !important;
+  min-height: 22px !important;
+  min-width: unset !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(0,0,0,.25) !important;
+
+  // Force all child text elements to black — overrides EUI CSS vars
+  * {
+    color: $wa-black !important;
+    text-shadow: none !important;
+  }
+}
+
+.euiButton:hover,
+.euiButtonEmpty:hover,
+.euiButtonIcon:hover,
+.euiIconButton:hover,
+button:hover {
+  background: lighten(#afbac4, 5%) !important;
+}
+
+.euiButton:active,
+.euiButtonEmpty:active,
+.euiButtonIcon:active,
+button:active {
+  box-shadow:
+    inset  2px  2px 1px rgba(0,0,0,.4),
+    inset -1px -1px 1px rgba(255,255,255,.6) !important;
+}
+
+.euiButton:disabled,
+.euiButtonEmpty:disabled,
+button:disabled {
+  opacity: .4 !important;
+  cursor: default !important;
+}
+
+.euiButton__content,
+.euiButtonEmpty__content {
+  color: $wa-black !important;
+  text-shadow: none !important;
+  font-size: 11px !important;
+}
+
+.euiButton__text,
+.euiButtonEmpty__text,
+.euiButton__content span,
+.euiButtonEmpty__content span,
+.euiButton > span,
+.euiButtonEmpty > span,
+.euiButtonIcon > span,
+.euiIconButton > span,
+button > span {
+  color: $wa-black !important;
+  text-shadow: none !important;
+}
+
+// Green LED indicator dot on button labels  (.button__toggle)
+.euiButton__text::before,
+.euiButtonEmpty__text::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 4px !important;
+  height: 4px !important;
+  background: $wa-green !important;
+  box-shadow: 0 0 3px $wa-green !important;
+  opacity: .7 !important;
+  margin-right: 3px !important;
+  vertical-align: middle !important;
+  border: 1px solid $wa-black !important;
+  border-color:
+    rgba(0,0,0,1)        rgba(255,255,255,.2)
+    rgba(255,255,255,.2) rgba(0,0,0,1) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// INPUTS / FIELDS  (LCD + indent style  —  .black-n-green)
+// ════════════════════════════════════════════════════════════════════════
+
+input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+.euiFieldText,
+.euiFieldSearch,
+.euiFieldNumber,
+.euiFieldPassword,
+.euiTextArea,
+.euiSelect {
+  @extend %lcd;
+  padding: 2px 4px !important;
+  font-size: 12px !important;
+  height: auto !important;
+  caret-color: $wa-green !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(155,255,155,.3) !important;
+  text-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 1px solid rgba(155,255,155,.6) !important;
+  outline-offset: -2px !important;
+}
+
+// Combo box wrapper
+.euiComboBox,
+.euiSuperSelect {
+  @extend %indent;
+  background: $wa-black !important;
+}
+
+.euiComboBox__inputWrap {
+  background: $wa-black !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: $wa-green !important;
+}
+
+.euiComboBoxOption,
+.euiSelectableListItem,
+.euiSuperSelectItem {
+  background: transparent !important;
+  color: $wa-green !important;
+  font-size: 12px !important;
+  text-shadow: 0 0 3px rgba(155,255,155,.4) !important;
+}
+
+.euiComboBoxOption:hover,
+.euiSelectableListItem:hover,
+.euiComboBoxOption--isFocused {
+  background: rgba(155,255,155,.1) !important;
+  color: $wa-green !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// TABLES  (playlist style)
+// ════════════════════════════════════════════════════════════════════════
+
+table,
+.euiTable,
+.euiBasicTable {
+  background: $wa-black !important;
+  border: 1px solid $wa-black !important;
+  font-size: 12px !important;
+  border-collapse: collapse !important;
+}
+
+.euiTableHeaderCell,
+th {
+  background: $wa-purple !important;
+  color: $wa-yellow !important;
+  font-weight: bold !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  padding: 4px 8px !important;
+  letter-spacing: .05em !important;
+  text-shadow: 0 0 3px rgba(168,154,110,.5) !important;
+  border-bottom: 1px solid rgba(168,154,110,.3) !important;
+}
+
+.euiTableCell,
+td {
+  background: $wa-black !important;
+  color: $wa-green !important;
+  padding: 3px 8px !important;
+  border-bottom: 1px solid rgba(255,255,255,.03) !important;
+  font-size: 12px !important;
+  text-shadow: 0 0 4px rgba(155,255,155,.35) !important;
+}
+
+.euiTableRow:nth-child(even) .euiTableCell,
+tr:nth-child(even) td {
+  background: rgba(155,255,155,.025) !important;
+}
+
+.euiTableRow:hover .euiTableCell,
+tr:hover td {
+  background: rgba(155,255,155,.08) !important;
+  color: #ffffff !important;
+}
+
+// Selected row — deep blue like playlist selection highlight
+.euiTableRow-isSelected .euiTableCell {
+  background: rgb(0,0,120) !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiTabs {
+  background: $wa-purple !important;
+  border-bottom: 1px solid rgba(0,0,0,.6) !important;
+  gap: 2px !important;
+}
+
+.euiTab {
+  @extend %button-face;
+  color: $wa-black !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: .05em !important;
+  padding: 4px 10px !important;
+  margin-right: 1px !important;
+}
+
+.euiTab:hover { background: lighten(#afbac4, 8%) !important; }
+
+.euiTab-isSelected {
+  background: $wa-silver !important;
+  box-shadow:
+    inset 2px 2px 1px rgba(0,0,0,.4),
+    inset -1px -1px 1px rgba(255,255,255,.6) !important;
+  color: $wa-black !important;
+}
+
+.euiTab__content {
+  color: inherit !important;
+  text-shadow: none !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// SIDE NAV
+// ════════════════════════════════════════════════════════════════════════
+
+.euiSideNav,
+.euiNavDrawer,
+.euiNavDrawerGroup {
+  background: $wa-purple !important;
+  border-right: 1px solid rgba(0,0,0,.5) !important;
+  box-shadow: inset -1px 0 0 rgba(255,255,255,.06) !important;
+}
+
+.euiSideNavItem__content,
+.euiSideNavItemButton {
+  color: $wa-silver !important;
+  font-size: 12px !important;
+}
+
+.euiSideNavItem__content:hover,
+.euiSideNavItemButton:hover {
+  background: rgba(155,255,155,.08) !important;
+  color: $wa-green !important;
+  text-shadow: 0 0 4px rgba(155,255,155,.5) !important;
+}
+
+.euiSideNavItem-isSelected .euiSideNavItem__content,
+.euiSideNavItemButton-isActive {
+  color: $wa-green !important;
+  text-shadow: 0 0 6px $wa-green !important;
+  background: rgba(155,255,155,.06) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BREADCRUMBS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiBreadcrumbs { background: transparent !important; }
+
+.euiBreadcrumb__content,
+.euiBreadcrumbLink {
+  color: $wa-yellow !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: .05em !important;
+  text-shadow: 0 0 3px rgba(168,154,110,.4) !important;
+}
+
+.euiBreadcrumbLink:hover {
+  color: lighten(#a89a6e, 25%) !important;
+  text-decoration: underline !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// MODAL BODY / FOOTER
+// ════════════════════════════════════════════════════════════════════════
+
+.euiModal {
+  @extend %module;
+  min-width: 200px !important;
+}
+
+.euiModalBody {
+  background: $wa-purple !important;
+  padding: 8px !important;
+  color: $wa-silver !important;
+}
+
+.euiModalBody p,
+.euiModalBody span,
+.euiModalBody div,
+.euiModalBody label {
+  color: $wa-silver !important;
+  text-shadow: none !important;
+}
+
+.euiModalFooter {
+  background: $wa-purple !important;
+  border-top: 1px solid rgba(0,0,0,.5) !important;
+  padding: 4px !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// FLYOUT
+// ════════════════════════════════════════════════════════════════════════
+
+.euiFlyout {
+  background: $wa-purple !important;
+  border-left: 1px solid rgba(0,0,0,.6) !important;
+  box-shadow: -2px 0 8px rgba(0,0,0,.5) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// TOOLTIPS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiToolTip {
+  @extend %lcd;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  max-width: 300px !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// TOASTS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiToast,
+.euiGlobalToast {
+  @extend %module;
+  padding: 0 !important;
+  min-width: 200px !important;
+}
+
+.euiToastHeader {
+  background: $wa-purple !important;
+  padding: 2px 4px !important;
+  border-bottom: 1px solid rgba(0,0,0,.5) !important;
+  position: relative !important;
+}
+
+.euiToastHeader::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  left: 16px !important;
+  top: 2px !important;
+  width: 40px !important;
+  height: 5px !important;
+  @extend %title-stripe;
+  border-radius: 2px !important;
+  pointer-events: none !important;
+}
+
+.euiToastHeader__title {
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 0 3px $wa-black !important;
+  letter-spacing: .08em !important;
+}
+
+.euiToastBody {
+  background: $wa-purple !important;
+  padding: 6px 8px !important;
+  color: $wa-silver !important;
+  font-size: 12px !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BADGES
+// ════════════════════════════════════════════════════════════════════════
+
+.euiBadge {
+  @extend %button-face;
+  color: $wa-black !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  padding: 2px 6px !important;
+  text-shadow: none !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// CALLOUTS / ALERTS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiCallOut {
+  @extend %module;
+  padding: 6px 8px !important;
+}
+
+.euiCallOut__title {
+  color: $wa-yellow !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 0 4px rgba(168,154,110,.5) !important;
+}
+
+.euiCallOut p,
+.euiCallOut span {
+  color: $wa-silver !important;
+  text-shadow: none !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// CONTEXT MENU
+// ════════════════════════════════════════════════════════════════════════
+
+.euiContextMenu,
+.euiContextMenuPanel {
+  @extend %module;
+  padding: 2px !important;
+  min-width: 120px !important;
+}
+
+.euiContextMenuItem {
+  background: transparent !important;
+  color: $wa-silver !important;
+  font-size: 12px !important;
+  padding: 4px 16px !important;
+}
+
+.euiContextMenuItem:hover {
+  background: rgb(0,0,120) !important;
+  color: #ffffff !important;
+}
+
+.euiContextMenuItemSeparator {
+  border-top: 1px solid rgba(0,0,0,.5) !important;
+  margin: 2px 4px !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// PAGINATION
+// ════════════════════════════════════════════════════════════════════════
+
+.euiPagination {
+  background: transparent !important;
+  gap: 1px !important;
+}
+
+.euiPaginationButton {
+  @extend %button-face;
+  color: $wa-black !important;
+  font-size: 11px !important;
+  min-width: 24px !important;
+  height: 22px !important;
+  padding: 2px 6px !important;
+  font-weight: bold !important;
+}
+
+.euiPaginationItem-isActive {
+  box-shadow:
+    inset 2px 2px 1px rgba(0,0,0,.4),
+    inset -1px -1px 1px rgba(255,255,255,.6) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// PROGRESS / SCRUBBER  (.main__scrubber + indent)
+// ════════════════════════════════════════════════════════════════════════
+
+.euiProgress {
+  @extend %indent;
+  background: $wa-black !important;
+  height: 8px !important;
+}
+
+.euiProgress__value,
+.euiProgress > div {
+  background: linear-gradient(to right, $wa-dark-green, $wa-green) !important;
+  height: 100% !important;
+  box-shadow: 0 0 4px rgba(155,255,155,.6) !important;
+}
+
+// Range / slider inputs  (.slider / .slider__button)
+input[type="range"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: $wa-orange !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+  border: 1px solid white !important;
+  border-color:
+    rgba(0,0,0,1)        rgba(255,255,255,.2)
+    rgba(255,255,255,.2) rgba(0,0,0,1) !important;
+  box-shadow: inset 1px 1px rgba(0,0,0,.4) !important;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  width: 14px !important;
+  height: 11px !important;
+  background: $wa-silver !important;
+  border: 1px solid rgba(0,0,0,.6) !important;
+  border-radius: 2px !important;
+  box-shadow:
+    inset -2px -2px 1px rgba(0,0,0,.4),
+    inset  2px  2px 1px rgba(255,255,255,1) !important;
+  cursor: pointer !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// LOADING SPINNER
+// ════════════════════════════════════════════════════════════════════════
+
+.euiLoadingSpinner {
+  border: 2px solid rgba(155,255,155,.12) !important;
+  border-top-color: $wa-green !important;
+  box-shadow: 0 0 8px rgba(155,255,155,.3) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// FORM LABELS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiFormRow__label,
+label {
+  color: $wa-silver !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: .05em !important;
+  text-shadow: none !important;
+}
+
+.euiFormHelpText {
+  color: rgba(175,186,196,.55) !important;
+  font-size: 11px !important;
+}
+
+.euiFormErrorText {
+  color: $wa-orange !important;
+  font-size: 11px !important;
+  text-shadow: 0 0 4px rgba(214,122,31,.5) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// SWITCH / TOGGLE
+// ════════════════════════════════════════════════════════════════════════
+
+.euiSwitch__track {
+  background: $wa-black !important;
+  border: 1px solid white !important;
+  border-color:
+    rgba(0,0,0,1)        rgba(255,255,255,.2)
+    rgba(255,255,255,.2) rgba(0,0,0,1) !important;
+  box-shadow: inset 1px 1px rgba(0,0,0,.4) !important;
+  border-radius: 0 !important;
+}
+
+.euiSwitch__thumb {
+  background: $wa-silver !important;
+  box-shadow:
+    inset -2px -2px 1px rgba(0,0,0,.4),
+    inset  2px  2px 1px rgba(255,255,255,1) !important;
+  border-radius: 0 !important;
+}
+
+.euiSwitch-isChecked .euiSwitch__track {
+  background: rgba(0,0,100,.8) !important;
+}
+
+.euiSwitch-isChecked .euiSwitch__thumb {
+  background: $wa-green !important;
+  box-shadow: 0 0 4px $wa-green !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// ICONS
+// ════════════════════════════════════════════════════════════════════════
+
+.euiIcon, svg {
+  color: $wa-silver !important;
+  fill: $wa-silver !important;
+}
+
+.euiHeader .euiIcon,
+.euiHeader svg {
+  color: $wa-yellow !important;
+  fill: $wa-yellow !important;
+}
+
+button .euiIcon,
+.euiButton .euiIcon,
+.euiButtonEmpty .euiIcon {
+  color: $wa-black !important;
+  fill: $wa-black !important;
+}
+
+.euiContextMenuItem .euiIcon            { color: $wa-silver !important; fill: $wa-silver !important; }
+.euiContextMenuItem:hover .euiIcon      { color: #ffffff !important;    fill: #ffffff !important; }
+
+// ════════════════════════════════════════════════════════════════════════
+// LINKS
+// ════════════════════════════════════════════════════════════════════════
+
+a, .euiLink {
+  color: $wa-green !important;
+  text-decoration: none !important;
+}
+
+a:hover, .euiLink:hover {
+  color: lighten(#9bff9b, 15%) !important;
+  text-decoration: underline !important;
+  text-shadow: 0 0 5px $wa-green !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// CODE / PRE
+// ════════════════════════════════════════════════════════════════════════
+
+code, pre, .euiCodeBlock {
+  @extend %lcd;
+  padding: 4px 6px !important;
+  font-size: 12px !important;
+  display: block !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// HR
+// ════════════════════════════════════════════════════════════════════════
+
+hr,
+.euiHorizontalRule {
+  border: none !important;
+  border-top: 1px solid rgba(0,0,0,.6) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.07) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// SCROLLBARS  (silver bevel thumb on purple track)
+// ════════════════════════════════════════════════════════════════════════
+
+::-webkit-scrollbar {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: $wa-purple !important;
+  border: 1px solid rgba(0,0,0,.4) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $wa-silver !important;
+  box-shadow:
+    inset -1px -1px 0 rgba(0,0,0,.4),
+    inset  1px  1px 0 rgba(255,255,255,.8),
+    inset -2px -2px 0 rgba(0,0,0,.2),
+    inset  2px  2px 0 rgba(255,255,255,.6) !important;
+}
+
+::-webkit-scrollbar-button {
+  background: $wa-silver !important;
+  box-shadow:
+    inset -1px -1px 0 rgba(0,0,0,.4),
+    inset  2px  2px 0 rgba(255,255,255,1) !important;
+}
+
+::-webkit-scrollbar-corner { background: $wa-purple !important; }
+
+// ════════════════════════════════════════════════════════════════════════
+// SELECTION
+// ════════════════════════════════════════════════════════════════════════
+
+::selection {
+  background: rgb(0,0,120) !important;
+  color: #ffffff !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// TEXT HIERARCHY
+// ════════════════════════════════════════════════════════════════════════
+
+h1, h2, h3, h4, h5, h6 {
+  color: $wa-yellow !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: .06em !important;
+  text-shadow: 0 0 4px rgba(168,154,110,.4) !important;
+}
+
+p, span, div, li {
+  color: $wa-silver !important;
+  text-shadow: none !important;
+}
+
+.euiText, .euiTextColor  { color: $wa-silver !important; }
+.euiTitle                {
+  color: $wa-yellow !important;
+  text-shadow: 0 0 4px rgba(168,154,110,.4) !important;
+}
+
+.euiStat__title {
+  color: $wa-green !important;
+  text-shadow: 0 0 6px rgba(155,255,155,.5) !important;
+  font-family: 'Courier New', monospace !important;
+}
+
+.euiStat__description { color: $wa-silver !important; }
+
+.euiEmptyPrompt { background: transparent !important; }
+.euiEmptyPrompt__title {
+  color: $wa-yellow !important;
+  text-shadow: 0 0 4px rgba(168,154,110,.4) !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// FOCUS
+// ════════════════════════════════════════════════════════════════════════
+
+*:focus-visible {
+  outline: 1px solid rgba(155,255,155,.55) !important;
+  outline-offset: 1px !important;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// EQ VISUALIZER  (bottom-left decorative widget)
+// Green bar-graph, black background, indent border
+// ════════════════════════════════════════════════════════════════════════
+
+body::after {
+  content: "" !important;
+  position: fixed !important;
+  bottom: 6px !important;
+  left: 6px !important;
+  width: 96px !important;
+  height: 28px !important;
+  background: $wa-black !important;
+  border: 1px solid rgba(0,0,0,1) !important;
+  border-color:
+    rgba(0,0,0,1)        rgba(255,255,255,.2)
+    rgba(255,255,255,.2) rgba(0,0,0,1) !important;
+  box-shadow: inset 1px 1px rgba(0,0,0,.4) !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+  background-image:
+    linear-gradient(to top, rgba(155,255,155,1) 40%, transparent 40%),
+    linear-gradient(to top, rgba(155,255,155,1) 65%, transparent 65%),
+    linear-gradient(to top, rgba(155,255,155,1) 50%, transparent 50%),
+    linear-gradient(to top, rgba(155,255,155,1) 80%, transparent 80%),
+    linear-gradient(to top, rgba(155,255,155,1) 35%, transparent 35%) !important;
+  background-size: 14px 100% !important;
+  background-position: 4px 0, 22px 0, 40px 0, 58px 0, 76px 0 !important;
+  background-repeat: no-repeat !important;
+  animation: eq-bars .6s steps(1) infinite !important;
+}
+
+@keyframes eq-bars {
+  0%   { background-size: 14px 40%, 14px 65%, 14px 50%, 14px 80%, 14px 35%; }
+  16%  { background-size: 14px 72%, 14px 38%, 14px 85%, 14px 45%, 14px 90%; }
+  33%  { background-size: 14px 55%, 14px 90%, 14px 30%, 14px 65%, 14px 75%; }
+  50%  { background-size: 14px 88%, 14px 55%, 14px 70%, 14px 30%, 14px 50%; }
+  66%  { background-size: 14px 45%, 14px 80%, 14px 95%, 14px 55%, 14px 65%; }
+  83%  { background-size: 14px 60%, 14px 45%, 14px 60%, 14px 90%, 14px 40%; }
+  100% { background-size: 14px 30%, 14px 70%, 14px 45%, 14px 75%, 14px 85%; }
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// STATUS BAR  (bottom-right LCD ticker)
+// ════════════════════════════════════════════════════════════════════════
+
+body::before {
+  content: "■ KIBANA v9  ●  READY" !important;
+  position: fixed !important;
+  bottom: 6px !important;
+  right: 6px !important;
+  background: $wa-black !important;
+  color: $wa-green !important;
+  padding: 2px 6px !important;
+  font-size: 8px !important;
+  font-family: 'Courier New', monospace !important;
+  font-weight: bold !important;
+  letter-spacing: .08em !important;
+  border: 1px solid rgba(0,0,0,1) !important;
+  border-color:
+    rgba(0,0,0,1)        rgba(255,255,255,.2)
+    rgba(255,255,255,.2) rgba(0,0,0,1) !important;
+  box-shadow: inset 1px 1px rgba(0,0,0,.4) !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+  text-shadow: 0 0 4px $wa-green, 0 0 8px rgba(155,255,155,.4) !important;
+  white-space: nowrap !important;
+  text-transform: uppercase !important;
+  animation: lcd-pulse 1.6s steps(1) infinite !important;
+}
+
+@keyframes lcd-pulse {
+  0%,  49% { opacity: 1; }
+  50%, 100% { opacity: .65; }
+}
