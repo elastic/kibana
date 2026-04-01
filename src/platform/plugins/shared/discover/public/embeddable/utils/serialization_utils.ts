@@ -147,19 +147,22 @@ export const serializeState = ({
     };
   }
 
-  const serializedTitles = serializeTitles();
-  const title = serializedTitles?.title || initialState.savedObjectTitle;
-  const description = serializedTitles?.description || initialState.savedObjectDescription;
+  const { title, description, ...titleOptions } = serializeTitles() ?? {};
+
+  const serializedTitles = {
+    title: title || initialState.savedObjectTitle,
+    description: description || initialState.savedObjectDescription,
+  };
 
   return {
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
-    ...(title && { title }),
-    ...(description && { description }),
+    ...serializedTitles,
+    ...titleOptions,
     attributes: {
       ...savedSearchAttributes,
-      ...(title && { title }),
-      ...(description && { description }),
+      ...(serializedTitles.title && { title: serializedTitles.title }),
+      ...(serializedTitles.description && { description: serializedTitles.description }),
     },
   };
 };
