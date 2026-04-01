@@ -126,7 +126,6 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/doc-links'
   - '@kbn/yaml-loader'
-  - '@kbn/doc-links'
 tags:
   - plugin
   - prod
