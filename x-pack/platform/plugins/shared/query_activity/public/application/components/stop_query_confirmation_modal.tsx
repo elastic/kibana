@@ -41,7 +41,7 @@ export const StopQueryConfirmationModal: React.FC<StopQueryConfirmationModalProp
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.title', {
-              defaultMessage: 'Are you sure you want to cancel this query?',
+              defaultMessage: 'Cancel this query?',
             })}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
