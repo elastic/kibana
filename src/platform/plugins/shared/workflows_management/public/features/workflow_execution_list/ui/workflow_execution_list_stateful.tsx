@@ -109,8 +109,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
 
     try {
       await api.cancelAllWorkflowExecutions(workflowId);
-      telemetry.reportWorkflowRunCancelled({
-        workflowExecutionId: 'bulk_workflow_executions',
+      telemetry.reportWorkflowExecutionsCancelled({
         workflowId,
         origin: 'workflow_detail',
       });
@@ -123,7 +122,13 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
         ),
       });
     } catch (cancelError) {
-      notifications?.toasts.addError(cancelError, {
+      const err = cancelError instanceof Error ? cancelError : new Error(String(cancelError));
+      telemetry.reportWorkflowExecutionsCancelled({
+        workflowId,
+        origin: 'workflow_detail',
+        error: err,
+      });
+      notifications?.toasts.addError(err, {
         title: i18n.translate(
           'workflows.workflowExecutionList.footerCancelNonTerminal.bulkFailureTitle',
           {
@@ -134,7 +139,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     } finally {
       setIsCancelLoadedNonTerminalInProgress(false);
     }
-  }, [api, notifications, refetch, telemetry, workflowId]);
+  }, [api, notifications, telemetry, workflowId]);
 
   return (
     <WorkflowExecutionListComponent

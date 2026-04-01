@@ -29,7 +29,7 @@ jest.mock('@kbn/workflows-ui', () => ({
 
 jest.mock('../../../hooks/use_telemetry', () => ({
   useTelemetry: () => ({
-    reportWorkflowRunCancelled: jest.fn(),
+    reportWorkflowExecutionsCancelled: jest.fn(),
   }),
 }));
 
