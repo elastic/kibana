@@ -60,38 +60,38 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
 
     let field: FieldMetadata | undefined;
 
-    // 1. Try resolving from metadata-fields static metadata (highest priority)
-    if (isSourceAllowed('metadata')) {
+    // 1. Try resolving from streams (highest priority when streamName is provided)
+    if (isSourceAllowed('streams') && streamName) {
+      field = await this.streamsFieldsRepository.getByName(fieldName, { streamName });
+    }
+
+    // 2. Try resolving from metadata-fields static metadata
+    if (!field && isSourceAllowed('metadata')) {
       field = this.metadataFieldsRepository.getByName(fieldName);
     }
 
-    // 2. For prefixed fields (attributes.* or resource.attributes.*),
+    // 3. For prefixed fields (attributes.* or resource.attributes.*),
     //    prioritize OpenTelemetry over ECS to avoid conflicts with namespaced ECS fields
     if (!field && prefix && isSourceAllowed('otel')) {
       field = this.otelFieldsRepository.getByName(fieldName);
     }
 
-    // 3. Try resolving from ECS static metadata (authoritative schema for non-prefixed fields)
+    // 4. Try resolving from ECS static metadata (authoritative schema for non-prefixed fields)
     if (!field && isSourceAllowed('ecs')) {
       field = this.ecsFieldsRepository.getByName(fieldName);
     }
 
-    // 4. For non-prefixed fields, try OpenTelemetry as fallback
+    // 5. For non-prefixed fields, try OpenTelemetry as fallback
     if (!field && !prefix && isSourceAllowed('otel')) {
       field = this.otelFieldsRepository.getByName(fieldName);
     }
 
-    // 5. Try searching for the field in the Elastic Package Registry (integration-specific)
+    // 6. Try searching for the field in the Elastic Package Registry (integration-specific)
     if (!field && isSourceAllowed('integration') && this.hasFleetPermissions(this.capabilities)) {
       field = await this.integrationFieldsRepository.getByName(fieldName, {
         integration,
         dataset,
       });
-    }
-
-    // 6. Try resolving from streams (highest priority when streamName is provided)
-    if (isSourceAllowed('streams') && streamName) {
-      field = await this.streamsFieldsRepository.getByName(fieldName, { streamName });
     }
 
     return field;
