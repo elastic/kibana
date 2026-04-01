@@ -109,7 +109,9 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             {
               dataset: {
                 name: `sigevents: KI feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
+                description: `[${dataset.id}] KI feature extraction from ${
+                  scenario.metadata.failure_domain
+                }${scenario.metadata.failure_mode ? ` / ${scenario.metadata.failure_mode}` : ''}`,
                 examples: [
                   {
                     input: { sample_documents: sampleDocuments },
@@ -149,7 +151,9 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 log,
                 extractContext: (_input, metadata) => {
                   const meta = metadata as Record<string, unknown>;
-                  return `Identify key infrastructure features from log data. Failure domain: ${meta.failure_domain}, failure mode: ${meta.failure_mode}`;
+                  return `Identify key infrastructure features from log data. Failure domain: ${
+                    meta.failure_domain
+                  }${meta.failure_mode ? `, failure mode: ${meta.failure_mode}` : ''}`;
                 },
                 extractResponse: (output) => {
                   const features = getFeaturesFromOutput(output);

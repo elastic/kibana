@@ -93,7 +93,6 @@ export const otelDemoDataset: DatasetConfig = {
       metadata: {
         difficulty: 'easy',
         failure_domain: 'none',
-        failure_mode: 'healthy_baseline',
       },
     },
     {
@@ -432,7 +431,6 @@ export const otelDemoDataset: DatasetConfig = {
       metadata: {
         difficulty: 'easy',
         failure_domain: 'none',
-        failure_mode: 'healthy_baseline',
       },
     },
     {
