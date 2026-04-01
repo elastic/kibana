@@ -26,7 +26,11 @@ import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
-import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
+import type {
+  SearchEmbeddableApi,
+  SearchEmbeddablePanelApiState,
+  SearchEmbeddableRuntimeState,
+} from './types';
 import { SolutionType } from '../context_awareness';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -128,7 +132,7 @@ describe('saved search embeddable', () => {
   };
 
   const finalizeApiMock = (
-    api: EmbeddableApiRegistration<SearchEmbeddableState, SearchEmbeddableApi>
+    api: EmbeddableApiRegistration<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
   ) => ({
     ...api,
     applySerializedState: () => undefined,
@@ -149,7 +153,7 @@ describe('saved search embeddable', () => {
   };
 
   const finalizeEditableApiMock = (
-    api: EmbeddableApiRegistration<SearchEmbeddableState, SearchEmbeddableApi>
+    api: EmbeddableApiRegistration<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
   ) => ({
     ...api,
     applySerializedState: () => undefined,
