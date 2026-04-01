@@ -1694,6 +1694,78 @@ describe('generateOtelcolConfig', () => {
       expect(result.service?.pipelines).not.toHaveProperty('traces/otlp/test-otel-stream-id-1');
     });
 
+    it('renames pipeline for non-dynamic input when another template in the package has dynamic_signal_types', () => {
+      const mixedPackageInfo = {
+        type: 'integration',
+        name: 'mixed_pkg',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'otel_policy',
+            title: 'OTel',
+            description: 'OTel',
+            inputs: [
+              {
+                type: OTEL_COLLECTOR_INPUT_TYPE,
+                title: 'OTel',
+                description: 'OTel',
+                dynamic_signal_types: true,
+              },
+            ],
+          },
+          {
+            name: 'metrics_policy',
+            title: 'Metrics',
+            description: 'Metrics',
+            inputs: [
+              {
+                type: OTEL_COLLECTOR_INPUT_TYPE,
+                title: 'Metrics OTel',
+                description: 'Metrics only',
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      const nonDynamicInput: FullAgentPolicyInput = {
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        id: 'non-dynamic-otel',
+        name: 'non-dynamic-otel',
+        revision: 0,
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        package_policy_id: 'non-dynamic-policy',
+        meta: {
+          package: {
+            name: 'mixed_pkg',
+            version: '1.0.0',
+            policy_template: 'metrics_policy',
+          },
+        },
+        streams: [
+          {
+            id: 'stream-id-1',
+            data_stream: { dataset: 'mixed_pkg.metrics', type: 'traces' },
+            receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4317' } } } },
+            service: {
+              pipelines: {
+                'logs/otlp': { receivers: ['otlp'] },
+              },
+            },
+          },
+        ],
+      };
+
+      const cache = new Map([['mixed_pkg-1.0.0', mixedPackageInfo]]);
+      const result = generateOtelcolConfig([nonDynamicInput], defaultOutput, cache);
+
+      expect(result.service?.pipelines).toHaveProperty('traces/otlp/non-dynamic-otel-stream-id-1');
+      expect(result.service?.pipelines).not.toHaveProperty(
+        'logs/otlp/non-dynamic-otel-stream-id-1'
+      );
+    });
+
     it('does not rename when there are multiple pipelines', () => {
       const input: FullAgentPolicyInput = {
         type: OTEL_COLLECTOR_INPUT_TYPE,
