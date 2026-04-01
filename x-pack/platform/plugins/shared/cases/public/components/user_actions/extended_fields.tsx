@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { startCase } from 'lodash';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ExtendedFieldsUserAction } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
+import { PreferenceFormattedDate } from '../formatted_date';
 import * as i18n from './translations';
+import { getMaybeDate } from '../formatted_date/maybe_date';
 
 const getFieldDisplayName = (key: string): string => {
   // The key arrives as camelCase (e.g. "riskScoreAsKeyword") because convertToCamelCase
@@ -20,13 +23,27 @@ const getFieldDisplayName = (key: string): string => {
   return startCase(withoutTypeSuffix);
 };
 
-const getLabelTitle = (userAction: SnakeToCamelCase<ExtendedFieldsUserAction>): string => {
+const getLabelTitle = (userAction: SnakeToCamelCase<ExtendedFieldsUserAction>): React.ReactNode => {
   const extendedFields = userAction.payload.extendedFields ?? {};
   const entries = Object.entries(extendedFields);
 
   if (entries.length === 1) {
     const [key, value] = entries[0];
-    return i18n.SET_TEMPLATE_FIELD_LABEL(getFieldDisplayName(key), String(value));
+    const displayName = getFieldDisplayName(key);
+
+    if (key.endsWith('AsDate') && typeof value === 'string') {
+      const maybeDate = getMaybeDate(value);
+      if (maybeDate.isValid()) {
+        return (
+          <>
+            {i18n.SET_TEMPLATE_FIELD_LABEL_PREFIX(displayName)}{' '}
+            <PreferenceFormattedDate value={maybeDate.toDate()} stripMs />
+          </>
+        );
+      }
+    }
+
+    return i18n.SET_TEMPLATE_FIELD_LABEL(displayName, String(value));
   }
 
   return i18n.UPDATED_TEMPLATE_FIELDS;

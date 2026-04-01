@@ -6,19 +6,16 @@
  */
 
 import type { Condition } from '@kbn/streamlang';
-import type { EntityType, EntityField } from './entity_schema';
+import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
 import { collectValues, newestValue, oldestValue } from './field_retention_operations';
 
 export const ENTITY_ID_FIELD = 'entity.id';
+export const ENTITY_SOURCE_FIELD = 'entity.source';
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'
 ): EntityField[] => [
-  newestValue({
-    source: '_index',
-    destination: 'entity.source',
-  }),
   newestValue({ source: 'asset.id' }),
   newestValue({ source: 'asset.name' }),
   newestValue({ source: 'asset.owner' }),
@@ -52,7 +49,10 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   const prefix = rootField ? `${rootField}.entity` : 'entity';
 
   return [
-    newestValue({ source: `${prefix}.source`, destination: 'entity.source' }),
+    collectValues({ source: 'event.module' }),
+    collectValues({ source: 'event.dataset' }),
+    collectValues({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
+    collectValues({ source: ENTITY_SOURCE_FIELD, fieldHistoryLength: 50 }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
@@ -94,6 +94,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.lifecycle.last_seen',
       mapping: { type: 'date' },
     }),
+    // Raw indices have no entity.lifecycle.*; derive from @timestamp like last_seen.
     newestValue({
       source: `${prefix}.lifecycle.last_activity`,
       destination: 'entity.lifecycle.last_activity',
@@ -124,6 +125,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.relationships.communicates_with`,
       destination: 'entity.relationships.communicates_with',
       mapping: { type: 'keyword' },
+      fieldHistoryLength: 50,
       allowAPIUpdate: true,
     }),
     collectValues({
@@ -186,6 +188,17 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       allowAPIUpdate: true,
     }),
   ];
+};
+
+export const ENTITY_SOURCE_FIELD_EVALUATION: FieldEvaluation = {
+  destination: ENTITY_SOURCE_FIELD,
+  sources: [
+    { field: 'event.module' },
+    { field: 'event.dataset' },
+    { field: 'data_stream.dataset' },
+  ],
+  fallbackValue: null,
+  whenClauses: [],
 };
 
 export function isNotEmptyCondition(field: string): Condition {

@@ -6421,7 +6421,7 @@ groups:
       - name: container.runtime.description
         type: string
         brief: |
-          A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.
+          A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.
         examples:
           - 'docker://19.3.1 - CRI: 1.22.0'
         requirement_level: recommended
@@ -6489,7 +6489,24 @@ groups:
     stability: development
     attributes:
       - name: deployment.environment.name
-        type: string
+        type:
+          members:
+            - id: production
+              value: production
+              brief: Production environment
+              stability: development
+            - id: staging
+              value: staging
+              brief: Staging environment
+              stability: development
+            - id: test
+              value: test
+              brief: Testing environment
+              stability: development
+            - id: development
+              value: development
+              brief: Development environment
+              stability: development
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -20898,7 +20915,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -34056,7 +34073,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -34200,7 +34217,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -34400,7 +34417,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -58007,6 +58024,160 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.limit
+    type: metric
+    brief: Total number of hugepages available.
+    stability: development
+    metric_name: system.memory.linux.hugepages.limit
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.page_size
+    type: metric
+    brief: System hugepage size in bytes.
+    stability: development
+    metric_name: system.memory.linux.hugepages.page_size
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.reserved
+    type: metric
+    brief: Number of reserved hugepages.
+    note: |
+      Hugepages for which a commitment to allocate has been made, but no allocation has yet been made.
+      This is reported as a separate metric rather than a `usage` state because reserved pages are already counted in `free` pages.
+      They represent a subset of free pages that cannot be used for non-reserved allocations.
+    stability: development
+    metric_name: system.memory.linux.hugepages.reserved
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.surplus
+    type: metric
+    brief: Number of surplus hugepages.
+    note: |
+      Overcommitted hugepages beyond the persistent pool.
+      This is reported as a separate metric rather than a `usage` state because surplus pages can be in either `used` or `free` state.
+      Including them in `usage` would break the convention that `usage` states sum to the `limit`.
+    stability: development
+    metric_name: system.memory.linux.hugepages.surplus
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.usage
+    type: metric
+    brief: Number of hugepages in use by state.
+    stability: development
+    attributes:
+      - name: system.memory.linux.hugepages.state
+        type:
+          members:
+            - id: free
+              value: free
+              stability: development
+            - id: used
+              value: used
+              stability: development
+        brief: The Linux HugePages memory state
+        examples:
+          - free
+          - used
+        requirement_level: recommended
+        stability: development
+    metric_name: system.memory.linux.hugepages.usage
+    instrument: updowncounter
+    unit: '{page}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+      attributes:
+        system.memory.linux.hugepages.state:
+          source_group: registry.system.memory
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.hugepages.utilization
+    type: metric
+    brief: Percentage of hugepages in use by state.
+    stability: development
+    attributes:
+      - name: system.memory.linux.hugepages.state
+        type:
+          members:
+            - id: free
+              value: free
+              stability: development
+            - id: used
+              value: used
+              stability: development
+        brief: The Linux HugePages memory state
+        examples:
+          - free
+          - used
+        requirement_level: recommended
+        stability: development
+    metric_name: system.memory.linux.hugepages.utilization
+    instrument: gauge
+    unit: '1'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+      attributes:
+        system.memory.linux.hugepages.state:
+          source_group: registry.system.memory
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: double
   - id: metric.system.memory.linux.shared
     type: metric
     brief: Shared memory used (mostly by tmpfs).
@@ -63677,7 +63848,7 @@ groups:
       - name: aws.secretsmanager.secret.arn
         type: string
         brief: |
-          The ARN of the Secret stored in the Secrets Mangger
+          The ARN of the Secret stored in the Secrets Manager
         examples:
           - arn:aws:secretsmanager:us-east-1:123456789012:secret:SecretName-6RandomCharacters
         requirement_level: recommended
@@ -65157,7 +65328,7 @@ groups:
       - name: container.runtime.description
         type: string
         brief: |
-          A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.
+          A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.
         examples:
           - 'docker://19.3.1 - CRI: 1.22.0'
         requirement_level: recommended
@@ -66493,7 +66664,24 @@ groups:
       This document defines attributes for software deployments.
     attributes:
       - name: deployment.environment.name
-        type: string
+        type:
+          members:
+            - id: production
+              value: production
+              brief: Production environment
+              stability: development
+            - id: staging
+              value: staging
+              brief: Staging environment
+              stability: development
+            - id: test
+              value: test
+              brief: Testing environment
+              stability: development
+            - id: development
+              value: development
+              brief: Development environment
+              stability: development
         brief: |
           Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).
         examples:
@@ -69178,7 +69366,7 @@ groups:
       - name: hw.battery.capacity
         type: string
         brief: |
-          Design capacity in Watts-hours or Amper-hours
+          Design capacity in Watts-hours or Ampere-hours
         examples:
           - 9.3Ah
           - 50Wh
@@ -75416,6 +75604,21 @@ groups:
     type: attribute_group
     brief: Describes System Memory attributes
     attributes:
+      - name: system.memory.linux.hugepages.state
+        type:
+          members:
+            - id: free
+              value: free
+              stability: development
+            - id: used
+              value: used
+              stability: development
+        brief: The Linux HugePages memory state
+        examples:
+          - free
+          - used
+        requirement_level: recommended
+        stability: development
       - name: system.memory.linux.slab.state
         type:
           members:
