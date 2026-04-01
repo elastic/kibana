@@ -8,7 +8,7 @@
 import { useEffect, useState, useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { getLatestEntitiesIndexName } from './constants';
+import { getEntitiesAlias, ENTITY_LATEST } from './constants';
 
 export const useEntityStoreDataView = (spaceId: string | undefined) => {
   const {
@@ -23,7 +23,7 @@ export const useEntityStoreDataView = (spaceId: string | undefined) => {
   useEffect(() => {
     if (!spaceId) return;
 
-    const indexPattern = getLatestEntitiesIndexName(spaceId);
+    const indexPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
 
     if (createdRef.current === indexPattern) return;
 

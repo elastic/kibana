@@ -11,7 +11,7 @@ import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
 import { getHiddenBandsFilters } from '../hidden_bands_filter';
-import { getLatestEntitiesIndexName } from '../../home/constants';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../home/constants';
 
 export type ViewByMode = 'entity' | 'jobId';
 
@@ -77,7 +77,7 @@ const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
   return `
     | EVAL entity.id = entity_id
     | RENAME @timestamp AS event_timestamp
-    | LOOKUP JOIN ${getLatestEntitiesIndexName(spaceId)} ON entity.id
+    | LOOKUP JOIN ${getEntitiesAlias(ENTITY_LATEST, spaceId)} ON entity.id
     | RENAME event_timestamp AS @timestamp
     ${entityFilter}`;
 };
