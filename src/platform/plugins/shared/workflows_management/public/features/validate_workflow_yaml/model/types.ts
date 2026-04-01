@@ -188,3 +188,7 @@ export type YamlValidationResult =
   | YamlValidationResultTriggerConditionError
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError;
+
+export function validationResultFingerprint(r: YamlValidationResult): string {
+  return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;
+}
