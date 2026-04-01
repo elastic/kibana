@@ -235,7 +235,7 @@ export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
 
 const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12 =
   DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10.extends({
-    hideTable: schema.maybe(schema.boolean({ defaultValue: false })),
+    hideTable: schema.boolean({ defaultValue: false }),
   });
 
 const SCHEMA_DISCOVER_SESSION_TAB_VERSION_12 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_10.extends({
