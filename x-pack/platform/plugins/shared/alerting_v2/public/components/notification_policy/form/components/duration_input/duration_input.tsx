@@ -8,35 +8,13 @@
 import { EuiFieldNumber, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import { DEFAULT_THROTTLE_INTERVAL, DURATION_UNIT_LABELS } from '../../constants';
 
 type DurationUnit = 's' | 'm' | 'h' | 'd';
 
-const DURATION_UNIT_OPTIONS: Array<{ value: DurationUnit; text: string }> = [
-  {
-    value: 's',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.seconds', {
-      defaultMessage: 'second(s)',
-    }),
-  },
-  {
-    value: 'm',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.minutes', {
-      defaultMessage: 'minute(s)',
-    }),
-  },
-  {
-    value: 'h',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.hours', {
-      defaultMessage: 'hour(s)',
-    }),
-  },
-  {
-    value: 'd',
-    text: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationInput.days', {
-      defaultMessage: 'day(s)',
-    }),
-  },
-];
+const DURATION_UNIT_OPTIONS: Array<{ value: DurationUnit; text: string }> = (
+  ['s', 'm', 'h', 'd'] as const
+).map((unit) => ({ value: unit, text: DURATION_UNIT_LABELS[unit] }));
 
 const VALID_UNITS: ReadonlySet<DurationUnit> = new Set(['s', 'm', 'h', 'd']);
 
@@ -51,8 +29,6 @@ const parseDuration = (raw: string): { value: number | ''; unit: DurationUnit } 
 
   return { value: Number.isNaN(parsed) ? '' : parsed, unit };
 };
-
-const DEFAULT_DURATION = '5m';
 
 interface DurationInputProps {
   value: string;
@@ -95,10 +71,10 @@ export function DurationInput({
 
   const handleBlur = () => {
     if (!value || durationValue === '') {
-      const parsed = parseDuration(DEFAULT_DURATION);
+      const parsed = parseDuration(DEFAULT_THROTTLE_INTERVAL);
       setDurationValue(parsed.value);
       setDurationUnit(parsed.unit);
-      onChange(DEFAULT_DURATION);
+      onChange(DEFAULT_THROTTLE_INTERVAL);
     }
   };
 

@@ -9,6 +9,7 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { DURATION_UNIT_LABELS } from '../constants';
 
 interface DispatchConfigSummaryProps {
   groupingMode: GroupingMode;
@@ -17,27 +18,12 @@ interface DispatchConfigSummaryProps {
   throttleInterval: string;
 }
 
-const UNIT_LABELS: Record<string, string> = {
-  s: i18n.translate('xpack.alertingV2.notificationPolicy.form.dispatchSummary.unit.seconds', {
-    defaultMessage: 'second(s)',
-  }),
-  m: i18n.translate('xpack.alertingV2.notificationPolicy.form.dispatchSummary.unit.minutes', {
-    defaultMessage: 'minute(s)',
-  }),
-  h: i18n.translate('xpack.alertingV2.notificationPolicy.form.dispatchSummary.unit.hours', {
-    defaultMessage: 'hour(s)',
-  }),
-  d: i18n.translate('xpack.alertingV2.notificationPolicy.form.dispatchSummary.unit.days', {
-    defaultMessage: 'day(s)',
-  }),
-};
-
 const formatInterval = (raw: string): string => {
   if (!raw) return '';
   const unit = raw.charAt(raw.length - 1);
   const value = parseInt(raw, 10);
   if (Number.isNaN(value)) return raw;
-  return `${value} ${UNIT_LABELS[unit] ?? unit}`;
+  return `${value} ${DURATION_UNIT_LABELS[unit] ?? unit}`;
 };
 
 const getDispatchSummary = ({

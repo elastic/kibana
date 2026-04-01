@@ -121,6 +121,21 @@ export const THROTTLE_INTERVAL_PATTERN = /^[1-9][0-9]*[dhms]$/;
 
 export const DEFAULT_THROTTLE_INTERVAL = '5m';
 
+export const DURATION_UNIT_LABELS: Record<string, string> = {
+  s: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationUnit.seconds', {
+    defaultMessage: 'second(s)',
+  }),
+  m: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationUnit.minutes', {
+    defaultMessage: 'minute(s)',
+  }),
+  h: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationUnit.hours', {
+    defaultMessage: 'hour(s)',
+  }),
+  d: i18n.translate('xpack.alertingV2.notificationPolicy.form.durationUnit.days', {
+    defaultMessage: 'day(s)',
+  }),
+};
+
 export const DEFAULT_FORM_STATE: NotificationPolicyFormState = {
   name: '',
   description: '',
