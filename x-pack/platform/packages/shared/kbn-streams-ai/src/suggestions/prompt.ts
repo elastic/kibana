@@ -22,6 +22,8 @@ export const StreamSuggestionsPrompt = createPrompt({
     degraded_docs_pct: z.string(),
     dataset_analysis: z.string(),
     log_patterns: z.string(),
+    /** When set, constrains the LLM to only generate a suggestion of this type. */
+    allowed_type: z.string().optional(),
   }),
 })
   .version({
@@ -63,7 +65,7 @@ export const StreamSuggestionsPrompt = createPrompt({
                   description: {
                     type: 'string',
                     description:
-                      'One to three sentences describing the issue and the benefit of acting on it, specific to this stream.',
+                      'One to three sentences, no more than 30 words total, describing the issue and the benefit of acting on it, specific to this stream. Return as markdown.',
                   },
                 },
                 required: ['type', 'title', 'description'],

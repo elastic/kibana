@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 
@@ -29,15 +30,21 @@ export function useTimeRange() {
   const rangeFrom = searchParams.get('rangeFrom') ?? DEFAULT_FROM;
   const rangeTo = searchParams.get('rangeTo') ?? DEFAULT_TO;
 
-  // Convert relative times (e.g., "now-15m") to absolute timestamps
-  const { from: start, to: end } = getAbsoluteTimeRange(
-    { from: rangeFrom, to: rangeTo },
-    { forceNow: new Date() }
-  );
-
-  // Also provide numeric timestamps for chart formatters
-  const startMs = new Date(start).getTime();
-  const endMs = new Date(end).getTime();
+  // Convert relative times (e.g., "now-15m") to absolute timestamps.
+  // Memoized so that `startMs`/`endMs` remain stable across renders when the
+  // URL params haven't changed, preventing downstream effects from re-firing.
+  const { start, end, startMs, endMs } = useMemo(() => {
+    const { from: absFrom, to: absTo } = getAbsoluteTimeRange(
+      { from: rangeFrom, to: rangeTo },
+      { forceNow: new Date() }
+    );
+    return {
+      start: absFrom,
+      end: absTo,
+      startMs: new Date(absFrom).getTime(),
+      endMs: new Date(absTo).getTime(),
+    };
+  }, [rangeFrom, rangeTo]);
 
   return {
     rangeFrom, // Relative: "now-15m"

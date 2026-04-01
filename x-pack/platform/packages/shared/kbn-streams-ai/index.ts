@@ -8,6 +8,7 @@
 export { generateStreamDescription } from './src/description/generate_description';
 export {
   generateStreamSuggestions,
+  SUGGESTION_TYPES,
   type StreamSuggestion,
   type StreamSuggestionType,
 } from './src/suggestions/generate_suggestions';

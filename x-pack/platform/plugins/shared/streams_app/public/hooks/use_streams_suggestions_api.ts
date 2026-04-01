@@ -6,8 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import { useAbortController } from '@kbn/react-hooks';
+import { map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { StreamSuggestion } from '@kbn/streams-ai';
 import { useKibana } from './use_kibana';
+
+export type { StreamSuggestion };
 
 export function useStreamsSuggestionsApi() {
   const {
@@ -18,34 +22,36 @@ export function useStreamsSuggestionsApi() {
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
-
   return useMemo(
     () => ({
-      getStreamSuggestions: async ({
+      streamSuggestions: ({
         streamName,
         connectorId,
         start,
         end,
+        signal,
       }: {
         streamName: string;
         connectorId: string;
         start: number;
         end: number;
-      }) => {
-        return streamsRepositoryClient.fetch('POST /internal/streams/{name}/_suggestions', {
-          signal,
-          params: {
-            path: { name: streamName },
-            body: {
-              connector_id: connectorId,
-              start,
-              end,
+        signal: AbortSignal;
+      }): Observable<StreamSuggestion | null> => {
+        return streamsRepositoryClient
+          .stream('POST /internal/streams/{name}/_suggestions', {
+            signal,
+            params: {
+              path: { name: streamName },
+              body: {
+                connector_id: connectorId,
+                start,
+                end,
+              },
             },
-          },
-        });
+          })
+          .pipe(map((event) => event.suggestion));
       },
     }),
-    [signal, streamsRepositoryClient]
+    [streamsRepositoryClient]
   );
 }

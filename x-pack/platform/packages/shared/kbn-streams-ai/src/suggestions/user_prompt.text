@@ -1,5 +1,9 @@
 Analyse the following stream and suggest improvements.
 
+{{#allowed_type}}
+You must only generate a suggestion of type `{{{allowed_type}}}`. Return an empty suggestions array if this type does not apply to this stream.
+{{/allowed_type}}
+
 ## Stream
 
 `name`
