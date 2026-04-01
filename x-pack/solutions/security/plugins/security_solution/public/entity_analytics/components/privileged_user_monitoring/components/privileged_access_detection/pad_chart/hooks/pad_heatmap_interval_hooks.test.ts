@@ -7,7 +7,7 @@
 
 import { useGlobalTime } from '../../../../../../../common/containers/use_global_time';
 import moment from 'moment';
-import { useIntervalForHeatmap } from './pad_heatmap_interval_hooks';
+import { useIntervalForHeatmap } from '../../../../../recent_anomalies/anomaly_heatmap_interval';
 
 jest.mock('../../../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn(),
