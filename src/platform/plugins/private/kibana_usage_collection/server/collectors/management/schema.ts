@@ -757,6 +757,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the Streams management Overview tab',
     },
   },
+  'observability:streamsSigEventsIndexPatterns': {
+    type: 'keyword',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
