@@ -290,6 +290,7 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
   - '@kbn/evals-plugin'
+  - '@kbn/shared-ux-column-presets'
 tags:
   - plugin
   - prod
