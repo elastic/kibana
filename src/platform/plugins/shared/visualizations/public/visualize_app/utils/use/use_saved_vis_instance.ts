@@ -112,7 +112,7 @@ export const useSavedVisInstance = (
           ? stateTransferService.getAppNameFromId(originatingApp)
           : undefined;
         const redirectToOrigin = originatingApp
-          ? () => navigateToApp(originatingApp)
+          ? () => navigateToApp(originatingApp, { path: originatingPath })
           : () => history.push(VisualizeConstants.LANDING_PAGE_PATH);
 
         if (savedVis.id) {
@@ -212,6 +212,7 @@ export const useSavedVisInstance = (
     state.visEditorController,
     embeddableInput,
     incomingBreadcrumbs,
+    originatingPath,
   ]);
 
   useEffect(() => {

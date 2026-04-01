@@ -48,7 +48,7 @@ export function getBreadcrumbs({
       onClick: () => {
         getNavigateToApp()(originatingApp);
       },
-      text: getAppNameFromId(originatingApp),
+      text: getAppNameFromId(originatingApp) ?? originatingApp,
     });
   }
 

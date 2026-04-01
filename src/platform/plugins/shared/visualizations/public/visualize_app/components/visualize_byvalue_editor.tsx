@@ -76,6 +76,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     isChromeVisible,
     valueInput,
     originatingApp,
+    originatingPath,
     incomingBreadcrumbs
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(

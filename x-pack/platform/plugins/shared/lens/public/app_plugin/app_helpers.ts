@@ -19,10 +19,30 @@ import type {
   LensAppLocatorParams,
   LensDocument,
 } from '@kbn/lens-common';
-import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableEditorBreadcrumb,
+  EmbeddableEditorState,
+} from '@kbn/embeddable-plugin/public';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
+
+/**
+ * Returns true when the user navigated to Lens from an active container view (e.g. a Dashboard panel),
+ * as opposed to a library listing page (e.g. the Dashboard Visualizations tab or the Visualize library).
+ * Used to determine whether "Save and Return" should be shown and whether `isLinkedToOriginatingApp`
+ * should be set on initial load.
+ */
+export function isComingFromContainerView(
+  incomingState: EmbeddableEditorState | undefined
+): boolean {
+  return Boolean(
+    incomingState?.originatingApp &&
+      incomingState.originatingApp !== VISUALIZE_APP_ID &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/')
+  );
+}
 
 export function isLegacyEditorEmbeddable(
   initialContext: VisualizeEditorContext | VisualizeFieldContext | undefined
@@ -86,7 +106,7 @@ export function setBreadcrumbsTitle(
 
   if (incomingBreadcrumbs?.length) {
     breadcrumbs.push(...incomingBreadcrumbs);
-  } else if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
+  } else if (originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {
         redirectToOrigin();

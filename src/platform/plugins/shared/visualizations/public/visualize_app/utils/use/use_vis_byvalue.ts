@@ -21,6 +21,7 @@ export const useVisByValue = (
   isChromeVisible: boolean | undefined,
   valueInput?: VisualizeInput,
   originatingApp?: string,
+  originatingPath?: string,
   incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[]
 ) => {
   const [state, setState] = useState<{
@@ -59,7 +60,9 @@ export const useVisByValue = (
       const originatingAppName = originatingApp
         ? stateTransferService.getAppNameFromId(originatingApp)
         : undefined;
-      const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
+      const redirectToOrigin = originatingApp
+        ? () => navigateToApp(originatingApp, { path: originatingPath })
+        : undefined;
 
       const editBreadcrumbs = getEditBreadcrumbs({
         originatingAppName,
@@ -90,6 +93,7 @@ export const useVisByValue = (
     state.visEditorController,
     valueInput,
     originatingApp,
+    originatingPath,
     incomingBreadcrumbs,
   ]);
 

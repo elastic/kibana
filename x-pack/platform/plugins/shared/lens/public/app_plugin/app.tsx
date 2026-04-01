@@ -51,6 +51,7 @@ import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
+  isComingFromContainerView,
   isLegacyEditorEmbeddable,
   setBreadcrumbsTitle,
   useNavigateBackToApp,
@@ -68,17 +69,6 @@ export type SaveProps = Simplify<
     panelTimeRange?: TimeRange;
   }
 >;
-
-// Helper to determine if we're coming from a specific dashboard/canvas view (not from library list)
-function isComingFromContainerView(incomingState?: LensAppProps['incomingState']): boolean {
-  return Boolean(
-    incomingState?.originatingApp &&
-      incomingState?.originatingApp !== 'visualize' &&
-      incomingState?.originatingPath &&
-      // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
-      !incomingState.originatingPath.includes('/list/')
-  );
-}
 
 export function App({
   history,
