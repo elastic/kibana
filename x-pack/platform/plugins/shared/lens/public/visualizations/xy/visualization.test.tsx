@@ -247,7 +247,8 @@ describe('xy_visualization', () => {
           ],
           "legend": Object {
             "isVisible": true,
-            "position": "right",
+            "layout": "list",
+            "position": "bottom",
           },
           "preferredSeriesType": "bar_stacked",
           "title": "Empty XY chart",

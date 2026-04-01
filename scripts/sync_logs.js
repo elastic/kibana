@@ -313,7 +313,7 @@ function search(sourceClient, config, cycleNumber, log, startTime, endTime) {
 
   var query = {
     bool: {
-      must: [{ match_all: {} }, { range: { '@timestamp': timeRange } }],
+      filter: [{ range: { '@timestamp': timeRange } }],
     },
   };
 
@@ -332,7 +332,7 @@ function search(sourceClient, config, cycleNumber, log, startTime, endTime) {
         function_score: {
           query: query,
           functions: [{ random_score: { seed: seed } }],
-          score_mode: 'sum',
+          boost_mode: 'replace',
         },
       },
       size: size,

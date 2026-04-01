@@ -62,6 +62,7 @@ import {
   GAP_STATUS_IN_PROGRESS_LABEL,
   GAP_STATUS_UNFILLED_LABEL,
   GAP_STATUS_FILLED_LABEL,
+  GAP_STATUS_ERROR_LABEL,
   gapStatusTooltipInProgress,
   gapStatusTooltipUnfilled,
   gapStatusTooltipFilled,
@@ -533,17 +534,21 @@ export const useGapStatusColumn = (): TableColumn => {
         const totalFilledDurationMs = gapInfo.total_filled_duration_ms;
 
         const byStatus: Record<GapFillStatus, { color: string; label: string }> = {
+          [gapFillStatus.FILLED]: {
+            color: euiTheme.colors.vis.euiColorVis0,
+            label: GAP_STATUS_FILLED_LABEL,
+          },
           [gapFillStatus.IN_PROGRESS]: {
-            color: euiTheme.colors.backgroundBaseWarning,
+            color: euiTheme.colors.vis.euiColorVis2,
             label: GAP_STATUS_IN_PROGRESS_LABEL,
           },
           [gapFillStatus.UNFILLED]: {
-            color: euiTheme.colors.backgroundBaseDanger,
+            color: euiTheme.colors.vis.euiColorVis6,
             label: GAP_STATUS_UNFILLED_LABEL,
           },
-          [gapFillStatus.FILLED]: {
-            color: euiTheme.colors.backgroundBaseSuccess,
-            label: GAP_STATUS_FILLED_LABEL,
+          [gapFillStatus.ERROR]: {
+            color: euiTheme.colors.vis.euiColorVis8,
+            label: GAP_STATUS_ERROR_LABEL,
           },
         };
 
@@ -572,9 +577,10 @@ export const useGapStatusColumn = (): TableColumn => {
       width: '120px',
     }),
     [
-      euiTheme.colors.backgroundBaseWarning,
-      euiTheme.colors.backgroundBaseDanger,
-      euiTheme.colors.backgroundBaseSuccess,
+      euiTheme.colors.vis.euiColorVis0,
+      euiTheme.colors.vis.euiColorVis2,
+      euiTheme.colors.vis.euiColorVis6,
+      euiTheme.colors.vis.euiColorVis8,
     ]
   );
 };
