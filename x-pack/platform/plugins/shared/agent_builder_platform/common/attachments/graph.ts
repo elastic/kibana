@@ -12,13 +12,22 @@ export const GRAPH_ATTACHMENT_TYPE = 'graph' as const;
 
 const graphNodeSchema = z.looseObject({
   id: z.string().min(1),
+  type: z.string().optional(),
+  parentId: z.string().optional(),
   position: z.object({
     x: z.number(),
     y: z.number(),
   }),
   data: z.looseObject({
     label: z.string(),
+    icon: z.string().optional(),
   }),
+  style: z
+    .object({
+      width: z.number().optional(),
+      height: z.number().optional(),
+    })
+    .optional(),
 });
 
 const graphEdgeSchema = z.looseObject({
