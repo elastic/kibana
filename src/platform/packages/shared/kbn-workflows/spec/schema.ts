@@ -12,7 +12,7 @@ import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers';
-import { FlatInputSchema } from './schema/triggers/manual_trigger_schema';
+import { FlatInputSchema, isManualTrigger } from './schema/triggers/manual_trigger_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -721,10 +721,22 @@ export const WorkflowSchema = WorkflowSchemaBase.extend({
 }).transform((data) => {
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
+  const mappedTriggers = (data.triggers ?? []).map((trigger) => {
+    if (!isManualTrigger(trigger)) {
+      return trigger;
+    }
+
+    return {
+      ...trigger,
+      inputs: trigger.inputs ? normalizeFieldsToJsonSchema(trigger.inputs) : undefined,
+    };
+  });
+
   const { outputs: __, ...rest } = data;
   return {
     ...rest,
     ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
+    triggers: mappedTriggers,
   };
 });
 

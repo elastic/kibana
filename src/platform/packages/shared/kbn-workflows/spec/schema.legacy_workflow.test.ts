@@ -110,18 +110,22 @@ describe('Legacy workflow format (backward compatibility)', () => {
     const workflow = {
       name: 'Legacy workflow',
       enabled: true,
-      triggers: [{ type: 'manual' }],
-      inputs: [
+      triggers: [
         {
-          name: 'username',
-          type: 'string',
-          required: true,
-          default: 'admin',
-        },
-        {
-          name: 'age',
-          type: 'number',
-          default: 25,
+          type: 'manual',
+          inputs: [
+            {
+              name: 'username',
+              type: 'string',
+              required: true,
+              default: 'admin',
+            },
+            {
+              name: 'age',
+              type: 'number',
+              default: 25,
+            },
+          ],
         },
       ],
       steps: [{ name: 'step1', type: 'console', with: { message: 'test' } }],
