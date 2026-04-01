@@ -116,21 +116,28 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        content$.pipe(map(() => undefined))
+        content$.pipe(map(() => undefined)),
+        settings$.pipe(map(() => undefined))
       ).pipe(map(() => undefined)),
       getComparators: () => {
         return {
           ...titleComparators,
           content: isByReference ? 'skip' : 'referenceEquality',
+          settings: isByReference ? 'skip' : 'deepEquality',
           ref_id: 'skip',
         };
       },
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
         // There are no unsaved changes to reset for
-        // by reference 'content' since by reference 'content' is saved on apply.
+        // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
           content$.next((initialState as MarkdownByValueState).content);
+          settings$.next(
+            (initialState as MarkdownByValueState).settings ?? {
+              open_links_in_new_tab: true,
+            }
+          );
         }
       },
     });
@@ -170,6 +177,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           content: content$.getValue(),
           title,
           description: titleManager.getLatestState().description,
+          settings: settings$.getValue(),
         });
         return id;
       },
