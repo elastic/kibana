@@ -79,70 +79,67 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'should execute multiple steps in else branch',
-      async ({ testBed, esql }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              condition: {
-                field: 'attributes.status',
-                eq: 'active',
-                steps: [
-                  {
-                    action: 'set',
-                    to: 'attributes.outcome',
-                    value: 'success',
-                  } as SetProcessor,
-                ],
-                else: [
-                  {
-                    action: 'set',
-                    to: 'attributes.outcome',
-                    value: 'failure',
-                  } as SetProcessor,
-                  {
-                    action: 'set',
-                    to: 'attributes.reason',
-                    value: 'not_active',
-                  } as SetProcessor,
-                ],
-              },
+    apiTest('should execute multiple steps in else branch', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'attributes.status',
+              eq: 'active',
+              steps: [
+                {
+                  action: 'set',
+                  to: 'attributes.outcome',
+                  value: 'success',
+                } as SetProcessor,
+              ],
+              else: [
+                {
+                  action: 'set',
+                  to: 'attributes.outcome',
+                  value: 'failure',
+                } as SetProcessor,
+                {
+                  action: 'set',
+                  to: 'attributes.reason',
+                  value: 'not_active',
+                } as SetProcessor,
+              ],
             },
-          ],
-        };
+          },
+        ],
+      };
 
-        const { processors } = await transpileIngestPipeline(streamlangDSL);
-        const { query } = await transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
-        const mappingDoc = {
-          attributes: { status: 'null', outcome: 'null', reason: 'null' },
-        };
-        const docs = [{ attributes: { status: 'active' } }, { attributes: { status: 'inactive' } }];
+      const mappingDoc = {
+        attributes: { status: 'null', outcome: 'null', reason: 'null' },
+      };
+      const docs = [{ attributes: { status: 'active' } }, { attributes: { status: 'inactive' } }];
 
-        await testBed.ingest('ingest-else-multi', docs, processors);
-        const ingestResult = await testBed.getDocsOrdered('ingest-else-multi');
+      await testBed.ingest('ingest-else-multi', docs, processors);
+      const ingestResult = await testBed.getDocsOrdered('ingest-else-multi');
 
-        await testBed.ingest('esql-else-multi', [mappingDoc, ...docs]);
-        const esqlResult = await esql.queryOnIndex('esql-else-multi', query);
+      await testBed.ingest('esql-else-multi', [mappingDoc, ...docs]);
+      const esqlResult = await esql.queryOnIndex('esql-else-multi', query);
 
-        // Active doc: only outcome set
-        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.outcome).toBe('success');
-        expect(esqlResult.documentsOrdered[1]).toStrictEqual(
-          expect.objectContaining({ 'attributes.outcome': 'success' })
-        );
+      // Active doc: only outcome set
+      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.outcome).toBe('success');
+      expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+        expect.objectContaining({ 'attributes.outcome': 'success' })
+      );
 
-        // Inactive doc: both outcome and reason set by else branch
-        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.outcome).toBe('failure');
-        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.reason).toBe('not_active');
-        expect(esqlResult.documentsOrdered[2]).toStrictEqual(
-          expect.objectContaining({
-            'attributes.outcome': 'failure',
-            'attributes.reason': 'not_active',
-          })
-        );
-      }
-    );
+      // Inactive doc: both outcome and reason set by else branch
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.outcome).toBe('failure');
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.reason).toBe('not_active');
+      expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+        expect.objectContaining({
+          'attributes.outcome': 'failure',
+          'attributes.reason': 'not_active',
+        })
+      );
+    });
 
     apiTest(
       'should produce same results after round-tripping through identifier utilities',
