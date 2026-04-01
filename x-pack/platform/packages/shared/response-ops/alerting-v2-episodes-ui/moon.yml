@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/data-plugin'
   - '@kbn/discover-utils'
+  - '@kbn/es-query'
+  - '@kbn/react-hooks'
   - '@kbn/alerting-v2-constants'
 tags:
   - shared-browser

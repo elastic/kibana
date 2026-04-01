@@ -83,7 +83,6 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/skills',
     sidebarView: 'conversation',
-    isExperimental: true,
     navLabel: navLabels.skills,
     element: <AgentBuilderAgentSkillsPage />,
   },
@@ -136,19 +135,16 @@ export const manageRoutes: RouteDefinition[] = [
     path: '/manage/skills',
     sidebarView: 'manage',
     navLabel: navLabels.skills,
-    isExperimental: true,
     element: <AgentBuilderSkillsPage />,
   },
   {
     path: '/manage/skills/new',
     sidebarView: 'manage',
-    isExperimental: true,
     element: <AgentBuilderSkillCreatePage />,
   },
   {
     path: '/manage/skills/:skillId',
     sidebarView: 'manage',
-    isExperimental: true,
     element: <AgentBuilderSkillDetailsPage />,
   },
   {

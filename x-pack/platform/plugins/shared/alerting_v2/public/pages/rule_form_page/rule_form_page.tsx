@@ -63,9 +63,16 @@ interface FetchedRuleFormPageProps {
 
 const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
   const isClone = mode === 'clone';
-  const { data: rule, isLoading, isError, error } = useFetchRule(ruleId);
+  const {
+    data: rule,
+    isLoading,
+    isFetching,
+    isFetchedAfterMount,
+    isError,
+    error,
+  } = useFetchRule(ruleId);
 
-  if (isLoading) {
+  if (isLoading || (!isFetchedAfterMount && isFetching)) {
     return <EuiLoadingSpinner size="xl" />;
   }
 

@@ -9,8 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { Insight } from '@kbn/streams-schema';
-import { getImpactLevel } from '@kbn/streams-schema';
+import {
+  type Insight,
+  getImpactLevel,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
@@ -18,7 +21,7 @@ import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -61,10 +64,13 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
               const taskLogger = taskContext.logger.get('insights_discovery');
               const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
+              const connectorId = await resolveConnectorIdAndCheckAllowlist({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
                 logger: taskLogger,
+                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                request: runContext.fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
