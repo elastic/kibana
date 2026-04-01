@@ -107,6 +107,7 @@ dependsOn:
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/stack-connectors-plugin'
   - '@kbn/std'
+  - '@kbn/streams-ai'
   - '@kbn/cps'
 tags:
   - plugin
