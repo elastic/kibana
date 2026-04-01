@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { FAILURE_STORE_SELECTOR } from '../../../../../common/constants';
@@ -232,7 +232,9 @@ async function fetchFailureStoreDocuments({
  * will run, and pre-applying them here would cause docs to appear already-parsed and then fail
  * the simulation on a second pass.
  */
-function collectAncestorProcessing(ancestors: Streams.WiredStream.Definition[]): StreamlangDSL {
+export function collectAncestorProcessing(
+  ancestors: Streams.WiredStream.Definition[]
+): StreamlangDSL {
   const allSteps: StreamlangDSL['steps'] = [];
 
   // Sort ancestors from root (shortest name) to closest parent
