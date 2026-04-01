@@ -42,6 +42,7 @@ export const AmazonS3: ConnectorSpec = {
       defaultMessage: 'List buckets and download files from Amazon S3',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {

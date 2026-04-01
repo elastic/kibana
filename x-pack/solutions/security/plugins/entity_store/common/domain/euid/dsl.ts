@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { EntityType } from '../definitions/entity_schema';
+import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
@@ -27,7 +27,6 @@ import {
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
-import type { FieldEvaluation } from '../definitions/entity_schema';
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
@@ -118,8 +117,9 @@ export function getEuidDslFilterBasedOnDocument(
     };
   }
 
-  if (identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
@@ -139,9 +139,7 @@ export function getEuidDslFilterBasedOnDocument(
 
   // Evaluated fields (e.g. entity.namespace from event.module) are computed in memory and are not
   // stored in the index. Including them in the query would make it never match real documents.
-  const evaluatedDestinations = new Set(
-    identityField.fieldEvaluations?.map((e) => e.destination) ?? []
-  );
+  const evaluatedDestinations = new Set(fieldEvaluations.map((e) => e.destination));
 
   const filterValues = Object.entries(fieldsToBeFilteredOn.values).filter(
     ([field]) => !evaluatedDestinations.has(field)
@@ -153,21 +151,23 @@ export function getEuidDslFilterBasedOnDocument(
       })),
     },
   };
+  const boolQuery = dsl.bool!;
 
   const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
     (field) => !evaluatedDestinations.has(field)
   );
   if (toBeFilteredOut.length > 0) {
-    const priorMust = Array.isArray(dsl.bool?.must) ? dsl.bool.must : [];
+    const priorMust = Array.isArray(boolQuery.must) ? boolQuery.must : [];
     dsl.bool = {
-      ...dsl.bool,
+      ...boolQuery,
       must: [...priorMust, ...toBeFilteredOut.map(fieldMissingOrEmptyDsl)],
     };
   }
 
-  if (identityField.fieldEvaluations?.length) {
-    const filterList = Array.isArray(dsl.bool?.filter) ? dsl.bool.filter : [];
-    for (const evaluation of identityField.fieldEvaluations) {
+  if (fieldEvaluations.length > 0) {
+    const currentBoolQuery = dsl.bool!;
+    const filterList = Array.isArray(currentBoolQuery.filter) ? currentBoolQuery.filter : [];
+    for (const evaluation of fieldEvaluations) {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
       const sourceFields = [...exactMatchFields, ...prefixMatchFields];
       const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));

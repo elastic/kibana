@@ -55,7 +55,22 @@ export const GoogleCalendar: ConnectorSpec = {
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { disabled: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },
