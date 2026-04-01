@@ -17,8 +17,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError } from './esql_response_error';
-import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
+import { executeEsqlQuery } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -177,64 +176,5 @@ describe('executeEsqlQuery', () => {
         filter: undefined,
       })
     );
-  });
-
-  it('does not throw when response has no error object (happy path)', async () => {
-    await expect(
-      executeEsqlQuery({
-        esqlQuery: 'TS metrics-* | METRICS_INFO',
-        search: mockSearch,
-        dataView: dataViewWithAtTimefieldMock,
-        uiSettings: mockUiSettings,
-      })
-    ).resolves.toStrictEqual([
-      {
-        metric_name: 'metric.name',
-        data_stream: 'metrics-stream-1',
-        unit: 'ms',
-        metric_type: 'counter',
-        field_type: 'gauge',
-        dimension_fields: 'host',
-      },
-    ]);
-  });
-
-  it('throws EsqlResponseError when response contains an Elasticsearch error object', async () => {
-    mockGetESQLResults.mockResolvedValueOnce({
-      response: {
-        error: {
-          type: 'remote_transport_exception',
-          reason: 'ccs query failed',
-        },
-      },
-      params: { query: '' },
-    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
-
-    await expect(
-      executeEsqlQuery({
-        esqlQuery: 'TS metrics-* | METRICS_INFO',
-        search: mockSearch,
-        dataView: dataViewWithAtTimefieldMock,
-        uiSettings: mockUiSettings,
-      })
-    ).rejects.toThrow(EsqlResponseError);
-  });
-});
-
-describe('fetchEsqlResponseOrThrow', () => {
-  it('throws EsqlResponseError for error responses', async () => {
-    mockGetESQLResults.mockResolvedValueOnce({
-      response: {
-        error: {
-          type: 'illegal_argument_exception',
-          reason: 'bad request',
-        },
-      },
-      params: { query: '' },
-    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
-
-    await expect(
-      fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])
-    ).rejects.toThrow(EsqlResponseError);
   });
 });
