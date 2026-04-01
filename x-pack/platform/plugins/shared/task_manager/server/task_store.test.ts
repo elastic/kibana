@@ -67,6 +67,7 @@ function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClien
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const scopedSavedObjectsClient = savedObjectsRepositoryMock.create();
 const esoClient = createEncryptedSavedObjectsClientMock();
+const invalidationSoClientMock = savedObjectsClientMock.create();
 
 const serializer = savedObjectsServiceMock.createSerializer();
 const adHocTaskCounter = new AdHocTaskCounter();
@@ -1533,6 +1534,7 @@ describe('TaskStore', () => {
       mockGetScopedClient = jest.fn();
       const mockSavedObjectsService = {
         getScopedClient: mockGetScopedClient,
+        getUnsafeInternalClient: jest.fn().mockReturnValue(invalidationSoClientMock),
       };
       store = new TaskStore({
         logger,
@@ -1875,7 +1877,7 @@ describe('TaskStore', () => {
         excludedExtensions: ['security', 'spaces'],
       });
 
-      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
         {
           attributes: { apiKeyId: 'apiKeyId', createdAt: expect.any(String) },
           type: 'api_key_to_invalidate',
@@ -2927,6 +2929,9 @@ describe('TaskStore', () => {
     };
 
     beforeEach(() => {
+      (coreStart.savedObjects.getUnsafeInternalClient as jest.Mock).mockReturnValue(
+        invalidationSoClientMock
+      );
       store = new TaskStore({
         logger,
         index: 'tasky',
@@ -2973,7 +2978,7 @@ describe('TaskStore', () => {
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
-      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
         {
           attributes: { apiKeyId: 'apiKeyId', createdAt: expect.any(String) },
           type: 'api_key_to_invalidate',
@@ -3054,6 +3059,9 @@ describe('TaskStore', () => {
     const tasksIdsToDelete = [randomId(), randomId()];
 
     beforeEach(() => {
+      (coreStart.savedObjects.getUnsafeInternalClient as jest.Mock).mockReturnValue(
+        invalidationSoClientMock
+      );
       store = new TaskStore({
         logger,
         index: 'tasky',
@@ -3107,7 +3115,7 @@ describe('TaskStore', () => {
       });
       const result = await store.bulkRemove(['task1', 'task2']);
       expect(result).toBeUndefined();
-      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
         {
           attributes: { apiKeyId: 'apiKeyId1', createdAt: expect.any(String) },
           type: 'api_key_to_invalidate',
