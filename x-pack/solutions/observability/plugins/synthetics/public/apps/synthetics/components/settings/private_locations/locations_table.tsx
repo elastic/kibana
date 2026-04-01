@@ -191,7 +191,7 @@ export const PrivateLocationsTable = ({
           icon: 'trash',
           type: 'icon' as const,
           color: 'danger',
-          enabled: (item: ListItem) => {            
+          enabled: (item: ListItem) => {
             const canDelete = item.monitors === 0;
             return canDelete && canSave;
           },
@@ -289,19 +289,17 @@ export const PrivateLocationsTable = ({
           skippedMonitors={monitorPendingReset.skippedMonitors}
         />
       )}
-      {
-        locationPendingDelete && (
-          <DeleteLocationModal
-            label={items.find((item) => item.id === locationPendingDelete)?.label ?? ''}
-            locationId={locationPendingDelete}
-            onDelete={(id) => {
-              onDelete(id);              
-            }}
-            onCancel={() => setLocationPendingDelete(null)}
-            loading={deleteLoading ?? false}
-          />
-        )
-      }
+      {locationPendingDelete && (
+        <DeleteLocationModal
+          label={items.find((item) => item.id === locationPendingDelete)?.label ?? ''}
+          locationId={locationPendingDelete}
+          onDelete={(id) => {
+            onDelete(id);
+          }}
+          onCancel={() => setLocationPendingDelete(null)}
+          loading={deleteLoading ?? false}
+        />
+      )}
     </div>
   );
 };
@@ -329,13 +327,13 @@ const DELETE_LOCATION = i18n.translate(
   }
 );
 
-const getDeleteDescription = (canDelete: boolean, monCount: number) => canDelete ? DELETE_LOCATION : i18n.translate(
-  'xpack.synthetics.monitorManagement.cannotDelete.description',
-  {
-    defaultMessage: `You can't delete this location because it is used in {monCount, number} {monCount, plural,one {monitor} other {monitors}}. Remove all monitors from this location first.`,
-    values: { monCount },
-  }
-);
+const getDeleteDescription = (canDelete: boolean, monCount: number) =>
+  canDelete
+    ? DELETE_LOCATION
+    : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete.description', {
+        defaultMessage: `You can't delete this location because it is used in {monCount, number} {monCount, plural,one {monitor} other {monitors}}. Remove all monitors from this location first.`,
+        values: { monCount },
+      });
 
 const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLocations.editLabel', {
   defaultMessage: 'Edit private location',
