@@ -18,6 +18,20 @@ import {
   taskSchemaV9,
 } from '../schemas/task';
 
+import { InstanceTaskCost } from '../../task';
+
+// the valid task costs baked into the v8 schema
+const v8Costs = new Set([
+  undefined, // to handle case of cost not set
+  `${InstanceTaskCost.Tiny}`,
+  `${InstanceTaskCost.Normal}`,
+  `${InstanceTaskCost.ExtraLarge}`,
+]);
+
+interface Costable {
+  cost?: string;
+}
+
 // IMPORTANT!!!
 // When adding new model versions, make sure to manually test
 // downgrading to the previous version. This is a gap in our
@@ -119,7 +133,14 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
   '9': {
     changes: [],
     schemas: {
-      forwardCompatibility: taskSchemaV9.extends({}, { unknowns: 'ignore' }),
+      // set cost to normal if it is not in the version 8 costs literals
+      forwardCompatibility: (attributes) => {
+        const costable = attributes as Costable;
+        if (v8Costs.has(costable.cost)) return attributes;
+
+        costable.cost = InstanceTaskCost.Normal; // default to normal if cost is not set or is invalid, to maintain backward compatibility with v8
+        return costable;
+      },
       create: taskSchemaV9,
     },
   },

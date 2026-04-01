@@ -6,21 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { InstanceTaskCost } from '../../task';
 import { isInterval } from '../../lib/intervals';
 import { scheduleRruleSchemaV1, scheduleRruleSchemaV2, scheduleRruleSchemaV3 } from './rrule';
 
 export function validateDuration(duration: string) {
   if (!isInterval(duration)) {
     return 'string is not a valid duration: ' + duration;
-  }
-}
-
-const TaskCostsSet = new Set(Object.values(InstanceTaskCost).map((cost) => cost.toString()));
-
-export function validateCost(cost: string) {
-  if (!TaskCostsSet.has(cost)) {
-    return `Invalid task cost: ${cost}`;
   }
 }
 
@@ -98,9 +89,5 @@ export const taskSchemaV8 = taskSchemaV7.extends({
 });
 
 export const taskSchemaV9 = taskSchemaV8.extends({
-  cost: schema.maybe(
-    schema.string({
-      validate: validateCost,
-    })
-  ),
+  cost: schema.maybe(schema.string()),
 });
