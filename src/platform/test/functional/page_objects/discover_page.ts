@@ -448,6 +448,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('unifiedHistogramChart');
   }
 
+  public async isTableVisible() {
+    return await this.testSubjects.exists('discoverDocTable');
+  }
+
   public async toggleChartVisibility() {
     if (await this.isChartVisible()) {
       await this.testSubjects.click('dscHideHistogramButton');
@@ -465,6 +469,16 @@ export class DiscoverPageObject extends FtrService {
   public async closeHistogramPanel() {
     await this.testSubjects.click('dscHideHistogramButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async openTablePanel() {
+    await this.testSubjects.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  public async closeTablePanel() {
+    await this.testSubjects.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   public async getHistogramHeight() {
@@ -762,8 +776,7 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
-    // Find the selected tab and open its menu
+  private async clickSelectedTabMenuItem(menuItemTestSubj: string) {
     const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
     for (const tabElement of tabElements) {
       const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
@@ -773,20 +786,34 @@ export class DiscoverPageObject extends FtrService {
         );
         await menuButton.click();
         await this.retry.waitFor('tab menu to open', async () => {
-          return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
+          return await this.testSubjects.exists(menuItemTestSubj);
         });
-        await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
-        await this.header.waitUntilLoadingHasFinished();
-        await this.waitUntilSearchingHasFinished();
-        if (options?.discardModal) {
-          await this.testSubjects.exists('discover-esql-to-dataview-modal');
-          await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-          await this.retry.waitFor('the modal to close', async () => {
-            return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-          });
-        }
+        await this.testSubjects.click(menuItemTestSubj);
         return;
       }
+    }
+  }
+
+  public async openInspectorFromTabMenu() {
+    const isOpen = await this.testSubjects.exists('inspectorPanel');
+    if (isOpen) return;
+
+    await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_inspect');
+    await this.retry.waitFor('inspector panel to open', async () => {
+      return await this.testSubjects.exists('inspectorPanel');
+    });
+  }
+
+  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
+    await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+    if (options?.discardModal) {
+      await this.testSubjects.exists('discover-esql-to-dataview-modal');
+      await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
+      await this.retry.waitFor('the modal to close', async () => {
+        return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
+      });
     }
   }
 
