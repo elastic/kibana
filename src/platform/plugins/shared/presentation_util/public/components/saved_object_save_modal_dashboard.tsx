@@ -28,6 +28,7 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
     canSaveByReference,
     hideDashboardOptions,
     initialDashboardOption,
+    onCopyOnSaveChangeCb,
   } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
@@ -85,6 +86,7 @@ function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboardProps<
     }
     setDashboardOption(null);
     setCopyOnSave(newCopyOnSave);
+    onCopyOnSaveChangeCb?.(newCopyOnSave);
   };
 
   const onModalSave = async (onSaveProps: OnSaveProps): Promise<void> => {

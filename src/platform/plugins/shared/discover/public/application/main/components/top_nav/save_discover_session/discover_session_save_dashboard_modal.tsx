@@ -36,6 +36,7 @@ export interface DiscoverSessionSaveDashboardModalProps {
   isTimeBased: boolean;
   managed?: boolean;
   onClose: () => void;
+  onCopyOnSaveChange?: (newCopyOnSave: boolean) => void;
   onSave: (props: DiscoverSessionSaveDashboardModalSaveProps) => Promise<void>;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   sessionId?: string;
@@ -50,6 +51,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
   isTimeBased,
   managed,
   onClose,
+  onCopyOnSaveChange,
   onSave,
   savedObjectsTagging,
   sessionId,
@@ -146,6 +148,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
         defaultMessage: 'Discover session',
       })}
       onClose={onClose}
+      onCopyOnSaveChangeCb={onCopyOnSaveChange}
       onSave={handleSave}
       tagOptions={tagOptions}
     />

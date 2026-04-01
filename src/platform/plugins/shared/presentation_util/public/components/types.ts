@@ -31,4 +31,5 @@ export interface SaveModalDashboardProps<T = void> {
   customModalTitle?: React.ReactNode;
   hideDashboardOptions?: boolean;
   initialDashboardOption?: DashboardSavingOption;
+  onCopyOnSaveChangeCb?: (newCopyOnSave: boolean) => void;
 }

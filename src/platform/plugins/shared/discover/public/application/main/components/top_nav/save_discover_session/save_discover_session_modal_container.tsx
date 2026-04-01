@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
@@ -70,9 +70,18 @@ export const DiscoverSessionSaveModalContainer = ({
   });
 
   const isSaveCallbackFlow = Boolean(onSaveCb);
+
+  const [copyOnSaveToggled, setCopyOnSaveToggled] = useState(false);
+
   const showDashboardOptions =
     !isSaveCallbackFlow &&
-    (initialCopyOnSave || (!isEmbeddedEditor && !persistedDiscoverSession?.id));
+    (initialCopyOnSave ||
+      copyOnSaveToggled ||
+      (!isEmbeddedEditor && !persistedDiscoverSession?.id));
+
+  const onCopyOnSaveChange = useCallback((newCopyOnSave: boolean) => {
+    setCopyOnSaveToggled(newCopyOnSave);
+  }, []);
 
   const navigateToDashboard = (dashboardId: string, serializedState: Record<string, unknown>) => {
     services.embeddable.getStateTransfer().navigateToWithEmbeddablePackages('dashboards', {
@@ -140,6 +149,7 @@ export const DiscoverSessionSaveModalContainer = ({
         newTags,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
+        skipResetDiscoverSession: Boolean(dashboardId),
       })
     ).unwrap();
 
@@ -215,6 +225,7 @@ export const DiscoverSessionSaveModalContainer = ({
       isTimeBased={isTimeBased}
       managed={persistedDiscoverSession?.managed ?? false}
       onClose={onClose}
+      onCopyOnSaveChange={onCopyOnSaveChange}
       onSave={onSave}
       savedObjectsTagging={services.savedObjectsTagging}
       sessionId={initialCopyOnSave ? undefined : persistedDiscoverSession?.id}
