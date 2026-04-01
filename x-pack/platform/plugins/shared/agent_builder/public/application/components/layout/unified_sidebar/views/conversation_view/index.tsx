@@ -181,6 +181,11 @@ export const ConversationSidebarView: React.FC = () => {
     padding-top: ${euiTheme.size.base};
   `;
 
+  const handlePressNewConversation = () => {
+    setIsCustomizeOpen(false);
+    navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
+  };
+
   return (
     <div css={containerStyles} data-test-subj="agentBuilderSidebar-conversation">
       <EuiHorizontalRule margin="none" />
@@ -236,9 +241,7 @@ export const ConversationSidebarView: React.FC = () => {
                 iconType="plus"
                 size="s"
                 color="text"
-                onClick={() =>
-                  navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))
-                }
+                onClick={handlePressNewConversation}
                 data-test-subj="agentBuilderSidebarNewConversationButton"
               >
                 {newLabel}
@@ -277,6 +280,7 @@ export const ConversationSidebarView: React.FC = () => {
           currentConversationId={conversationId}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectConversation={(id) => {
+            setIsCustomizeOpen(false);
             navigateToAgentBuilderUrl(
               appPaths.agent.conversations.byId({ agentId, conversationId: id })
             );
