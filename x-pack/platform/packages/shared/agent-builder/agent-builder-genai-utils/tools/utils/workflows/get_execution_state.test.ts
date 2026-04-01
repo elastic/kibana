@@ -126,4 +126,148 @@ describe('getExecutionState', () => {
     });
     expect(getWorkflowOutputMock).not.toHaveBeenCalled();
   });
+
+  describe('WAITING_FOR_INPUT status', () => {
+    it('includes waiting_input with message and schema when step has both', async () => {
+      const workflowApi = createWorkflowApi();
+      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowId: 'wf-1',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        workflowDefinition: {
+          name: 'Approval Flow',
+          steps: [
+            {
+              name: 'approve',
+              type: 'waitForInput',
+              with: {
+                message: 'Please approve this request',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    approved: { type: 'boolean' },
+                    reason: { type: 'string' },
+                  },
+                  required: ['approved'],
+                },
+              },
+            },
+          ],
+        },
+        stepExecutions: [
+          { stepId: 'approve', status: ExecutionStatus.WAITING_FOR_INPUT, scopeStack: [] },
+        ],
+      });
+
+      const state = await getExecutionState({
+        executionId: 'exec-w1',
+        spaceId: 'default',
+        workflowApi,
+      });
+
+      expect(state?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(state?.waiting_input).toEqual({
+        message: 'Please approve this request',
+        schema: {
+          type: 'object',
+          properties: {
+            approved: { type: 'boolean' },
+            reason: { type: 'string' },
+          },
+          required: ['approved'],
+        },
+      });
+    });
+
+    it('includes waiting_input with only message when step has no schema', async () => {
+      const workflowApi = createWorkflowApi();
+      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowId: 'wf-2',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        workflowDefinition: {
+          name: 'Simple Wait',
+          steps: [
+            {
+              name: 'ask',
+              type: 'waitForInput',
+              with: { message: 'Provide input' },
+            },
+          ],
+        },
+        stepExecutions: [
+          { stepId: 'ask', status: ExecutionStatus.WAITING_FOR_INPUT, scopeStack: [] },
+        ],
+      });
+
+      const state = await getExecutionState({
+        executionId: 'exec-w2',
+        spaceId: 'default',
+        workflowApi,
+      });
+
+      expect(state?.waiting_input).toEqual({
+        message: 'Provide input',
+      });
+    });
+
+    it('finds waitForInput step nested inside a foreach', async () => {
+      const workflowApi = createWorkflowApi();
+      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowId: 'wf-3',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        workflowDefinition: {
+          name: 'Loop Approval',
+          steps: [
+            {
+              name: 'loop',
+              type: 'foreach',
+              foreach: '["a","b"]',
+              steps: [
+                {
+                  name: 'nested_ask',
+                  type: 'waitForInput',
+                  with: { message: 'Approve item' },
+                },
+              ],
+            },
+          ],
+        },
+        stepExecutions: [
+          { stepId: 'nested_ask', status: ExecutionStatus.WAITING_FOR_INPUT, scopeStack: [] },
+        ],
+      });
+
+      const state = await getExecutionState({
+        executionId: 'exec-w3',
+        spaceId: 'default',
+        workflowApi,
+      });
+
+      expect(state?.waiting_input?.message).toBe('Approve item');
+    });
+
+    it('omits waiting_input entirely when no waiting step is found', async () => {
+      const workflowApi = createWorkflowApi();
+      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowId: 'wf-4',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        workflowDefinition: {
+          name: 'Empty Wait',
+          steps: [],
+        },
+        stepExecutions: [],
+      });
+
+      const state = await getExecutionState({
+        executionId: 'exec-w4',
+        spaceId: 'default',
+        workflowApi,
+      });
+
+      expect(state?.waiting_input).toBeUndefined();
+    });
+  });
 });

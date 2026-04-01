@@ -72,7 +72,7 @@ export const useTopNavLinks = ({
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
-  onOpenInspector: () => void;
+  onOpenInspector?: () => void;
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
@@ -124,8 +124,10 @@ export const useTopNavLinks = ({
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
-    const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-    items.push(inspectAppMenuItem);
+    if (onOpenInspector) {
+      const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
+      items.push(inspectAppMenuItem);
+    }
 
     if (showCreateRuleV2) {
       const createRuleV2 = getCreateRuleMenuItem({
@@ -217,12 +219,12 @@ export const useTopNavLinks = ({
     services,
     discoverParams,
     appId,
-    onOpenInspector,
     dispatch,
     getState,
     isEsqlMode,
     currentDataView,
     currentTab,
+    onOpenInspector,
     persistedDiscoverSession,
     hasShareIntegration,
     hasUnsavedChanges,

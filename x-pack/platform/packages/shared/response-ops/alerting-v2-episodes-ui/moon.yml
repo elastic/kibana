@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-v2-episodes-ui'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: '@elastic/rna-project-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/alerting-v2-episodes-ui'
   description: Moon project for @kbn/alerting-v2-episodes-ui
   channel: ''
-  owner: '@elastic/response-ops'
+  owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui
 dependsOn:
   - '@kbn/core-http-browser'
@@ -28,6 +28,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/data-plugin'
   - '@kbn/discover-utils'
+  - '@kbn/es-query'
+  - '@kbn/react-hooks'
+  - '@kbn/alerting-v2-constants'
 tags:
   - shared-browser
   - package
