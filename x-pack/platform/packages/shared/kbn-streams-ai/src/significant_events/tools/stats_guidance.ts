@@ -67,10 +67,26 @@ interface StatsPattern {
 }
 
 /**
- * Best-effort field detection: scans the `dataset_analysis` text for known
- * field name patterns. This is inherently fragile since `analysis` is
- * unstructured LLM output, but sufficient for threshold heuristics.
+ * Normalizes the `properties.analysis` value into a flat string suitable for
+ * regex scanning. At runtime the dataset_analysis feature stores a
+ * `FormattedDocumentAnalysis` object (`{ total, sampled, fields }`) — not a
+ * plain string. This helper flattens the `fields` record into one line per
+ * field so downstream regex helpers (field detection, error-rate extraction)
+ * work identically for both shapes.
  */
+function normalizeAnalysis(raw: unknown): string {
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'object' && raw !== null && 'fields' in raw) {
+    const obj = raw as { fields?: Record<string, string[]> };
+    if (obj.fields && typeof obj.fields === 'object') {
+      return Object.entries(obj.fields)
+        .map(([key, values]) => `${key}: ${Array.isArray(values) ? values.join(', ') : values}`)
+        .join('\n');
+    }
+  }
+  return '';
+}
+
 function findFieldInAnalysis(analysis: string, patterns: string[]): string | undefined {
   for (const pattern of patterns) {
     if (analysis.includes(pattern)) {
@@ -107,11 +123,29 @@ function extractEntityCardinality(analysis: string, entityField: string): number
   if (fieldSection.length < 2) return undefined;
 
   const afterField = fieldSection[1].substring(0, CARDINALITY_SCAN_LENGTH);
-  const cardMatch = afterField.match(/(\d+)\s*(?:distinct|unique|values)/i);
-  if (cardMatch) {
-    return parseInt(cardMatch[1], 10);
+
+  // Prose format: "10 distinct values"
+  const proseMatch = afterField.match(/(\d+)\s*(?:distinct|unique|values)/i);
+  if (proseMatch) {
+    return parseInt(proseMatch[1], 10);
   }
-  return undefined;
+
+  // Field distribution format (FormattedDocumentAnalysis flattened):
+  //   " (keyword): val1 (40%), val2 (35%), ... (+3 more), (no value) (5%)"
+  // Count listed value entries (those with "(N%)") and add hidden ones.
+  const lineEnd = afterField.indexOf('\n');
+  const line = lineEnd >= 0 ? afterField.substring(0, lineEnd) : afterField;
+
+  const percentEntries = line.match(/\(\d+%\)/g);
+  if (!percentEntries) return undefined;
+
+  let count = percentEntries.length;
+  if (line.includes('(no value)')) count -= 1;
+
+  const moreMatch = line.match(/\+(\d+)\s*more/i);
+  if (moreMatch) count += parseInt(moreMatch[1], 10);
+
+  return count > 0 ? count : undefined;
 }
 
 /**
@@ -189,11 +223,7 @@ export function buildStatsGuidance(features: LlmFeature[]): string | null {
 
   if (!datasetFeature) return null;
 
-  const analysis =
-    typeof datasetFeature.properties?.analysis === 'string'
-      ? datasetFeature.properties.analysis
-      : '';
-
+  const analysis = normalizeAnalysis(datasetFeature.properties?.analysis);
   if (!analysis) return null;
 
   const fieldSpecificPatterns: StatsPattern[] = [];

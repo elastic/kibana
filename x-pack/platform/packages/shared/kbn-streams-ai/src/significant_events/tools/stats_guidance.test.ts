@@ -26,6 +26,17 @@ const makeDatasetFeature = (analysis: string): LlmFeature =>
     properties: { analysis },
   });
 
+const makeDatasetAnalysis = (
+  fields: Record<string, string[]>,
+  opts?: { total?: number; sampled?: number }
+): LlmFeature =>
+  makeFeature({
+    type: 'dataset_analysis',
+    properties: {
+      analysis: { total: opts?.total ?? 1000, sampled: opts?.sampled ?? 500, fields },
+    },
+  });
+
 describe('buildStatsGuidance', () => {
   it('returns null when no dataset_analysis feature is present', () => {
     const features = [makeFeature({ type: 'entity' })];
@@ -168,5 +179,146 @@ describe('buildStatsGuidance', () => {
     const result = buildStatsGuidance(features);
     expect(result).not.toBeNull();
     expect(result).not.toContain('LOG PATTERN CONTEXT');
+  });
+
+  describe('FormattedDocumentAnalysis (object) shape', () => {
+    it('returns guidance when log.level is a field key', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'log.level (keyword)': ['ERROR (15%)', 'INFO (60%)', 'WARN (25%)'],
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).toContain('Service Error Rate Degradation');
+      expect(result).toContain('log.level');
+    });
+
+    it('extracts error percentage from field distribution values', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'log.level (keyword)': ['ERROR (8%)', 'INFO (72%)', 'WARN (20%)'],
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).toContain('Extracted baseline');
+      expect(result).toContain('8%');
+    });
+
+    it('returns HTTP error rate guidance from object analysis', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'http.response.status_code (long)': [
+            '200 (80%)',
+            '404 (10%)',
+            '500 (5%)',
+            '... (+3 more)',
+          ],
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).toContain('HTTP Error Rate');
+      expect(result).toContain('http.response.status_code');
+    });
+
+    it('returns latency guidance when event.duration is a field key', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'event.duration (long)': ['152340000 (20%)', '... (+50 more)'],
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).toContain('Latency Degradation');
+      expect(result).toContain('event.duration');
+    });
+
+    it('extracts entity cardinality from value distribution', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'log.level (keyword)': ['ERROR (5%)', 'INFO (80%)', 'WARN (15%)'],
+          'service.name (keyword)': [
+            'api-gateway (40%)',
+            'checkout-svc (35%)',
+            '... (+3 more)',
+          ],
+        }),
+        makeFeature({
+          type: 'entity',
+          properties: { field: 'service.name' },
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).toContain('Component-Level Degradation');
+      expect(result).toContain('service.name');
+      expect(result).toContain('5 distinct values');
+    });
+
+    it('skips component degradation when entity cardinality exceeds limit', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'log.level (keyword)': ['ERROR (5%)', 'INFO (80%)', 'WARN (15%)'],
+          'host.name (keyword)': ['host-1 (2%)', '... (+100 more)'],
+        }),
+        makeFeature({
+          type: 'entity',
+          properties: { field: 'host.name' },
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).not.toContain('Component-Level Degradation');
+    });
+
+    it('returns null when no field-specific fields are present in object analysis', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'message (text)': ['Starting server... (20%)', 'Request handled (80%)'],
+          '@timestamp (date)': [],
+        }),
+      ];
+      expect(buildStatsGuidance(features)).toBeNull();
+    });
+
+    it('excludes (no value) entries from entity cardinality count', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'log.level (keyword)': ['ERROR (10%)', 'INFO (90%)'],
+          'service.name (keyword)': [
+            'api-svc (50%)',
+            'web-svc (30%)',
+            '(no value) (20%)',
+          ],
+        }),
+        makeFeature({
+          type: 'entity',
+          properties: { field: 'service.name' },
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).toContain('Component-Level Degradation');
+      expect(result).toContain('2 distinct values');
+    });
+
+    it('combines multiple field-specific patterns from a single analysis object', () => {
+      const features = [
+        makeDatasetAnalysis({
+          'log.level (keyword)': ['ERROR (3%)', 'INFO (90%)', 'WARN (7%)'],
+          'http.response.status_code (long)': ['200 (85%)', '500 (2%)', '... (+5 more)'],
+          'event.duration (long)': ['50000000 (40%)', '... (+20 more)'],
+        }),
+      ];
+      const result = buildStatsGuidance(features);
+      expect(result).not.toBeNull();
+      expect(result).toContain('Service Error Rate Degradation');
+      expect(result).toContain('HTTP Error Rate');
+      expect(result).toContain('Latency Degradation');
+      expect(result).toContain('Traffic Drop');
+      expect(result).toContain('Abnormal Traffic Spike');
+    });
   });
 });
