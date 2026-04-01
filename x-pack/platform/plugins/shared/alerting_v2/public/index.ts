@@ -12,7 +12,7 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { mountAlertingV2App, mountNotificationPoliciesApp } from './main';
+import { mountAlertingV2App, mountNotificationPoliciesApp } from './application/mount';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
