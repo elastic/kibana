@@ -54,6 +54,7 @@ import {
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
+import { GROUP_NOT_SET_VALUE } from '../../../constants';
 
 const hasUnsupportedGroupingFunction = (definition: ESQLProperNode): boolean => {
   const funcExpr = isFunctionExpression(definition)
@@ -253,10 +254,11 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
     const aggregateFieldDefinition = getFieldDefinitionFromArg(aggregate.arg);
+    const aggregationName =
+      (aggregateFieldDefinition as ESQLFunction).operator?.name ?? aggregateFieldDefinition.text;
     appliedFunctions.push({
       identifier: removeBackticks(aggregate.field), // we remove backticks to have a clean identifier that gets displayed in the UI
-      aggregation:
-        (aggregateFieldDefinition as ESQLFunction).operator?.name ?? aggregateFieldDefinition.text,
+      aggregation: aggregationName,
     });
   });
 
@@ -469,7 +471,11 @@ function handleStatsByColumnLeafOperation(
   const filterCommand = Builder.command({
     name: 'where',
     args: [
-      shouldUseMatchPhrase
+      operationValue === GROUP_NOT_SET_VALUE
+        ? Builder.expression.func.postfix('IS NULL', [
+            Builder.identifier({ name: operationColumnName }),
+          ])
+        : shouldUseMatchPhrase
         ? Builder.expression.func.call('match_phrase', [
             Builder.identifier({ name: operationColumnName }),
             Builder.expression.literal.string(operationValue as string),
@@ -847,6 +853,14 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   if (isBinaryExpression(filteringExpression) && filteringExpression.name === 'and') {
     // This is already a combination of some conditions, for now we'll just append the new condition to the existing one
     modifiedFilteringWhereCommand = synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringExpression}`;
+  } else if (
+    isFunctionExpression(filteringExpression) &&
+    filteringExpression.subtype === 'postfix-unary-expression'
+  ) {
+    modifiedFilteringWhereCommand =
+      (filteringExpression.args[0] as ESQLColumn).name === normalizedFieldName
+        ? synth.cmd`WHERE ${computedFilteringExpression}`
+        : synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringExpression}`;
   } else {
     modifiedFilteringWhereCommand =
       isBinaryExpression(filteringExpression) &&

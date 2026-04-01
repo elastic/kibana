@@ -26,6 +26,7 @@ import {
   handleInstallPackageFailure,
   installPackage,
   isPackageVersionOrLaterInstalled,
+  saveKibanaAssetsRefs,
 } from './install';
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
@@ -1021,5 +1022,105 @@ describe('isPackageVersionOrLaterInstalled', () => {
     });
 
     await expect(res).rejects.toThrowError('test unexpected error');
+  });
+});
+
+describe('saveKibanaAssetsRefs', () => {
+  const soClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    soClient.get.mockReset();
+    soClient.update.mockReset();
+    (soClient.getCurrentNamespace as jest.Mock).mockReturnValue('my-space');
+  });
+
+  it('should append to existing additional space refs when saveAsAdditionnalSpace and append are both true', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-pkg',
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        additional_spaces_installed_kibana: {
+          'my-space': [{ id: 'existing-dashboard', type: 'dashboard' }],
+        },
+      },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+
+    await saveKibanaAssetsRefs(
+      soClient,
+      'test-pkg',
+      [{ id: 'new-template', type: 'alerting_rule_template' as any }],
+      true,
+      true
+    );
+
+    expect(soClient.update).toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      'test-pkg',
+      expect.objectContaining({
+        additional_spaces_installed_kibana: {
+          'my-space': expect.arrayContaining([
+            { id: 'new-template', type: 'alerting_rule_template' },
+            { id: 'existing-dashboard', type: 'dashboard' },
+          ]),
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should deduplicate refs when appending to additional space', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-pkg',
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        additional_spaces_installed_kibana: {
+          'my-space': [{ id: 'existing-template', type: 'alerting_rule_template' }],
+        },
+      },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+
+    await saveKibanaAssetsRefs(
+      soClient,
+      'test-pkg',
+      [{ id: 'existing-template', type: 'alerting_rule_template' as any }],
+      true,
+      true
+    );
+
+    const updateCall = soClient.update.mock.calls[0][2] as any;
+    const spaceRefs = updateCall.additional_spaces_installed_kibana['my-space'];
+    expect(spaceRefs).toHaveLength(1);
+    expect(spaceRefs[0].id).toBe('existing-template');
+  });
+
+  it('should overwrite additional space refs when append is false', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-pkg',
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        additional_spaces_installed_kibana: {
+          'my-space': [{ id: 'old-dashboard', type: 'dashboard' }],
+        },
+      },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+
+    await saveKibanaAssetsRefs(
+      soClient,
+      'test-pkg',
+      [{ id: 'new-dashboard', type: 'dashboard' as any }],
+      true,
+      false
+    );
+
+    const updateCall = soClient.update.mock.calls[0][2] as any;
+    const spaceRefs = updateCall.additional_spaces_installed_kibana['my-space'];
+    expect(spaceRefs).toHaveLength(1);
+    expect(spaceRefs[0].id).toBe('new-dashboard');
   });
 });

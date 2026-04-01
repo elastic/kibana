@@ -111,6 +111,7 @@ describe('UserName', () => {
           id: 'user-panel',
           params: {
             userName: props.value,
+            entityId: undefined,
             contextID: props.contextId,
             scopeId: TableId.alertsOnAlertsPage,
           },
@@ -141,6 +142,7 @@ describe('UserName', () => {
           id: 'user-panel',
           params: {
             userName: props.value,
+            entityId: undefined,
             contextID: props.contextId,
             scopeId: 'timeline-1',
           },

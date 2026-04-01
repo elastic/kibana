@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useMemo } from 'react';
+import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
+import { EventKind } from './constants/event_kinds';
+import { Header } from './header';
+import { OverviewTab } from './tabs/overview_tab';
+
+export interface DocumentFlyoutProps {
+  /**
+   * The document to display
+   */
+  hit: DataTableRecord;
+  /**
+   * Cell action renderer for the analyzer
+   */
+  renderCellActions: CellActionRenderer;
+}
+
+/**
+ * Content for the document flyout, combining the header and overview tab.
+ */
+export const DocumentFlyout = memo(({ hit, renderCellActions }: DocumentFlyoutProps) => {
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
+
+  const { hasAlertsRead, loading } = useAlertsPrivileges();
+  const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
+
+  if (isAlert && loading) {
+    return <FlyoutLoading data-test-subj="document-overview-loading" />;
+  }
+
+  if (missingAlertsPrivilege) {
+    return <FlyoutMissingAlertsPrivilege />;
+  }
+
+  return (
+    <>
+      <EuiFlyoutHeader>
+        <Header hit={hit} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <OverviewTab hit={hit} renderCellActions={renderCellActions} />
+      </EuiFlyoutBody>
+    </>
+  );
+});
+
+DocumentFlyout.displayName = 'DocumentFlyout';

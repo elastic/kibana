@@ -16,9 +16,7 @@ import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { Loading } from './loading';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
-interface Props extends FullTraceWaterfallProps {
-  core: CoreStart;
-}
+type Props = FullTraceWaterfallProps & { core: CoreStart };
 
 export function FullTraceWaterfallRenderer({
   traceId,
@@ -29,6 +27,7 @@ export function FullTraceWaterfallRenderer({
   onNodeClick,
   onErrorClick,
   core,
+  ...scrollProps
 }: Props) {
   useEffectOnce(() => {
     createCallApmApi(core);
@@ -72,12 +71,15 @@ export function FullTraceWaterfallRenderer({
       errors={data.errors}
       onClick={onNodeClick}
       scrollElement={scrollElement}
+      {...scrollProps}
       isEmbeddable
       showLegend
       serviceName={serviceName}
       onErrorClick={onErrorClick}
       agentMarks={data.agentMarks}
       showCriticalPathControl
+      traceDocsTotal={data.traceDocsTotal}
+      maxTraceItems={data.maxTraceItems}
     />
   );
 }
