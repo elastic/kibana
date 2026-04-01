@@ -195,6 +195,19 @@ describe('useTelemetry', () => {
     );
   });
 
+  it('reportIntegrationDeleteConfirmed calls reportEvent', () => {
+    const { result } = renderHook(() => useTelemetry(), { wrapper });
+
+    act(() => {
+      result.current.reportIntegrationDeleteConfirmed();
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      AIV2TelemetryEventType.IntegrationDeleteConfirmed,
+      expect.objectContaining({ sessionId: expect.any(String) })
+    );
+  });
+
   it('reportDataStreamRefreshConfirmed calls reportEvent', () => {
     const { result } = renderHook(() => useTelemetry(), { wrapper });
 
