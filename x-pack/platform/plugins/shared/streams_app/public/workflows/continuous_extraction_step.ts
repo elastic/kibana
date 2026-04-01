@@ -9,11 +9,8 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { StepCategory } from '@kbn/workflows';
 import {
   KI_SELECT_STREAMS_STEP_TYPE,
-  KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
   kiSelectStreamsInputSchema,
-  kiFeaturesExtractStreamInputSchema,
   kiSelectStreamsOutputSchema,
-  kiFeaturesExtractStreamOutputSchema,
 } from '@kbn/streams-plugin/common';
 
 export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
@@ -25,15 +22,4 @@ export const kiSelectStreamsPublicStepDefinition: PublicStepDefinition = {
   stability: 'tech_preview',
   inputSchema: kiSelectStreamsInputSchema,
   outputSchema: kiSelectStreamsOutputSchema,
-};
-
-export const kiFeaturesExtractStreamPublicStepDefinition: PublicStepDefinition = {
-  id: KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
-  label: 'KI Features Extraction (per-stream)',
-  description:
-    'Polls a scheduled KI features identification task for a single stream until completion and reports results.',
-  category: StepCategory.Kibana,
-  stability: 'tech_preview',
-  inputSchema: kiFeaturesExtractStreamInputSchema,
-  outputSchema: kiFeaturesExtractStreamOutputSchema,
 };

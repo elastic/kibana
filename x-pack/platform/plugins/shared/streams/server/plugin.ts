@@ -58,7 +58,6 @@ import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 import { registerKiSelectStreamsStep } from './lib/workflows/ki_select_streams_step';
-import { registerKiFeaturesExtractStreamStep } from './lib/workflows/ki_features_extract_stream_step';
 import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
@@ -231,10 +230,6 @@ export class StreamsPlugin
         workflowsExtensions: plugins.workflowsExtensions,
         getScopedClients,
         logger: this.logger,
-      });
-      registerKiFeaturesExtractStreamStep({
-        workflowsExtensions: plugins.workflowsExtensions,
-        getScopedClients,
       });
       continuousKiExtractionWorkflow = createContinuousKiExtractionWorkflowService(
         this.logger,

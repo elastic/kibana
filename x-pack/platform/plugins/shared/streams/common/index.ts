@@ -22,18 +22,12 @@ export {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   KI_SELECT_STREAMS_STEP_TYPE,
-  KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
 } from './constants';
 
 export {
-  featureSummarySchema,
-  tokenCountSchema,
-  iterationResultSchema,
   streamCandidateSchema,
   kiSelectStreamsInputSchema,
-  kiFeaturesExtractStreamInputSchema,
   kiSelectStreamsOutputSchema,
-  kiFeaturesExtractStreamOutputSchema,
 } from './continuous_extraction_schemas';
 
 export type { StreamDocsStat } from './doc_counts';

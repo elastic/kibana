@@ -56,13 +56,30 @@ export const STREAMS_TIERED_FEATURES = [
 
 export const FAILURE_STORE_SELECTOR = '::failures';
 
+/**
+ * Continuous KI extraction workflow
+ *
+ * A scheduled workflow that periodically identifies knowledge indicators (KI)
+ * across eligible streams. It selects streams, schedules feature identification
+ * tasks, and polls their status until completion or timeout.
+ */
+
+// Workflow identity
+export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
+export const KI_SELECT_STREAMS_STEP_TYPE = 'streams.ki_select_streams';
+
+// Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
+// timeout 1 minute shorter to avoid overlapping with the next run.
+export const COORDINATOR_INTERVAL_MINUTES = 10;
+
+// Stream selection: how many streams to process per run and how often
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
 export const MIN_EXTRACTION_INTERVAL_HOURS = 1;
 export const MAX_SCHEDULED_STREAMS = 5;
 
-export const COORDINATOR_INTERVAL_MINUTES = 10;
-
-export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
-
-export const KI_SELECT_STREAMS_STEP_TYPE = 'streams.ki_select_streams';
-export const KI_FEATURES_EXTRACT_STREAM_STEP_TYPE = 'streams.ki_features_extract_stream';
+// Task polling: the workflow polls each task's status endpoint every
+// POLL_DELAY_SECONDS. MAX_POLL_ITERATIONS is derived so the polling
+// loop fits within the workflow timeout.
+export const POLL_DELAY_SECONDS = 5;
+export const WORKFLOW_TIMEOUT_SECONDS = (COORDINATOR_INTERVAL_MINUTES - 1) * 60;
+export const MAX_POLL_ITERATIONS = Math.floor(WORKFLOW_TIMEOUT_SECONDS / POLL_DELAY_SECONDS);

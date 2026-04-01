@@ -10,11 +10,12 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 
 import {
   KI_SELECT_STREAMS_STEP_TYPE,
-  KI_FEATURES_EXTRACT_STREAM_STEP_TYPE,
   COORDINATOR_INTERVAL_MINUTES,
   MAX_SCHEDULED_STREAMS,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+  POLL_DELAY_SECONDS,
+  MAX_POLL_ITERATIONS,
 } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
@@ -27,7 +28,6 @@ const assertYamlInSync = (yaml: string, expected: string, label: string) => {
 };
 
 assertYamlInSync(WORKFLOW_YAML, KI_SELECT_STREAMS_STEP_TYPE, 'step type');
-assertYamlInSync(WORKFLOW_YAML, KI_FEATURES_EXTRACT_STREAM_STEP_TYPE, 'step type');
 assertYamlInSync(WORKFLOW_YAML, `timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`, 'timeout');
 assertYamlInSync(
   WORKFLOW_YAML,
@@ -49,6 +49,8 @@ assertYamlInSync(
   `name: extractionIntervalHours\n    type: number\n    default: ${DEFAULT_EXTRACTION_INTERVAL_HOURS}`,
   'extractionIntervalHours input'
 );
+assertYamlInSync(WORKFLOW_YAML, `max-iterations: ${MAX_POLL_ITERATIONS}`, 'max poll iterations');
+assertYamlInSync(WORKFLOW_YAML, `duration: "${POLL_DELAY_SECONDS}s"`, 'poll delay duration');
 
 export interface ContinuousKiExtractionWorkflowService {
   ensureWorkflow(params: {

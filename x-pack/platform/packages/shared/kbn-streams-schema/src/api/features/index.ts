@@ -19,6 +19,7 @@ export interface IterationResult {
 
 export interface IdentifyFeaturesResult {
   features: BaseFeature[];
+  durationMs: number;
   iterations?: IterationResult[];
   totalTokensUsed?: ChatCompletionTokenCount;
 }

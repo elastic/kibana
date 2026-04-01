@@ -41,8 +41,38 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          - name: poll_ki_features_extraction
-            type: streams.ki_features_extract_stream
+          - name: poll_task
+            type: while
+            max-iterations: 108
+            condition: "steps.check_status.output.status:in_progress"
+            steps:
+              - name: check_status
+                type: kibana.request
+                with:
+                  method: GET
+                  path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
+                  use_server_info: true
+                  headers:
+                    x-elastic-internal-origin: "kibana"
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: "5s"
+                    strategy: exponential
+              - name: if_poll_delay
+                type: if
+                condition: "steps.check_status.output.status:in_progress"
+                steps:
+                  - name: poll_delay
+                    type: wait
+                    with:
+                      duration: "5s"
+          - name: task_result
+            type: data.set
             with:
               streamName: "{{ foreach.item.streamName }}"
-              scheduledStreams: "${{ steps.select_streams.output.scheduled }}"
+              status: "${{ steps.check_status.output.status }}"
+              durationMs: "${{ steps.check_status.output.durationMs }}"
+              features: "${{ steps.check_status.output.features }}"
+              iterations: "${{ steps.check_status.output.iterations }}"
+              totalTokensUsed: "${{ steps.check_status.output.totalTokensUsed }}"

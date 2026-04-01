@@ -109,11 +109,6 @@ export class StreamsAppPlugin
           (m) => m.kiSelectStreamsPublicStepDefinition
         )
       );
-      plugins.workflowsExtensions.registerStepDefinition(() =>
-        import('./workflows/continuous_extraction_step').then(
-          (m) => m.kiFeaturesExtractStreamPublicStepDefinition
-        )
-      );
     }
 
     coreSetup.application.register({

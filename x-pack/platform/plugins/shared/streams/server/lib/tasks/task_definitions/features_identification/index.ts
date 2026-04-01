@@ -470,6 +470,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   }),
                 ]);
 
+                const durationMs = Date.now() - new Date(_task.created_at).getTime();
+
                 const reconciledComputedFeatures = reconcileComputedFeatures({
                   computedFeatures,
                   streamName,
@@ -489,11 +491,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   { start, end, streamName },
                   {
                     features: allFeatures,
+                    durationMs,
                     iterations: iterationResults,
                     totalTokensUsed,
                   }
                 );
               } catch (error) {
+                const failDurationMs = Date.now() - new Date(_task.created_at).getTime();
+
                 if (isDefinitionNotFoundError(error)) {
                   taskLogger.debug(
                     () =>
@@ -544,6 +549,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage,
                   {
                     features: [],
+                    durationMs: failDurationMs,
                     iterations: iterationResults,
                     totalTokensUsed: partialTokensUsed,
                   }
