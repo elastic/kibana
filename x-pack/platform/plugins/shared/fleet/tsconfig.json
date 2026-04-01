@@ -15,7 +15,8 @@
     "scripts/**/*",
     "package.json",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_automatic_import_v2/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -133,6 +134,7 @@
     "@kbn/user-profile-components",
     "@kbn/css-utils",
     "@kbn/rison",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/doc-links"
   ]
 }
