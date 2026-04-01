@@ -34,5 +34,5 @@ export const SKIP_BUTTON = i18n.translate(
 
 export const SKIP_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.skipButtonAriaLabel',
-  { defaultMessage: 'Skip this step and continue without uploading all the times.' }
+  { defaultMessage: 'Skip this step and continue without uploading all the items' }
 );
