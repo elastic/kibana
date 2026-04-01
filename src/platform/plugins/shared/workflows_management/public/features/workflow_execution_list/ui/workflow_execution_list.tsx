@@ -21,8 +21,9 @@ import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type WorkflowExecutionListDto } from '@kbn/workflows';
+import { isTerminalStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { ExecutionListFilters } from './workflow_execution_list_filters';
+import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
 
@@ -37,6 +38,9 @@ export interface WorkflowExecutionListProps {
   selectedId: string | null;
   setPaginationObserver: (ref: HTMLDivElement | null) => void;
   showExecutor?: boolean;
+  canCancelLoadedNonTerminal: boolean;
+  isCancelLoadedNonTerminalInProgress: boolean;
+  onConfirmCancelLoadedNonTerminal: () => Promise<void>;
 }
 
 // TODO: use custom table? add pagination and search
@@ -54,11 +58,24 @@ export const WorkflowExecutionList = ({
   selectedId,
   setPaginationObserver,
   showExecutor = false,
+  canCancelLoadedNonTerminal,
+  isCancelLoadedNonTerminalInProgress,
+  onConfirmCancelLoadedNonTerminal,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
 
-  // Extract unique executedBy values from executions
+  const nonTerminalLoadedCount = useMemo(() => {
+    if (!executions?.results.length) {
+      return 0;
+    }
+    return executions.results.filter((e) => !isTerminalStatus(e.status)).length;
+  }, [executions]);
+
+  const showListFooter = Boolean(
+    !isInitialLoading && !error && executions && executions.results.length > 0
+  );
+
   const availableExecutedByOptions = useMemo(() => {
     if (!executions?.results) return [];
     const uniqueUsers = new Set<string>();
@@ -70,7 +87,6 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions]);
 
-  // Reset scroll position when filters change
   useEffect(() => {
     if (scrollableContentRef.current) {
       scrollableContentRef.current.scrollTop = 0;
@@ -157,7 +173,6 @@ export const WorkflowExecutionList = ({
                   onClick={() => onExecutionClick(execution.id)}
                 />
               </EuiFlexItem>
-              {/* Observer element for infinite scrolling - attached to last item */}
               {execution.id === lastExecutionId && (
                 <div
                   ref={setPaginationObserver}
@@ -214,6 +229,15 @@ export const WorkflowExecutionList = ({
         <div ref={scrollableContentRef} css={styles.scrollableContent}>
           {content}
         </div>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <WorkflowExecutionListFooter
+          showFooter={showListFooter}
+          nonTerminalLoadedCount={nonTerminalLoadedCount}
+          canCancelLoadedNonTerminal={canCancelLoadedNonTerminal}
+          isCancelLoadedNonTerminalInProgress={isCancelLoadedNonTerminalInProgress}
+          onConfirmCancelLoadedNonTerminal={onConfirmCancelLoadedNonTerminal}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
