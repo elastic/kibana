@@ -10,6 +10,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -19,7 +20,6 @@ import {
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -134,9 +134,7 @@ describe('WorkflowDetailHeader', () => {
       },
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
-    mockUseWorkflowsCapabilities.mockReturnValue({
-      ...mockWorkflowsManagementCapabilities,
-    });
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
       setActiveTab: jest.fn(),
