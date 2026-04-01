@@ -10,8 +10,17 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills/type_defi
 
 export const alertRetrievalBuilderSkill = {
   basePath: 'skills/security/attack-discovery',
-  content: '',
-  description: 'Placeholder',
-  id: 'alert-retrieval-builder',
-  name: 'alert-retrieval-builder',
+  content:
+    '# Attack Discovery Alerts ES|QL Query Builder\n\nPlaceholder — real implementation added in PR 8.',
+  description: 'Placeholder — real implementation added in PR 8.',
+  getRegistryTools: () => ['platform.core.generate_esql', 'platform.core.execute_esql'],
+  id: 'attack-discovery-alert-retrieval-builder',
+  name: 'attack-discovery-alerts-esql-query-builder',
+  referencedContent: [
+    {
+      content: 'Placeholder — real implementation added in PR 8.',
+      name: 'example-esql-queries',
+      relativePath: './examples',
+    },
+  ],
 } as unknown as SkillDefinition;

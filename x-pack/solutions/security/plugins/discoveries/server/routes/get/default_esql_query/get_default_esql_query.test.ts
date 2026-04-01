@@ -163,8 +163,10 @@ describe('GET /internal/attack_discovery/attack_discovery/queries/esql/default',
 describe('registerGetDefaultEsqlQueryRoute feature flag', () => {
   it('returns 404 when the feature flag is disabled', async () => {
     const { assertWorkflowsEnabled } = await import('../../../lib/assert_workflows_enabled');
-    const mockNotFoundResponse = { type: 'not_found' } as never;
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as jest.Mock).mockImplementationOnce(
+      ({ response: r }: { response: ReturnType<typeof httpServerMock.createResponseFactory> }) =>
+        r.notFound({ body: { message: 'Attack Discovery workflows are not enabled' } })
+    );
 
     const { registerGetDefaultEsqlQueryRoute } = await import('./get_default_esql_query');
 

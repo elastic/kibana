@@ -18,7 +18,7 @@ import { createTracedLogger } from '@kbn/discoveries/impl/lib/create_traced_logg
 import { validateRequest } from '@kbn/discoveries/impl/attack_discovery/generation/validate_request';
 import type { DiscoveriesPluginStartDeps } from '../../types';
 import { resolveConnectorDetails } from '../../workflows/helpers/resolve_connector_details';
-import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../..';
+import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
 import type { WorkflowInitializationService } from '../../lib/workflow_initialization';
 import { executeGenerationWorkflow, getInferredPrebuiltStepTypes } from './helpers';

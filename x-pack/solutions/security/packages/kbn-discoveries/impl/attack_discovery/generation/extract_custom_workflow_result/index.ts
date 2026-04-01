@@ -5,20 +5,78 @@
  * 2.0.
  */
 
-// Placeholder — real implementation added in PR 4
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
+import { normalizeLastStepOutput } from '../normalize_last_step_output';
+
 export interface CustomWorkflowAlertResult {
+  /** CSV-formatted alert strings (one field per line: `fieldName,value1,value2,...`) */
   alerts: string[];
+  /** Number of alerts retrieved */
   alertsContextCount: number;
+  /** Source workflow ID */
   workflowId: string;
+  /** Source workflow run ID */
   workflowRunId: string;
 }
 
-export const extractCustomWorkflowResult = (_params: {
+const findLastStepWithOutput = (
+  stepExecutions: WorkflowExecutionDto['stepExecutions']
+): WorkflowExecutionDto['stepExecutions'][number] | undefined => {
+  for (let i = stepExecutions.length - 1; i >= 0; i--) {
+    const step = stepExecutions[i];
+
+    if (step.stepId !== 'trigger' && step.output != null) {
+      return step;
+    }
+  }
+
+  return undefined;
+};
+
+export const extractCustomWorkflowResult = ({
+  execution,
+  workflowId,
+  workflowRunId,
+}: {
   execution: WorkflowExecutionDto;
   workflowId: string;
   workflowRunId: string;
 }): CustomWorkflowAlertResult => {
-  throw new Error('Not implemented — real implementation added in PR 4');
+  if (execution.status === 'failed') {
+    const errorMessage = execution.error?.message ?? 'Unknown error';
+    throw new Error(`Custom alert retrieval workflow ${workflowId} failed: ${errorMessage}`);
+  }
+
+  if (execution.status === 'cancelled') {
+    throw new Error(
+      `Alert retrieval workflow (id: ${workflowId}) was cancelled. This may indicate a concurrent execution or manual cancellation. Retry generation.`
+    );
+  }
+
+  if (execution.status === 'timed_out') {
+    throw new Error(
+      `Alert retrieval workflow (id: ${workflowId}) timed out. Consider increasing the workflow timeout or reducing the alert count.`
+    );
+  }
+
+  const lastStep = findLastStepWithOutput(execution.stepExecutions);
+
+  if (lastStep == null) {
+    return {
+      alerts: [],
+      alertsContextCount: 0,
+      workflowId,
+      workflowRunId,
+    };
+  }
+
+  const alerts = normalizeLastStepOutput(lastStep.output);
+
+  return {
+    alerts,
+    alertsContextCount: alerts.length,
+    workflowId,
+    workflowRunId,
+  };
 };

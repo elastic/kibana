@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
-import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../../..';
+import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../../constants';
 import { registerGenerateWorkflowRoute } from './post_generate_workflow';
 
 jest.mock('../../../lib/assert_workflows_enabled', () => ({

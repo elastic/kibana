@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
-import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../..';
+import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { registerGenerateRoute } from './post_generate';
 
 jest.mock('../../lib/assert_workflows_enabled', () => ({
