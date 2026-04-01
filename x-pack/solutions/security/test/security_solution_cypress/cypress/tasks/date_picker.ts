@@ -77,9 +77,8 @@ export const updateDateRangeInLocalDatePickers = (
       // Convert "MMM D, YYYY @ HH:mm:ss.SSS" → ISO by stripping the " @ " separator.
       const toIso = (d: string) => new Date(d.replace(' @ ', ' ')).toISOString();
       cy.get(GET_DATE_RANGE_PICKER_CONTROL_BUTTON(localQueryBarSelector)).click();
-      cy.get(DATE_RANGE_PICKER_INPUT)
-        .clear()
-        .type(`${toIso(startDate)} to ${toIso(endDate)}{enter}`);
+      cy.get(DATE_RANGE_PICKER_INPUT).clear();
+      cy.get(DATE_RANGE_PICKER_INPUT).type(`${toIso(startDate)} to ${toIso(endDate)}{enter}`);
     } else {
       // Legacy EuiSuperDatePicker
       cy.get(GET_LOCAL_SHOW_DATES_BUTTON(localQueryBarSelector)).click();
