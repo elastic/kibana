@@ -25,23 +25,10 @@ export const STATUS_LABELS: Record<
       defaultMessage: 'The agent policy referenced by this private location no longer exists.',
     }
   ),
-  [PrivateLocationHealthStatusValue.AgentPolicyMismatch]: i18n.translate(
-    'xpack.synthetics.monitorHealth.status.agentPolicyMismatch',
-    {
-      defaultMessage:
-        'The package policy exists but is attached to a different agent policy than expected.',
-    }
-  ),
   [PrivateLocationHealthStatusValue.MissingLocation]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingLocation',
     {
       defaultMessage: 'The monitor references a private location that no longer exists.',
-    }
-  ),
-  [PrivateLocationHealthStatusValue.PackageNotInstalled]: i18n.translate(
-    'xpack.synthetics.monitorHealth.status.packageNotInstalled',
-    {
-      defaultMessage: 'The synthetics Fleet package is not installed.',
     }
   ),
 };
@@ -53,7 +40,6 @@ export const getStatusLabel = (status: PrivateLocationHealthStatusValue): string
 
 export const RESET_FIXABLE_STATUSES = new Set([
   PrivateLocationHealthStatusValue.MissingPackagePolicy,
-  PrivateLocationHealthStatusValue.AgentPolicyMismatch,
 ]);
 
 export const isFixableByResetStatus = (status: PrivateLocationHealthStatusValue): boolean =>

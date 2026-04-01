@@ -31,12 +31,8 @@ const STATUS_REASONS: Record<
     'The Fleet package policy for this monitor and private location pair does not exist.',
   [PrivateLocationHealthStatusValue.MissingAgentPolicy]:
     'The agent policy referenced by this private location no longer exists.',
-  [PrivateLocationHealthStatusValue.AgentPolicyMismatch]:
-    'The package policy exists but is attached to a different agent policy than expected.',
   [PrivateLocationHealthStatusValue.MissingLocation]:
     'The monitor references a private location that no longer exists.',
-  [PrivateLocationHealthStatusValue.PackageNotInstalled]:
-    'The synthetics Fleet package is not installed.',
 };
 
 interface FoundMonitor {
@@ -66,21 +62,6 @@ export class MonitorIntegrationHealthApi {
 
     const privateLocationAPI = new SyntheticsPrivateLocation(this.server);
 
-    const syntheticsInstallation =
-      await this.server.fleet.packageService.asInternalUser.getInstallation('synthetics');
-
-    if (!syntheticsInstallation) {
-      return {
-        monitors: this.buildAllLocationsWithStatus(
-          foundMonitors,
-          PrivateLocationHealthStatusValue.PackageNotInstalled,
-          allPrivateLocationsMap,
-          privateLocationAPI
-        ),
-        errors,
-      };
-    }
-
     const allSpacesWithMonitors = await privateLocationAPI.getAllSpacesWithMonitors();
     const allSpaces = new Set([this.spaceId, ...allSpacesWithMonitors]);
 
@@ -102,11 +83,9 @@ export class MonitorIntegrationHealthApi {
 
       // Status checks are ordered by root-cause severity (most fundamental first).
       // Only the first matching status is returned per location — downstream issues
-      // (e.g. agent_policy_mismatch) are moot when a more fundamental problem exists
-      // (e.g. the agent policy itself is missing).
+      // are moot when a more fundamental problem exists.
       //
-      // Priority: missing_location > missing_agent_policy > missing_package_policy
-      //           > agent_policy_mismatch > healthy
+      // Priority: missing_location > missing_agent_policy > missing_package_policy > healthy
       const locationStatuses: PrivateLocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const newFormatPolicyId = privateLocationAPI.getPolicyId(
@@ -152,21 +131,7 @@ export class MonitorIntegrationHealthApi {
         }
 
         const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
-        const existingPackagePolicy = existingPackagePoliciesMap.get(resolvedPolicyId);
-
         const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
-        const attachedPolicyIds = existingPackagePolicy?.policy_ids ?? [
-          existingPackagePolicy?.policy_id,
-        ];
-        if (!attachedPolicyIds.includes(expectedAgentPolicyId)) {
-          return MonitorIntegrationHealthApi.buildLocationStatus(
-            loc.id,
-            existingPrivateLocation.label,
-            PrivateLocationHealthStatusValue.AgentPolicyMismatch,
-            resolvedPolicyId,
-            expectedAgentPolicyId
-          );
-        }
 
         return MonitorIntegrationHealthApi.buildLocationStatus(
           loc.id,
@@ -272,43 +237,6 @@ export class MonitorIntegrationHealthApi {
       { ignoreMissing: true, withPackagePolicies: false }
     );
     return new Map((existingAgentPolicies ?? []).map((policy) => [policy.id, policy]));
-  }
-
-  private buildAllLocationsWithStatus(
-    foundMonitors: FoundMonitor[],
-    status: PrivateLocationHealthStatusValue,
-    allPrivateLocationsMap: Map<string, PrivateLocationAttributes>,
-    privateLocationAPI: SyntheticsPrivateLocation
-  ): MonitorHealthStatus[] {
-    return foundMonitors.map(({ so }) => {
-      const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
-      const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
-
-      const locationStatuses: PrivateLocationHealthStatus[] = privateLocations.map((loc) => {
-        const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
-        const expectedPolicyId = privateLocationAPI.getPolicyId(
-          { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
-          loc.id
-        );
-
-        return MonitorIntegrationHealthApi.buildLocationStatus(
-          loc.id,
-          existingPrivateLocation?.label ?? loc.label ?? loc.id,
-          status,
-          expectedPolicyId,
-          existingPrivateLocation?.agentPolicyId
-        );
-      });
-
-      return {
-        configId: so.id,
-        monitorName: so.attributes[ConfigKey.NAME],
-        isHealthy: locationStatuses.every(
-          (ls) => ls.status === PrivateLocationHealthStatusValue.Healthy
-        ),
-        privateLocations: locationStatuses,
-      };
-    });
   }
 
   private static buildLocationStatus(

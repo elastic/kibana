@@ -272,106 +272,6 @@ describe('MonitorIntegrationHealthApi', () => {
     });
   });
 
-  describe('package not installed', () => {
-    it('returns PackageNotInstalled for all private locations when synthetics package is not installed', async () => {
-      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
-      const so = createMonitorSO('mon-1', {
-        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
-
-      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetInstallation,
-      });
-
-      const result = await api.getHealth(['mon-1']);
-
-      expect(result.monitors).toHaveLength(1);
-      const locStatus = result.monitors[0].privateLocations[0];
-      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.PackageNotInstalled);
-      expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isHealthy).toBe(false);
-    });
-
-    it('does not mark public-only monitors as unhealthy when package is not installed', async () => {
-      const so = createMonitorSO('mon-1', {
-        locations: [{ id: 'us-east-1', label: 'US East', isServiceManaged: true }],
-      });
-
-      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetInstallation,
-      });
-
-      const result = await api.getHealth(['mon-1']);
-
-      expect(result.monitors[0].isHealthy).toBe(true);
-      expect(result.monitors[0].privateLocations).toHaveLength(0);
-    });
-
-    it('skips package/agent policy fetches when package is not installed', async () => {
-      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
-      const so = createMonitorSO('mon-1', {
-        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
-
-      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const fleetGetByIDs = jest.fn();
-      const fleetAgentPolicyGetByIds = jest.fn();
-      const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetInstallation,
-        fleetGetByIDs,
-        fleetAgentPolicyGetByIds,
-      });
-
-      await api.getHealth(['mon-1']);
-
-      expect(fleetGetByIDs).not.toHaveBeenCalled();
-      expect(fleetAgentPolicyGetByIds).not.toHaveBeenCalled();
-    });
-
-    it('marks all locations across multiple monitors as PackageNotInstalled', async () => {
-      const privateLoc1 = createPrivateLocation('loc-1', 'agent-1', 'Location 1');
-      const privateLoc2 = createPrivateLocation('loc-2', 'agent-2', 'Location 2');
-
-      const so1 = createMonitorSO('mon-1', {
-        locations: [
-          { id: 'loc-1', label: 'Location 1', isServiceManaged: false },
-          { id: 'loc-2', label: 'Location 2', isServiceManaged: false },
-        ],
-      });
-      const so2 = createMonitorSO('mon-2', {
-        locations: [{ id: 'loc-1', label: 'Location 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
-
-      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const getMock = jest.fn().mockResolvedValueOnce(so1).mockResolvedValueOnce(so2);
-      const api = buildApi({
-        monitorConfigRepository: { get: getMock },
-        fleetGetInstallation,
-      });
-
-      const result = await api.getHealth(['mon-1', 'mon-2']);
-
-      expect(result.monitors).toHaveLength(2);
-      for (const monitor of result.monitors) {
-        expect(monitor.isHealthy).toBe(false);
-        for (const loc of monitor.privateLocations) {
-          expect(loc.status).toBe(PrivateLocationHealthStatusValue.PackageNotInstalled);
-        }
-      }
-    });
-  });
-
   describe('healthy monitors', () => {
     it('returns healthy when package policy exists and agent policy matches', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
@@ -532,33 +432,6 @@ describe('MonitorIntegrationHealthApi', () => {
     });
   });
 
-  describe('agent policy mismatch', () => {
-    it('returns AgentPolicyMismatch when the package policy is attached to a different agent policy', async () => {
-      const privateLoc = createPrivateLocation('priv-loc-1', 'expected-agent-policy');
-      const so = createMonitorSO('mon-1', {
-        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
-      });
-
-      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
-
-      const expectedPolicyId = 'mon-1-priv-loc-1';
-      const packagePolicy = createPackagePolicy(expectedPolicyId, ['wrong-agent-policy']);
-      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
-
-      const api = buildApi({
-        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
-        fleetGetByIDs,
-      });
-
-      const result = await api.getHealth(['mon-1']);
-
-      const locStatus = result.monitors[0].privateLocations[0];
-      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.AgentPolicyMismatch);
-      expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isHealthy).toBe(false);
-    });
-  });
-
   describe('project monitors use different policy ID format', () => {
     it('generates policy ID without spaceId for project-origin monitors', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
@@ -703,7 +576,7 @@ describe('MonitorIntegrationHealthApi', () => {
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
     });
 
-    it('reports AgentPolicyMismatch for legacy policy attached to wrong agent', async () => {
+    it('reports healthy for legacy policy even when attached to a different agent', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'expected-agent');
       const so = createMonitorSO('mon-1', {
         locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
@@ -723,7 +596,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].privateLocations[0].status).toBe(
-        PrivateLocationHealthStatusValue.AgentPolicyMismatch
+        PrivateLocationHealthStatusValue.Healthy
       );
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(legacyPolicyId);
     });
