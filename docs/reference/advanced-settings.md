@@ -318,35 +318,6 @@ $$$notifications-lifetime-info$$$`notifications:lifetime:info` {applies_to}`stac
 
 ### {{observability}} [observability-advanced-settings]
 
-$$$ai-anonymization-settings$$$`ai:anonymizationSettings` {applies_to}`stack: preview` {applies_to}`observability: preview` {applies_to}`elasticsearch: preview`
-:   List of anonymization rules for AI Assistant. Includes rules for Named Entity Recognition (NER) models and regular expression patterns to identify and anonymize sensitive data.
-
-    :::{dropdown} Default configuration
-    ```json
-    {
-      "rules": [
-        {
-          "entityClass": "EMAIL",
-          "type": "RegExp",
-          "pattern": "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
-          "enabled": false
-        },
-        {
-          "type": "NER",
-          "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
-          "enabled": false,
-          "allowedEntityClasses": [
-            "PER",
-            "ORG",
-            "LOC"
-          ],
-          "timeoutSeconds": 30
-        }
-      ]
-    }
-    ```
-    :::
-
 $$$observability-log-sources$$$`observability:logSources` {applies_to}`stack: ga` {applies_to}`observability: ga`
 :   Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules. `logs-*-*, logs-*, filebeat-*` by default.
 
