@@ -45,3 +45,4 @@ browserslist
 react-day-picker
 jszip
 patch-package
+@opentelemetry/resources
