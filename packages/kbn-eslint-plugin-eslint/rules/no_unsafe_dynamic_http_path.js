@@ -199,12 +199,13 @@ function isSafeTemplateLiteralPath(node) {
       return true;
     }
 
+    const afterExpr = node.quasis[1]?.value.cooked;
     return (
       index === 0 &&
       isSafePathPrefixReference(expression) &&
       node.quasis[0].value.cooked === '' &&
-      node.quasis[1] != null &&
-      node.quasis[1].value.cooked.startsWith('/')
+      typeof afterExpr === 'string' &&
+      afterExpr.startsWith('/')
     );
   });
 }
