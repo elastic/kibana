@@ -610,119 +610,6 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
-export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
-  engines: Array<{
-    type: string;
-    status: string;
-    delay: string;
-    frequency: string;
-    docsPerSecond: number;
-    lookbackPeriod: string;
-    fieldHistoryLength: number;
-    indexPattern: string;
-    filter: string;
-    timestampField: string;
-    components: Array<{
-      id: string;
-      resource: string;
-      installed: boolean;
-      health?: string;
-    }>;
-  }>;
-}> = {
-  eventType: 'entity_store_health_report',
-  schema: {
-    engines: {
-      type: 'array',
-      items: {
-        properties: {
-          type: {
-            type: 'keyword',
-            _meta: { description: 'Engine type (e.g "host" or "generic")' },
-          },
-          status: {
-            type: 'keyword',
-            _meta: {
-              description: 'Overall engine status',
-            },
-          },
-          delay: {
-            type: 'keyword',
-            _meta: {
-              description: 'Initial data processing delay (human readable, e.g., "5s")',
-            },
-          },
-          frequency: {
-            type: 'keyword',
-            _meta: { description: 'Run frequency (e.g., "1m", "15m")' },
-          },
-          docsPerSecond: {
-            type: 'double',
-            _meta: { description: 'Indexing rate in documents per second' },
-          },
-          lookbackPeriod: {
-            type: 'keyword',
-            _meta: {
-              description: 'Lookback period used by the engine (e.g., "7d")',
-            },
-          },
-          fieldHistoryLength: {
-            type: 'long',
-            _meta: {
-              description: 'Number of historical field entries retained',
-            },
-          },
-          indexPattern: {
-            type: 'keyword',
-            _meta: { description: 'Additional index pattern ingested by the transform' },
-          },
-          filter: {
-            type: 'keyword',
-            _meta: {
-              description: 'Optional filter applied to ingested documents',
-            },
-          },
-          timestampField: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'Name of the timestamp field used for all operations (e.g. "@timestamp")',
-            },
-          },
-          components: {
-            type: 'array',
-            items: {
-              properties: {
-                id: {
-                  type: 'keyword',
-                  _meta: { description: 'Component identifier' },
-                },
-                resource: {
-                  type: 'keyword',
-                  _meta: {
-                    description: 'Type of the component (e.g. "index" or "transform")',
-                  },
-                },
-                installed: {
-                  type: 'boolean',
-                  _meta: { description: 'Whether the component is installed' },
-                },
-                health: {
-                  type: 'keyword',
-                  _meta: {
-                    optional: true,
-                    description: 'Reported component health; Present for transforms',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-};
-
 export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   error: string;
 }> = {
@@ -865,34 +752,6 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
       _meta: {
         optional: true,
         description: 'Contains the error message in case the tool usage was not successful',
-      },
-    },
-  },
-};
-
-export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
-  storeSize: number;
-  entityType: string;
-  namespace: string;
-}> = {
-  eventType: 'entity_store_usage',
-  schema: {
-    storeSize: {
-      type: 'long',
-      _meta: {
-        description: 'Number of entities stored in the entity store by type and namespace',
-      },
-    },
-    entityType: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entities stored (e.g. "host")',
-      },
-    },
-    namespace: {
-      type: 'keyword',
-      _meta: {
-        description: 'Namespace where the entities are stored (e.g. "default")',
       },
     },
   },
@@ -1948,12 +1807,10 @@ export const events = [
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,
-  ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_API_CALL_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_DELETION_EVENT,
-  ENTITY_STORE_USAGE_EVENT,
   ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT,
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
