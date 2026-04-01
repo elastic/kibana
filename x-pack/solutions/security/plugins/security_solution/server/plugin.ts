@@ -415,14 +415,16 @@ export class Plugin implements ISecuritySolutionPlugin {
         recommendedEndpoints: [],
       });
 
-      plugins.searchInferenceEndpoints.features.register({
-        parentFeatureId: 'security_search_inference_parent',
-        featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
-        featureName: 'Automatic migration',
-        featureDescription: 'Automatic migration inference endpoint configuration',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
+      if (!experimentalFeatures.siemMigrationsDisabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: 'security_search_inference_parent',
+          featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
+          featureName: 'Automatic migration',
+          featureDescription: 'Automatic migration inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
     }
 
     const requestContextFactory = new RequestContextFactory({
