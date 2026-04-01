@@ -5,81 +5,110 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { deriveAlertDelayModeFromStateTransition } from '../utils/rule_request_mappers';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 
 type DelayMode = 'immediate' | 'breaches' | 'duration';
 
+const MODE_OPTION_IDS = {
+  immediate: 'alert_delay_mode_immediate',
+  breaches: 'alert_delay_mode_breaches',
+  duration: 'alert_delay_mode_duration',
+} as const;
+
 const MODE_OPTIONS = [
   {
-    id: 'immediate' as const,
+    id: MODE_OPTION_IDS.immediate,
     label: i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeImmediate', {
       defaultMessage: 'Immediate',
     }),
   },
   {
-    id: 'breaches' as const,
+    id: MODE_OPTION_IDS.breaches,
     label: i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeBreaches', {
       defaultMessage: 'Breaches',
     }),
   },
   {
-    id: 'duration' as const,
+    id: MODE_OPTION_IDS.duration,
     label: i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeDuration', {
       defaultMessage: 'Duration',
     }),
   },
 ];
 
+const modeFromOptionId = (id: string): DelayMode => {
+  if (id === MODE_OPTION_IDS.immediate) return 'immediate';
+  if (id === MODE_OPTION_IDS.duration) return 'duration';
+  return 'breaches';
+};
+
+const optionIdForMode = (mode: DelayMode): string => {
+  if (mode === 'immediate') return MODE_OPTION_IDS.immediate;
+  if (mode === 'duration') return MODE_OPTION_IDS.duration;
+  return MODE_OPTION_IDS.breaches;
+};
+
 const DEFAULT_PENDING_COUNT = 2;
 const DEFAULT_PENDING_TIMEFRAME = '2m';
 
-const deriveMode = (stateTransition?: {
-  pendingTimeframe?: string;
-  pendingCount?: number;
-}): DelayMode => {
-  if (stateTransition?.pendingTimeframe != null) return 'duration';
-  if (stateTransition?.pendingCount != null) return 'breaches';
-  return 'immediate';
-};
-
 export const AlertDelayField = () => {
-  const { control, setValue } = useFormContext<FormValues>();
+  const { control, getValues, setValue } = useFormContext<FormValues>();
   const stateTransition = useWatch({ control, name: 'stateTransition' });
-  const [selectedMode, setSelectedMode] = useState<DelayMode>(deriveMode(stateTransition));
+  const selectedMode = useWatch({ control, name: 'stateTransitionAlertDelayMode' });
+  const displayMode: DelayMode =
+    selectedMode ?? deriveAlertDelayModeFromStateTransition(stateTransition);
 
   const onModeChange = useCallback(
-    (mode: string) => {
-      switch (mode as DelayMode) {
+    (optionId: string) => {
+      const st = getValues('stateTransition') ?? {};
+      const nextMode = modeFromOptionId(optionId);
+      switch (nextMode) {
         case 'immediate':
-          setSelectedMode('immediate');
-          setValue('stateTransition.pendingCount', undefined);
-          setValue('stateTransition.pendingTimeframe', undefined);
+          setValue('stateTransitionAlertDelayMode', 'immediate', { shouldDirty: true });
+          setValue(
+            'stateTransition',
+            {
+              ...st,
+              pendingCount: null,
+              pendingTimeframe: null,
+            },
+            { shouldDirty: true, shouldTouch: true }
+          );
           break;
         case 'breaches':
-          setSelectedMode('breaches');
+          setValue('stateTransitionAlertDelayMode', 'breaches', { shouldDirty: true });
           setValue(
-            'stateTransition.pendingCount',
-            stateTransition?.pendingCount ?? DEFAULT_PENDING_COUNT
+            'stateTransition',
+            {
+              ...st,
+              pendingCount: st.pendingCount ?? DEFAULT_PENDING_COUNT,
+              pendingTimeframe: null,
+            },
+            { shouldDirty: true, shouldTouch: true }
           );
-          setValue('stateTransition.pendingTimeframe', undefined);
           break;
         case 'duration':
-          setSelectedMode('duration');
-          setValue('stateTransition.pendingCount', undefined);
+          setValue('stateTransitionAlertDelayMode', 'duration', { shouldDirty: true });
           setValue(
-            'stateTransition.pendingTimeframe',
-            stateTransition?.pendingTimeframe ?? DEFAULT_PENDING_TIMEFRAME
+            'stateTransition',
+            {
+              ...st,
+              pendingCount: null,
+              pendingTimeframe: st.pendingTimeframe ?? DEFAULT_PENDING_TIMEFRAME,
+            },
+            { shouldDirty: true, shouldTouch: true }
           );
           break;
       }
     },
-    [setValue, stateTransition?.pendingCount, stateTransition?.pendingTimeframe]
+    [getValues, setValue]
   );
 
   return (
@@ -97,20 +126,20 @@ export const AlertDelayField = () => {
             defaultMessage: 'Alert delay mode',
           })}
           options={MODE_OPTIONS}
-          idSelected={selectedMode}
+          idSelected={optionIdForMode(displayMode)}
           onChange={onModeChange}
           isFullWidth
           data-test-subj="stateTransitionDelayMode"
         />
         <EuiSpacer size="s" />
-        {selectedMode === 'immediate' && (
+        {displayMode === 'immediate' && (
           <EuiText size="xs" color="subdued" data-test-subj="stateTransitionImmediateDescription">
             {i18n.translate('xpack.alertingV2.ruleForm.alertDelay.immediateDescription', {
               defaultMessage: 'No delay - Alerts on first breach',
             })}
           </EuiText>
         )}
-        {selectedMode === 'breaches' && (
+        {displayMode === 'breaches' && (
           <StateTransitionCountField
             variant="pending"
             prependLabel={i18n.translate(
@@ -119,7 +148,7 @@ export const AlertDelayField = () => {
             )}
           />
         )}
-        {selectedMode === 'duration' && (
+        {displayMode === 'duration' && (
           <StateTransitionTimeframeField
             variant="pending"
             numberPrependLabel={i18n.translate(
