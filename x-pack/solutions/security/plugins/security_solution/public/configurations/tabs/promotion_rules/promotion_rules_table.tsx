@@ -191,7 +191,6 @@ const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColum
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: true,
-    width: '16%',
     isLoadingJobs: false,
     mlJobs: [],
   });

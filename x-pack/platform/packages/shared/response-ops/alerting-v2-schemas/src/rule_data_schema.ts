@@ -261,7 +261,7 @@ export const updateRuleDataSchema = z
       .strict()
       .optional(),
     recovery_policy: recoveryPolicySchema.optional().nullable(),
-    state_transition: stateTransitionSchema,
+    state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).optional().nullable(),

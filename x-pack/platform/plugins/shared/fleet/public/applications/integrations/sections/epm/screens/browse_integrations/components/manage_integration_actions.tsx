@@ -150,6 +150,7 @@ export const ManageIntegrationActions: React.FC<{
           iconType="checkInCircleFilled"
           iconSide="left"
           onClick={openReviewModal}
+          data-test-subj="manageIntegrationReviewApproveInlineBtn"
           style={{
             backgroundColor: euiTheme.colors.backgroundLightPrimary,
             borderRadius: euiTheme.border.radius.small,
@@ -211,6 +212,7 @@ export const ManageIntegrationActions: React.FC<{
                 disabled={reviewApproveDisabled}
                 toolTipContent={reviewApproveTooltip}
                 onClick={openReviewModal}
+                data-test-subj="manageIntegrationReviewApproveMenuItem"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
@@ -221,6 +223,7 @@ export const ManageIntegrationActions: React.FC<{
                 key="installToCluster"
                 icon="exportAction"
                 disabled={!isApproved || isInstalling}
+                data-test-subj="manageIntegrationInstallMenuItem"
                 toolTipContent={
                   isApproved
                     ? undefined
@@ -242,6 +245,7 @@ export const ManageIntegrationActions: React.FC<{
                 key="downloadZip"
                 icon="download"
                 disabled={!isPackageReady || isDownloadingZip}
+                data-test-subj="manageIntegrationDownloadZipMenuItem"
                 toolTipContent={
                   isPackageReady
                     ? undefined
@@ -267,6 +271,7 @@ export const ManageIntegrationActions: React.FC<{
                   closePopover();
                   onEdit(integration.integrationId);
                 }}
+                data-test-subj="manageIntegrationEditMenuItem"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.actions.edit"
@@ -277,6 +282,7 @@ export const ManageIntegrationActions: React.FC<{
                 key="delete"
                 icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
                 onClick={openDeleteConfirm}
+                data-test-subj="manageIntegrationDeleteMenuItem"
               >
                 <EuiTextColor color="danger">
                   <FormattedMessage
