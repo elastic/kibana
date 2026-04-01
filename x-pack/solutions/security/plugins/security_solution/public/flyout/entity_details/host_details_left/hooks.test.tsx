@@ -106,7 +106,6 @@ describe('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
-        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
     });
 
@@ -127,7 +126,6 @@ describe('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.CSP_INSIGHTS }),
-        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
     });
 
@@ -142,12 +140,14 @@ describe('hooks', () => {
             hasMisconfigurationFindings: false,
             hasVulnerabilitiesFindings: false,
             hasNonClosedAlerts: false,
+            entityStoreEntityId: 'testEntityStoreId',
           }),
         { wrapper: TestProviders }
       );
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
+        expect.objectContaining({ id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP }),
       ]);
     });
 

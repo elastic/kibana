@@ -374,7 +374,7 @@ const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): s
         ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${euidColumn})`)}, "")`;
     })
     .join(',\n      ');
-  return `REPLACE(CONCAT("\\"sourceFields\\":, ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "\\\\{,", "{")`;
+  return `REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "\\\\{,", ${JSON_OBJECT_START})`;
 };
 
 const buildActorSourceFieldsEsql = (): string =>
