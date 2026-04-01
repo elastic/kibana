@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, boomify, notFound, serverUnavailable } from '@hapi/boom';
+import { boomify, notFound, serverUnavailable } from '@hapi/boom';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { isInferenceError } from '@kbn/inference-common';
 import type { ResolvedInferenceEndpoints } from '@kbn/search-inference-endpoints/server';
@@ -26,8 +26,7 @@ type ResolveArgs = Pick<
 /**
  * Returns the connector list for Observability AI Assistant.
  *
- * When Model Settings is enabled and has a non-empty allow-list, returns only those connectors.
- * When Model Settings is configured but empty, throws 400.
+ * When Model Settings is enabled and SIEP returns endpoints, returns only those.
  * Otherwise falls back to the full inference connector list.
  */
 export async function resolveConnectorList({
@@ -38,14 +37,8 @@ export async function resolveConnectorList({
 }: ResolveArgs): Promise<InferenceConnector[]> {
   const resolved = await loadEndpoints({ context, plugins, request, logger });
 
-  if (resolved?.endpoints.length) {
+  if (resolved) {
     return resolved.endpoints;
-  }
-
-  if (resolved?.soEntryFound) {
-    throw badRequest(
-      'No inference endpoints are configured for Observability AI Assistant in this space.'
-    );
   }
 
   const inferenceStart = await plugins.inference.start();
@@ -55,8 +48,7 @@ export async function resolveConnectorList({
 /**
  * Returns a single connector by id for Observability AI Assistant.
  *
- * When Model Settings is enabled and has a non-empty allow-list, the connector must be in it (404 otherwise).
- * When Model Settings is configured but empty, throws 400.
+ * When Model Settings is enabled and SIEP returns endpoints, the connector must be in them (404 otherwise).
  * Otherwise falls back to the inference plugin.
  */
 export async function resolveConnectorById({
@@ -68,7 +60,7 @@ export async function resolveConnectorById({
 }: ResolveArgs & { connectorId: string }): Promise<InferenceConnector> {
   const resolved = await loadEndpoints({ context, plugins, request, logger });
 
-  if (resolved?.endpoints.length) {
+  if (resolved) {
     const connector = resolved.endpoints.find((c) => c.connectorId === connectorId);
     if (!connector) {
       throw notFound(
@@ -76,12 +68,6 @@ export async function resolveConnectorById({
       );
     }
     return connector;
-  }
-
-  if (resolved?.soEntryFound) {
-    throw badRequest(
-      'No inference endpoints are configured for Observability AI Assistant in this space.'
-    );
   }
 
   const inferenceStart = await plugins.inference.start();

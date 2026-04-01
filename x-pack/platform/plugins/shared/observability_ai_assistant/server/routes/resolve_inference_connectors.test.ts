@@ -105,8 +105,8 @@ describe('resolveConnectorList', () => {
     expect(await callList({ plugins: siepPlugins(endpoints, true) })).toEqual(endpoints);
   });
 
-  it('throws 400 when model settings is configured but empty', async () => {
-    await assertBoom(callList({ plugins: siepPlugins([], true) }), 400);
+  it('returns empty list when model settings is configured but has no endpoints', async () => {
+    expect(await callList({ plugins: siepPlugins([], true) })).toEqual([]);
   });
 
   it('falls back to inference when model settings flag is off', async () => {
@@ -121,9 +121,8 @@ describe('resolveConnectorList', () => {
     expect(await callList({ plugins: inferenceOnlyPlugins(fallback) })).toEqual(fallback);
   });
 
-  it('falls back to inference when empty endpoints and no SO entry', async () => {
-    const fallback = [connector('z')];
-    expect(await callList({ plugins: siepPlugins([], false, { fallback }) })).toEqual(fallback);
+  it('returns empty list when SIEP returns no endpoints and no SO entry', async () => {
+    expect(await callList({ plugins: siepPlugins([], false) })).toEqual([]);
   });
 
   it('logs warnings from SIEP resolution', async () => {
@@ -157,8 +156,8 @@ describe('resolveConnectorById', () => {
     await assertBoom(callById('missing', { plugins: siepPlugins([connector('a')], true) }), 404);
   });
 
-  it('throws 400 when model settings is configured but empty', async () => {
-    await assertBoom(callById('any', { plugins: siepPlugins([], true) }), 400);
+  it('throws 404 when model settings is configured but has no endpoints', async () => {
+    await assertBoom(callById('any', { plugins: siepPlugins([], true) }), 404);
   });
 
   it('falls back to inference when model settings flag is off', async () => {
@@ -173,11 +172,8 @@ describe('resolveConnectorById', () => {
     expect(await callById('fb', { plugins: inferenceOnlyPlugins([c]) })).toBe(c);
   });
 
-  it('falls back to inference when empty endpoints and no SO entry', async () => {
-    const c = connector('inferred');
-    expect(await callById('inferred', { plugins: siepPlugins([], false, { fallback: [c] }) })).toBe(
-      c
-    );
+  it('throws 404 when SIEP returns no endpoints and no SO entry', async () => {
+    await assertBoom(callById('any', { plugins: siepPlugins([], false) }), 404);
   });
 
   it('throws 503 when getForFeature fails', async () => {
