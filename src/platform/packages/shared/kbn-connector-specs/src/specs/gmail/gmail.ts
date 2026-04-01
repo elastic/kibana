@@ -36,6 +36,7 @@ export const GmailConnector: ConnectorSpec = {
     displayName: 'Gmail',
     description: 'Search and read emails from Gmail',
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
@@ -43,6 +44,11 @@ export const GmailConnector: ConnectorSpec = {
       'bearer',
       {
         type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { disabled: true },
+          },
+        },
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',

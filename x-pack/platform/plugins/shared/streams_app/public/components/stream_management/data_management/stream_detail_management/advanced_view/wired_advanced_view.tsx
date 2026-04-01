@@ -12,7 +12,6 @@ import type { Streams } from '@kbn/streams-schema';
 import { isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
-import { StreamDiscoveryConfiguration } from '../../../../sig_events/stream_detail_systems/stream_discovery_configuration';
 import { StreamDescription } from '../../../../sig_events/stream_detail_systems/stream_description';
 import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
@@ -62,12 +61,11 @@ export function WiredAdvancedView({
             aiFeatures={aiFeatures}
           />
           <EuiSpacer />
-          <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
-          <EuiSpacer />
         </>
       )}
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
+          announceOnMount={false}
           iconType="warning"
           color="primary"
           title={i18n.translate(

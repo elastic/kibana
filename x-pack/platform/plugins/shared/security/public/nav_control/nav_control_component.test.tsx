@@ -300,7 +300,7 @@ describe('SecurityNavControl', () => {
                 >
                   <span
                     class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="exit"
+                    data-euiicon-type="logOut"
                   />
                   <span
                     class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
@@ -419,7 +419,7 @@ describe('SecurityNavControl', () => {
                 >
                   <span
                     class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="exit"
+                    data-euiicon-type="logOut"
                   />
                   <span
                     class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
@@ -487,7 +487,7 @@ describe('SecurityNavControl', () => {
                 >
                   <span
                     class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="exit"
+                    data-euiicon-type="logOut"
                   />
                   <span
                     class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
