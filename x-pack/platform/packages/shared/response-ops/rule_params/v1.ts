@@ -5,7 +5,7 @@
  * 2.0.
  */
 import path from 'node:path';
-import type { Type, TypeOf , ObjectType} from '@kbn/config-schema';
+import type { Type, TypeOf, ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { mlAnomalyDetectionAlertParamsSchemaV1 } from './anomaly_detection';
 import { anomalyDetectionJobsHealthRuleParamsSchemaV1 } from './anomaly_detection_jobs_health';

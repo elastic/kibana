@@ -191,7 +191,6 @@ const baseCreateBodyFields = {
 
 export { createRuleParamsExamplesV1 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const knownCreateBodySchema = schema.discriminatedUnion(
   'rule_type_id',
   createRuleBodyVariantsV1(baseCreateBodyFields) as any
