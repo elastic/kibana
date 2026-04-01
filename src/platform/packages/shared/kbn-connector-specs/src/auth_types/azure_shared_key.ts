@@ -157,7 +157,7 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'azure_shared_key',
   schema: authSchema,
   configure: async (
-    _: AuthContext,
+    ctx: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
@@ -173,14 +173,21 @@ export const AzureSharedKeyAuth: AuthTypeSpec<AuthSchemaType> = {
       const { pathname, searchParams } = getRequestUrl(config);
       const canonicalizedHeaders = buildCanonicalizedHeaders(headers);
       const canonicalizedResource = buildCanonicalizedResource(accountName, pathname, searchParams);
+      const verb = (config.method ?? 'GET').toUpperCase();
       const stringToSign = buildStringToSign(
-        (config.method ?? 'GET').toUpperCase(),
+        verb,
         headers,
         canonicalizedHeaders,
         canonicalizedResource
       );
       const signature = computeSignature(stringToSign, accountKey);
       const authHeader = `SharedKey ${accountName}:${signature}`;
+
+      ctx.logger.debug(
+        `[azure-shared-key] signing ${verb} ${config.url ?? ''}\n` +
+          `  canonical-resource: ${canonicalizedResource}\n` +
+          `  string-to-sign: ${JSON.stringify(stringToSign)}`
+      );
 
       config.headers = config.headers ?? {};
       config.headers['x-ms-date'] = msDate;

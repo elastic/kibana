@@ -17,6 +17,9 @@
  * @see https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api
  */
 
+/* eslint-disable import/no-nodejs-modules -- stream is used server-side only for streaming blob downloads */
+import type { Readable } from 'stream';
+/* eslint-enable import/no-nodejs-modules */
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
@@ -26,12 +29,26 @@ import listContainersWorkflow from './workflows/list_containers.yaml';
 import getBlobWorkflow from './workflows/get_blob.yaml';
 
 const AZURE_BLOB_API_VERSION = '2021-06-08';
+const MAX_BLOB_DOWNLOAD_SIZE_BYTES = 131072; // 128 KB
+
+/** Narrow no-break space: macOS uses this before AM/PM in default screenshot filenames, not U+0020. */
+const NNBS = '\u202F';
 
 /**
- * Default maximum blob size that can be downloaded (128 kilobytes).
- * Blobs larger than this will be rejected to avoid memory issues.
+ * If the blob name looks like a default macOS screenshot but uses a regular space before AM/PM,
+ * rewrite that space to U+202F so the path matches what macOS actually wrote when uploading.
+ * @see https://core.trac.wordpress.org/ticket/62995
  */
-const MAX_BLOB_DOWNLOAD_SIZE_BYTES = 128 * 1024;
+function applyMacOsScreenshotMeridiemSpace(blobName: string): string {
+  if (!blobName.startsWith('Screenshot ')) {
+    return blobName;
+  }
+  // Screenshot 2026-04-01 at 9.56.48 AM.png → space before AM/PM should be NNBS on macOS
+  return blobName.replace(
+    /^(Screenshot \d{4}-\d{2}-\d{2} at \d{1,2}\.\d{2}\.\d{2}) (AM|PM)(?=\.|$)/i,
+    (_, prefix, meridiem) => `${prefix}${NNBS}${meridiem}`
+  );
+}
 
 function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
@@ -187,27 +204,44 @@ export const AzureBlob: ConnectorSpec = {
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
         const container = encodePathSegment(input.container);
-        const blobName = encodePathSegment(input.blobName);
-        const blobUrl = `${baseUrl}/${container}/${blobName}`;
-
-        const maxSize = MAX_BLOB_DOWNLOAD_SIZE_BYTES;
-        const headResponse = await ctx.client.head(blobUrl);
-        const rawLength = headResponse.headers['content-length'];
+        const blobName = encodePathSegment(applyMacOsScreenshotMeridiemSpace(input.blobName));
+        const response = await ctx.client.get(`${baseUrl}/${container}/${blobName}`, {
+          responseType: 'stream',
+        });
+        const stream = response.data as Readable;
+        const contentType = response.headers['content-type'] as string | undefined;
+        const rawLength = response.headers['content-length'];
         const contentLength = rawLength ? parseInt(String(rawLength), 10) : undefined;
-        if (contentLength !== undefined && contentLength > maxSize) {
-          throw new Error(
-            `Blob size (${contentLength} bytes) exceeds maximum downloadable size (${maxSize} bytes).`
-          );
+
+        if (contentLength !== undefined && contentLength > MAX_BLOB_DOWNLOAD_SIZE_BYTES) {
+          stream.destroy();
+          return {
+            tooLarge: true,
+            contentLength,
+            message: `Blob size (${contentLength} bytes) exceeds the maximum downloadable size (${MAX_BLOB_DOWNLOAD_SIZE_BYTES} bytes).`,
+          };
         }
 
-        const response = await ctx.client.get(blobUrl, { responseType: 'arraybuffer' });
-        const buffer = response.data as ArrayBuffer;
-        const contentBase64 = Buffer.from(buffer).toString('base64');
-        const contentType = response.headers['content-type'] as string | undefined;
+        const chunks: Buffer[] = [];
+        let bytesRead = 0;
+        for await (const chunk of stream) {
+          const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array);
+          bytesRead += buf.length;
+          if (bytesRead > MAX_BLOB_DOWNLOAD_SIZE_BYTES) {
+            stream.destroy();
+            return {
+              tooLarge: true,
+              contentLength: bytesRead,
+              message: `Blob size (${bytesRead} bytes) exceeds the maximum downloadable size (${MAX_BLOB_DOWNLOAD_SIZE_BYTES} bytes).`,
+            };
+          }
+          chunks.push(buf);
+        }
+        const buffer = Buffer.concat(chunks);
         return {
-          contentBase64,
+          contentBase64: buffer.toString('base64'),
           contentType,
-          contentLength,
+          contentLength: contentLength ?? buffer.length,
         };
       },
     },
@@ -221,8 +255,17 @@ export const AzureBlob: ConnectorSpec = {
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
         const container = encodePathSegment(input.container);
-        const blobName = encodePathSegment(input.blobName);
-        const response = await ctx.client.head(`${baseUrl}/${container}/${blobName}`);
+        const blobName = encodePathSegment(applyMacOsScreenshotMeridiemSpace(input.blobName));
+        let response;
+        try {
+          response = await ctx.client.head(`${baseUrl}/${container}/${blobName}`);
+        } catch (err) {
+          const status = (err as { response?: { status?: number } })?.response?.status;
+          if (status === 404) {
+            throw new Error(`Blob not found: ${input.container}/${input.blobName}`);
+          }
+          throw err;
+        }
         return {
           contentType: response.headers['content-type'],
           contentLength: response.headers['content-length']

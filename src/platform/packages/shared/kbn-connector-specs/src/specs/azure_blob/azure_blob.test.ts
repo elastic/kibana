@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
+import { Readable } from 'stream';
 import type { ActionContext } from '../../connector_spec';
 import { AzureBlob } from './azure_blob';
 
@@ -97,9 +99,9 @@ describe('AzureBlob', () => {
 
   describe('getBlob action', () => {
     it('should get blob and return base64 content', async () => {
-      const buffer = Buffer.from('hello');
+      const stream = Readable.from(Buffer.from('hello'));
       mockClient.get.mockResolvedValue({
-        data: buffer,
+        data: stream,
         headers: { 'content-type': 'text/plain', 'content-length': '5' },
       });
 
@@ -110,11 +112,68 @@ describe('AzureBlob', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         `${baseUrl}/mycontainer/file.txt`,
-        expect.objectContaining({ responseType: 'arraybuffer' })
+        expect.objectContaining({ responseType: 'stream' })
       );
       expect(result.contentBase64).toBe(Buffer.from('hello').toString('base64'));
       expect(result.contentType).toBe('text/plain');
       expect(result.contentLength).toBe(5);
+    });
+
+    it('should use narrow no-break space before AM in default macOS screenshot names', async () => {
+      const stream = Readable.from(Buffer.from('x'));
+      mockClient.get.mockResolvedValue({
+        data: stream,
+        headers: { 'content-type': 'image/png', 'content-length': '1' },
+      });
+
+      await AzureBlob.actions.getBlob.handler(mockContext, {
+        container: 'mycontainer',
+        blobName: 'Screenshot 2026-04-01 at 9.56.48 AM.png',
+      });
+
+      // macOS writes U+202F before AM/PM; agents often pass a regular space (U+0020).
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${baseUrl}/mycontainer/Screenshot%202026-04-01%20at%209.56.48%E2%80%AFAM.png`,
+        expect.objectContaining({ responseType: 'stream' })
+      );
+    });
+
+    it('should return tooLarge when Content-Length exceeds 128KB', async () => {
+      const stream = new Readable({ read() {} });
+      mockClient.get.mockResolvedValue({
+        data: stream,
+        headers: { 'content-type': 'video/mp4', 'content-length': '200000' },
+      });
+
+      const result = await AzureBlob.actions.getBlob.handler(mockContext, {
+        container: 'mycontainer',
+        blobName: 'large.mp4',
+      });
+
+      expect(result).toEqual({
+        tooLarge: true,
+        contentLength: 200000,
+        message: 'Blob size (200000 bytes) exceeds the maximum downloadable size (131072 bytes).',
+      });
+    });
+
+    it('should return tooLarge when streamed bytes exceed 128KB without Content-Length', async () => {
+      const bigChunk = Buffer.alloc(200000, 97);
+      const stream = Readable.from([bigChunk]);
+      mockClient.get.mockResolvedValue({
+        data: stream,
+        headers: { 'content-type': 'video/mp4' },
+      });
+
+      const result = await AzureBlob.actions.getBlob.handler(mockContext, {
+        container: 'mycontainer',
+        blobName: 'large.mp4',
+      });
+
+      expect(result).toMatchObject({
+        tooLarge: true,
+        contentLength: 200000,
+      });
     });
   });
 

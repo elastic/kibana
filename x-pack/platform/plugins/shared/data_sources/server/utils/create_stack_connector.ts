@@ -49,14 +49,14 @@ function buildSecretsFromConnectorSpec(
     const colonIndex = credentials.indexOf(':');
     if (colonIndex < 0) {
       throw new Error(
-        'Azure Blob credentials must be in the form accountName:accountKey (storage account name and key separated by a colon).'
+        'Azure Shared Key credentials must be in the form accountName:accountKey (storage account name and key separated by a colon).'
       );
     }
     const accountName = credentials.slice(0, colonIndex).trim();
     const accountKey = credentials.slice(colonIndex + 1).trim();
     if (!accountName || !accountKey) {
       throw new Error(
-        'Azure Blob credentials must be in the form accountName:accountKey; both account name and key must be non-empty.'
+        'Azure Shared Key credentials must be in the form accountName:accountKey; both account name and key must be non-empty.'
       );
     }
     secrets.authType = 'azure_shared_key';
