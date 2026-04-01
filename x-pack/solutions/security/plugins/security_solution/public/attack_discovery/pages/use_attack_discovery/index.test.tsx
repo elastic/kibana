@@ -67,6 +67,8 @@ const { wrapper: queryWrapper } = createQueryWrapperMock();
 describe('useAttackDiscovery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock feature flags service to return false by default
+    mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
     (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
     (useFetchAnonymizationFields as jest.Mock).mockReturnValue({ data: [] });
   });
@@ -160,5 +162,78 @@ describe('useAttackDiscovery', () => {
       text: errorMessage,
     });
     expect(result.current.isLoading).toBe(false);
+  });
+
+  describe('when attackDiscoveryWorkflowsEnabled feature flag is enabled', () => {
+    beforeEach(() => {
+      // Mock feature flags service to return true for this test suite
+      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+    });
+
+    afterEach(() => {
+      // Reset to default (false)
+      mockedUseKibana.services.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
+    });
+
+    it('calls the internal API with workflow configuration', async () => {
+      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({
+        execution_uuid: 'test-uuid',
+      });
+
+      const { result } = renderHook(
+        () =>
+          useAttackDiscovery({
+            connectorId: 'test-id',
+            setLoadingConnectorId,
+            size: 20,
+          }),
+        {
+          wrapper: queryWrapper,
+        }
+      );
+
+      await act(async () => {
+        await result.current.fetchAttackDiscoveries();
+      });
+
+      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+        '/internal/attack_discovery/_generate',
+        expect.objectContaining({
+          version: '1',
+          body: expect.stringContaining('workflow_config'),
+        })
+      );
+    });
+
+    it('includes workflow configuration in request body', async () => {
+      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({
+        execution_uuid: 'test-uuid',
+      });
+
+      const { result } = renderHook(
+        () =>
+          useAttackDiscovery({
+            connectorId: 'test-id',
+            setLoadingConnectorId,
+            size: 20,
+          }),
+        {
+          wrapper: queryWrapper,
+        }
+      );
+
+      await act(async () => {
+        await result.current.fetchAttackDiscoveries();
+      });
+
+      const callArgs = (mockedUseKibana.services.http.post as jest.Mock).mock.calls[0];
+      const requestBody = JSON.parse(callArgs[1].body);
+
+      expect(requestBody.workflow_config).toEqual({
+        alert_retrieval_workflow_ids: [],
+        default_alert_retrieval_mode: 'custom_query',
+        validation_workflow_id: 'default',
+      });
+    });
   });
 });
