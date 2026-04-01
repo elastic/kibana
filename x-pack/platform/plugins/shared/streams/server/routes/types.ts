@@ -59,7 +59,7 @@ export interface RouteDependencies {
   getScopedClients: GetScopedClients;
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
-  continuousKiExtractionWorkflow?: ContinuousKiExtractionWorkflowService;
+  continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

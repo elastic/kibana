@@ -23,11 +23,7 @@ interface ContinuousKiExtractionSettings {
   excludedStreamPatterns?: string;
 }
 
-export interface ModelSettings {
-  connectorIdKnowledgeIndicatorExtraction?: string;
-  connectorIdRuleGeneration?: string;
-  connectorIdDiscovery?: string;
-  indexPatterns?: string;
+export interface ModelSettings extends ModelSettingsConfigAttributes {
   continuousKiExtraction?: ContinuousKiExtractionSettings;
 }
 

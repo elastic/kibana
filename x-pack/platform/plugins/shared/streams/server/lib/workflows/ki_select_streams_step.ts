@@ -11,7 +11,6 @@ import { StepCategory } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { Streams, TaskStatus } from '@kbn/streams-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { minimatch } from 'minimatch';
 import type { GetScopedClients } from '../../routes/types';
 import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
@@ -29,6 +28,8 @@ import {
   MAX_SCHEDULED_STREAMS,
 } from '../../../common/constants';
 import {
+  parseExcludePatterns,
+  matchesExcludePatterns,
   type streamCandidateSchema,
   kiSelectStreamsInputSchema,
   kiSelectStreamsOutputSchema,
@@ -63,17 +64,13 @@ const classifyStreams = ({
   excludedStreamPatterns: string;
   intervalHours: number;
 }): StreamSelectionResult => {
-  const excludePatterns = (excludedStreamPatterns ?? '')
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean);
-  const isExcluded = (name: string) => excludePatterns.some((pattern) => minimatch(name, pattern));
+  const excludePatterns = parseExcludePatterns(excludedStreamPatterns);
 
   const excluded: string[] = [];
   const eligibleNames = new Set<string>();
   for (const stream of allStreams) {
     if (Streams.QueryStream.Definition.is(stream)) continue;
-    if (isExcluded(stream.name)) {
+    if (matchesExcludePatterns(stream.name, excludePatterns)) {
       excluded.push(stream.name);
     } else {
       eligibleNames.add(stream.name);
@@ -94,7 +91,11 @@ const classifyStreams = ({
     if (!eligibleNames.has(streamName)) continue;
     streamsWithTask.add(streamName);
 
-    if (task.status === TaskStatus.InProgress && !isStale(task.created_at)) {
+    if (task.status === TaskStatus.InProgress) {
+      if (isStale(task.created_at)) {
+        // Stale tasks are left for the task manager to handle; skip them entirely.
+        continue;
+      }
       alreadyRunning.push({ streamName, scheduledAt: task.created_at || null });
     } else {
       const lastActivityAt =
@@ -125,10 +126,6 @@ const classifyStreams = ({
   };
 };
 
-interface MinimalLogger {
-  warn(message: string): void;
-}
-
 /**
  * Schedules feature identification tasks for the given candidates, handling
  * failures gracefully via Promise.allSettled.
@@ -146,7 +143,7 @@ const scheduleCandidates = async ({
   request: KibanaRequest;
   start: number;
   end: number;
-  logger: MinimalLogger;
+  logger: Pick<Logger, 'warn'>;
 }): Promise<{ scheduled: StreamCandidate[]; failedToSchedule: StreamCandidate[] }> => {
   const results = await Promise.allSettled(
     toSchedule.map((candidate) =>

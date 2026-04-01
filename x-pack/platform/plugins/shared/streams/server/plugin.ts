@@ -229,7 +229,7 @@ export class StreamsPlugin
       });
     }
 
-    let continuousKiExtractionWorkflow: ContinuousKiExtractionWorkflowService | undefined;
+    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
     if (plugins.workflowsExtensions && plugins.workflowsManagement) {
       registerKiSelectStreamsStep({
@@ -237,7 +237,7 @@ export class StreamsPlugin
         getScopedClients,
         logger: this.logger,
       });
-      continuousKiExtractionWorkflow = createContinuousKiExtractionWorkflowService(
+      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
         this.logger,
         plugins.workflowsManagement.management
       );
@@ -313,7 +313,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousKiExtractionWorkflow,
+        continuousKiExtractionWorkflowService,
       },
       core,
       logger: this.logger,

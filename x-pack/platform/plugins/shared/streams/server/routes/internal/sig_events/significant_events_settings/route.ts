@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ModelSettings } from '../../../../lib/sig_events/saved_objects/model_settings_config_service';
 import { getConfiguredIndexPatterns } from '../../../../lib/sig_events/helpers/get_configured_index_patterns';
 import { createServerRoute } from '../../../create_server_route';
@@ -83,7 +82,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    continuousKiExtractionWorkflow,
+    continuousKiExtractionWorkflowService,
   }): Promise<{ success: true }> => {
     const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
@@ -91,12 +90,11 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await modelSettingsClient.updateSettings(params.body);
 
-    if (params.body.continuousKiExtraction && continuousKiExtractionWorkflow) {
+    if (params.body.continuousKiExtraction && continuousKiExtractionWorkflowService) {
       const updatedSettings = await modelSettingsClient.getSettings();
-      await continuousKiExtractionWorkflow.ensureWorkflow({
+      await continuousKiExtractionWorkflowService.ensureWorkflow({
         enabled: updatedSettings.continuousKiExtraction?.enabled ?? false,
         request,
-        spaceId: DEFAULT_SPACE_ID,
       });
     }
 

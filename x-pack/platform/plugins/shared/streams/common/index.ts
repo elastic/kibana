@@ -25,6 +25,8 @@ export {
 } from './constants';
 
 export {
+  parseExcludePatterns,
+  matchesExcludePatterns,
   streamCandidateSchema,
   kiSelectStreamsInputSchema,
   kiSelectStreamsOutputSchema,

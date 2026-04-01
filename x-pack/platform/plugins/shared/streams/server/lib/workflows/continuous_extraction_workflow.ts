@@ -7,16 +7,13 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
 export interface ContinuousKiExtractionWorkflowService {
-  ensureWorkflow(params: {
-    enabled: boolean;
-    request: KibanaRequest;
-    spaceId: string;
-  }): Promise<void>;
+  ensureWorkflow(params: { enabled: boolean; request: KibanaRequest }): Promise<void>;
 }
 
 export const createContinuousKiExtractionWorkflowService = (
@@ -26,68 +23,58 @@ export const createContinuousKiExtractionWorkflowService = (
   const log = logger.get('continuous-ki-extraction-workflow');
 
   return {
-    async ensureWorkflow({ enabled, request, spaceId }) {
-      try {
-        const existing = await managementApi.getWorkflow(
-          CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-          spaceId
-        );
+    async ensureWorkflow({ enabled, request }) {
+      const existing = await managementApi.getWorkflow(
+        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        DEFAULT_SPACE_ID
+      );
 
-        if (existing) {
-          const yamlChanged = existing.yaml !== WORKFLOW_YAML;
-          const enabledChanged = existing.enabled !== enabled;
+      if (existing) {
+        const yamlChanged = existing.yaml !== WORKFLOW_YAML;
+        const enabledChanged = existing.enabled !== enabled;
 
-          if (!yamlChanged && !enabledChanged) {
-            log.debug(
-              `Continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID} is already up to date`
-            );
-            return;
-          }
-
-          const patch: { yaml?: string; enabled?: boolean } = {};
-          if (yamlChanged) patch.yaml = WORKFLOW_YAML;
-          if (enabledChanged) patch.enabled = enabled;
-
-          await managementApi.updateWorkflow(
-            CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-            patch,
-            spaceId,
-            request
-          );
-
-          log.info(
-            `Updated continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
+        if (!yamlChanged && !enabledChanged) {
+          log.debug(
+            `Continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID} is already up to date`
           );
           return;
         }
 
-        if (!enabled) {
-          return;
-        }
-
-        await managementApi.createWorkflow(
-          { yaml: WORKFLOW_YAML, id: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID },
-          spaceId,
-          request
-        );
+        const patch: { yaml?: string; enabled?: boolean } = {};
+        if (yamlChanged) patch.yaml = WORKFLOW_YAML;
+        if (enabledChanged) patch.enabled = enabled;
 
         await managementApi.updateWorkflow(
           CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-          { enabled: true },
-          spaceId,
+          patch,
+          DEFAULT_SPACE_ID,
           request
         );
 
         log.info(
-          `Created continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
+          `Updated continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
         );
-      } catch (error) {
-        log.error(
-          `Failed to ensure continuous KI extraction workflow: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
+        return;
       }
+
+      if (!enabled) {
+        return;
+      }
+
+      await managementApi.createWorkflow(
+        { yaml: WORKFLOW_YAML, id: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID },
+        DEFAULT_SPACE_ID,
+        request
+      );
+
+      await managementApi.updateWorkflow(
+        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        { enabled: true },
+        DEFAULT_SPACE_ID,
+        request
+      );
+
+      log.info(`Created continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
     },
   };
 };

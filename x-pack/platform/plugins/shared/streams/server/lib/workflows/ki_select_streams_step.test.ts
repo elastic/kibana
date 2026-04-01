@@ -17,55 +17,45 @@ jest.mock('../tasks/is_stale', () => ({
   isStale: jest.fn().mockReturnValue(false),
 }));
 
-const { isStale } = jest.requireMock('../tasks/is_stale') as {
-  isStale: jest.Mock;
-};
+const { isStale } = jest.requireMock('../tasks/is_stale') as { isStale: jest.Mock };
 
 type TaskForTest = PersistedTask<FeaturesIdentificationTaskParams>;
 
-const makeTask = (overrides: {
-  task: { params: { streamName: string; start?: number; end?: number }; [key: string]: unknown };
-  status?: TaskStatus;
-  created_at?: string;
-  last_completed_at?: string;
-  last_failed_at?: string;
-  [key: string]: unknown;
-}): TaskForTest =>
-  ({
-    id: `task-${overrides.task.params.streamName}`,
+const makeTask = (
+  streamName: string,
+  overrides: Partial<Omit<TaskForTest, 'task'>> & {
+    task?: Partial<TaskForTest['task']>;
+  } = {}
+): TaskForTest => {
+  const { task: taskOverrides, ...rest } = overrides;
+  return {
+    id: `task-${streamName}`,
     type: 'streams:features-identification',
     space: 'default',
     created_at: '2025-01-01T00:00:00Z',
     status: TaskStatus.Completed,
     last_completed_at: '2025-01-01T00:05:00Z',
-    ...overrides,
-  } as unknown as TaskForTest);
-
-const makeStream = (name: string, isQuery = false) => {
-  const base = { name } as Record<string, unknown>;
-  if (isQuery) {
-    base.query = { view: `$.${name}` };
-  }
-  return base;
+    ...rest,
+    task: { params: { streamName, start: 0, end: 1 }, ...taskOverrides },
+  } as TaskForTest;
 };
+
+const makeStream = (name: string, opts?: { query: boolean }) => ({
+  name,
+  ...(opts?.query ? { query: { view: `$.${name}` } } : {}),
+});
+
+const scheduledNames = (output: Record<string, unknown>) =>
+  (output.scheduled as Array<{ streamName: string }>).map((s) => s.streamName);
 
 describe('kiSelectStreamsStep handler', () => {
   let handler: (context: Record<string, unknown>) => Promise<{ output: Record<string, unknown> }>;
 
-  const mockTaskClient = {
-    findByType: jest.fn(),
-    schedule: jest.fn(),
-  };
-
-  const mockStreamsClient = {
-    listStreams: jest.fn(),
-  };
-
-  const mockModelSettingsClient = {
-    getSettings: jest.fn(),
-  };
-
-  const mockUiSettingsClient = {} as Record<string, unknown>;
+  const mockTaskClient = { findByType: jest.fn(), schedule: jest.fn() };
+  const mockStreamsClient = { listStreams: jest.fn() };
+  const mockModelSettingsClient = { getSettings: jest.fn() };
+  const mockUiSettingsClient = {};
+  const mockLogger = { info: jest.fn(), warn: jest.fn(), debug: jest.fn(), error: jest.fn() };
 
   const mockGetScopedClients = jest.fn().mockResolvedValue({
     streamsClient: mockStreamsClient,
@@ -74,27 +64,19 @@ describe('kiSelectStreamsStep handler', () => {
     uiSettingsClient: mockUiSettingsClient,
   });
 
-  const mockLogger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
-  };
-
   const makeContext = (input: Record<string, unknown> = {}) => ({
     input,
-    contextManager: {
-      getFakeRequest: jest.fn().mockReturnValue({}),
-    },
+    contextManager: { getFakeRequest: jest.fn().mockReturnValue({}) },
     logger: mockLogger,
     abortSignal: new AbortController().signal,
   });
 
-  beforeAll(async () => {
-    const workflowsExtensions = {
-      registerStepDefinition: jest.fn(),
-    };
+  const enabledSettings = (overrides = {}) => ({
+    continuousKiExtraction: { enabled: true, ...overrides },
+  });
 
+  beforeAll(async () => {
+    const workflowsExtensions = { registerStepDefinition: jest.fn() };
     const { registerKiSelectStreamsStep } = await import('./ki_select_streams_step');
 
     registerKiSelectStreamsStep({
@@ -115,9 +97,7 @@ describe('kiSelectStreamsStep handler', () => {
       modelSettingsClient: mockModelSettingsClient,
       uiSettingsClient: mockUiSettingsClient,
     });
-    mockModelSettingsClient.getSettings.mockResolvedValue({
-      continuousKiExtraction: { enabled: true },
-    });
+    mockModelSettingsClient.getSettings.mockResolvedValue(enabledSettings());
     mockStreamsClient.listStreams.mockResolvedValue([]);
     mockTaskClient.findByType.mockResolvedValue([]);
     mockTaskClient.schedule.mockResolvedValue(undefined);
@@ -134,22 +114,19 @@ describe('kiSelectStreamsStep handler', () => {
   it('skips query streams', async () => {
     mockStreamsClient.listStreams.mockResolvedValue([
       makeStream('logs'),
-      makeStream('my-query', true),
+      makeStream('my-query', { query: true }),
     ]);
 
     const { output } = await handler(makeContext());
 
     expect(mockTaskClient.schedule).toHaveBeenCalledTimes(1);
-    expect(output.scheduled).toEqual([{ streamName: 'logs', lastCompletedAt: null }]);
+    expect(scheduledNames(output)).toEqual(['logs']);
   });
 
   it('excludes streams matching exclude patterns', async () => {
-    mockModelSettingsClient.getSettings.mockResolvedValue({
-      continuousKiExtraction: {
-        enabled: true,
-        excludedStreamPatterns: 'debug-*, test-*',
-      },
-    });
+    mockModelSettingsClient.getSettings.mockResolvedValue(
+      enabledSettings({ excludedStreamPatterns: 'debug-*, test-*' })
+    );
     mockStreamsClient.listStreams.mockResolvedValue([
       makeStream('logs'),
       makeStream('debug-app'),
@@ -159,9 +136,7 @@ describe('kiSelectStreamsStep handler', () => {
     const { output } = await handler(makeContext());
 
     expect(output.excluded).toEqual(['debug-app', 'test-data']);
-    expect((output.scheduled as Array<{ streamName: string }>).map((s) => s.streamName)).toEqual([
-      'logs',
-    ]);
+    expect(scheduledNames(output)).toEqual(['logs']);
   });
 
   it('treats streams without a task as never-processed candidates', async () => {
@@ -169,23 +144,18 @@ describe('kiSelectStreamsStep handler', () => {
       makeStream('stream-a'),
       makeStream('stream-b'),
     ]);
-    mockTaskClient.findByType.mockResolvedValue([]);
 
     const { output } = await handler(makeContext());
 
-    expect(output.scheduled).toEqual([
-      { streamName: 'stream-a', lastCompletedAt: null },
-      { streamName: 'stream-b', lastCompletedAt: null },
-    ]);
+    expect(scheduledNames(output)).toEqual(['stream-a', 'stream-b']);
   });
 
   it('identifies already running (in-progress, non-stale) tasks', async () => {
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('running-stream')]);
     mockTaskClient.findByType.mockResolvedValue([
-      makeTask({
+      makeTask('running-stream', {
         status: TaskStatus.InProgress,
         created_at: new Date().toISOString(),
-        task: { params: { streamName: 'running-stream', start: 0, end: 1 } },
       }),
     ]);
 
@@ -195,33 +165,28 @@ describe('kiSelectStreamsStep handler', () => {
     expect(output.scheduled).toEqual([]);
   });
 
-  it('treats stale in-progress tasks as candidates', async () => {
+  it('skips stale in-progress tasks (task manager handles them)', async () => {
     isStale.mockReturnValue(true);
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('stale-stream')]);
     mockTaskClient.findByType.mockResolvedValue([
-      makeTask({
+      makeTask('stale-stream', {
         status: TaskStatus.InProgress,
-        created_at: '2025-01-01T00:00:00Z',
         last_completed_at: undefined,
-        task: { params: { streamName: 'stale-stream', start: 0, end: 1 } },
       }),
     ]);
 
     const { output } = await handler(makeContext());
 
     expect(output.alreadyRunning).toEqual([]);
-    expect(output.scheduled).toEqual([{ streamName: 'stale-stream', lastCompletedAt: null }]);
+    expect(output.scheduled).toEqual([]);
+    expect(output.upToDate).toEqual([]);
   });
 
   it('marks recently completed tasks as up-to-date', async () => {
     const recentCompletion = new Date().toISOString();
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('fresh-stream')]);
     mockTaskClient.findByType.mockResolvedValue([
-      makeTask({
-        status: TaskStatus.Completed,
-        last_completed_at: recentCompletion,
-        task: { params: { streamName: 'fresh-stream', start: 0, end: 1 } },
-      }),
+      makeTask('fresh-stream', { last_completed_at: recentCompletion }),
     ]);
 
     const { output } = await handler(makeContext());
@@ -236,11 +201,7 @@ describe('kiSelectStreamsStep handler', () => {
     const oldCompletion = '2024-01-01T00:00:00Z';
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('old-stream')]);
     mockTaskClient.findByType.mockResolvedValue([
-      makeTask({
-        status: TaskStatus.Completed,
-        last_completed_at: oldCompletion,
-        task: { params: { streamName: 'old-stream', start: 0, end: 1 } },
-      }),
+      makeTask('old-stream', { last_completed_at: oldCompletion }),
     ]);
 
     const { output } = await handler(makeContext());
@@ -257,10 +218,9 @@ describe('kiSelectStreamsStep handler', () => {
       makeStream('candidate-2'),
     ]);
     mockTaskClient.findByType.mockResolvedValue([
-      makeTask({
+      makeTask('running', {
         status: TaskStatus.InProgress,
         created_at: new Date().toISOString(),
-        task: { params: { streamName: 'running', start: 0, end: 1 } },
       }),
     ]);
 
@@ -293,11 +253,7 @@ describe('kiSelectStreamsStep handler', () => {
     const twoHoursAgo = new Date(Date.now() - 2 * 3_600_000).toISOString();
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('recent-stream')]);
     mockTaskClient.findByType.mockResolvedValue([
-      makeTask({
-        status: TaskStatus.Completed,
-        last_completed_at: twoHoursAgo,
-        task: { params: { streamName: 'recent-stream', start: 0, end: 1 } },
-      }),
+      makeTask('recent-stream', { last_completed_at: twoHoursAgo }),
     ]);
 
     const { output: withDefault } = await handler(makeContext());
@@ -313,14 +269,11 @@ describe('kiSelectStreamsStep handler', () => {
     const recentFailure = new Date().toISOString();
     mockStreamsClient.listStreams.mockResolvedValue([makeStream('failed-stream')]);
     mockTaskClient.findByType.mockResolvedValue([
-      makeTask({
+      makeTask('failed-stream', {
         status: TaskStatus.Failed,
         last_failed_at: recentFailure,
         last_completed_at: undefined,
-        task: {
-          params: { streamName: 'failed-stream', start: 0, end: 1 },
-          error: 'some error',
-        },
+        task: { params: { streamName: 'failed-stream', start: 0, end: 1 }, error: 'some error' },
       }),
     ]);
 
@@ -331,22 +284,15 @@ describe('kiSelectStreamsStep handler', () => {
   });
 
   it('returns the resolved connectorId in output', async () => {
-    mockStreamsClient.listStreams.mockResolvedValue([]);
-
     const { output } = await handler(makeContext());
 
     expect(output.connectorId).toBe('connector-1');
   });
 
   it('returns settings in output', async () => {
-    mockModelSettingsClient.getSettings.mockResolvedValue({
-      continuousKiExtraction: {
-        enabled: true,
-        intervalHours: 6,
-        excludedStreamPatterns: 'debug-*',
-      },
-    });
-    mockStreamsClient.listStreams.mockResolvedValue([]);
+    mockModelSettingsClient.getSettings.mockResolvedValue(
+      enabledSettings({ intervalHours: 6, excludedStreamPatterns: 'debug-*' })
+    );
 
     const { output } = await handler(makeContext());
 
