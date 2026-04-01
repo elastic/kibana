@@ -52,3 +52,4 @@ export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.s
 
 export const UPDATES_INDEX = '.entities.v2.updates.security_default';
 export const LATEST_INDEX = '.entities.v2.latest.security_default';
+export const HISTORY_INDEX_PATTERN = '.entities.v2.history.security_default*';

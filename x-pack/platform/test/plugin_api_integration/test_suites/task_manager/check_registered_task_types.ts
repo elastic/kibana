@@ -44,7 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'extraLargeCostTask',
     'sampleLongRunningRecurringTask',
+    'sampleRecurringTaskTimingOutWithError',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -54,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       const types = (await getRegisteredTypes())
         .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
+
       expect(types).to.eql([
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
@@ -182,7 +185,9 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:field_retention:enrichment',
         'entity_store:health',
         'entity_store:snapshot',
+        'entity_store:v2:entity_maintainer_task:accesses_frequently_and_infrequently',
         'entity_store:v2:entity_maintainer_task:automated-resolution',
+        'entity_store:v2:entity_maintainer_task:communicates_with',
         'entity_store:v2:extract_entity_task:generic',
         'entity_store:v2:extract_entity_task:host',
         'entity_store:v2:extract_entity_task:service',

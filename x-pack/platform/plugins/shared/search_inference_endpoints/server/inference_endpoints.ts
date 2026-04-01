@@ -8,7 +8,7 @@
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { InferenceConnector } from '@kbn/inference-common';
+import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
@@ -177,7 +177,9 @@ const resolveEndpointIds = async (
   }
 
   return {
-    ids: recEntry?.recommendedEndpoints ?? [],
+    ids: recEntry?.recommendedEndpoints ?? [
+      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
+    ],
     warnings: [],
     soEntryFound: false,
   };

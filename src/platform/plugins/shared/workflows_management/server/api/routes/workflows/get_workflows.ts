@@ -20,7 +20,7 @@ import {
   OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_WITH_OPTIONAL_EXECUTIONS_SECURITY } from '../utils/route_security';
+import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 const querySchema = schema.object({
@@ -53,7 +53,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
     .get({
       path: '/api/workflows',
       access: 'public',
-      security: WORKFLOW_READ_WITH_OPTIONAL_EXECUTIONS_SECURITY,
+      security: WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
       summary: 'Get workflows',
       description: 'Retrieve a paginated list of workflows with optional filtering.',
       options: {
@@ -71,6 +71,9 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
       },
       withLicenseCheck(async (context, request, response) => {
         try {
+          if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
+            return response.forbidden();
+          }
           const params = prepareParams(request.query);
           const spaceId = spaces.getSpaceId(request);
           const includeExecutionHistory =

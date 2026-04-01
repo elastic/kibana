@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type {
+  AnalyticsServiceStart,
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -14,6 +15,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
@@ -33,7 +35,12 @@ import {
 import { createTriggerEventHandler } from './event_driven/trigger_event_handler';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
+import {
+  triggerEventDispatchedSchema,
+  WORKFLOWS_TRIGGER_EVENT_DISPATCHED,
+} from './telemetry/events';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
+import { WorkflowsManagementTelemetryClient } from './telemetry/workflows_management_telemetry_client';
 import {
   initializeTriggerEventsClient,
   initializeTriggerEventsDataStream,
@@ -64,7 +71,9 @@ export class WorkflowsPlugin
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private securityStart?: SecurityServiceStart;
   private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
+  private analytics?: AnalyticsServiceStart;
   private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -80,6 +89,10 @@ export class WorkflowsPlugin
     this.aiTelemetryClient = new WorkflowsAiTelemetryClient(core.analytics, this.logger);
 
     registerUISettings(core, plugins);
+    core.analytics.registerEventType({
+      eventType: WORKFLOWS_TRIGGER_EVENT_DISPATCHED,
+      schema: triggerEventDispatchedSchema,
+    });
 
     initializeTriggerEventsDataStream(core.dataStreams);
 
@@ -181,10 +194,15 @@ export class WorkflowsPlugin
     const resolveMatchingWorkflowSubscriptionsFn = (
       params: ResolveMatchingWorkflowSubscriptionsParams
     ) => resolveMatchingWorkflowSubscriptions(params, { api, logger: this.logger });
+    const telemetryClient = new WorkflowsManagementTelemetryClient({
+      logger: this.logger,
+      getAnalytics: () => this.analytics,
+    });
 
     const triggerEventHandler = createTriggerEventHandler({
       api: this.api,
       logger: this.logger,
+      telemetryClient,
       getTriggerEventsClient: () => this.triggerEventsClient,
       getWorkflowExecutionEngine,
       resolveMatchingWorkflowSubscriptions: resolveMatchingWorkflowSubscriptionsFn,
@@ -196,7 +214,14 @@ export class WorkflowsPlugin
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces, getWorkflowExecutionEngine);
+    defineRoutes(
+      router,
+      this.api,
+      this.logger,
+      this.spaces,
+      getWorkflowExecutionEngine,
+      () => this.securityStart
+    );
 
     this.setupAiIntegration(core, api, this.aiTelemetryClient);
 
@@ -207,6 +232,9 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+    this.analytics = core.analytics;
+
+    this.securityStart = core.security;
 
     void this.initializeTriggerEventsClient(core);
 

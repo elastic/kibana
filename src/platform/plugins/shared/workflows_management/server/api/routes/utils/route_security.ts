@@ -25,10 +25,14 @@ import { WorkflowsManagementApiActions } from '@kbn/workflows';
 export const WORKFLOW_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.read] },
 };
-export const WORKFLOW_READ_WITH_OPTIONAL_EXECUTIONS_SECURITY: RouteSecurity = {
+/**
+ * This security configuration allows either `read` or `readExecution` privilege.
+ * This is used to include optional `readExecution` privilege.
+ * The `read` privilege needs to be checked explicitly in the route handler to enforce it.
+ */
+export const WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [
-      WorkflowsManagementApiActions.read,
       {
         anyRequired: [
           WorkflowsManagementApiActions.read,
