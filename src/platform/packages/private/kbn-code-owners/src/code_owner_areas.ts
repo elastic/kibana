@@ -48,6 +48,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/ml-ui',
     'elastic/platform-docs',
     'elastic/response-ops',
+    'elastic/rna-project-team',
     'elastic/stack-monitoring',
     'elastic/workflows-eng',
   ],
