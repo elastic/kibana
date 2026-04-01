@@ -13,6 +13,7 @@ export type { LayoutConfigType, JsonLayoutConfigType, PatternLayoutConfigType } 
 export type {
   FileAppenderConfig,
   ConsoleAppenderConfig,
+  OtelAppenderConfig,
   RollingFileAppenderConfig,
   RewriteAppenderConfig,
   AppenderConfigType,

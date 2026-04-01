@@ -7,25 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockCreateLayout = jest.fn();
-jest.mock('../layouts/layouts', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { schema } = require('@kbn/config-schema');
-  return {
-    Layouts: {
-      configSchema: schema.object({ type: schema.literal('mock') }),
-      create: mockCreateLayout,
-    },
-  };
-});
+export const mockEmit = jest.fn();
+export const mockShutdown = jest.fn();
+export const mockGetLogger = jest.fn(() => ({ emit: mockEmit }));
+export const mockLoggerProvider = jest.fn(() => ({
+  getLogger: mockGetLogger,
+  shutdown: mockShutdown,
+}));
+export const mockBatchLogRecordProcessor = jest.fn();
+export const mockOTLPLogExporter = jest.fn();
+export const mockResourceFromAttributes = jest.fn();
 
 jest.mock('@opentelemetry/sdk-logs', () => ({
-  LoggerProvider: jest.fn(() => ({ getLogger: jest.fn(() => ({ emit: jest.fn() })) })),
-  BatchLogRecordProcessor: jest.fn(),
+  LoggerProvider: mockLoggerProvider,
+  BatchLogRecordProcessor: mockBatchLogRecordProcessor,
 }));
+
 jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
-  OTLPLogExporter: jest.fn(),
+  OTLPLogExporter: mockOTLPLogExporter,
 }));
+
 jest.mock('@opentelemetry/resources', () => ({
-  resourceFromAttributes: jest.fn(),
+  resourceFromAttributes: mockResourceFromAttributes,
 }));
