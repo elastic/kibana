@@ -19,10 +19,10 @@ describe('registerAttachmentUiDefinitions', () => {
     jest.clearAllMocks();
   });
 
-  it('registers all three attachment types', () => {
+  it('registers all four attachment types', () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
-    expect(mockAddAttachmentType).toHaveBeenCalledTimes(3);
+    expect(mockAddAttachmentType).toHaveBeenCalledTimes(4);
   });
 
   it('registers alert attachment type with correct config', () => {
@@ -62,6 +62,19 @@ describe('registerAttachmentUiDefinitions', () => {
     const config = ruleCall![1];
     expect(config.getIcon()).toBe('document');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Rule');
+  });
+
+  it('registers lead attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+
+    const leadCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === SecurityAgentBuilderAttachments.lead
+    );
+    expect(leadCall).toBeDefined();
+
+    const config = leadCall![1];
+    expect(config.getIcon()).toBe('sparkles');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Hunting Lead');
   });
 
   it('returns attachmentLabel when provided in attachment data', () => {

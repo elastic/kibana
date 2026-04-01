@@ -92,6 +92,21 @@ import {
   WATCHLISTS_URL,
   WATCHLISTS_INDICES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
+import {
+  GENERATE_LEADS_URL,
+  GET_LEADS_URL,
+  GET_LEAD_BY_ID_URL,
+  LEAD_GENERATION_STATUS_URL,
+  DISMISS_LEAD_URL,
+  BULK_UPDATE_LEADS_URL,
+} from '../../../common/entity_analytics/lead_generation/constants';
+import type {
+  FindLeadsResponse,
+  GenerateLeadsResponse,
+  Lead,
+  LeadGenerationStatus,
+  BulkUpdateLeadsResponse,
+} from '../../../common/entity_analytics/lead_generation/types';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -722,15 +737,13 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'PUT',
         body: JSON.stringify(params.body),
       });
+
     const deleteWatchlist = async (params: { id: string }) =>
       http.fetch<{ deleted: true }>(`${WATCHLISTS_URL}/${params.id}`, {
         version: API_VERSIONS.public.v1,
         method: 'DELETE',
       });
 
-    /**
-     * List entity sources linked to a specific watchlist
-     */
     const listWatchlistEntitySources = async (params: {
       watchlistId: string;
       signal?: AbortSignal;
@@ -744,9 +757,6 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
 
-    /**
-     * Update an entity source linked to a watchlist
-     */
     const updateWatchlistEntitySource = async (params: {
       watchlistId: string;
       entitySourceId: string;
@@ -761,9 +771,6 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
 
-    /**
-     * Search indices with entity fields for watchlists
-     */
     const searchWatchlistIndices = async (params: {
       query: string | undefined;
       signal?: AbortSignal;
@@ -775,6 +782,75 @@ export const useEntityAnalyticsRoutes = () => {
           searchQuery: params.query,
         },
         signal: params.signal,
+      });
+
+    const fetchLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params?: {
+        page?: number;
+        perPage?: number;
+        sortField?: 'priority' | 'timestamp';
+        sortOrder?: 'asc' | 'desc';
+        status?: 'active' | 'dismissed' | 'expired';
+      };
+    }) =>
+      http.fetch<FindLeadsResponse>(GET_LEADS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        query: params,
+        signal,
+      });
+
+    const fetchLeadById = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
+      http.fetch<Lead>(GET_LEAD_BY_ID_URL.replace('{id}', id), {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        signal,
+      });
+
+    const fetchLeadGenerationStatus = ({ signal }: { signal?: AbortSignal }) =>
+      http.fetch<LeadGenerationStatus>(LEAD_GENERATION_STATUS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        signal,
+      });
+
+    const generateLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params?: { maxLeads?: number };
+    }) =>
+      http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params ?? {}),
+        signal,
+      });
+
+    const dismissLead = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
+      http.fetch<void>(DISMISS_LEAD_URL.replace('{id}', id), {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        signal,
+      });
+
+    const bulkUpdateLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: { ids: string[]; status: 'active' | 'dismissed' | 'expired' };
+    }) =>
+      http.fetch<BulkUpdateLeadsResponse>(BULK_UPDATE_LEADS_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+        signal,
       });
 
     return {
@@ -818,6 +894,12 @@ export const useEntityAnalyticsRoutes = () => {
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
       fetchWatchlists,
+      fetchLeads,
+      fetchLeadById,
+      fetchLeadGenerationStatus,
+      generateLeads,
+      dismissLead,
+      bulkUpdateLeads,
     };
   }, [
     http,
