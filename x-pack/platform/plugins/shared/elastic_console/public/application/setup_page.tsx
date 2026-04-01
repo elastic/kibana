@@ -43,7 +43,7 @@ export const SetupPage: React.FC = () => {
     setError(null);
 
     try {
-      const data = await services.http.post<SetupResponse>('/internal/elastic_console/setup');
+      const data = await services.http.post<SetupResponse>('/internal/sre_agent/setup');
       setSetupData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create setup credentials');
@@ -130,7 +130,7 @@ export const SetupPage: React.FC = () => {
                       },
                     },
                     options: {
-                      baseURL: `${setupData.kibanaUrl}/internal/elastic_console/v1`,
+                      baseURL: `${setupData.kibanaUrl}/internal/sre_agent/v1`,
                       apiKey: 'ignored',
                       headers: {
                         Authorization: `ApiKey ${setupData.apiKeyEncoded}`,

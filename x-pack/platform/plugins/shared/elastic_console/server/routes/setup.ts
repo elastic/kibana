@@ -23,7 +23,7 @@ export const registerSetupRoute = ({
 }) => {
   router.post(
     {
-      path: '/internal/elastic_console/setup',
+      path: '/internal/sre_agent/setup',
       security: {
         authz: { enabled: false, reason: 'This route creates an API key scoped to the user' },
       },

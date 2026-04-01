@@ -61,7 +61,7 @@ export const registerConversationRoutes = ({
   // List conversations
   router.get(
     {
-      path: '/internal/elastic_console/conversations',
+      path: '/internal/sre_agent/conversations',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
@@ -132,7 +132,7 @@ export const registerConversationRoutes = ({
   // Get single conversation
   router.get(
     {
-      path: '/internal/elastic_console/conversations/{id}',
+      path: '/internal/sre_agent/conversations/{id}',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
@@ -192,7 +192,7 @@ export const registerConversationRoutes = ({
   // Create conversation
   router.post(
     {
-      path: '/internal/elastic_console/conversations',
+      path: '/internal/sre_agent/conversations',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },
@@ -266,7 +266,7 @@ export const registerConversationRoutes = ({
   // Update conversation
   router.put(
     {
-      path: '/internal/elastic_console/conversations/{id}',
+      path: '/internal/sre_agent/conversations/{id}',
       security: {
         authz: { requiredPrivileges: ['agentBuilder:write'] },
       },

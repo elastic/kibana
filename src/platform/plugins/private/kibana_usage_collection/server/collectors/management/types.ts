@@ -195,5 +195,5 @@ export interface UsageStats {
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
-  'elasticConsole:enabled': boolean;
+  'sreAgent:enabled': boolean;
 }

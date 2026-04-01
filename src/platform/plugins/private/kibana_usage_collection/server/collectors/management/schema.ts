@@ -790,7 +790,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Switches the Entity Store Engine to v2',
     },
   },
-  'elasticConsole:enabled': {
+  'sreAgent:enabled': {
     type: 'boolean',
     _meta: {
       description: 'Non-default value of setting.',
