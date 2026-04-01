@@ -16,18 +16,24 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from '../constants';
+import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 
 @injectable()
 export class BulkGetAlertActionsRoute implements RouteHandler {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/action/_bulk_get`;
+  static path = `${ALERTING_V2_ALERT_API_PATH}/action/_bulk_get`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'public',
+    summary: 'Bulk get alert actions',
+    description: 'Get actions for multiple episodes in a single request.',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(bulkGetAlertActionsBodySchema),
