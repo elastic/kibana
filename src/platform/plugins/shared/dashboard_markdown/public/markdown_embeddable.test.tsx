@@ -99,6 +99,22 @@ describe('MarkdownEmbeddable', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
+  it('resolves bare relative links against current URL', async () => {
+    await renderEmbeddable({
+      initialState: { content: '[go to discover](discover)' },
+    });
+    const link = screen.getByRole('link', { name: /go to discover/i });
+    expect(link).toHaveAttribute('href', '/discover');
+  });
+
+  it('does not modify absolute links during relative resolution', async () => {
+    await renderEmbeddable({
+      initialState: { content: '[elastic](https://elastic.co)' },
+    });
+    const link = screen.getByRole('link', { name: /elastic/i });
+    expect(link).toHaveAttribute('href', 'https://elastic.co');
+  });
+
   it('shows renderer in view mode, shows editor in edit mode', async () => {
     const { embeddable } = await renderEmbeddable({
       initialState: { content: 'HELLO' },
@@ -224,6 +240,7 @@ describe('MarkdownEmbeddable', () => {
 
     expect(embeddable.api.getSerializedStateByValue()).toEqual({
       content: 'by value markdown',
+      settings: { open_links_in_new_tab: true },
     });
   });
 
@@ -252,6 +269,7 @@ describe('MarkdownEmbeddable', () => {
       title: 'Some title',
       description: 'some description',
       hide_title: true,
+      settings: { open_links_in_new_tab: true },
     });
   });
 });

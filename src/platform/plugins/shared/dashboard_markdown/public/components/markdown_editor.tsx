@@ -70,6 +70,7 @@ const strings = {
   }),
 };
 export interface MarkdownEditorProps {
+  parsingPluginList?: EuiMarkdownEditorProps['parsingPluginList'];
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
   content: string;
   onCancel: () => void;
@@ -80,6 +81,7 @@ export interface MarkdownEditorProps {
 }
 
 export const MarkdownEditor = ({
+  parsingPluginList,
   processingPluginList,
   content,
   onCancel,
@@ -120,6 +122,7 @@ export const MarkdownEditor = ({
           onChange={onChange}
           aria-label={strings.ariaLabel}
           placeholder={strings.placeholder}
+          parsingPluginList={parsingPluginList}
           processingPluginList={processingPluginList}
           uiPlugins={uiPlugins}
           height="full"
@@ -142,7 +145,7 @@ export const MarkdownEditor = ({
         />
       </div>
       {isPreview && (
-        <MarkdownRenderer processingPluginList={processingPluginList} content={value} />
+        <MarkdownRenderer parsingPluginList={parsingPluginList} processingPluginList={processingPluginList} content={value} />
       )}
       <MarkdownFooter
         onCancel={onCancel}
