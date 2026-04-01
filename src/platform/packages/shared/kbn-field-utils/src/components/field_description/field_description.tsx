@@ -68,7 +68,7 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
 };
 
 const EcsFieldDescriptionFallback: React.FC<
-  FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart; streamName?: string }
+  FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
 > = ({ fieldsMetadataService, streamNames, ...props }) => {
   const fieldName = removeKeywordSuffix(props.field.name);
 
@@ -115,6 +115,7 @@ const StreamDescriptionItem: React.FC<{
     attributes: ['description'],
     fieldNames: [fieldName],
     streamName,
+    source: ['streams'],
   });
 
   const description = streamMetadata?.[fieldName]?.description;
