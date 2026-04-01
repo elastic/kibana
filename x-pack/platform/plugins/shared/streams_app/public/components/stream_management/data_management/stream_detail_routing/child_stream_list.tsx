@@ -452,7 +452,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onDismiss={resetForm}
-                  onRegenerate={refineSuggestionsForStream}
+                  onRetry={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
                   reason={suggestionReason}
                 />

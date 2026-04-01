@@ -9,21 +9,21 @@ import { EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
-import { RefinementPopover } from './refinement_popover';
+import { GenerateSuggestionButton } from './generate_suggestions_button';
 import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 import type { PartitionSuggestionReason } from './use_review_suggestions_form';
 
 export function NoSuggestionsCallout({
   aiFeatures,
   isLoadingSuggestions,
-  onRegenerate,
+  onRetry,
   onDismiss,
   isDisabled = false,
   reason,
 }: {
   aiFeatures: AIFeatures;
   isLoadingSuggestions: boolean;
-  onRegenerate: (connectorId: string, userPrompt?: string) => void;
+  onRetry: (connectorId: string) => void;
   onDismiss: () => void;
   isDisabled?: boolean;
   reason?: PartitionSuggestionReason;
@@ -61,13 +61,21 @@ export function NoSuggestionsCallout({
       data-test-subj="streamsAppNoSuggestionsCallout"
     >
       <EuiText size="s">{description}</EuiText>
-      <EuiSpacer size="m" />
-      <RefinementPopover
-        onRefine={onRegenerate}
-        isLoading={isLoadingSuggestions}
-        aiFeatures={aiFeatures}
-        isDisabled={isDisabled}
-      />
+      {reason !== 'all_data_partitioned' && (
+        <>
+          <EuiSpacer size="m" />
+          <GenerateSuggestionButton
+            onClick={onRetry}
+            isLoading={isLoadingSuggestions}
+            isDisabled={isDisabled}
+            aiFeatures={aiFeatures}
+          >
+            {i18n.translate('xpack.streams.streamDetailRouting.childStreamList.tryAgainButton', {
+              defaultMessage: 'Try again',
+            })}
+          </GenerateSuggestionButton>
+        </>
+      )}
     </EuiCallOut>
   );
 }
