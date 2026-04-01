@@ -34,7 +34,6 @@ exports[`isFullScreen 1`] = `
           "nonce": undefined,
           "registered": Object {},
           "sheet": StyleSheet {
-            "_alreadyInsertedOrderInsensitiveRule": true,
             "_insertTag": [Function],
             "before": null,
             "container": <head>
@@ -43,19 +42,11 @@ exports[`isFullScreen 1`] = `
                 data-s=""
               >
                 
-                .css-1hok13p-mapScaleControlStyles-ScaleControl{position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;}
-              </style>
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                .css-5ojysv-mapScaleControlStyles-mapScaleControlFullScreenStyles-ScaleControl{position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;bottom:calc(24px * 2);}
               </style>
             </head>,
             "ctr": 2,
             "insertionPoint": undefined,
-            "isSpeedy": false,
+            "isSpeedy": true,
             "key": "css",
             "nonce": undefined,
             "prepend": undefined,
@@ -65,14 +56,6 @@ exports[`isFullScreen 1`] = `
                 data-s=""
               >
                 
-                .css-1hok13p-mapScaleControlStyles-ScaleControl{position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;}
-              </style>,
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                .css-5ojysv-mapScaleControlStyles-mapScaleControlFullScreenStyles-ScaleControl{position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;bottom:calc(24px * 2);}
               </style>,
             ],
           },
@@ -81,11 +64,9 @@ exports[`isFullScreen 1`] = `
       isStringTag={true}
       serialized={
         Object {
-          "map": undefined,
           "name": "5ojysv-mapScaleControlStyles-mapScaleControlFullScreenStyles-ScaleControl",
           "next": undefined,
           "styles": "position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;;label:mapScaleControlStyles;;;bottom:calc(24px * 2);;label:mapScaleControlFullScreenStyles;;;;label:ScaleControl;;",
-          "toString": [Function],
         }
       }
     />
@@ -136,7 +117,6 @@ exports[`render 1`] = `
           "nonce": undefined,
           "registered": Object {},
           "sheet": StyleSheet {
-            "_alreadyInsertedOrderInsensitiveRule": true,
             "_insertTag": [Function],
             "before": null,
             "container": <head>
@@ -145,12 +125,11 @@ exports[`render 1`] = `
                 data-s=""
               >
                 
-                .css-1hok13p-mapScaleControlStyles-ScaleControl{position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;}
               </style>
             </head>,
             "ctr": 1,
             "insertionPoint": undefined,
-            "isSpeedy": false,
+            "isSpeedy": true,
             "key": "css",
             "nonce": undefined,
             "prepend": undefined,
@@ -160,7 +139,6 @@ exports[`render 1`] = `
                 data-s=""
               >
                 
-                .css-1hok13p-mapScaleControlStyles-ScaleControl{position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;}
               </style>,
             ],
           },
@@ -169,11 +147,9 @@ exports[`render 1`] = `
       isStringTag={true}
       serialized={
         Object {
-          "map": undefined,
           "name": "1hok13p-mapScaleControlStyles-ScaleControl",
           "next": undefined,
           "styles": "position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;;label:mapScaleControlStyles;;;;;label:ScaleControl;;",
-          "toString": [Function],
         }
       }
     />
