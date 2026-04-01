@@ -27,6 +27,7 @@
     "requiredBundles": [
       "esUiShared",
       "kibanaUtils"
-    ]
+    ],
+    "extraPublicDirs": ["common"]
   }
 }

@@ -13,7 +13,12 @@ import { rspack, type Configuration, type Compiler, type RspackPluginInstance } 
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { discoverPlugins, createCoreEntry, getPackageMapPath, type PluginEntry } from '../utils/plugin_discovery';
+import {
+  discoverPlugins,
+  createCoreEntry,
+  getPackageMapPath,
+  type PluginEntry,
+} from '../utils/plugin_discovery';
 import { DLL_MANIFEST } from './dll_manifest';
 import { getExternals } from './externals';
 import {
@@ -27,14 +32,11 @@ import type { ThemeTag } from '../types';
 /**
  * Plugin to emit stats.json file for bundle analysis.
  * Used when profiling is enabled.
- * 
+ *
  * Uses SYNCHRONOUS file writing to ensure stats are written before process exits.
  */
 class EmitStatsPlugin {
-  constructor(
-    private readonly outputDir: string,
-    private readonly log?: ToolingLog
-  ) {}
+  constructor(private readonly outputDir: string, private readonly log?: ToolingLog) {}
 
   apply(compiler: Compiler) {
     // Use 'afterDone' hook which fires after all 'done' hooks complete
@@ -236,10 +238,12 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
         const now = Date.now();
         const timeSinceLastLog = now - lastLogTime;
 
-        const nextMilestone = Math.ceil((lastLoggedPercent + 1) / PERCENT_INTERVAL) * PERCENT_INTERVAL;
+        const nextMilestone =
+          Math.ceil((lastLoggedPercent + 1) / PERCENT_INTERVAL) * PERCENT_INTERVAL;
 
         const hitPercentMilestone = percentInt >= nextMilestone;
-        const hitTimeInterval = timeSinceLastLog >= TIME_INTERVAL_MS && percentInt > lastLoggedPercent;
+        const hitTimeInterval =
+          timeSinceLastLog >= TIME_INTERVAL_MS && percentInt > lastLoggedPercent;
 
         if (hitPercentMilestone || hitTimeInterval) {
           lastLoggedPercent = percentInt;
@@ -351,7 +355,9 @@ export async function createSingleCompileConfig(
   const unifiedEntryPath = createUnifiedEntry(wrapperDir, repoRoot, pluginEntries);
 
   if (log) {
-    log.info(`Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`);
+    log.info(
+      `Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`
+    );
     if (hmr) {
       log.info(`HMR enabled (port ${hmrPort})`);
     }
@@ -393,9 +399,7 @@ export async function createSingleCompileConfig(
       // Single unified bundle (with [name] for runtimeChunk compatibility)
       filename: '[name].bundle.js',
       // Async chunks: short hash names in production, descriptive names in development
-      chunkFilename: dist
-        ? 'chunks/[contenthash:8].js'
-        : 'chunks/[name].[contenthash:8].js',
+      chunkFilename: dist ? 'chunks/[contenthash:8].js' : 'chunks/[name].[contenthash:8].js',
       // Use 'auto' to dynamically resolve publicPath at runtime based on document.currentScript
       publicPath: 'auto',
       clean: !watch,
@@ -634,12 +638,23 @@ export async function createSingleCompileConfig(
   };
 }
 
-function findEntry(contextDir: string): string | null {
-  const publicDir = Path.join(contextDir, 'public');
+/**
+ * Find the index entry file for a given target directory within a plugin.
+ *
+ * Generalizes the previous `findEntry` (which only looked in `public/`) to
+ * support any target directory declared in `extraPublicDirs`. This mirrors
+ * the legacy webpack optimizer's val-loader entry generation where each
+ * target in `bundle.remoteInfo.targets` was resolved via
+ * `Path.resolve(bundle.contextDir, target)`.
+ *
+ * @see packages/kbn-optimizer/src/worker/webpack.config.ts (val-loader entries)
+ */
+export function findTargetEntry(contextDir: string, target: string = 'public'): string | null {
+  const targetDir = Path.join(contextDir, target);
   const extensions = ['.ts', '.tsx', '.js', '.jsx'];
 
   for (const ext of extensions) {
-    const entryPath = Path.join(publicDir, `index${ext}`);
+    const entryPath = Path.join(targetDir, `index${ext}`);
     if (Fs.existsSync(entryPath)) {
       return entryPath;
     }
@@ -660,12 +675,12 @@ function findEntry(contextDir: string): string | null {
  */
 // Entry file version - increment when changing the entry generation logic
 // This ensures the entry file is regenerated when config structure changes
-const ENTRY_VERSION = 'v3';
+const ENTRY_VERSION = 'v4';
 
 function createUnifiedEntry(
   wrapperDir: string,
   repoRoot: string,
-  pluginEntries: Array<{ id: string; path: string; bundleId: string }>
+  pluginEntries: Array<{ id: string; path: string; bundleId: string; pluginId: string }>
 ): string {
   const unifiedEntryPath = Path.join(wrapperDir, 'kibana-unified-entry.js');
 
@@ -681,7 +696,12 @@ function createUnifiedEntry(
   // This allows cache reuse when the same plugins are present regardless of repo location
   const pluginListHash = rspack.util
     .createHash('xxhash64')
-    .update(`${ENTRY_VERSION}\n${pluginEntries.map((e) => `${e.id}:${Path.relative(repoRoot, e.path)}`).join('\n')}`, 'utf-8')
+    .update(
+      `${ENTRY_VERSION}\n${pluginEntries
+        .map((e) => `${e.id}:${Path.relative(repoRoot, e.path)}`)
+        .join('\n')}`,
+      'utf-8'
+    )
     .digest('hex');
 
   // Check if file exists and has the same hash (skip regeneration)
@@ -694,25 +714,36 @@ function createUnifiedEntry(
   }
 
   // Separate core from other plugins
-  const coreEntries = pluginEntries.filter(e => e.id === 'core');
-  const otherEntries = pluginEntries.filter(e => e.id !== 'core');
+  const coreEntries = pluginEntries.filter((e) => e.id === 'core');
+  const otherEntries = pluginEntries.filter((e) => e.id !== 'core');
 
   // Generate SYNC imports for core (always needed first)
   // Use relative paths for cache portability across machines
-  const coreImports = coreEntries.map((entry, i) => {
-    return `import * as core_${i} from ${JSON.stringify(toRelativePath(entry.path))};`;
-  }).join('\n');
+  const coreImports = coreEntries
+    .map((entry, i) => {
+      return `import * as core_${i} from ${JSON.stringify(toRelativePath(entry.path))};`;
+    })
+    .join('\n');
 
-  const coreRegistrations = coreEntries.map((entry, i) => {
-    return `registerPlugin('${entry.bundleId}', core_${i});`;
-  }).join('\n');
+  const coreRegistrations = coreEntries
+    .map((entry, i) => {
+      return `registerPlugin('${entry.bundleId}', core_${i});`;
+    })
+    .join('\n');
 
-  // Generate DIRECT async imports for each plugin (no zone chunks)
-  // RSPack will naturally split based on import dependencies
-  // Use relative paths for cache portability
-  const pluginImports = otherEntries.map((entry, i) => {
-    return `    import(${JSON.stringify(toRelativePath(entry.path))}).then(m => registerPlugin('${entry.bundleId}', m))`;
-  }).join(',\n');
+  // Generate DIRECT async imports for each plugin target (no zone chunks).
+  // All targets for the same plugin share a webpackChunkName so rspack merges
+  // them into a single chunk. Each import() still resolves to its own module
+  // namespace. This avoids near-empty secondary chunks for extra targets
+  // (e.g., common/) whose modules are already pulled in by public/.
+  const pluginImports = otherEntries
+    .map((entry) => {
+      const chunkName = `plugin-${entry.pluginId}`;
+      return `    import(/* webpackChunkName: ${JSON.stringify(chunkName)} */ ${JSON.stringify(
+        toRelativePath(entry.path)
+      )}).then(m => registerPlugin('${entry.bundleId}', m))`;
+    })
+    .join(',\n');
 
   const content = `// Auto-generated unified entry for Kibana RSPack build
 // Plugin list hash: ${pluginListHash}
@@ -720,9 +751,9 @@ function createUnifiedEntry(
 //
 // DIRECT IMPORT STRATEGY (no zone chunks):
 // 1. Core loads synchronously (always needed)
-// 2. Each plugin loaded directly via import()
-// 3. RSPack naturally splits based on dependencies
-// 4. maxSize forces large chunks to be split
+// 2. Each plugin target (public + extraPublicDirs) loaded via import()
+// 3. Targets sharing the same webpackChunkName merge into one chunk per plugin
+// 4. RSPack naturally splits based on dependencies; maxSize splits large chunks
 
 // Verify __kbnBundles__ is available
 if (typeof __kbnBundles__ === 'undefined' || typeof __kbnBundles__.define !== 'function') {
@@ -762,30 +793,46 @@ export { core_0 as core };
 }
 
 /**
- * Collect plugin entries from discovered plugins
+ * Collect plugin entries from discovered plugins, including extra targets
+ * declared in `extraPublicDirs`.
+ *
+ * The legacy webpack optimizer registered a `__kbnBundles__.define()` call
+ * for every target in `['public', ...extraPublicDirs]` via the val-loader
+ * entry creator. This function produces the equivalent set of entries so
+ * that `createUnifiedEntry` can generate matching registrations.
+ *
+ * Each entry includes a `pluginId` field used by `createUnifiedEntry` to
+ * group targets under the same `webpackChunkName`, ensuring rspack merges
+ * them into a single chunk per plugin.
  */
 function collectPluginEntries(
   repoRoot: string,
   plugins: PluginEntry[]
-): Array<{ id: string; path: string; bundleId: string }> {
-  const pluginEntries: Array<{ id: string; path: string; bundleId: string }> = [];
+): Array<{ id: string; path: string; bundleId: string; pluginId: string }> {
+  const pluginEntries: Array<{ id: string; path: string; bundleId: string; pluginId: string }> = [];
 
-  // Add core
   const coreEntry = createCoreEntry(repoRoot);
-  const coreEntryPath = findEntry(coreEntry.contextDir);
+  const coreEntryPath = findTargetEntry(coreEntry.contextDir, 'public');
   if (coreEntryPath) {
-    pluginEntries.push({ id: 'core', path: coreEntryPath, bundleId: 'entry/core/public' });
+    pluginEntries.push({
+      id: 'core',
+      path: coreEntryPath,
+      bundleId: 'entry/core/public',
+      pluginId: 'core',
+    });
   }
 
-  // Add plugins
   for (const plugin of plugins) {
-    const entryPath = findEntry(plugin.contextDir);
-    if (entryPath) {
-      pluginEntries.push({
-        id: plugin.id,
-        path: entryPath,
-        bundleId: `plugin/${plugin.id}/public`,
-      });
+    for (const target of plugin.targets) {
+      const entryPath = findTargetEntry(plugin.contextDir, target);
+      if (entryPath) {
+        pluginEntries.push({
+          id: target === 'public' ? plugin.id : `${plugin.id}/${target}`,
+          path: entryPath,
+          bundleId: `plugin/${plugin.id}/${target}`,
+          pluginId: plugin.id,
+        });
+      }
     }
   }
 
@@ -830,10 +877,8 @@ class PluginWatchPlugin {
       return true;
     }
 
-    const isManifest = (f: string) =>
-      f.endsWith('/kibana.jsonc') || f.endsWith('\\kibana.jsonc');
-    const isPluginEntry = (f: string) =>
-      /[/\\]public[/\\]index\.(?!test\.)[^/\\]+$/.test(f);
+    const isManifest = (f: string) => f.endsWith('/kibana.jsonc') || f.endsWith('\\kibana.jsonc');
+    const isPluginEntry = (f: string) => /[/\\]public[/\\]index\.(?!test\.)[^/\\]+$/.test(f);
     const isPackageMap = (f: string) =>
       f.endsWith('/package-map.json') || f.endsWith('\\package-map.json');
 
@@ -883,10 +928,7 @@ class PluginWatchPlugin {
         });
 
         // Collect plugin entries
-        const pluginEntries = collectPluginEntries(
-          this.options.repoRoot,
-          currentPlugins
-        );
+        const pluginEntries = collectPluginEntries(this.options.repoRoot, currentPlugins);
 
         const currentHash = rspack.util
           .createHash('xxhash64')
@@ -902,12 +944,12 @@ class PluginWatchPlugin {
           createUnifiedEntry(this.wrapperDir, this.options.repoRoot, pluginEntries);
 
           // Update manifest list for watching
-          this.pluginManifests = currentPlugins.map((p) =>
-            Path.join(p.contextDir, 'kibana.jsonc')
-          );
+          this.pluginManifests = currentPlugins.map((p) => Path.join(p.contextDir, 'kibana.jsonc'));
 
           if (this.options.log) {
-            this.options.log.info(`Plugin list changed, regenerating entry (${pluginEntries.length} bundles)`);
+            this.options.log.info(
+              `Plugin list changed, regenerating entry (${pluginEntries.length} bundles)`
+            );
             if (!isInitial) {
               this.options.log.warning(
                 'Browser plugin list changed. Stop and restart the dev server for the changes to take full effect.'

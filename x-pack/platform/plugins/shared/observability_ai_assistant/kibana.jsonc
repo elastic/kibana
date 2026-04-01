@@ -23,6 +23,6 @@
     "optionalPlugins": ["cloud", "serverless", "usageCollection", "agentBuilder"],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
     "runtimePluginDependencies": ["ml"],
-    "extraPublicDirs": []
+    "extraPublicDirs": ["common"]
   }
 }

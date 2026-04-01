@@ -19,15 +19,16 @@ export interface PluginEntry {
    * (e.g., ['public', 'common']). Derived from 'public' + manifest
    * plugin.extraPublicDirs.
    *
-   * In the legacy webpack optimizer, each target gets a separate
-   * __kbnBundles__.define('plugin/{id}/{target}', ...) registration,
-   * allowing other plugins to import from those directories at runtime.
+   * Each target gets a `__kbnBundles__.define('plugin/{id}/{target}', ...)`
+   * registration in the generated entry, matching the legacy webpack
+   * optimizer's per-target registration. All targets for the same plugin
+   * share a `webpackChunkName` magic comment so rspack merges them into
+   * a single chunk, avoiding near-empty secondary chunks.
    *
-   * The rspack single-compilation model currently only registers
-   * 'plugin/{id}/public'. Registering extra targets will be needed
-   * for full parity with the legacy optimizer, particularly for
-   * external/third-party plugins that rely on
-   * __kbnBundles__.get('plugin/{id}/{target}') for non-public dirs.
+   * External/third-party plugins rely on
+   * `__kbnBundles__.get('plugin/{id}/{target}')` for non-public dirs,
+   * and the cross-plugin externals validation in external builds verifies
+   * imports against these declared targets.
    */
   targets: string[];
   /**

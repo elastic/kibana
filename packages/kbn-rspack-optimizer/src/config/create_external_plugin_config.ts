@@ -12,6 +12,9 @@ import Fs from 'fs';
 import { rspack, type Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import { parseKbnImportReq } from '@kbn/repo-packages';
+import { discoverPlugins } from '../utils/plugin_discovery';
+import { findTargetEntry } from './create_single_compile_config';
 import { DLL_MANIFEST } from './dll_manifest';
 import { getExternals } from './externals';
 import {
@@ -98,8 +101,28 @@ export async function createExternalPluginConfig(
     themeTags = ['borealislight', 'borealisdark'] as ThemeTag[],
   } = options;
 
+  // Discover all in-repo browser plugins to build the cross-plugin externals map.
+  // We exclude examples and test plugins: the legacy kbn-plugin-helpers excluded
+  // them from BundleRemotes for external builds, and external plugins should not
+  // depend on them.
+  const inRepoPlugins = await discoverPlugins({
+    repoRoot,
+    examples: false,
+    testPlugins: false,
+  });
+
+  // Build targets map: pkgId -> { pluginId, targets }
+  const pluginTargets = new Map<string, { pluginId: string; targets: string[] }>();
+  for (const p of inRepoPlugins) {
+    pluginTargets.set(p.pkgId, { pluginId: p.id, targets: p.targets });
+  }
+
+  // Read the external plugin's own manifest to compute its targets
+  const pluginManifest = readPluginManifest(pluginDir);
+  const pluginTargetDirs = ['public', ...(pluginManifest?.plugin?.extraPublicDirs ?? [])];
+
   // Find entry point
-  const entryPath = findEntry(pluginDir);
+  const entryPath = findTargetEntry(pluginDir, 'public');
   if (!entryPath) {
     throw new Error(`No entry point found in ${pluginDir}/public/`);
   }
@@ -110,7 +133,7 @@ export async function createExternalPluginConfig(
     Fs.mkdirSync(wrapperDir, { recursive: true });
   }
 
-  const wrapperPath = createPluginWrapper(wrapperDir, pluginId, entryPath);
+  const wrapperPath = createPluginWrapper(wrapperDir, pluginId, pluginDir, pluginTargetDirs);
 
   // Get shared deps externals (React, EUI, etc.) - same as main build
   const sharedDepsExternals = getExternals();
@@ -146,9 +169,10 @@ export async function createExternalPluginConfig(
     externals: [
       // Static externals for npm shared deps (same as main build)
       sharedDepsExternals,
-      // Dynamic externals for cross-plugin imports (different from main build)
-      // Main build bundles these together; external plugins must use __kbnBundles__
-      createCrossPluginExternals(),
+      // Dynamic externals for cross-plugin imports (different from main build).
+      // Uses callback-style externals to report errors when an import targets
+      // an undeclared directory, matching legacy BundleRemotesPlugin semantics.
+      createCrossPluginExternals(pluginTargets),
     ],
 
     // Use shared resolve config + fallbacks
@@ -208,7 +232,9 @@ export async function createExternalPluginConfig(
               Path.resolve(pluginDir, 'package.json'),
               ...CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
             ],
-            version: `external-plugin-v3-${dist ? 'prod' : 'dev'}-${getExternalPluginConfigHash(repoRoot)}`,
+            version: `external-plugin-v3-${dist ? 'prod' : 'dev'}-${getExternalPluginConfigHash(
+              repoRoot
+            )}`,
             storage: {
               type: 'filesystem',
               directory: Path.resolve(
@@ -248,86 +274,141 @@ export async function createExternalPluginConfig(
 }
 
 /**
- * Create externals function for cross-plugin imports.
- * External plugins must use __kbnBundles__.get() to access other plugins
- * since they're not bundled together like the main build.
+ * Create callback-style externals function for cross-plugin imports.
+ *
+ * External plugins must use `__kbnBundles__.get()` to access other plugins
+ * since they're not bundled together like the main build. This function
+ * validates imports against the declared targets of each in-repo plugin,
+ * replicating the error semantics of the legacy `BundleRemotesPlugin`:
+ *
+ * - If an import targets a directory not declared in `extraPublicDirs`,
+ *   the build fails with an explicit error message.
+ * - If the import targets a declared directory, it's externalized to a
+ *   `__kbnBundles__.get('plugin/{id}/{target}')` call.
+ * - `@kbn/core/public` is handled as a special case.
+ *
+ * We use callback-style externals (rather than return-style) because
+ * rspack's callback API lets us report build errors via `callback(new Error(...))`,
+ * matching the legacy plugin's error-on-invalid-target behavior.
+ *
+ * The `convertPkgIdToPluginId` heuristic (error-prone kebab-to-camel conversion)
+ * is replaced by the authoritative `pluginId` from the discovered manifest data.
+ *
+ * @see packages/kbn-optimizer/src/worker/bundle_remotes_plugin.ts (legacy equivalent)
  */
-function createCrossPluginExternals(): (data: { request?: string }) => string | undefined {
-  return (data: { request?: string }): string | undefined => {
-    const { request } = data;
-    if (!request) return undefined;
+export function createCrossPluginExternals(
+  pluginTargets: Map<string, { pluginId: string; targets: string[] }>
+) {
+  return ({ request }: { request?: string }, callback: (err?: Error, result?: string) => void) => {
+    if (!request) return callback();
 
-    // Externalize @kbn/*-plugin imports to __kbnBundles__.get()
-    if (request.startsWith('@kbn/') && request.includes('-plugin')) {
-      const parts = request.split('/');
-      const pkgId = parts.slice(0, 2).join('/');
-      const target = parts[2] || 'public';
+    // .json and ?raw imports are not cross-plugin externals
+    // (legacy BundleRemotesPlugin excluded these)
+    if (request.endsWith('.json') || request.endsWith('?raw')) {
+      return callback();
+    }
 
-      if (target === 'public' || target === 'common') {
-        // Convert package ID to plugin ID
-        // e.g., @kbn/triggers-actions-ui-plugin -> triggersActionsUi
-        const pluginIdFromPkg = convertPkgIdToPluginId(pkgId);
-        const bundleId = `plugin/${pluginIdFromPkg}/${target}`;
-        return `__kbnBundles__.get('${bundleId}')`;
+    const parsed = parseKbnImportReq(request);
+    if (!parsed) return callback();
+
+    // @kbn/core is not in the pluginTargets map — handle it specially
+    if (parsed.pkgId === '@kbn/core') {
+      if (parsed.target === 'public' || parsed.target.startsWith('public/')) {
+        return callback(undefined, `__kbnBundles__.get('entry/core/public')`);
       }
+      return callback();
     }
 
-    // Externalize @kbn/core imports
-    if (request === '@kbn/core/public' || request.startsWith('@kbn/core/public/')) {
-      return `__kbnBundles__.get('entry/core/public')`;
+    const remote = pluginTargets.get(parsed.pkgId);
+    if (!remote) return callback();
+
+    if (!remote.targets.includes(parsed.target)) {
+      return callback(
+        new Error(
+          `import [${request}] references a non-public export of the [${remote.pluginId}] ` +
+            `bundle and must point to one of the public directories: [${remote.targets}]`
+        )
+      );
     }
 
-    return undefined;
+    const bundleId = `plugin/${remote.pluginId}/${parsed.target}`;
+    return callback(undefined, `__kbnBundles__.get('${bundleId}')`);
   };
 }
 
 /**
- * Convert package ID to plugin ID.
- * e.g., @kbn/triggers-actions-ui-plugin -> triggersActionsUi
+ * Read the plugin's `kibana.jsonc` manifest. Returns the parsed manifest
+ * object or null if it doesn't exist / is malformed.
  */
-function convertPkgIdToPluginId(pkgId: string): string {
-  // Remove @kbn/ prefix and -plugin suffix
-  let id = pkgId.replace('@kbn/', '').replace(/-plugin$/, '');
-
-  // Convert kebab-case to camelCase
-  id = id.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-
-  return id;
-}
-
-function findEntry(pluginDir: string): string | null {
-  const publicDir = Path.join(pluginDir, 'public');
-  const extensions = ['.ts', '.tsx', '.js', '.jsx'];
-
-  for (const ext of extensions) {
-    const entryPath = Path.join(publicDir, `index${ext}`);
-    if (Fs.existsSync(entryPath)) {
-      return entryPath;
-    }
+function readPluginManifest(
+  pluginDir: string
+): { plugin?: { id?: string; extraPublicDirs?: string[]; browser?: boolean } } | null {
+  const manifestPath = Path.join(pluginDir, 'kibana.jsonc');
+  try {
+    const raw = Fs.readFileSync(manifestPath, 'utf-8');
+    // kibana.jsonc may contain comments; strip them with a simple regex
+    // (JSON5/JSONC parsing — only single-line and block comments)
+    const stripped = raw.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    return JSON.parse(stripped);
+  } catch {
+    return null;
   }
-
-  return null;
 }
 
 /**
  * Create a wrapper entry module that:
- * 1. Imports the plugin entry
- * 2. Registers it with __kbnBundles__
+ * 1. Imports each target entry of the plugin
+ * 2. Registers all targets with `__kbnBundles__`
+ *
+ * The legacy optimizer registered every target in `['public', ...extraPublicDirs]`
+ * with `__kbnBundles__.define()`. This ensures external plugins' extra targets
+ * are also available at runtime via `__kbnBundles__.get('plugin/{id}/{target}')`.
+ *
+ * @param targets - The plugin's resolved targets (['public', ...extraPublicDirs])
  */
-function createPluginWrapper(
+export function createPluginWrapper(
   wrapperDir: string,
   pluginId: string,
-  realEntryPath: string
+  pluginDir: string,
+  targets: string[]
 ): string {
   const wrapperPath = Path.join(wrapperDir, `${pluginId}-wrapper.js`);
 
-  const content = `
-// Auto-generated wrapper for external plugin: ${pluginId}
-// This registers the plugin with Kibana's __kbnBundles__ system
+  // Resolve each target to an import + registration block.
+  // Only include targets that have an index file (validated at build time).
+  const targetEntries: Array<{ target: string; entryPath: string; varName: string }> = [];
+  for (const target of targets) {
+    const entryPath = findTargetEntry(pluginDir, target);
+    if (entryPath) {
+      const varName = `plugin_${target.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      targetEntries.push({ target, entryPath, varName });
+    }
+  }
 
-import * as pluginModule from ${JSON.stringify(realEntryPath)};
+  if (targetEntries.length === 0) {
+    throw new Error(`No entry points found for plugin ${pluginId} in targets: [${targets}]`);
+  }
 
-// Register with __kbnBundles__ for Kibana to discover
+  const imports = targetEntries
+    .map((t) => `import * as ${t.varName} from ${JSON.stringify(t.entryPath)};`)
+    .join('\n');
+
+  const registrations = targetEntries
+    .map(
+      (t) =>
+        `__kbnBundles__.define('plugin/${pluginId}/${t.target}', () => ${t.varName}, 'plugin/${pluginId}/${t.target}');`
+    )
+    .join('\n');
+
+  // Use the first target (public) for the default re-export
+  const primaryEntry = targetEntries[0];
+
+  const content = `// Auto-generated wrapper for external plugin: ${pluginId}
+// Targets registered: [${targets.join(', ')}]
+// All targets validated at build time via findTargetEntry
+
+${imports}
+
 if (typeof __kbnBundles__ === 'undefined') {
   throw new Error(
     'External plugin "${pluginId}" loaded before Kibana bundles. ' +
@@ -335,17 +416,10 @@ if (typeof __kbnBundles__ === 'undefined') {
   );
 }
 
-__kbnBundles__.define(
-  'plugin/${pluginId}/public',
-  function bundleRequire(key) {
-    return pluginModule;
-  },
-  'plugin/${pluginId}/public'
-);
+${registrations}
 
-// Also export for potential direct imports
-export * from ${JSON.stringify(realEntryPath)};
-export default pluginModule;
+export * from ${JSON.stringify(primaryEntry.entryPath)};
+export default ${primaryEntry.varName};
 `;
 
   Fs.writeFileSync(wrapperPath, content);
