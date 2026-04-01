@@ -94,7 +94,7 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
           onChange={onOptionsChange}
           options={items}
           renderOption={(option) =>
-            filterName === 'platform' ? (
+            filterName === 'platform' && !option.disabled ? (
               <EuiBadge color="hollow">{option.label}</EuiBadge>
             ) : (
               option.label

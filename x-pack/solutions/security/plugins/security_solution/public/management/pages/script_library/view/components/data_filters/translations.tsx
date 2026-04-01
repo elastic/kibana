@@ -23,6 +23,11 @@ export const FILTER_NAMES = Object.freeze({
 });
 
 export const FILTER_PLACEHOLDERS = Object.freeze({
+  getFilterOptionsLabel: (optionsCount: number) =>
+    i18n.translate('xpack.securitySolution.scriptLibrary.filter.filterOptionsLabel', {
+      defaultMessage: '{optionsCount} options',
+      values: { optionsCount },
+    }),
   listLengthTitle: (length: number) =>
     i18n.translate('xpack.securitySolution.scriptLibrary.filter.listLength', {
       defaultMessage: '{length} options',

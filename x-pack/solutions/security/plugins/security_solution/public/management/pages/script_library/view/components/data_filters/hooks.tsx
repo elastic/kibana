@@ -73,6 +73,14 @@ export const useScriptLibraryFilter = (
       : [];
   }, [filterName, fileType, os, category, isFileTypeFilter, isPlatformFilter, isTagsFilter]);
 
+  const filterOptions = useMemo(() => {
+    items.unshift({
+      label: FILTER_PLACEHOLDERS.getFilterOptionsLabel(items.length),
+      disabled: true,
+    });
+    return items;
+  }, [items]);
+
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
   const numActiveFilters = useMemo(
     () => items.filter((item) => item.checked === 'on').length,
@@ -84,7 +92,7 @@ export const useScriptLibraryFilter = (
   );
 
   return {
-    items,
+    items: filterOptions,
     hasActiveFilters,
     numActiveFilters,
     numFilters,
