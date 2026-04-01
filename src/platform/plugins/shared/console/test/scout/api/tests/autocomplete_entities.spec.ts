@@ -18,12 +18,14 @@ const INDEX_TEMPLATE_NAME = 'test-index-template-1';
 const COMPONENT_TEMPLATE_NAME = 'test-component-template-1';
 const DATA_STREAM_NAME = 'test-data-stream-1';
 
-const buildUrl = (query: Record<string, unknown>) => {
+const AUTOCOMPLETE_API = 'api/console/autocomplete_entities';
+
+const toQueryString = (query: Record<string, unknown>) => {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     params.set(key, String(value));
   }
-  return `api/console/autocomplete_entities?${params.toString()}`;
+  return params.toString();
 };
 
 apiTest.describe(
@@ -38,9 +40,14 @@ apiTest.describe(
   },
   () => {
     let credentials: RoleApiCredentials;
+    let requestOptions: { headers: Record<string, string>; responseType: 'json' };
 
     apiTest.beforeAll(async ({ esClient, requestAuth }) => {
-      credentials = await requestAuth.getApiKey('viewer');
+      credentials = await requestAuth.getApiKey('admin');
+      requestOptions = {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      };
 
       await esClient.indices.create({
         index: INDEX_NAME,
@@ -74,47 +81,31 @@ apiTest.describe(
         { ignore: [404] }
       );
       await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
-      await esClient.indices.deleteDataStream(
-        { name: DATA_STREAM_NAME },
-        { ignore: [404] }
-      );
-      await esClient.indices.deleteIndexTemplate(
-        { name: INDEX_TEMPLATE_NAME },
-        { ignore: [404] }
-      );
+      await esClient.indices.deleteDataStream({ name: DATA_STREAM_NAME }, { ignore: [404] });
+      await esClient.indices.deleteIndexTemplate({ name: INDEX_TEMPLATE_NAME }, { ignore: [404] });
       await esClient.cluster.deleteComponentTemplate(
         { name: COMPONENT_TEMPLATE_NAME },
         { ignore: [404] }
       );
     });
 
-    const sendRequest = async (
-      apiClient: { get: Function },
-      query: Record<string, unknown>
-    ) => {
-      return apiClient.get(buildUrl(query), {
-        headers: {
-          ...COMMON_HEADERS,
-          ...credentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-    };
-
     apiTest('returns 400 when no settings are provided', async ({ apiClient }) => {
-      const response = await sendRequest(apiClient, {});
+      const response = await apiClient.get(AUTOCOMPLETE_API, requestOptions);
       expect(response).toHaveStatusCode(400);
     });
 
     apiTest(
       'returns all entity categories when all settings are enabled',
       async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, {
-          indices: true,
-          fields: true,
-          templates: true,
-          dataStreams: true,
-        });
+        const response = await apiClient.get(
+          `${AUTOCOMPLETE_API}?${toQueryString({
+            indices: true,
+            fields: true,
+            templates: true,
+            dataStreams: true,
+          })}`,
+          requestOptions
+        );
 
         expect(response).toHaveStatusCode(200);
         expect(Object.keys(response.body).sort()).toStrictEqual([
@@ -128,72 +119,78 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'returns empty payload when all settings are disabled',
-      async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, {
+    apiTest('returns empty payload when all settings are disabled', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${AUTOCOMPLETE_API}?${toQueryString({
           indices: false,
           fields: false,
           templates: false,
           dataStreams: false,
-        });
+        })}`,
+        requestOptions
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.legacyTemplates).toStrictEqual({});
-        expect(response.body.indexTemplates).toStrictEqual({});
-        expect(response.body.componentTemplates).toStrictEqual({});
-        expect(response.body.aliases).toStrictEqual({});
-        expect(response.body.mappings).toStrictEqual({});
-        expect(response.body.dataStreams).toStrictEqual({});
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.legacyTemplates).toStrictEqual({});
+      expect(response.body.indexTemplates).toStrictEqual({});
+      expect(response.body.componentTemplates).toStrictEqual({});
+      expect(response.body.aliases).toStrictEqual({});
+      expect(response.body.mappings).toStrictEqual({});
+      expect(response.body.dataStreams).toStrictEqual({});
+    });
 
-    apiTest(
-      'returns empty templates when templates setting is disabled',
-      async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { templates: false });
+    apiTest('returns empty templates when templates setting is disabled', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${AUTOCOMPLETE_API}?${toQueryString({ templates: false })}`,
+        requestOptions
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.legacyTemplates).toStrictEqual({});
-        expect(response.body.indexTemplates).toStrictEqual({});
-        expect(response.body.componentTemplates).toStrictEqual({});
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.legacyTemplates).toStrictEqual({});
+      expect(response.body.indexTemplates).toStrictEqual({});
+      expect(response.body.componentTemplates).toStrictEqual({});
+    });
 
     apiTest(
       'returns empty data streams when dataStreams setting is disabled',
       async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { dataStreams: false });
+        const response = await apiClient.get(
+          `${AUTOCOMPLETE_API}?${toQueryString({ dataStreams: false })}`,
+          requestOptions
+        );
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.dataStreams).toStrictEqual({});
       }
     );
 
-    apiTest(
-      'returns empty aliases when indices setting is disabled',
-      async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { indices: false });
+    apiTest('returns empty aliases when indices setting is disabled', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${AUTOCOMPLETE_API}?${toQueryString({ indices: false })}`,
+        requestOptions
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.aliases).toStrictEqual({});
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.aliases).toStrictEqual({});
+    });
 
-    apiTest(
-      'returns empty mappings when fields setting is disabled',
-      async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { fields: false });
+    apiTest('returns empty mappings when fields setting is disabled', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${AUTOCOMPLETE_API}?${toQueryString({ fields: false })}`,
+        requestOptions
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.mappings).toStrictEqual({});
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.mappings).toStrictEqual({});
+    });
 
     apiTest(
       'does not return mappings for test index when fieldsIndices is not specified',
       async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { fields: true });
+        const response = await apiClient.get(
+          `${AUTOCOMPLETE_API}?${toQueryString({ fields: true })}`,
+          requestOptions
+        );
 
         expect(response).toHaveStatusCode(200);
         expect(Object.keys(response.body.mappings)).not.toContain(INDEX_NAME);
@@ -203,55 +200,55 @@ apiTest.describe(
     apiTest(
       'returns mappings for test index when fieldsIndices is specified',
       async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, {
-          fields: true,
-          fieldsIndices: INDEX_NAME,
-        });
+        const response = await apiClient.get(
+          `${AUTOCOMPLETE_API}?${toQueryString({ fields: true, fieldsIndices: INDEX_NAME })}`,
+          requestOptions
+        );
 
         expect(response).toHaveStatusCode(200);
         expect(Object.keys(response.body.mappings)).toContain(INDEX_NAME);
       }
     );
 
-    apiTest(
-      'returns aliases when indices setting is enabled',
-      async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { indices: true });
+    apiTest('returns aliases when indices setting is enabled', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${AUTOCOMPLETE_API}?${toQueryString({ indices: true })}`,
+        requestOptions
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.aliases[INDEX_NAME].aliases).toStrictEqual({
-          [ALIAS_NAME]: {},
-        });
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.aliases[INDEX_NAME].aliases).toStrictEqual({ [ALIAS_NAME]: {} });
+    });
 
-    apiTest(
-      'returns data streams when dataStreams setting is enabled',
-      async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { dataStreams: true });
+    apiTest('returns data streams when dataStreams setting is enabled', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${AUTOCOMPLETE_API}?${toQueryString({ dataStreams: true })}`,
+        requestOptions
+      );
 
-        expect(response).toHaveStatusCode(200);
-        const dataStreamNames = response.body.dataStreams.data_streams.map(
-          (ds: { name: string }) => ds.name
-        );
-        expect(dataStreamNames).toContain(DATA_STREAM_NAME);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      const dataStreamNames = response.body.dataStreams.data_streams.map(
+        (ds: { name: string }) => ds.name
+      );
+      expect(dataStreamNames).toContain(DATA_STREAM_NAME);
+    });
 
     apiTest(
       'returns index and component templates when templates setting is enabled',
       async ({ apiClient }) => {
-        const response = await sendRequest(apiClient, { templates: true });
+        const response = await apiClient.get(
+          `${AUTOCOMPLETE_API}?${toQueryString({ templates: true })}`,
+          requestOptions
+        );
 
         expect(response).toHaveStatusCode(200);
         const indexTemplateNames = response.body.indexTemplates.index_templates.map(
           (it: { name: string }) => it.name
         );
         expect(indexTemplateNames).toContain(INDEX_TEMPLATE_NAME);
-        const componentTemplateNames =
-          response.body.componentTemplates.component_templates.map(
-            (ct: { name: string }) => ct.name
-          );
+        const componentTemplateNames = response.body.componentTemplates.component_templates.map(
+          (ct: { name: string }) => ct.name
+        );
         expect(componentTemplateNames).toContain(COMPONENT_TEMPLATE_NAME);
       }
     );

@@ -28,38 +28,29 @@ apiTest.describe(
     let credentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      credentials = await requestAuth.getApiKey('viewer');
+      credentials = await requestAuth.getApiKey('admin');
     });
 
-    apiTest(
-      'returns warning header for system indices requests',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(PROXY_PATH, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...credentials.apiKeyHeader,
-          },
-        });
+    apiTest('returns warning header for system indices requests', async ({ apiClient }) => {
+      const response = await apiClient.post(PROXY_PATH, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+      });
 
-        expect(response.headers.warning).toBeDefined();
-        expect(response.headers.warning).toMatch(/^299/);
-        expect(response.headers.warning).toContain('system indices');
-      }
-    );
+      expect(response.headers.warning).toBeDefined();
+      expect(response.headers.warning).toMatch(/^299/);
+      expect(response.headers.warning).toContain('system indices');
+    });
 
-    apiTest(
-      'does not forward x-elastic-product-origin',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(PROXY_PATH, {
-          headers: {
-            ...COMMON_HEADERS,
-            'x-elastic-product-origin': 'kibana',
-            ...credentials.apiKeyHeader,
-          },
-        });
+    apiTest('does not forward x-elastic-product-origin', async ({ apiClient }) => {
+      const response = await apiClient.post(PROXY_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          'x-elastic-product-origin': 'kibana',
+          ...credentials.apiKeyHeader,
+        },
+      });
 
-        expect(response.headers.warning).toBeDefined();
-      }
-    );
+      expect(response.headers.warning).toBeDefined();
+    });
   }
 );
