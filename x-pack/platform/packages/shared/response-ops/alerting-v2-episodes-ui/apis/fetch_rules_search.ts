@@ -7,8 +7,8 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
+import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 
-const FIND_RULES_ENDPOINT = '/internal/alerting/v2/rule';
 const SEARCH_PAGE_SIZE = 50;
 
 export interface FetchRulesSearchParams {
@@ -27,7 +27,7 @@ export async function fetchRulesSearch({
   if (!query || !query.trim()) {
     return [];
   }
-  const res = await http.get<FindRulesResponse>(FIND_RULES_ENDPOINT, {
+  const res = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
     query: {
       search: query.trim(),
       perPage: SEARCH_PAGE_SIZE,
