@@ -916,7 +916,7 @@ describe('query_utils', () => {
       it('defaults missing model fields to zero', async () => {
         esClient.search.mockResolvedValue(
           mockRoundMetricsResponse({
-            byModel: [{ model: 'unknown-model' }],
+            byModel: [{ model: 'unknown-model' } as any],
           })
         );
 
