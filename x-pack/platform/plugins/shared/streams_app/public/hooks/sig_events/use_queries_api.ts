@@ -15,6 +15,13 @@ interface QueriesApi {
   promoteAll: () => Promise<{ promoted: number }>;
   upsertQuery: ({ query, streamName }: { query: StreamQuery; streamName: string }) => Promise<void>;
   removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
+  deleteQueriesInBulk: ({
+    queryIds,
+    streamName,
+  }: {
+    queryIds: string[];
+    streamName: string;
+  }) => Promise<void>;
   getUnbackedQueriesCount: (signal?: AbortSignal | null) => Promise<{ count: number }>;
   abort: () => void;
 }
@@ -68,6 +75,25 @@ export function useQueriesApi(): QueriesApi {
             },
           }
         );
+      },
+      deleteQueriesInBulk: async ({
+        queryIds,
+        streamName,
+      }: {
+        queryIds: string[];
+        streamName: string;
+      }) => {
+        await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+          signal,
+          params: {
+            path: {
+              name: streamName,
+            },
+            body: {
+              operations: queryIds.map((id) => ({ delete: { id } })),
+            },
+          },
+        });
       },
       promoteAll: async () => {
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
