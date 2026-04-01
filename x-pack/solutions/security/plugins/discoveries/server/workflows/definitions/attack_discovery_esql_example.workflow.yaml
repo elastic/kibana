@@ -1,0 +1,159 @@
+version: '1'
+name: Attack discovery - ES|QL example alert retrieval
+description: |
+  Example workflow demonstrating custom alert retrieval using ES|QL.
+  This serves as a reference for users creating their own retrieval workflows.
+
+  The ES|QL query retrieves open and acknowledged security alerts, excluding
+  building block alerts, sorted by risk score (highest first) and timestamp.
+  A KEEP clause limits the output to security-relevant ECS fields that
+  exist in the .alerts-security.alerts-default index.
+
+  This query replicates the behavior of the DSL query in:
+  kbn-elastic-assistant-common/impl/alerts/get_open_and_acknowledged_alerts_query
+
+  NOTE: This is an EXAMPLE workflow. Users should customize the ES|QL query
+  and the KEEP fields for their specific use case.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - Example
+  - attackDiscovery:esql_example_alert_retrieval
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: alerts_index_pattern
+    type: string
+    required: false
+    description: >
+      Elasticsearch index pattern for security alerts. When not provided,
+      defaults to .alerts-security.alerts-<spaceId> using the current
+      Kibana space (via workflow.spaceId).
+  - name: size
+    type: number
+    default: 100
+    description: Maximum alerts to retrieve (1-10000)
+  - name: start
+    type: string
+    required: false
+    default: now-24h
+    description: Time range start (date math, e.g., now-24h, now-7d)
+  - name: end
+    type: string
+    required: false
+    default: now
+    description: Time range end (date math, e.g., now)
+
+steps:
+  # Execute ES|QL query to retrieve open and acknowledged alerts
+  # Sorted by risk score (highest first), then by timestamp (most recent first)
+  # Excludes building block alerts
+  # KEEP fields match the default anonymization fields (DEFAULT_ALLOW)
+  # from elastic_assistant/common/anonymization/index.ts.
+  - name: query_alerts
+    type: elasticsearch.esql.query
+    timeout: '5m'
+    with:
+      # ES|QL query to retrieve open/acknowledged alerts, excluding building blocks
+      query: |
+        {%- if inputs.alerts_index_pattern -%}
+        FROM {{ inputs.alerts_index_pattern }} METADATA _id
+        {%- else -%}
+        FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+        {%- endif %}
+        | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
+        | WHERE kibana.alert.building_block_type IS NULL
+        | SORT kibana.alert.risk_score DESC, @timestamp DESC
+        | LIMIT {{ inputs.size }}
+        | KEEP
+            _id, @timestamp,
+            actions.name, actions.message, actions.status, actions.context,
+            agent.id,
+            asset.criticality,
+            cloud.account.name, cloud.availability_zone, cloud.provider,
+            cloud.region, cloud.service.name,
+            destination.ip,
+            dns.question.name, dns.question.type,
+            entity.id, entity.name, entity.sub_type, entity.type,
+            event.category, event.dataset, event.module, event.outcome,
+            file.Ext.original.path, file.hash.sha256, file.name, file.path,
+            group.id, group.name,
+            host.architecture, host.asset.criticality, host.name,
+            host.os.name, host.os.version,
+            host.risk.calculated_level, host.risk.calculated_score_norm,
+            host.type,
+            kibana.alert.original_time, kibana.alert.risk_score,
+            kibana.alert.rule.description, kibana.alert.rule.name,
+            kibana.alert.rule.references,
+            kibana.alert.rule.threat.framework,
+            kibana.alert.rule.threat.tactic.id,
+            kibana.alert.rule.threat.tactic.name,
+            kibana.alert.rule.threat.tactic.reference,
+            kibana.alert.rule.threat.technique.id,
+            kibana.alert.rule.threat.technique.name,
+            kibana.alert.rule.threat.technique.reference,
+            kibana.alert.rule.threat.technique.subtechnique.id,
+            kibana.alert.rule.threat.technique.subtechnique.name,
+            kibana.alert.rule.threat.technique.subtechnique.reference,
+            kibana.alert.severity, kibana.alert.workflow_status,
+            message,
+            network.protocol,
+            process.args,
+            process.code_signature.exists, process.code_signature.signing_id,
+            process.code_signature.status, process.code_signature.subject_name,
+            process.code_signature.trusted,
+            process.command_line, process.executable, process.exit_code,
+            process.Ext.memory_region.bytes_compressed_present,
+            process.Ext.memory_region.malware_signature.all_names,
+            process.Ext.memory_region.malware_signature.primary.matches,
+            process.Ext.memory_region.malware_signature.primary.signature.name,
+            process.Ext.token.integrity_level_name,
+            process.hash.md5, process.hash.sha1, process.hash.sha256,
+            process.name,
+            process.parent.args, process.parent.args_count,
+            process.parent.code_signature.exists,
+            process.parent.code_signature.status,
+            process.parent.code_signature.subject_name,
+            process.parent.code_signature.trusted,
+            process.parent.command_line, process.parent.executable,
+            process.parent.name,
+            process.pe.original_file_name,
+            process.pid, process.working_directory,
+            Ransomware.feature, Ransomware.files.data,
+            Ransomware.files.entropy, Ransomware.files.extension,
+            Ransomware.files.metrics, Ransomware.files.operation,
+            Ransomware.files.path, Ransomware.files.score,
+            Ransomware.version,
+            resource.id, resource.name, resource.sub_type, resource.type,
+            result.evaluation,
+            rule.description, rule.name, rule.section, rule.tags,
+            rule.benchmark.name, rule.benchmark.id,
+            rule.benchmark.rule_number, rule.benchmark.version,
+            rule.reference,
+            source.ip,
+            threat.framework,
+            threat.tactic.id, threat.tactic.name, threat.tactic.reference,
+            threat.technique.id, threat.technique.name,
+            threat.technique.reference,
+            threat.technique.subtechnique.id,
+            threat.technique.subtechnique.name,
+            threat.technique.subtechnique.reference,
+            user.asset.criticality, user.domain, user.name,
+            user.risk.calculated_level, user.risk.calculated_score_norm,
+            user.target.name,
+            vulnerability.category, vulnerability.classification,
+            vulnerability.description, vulnerability.enumeration,
+            vulnerability.report_id, vulnerability.scanner.vendor,
+            vulnerability.severity, vulnerability.score.base,
+            vulnerability.score.version, vulnerability.id,
+            package.name, package.version, package.fixed_version
+      # Apply time range filter using Elasticsearch DSL (supports date math like now-24h)
+      filter:
+        range:
+          '@timestamp':
+            gte: '${{ inputs.start }}'
+            lte: '${{ inputs.end }}'
+            format: strict_date_optional_time
