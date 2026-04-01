@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema, asCodeResolveSchema } from '@kbn/as-code-shared-schemas';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { warningsSchema } from '../warnings_schema';
 
@@ -17,7 +17,6 @@ export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: asCodeMetaSchema,
-    resolve: asCodeResolveSchema,
     warnings: schema.maybe(warningsSchema),
   });
 }

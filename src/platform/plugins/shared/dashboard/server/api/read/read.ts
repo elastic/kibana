@@ -19,32 +19,35 @@ export async function read(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   isDashboardAppRequest: boolean = false
-): Promise<DashboardReadResponseBody> {
+): Promise<{ body: DashboardReadResponseBody; resolveHeaders: Record<string, string> }> {
   const { core } = await requestCtx.resolve(['core']);
   const {
     saved_object: savedObject,
     outcome,
-
     alias_purpose,
-
     alias_target_id,
   } = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
     id
   );
 
-  const response = getDashboardCRUResponseBody(
-    savedObject,
-    'read',
-    dashboardStateSchema,
-    isDashboardAppRequest
-  );
+  const resolveHeaders: Record<string, string> = {
+    'kbn-resolve-outcome': outcome,
+  };
+  if (alias_target_id) {
+    resolveHeaders['kbn-resolve-alias-target-id'] = alias_target_id;
+  }
+  if (alias_purpose) {
+    resolveHeaders['kbn-resolve-purpose'] = alias_purpose;
+  }
+
   return {
-    ...response,
-    resolve: {
-      alias_target_id,
-      alias_purpose,
-      outcome,
-    },
+    body: getDashboardCRUResponseBody(
+      savedObject,
+      'read',
+      dashboardStateSchema,
+      isDashboardAppRequest
+    ),
+    resolveHeaders,
   };
 }
