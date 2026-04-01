@@ -210,7 +210,7 @@ describe('createSmlAttachTool', () => {
         data: { layers: [] },
         origin: 'ref-1',
       },
-      expect.any(String)
+      'agent'
     );
   });
 
@@ -302,6 +302,8 @@ describe('createSmlAttachTool', () => {
     const chunkId = makeChunkId('dashboard', 'ref-real');
     const smlDoc = createSmlDoc('dashboard', 'ref-real', CHUNK_UUID_A, {
       title: 'Real Document Title',
+      type: 'dashboard',
+      origin_id: 'ref-real',
     });
     const toAttachment = jest.fn().mockResolvedValue({ type: 'dashboard', data: {} });
     mockCheckItemsAccess.mockResolvedValue(new Map([[chunkId, true]]));

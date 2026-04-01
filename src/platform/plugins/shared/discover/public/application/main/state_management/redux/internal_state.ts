@@ -12,8 +12,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { isEqual, throttle } from 'lodash';
 import { from, type Observable } from 'rxjs';
 import {
+  type ImmutableStateInvariantMiddlewareOptions,
   type PayloadAction,
   type PayloadActionCreator,
+  type SerializableStateInvariantMiddlewareOptions,
   type ThunkAction,
   type ThunkDispatch,
   type TypedStartListening,
@@ -46,6 +48,7 @@ import {
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
+  HEAVY_STATE_KEYS,
 } from './types';
 import {
   loadDataViewList,
@@ -53,6 +56,7 @@ import {
   initializeSingleTab,
   type RawAppStatePayload,
 } from './actions';
+import { DEFAULT_EXPANDED_DOC_OWNER } from './constants';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
@@ -218,18 +222,28 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
+        expandedDocOwner?: string;
         initialDocViewerTabId?: string;
         initialDocViewerTabState?: object;
       }>
     ) => {
       withTab(state, action.payload, (tab) => {
+        const nextExpandedDocOwner = action.payload.expandedDoc
+          ? action.payload.expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER
+          : undefined;
+
         if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
           // Reset the initialDocViewerTabId and docViewer when changing expandedDoc to a different document
           tab.initialDocViewerTabId = undefined;
           tab.uiState.docViewer = {};
         }
 
+        if (!action.payload.expandedDoc || tab.expandedDocOwner !== nextExpandedDocOwner) {
+          tab.renderDocumentViewMeta = undefined;
+        }
+
         tab.expandedDoc = action.payload.expandedDoc;
+        tab.expandedDocOwner = nextExpandedDocOwner;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
         if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
@@ -241,6 +255,15 @@ export const internalStateSlice = createSlice({
             },
           };
         }
+      });
+    },
+
+    setRenderDocumentViewMeta: (
+      state,
+      action: TabAction<Pick<TabState, 'renderDocumentViewMeta'>>
+    ) => {
+      withTab(state, action.payload, (tab) => {
+        tab.renderDocumentViewMeta = action.payload.renderDocumentViewMeta;
       });
     },
 
@@ -380,6 +403,8 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
+        tab.expandedDocOwner = undefined;
+        tab.renderDocumentViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};
       }),
@@ -645,6 +670,21 @@ export interface InternalStateDependencies {
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
+const DEFAULT_SERIALIZABLE_IGNORED_ACTION_PATHS = ['meta.arg', 'meta.baseQueryMeta'];
+const HEAVY_STATE_PATHS = HEAVY_STATE_KEYS.map((key) => new RegExp(`(^|\\.)${key}(\\.|$)`));
+
+const immutableCheckOptions: ImmutableStateInvariantMiddlewareOptions = {
+  ignoredPaths: HEAVY_STATE_PATHS,
+};
+
+const serializableCheckOptions: SerializableStateInvariantMiddlewareOptions = {
+  // Skipped values from HEAVY_STATE_KEYS still go through RTK's isNestedFrozen
+  // cache eligibility check unless disableCache is set, which can cause noticeable
+  // rendering delays when using Discover in dev builds
+  disableCache: true,
+  ignoredActionPaths: [...DEFAULT_SERIALIZABLE_IGNORED_ACTION_PATHS, ...HEAVY_STATE_PATHS],
+  ignoredPaths: HEAVY_STATE_PATHS,
+};
 
 export const createInternalStateStore = (
   options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
@@ -665,7 +705,8 @@ export const createInternalStateStore = (
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         thunk: { extraArgument: optionsWithStore },
-        serializableCheck: !IS_JEST_ENVIRONMENT,
+        immutableCheck: immutableCheckOptions,
+        serializableCheck: IS_JEST_ENVIRONMENT ? false : serializableCheckOptions,
       }).prepend(createMiddleware(optionsWithStore)),
     devTools: {
       name: 'DiscoverInternalState',
