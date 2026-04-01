@@ -7,13 +7,13 @@
 
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { ALERTING_EPISODES_PAGINATED_QUERY } from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { buildEpisodesQuery } from '../utils/build_episodes_esql_query';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
 
 jest.mock('../utils/execute_esql_query');
 
-const executeEsqlQueryMock = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
+const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 
 describe('fetchAlertingEpisodes', () => {
   const mockExpressions = {} as ExpressionsStart;
@@ -22,26 +22,25 @@ describe('fetchAlertingEpisodes', () => {
     jest.clearAllMocks();
   });
 
-  it('should call executeEsqlQuery with correct parameters for first page', () => {
+  it('should call executeEsqlQuery with correct parameters', () => {
     const pageSize = 10;
+    const expectedQuery = buildEpisodesQuery({
+      sortField: '@timestamp',
+      sortDirection: 'desc',
+    }).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
       services: { expressions: mockExpressions },
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
-      query: ALERTING_EPISODES_PAGINATED_QUERY,
+      query: expectedQuery,
       input: {
         type: 'kibana_context',
         esqlVariables: [
-          {
-            key: 'lastEpisodeTimestamp',
-            value: null,
-            type: ESQLVariableType.VALUES,
-          },
           {
             key: 'pageSize',
             value: pageSize,
@@ -53,28 +52,25 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with correct parameters when beforeTimestamp is provided', () => {
+  it('should call executeEsqlQuery with different page size', () => {
     const pageSize = 20;
-    const beforeTimestamp = '2024-01-15T10:30:00.000Z';
+    const expectedQuery = buildEpisodesQuery({
+      sortField: '@timestamp',
+      sortDirection: 'desc',
+    }).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
-      beforeTimestamp,
       services: { expressions: mockExpressions },
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
-      query: ALERTING_EPISODES_PAGINATED_QUERY,
+      query: expectedQuery,
       input: {
         type: 'kibana_context',
         esqlVariables: [
-          {
-            key: 'lastEpisodeTimestamp',
-            value: beforeTimestamp,
-            type: ESQLVariableType.VALUES,
-          },
           {
             key: 'pageSize',
             value: pageSize,
@@ -90,6 +86,10 @@ describe('fetchAlertingEpisodes', () => {
     const pageSize = 15;
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
+    const expectedQuery = buildEpisodesQuery({
+      sortField: '@timestamp',
+      sortDirection: 'desc',
+    }).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
@@ -97,18 +97,13 @@ describe('fetchAlertingEpisodes', () => {
       services: { expressions: mockExpressions },
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
-      query: ALERTING_EPISODES_PAGINATED_QUERY,
+      query: expectedQuery,
       input: {
         type: 'kibana_context',
         esqlVariables: [
-          {
-            key: 'lastEpisodeTimestamp',
-            value: null,
-            type: ESQLVariableType.VALUES,
-          },
           {
             key: 'pageSize',
             value: pageSize,
@@ -120,31 +115,27 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with all parameters provided', () => {
+  it('should call executeEsqlQuery with custom sort parameters', () => {
     const pageSize = 25;
-    const beforeTimestamp = '2024-02-20T15:45:30.000Z';
-    const abortController = new AbortController();
-    const abortSignal = abortController.signal;
+    const sortState = {
+      sortField: 'episode.status',
+      sortDirection: 'asc' as const,
+    };
+    const expectedQuery = buildEpisodesQuery(sortState).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
-      beforeTimestamp,
-      abortSignal,
+      sortState,
       services: { expressions: mockExpressions },
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
-      query: ALERTING_EPISODES_PAGINATED_QUERY,
+      query: expectedQuery,
       input: {
         type: 'kibana_context',
         esqlVariables: [
-          {
-            key: 'lastEpisodeTimestamp',
-            value: beforeTimestamp,
-            type: ESQLVariableType.VALUES,
-          },
           {
             key: 'pageSize',
             value: pageSize,
@@ -152,7 +143,7 @@ describe('fetchAlertingEpisodes', () => {
           },
         ],
       },
-      abortSignal,
+      abortSignal: undefined,
     });
   });
 });

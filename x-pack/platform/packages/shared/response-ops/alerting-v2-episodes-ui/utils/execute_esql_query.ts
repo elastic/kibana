@@ -17,9 +17,13 @@ export interface ExecuteEsqlQueryOptions<Input> {
   noCache?: boolean;
 }
 
+/** Time field used for the time range filter (must match the expression's timeField argument). */
+const ESQL_TIME_FIELD = '@timestamp';
+
 /**
  * Executes an ES|QL query through the expressions plugin, using Discover's `esql` function,
  * which also transforms the tabular result into a datatable-ready data structure.
+ * Passes timeField so that input.timeRange is applied as a filter on @timestamp.
  */
 export const executeEsqlQuery = <Input = unknown>({
   expressions,
@@ -28,11 +32,9 @@ export const executeEsqlQuery = <Input = unknown>({
   abortSignal,
   noCache,
 }: ExecuteEsqlQueryOptions<Input>) => {
-  const executionContract = expressions.execute<Input, Datatable>(
-    `esql '${query}'`,
-    input,
-    noCache ? { allowCache: false } : undefined
-  );
+  const expression = `esql '${query.replace(/'/g, "\\'")}' timeField='${ESQL_TIME_FIELD}'`;
+  const options = noCache ? { allowCache: false } : undefined;
+  const executionContract = expressions.execute<Input, Datatable>(expression, input, options);
   abortSignal?.addEventListener('abort', (e) => {
     executionContract.cancel((e.target as AbortSignal)?.reason);
   });

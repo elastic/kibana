@@ -44,7 +44,7 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | STATS count() BY status'",
+      "esql 'FROM index | STATS count() BY status' timeField='@timestamp'",
       null,
       undefined
     );
@@ -74,7 +74,7 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM logs'",
+      "esql 'FROM logs' timeField='@timestamp'",
       input,
       undefined
     );
@@ -101,7 +101,7 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | WHERE status == 'active''",
+      "esql 'FROM index | WHERE status == \\'active\\'' timeField='@timestamp'",
       null,
       undefined
     );

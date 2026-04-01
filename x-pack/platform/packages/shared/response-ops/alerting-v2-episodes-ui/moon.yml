@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/discover-utils'
   - '@kbn/i18n-react'
+  - '@kbn/es-query'
+  - '@kbn/react-hooks'
   - '@kbn/alerting-v2-constants'
 tags:
   - shared-browser
