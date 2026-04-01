@@ -175,16 +175,21 @@ export function validateNameTitleFieldTypesExistingType(
     return;
   }
 
-  const invalidFields = getInvalidNameTitleFields(to);
-  if (invalidFields.length === 0) {
+  const invalidInTo = getInvalidNameTitleFields(to);
+  if (invalidInTo.length === 0) {
     return;
   }
 
-  const preExisting = invalidFields.filter(
-    ({ fieldName }) => `properties.${fieldName}.type` in from.mappings
+  // A field is "pre-existing" only if it was already invalid in the baseline — not merely
+  // present. This correctly catches the case where a field was downgraded from 'text' to
+  // 'keyword', which is a newly introduced problem even though the key existed before.
+  const alreadyInvalidInFrom = new Set(
+    getInvalidNameTitleFields(from).map(({ fieldName }) => fieldName)
   );
-  const newlyIntroduced = invalidFields.filter(
-    ({ fieldName }) => !(`properties.${fieldName}.type` in from.mappings)
+
+  const preExisting = invalidInTo.filter(({ fieldName }) => alreadyInvalidInFrom.has(fieldName));
+  const newlyIntroduced = invalidInTo.filter(
+    ({ fieldName }) => !alreadyInvalidInFrom.has(fieldName)
   );
 
   if (preExisting.length > 0) {

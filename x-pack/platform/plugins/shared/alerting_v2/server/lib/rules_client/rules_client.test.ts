@@ -544,10 +544,13 @@ describe('RulesClient', () => {
 
       const res = await client.getRules(['rule-id-get-many-1', 'rule-id-get-many-2']);
 
-      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
-        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-1' },
-        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-2' },
-      ]);
+      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [
+          { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-1' },
+          { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-get-many-2' },
+        ],
+        undefined
+      );
       expect(res).toHaveLength(2);
       expect(res[0]).toEqual(
         expect.objectContaining({
