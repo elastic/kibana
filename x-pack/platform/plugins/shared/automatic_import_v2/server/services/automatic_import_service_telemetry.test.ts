@@ -556,10 +556,10 @@ describe('AutomaticImportSetupService', () => {
       );
     });
 
-    it('should handle errors from task manager service', async () => {
+    it('should still delete saved object when task manager removal fails', async () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
-      const mockDeleteSavedObject = jest.fn();
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
@@ -573,18 +573,21 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
-        'Task removal failed'
-      );
+      await service.deleteDataStream('integration-123', 'data-stream-456');
 
-      expect(mockDeleteSamples).not.toHaveBeenCalled();
-      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+      expect(mockRemoveTask).toHaveBeenCalled();
+      expect(mockDeleteSamples).toHaveBeenCalledWith('integration-123', 'data-stream-456');
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'data-stream-456',
+        'integration-123',
+        undefined
+      );
     });
 
-    it('should handle errors from samples index service', async () => {
+    it('should still delete saved object when samples index deletion fails', async () => {
       const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockDeleteSavedObject = jest.fn();
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
@@ -598,11 +601,15 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
-        'Sample deletion failed'
-      );
+      await service.deleteDataStream('integration-123', 'data-stream-456');
 
-      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+      expect(mockRemoveTask).toHaveBeenCalled();
+      expect(mockDeleteSamples).toHaveBeenCalled();
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'data-stream-456',
+        'integration-123',
+        undefined
+      );
     });
 
     it('should handle errors from saved object service', async () => {

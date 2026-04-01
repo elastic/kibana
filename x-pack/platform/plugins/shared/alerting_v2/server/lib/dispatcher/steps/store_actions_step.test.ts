@@ -7,7 +7,10 @@
 
 import { StoreActionsStep } from './store_actions_step';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../../resources/datastreams/alert_actions';
 import {
   createDispatcherPipelineState,
   createAlertEpisode,
