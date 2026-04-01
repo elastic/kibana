@@ -12,7 +12,6 @@ import {
   EuiIcon,
   EuiLoadingElastic,
   EuiLoadingSpinner,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -24,7 +23,6 @@ import type { ErrorCategory } from '@kbn/discoveries-schemas';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
 import { WorkflowExecutionDetailsFlyout } from './workflow_execution_details_flyout';
-import type { SourceMetadata } from './workflow_execution_details_flyout/diagnostic_report/helpers/build_diagnostic_report';
 import * as i18n from './translations';
 import { getIsTerminalState } from './get_is_terminal_state';
 import { useDismissAttackDiscoveryGeneration } from '../use_dismiss_attack_discovery_generations';
@@ -40,8 +38,6 @@ interface Props {
   alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   averageSuccessfulDurationNanoseconds?: number;
-  connectorActionTypeId?: string;
-  connectorModel?: string;
   connectorName?: string;
   discoveries?: number;
   duplicatesDroppedCount?: number;
@@ -61,7 +57,6 @@ interface Props {
   persistedCount?: number;
   reason?: string;
   refetchGenerations?: () => void;
-  sourceMetadata?: SourceMetadata | null;
   start?: string | null;
   status?: 'started' | 'succeeded' | 'failed' | 'canceled' | 'dismissed';
   successfulGenerations?: number;
@@ -74,8 +69,6 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   alertsContextCount,
   approximateFutureTime,
   averageSuccessfulDurationNanoseconds,
-  connectorActionTypeId,
-  connectorModel,
   connectorName,
   discoveries,
   duplicatesDroppedCount,
@@ -94,7 +87,6 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   persistedCount,
   reason,
   refetchGenerations,
-  sourceMetadata,
   start,
   status,
   successfulGenerations,
@@ -249,8 +241,8 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   }, []);
 
   const showDetailsButton = useMemo(
-    () => !hideActions && isWorkflowsEnabled && workflowId != null,
-    [hideActions, isWorkflowsEnabled, workflowId]
+    () => !hideActions && isWorkflowsEnabled && workflowRunId != null && workflowId != null,
+    [hideActions, isWorkflowsEnabled, workflowId, workflowRunId]
   );
 
   return (
@@ -285,14 +277,12 @@ const LoadingCalloutComponent: React.FC<Props> = ({
                 `}
                 grow={false}
               >
-                <EuiToolTip content={i18n.VIEW_DETAILS} disableScreenReaderOutput position="top">
-                  <EuiButtonIcon
-                    aria-label={i18n.VIEW_DETAILS}
-                    data-test-subj="detailsButton"
-                    iconType="inspect"
-                    onClick={openFlyout}
-                  />
-                </EuiToolTip>
+                <EuiButtonIcon
+                  aria-label={i18n.DETAILS}
+                  data-test-subj="detailsButton"
+                  iconType="inspect"
+                  onClick={openFlyout}
+                />
               </EuiFlexItem>
             )}
 
@@ -332,41 +322,22 @@ const LoadingCalloutComponent: React.FC<Props> = ({
         <WorkflowExecutionDetailsFlyout
           alertsContextCount={alertsContextCount}
           approximateFutureTime={approximateFutureTime}
-          averageSuccessfulDurationMs={
-            averageSuccessfulDurationNanoseconds != null
-              ? Math.round(averageSuccessfulDurationNanoseconds / 1_000_000)
-              : undefined
-          }
           averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
-          configuredMaxAlerts={
-            localStorageAttackDiscoveryMaxAlerts != null
-              ? parseInt(localStorageAttackDiscoveryMaxAlerts, 10) || undefined
-              : undefined
-          }
-          connectorActionTypeId={connectorActionTypeId}
-          connectorModel={connectorModel}
           connectorName={connectorName}
-          dateRangeEnd={end ?? undefined}
-          dateRangeStart={start ?? undefined}
           discoveriesCount={discoveries}
-          duplicatesDroppedCount={duplicatesDroppedCount}
           end={end}
           errorCategory={errorCategory}
           eventActions={eventActions}
           executionUuid={executionUuid}
           failedWorkflowId={failedWorkflowId}
-          generatedCount={generatedCount}
           generationEndTime={generationEndTime}
           generationStatus={status}
-          hallucinationsFilteredCount={hallucinationsFilteredCount}
           http={http}
           loadingMessage={loadingMessage}
           localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
           onClose={closeFlyout}
           onRefresh={onRefresh}
-          persistedCount={persistedCount}
           reason={reason}
-          sourceMetadata={sourceMetadata}
           start={start}
           successfulGenerations={successfulGenerations}
           workflowExecutions={workflowExecutions}

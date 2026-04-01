@@ -91,13 +91,6 @@ export const DETAILS = i18n.translate(
   }
 );
 
-export const VIEW_DETAILS = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.loadingCallout.viewDetailsButtonLabel',
-  {
-    defaultMessage: 'View details',
-  }
-);
-
 export const INFORMATION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.loadingCallout.informationButtonLabel',
   {

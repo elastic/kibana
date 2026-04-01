@@ -54,31 +54,6 @@ export const getCanonicalOrder = (step: StepExecutionWithLink): number => {
 };
 
 /**
- * Groups steps by their pipeline phase (falling back to stepId when pipelinePhase
- * is undefined), preserving insertion order. All steps in the same phase are
- * collected into a single group, allowing the UI to render one row per pipeline
- * phase regardless of how many internal steps a custom workflow contains.
- */
-export const groupStepsByPhase = (
-  steps: StepExecutionWithLink[]
-): Map<string, StepExecutionWithLink[]> => {
-  const groups = new Map<string, StepExecutionWithLink[]>();
-
-  for (const step of steps) {
-    const key = step.pipelinePhase ?? step.stepId;
-    const existing = groups.get(key);
-
-    if (existing != null) {
-      existing.push(step);
-    } else {
-      groups.set(key, [step]);
-    }
-  }
-
-  return groups;
-};
-
-/**
  * Groups steps by their workflowId, preserving insertion order.
  * Steps without a workflowId are each treated as their own group.
  */

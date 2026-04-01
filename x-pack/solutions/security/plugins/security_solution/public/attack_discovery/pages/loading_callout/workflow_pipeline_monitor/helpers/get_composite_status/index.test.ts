@@ -50,10 +50,10 @@ describe('getCompositeStatus', () => {
     expect(getCompositeStatus(steps)).toBe(ExecutionStatus.PENDING);
   });
 
-  it('returns the first step status as fallback for unrecognized terminal statuses (e.g. CANCELLED + SKIPPED)', () => {
+  it('returns RUNNING as fallback for mixed statuses', () => {
     const steps = [createStep(ExecutionStatus.CANCELLED), createStep(ExecutionStatus.SKIPPED)];
 
-    expect(getCompositeStatus(steps)).toBe(ExecutionStatus.CANCELLED);
+    expect(getCompositeStatus(steps)).toBe(ExecutionStatus.RUNNING);
   });
 
   it('prioritizes RUNNING over FAILED', () => {

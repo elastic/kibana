@@ -130,31 +130,4 @@ describe('WorkflowGroupSteps', () => {
 
     expect(screen.getByTestId('testInspect')).toBeInTheDocument();
   });
-
-  it('renders badge when provided', () => {
-    const steps = [createMockStep({ executionTimeMs: 1000 })];
-
-    render(
-      <TestProviders>
-        <WorkflowGroupSteps
-          badge={<span data-test-subj="testBadge">{'1 discovery'}</span>}
-          steps={steps}
-        />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('testBadge')).toBeInTheDocument();
-  });
-
-  it('does not render badge area when badge is not provided', () => {
-    const steps = [createMockStep({ executionTimeMs: 1000 })];
-
-    render(
-      <TestProviders>
-        <WorkflowGroupSteps steps={steps} />
-      </TestProviders>
-    );
-
-    expect(screen.queryByTestId('testBadge')).not.toBeInTheDocument();
-  });
 });

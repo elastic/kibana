@@ -16,6 +16,7 @@ import { isTerminalStatus } from '@kbn/workflows/types/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { applyGenerationStatusOverride } from './apply_generation_status_override';
 import { buildAggregatedWorkflowExecution } from './helpers/build_aggregated_workflow_execution';
+import { buildStubWorkflowExecution } from './build_stub_workflow_execution';
 import { buildWorkflowExecutionTargets } from './helpers/build_workflow_execution_targets';
 import type { AggregatedWorkflowExecution } from '../../loading_callout/types';
 import * as i18n from './translations';
@@ -28,6 +29,8 @@ interface UseWorkflowExecutionDetailsProps {
   executionUuid?: string | null;
   http: HttpSetup;
   stubData?: {
+    alertsContextCount?: number | null;
+    discoveriesCount?: number | null;
     eventActions?: string[] | null;
     generationStatus?: 'started' | 'succeeded' | 'failed' | 'canceled' | 'dismissed';
   };
@@ -109,20 +112,36 @@ export const useWorkflowExecutionDetails = ({
       return undefined;
     }
 
-    // Fetch workflow execution details from the API.
+    // Filter to only real (non-stub) workflow execution targets
+    const realTargets = workflowExecutionTargets.filter(
+      (target) => !target.workflowRunId.startsWith('stub-')
+    );
+
+    // TODO: Remove this stub path once workflows execution details
+    // are always available via /api/workflowExecutions/{id} (blocked by PR #246446).
+    // TODO: Remove stubData plumbing into this hook post PR #246446.
+    // Only fall back to stub data if there are NO real workflow execution IDs available
+    if (realTargets.length === 0) {
+      // Use the first stub ID for building stub execution data
+      const stubWorkflowRunId = workflowExecutionTargets[0]?.workflowRunId ?? `stub-${Date.now()}`;
+
+      return buildAggregatedWorkflowExecution({
+        executions: [buildStubWorkflowExecution(stubWorkflowRunId, stubData ?? {})],
+        workflowExecutions,
+      });
+    }
+
+    // Fetch real workflow execution details from the API.
     // Use Promise.allSettled so that a single 404 (e.g. from a synthetic
     // workflowRunId for a disabled custom alert retrieval workflow) does not
     // cause the entire panel to fail. Successfully-fetched executions are
     // rendered normally; missing ones appear as pipeline placeholders.
     const settled = await Promise.allSettled(
-      workflowExecutionTargets.map((target) =>
-        http.fetch<WorkflowExecutionDto>(
-          `/api/workflows/executions/${encodeURIComponent(target.workflowRunId)}`,
-          {
-            method: 'GET',
-            signal: abortController.current.signal,
-          }
-        )
+      realTargets.map((target) =>
+        http.fetch<WorkflowExecutionDto>(`/api/workflows/executions/${target.workflowRunId}`, {
+          method: 'GET',
+          signal: abortController.current.signal,
+        })
       )
     );
 
@@ -130,11 +149,9 @@ export const useWorkflowExecutionDetails = ({
       .filter((o): o is PromiseFulfilledResult<WorkflowExecutionDto> => o.status === 'fulfilled')
       .map((o) => o.value);
 
-    const successfulTargets = workflowExecutionTargets.filter(
-      (_, i) => settled[i].status === 'fulfilled'
-    );
+    const successfulTargets = realTargets.filter((_, i) => settled[i].status === 'fulfilled');
 
-    const failedAlertRetrievalTargets = workflowExecutionTargets.filter(
+    const failedAlertRetrievalTargets = realTargets.filter(
       (target, i) => settled[i].status === 'rejected' && target.pipelinePhase === 'retrieve_alerts'
     );
 
@@ -147,7 +164,6 @@ export const useWorkflowExecutionDetails = ({
 
     return applyGenerationStatusOverride({
       aggregatedExecution: aggregated,
-      eventActions: stubData?.eventActions,
       generationStatus: stubData?.generationStatus,
     });
   }, [http, stubData, workflowExecutionTargets, workflowExecutions]);
@@ -198,11 +214,6 @@ export const useWorkflowExecutionDetails = ({
   return {
     data,
     error,
-    // When there are no workflow execution targets (e.g. provided mode before
-    // event-log tracking data is available), the query is disabled — but
-    // react-query v4 still returns `isLoading: true` for disabled queries with
-    // no cached data. Guard against this so callers don't show a spinner when
-    // there is simply nothing to fetch yet.
-    isLoading: workflowExecutionRunIds.length > 0 && isLoading,
+    isLoading,
   };
 };

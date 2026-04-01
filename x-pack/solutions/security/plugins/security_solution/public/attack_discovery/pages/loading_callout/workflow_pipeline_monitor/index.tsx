@@ -23,7 +23,6 @@ import type { PipelineDataResponse } from '../../hooks/use_pipeline_data';
 import type { StepExecutionWithLink, WorkflowInspectMetadata } from '../types';
 import { useWorkflowEditorLink } from '../../use_workflow_editor_link';
 import { GroupedAlertRetrievalContent } from './grouped_alert_retrieval_content';
-import { WorkflowGroupSteps } from './workflow_group_steps';
 import { getCompositeStatus } from './helpers/get_composite_status';
 import {
   getAlertsCountBadgeLabel,
@@ -39,7 +38,6 @@ import { INSPECT_CONFIG } from './helpers/inspect_config';
 import { mapStatusToEuiStatus } from './helpers/map_status_to_eui_status';
 import {
   getCanonicalOrder,
-  groupStepsByPhase,
   groupStepsByWorkflow,
   isAlertRetrievalStep,
   isPersistenceStep,
@@ -106,20 +104,11 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
     [onViewData, pipelineData]
   );
 
-  /** Finds the alert retrieval entry matching a workflow run ID, if any.
-   * When runId is undefined (e.g. a placeholder step), falls back to a
-   * synthetic 'provided' entry so pre-provided alerts are still counted. */
+  /** Finds the alert retrieval entry matching a workflow run ID, if any */
   const findAlertRetrieval = useCallback(
     (runId?: string) => {
-      if (pipelineData?.alert_retrieval == null) {
+      if (runId == null || pipelineData?.alert_retrieval == null) {
         return undefined;
-      }
-
-      if (runId == null) {
-        return (
-          pipelineData.alert_retrieval.find((entry) => entry.workflow_run_id === 'provided') ??
-          undefined
-        );
       }
 
       return pipelineData.alert_retrieval.find((entry) => entry.workflow_run_id === runId);
@@ -271,23 +260,8 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
       (step) =>
         step.stepId === 'generate_discoveries' || step.pipelinePhase === 'generate_discoveries'
     );
-    // isGenerationStarted is true if:
-    // 1. The generation step is beyond PENDING (actively running or done), OR
-    // 2. The generation step has a workflowRunId — meaning a real generation workflow execution
-    //    exists and is running, even if its internal step hasn't been created yet by the workflow
-    //    engine. Without this check, scheduled runs appear "stuck in alert retrieval" because the
-    //    workflow engine shows the generation step as PENDING while the LLM is already being called.
-    // 3. The top-level workflowRunId prop is non-null — the flyout only renders when generation
-    //    tracking data is available, so workflowRunId being set means generation has started.
-    //    This covers the edge case where the generation execution returns no step executions AND
-    //    no workflow definition (e.g., immediately after runWorkflow() returns), causing
-    //    buildStepExecutions to return an empty array and addAttackDiscoveryPipelinePlaceholders
-    //    to substitute a placeholder with workflowRunId: undefined that defeats check #2 above.
     const isGenerationStarted =
-      workflowRunId != null ||
-      (generationStep != null &&
-        (generationStep.status !== ExecutionStatus.PENDING ||
-          generationStep.workflowRunId != null));
+      generationStep != null && generationStep.status !== ExecutionStatus.PENDING;
 
     const alertRetrievalStepItems: EuiStepProps[] = (() => {
       if (alertRetrievalSteps.length > 1) {
@@ -386,55 +360,41 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
       return [];
     })();
 
-    const phaseGroups = groupStepsByPhase(otherSteps);
-
-    const sortedPhaseEntries = [...phaseGroups.entries()].sort(
-      ([, groupA], [, groupB]) => getCanonicalOrder(groupA[0]) - getCanonicalOrder(groupB[0])
+    const orderedOtherSteps = [...otherSteps].sort(
+      (a, b) => getCanonicalOrder(a) - getCanonicalOrder(b)
     );
 
-    const otherStepItems: EuiStepProps[] = sortedPhaseEntries.map(([, phaseSteps]) => {
-      const representativeStep = phaseSteps[0];
-      const compositeStatus = getCompositeStatus(phaseSteps);
-
-      // When generation has started but the workflow engine hasn't created its internal step
-      // yet, the placeholder step has status PENDING. Override to RUNNING so the UI shows
-      // the generation phase as active rather than not-yet-started.
-      const effectiveStatus =
-        isGenerationStep(representativeStep) &&
-        isGenerationStarted &&
-        compositeStatus === ExecutionStatus.PENDING
-          ? ExecutionStatus.RUNNING
-          : compositeStatus;
-
-      return {
-        children: (
-          <WorkflowGroupSteps
-            badge={renderDiscoveryCountBadge(representativeStep)}
-            inspectButton={renderInspectButton(
-              representativeStep.stepId,
-              representativeStep.pipelinePhase,
-              {
-                workflowId: representativeStep.workflowId,
-                workflowName: representativeStep.workflowName,
-                workflowRunId: representativeStep.workflowRunId,
-              }
-            )}
-            steps={phaseSteps}
-          />
-        ),
-        status: mapStatusToEuiStatus(effectiveStatus),
-        title:
-          effectiveStatus === ExecutionStatus.RUNNING ? (
-            <PulsingTitle>{formatStepName(representativeStep.stepId)}</PulsingTitle>
-          ) : (
-            formatStepName(representativeStep.stepId)
+    const otherStepItems: EuiStepProps[] = orderedOtherSteps.map(
+      (step) =>
+        ({
+          children: (
+            <StepContent
+              alertsCountBadge={renderDiscoveryCountBadge(step)}
+              executionTimeMs={step.executionTimeMs}
+              finishedAt={step.finishedAt}
+              inspectButton={renderInspectButton(step.stepId, step.pipelinePhase, {
+                workflowId: step.workflowId,
+                workflowName: step.workflowName,
+                workflowRunId: step.workflowRunId,
+              })}
+              key={step.id}
+              startedAt={step.startedAt}
+              status={step.status}
+              step={step}
+            />
           ),
-      } as EuiStepProps;
-    });
+          status: mapStatusToEuiStatus(step.status),
+          title:
+            step.status === ExecutionStatus.RUNNING ? (
+              <PulsingTitle>{formatStepName(step.stepId)}</PulsingTitle>
+            ) : (
+              formatStepName(step.stepId)
+            ),
+        } as EuiStepProps)
+    );
 
     return [...alertRetrievalStepItems, ...otherStepItems];
   }, [
-    isGenerationStep,
     pipelineData,
     renderCombinedInspectButton,
     renderDiscoveryCountBadge,
@@ -442,7 +402,6 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
     renderWorkflowAlertsCountBadge,
     renderWorkflowInspectButton,
     sortedSteps,
-    workflowRunId,
   ]);
 
   return (
