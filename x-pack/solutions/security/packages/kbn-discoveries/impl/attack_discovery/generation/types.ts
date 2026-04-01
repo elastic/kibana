@@ -37,17 +37,8 @@ export interface ParsedApiConfig {
   provider?: string;
 }
 
-// Minimal type for the workflows management API — full version in PR 4
-export interface WorkflowsManagementApi {
-  getWorkflow: (workflowId: string, spaceId: string) => Promise<unknown>;
-  getWorkflowExecution: (
-    executionId: string,
-    spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
-  ) => Promise<unknown>;
-  runWorkflow: (
-    workflow: unknown,
-    spaceId: string,
-    inputs: Record<string, unknown>
-  ) => Promise<unknown>;
-}
+// Alias the workflows management API type from the platform plugin.
+// The full named alias is added in PR 4; this gives PR 3 code a stable type to import.
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+
+export type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
