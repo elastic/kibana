@@ -41,7 +41,7 @@ export function SettingsTab() {
     return managementLocator?.getRedirectUrl({ sectionId: 'ml', appId: 'model_settings' }) ?? '';
   }, [share.url.locators]);
 
-  const savedIndexPatterns = core.uiSettings.get<string>(
+  const savedIndexPatterns = core.settings.client.get<string>(
     OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
     DEFAULT_INDEX_PATTERNS
   );

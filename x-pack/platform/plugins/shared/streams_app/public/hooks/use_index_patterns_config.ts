@@ -17,7 +17,7 @@ import { useKibana } from './use_kibana';
 export function useIndexPatternsConfig() {
   const { core } = useKibana();
 
-  const rawValue = core.uiSettings.get<string>(
+  const rawValue = core.settings.client.get<string>(
     OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
     DEFAULT_INDEX_PATTERNS
   );
