@@ -26,6 +26,8 @@ type ReportDoneButtonClicked = () => void;
 
 type ReportDataStreamDeleteConfirmed = () => void;
 
+type ReportIntegrationDeleteConfirmed = () => void;
+
 type ReportDataStreamRefreshConfirmed = () => void;
 
 type ReportPipelineEdited = (params: {
@@ -44,6 +46,7 @@ interface TelemetryContextProps {
   reportCancelButtonClicked: ReportCancelButtonClicked;
   reportDoneButtonClicked: ReportDoneButtonClicked;
   reportDataStreamDeleteConfirmed: ReportDataStreamDeleteConfirmed;
+  reportIntegrationDeleteConfirmed: ReportIntegrationDeleteConfirmed;
   reportDataStreamRefreshConfirmed: ReportDataStreamRefreshConfirmed;
   reportPipelineEdited: ReportPipelineEdited;
 }
@@ -58,6 +61,7 @@ const defaultTelemetryContext: TelemetryContextProps = {
   reportCancelButtonClicked: () => {},
   reportDoneButtonClicked: () => {},
   reportDataStreamDeleteConfirmed: () => {},
+  reportIntegrationDeleteConfirmed: () => {},
   reportDataStreamRefreshConfirmed: () => {},
   reportPipelineEdited: () => {},
 };
@@ -140,6 +144,10 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     });
   }, [telemetry]);
 
+  const reportIntegrationDeleteConfirmed = useCallback<ReportIntegrationDeleteConfirmed>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.IntegrationDeleteConfirmed, {});
+  }, [telemetry]);
+
   const reportDataStreamRefreshConfirmed = useCallback<ReportDataStreamRefreshConfirmed>(() => {
     telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamRefreshConfirmed, {
       sessionId: sessionData.current.sessionId,
@@ -169,6 +177,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
       reportCancelButtonClicked,
       reportDoneButtonClicked,
       reportDataStreamDeleteConfirmed,
+      reportIntegrationDeleteConfirmed,
       reportDataStreamRefreshConfirmed,
       reportPipelineEdited,
     }),
@@ -181,6 +190,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
       reportCancelButtonClicked,
       reportDoneButtonClicked,
       reportDataStreamDeleteConfirmed,
+      reportIntegrationDeleteConfirmed,
       reportDataStreamRefreshConfirmed,
       reportPipelineEdited,
     ]

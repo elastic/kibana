@@ -107,6 +107,18 @@ export const getAllIntegrations = async ({
     signal: abortSignal,
   });
 
+export interface DeleteIntegrationRequest {
+  integrationId: string;
+}
+
+export const deleteIntegration = async ({
+  http,
+  integrationId,
+}: RequestDeps & DeleteIntegrationRequest): Promise<void> =>
+  http.delete<void>(`${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(integrationId)}`, {
+    version: '1',
+  });
+
 export interface UploadSamplesRequest {
   integrationId: string;
   dataStreamId: string;
