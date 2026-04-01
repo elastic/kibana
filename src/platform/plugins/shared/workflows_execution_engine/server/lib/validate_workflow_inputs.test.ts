@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
@@ -19,8 +19,9 @@ describe('validateWorkflowInputs', () => {
   let mockRepository: jest.Mocked<Pick<WorkflowExecutionRepository, 'updateWorkflowExecution'>>;
   let mockLogger: jest.Mocked<Pick<Logger, 'error'>>;
 
-  const makeWorkflow = (inputs?: Record<string, unknown>): WorkflowExecutionEngineModel => {
-    const triggers = inputs !== undefined ? [{ type: 'manual', inputs } as ManualTrigger] : [];
+  const makeWorkflow = (inputs?: ManualTrigger['inputs']): WorkflowExecutionEngineModel => {
+    const triggers: WorkflowYaml['triggers'] =
+      inputs !== undefined ? ([{ type: 'manual', inputs }] as WorkflowYaml['triggers']) : [];
     return {
       id: 'workflow-1',
       name: 'Test Workflow',
@@ -31,7 +32,6 @@ describe('validateWorkflowInputs', () => {
         version: '1',
         triggers,
         steps: [],
-        ...(inputs !== undefined ? { inputs } : {}),
       },
       yaml: '',
     };

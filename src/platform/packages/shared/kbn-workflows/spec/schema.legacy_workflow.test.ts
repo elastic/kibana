@@ -86,7 +86,7 @@ describe('Legacy workflow format (backward compatibility)', () => {
     const autocompleteResult = WorkflowSchemaForAutocomplete.safeParse(workflow);
     expect(autocompleteResult.success).toBe(true);
 
-    const manualTriggerAutocomplete = result.data?.triggers?.find((trigger) =>
+    const manualTriggerAutocomplete = autocompleteResult.data?.triggers?.find((trigger) =>
       isManualTrigger(trigger)
     );
 

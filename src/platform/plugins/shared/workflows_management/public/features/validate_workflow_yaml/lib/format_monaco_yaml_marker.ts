@@ -33,7 +33,7 @@ export function formatMonacoYamlMarker(
   if (marker.message === 'Property inputs is not allowed.' && marker.startColumn === 1) {
     return {
       ...newMarker,
-      message: 'The "inputs" must be defined under manual trigger, not at the root level.',
+      message: 'The "inputs" must be defined under a manual trigger, not at the root level.',
     };
   }
 
