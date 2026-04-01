@@ -39,6 +39,7 @@ jest.mock('../../../../common', () => ({
     services: {
       http: {},
       notifications: { toasts: { addError: jest.fn(), addWarning: jest.fn() } },
+      application: { navigateToApp: jest.fn() },
     },
   })),
 }));
@@ -152,8 +153,8 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('createDataStreamFlyout')).toBeInTheDocument();
       });
 
-      expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
-      expect(getByTestId('dataStreamDescriptionInput')).toBeInTheDocument();
+      expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
+      expect(getByTestId('dataStreamDescriptionInputV2')).toBeInTheDocument();
       expect(getByTestId('dataCollectionMethodSelect')).toBeInTheDocument();
       expect(getByTestId('logsSourceUploadCard')).toBeInTheDocument();
       expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
@@ -409,10 +410,10 @@ describe('CreateDataStreamFlyout', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
+        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
       });
 
-      fireEvent.change(getByTestId('dataStreamTitleInput'), {
+      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
         target: { value: 'existing data stream' },
       });
 
@@ -441,10 +442,10 @@ describe('CreateDataStreamFlyout', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
+        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
       });
 
-      fireEvent.change(getByTestId('dataStreamTitleInput'), {
+      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
         target: { value: 'MY DATA STREAM' },
       });
 
@@ -473,14 +474,14 @@ describe('CreateDataStreamFlyout', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
+        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
       });
 
-      fireEvent.change(getByTestId('dataStreamTitleInput'), {
+      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
         target: { value: 'New Unique Stream' },
       });
 
-      const titleInput = getByTestId('dataStreamTitleInput');
+      const titleInput = getByTestId('dataStreamTitleInputV2');
       expect(titleInput.getAttribute('aria-invalid')).not.toBe('true');
     });
   });
