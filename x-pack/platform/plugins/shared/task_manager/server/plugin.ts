@@ -158,6 +158,7 @@ export class TaskManagerPlugin
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
   private taskEventLogger?: TaskEventLogger;
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
+  private taskStore?: TaskStore;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -288,6 +289,7 @@ export class TaskManagerPlugin
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
       coreStartServices: core.getStartServices,
+      getEncryptedSavedObjectsClient: () => this.taskStore?.getEncryptedSavedObjectsClient(),
       invalidateApiKeyFn: this.invalidateApiKey.bind(this),
       invalidateUiamApiKeyFn: () => this.invalidateUiamApiKey,
       logger: this.logger,
@@ -377,6 +379,7 @@ export class TaskManagerPlugin
       executionContext,
       apiKeyStrategy,
     });
+    this.taskStore = taskStore;
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 

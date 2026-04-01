@@ -39,6 +39,12 @@ export class TaskManagerDependenciesPlugin {
       enforceRandomId: false,
     });
 
+    plugin.encryptedSavedObjects.registerType({
+      type: 'api_key_to_invalidate',
+      attributesToEncrypt: new Set(['uiamApiKey']),
+      attributesToIncludeInAAD: new Set(['apiKeyId', 'createdAt']),
+    });
+
     plugin.taskManager.registerCanEncryptedSavedObjects(plugin.encryptedSavedObjects.canEncrypt);
 
     plugin.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
@@ -50,7 +56,7 @@ export class TaskManagerDependenciesPlugin {
   public start(core: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
     plugin.taskManager.registerEncryptedSavedObjectsClient(
       plugin.encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['task'],
+        includedHiddenTypes: ['task', 'api_key_to_invalidate'],
       })
     );
     plugin.taskManager.registerApiKeyInvalidateFn(

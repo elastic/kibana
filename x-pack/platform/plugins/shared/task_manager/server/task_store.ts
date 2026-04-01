@@ -19,6 +19,7 @@ import type {
   SavedObjectsBulkDeleteResponse,
   Logger,
   SavedObjectsServiceStart,
+  SavedObjectsClientContract,
   SecurityServiceStart,
   KibanaRequest,
   SavedObject,
@@ -64,7 +65,7 @@ import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { BulkUpdateError, MsearchError } from './lib/errors';
-import { TASK_SO_NAME } from './saved_objects';
+import { TASK_SO_NAME, INVALIDATE_API_KEY_SO_NAME } from './saved_objects';
 import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_key_strategy';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
@@ -153,6 +154,7 @@ export class TaskStore {
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private savedObjectsService: SavedObjectsServiceStart;
+  private _invalidationSoClient?: SavedObjectsClientContract;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
   private requestTimeouts: RequestTimeoutsConfig;
@@ -163,6 +165,15 @@ export class TaskStore {
   private basePath: IBasePath;
   private executionContextRunner: ExecutionContextRunner;
   private apiKeyStrategy: ApiKeyStrategy;
+
+  private get invalidationSoClient(): SavedObjectsClientContract {
+    if (!this._invalidationSoClient) {
+      this._invalidationSoClient = this.savedObjectsService.getUnsafeInternalClient({
+        includedHiddenTypes: [INVALIDATE_API_KEY_SO_NAME],
+      });
+    }
+    return this._invalidationSoClient;
+  }
 
   /**
    * Constructs a new TaskStore.
@@ -203,6 +214,10 @@ export class TaskStore {
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
     this.esoClient = client;
+  }
+
+  public getEncryptedSavedObjectsClient(): EncryptedSavedObjectsClient | undefined {
+    return this.esoClient;
   }
 
   private canEncryptSo() {
@@ -746,7 +761,7 @@ export class TaskStore {
       await this.apiKeyStrategy.markForInvalidation(
         allInvalidationTargets,
         this.logger,
-        this.savedObjectsRepository
+        this.invalidationSoClient
       );
     }
 
@@ -864,7 +879,7 @@ export class TaskStore {
         await this.apiKeyStrategy.markForInvalidation(
           targets,
           this.logger,
-          this.savedObjectsRepository
+          this.invalidationSoClient
         );
       }
     }
@@ -905,7 +920,7 @@ export class TaskStore {
       await this.apiKeyStrategy.markForInvalidation(
         allInvalidationTargets,
         this.logger,
-        this.savedObjectsRepository
+        this.invalidationSoClient
       );
     }
 

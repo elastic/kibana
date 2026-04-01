@@ -13,6 +13,7 @@ import type {
   InvalidateUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { TaskScheduling } from '../task_scheduling';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
@@ -53,6 +54,7 @@ export async function scheduleInvalidateApiKeyTask(
 interface RegisterInvalidateApiKeyTaskOpts {
   configInterval: string;
   coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>;
+  getEncryptedSavedObjectsClient: () => EncryptedSavedObjectsClient | undefined;
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
   invalidateUiamApiKeyFn?: () => UiamApiKeyInvalidationFn | undefined;
   logger: Logger;
@@ -65,6 +67,7 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
     logger,
     configInterval,
     coreStartServices,
+    getEncryptedSavedObjectsClient,
     invalidateApiKeyFn,
     invalidateUiamApiKeyFn,
     removalDelay,
@@ -77,6 +80,7 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
         logger,
         configInterval,
         coreStartServices,
+        getEncryptedSavedObjectsClient,
         invalidateApiKeyFn,
         invalidateUiamApiKeyFn,
         removalDelay,
@@ -90,6 +94,7 @@ type InvalidateApiKeysTaskRunnerOpts = Pick<
   | 'logger'
   | 'configInterval'
   | 'coreStartServices'
+  | 'getEncryptedSavedObjectsClient'
   | 'invalidateApiKeyFn'
   | 'invalidateUiamApiKeyFn'
   | 'removalDelay'
@@ -100,6 +105,7 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
     logger,
     configInterval,
     coreStartServices,
+    getEncryptedSavedObjectsClient,
     invalidateApiKeyFn,
     invalidateUiamApiKeyFn,
     removalDelay,
@@ -114,6 +120,7 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
           ]);
 
           const totalInvalidated = await runInvalidate({
+            encryptedSavedObjectsClient: getEncryptedSavedObjectsClient(),
             invalidateApiKeyFn,
             invalidateUiamApiKeyFn: invalidateUiamApiKeyFn?.(),
             logger,
