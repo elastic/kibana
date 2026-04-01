@@ -10,7 +10,6 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED,
   writeAttackDiscoveryEvent,
-  type AttackDiscoverySource,
 } from '../../persistence/event_logging';
 
 import type { WorkflowExecutionsTracking } from '../types';
@@ -22,7 +21,6 @@ export const writeAlertRetrievalStartedEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
-  source,
   spaceId,
   startTime,
   workflowExecutions,
@@ -35,7 +33,6 @@ export const writeAlertRetrievalStartedEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
-  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowExecutions: WorkflowExecutionsTracking;
@@ -52,7 +49,6 @@ export const writeAlertRetrievalStartedEvent = async ({
       eventLogIndex,
       executionUuid,
       message: `Attack discovery alert retrieval ${executionUuid} started`,
-      source,
       spaceId,
       start: startTime,
       workflowExecutions,

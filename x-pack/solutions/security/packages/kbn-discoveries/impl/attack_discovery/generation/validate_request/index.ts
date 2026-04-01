@@ -94,6 +94,32 @@ export const validateRequest = ({
     };
   }
 
+  if (
+    workflowConfig.default_alert_retrieval_mode === 'esql' &&
+    (workflowConfig.esql_query == null || workflowConfig.esql_query.trim() === '')
+  ) {
+    return {
+      body: {
+        message:
+          'esql_query is required in workflow_config when default_alert_retrieval_mode is "esql"',
+      },
+      ok: false,
+    };
+  }
+
+  if (
+    workflowConfig.default_alert_retrieval_mode === 'provided' &&
+    (workflowConfig.provided_context == null || workflowConfig.provided_context.length === 0)
+  ) {
+    return {
+      body: {
+        message:
+          'provided_context is required in workflow_config when default_alert_retrieval_mode is "provided"',
+      },
+      ok: false,
+    };
+  }
+
   if (!validatedRequestBody.alerts_index_pattern) {
     return {
       body: {

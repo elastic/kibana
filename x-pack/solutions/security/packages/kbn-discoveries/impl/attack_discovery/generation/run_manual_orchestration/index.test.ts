@@ -112,8 +112,8 @@ const baseParams = {
   spaceId: 'default',
   start: 'now',
   workflowConfig: {
-    alert_retrieval_mode: 'custom_query' as const,
     alert_retrieval_workflow_ids: [],
+    default_alert_retrieval_mode: 'custom_query' as const,
     validation_workflow_id: 'default',
   },
   workflowsManagementApi: {} as never,
@@ -169,6 +169,16 @@ describe('runManualOrchestration', () => {
     expect(result).toEqual(mockValidationOutcome);
   });
 
+  it('passes persist to the validation step', async () => {
+    await runManualOrchestration({ ...baseParams, persist: false });
+
+    expect(mockRunValidationStep).toHaveBeenCalledWith(
+      expect.objectContaining({
+        persist: false,
+      })
+    );
+  });
+
   it('throws when the retrieval step throws', async () => {
     mockRunRetrievalStep.mockRejectedValue(new Error('retrieval boom'));
 
@@ -186,59 +196,12 @@ describe('runManualOrchestration', () => {
     expect(mockRunValidationStep).not.toHaveBeenCalled();
   });
 
-  it('throws when the validation step throws', async () => {
-    mockRunValidationStep.mockRejectedValue(new Error('validation boom'));
+  it('returns validation_failed when validation step returns failure', async () => {
+    mockRunValidationStep.mockResolvedValue({ outcome: 'validation_failed' });
 
-    await expect(runManualOrchestration(baseParams)).rejects.toThrow('validation boom');
-  });
+    const result = await runManualOrchestration(baseParams);
 
-  describe('provided mode', () => {
-    const providedParams = {
-      ...baseParams,
-      alerts: ['alert-A', 'alert-B'],
-      workflowConfig: {
-        alert_retrieval_mode: 'provided' as const,
-        alert_retrieval_workflow_ids: [],
-        validation_workflow_id: 'default',
-      },
-    };
-
-    it('skips runRetrievalStep when mode is provided and alerts are non-empty', async () => {
-      await runManualOrchestration(providedParams);
-
-      expect(mockRunRetrievalStep).not.toHaveBeenCalled();
-    });
-
-    it('passes a synthetic AlertRetrievalResult to runGenerationStep when mode is provided', async () => {
-      await runManualOrchestration(providedParams);
-
-      expect(mockRunGenerationStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          alertRetrievalResult: expect.objectContaining({
-            alerts: ['alert-A', 'alert-B'],
-            alertsContextCount: 2,
-            workflowId: 'provided',
-          }),
-        })
-      );
-    });
-
-    it('still calls runRetrievalStep when mode is provided but alerts is empty', async () => {
-      await runManualOrchestration({
-        ...providedParams,
-        alerts: [],
-      });
-
-      expect(mockRunRetrievalStep).toHaveBeenCalled();
-    });
-
-    it('still calls runRetrievalStep when mode is provided but alerts is undefined', async () => {
-      const { alerts: _alerts, ...paramsWithoutAlerts } = providedParams;
-
-      await runManualOrchestration(paramsWithoutAlerts);
-
-      expect(mockRunRetrievalStep).toHaveBeenCalled();
-    });
+    expect(result).toEqual({ outcome: 'validation_failed' });
   });
 
   describe('execution summary logging', () => {
@@ -288,10 +251,10 @@ describe('runManualOrchestration', () => {
       );
     });
 
-    it('logs a failed summary when validation throws', async () => {
-      mockRunValidationStep.mockRejectedValue(new Error('validation boom'));
+    it('logs a failed summary when validation returns validation_failed', async () => {
+      mockRunValidationStep.mockResolvedValue({ outcome: 'validation_failed' });
 
-      await expect(runManualOrchestration(baseParams)).rejects.toThrow('validation boom');
+      await runManualOrchestration(baseParams);
 
       expect(baseParams.logger.info).toHaveBeenCalledWith(
         expect.stringContaining('Orchestration summary [failed]')

@@ -50,12 +50,6 @@ const getEsqlDescription = (): string =>
     defaultMessage: 'alerts retrieved via ES|QL',
   });
 
-const getProvidedDescription = (alertsCount: number): string =>
-  i18n.translate('xpack.discoveries.getWorkflowLoadingMessage.provided', {
-    defaultMessage: '{alertsCount} pre-provided {alertsCount, plural, =1 {alert} other {alerts}}',
-    values: { alertsCount },
-  });
-
 const getWorkflowsDescription = (workflowCount: number): string =>
   i18n.translate('xpack.discoveries.getWorkflowLoadingMessage.workflows', {
     defaultMessage:
@@ -87,8 +81,10 @@ export const getWorkflowLoadingMessage = ({
   start?: string;
   workflowConfig: WorkflowConfig;
 }): string => {
-  const { alert_retrieval_mode: mode, alert_retrieval_workflow_ids: alertRetrievalWorkflowIds } =
-    workflowConfig;
+  const {
+    alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
+    default_alert_retrieval_mode: mode,
+  } = workflowConfig;
   const workflowCount = alertRetrievalWorkflowIds.length;
   const hasCustomWorkflows = workflowCount > 0;
 
@@ -97,8 +93,6 @@ export const getWorkflowLoadingMessage = ({
       ? [getCustomQueryDescription({ alertsCount, end, start })]
       : mode === 'esql'
       ? [getEsqlDescription()]
-      : mode === 'provided'
-      ? [getProvidedDescription(alertsCount)]
       : []),
     ...(hasCustomWorkflows ? [getWorkflowsDescription(workflowCount)] : []),
   ];

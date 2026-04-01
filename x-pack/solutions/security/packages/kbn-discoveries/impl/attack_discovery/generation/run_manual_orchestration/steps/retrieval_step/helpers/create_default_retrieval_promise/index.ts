@@ -12,17 +12,42 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   invokeAlertRetrievalWorkflow,
   type AlertRetrievalResult,
+  type AnonymizedAlert,
   type WorkflowsManagementApi,
 } from '../../../../../invoke_alert_retrieval_workflow';
-import type { AttackDiscoverySource } from '../../../../../../persistence/event_logging';
-import type { AlertRetrievalMode, ParsedApiConfig } from '../../../../../types';
+import type { DefaultAlertRetrievalMode, ParsedApiConfig } from '../../../../../types';
+
+const buildProvidedResult = ({
+  apiConfig,
+  providedContext,
+}: {
+  apiConfig: ParsedApiConfig;
+  providedContext: string[];
+}): AlertRetrievalResult => {
+  const anonymizedAlerts: AnonymizedAlert[] = providedContext.map((content) => ({
+    metadata: {},
+    page_content: content,
+  }));
+
+  return {
+    alerts: providedContext,
+    alertsContextCount: providedContext.length,
+    anonymizedAlerts,
+    apiConfig,
+    connectorName: '',
+    replacements: {},
+    workflowExecutions: [],
+    workflowId: 'provided',
+    workflowRunId: 'provided',
+  };
+};
 
 export const createLegacyRetrievalPromise = ({
   alertsIndexPattern,
   anonymizationFields,
   apiConfig,
   authenticatedUser,
-  alertRetrievalMode,
+  defaultAlertRetrievalMode,
   defaultAlertRetrievalWorkflowId,
   end,
   esqlQuery,
@@ -31,9 +56,9 @@ export const createLegacyRetrievalPromise = ({
   executionUuid,
   filter,
   logger,
+  providedContext,
   request,
   size,
-  source,
   spaceId,
   start,
   workflowsManagementApi,
@@ -42,7 +67,7 @@ export const createLegacyRetrievalPromise = ({
   anonymizationFields: AnonymizationFieldResponse[];
   apiConfig: ParsedApiConfig;
   authenticatedUser: AuthenticatedUser;
-  alertRetrievalMode: AlertRetrievalMode;
+  defaultAlertRetrievalMode: DefaultAlertRetrievalMode;
   defaultAlertRetrievalWorkflowId: string;
   end?: string;
   esqlQuery?: string;
@@ -51,15 +76,21 @@ export const createLegacyRetrievalPromise = ({
   executionUuid: string;
   filter?: Record<string, unknown>;
   logger: Logger;
+  providedContext?: string[];
   request: KibanaRequest;
   size?: number;
-  source?: AttackDiscoverySource;
   spaceId: string;
   start?: string;
   workflowsManagementApi: WorkflowsManagementApi;
 }): Promise<AlertRetrievalResult | null> => {
-  if (alertRetrievalMode === 'custom_only' || alertRetrievalMode === 'provided') {
+  if (defaultAlertRetrievalMode === 'disabled') {
     return Promise.resolve(null);
+  }
+
+  if (defaultAlertRetrievalMode === 'provided') {
+    return Promise.resolve(
+      buildProvidedResult({ apiConfig, providedContext: providedContext ?? [] })
+    );
   }
 
   return invokeAlertRetrievalWorkflow({
@@ -68,7 +99,7 @@ export const createLegacyRetrievalPromise = ({
     apiConfig,
     authenticatedUser,
     end,
-    esqlQuery: alertRetrievalMode === 'esql' ? esqlQuery : undefined,
+    esqlQuery: defaultAlertRetrievalMode === 'esql' ? esqlQuery : undefined,
     eventLogger,
     eventLogIndex,
     executionUuid,
@@ -76,7 +107,6 @@ export const createLegacyRetrievalPromise = ({
     logger,
     request,
     size,
-    source,
     spaceId,
     start,
     workflowId: defaultAlertRetrievalWorkflowId,
