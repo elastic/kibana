@@ -100,7 +100,10 @@ export type ReviewApproveMenuClickedPayload = Record<string, never>;
 export type IntegrationDownloadZipClickedPayload = Record<string, never>;
 export type ApproveModalCancelClickedPayload = Record<string, never>;
 export type ApproveModalApproveClickedPayload = Record<string, never>;
-export type IntegrationDeleteConfirmedPayload = Record<string, never>;
+export interface IntegrationDeleteConfirmedPayload {
+  sessionId: string;
+}
+
 export interface DataStreamDeleteConfirmedPayload {
   sessionId: string;
 }

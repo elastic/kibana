@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { FieldValue, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getSampleDocuments } from '@kbn/ai-tools';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
 
-const SAMPLE_DOCS_TARGET_UNIQUE_APPS = 8;
-const SAMPLE_DOCS_MAX = 60;
-const SAMPLE_DOCS_PAGE_SIZE = 50;
-const REQUIRED_APP_SAMPLE_SIZE = 10;
+const SAMPLE_DOCS_MAX = 50;
 
-const getAppNameFromLogDoc = (doc: Record<string, unknown>): string | undefined => {
-  const resource = doc.resource as Record<string, unknown> | undefined;
-  const attributes = resource?.attributes as Record<string, unknown> | undefined;
-  const app = attributes?.app;
-  return typeof app === 'string' && app.length > 0 ? app : undefined;
+const getAppNameFromFields = (fields: Record<string, unknown>): string | undefined => {
+  const app = fields['resource.attributes.app'];
+  if (Array.isArray(app)) {
+    return app[0];
+  }
+  return undefined;
 };
 
 const extractRequiredAppsFromCriteria = (scenario: KIFeatureExtractionScenario): string[] => {
@@ -48,13 +48,6 @@ const extractRequiredAppsFromCriteria = (scenario: KIFeatureExtractionScenario):
   return [...apps].filter(Boolean);
 };
 
-const docKey = (doc: Record<string, unknown>): string => {
-  const ts = String(doc['@timestamp'] ?? '');
-  const body = doc.body as Record<string, unknown> | undefined;
-  const text = typeof body?.text === 'string' ? body.text : '';
-  return `${ts}:${text.slice(0, 200)}`;
-};
-
 const addUniqueHitsToSample = ({
   hits,
   docs,
@@ -67,20 +60,18 @@ const addUniqueHitsToSample = ({
   uniqueApps: Set<string>;
 }): void => {
   for (const hit of hits) {
-    const source = hit._source;
-    if (!source) {
+    if (!hit._id || !hit.fields || isEmpty(hit.fields)) {
       continue;
     }
 
-    const key = docKey(source);
-    if (seen.has(key)) {
+    if (seen.has(hit._id)) {
       continue;
     }
 
-    seen.add(key);
+    seen.add(hit._id);
     docs.push(hit);
 
-    const app = getAppNameFromLogDoc(source);
+    const app = getAppNameFromFields(hit.fields);
     if (app) {
       uniqueApps.add(app);
     }
@@ -100,56 +91,44 @@ export const collectSampleDocuments = async ({
   scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
-  const query = scenario.input.log_query_filter ?? { match_all: {} };
+  const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
   const uniqueApps = new Set<string>();
   const seen = new Set<string>();
+  const requiredApps = extractRequiredAppsFromCriteria(scenario);
 
-  let searchAfter: FieldValue[] | undefined;
+  const requiredAppResults = await Promise.all(
+    requiredApps.map((app) =>
+      getSampleDocuments({
+        esClient,
+        index: MANAGED_STREAM_SEARCH_PATTERN,
+        start: 0,
+        end: Date.now(),
+        filter: [...query, { term: { 'resource.attributes.app': app } }],
+        size: 1,
+      })
+    )
+  );
 
-  while (docs.length < SAMPLE_DOCS_MAX && uniqueApps.size < SAMPLE_DOCS_TARGET_UNIQUE_APPS) {
-    const searchResult = await esClient.search<Record<string, unknown>>({
+  addUniqueHitsToSample({
+    hits: requiredAppResults.flatMap(({ hits }) => hits),
+    docs,
+    seen,
+    uniqueApps,
+  });
+
+  if (docs.length < SAMPLE_DOCS_MAX) {
+    const { hits } = await getSampleDocuments({
+      esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
-      size: SAMPLE_DOCS_PAGE_SIZE,
-      query,
-      sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
+      start: 0,
+      end: Date.now(),
+      filter: [...query, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
+      size: SAMPLE_DOCS_MAX - docs.length,
     });
-
-    const hits = searchResult.hits.hits;
-    if (hits.length === 0) {
-      break;
-    }
 
     addUniqueHitsToSample({ hits, docs, seen, uniqueApps });
-
-    searchAfter = hits.at(-1)?.sort as FieldValue[] | undefined;
-    if (!searchAfter) {
-      break;
-    }
-  }
-
-  const requiredApps = extractRequiredAppsFromCriteria(scenario);
-  const missingRequiredApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (missingRequiredApps.length > 0 && docs.length < SAMPLE_DOCS_MAX) {
-    log.debug(`Missing required apps in sample: ${missingRequiredApps.join(', ')}`);
-  }
-
-  for (const app of missingRequiredApps) {
-    if (docs.length >= SAMPLE_DOCS_MAX) break;
-
-    const remaining = SAMPLE_DOCS_MAX - docs.length;
-    const size = Math.min(REQUIRED_APP_SAMPLE_SIZE, remaining);
-
-    const result = await esClient.search<Record<string, unknown>>({
-      index: MANAGED_STREAM_SEARCH_PATTERN,
-      size,
-      query: { term: { 'resource.attributes.app': app } },
-      sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],
-    });
-
-    addUniqueHitsToSample({ hits: result.hits.hits, docs, seen, uniqueApps });
   }
 
   log.info(
@@ -158,10 +137,10 @@ export const collectSampleDocuments = async ({
     ].join(', ')}`
   );
 
-  const remainingMissingApps = requiredApps.filter((app) => !uniqueApps.has(app));
-  if (remainingMissingApps.length > 0) {
+  const missingApps = requiredApps.filter((app) => !uniqueApps.has(app));
+  if (missingApps.length > 0) {
     log.warning(
-      `Sample is missing required app(s) from criteria: ${remainingMissingApps.join(
+      `Sample is missing required app(s) from criteria: ${missingApps.join(
         ', '
       )} (criteria may not be satisfiable from available logs)`
     );
