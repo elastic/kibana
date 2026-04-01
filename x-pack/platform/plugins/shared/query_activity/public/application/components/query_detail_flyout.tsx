@@ -140,7 +140,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
                 {i18n.translate('xpack.queryActivity.flyout.runtimeLabel', {
-                  defaultMessage: 'Runtime',
+                  defaultMessage: 'Run time',
                 })}
               </EuiText>
               <EuiSpacer size="xs" />
