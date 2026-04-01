@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { CreateTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import { TIMELINE_EXPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import {
   getTimelines,
@@ -22,6 +23,8 @@ import {
 } from '../../utils/timelines';
 import * as users from '../../../../config/privileges/users';
 import { roles } from '../../../../config/privileges/roles';
+import { Role } from '@kbn/security-plugin-types-common';
+import TestAgent from 'supertest/lib/agent';
 
 const canOnlyReadUsers = [users.secReadV1User, users.secTimelineReadUser];
 const canWriteUsers = [users.secAllV1User, users.secTimelineAllUser];
@@ -34,6 +37,25 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const isEss = !isServerless;
+
+  // map roles by name for easier access in tests
+  const rolesByName = Object.fromEntries(
+    roles.map((role) => [role.name, role])
+  ) as unknown as Record<Role['name'], Role>;
+
+  const canOnlyReadRoles = [rolesByName.secReadV1, rolesByName.secTimelineReadV2];
+  const canWriteRoles = [rolesByName.secAllV1, rolesByName.secTimelineAllV2];
+  const canWriteOrReadRoles = [...canOnlyReadRoles, ...canWriteRoles];
+  const cannotAccessRoles = [rolesByName.secNoneV1, rolesByName.secTimelineNoneV2];
+  const MAX_TIMELINE_EXPORT_IDS = 1000;
+
+  const supertestCache = new Map<(typeof roles)[number]['name'], TestAgent>();
+  const exportTimeline = async (supertest: TestAgent, ids: string[]) =>
+    supertest
+      .post(`${TIMELINE_EXPORT_URL}?file_name=timelines_export.ndjson`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ ids });
 
   describe('Timeline privileges', () => {
     before(async () => {
@@ -101,6 +123,55 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           const resolveTimelineResponse = await resolveTimeline(superTest, getTimelineId());
           expect(resolveTimelineResponse.status).to.be(403);
         });
+      });
+    });
+
+    describe('export timelines', () => {
+      let getTimelineId = () => '';
+
+      before(async () => {
+        const superTest = supertestCache.get(rolesByName.secTimelineAllV2.name)!;
+        const {
+          body: { savedObjectId },
+        } = await createBasicTimeline(superTest, 'timeline for export');
+        getTimelineId = () => savedObjectId;
+      });
+
+      canWriteOrReadRoles.forEach((role) => {
+        it(`role "${role.name}" can export timelines`, async () => {
+          const superTest = supertestCache.get(role.name)!;
+          const exportTimelineResponse = await exportTimeline(superTest, [getTimelineId()]);
+          expect(exportTimelineResponse.status).to.be(200);
+        });
+      });
+
+      cannotAccessRoles.forEach((role) => {
+        it(`role "${role.name}" cannot export timelines`, async () => {
+          const superTest = supertestCache.get(role.name)!;
+          const exportTimelineResponse = await exportTimeline(superTest, [getTimelineId()]);
+          expect(exportTimelineResponse.status).to.be(403);
+        });
+      });
+
+      it('rejects export requests above the max ids limit for read roles', async () => {
+        const superTest = supertestCache.get(rolesByName.secTimelineReadV2.name)!;
+        const oversizedIds = Array.from(
+          { length: MAX_TIMELINE_EXPORT_IDS + 1 },
+          (_, index) => `non-existent-timeline-${index}`
+        );
+        const exportTimelineResponse = await exportTimeline(superTest, oversizedIds);
+        expect(exportTimelineResponse.status).to.be(400);
+      });
+
+      it('accepts duplicate timeline ids for read roles', async () => {
+        const superTest = supertestCache.get(rolesByName.secTimelineReadV2.name)!;
+        const timelineId = getTimelineId();
+        const exportTimelineResponse = await exportTimeline(superTest, [
+          timelineId,
+          timelineId,
+          timelineId,
+        ]);
+        expect(exportTimelineResponse.status).to.be(200);
       });
     });
 
