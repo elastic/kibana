@@ -11,29 +11,25 @@ import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { MarkdownAttributes } from './markdown_saved_object';
 
 export function getMarkdownMeta(
-  savedObject: SavedObject<MarkdownAttributes> | SavedObjectsUpdateResponse<MarkdownAttributes>,
-  operation: 'create' | 'read' | 'update' | 'search'
+  savedObject: SavedObject<MarkdownAttributes> | SavedObjectsUpdateResponse<MarkdownAttributes>
 ) {
   return {
     error: savedObject.error,
+    ...(savedObject.created_at && { created_at: savedObject.created_at }),
+    ...(savedObject.created_by && { created_by: savedObject.created_by }),
     updated_at: savedObject.updated_at,
     updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
-    ...(['create', 'read', 'search'].includes(operation) && {
-      created_at: savedObject.created_at,
-      created_by: savedObject.created_by,
-    }),
   };
 }
 
 // CRU is Create, Read, Update
 export function getMarkdownCRUResponseBody(
-  savedObject: SavedObject<MarkdownAttributes> | SavedObjectsUpdateResponse<MarkdownAttributes>,
-  operation: 'create' | 'read' | 'update' | 'search'
+  savedObject: SavedObject<MarkdownAttributes> | SavedObjectsUpdateResponse<MarkdownAttributes>
 ) {
   return {
     id: savedObject.id,
     data: savedObject.attributes as MarkdownAttributes,
-    meta: getMarkdownMeta(savedObject, operation),
+    meta: getMarkdownMeta(savedObject),
   };
 }
