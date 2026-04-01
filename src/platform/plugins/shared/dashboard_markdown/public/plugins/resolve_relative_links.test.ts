@@ -69,6 +69,30 @@ describe('resolveRelativeLinksPlugin', () => {
     expect(getLink(tree).url).toBe('/some/other/sibling');
   });
 
+  it('resolves ../ parent traversal links', () => {
+    setLocation('http://localhost:5601/s/my-space/app/dashboards');
+    const tree = createTree(createLinkNode('../security/account'));
+    resolveRelativeLinksPlugin()()(tree);
+
+    expect(getLink(tree).url).toBe('/s/my-space/security/account');
+  });
+
+  it('resolves multiple levels of ../ traversal', () => {
+    setLocation('http://localhost:5601/s/my-space/app/dashboards');
+    const tree = createTree(createLinkNode('../../other-path'));
+    resolveRelativeLinksPlugin()()(tree);
+
+    expect(getLink(tree).url).toBe('/s/other-path');
+  });
+
+  it('resolves ./ current directory links', () => {
+    setLocation('http://localhost:5601/s/my-space/app/dashboards');
+    const tree = createTree(createLinkNode('./discover'));
+    resolveRelativeLinksPlugin()()(tree);
+
+    expect(getLink(tree).url).toBe('/s/my-space/app/discover');
+  });
+
   it('does not modify absolute URLs with protocols', () => {
     setLocation('http://localhost:5601/app/dashboards');
     const tree = createTree(createLinkNode('https://example.com'));
