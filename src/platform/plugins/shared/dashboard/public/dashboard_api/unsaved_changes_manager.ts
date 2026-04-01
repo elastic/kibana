@@ -39,7 +39,6 @@ export function initializeUnsavedChangesManager({
   projectRoutingManager,
   setState,
   onSave$,
-  getCurrentState,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -51,7 +50,6 @@ export function initializeUnsavedChangesManager({
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   setState: (state: DashboardState) => void;
   onSave$: PublishesOnSave['onSave$'];
-  getCurrentState: () => DashboardState;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -64,8 +62,8 @@ export function initializeUnsavedChangesManager({
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-  const onSaveSubscription = onSave$.subscribe(() => {
-    lastSavedState$.next(getCurrentState());
+  const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
+    lastSavedState$.next(dashboardState);
   });
 
   const dashboardStateChanges$ = combineLatest([

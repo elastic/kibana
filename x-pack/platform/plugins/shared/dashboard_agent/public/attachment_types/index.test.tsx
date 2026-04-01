@@ -120,6 +120,12 @@ const createMockDashboardApi = (
   };
 };
 
+const mockSavedDashboardState = {
+  title: 'Saved Dashboard',
+  description: '',
+  panels: [],
+} as unknown as DashboardSaveEvent['dashboardState'];
+
 const createMockAttachment = (id: string, origin?: string) => {
   let currentOrigin = origin;
   const attachment: DashboardAttachment = {
@@ -221,12 +227,20 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
 
       // First save triggers update
-      mockApi.emitSave({ previousDashboardId: undefined, dashboardId: 'new-dashboard-id' });
+      mockApi.emitSave({
+        previousDashboardId: undefined,
+        dashboardId: 'new-dashboard-id',
+        dashboardState: mockSavedDashboardState,
+      });
       expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
 
       // Undefined doesn't trigger
       updateOrigin.mockClear();
-      mockApi.emitSave({ previousDashboardId: 'new-dashboard-id', dashboardId: undefined });
+      mockApi.emitSave({
+        previousDashboardId: 'new-dashboard-id',
+        dashboardId: undefined,
+        dashboardState: mockSavedDashboardState,
+      });
       expect(updateOrigin).not.toHaveBeenCalled();
 
       cleanup?.();
@@ -244,6 +258,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       mockApi.emitSave({
         previousDashboardId: 'different-dashboard-id',
         dashboardId: 'newly-saved-id',
+        dashboardState: mockSavedDashboardState,
       });
 
       expect(updateOrigin).not.toHaveBeenCalled();

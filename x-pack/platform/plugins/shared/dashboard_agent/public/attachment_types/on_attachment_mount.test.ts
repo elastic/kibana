@@ -44,6 +44,12 @@ interface MockChildApi {
   applySerializedState: jest.Mock;
 }
 
+const mockSavedDashboardState: DashboardSaveEvent['dashboardState'] = {
+  title: 'Saved Dashboard',
+  description: '',
+  panels: [],
+};
+
 const createMockDashboardApi = (): MockDashboardApi => ({
   savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
   onSave$: new Subject<DashboardSaveEvent>(),
@@ -351,7 +357,11 @@ describe('onAttachmentMount - manual changes sync', () => {
       mountHandler();
       dashboardAppClientApi$.next(mockApi);
 
-      mockApi.onSave$.next({ previousDashboardId: undefined, dashboardId: 'new-dashboard-id' });
+      mockApi.onSave$.next({
+        previousDashboardId: undefined,
+        dashboardId: 'new-dashboard-id',
+        dashboardState: mockSavedDashboardState,
+      });
 
       expect(updateOrigin).toHaveBeenCalledWith('new-dashboard-id');
     });
@@ -362,7 +372,11 @@ describe('onAttachmentMount - manual changes sync', () => {
       mountHandler();
       dashboardAppClientApi$.next(mockApi);
 
-      mockApi.onSave$.next({ previousDashboardId: 'dashboard-a', dashboardId: 'dashboard-b' });
+      mockApi.onSave$.next({
+        previousDashboardId: 'dashboard-a',
+        dashboardId: 'dashboard-b',
+        dashboardState: mockSavedDashboardState,
+      });
 
       expect(updateOrigin).toHaveBeenCalledWith('dashboard-b');
     });
@@ -374,7 +388,11 @@ describe('onAttachmentMount - manual changes sync', () => {
       mountHandler();
       dashboardAppClientApi$.next(mockApi);
 
-      mockApi.onSave$.next({ previousDashboardId: 'dashboard-b', dashboardId: 'dashboard-b' });
+      mockApi.onSave$.next({
+        previousDashboardId: 'dashboard-b',
+        dashboardId: 'dashboard-b',
+        dashboardState: mockSavedDashboardState,
+      });
 
       expect(updateOrigin).not.toHaveBeenCalled();
     });

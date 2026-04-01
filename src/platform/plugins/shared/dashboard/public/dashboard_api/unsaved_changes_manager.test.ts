@@ -102,7 +102,6 @@ describe('unsavedChangesManager', () => {
           projectRoutingManager: projectRoutingManagerMock,
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
-          getCurrentState: getSampleDashboardState,
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -129,7 +128,6 @@ describe('unsavedChangesManager', () => {
           projectRoutingManager: projectRoutingManagerMock,
           setState: setStateMock,
           onSave$: onSave$.asObservable(),
-          getCurrentState: getSampleDashboardState,
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -185,7 +183,6 @@ describe('unsavedChangesManager', () => {
         projectRoutingManager: customProjectRoutingManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
-        getCurrentState: getSampleDashboardState,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -221,7 +218,6 @@ describe('unsavedChangesManager', () => {
         projectRoutingManager: customProjectRoutingManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
-        getCurrentState: () => lastSavedState,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -247,11 +243,11 @@ describe('unsavedChangesManager', () => {
         projectRoutingManager: projectRoutingManagerMock,
         setState: setStateMock,
         onSave$: onSave$.asObservable(),
-        getCurrentState: () => currentState,
       });
       const saveEvent = {
         previousDashboardId: 'dashboard-a',
         dashboardId: 'dashboard-b',
+        dashboardState: currentState,
       };
 
       onSave$.next(saveEvent);

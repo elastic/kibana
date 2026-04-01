@@ -150,7 +150,6 @@ export function getDashboardApi({
     projectRoutingManager,
     setState,
     onSave$: onSave$.asObservable(),
-    getCurrentState: getState,
   });
 
   function getState() {
@@ -251,6 +250,7 @@ export function getDashboardApi({
       onSave$.next({
         previousDashboardId,
         dashboardId: saveResult.id,
+        dashboardState: getState(),
       });
 
       return saveResult;
@@ -270,6 +270,7 @@ export function getDashboardApi({
       onSave$.next({
         previousDashboardId,
         dashboardId: saveResult?.id ?? previousDashboardId,
+        dashboardState,
       });
 
       return;

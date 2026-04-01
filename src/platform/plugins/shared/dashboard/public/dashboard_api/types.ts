@@ -65,6 +65,7 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 export interface DashboardSaveEvent {
   previousDashboardId?: string;
   dashboardId?: string;
+  dashboardState: DashboardState;
 }
 
 export interface PublishesOnSave {
