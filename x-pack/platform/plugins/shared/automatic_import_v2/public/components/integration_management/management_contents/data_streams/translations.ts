@@ -85,6 +85,13 @@ export const LOGS_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const LOG_SAMPLE_REQUIRED_FOR_ANALYSIS = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.logSampleRequiredForAnalysis',
+  {
+    defaultMessage: 'Log sample is required for analysis',
+  }
+);
+
 export const AI_ANALYSIS_CALLOUT = i18n.translate(
   'xpack.automaticImportV2.dataStreams.aiAnalysisCallout',
   {
@@ -122,6 +129,13 @@ export const ANALYZE_LOGS_BUTTON = i18n.translate(
   'xpack.automaticImportV2.dataStreams.analyzeLogsButton',
   {
     defaultMessage: 'Analyze logs',
+  }
+);
+
+export const ANALYZE_LOGS_DISABLED_LOADING = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.analyzeLogsDisabledLoading',
+  {
+    defaultMessage: 'Please wait for the current operation to finish.',
   }
 );
 
