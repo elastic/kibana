@@ -195,7 +195,7 @@ export const createNavigationTree = (
             ? [
                 {
                   id: 'v2_alerting_preview',
-                  title: 'V2 Alerting Preview',
+                  title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
                   renderAs: 'panelOpener' as const,
                   children: [
                     { link: 'management:rules' as const },

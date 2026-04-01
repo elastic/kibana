@@ -253,7 +253,9 @@ export function createNavigationTree({
             ? [
                 {
                   id: 'v2_alerting_preview',
-                  title: 'V2 Alerting Preview',
+                  title: i18n.translate('xpack.serverlessSearch.nav.management.v2AlertingPreview', {
+                    defaultMessage: 'V2 Alerting Preview',
+                  }),
                   renderAs: 'panelOpener' as const,
                   breadcrumbStatus: 'hidden' as const,
                   children: [
