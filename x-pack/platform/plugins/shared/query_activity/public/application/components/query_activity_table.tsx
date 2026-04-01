@@ -252,6 +252,9 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
     [queries]
   );
 
+  // EUI's custom_component API requires a stable component reference — if the function identity
+  // changes, EUI remounts the component and resets its state. We use refs to keep the memoized
+  // component in sync with the latest state values without recreating it on every render.
   const runTimeValueRef = React.useRef(runTimeValue);
   runTimeValueRef.current = runTimeValue;
   const runTimeUnitRef = React.useRef(runTimeUnit);
