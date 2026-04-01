@@ -13,11 +13,7 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import {
-  initializeUnsavedChanges,
-  initializeTitleManager,
-  titleComparators,
-} from '@kbn/presentation-publishing';
+import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
 import type { ImageEmbeddableState } from '../../server';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
@@ -31,10 +27,11 @@ export const getImageEmbeddableFactory = () => {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
+      linkToContainerState,
       initialState,
       finalizeApi,
-      uuid,
       parentApi,
+      uuid,
     }) => {
       const titleManager = initializeTitleManager(initialState);
 
@@ -44,18 +41,7 @@ export const getImageEmbeddableFactory = () => {
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.image_config);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
-      function serializeState() {
-        return {
-          ...titleManager.getLatestState(),
-          ...drilldownsManager.getLatestState(),
-          image_config: imageConfig$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           imageConfig$.pipe(map(() => undefined)),
@@ -68,17 +54,22 @@ export const getImageEmbeddableFactory = () => {
             image_config: 'deepEquality',
           };
         },
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          if (lastSaved) imageConfig$.next(lastSaved.image_config);
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+          image_config: imageConfig$.getValue(),
+        }),
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          drilldownsManager.reinitializeState(nextState ?? {});
+          if (nextState) imageConfig$.next(nextState.image_config);
         },
       });
 
       const embeddable = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...unsavedChangesApi,
+        ...containerStateApi,
         dataLoading$,
         supportedTriggers: () => IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
 
@@ -106,7 +97,6 @@ export const getImageEmbeddableFactory = () => {
           i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
             defaultMessage: 'image',
           }),
-        serializeState,
       });
       return {
         api: embeddable,

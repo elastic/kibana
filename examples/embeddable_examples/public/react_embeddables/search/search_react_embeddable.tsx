@@ -17,7 +17,6 @@ import {
   initializeTimeRangeManager,
   timeRangeComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
@@ -28,7 +27,7 @@ import type { SearchApi, Services, SearchSerializedState } from './types';
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
@@ -53,10 +52,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: timeRangeManager.anyStateChange$,
         getComparators: () => {
           /**
@@ -66,13 +62,14 @@ export const getSearchEmbeddableFactory = (services: Services) => {
            */
           return timeRangeComparators;
         },
-        onReset: (lastSaved) => {
+        serializeState,
+        applySerializedState: (nextState) => {
           /**
            * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
-           * function here before resetting. onReset can be async so to support a potential async deserialize function.
+           * function here before applying the state. onReset can be async to support a potential async deserialize function.
            */
 
-          timeRangeManager.reinitializeState(lastSaved);
+          timeRangeManager.reinitializeState(nextState);
         },
       });
 
@@ -80,9 +77,8 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         blockingError$,
         dataViews$,
         dataLoading$,
-        ...unsavedChangesApi,
+        ...containerStateApi,
         ...timeRangeManager.api,
-        serializeState,
       });
 
       const count$ = new BehaviorSubject<number>(0);

@@ -27,7 +27,6 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
-  initializeUnsavedChanges,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
 
@@ -66,7 +65,13 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      linkToContainerState,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const state = initialState;
 
       if (isOptionsListESQLControlState(state)) {
@@ -149,7 +154,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           loadMoreSubject,
           loadingSuggestions$,
           debouncedSearchString,
-          parentApi,
           uuid,
         },
         requestSize$: temporaryStateManager.api.requestSize$,
@@ -235,21 +239,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListControlState {
-        return {
-          ...dataControlManager.getLatestState(),
-          ...selectionsManager.getLatestState(),
-          ...editorStateManager.getLatestState(),
-
-          // serialize state that cannot be changed to keep it consistent
-          display_settings: state.display_settings,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
@@ -270,13 +260,21 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           exclude: false,
           exists_selected: false,
         },
-        onReset: (lastSaved) => {
-          if (isOptionsListESQLControlState(lastSaved)) {
+        serializeState: () => ({
+          ...dataControlManager.getLatestState(),
+          ...selectionsManager.getLatestState(),
+          ...editorStateManager.getLatestState(),
+
+          // serialize state that cannot be changed to keep it consistent
+          display_settings: state.display_settings,
+        }),
+        applySerializedState: (nextState) => {
+          if (isOptionsListESQLControlState(nextState)) {
             throw new Error('ES|QL control state handling not yet implemented');
           }
-          dataControlManager.reinitializeState(lastSaved);
-          selectionsManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
+          dataControlManager.reinitializeState(nextState);
+          selectionsManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
         },
       });
 
@@ -293,12 +291,11 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...containerStateApi,
         ...dataControlManager.api,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
-        serializeState,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,

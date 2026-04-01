@@ -23,7 +23,6 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -66,6 +65,7 @@ export const getSearchEmbeddableFactory = ({
     type: SEARCH_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
+      linkToContainerState,
       initialState,
       finalizeApi,
       parentApi,
@@ -131,18 +131,15 @@ export const getSearchEmbeddableFactory = ({
 
       const inlineEditingApi = initializeInlineEditingApi({
         uuid,
-        parentApi,
         tabs,
-        selectedTabId$,
-        searchEmbeddable,
-        blockingError$,
+        parentApi,
         dataLoading$,
+        selectedTabId$,
+        blockingError$,
+        searchEmbeddable,
       });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState: () => serialize(savedObjectId$.getValue()),
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           searchEmbeddable.anyStateChange$,
@@ -190,13 +187,14 @@ export const getSearchEmbeddableFactory = ({
             tabs: 'skip',
           };
         },
-        onReset: async (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) {
+        serializeState: () => serialize(savedObjectId$.getValue()),
+        applySerializedState: async (nextState) => {
+          drilldownsManager.reinitializeState(nextState ?? {});
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          if (nextState) {
             const lastSavedRuntimeState = await deserializeState({
-              serializedState: lastSaved,
+              serializedState: nextState,
               discoverServices,
             });
 
@@ -212,7 +210,6 @@ export const getSearchEmbeddableFactory = ({
 
       const editApi = initializeEditApi({
         uuid,
-        parentApi,
         partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$, getSelectedTabId },
         discoverServices,
         isEditable: startServices.isEditable,
@@ -220,7 +217,7 @@ export const getSearchEmbeddableFactory = ({
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
-        ...unsavedChangesApi,
+        ...containerStateApi,
         ...titleManager.api,
         ...searchEmbeddable.api,
         ...timeRangeManager.api,
@@ -276,7 +273,6 @@ export const getSearchEmbeddableFactory = ({
           }),
         getSerializedStateByValue: () => serialize(undefined),
         getSerializedStateByReference: (newId: string) => serialize(newId),
-        serializeState: () => serialize(savedObjectId$.getValue()),
         getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];

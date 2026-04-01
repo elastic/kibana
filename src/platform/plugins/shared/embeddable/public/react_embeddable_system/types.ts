@@ -13,6 +13,8 @@ import type {
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
+  PublishesUnsavedChanges,
+  ContainerStateManagerInitializer,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
@@ -61,6 +63,13 @@ export interface BuildEmbeddableProps<
    * An optional parent API.
    */
   parentApi: unknown | undefined;
+
+  /**
+   * Initializes and returns all APIs required for the parent to interact with the state of this API.
+   */
+  linkToContainerState: (
+    args: ContainerStateManagerInitializer<SerializedState>
+  ) => PublishesUnsavedChanges & HasSerializableState<SerializedState>;
 
   /**
    *

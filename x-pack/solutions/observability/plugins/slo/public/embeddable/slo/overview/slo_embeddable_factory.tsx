@@ -22,7 +22,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
@@ -58,8 +57,7 @@ export const getOverviewEmbeddableFactory = ({
     initializeDrilldownsManager,
     initialState,
     finalizeApi,
-    uuid,
-    parentApi,
+    linkToContainerState,
   }) => {
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
@@ -89,35 +87,7 @@ export const getOverviewEmbeddableFactory = ({
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
     const reload$ = new Subject<boolean>();
 
-    function serializeState(): OverviewEmbeddableState {
-      const commonState = {
-        ...titleManager.getLatestState(),
-        ...drilldownsManager.getLatestState(),
-      };
-
-      if (overviewMode$.getValue() === 'single') {
-        return {
-          ...commonState,
-          overview_mode: 'single',
-          ...singleSloManager.getLatestState(),
-        };
-      }
-
-      if (overviewMode$.getValue() === 'groups') {
-        return {
-          ...commonState,
-          overview_mode: 'groups',
-          ...groupSloManager.getLatestState(),
-        };
-      }
-
-      throw new Error('overview_mode not provided');
-    }
-
-    const unsavedChangesApi = initializeUnsavedChanges<OverviewEmbeddableState>({
-      uuid,
-      parentApi,
-      serializeState,
+    const containerStateApi = linkToContainerState({
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
@@ -134,17 +104,41 @@ export const getOverviewEmbeddableFactory = ({
         ...titleComparators,
         ...drilldownsManager.comparators,
       }),
-      onReset: (lastSaved) => {
-        drilldownsManager.reinitializeState(lastSaved ?? {});
-        titleManager.reinitializeState(lastSaved);
-        singleSloManager.reinitializeState(lastSaved as SingleOverviewCustomState);
-        groupSloManager.reinitializeState(lastSaved as GroupOverviewCustomState);
-        setOverviewMode(lastSaved?.overview_mode);
+      serializeState: () => {
+        const commonState = {
+          ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+        };
+
+        if (overviewMode$.getValue() === 'single') {
+          return {
+            ...commonState,
+            overview_mode: 'single',
+            ...singleSloManager.getLatestState(),
+          };
+        }
+
+        if (overviewMode$.getValue() === 'groups') {
+          return {
+            ...commonState,
+            overview_mode: 'groups',
+            ...groupSloManager.getLatestState(),
+          };
+        }
+
+        throw new Error('overview_mode not provided');
+      },
+      applySerializedState: (nextState) => {
+        drilldownsManager.reinitializeState(nextState ?? {});
+        titleManager.reinitializeState(nextState);
+        singleSloManager.reinitializeState(nextState as SingleOverviewCustomState);
+        groupSloManager.reinitializeState(nextState as GroupOverviewCustomState);
+        setOverviewMode(nextState?.overview_mode);
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...containerStateApi,
       ...titleManager.api,
       ...drilldownsManager.api,
       defaultTitle$,
@@ -169,7 +163,6 @@ export const getOverviewEmbeddableFactory = ({
           return Promise.reject();
         }
       },
-      serializeState,
       getSloGroupOverviewConfig: (): GroupOverviewCustomState => {
         return {
           ...groupSloManager.getLatestState(),

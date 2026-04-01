@@ -18,7 +18,6 @@ import {
   getViewModeSubject,
   useBatchedPublishingSubjects,
   apiPublishesSettings,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -53,7 +52,13 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      linkToContainerState,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const state = initialState;
 
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
@@ -223,17 +228,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         })
       );
 
-      function serializeState() {
-        return {
-          ...timeRangePercentage.getLatestState(),
-          is_anchored: isAnchored$.value,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<TimeSliderControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           timeRangePercentage.anyStateChange$,
           isAnchored$.pipe(map(() => undefined))
@@ -245,18 +240,21 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             is_anchored: 'referenceEquality',
           };
         },
-        onReset: (lastSaved) => {
-          timeRangePercentage.reinitializeState(lastSaved);
-          setIsAnchored(lastSaved?.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
+        serializeState: () => ({
+          ...timeRangePercentage.getLatestState(),
+          is_anchored: isAnchored$.value,
+        }),
+        applySerializedState: (nextState) => {
+          timeRangePercentage.reinitializeState(nextState);
+          setIsAnchored(nextState?.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...containerStateApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,
-        serializeState,
         clearSelections: () => {
           setTimeslice(undefined);
           hasTimeSliceSelection$.next(false);

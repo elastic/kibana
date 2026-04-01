@@ -207,9 +207,11 @@ export {
   type HasSerializedChildState,
 } from './interfaces/containers/child_state';
 
-export { childrenUnsavedChanges$ } from './interfaces/containers/unsaved_changes/children_unsaved_changes';
-
-export { initializeUnsavedChanges } from './interfaces/containers/unsaved_changes/initialize_unsaved_changes';
+export { childrenUnsavedChanges$ } from './interfaces/containers/container_state/children_unsaved_changes';
+export {
+  linkToContainerState,
+  type ContainerStateManagerInitializer,
+} from './interfaces/containers/container_state/link_to_container_state';
 
 export {
   apiCanDuplicatePanels,

@@ -17,7 +17,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   apiPublishesSettings,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
 import {
@@ -57,6 +56,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
   type: MAP_SAVED_OBJECT_TYPE,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
+    linkToContainerState,
     initialState,
     finalizeApi,
     parentApi,
@@ -117,15 +117,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       return getByValueState(getLatestState(), savedMap.getAttributes());
     }
 
-    function serializeState() {
-      const savedObjectId = savedMap.getSavedObjectId();
-      return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
-    }
-
-    const unsavedChangesApi = initializeUnsavedChanges<MapEmbeddableState>({
-      uuid,
-      parentApi,
-      serializeState,
+    const containerStateApi = linkToContainerState({
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         crossPanelActions.anyStateChange$,
@@ -145,13 +137,17 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
           savedObjectId: 'skip',
         };
       },
-      onReset: async (lastSaved) => {
-        drilldownsManager.reinitializeState(lastSaved ?? {});
-        timeRangeManager.reinitializeState(lastSaved);
-        titleManager.reinitializeState(lastSaved);
+      serializeState: () => {
+        const savedObjectId = savedMap.getSavedObjectId();
+        return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
+      },
+      applySerializedState: async (nextState) => {
+        drilldownsManager.reinitializeState(nextState ?? {});
+        timeRangeManager.reinitializeState(nextState);
+        titleManager.reinitializeState(nextState);
 
-        if (lastSaved) {
-          await savedMap.reset(lastSaved);
+        if (nextState) {
+          await savedMap.reset(nextState);
         }
       },
     });
@@ -159,7 +155,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     api = finalizeApi({
       defaultTitle$,
       defaultDescription$,
-      ...unsavedChangesApi,
+      ...containerStateApi,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
       ...titleManager.api,
@@ -183,7 +179,6 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       ),
       ...initializeDataViews(savedMap.getStore()),
       ...projectRoutingManager.api,
-      serializeState,
       supportedTriggers: () => {
         return [ON_OPEN_PANEL_MENU, ON_APPLY_FILTER, ON_CLICK_VALUE];
       },

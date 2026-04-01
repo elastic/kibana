@@ -22,7 +22,6 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
@@ -49,7 +48,7 @@ export function getAlertsEmbeddableFactory({
 }) {
   const factory: EmbeddableFactory<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
       const deps = { ...coreStart, ...pluginsStart };
       async function onEdit() {
         try {
@@ -73,32 +72,26 @@ export function getAlertsEmbeddableFactory({
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
-      function serializeState(): SloAlertsEmbeddableState {
-        return {
-          ...titleManager.getLatestState(),
-          ...sloAlertsStateManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<SloAlertsEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(titleManager.anyStateChange$, sloAlertsStateManager.anyStateChange$),
         getComparators: () => ({
           ...titleComparators,
           slos: 'referenceEquality',
           showAllGroupByInstances: 'referenceEquality',
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          sloAlertsStateManager.reinitializeState(lastSaved);
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...sloAlertsStateManager.getLatestState(),
+        }),
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          sloAlertsStateManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...containerStateApi,
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.slo.editSloAlertswEmbeddable.typeDisplayName', {
@@ -108,7 +101,6 @@ export function getAlertsEmbeddableFactory({
         onEdit: async () => {
           onEdit();
         },
-        serializeState,
         getSloAlertsConfig: () => {
           return {
             slos: sloAlertsStateManager.api.slos$.getValue(),

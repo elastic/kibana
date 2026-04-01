@@ -28,7 +28,6 @@ import {
   initializeStateManager,
   titleComparators,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { merge } from 'rxjs';
@@ -50,7 +49,7 @@ const bookStateComparators: StateComparators<BookState> = {
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
   const savedBookEmbeddableFactory: EmbeddableFactory<BookEmbeddableState, BookApi> = {
     type: BOOK_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
       const titleManager = initializeTitleManager(initialState);
       const savedObjectId = (initialState as BookByReferenceState).savedObjectId;
       const initialBookState = savedObjectId ? await loadBook(savedObjectId) : initialState;
@@ -65,12 +64,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
       });
 
-      const serializeState = () => serializeBook(savedObjectId);
-
-      const unsavedChangesApi = initializeUnsavedChanges<BookEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(titleManager.anyStateChange$, bookStateManager.anyStateChange$),
         getComparators: () => {
           return {
@@ -79,14 +73,15 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             savedObjectId: 'skip', // saved book id will not change over the lifetime of the embeddable.
           };
         },
-        onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          if (!savedObjectId) bookStateManager.reinitializeState(lastSaved as BookState);
+        serializeState: () => serializeBook(savedObjectId),
+        applySerializedState: async (nextState) => {
+          titleManager.reinitializeState(nextState);
+          if (!savedObjectId) bookStateManager.reinitializeState(nextState as BookState);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...containerStateApi,
         ...titleManager.api,
         onEdit: async () => {
           openLazyFlyout({
@@ -122,7 +117,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
             defaultMessage: 'book',
           }),
-        serializeState,
 
         // library transforms
         getSavedObjectId: () => savedObjectId,

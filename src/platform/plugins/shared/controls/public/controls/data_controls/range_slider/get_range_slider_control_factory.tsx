@@ -15,7 +15,6 @@ import {
   apiHasSections,
   apiPublishesViewMode,
   fetch$,
-  initializeUnsavedChanges,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -42,7 +41,13 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      linkToContainerState,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
@@ -68,18 +73,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         dataControlManager.internalApi.onSelectionChange
       );
 
-      function serializeState() {
-        return {
-          ...dataControlManager.getLatestState(),
-          ...editorStateManager.getLatestState(),
-          value: selections.value$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selections.value$,
@@ -92,18 +86,22 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value: 'deepEquality',
           };
         },
-        onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
-          selections.setValue(lastSaved?.value);
+        serializeState: () => ({
+          ...dataControlManager.getLatestState(),
+          ...editorStateManager.getLatestState(),
+          value: selections.value$.getValue(),
+        }),
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
+          selections.setValue(nextState?.value);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...containerStateApi,
         ...dataControlManager.api,
         dataLoading$,
-        serializeState,
         clearSelections: () => {
           selections.setValue(undefined);
         },
@@ -134,7 +132,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           selections.setValue(undefined);
         });
 
-      const controlFetch$ = fetch$({ uuid, parentApi });
+      const controlFetch$ = fetch$({ parentApi });
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({

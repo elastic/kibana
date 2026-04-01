@@ -19,7 +19,6 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
@@ -85,7 +84,7 @@ export const getFieldListFactory = (
 ) => {
   const fieldListEmbeddableFactory: EmbeddableFactory<FieldListSerializedState, FieldListApi> = {
     type: FIELD_LIST_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
       const state = await deserializeState(dataViews, initialState);
       const allDataViews = await dataViews.getIdsWithTitle();
       const subscriptions = new Subscription();
@@ -117,19 +116,17 @@ export const getFieldListFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<FieldListSerializedState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(titleManager.anyStateChange$, fieldListStateManager.anyStateChange$),
         getComparators: () => ({
           ...titleComparators,
-          selectedFieldNames: (a, b) => {
+          selectedFieldNames: (a: string[] | undefined, b: string[] | undefined) => {
             return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
           },
           dataViewId: 'referenceEquality',
         }),
-        onReset: async (lastSaved) => {
+        serializeState,
+        applySerializedState: async (lastSaved: FieldListSerializedState | undefined) => {
           const lastState = await deserializeState(dataViews, lastSaved);
           fieldListStateManager.reinitializeState(lastState);
           titleManager.reinitializeState(lastSaved);
@@ -138,8 +135,7 @@ export const getFieldListFactory = (
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...containerStateApi,
       });
 
       return {

@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
+import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer, linkToContainerState } from '@kbn/presentation-publishing';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
-
+import type { SerializedDrilldowns } from '../../server';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
-import type { SerializedDrilldowns } from '../../server';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -101,6 +99,7 @@ export const EmbeddableRenderer = <
             finalizeApi,
             uuid,
             parentApi,
+            linkToContainerState: (args) => linkToContainerState({ ...args, uuid, parentApi }),
             initializeDrilldownsManager: async (
               embeddableUuid: string,
               state: SerializedDrilldowns

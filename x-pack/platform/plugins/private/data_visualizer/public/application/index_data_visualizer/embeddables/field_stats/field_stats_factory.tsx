@@ -20,7 +20,6 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -109,7 +108,13 @@ export const getFieldStatsChartEmbeddableFactory = (
     FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ uuid, initialState, parentApi, finalizeApi }) => {
+    buildEmbeddable: async ({
+      linkToContainerState,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const { http, uiSettings, notifications, ...startServices } = coreStart;
@@ -191,18 +196,7 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const { toasts } = deps.notifications;
 
-      const serializeState = () => {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...serializeFieldStatsChartState(),
-        };
-      };
-
-      const unsavedChangesApi = initializeUnsavedChanges<FieldStatisticsTableEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -213,10 +207,15 @@ export const getFieldStatsChartEmbeddableFactory = (
           ...fieldStatsControlsComparators,
           ...timeRangeComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          timeRangeManager.reinitializeState(lastSaved);
-          fieldStatsStateManager.reinitializeState(lastSaved);
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializeFieldStatsChartState(),
+        }),
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          fieldStatsStateManager.reinitializeState(nextState);
         },
       });
 
@@ -224,7 +223,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...fieldStatsControlsApi,
-        ...unsavedChangesApi,
+        ...containerStateApi,
         // PublishesDataLoading
         dataLoading$,
         // PublishesBlockingError
@@ -262,7 +261,6 @@ export const getFieldStatsChartEmbeddableFactory = (
           });
         },
         dataViews$,
-        serializeState,
       });
 
       const reload$ = fetch$(api).pipe(

@@ -22,7 +22,6 @@ import {
   useBatchedPublishingSubjects,
   titleComparators,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -49,7 +48,7 @@ export const LinksContext = createContext<LinksApi | null>(null);
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState, parentApi }) => {
       const savedObjectId = (initialState as LinksByReferenceState).savedObjectId;
       const intialLinksState = savedObjectId
         ? await loadFromLibrary(savedObjectId)
@@ -86,13 +85,7 @@ export const getLinksEmbeddableFactory = () => {
         };
       }
 
-      const serializeState = () =>
-        isByReference ? serializeByReference(savedObjectId) : serializeByValue();
-
-      const unsavedChangesApi = initializeUnsavedChanges<LinksEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           layout$.pipe(map(() => undefined)),
@@ -121,24 +114,25 @@ export const getLinksEmbeddableFactory = () => {
             savedObjectId: 'skip',
           };
         },
-        onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
+        serializeState: () =>
+          isByReference ? serializeByReference(savedObjectId) : serializeByValue(),
+        applySerializedState: async (nextState) => {
+          titleManager.reinitializeState(nextState);
           if (!savedObjectId) {
-            layout$.next((lastSaved as LinksByValueState)?.layout);
-            resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
+            layout$.next((nextState as LinksByValueState)?.layout);
+            resolvedLinks$.next(await resolveLinks((nextState as LinksByValueState)?.links ?? []));
           }
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...containerStateApi,
         blockingError$,
         defaultTitle$,
         defaultDescription$,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
         getTypeDisplayName: () => DISPLAY_NAME,
-        serializeState,
         saveToLibrary: async (newTitle: string) => {
           defaultTitle$.next(newTitle);
           const {

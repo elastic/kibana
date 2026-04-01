@@ -10,7 +10,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { ApmEmbeddableContext } from '../../embeddable_context';
@@ -25,7 +24,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
     type: APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState }) => {
       const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
@@ -39,26 +38,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      function serializeState(): EmbeddableApmAlertingVizProps {
-        return {
-          ...titleManager.getLatestState(),
-          serviceName: serviceName$.getValue(),
-          transactionType: transactionType$.getValue(),
-          transactionName: transactionName$.getValue(),
-          environment: environment$.getValue(),
-          rangeFrom: rangeFrom$.getValue(),
-          rangeTo: rangeTo$.getValue(),
-          rule: rule$.getValue(),
-          alert: alert$.getValue(),
-          kuery: kuery$.getValue(),
-          filters: filters$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<EmbeddableApmAlertingVizProps>({
-        parentApi,
-        uuid,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           serviceName$,
@@ -85,25 +65,37 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
           kuery: 'referenceEquality',
           filters: 'referenceEquality',
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          serviceName$.next(lastSaved?.serviceName ?? '');
-          transactionType$.next(lastSaved?.transactionType);
-          transactionName$.next(lastSaved?.transactionName);
-          environment$.next(lastSaved?.environment);
-          rangeFrom$.next(lastSaved?.rangeFrom);
-          rangeTo$.next(lastSaved?.rangeTo);
-          rule$.next(lastSaved?.rule as EmbeddableApmAlertingVizProps['rule']);
-          alert$.next(lastSaved?.alert as EmbeddableApmAlertingVizProps['alert']);
-          kuery$.next(lastSaved?.kuery);
-          filters$.next(lastSaved?.filters);
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          transactionType: transactionType$.getValue(),
+          transactionName: transactionName$.getValue(),
+          environment: environment$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          rule: rule$.getValue(),
+          alert: alert$.getValue(),
+          kuery: kuery$.getValue(),
+          filters: filters$.getValue(),
+        }),
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          serviceName$.next(nextState?.serviceName ?? '');
+          transactionType$.next(nextState?.transactionType);
+          transactionName$.next(nextState?.transactionName);
+          environment$.next(nextState?.environment);
+          rangeFrom$.next(nextState?.rangeFrom);
+          rangeTo$.next(nextState?.rangeTo);
+          rule$.next(nextState?.rule as EmbeddableApmAlertingVizProps['rule']);
+          alert$.next(nextState?.alert as EmbeddableApmAlertingVizProps['alert']);
+          kuery$.next(nextState?.kuery);
+          filters$.next(nextState?.filters);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...containerStateApi,
       });
 
       return {

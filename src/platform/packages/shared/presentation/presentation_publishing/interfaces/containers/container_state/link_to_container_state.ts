@@ -7,42 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import type { MaybePromise } from '@kbn/utility-types';
 import { combineLatestWith, debounceTime, map, of } from 'rxjs';
-import type { HasSerializableState } from '../../has_serializable_state';
-import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
+import type { StateManager, StateManagerInitializer } from '../../../state_manager/types';
+import type { HasParentApi } from '../../has_parent_api';
+import type { HasSerializableState } from '../../has_serializable_state';
+import type { HasUniqueId } from '../../has_uuid';
+import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { getTitle } from '../../titles/publishes_title';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
+
 const UNSAVED_CHANGES_DEBOUNCE = 100;
 
-export const initializeUnsavedChanges = <StateType extends object = object>({
-  uuid,
-  onReset,
-  parentApi,
-  getComparators,
-  defaultState,
-  serializeState,
-  anyStateChange$,
-  checkRefEquality,
-}: {
-  uuid: string;
-  parentApi: unknown;
-  anyStateChange$: Observable<void>;
-  serializeState: () => StateType;
+export interface ContainerStateManagerInitializer<StateType extends object>
+  extends HasSerializableState<StateType> {
+  defaultState?: StateManagerInitializer<StateType>['defaultState'];
+  anyStateChange$: StateManager<StateType>['anyStateChange$'];
   getComparators: () => StateComparators<StateType>;
-  defaultState?: Partial<StateType>;
-  onReset?: (lastSavedPanelState?: StateType) => MaybePromise<void>;
-  checkRefEquality?: boolean;
-}): PublishesUnsavedChanges & Pick<HasSerializableState<StateType>, 'applySerializedState'> => {
-  const applySerializedState = async (state?: StateType) => {
-    await onReset?.(state);
-  };
+}
 
+export const linkToContainerState = <StateType extends object = object>({
+  uuid,
+  parentApi,
+  defaultState,
+  anyStateChange$,
+  serializeState,
+  getComparators,
+  applySerializedState,
+}: HasSerializableState<StateType> &
+  HasUniqueId &
+  HasParentApi &
+  ContainerStateManagerInitializer<StateType>): PublishesUnsavedChanges &
+  HasSerializableState<StateType> => {
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
     return {
+      serializeState,
       applySerializedState,
       hasUnsavedChanges$: of(false),
     };
@@ -72,5 +72,9 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     })
   );
 
-  return { applySerializedState, hasUnsavedChanges$ };
+  return {
+    serializeState,
+    hasUnsavedChanges$,
+    applySerializedState,
+  };
 };

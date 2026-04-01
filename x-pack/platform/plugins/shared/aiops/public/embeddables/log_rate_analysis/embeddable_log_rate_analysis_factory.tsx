@@ -22,7 +22,6 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
@@ -42,7 +41,13 @@ export const getLogRateAnalysisEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<LogRateAnalysisEmbeddableState, LogRateAnalysisEmbeddableApi> = {
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initialState,
+      finalizeApi,
+      linkToContainerState,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -62,18 +67,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      function serializeState() {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...serializeLogRateAnalysisChartState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<LogRateAnalysisEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -84,17 +78,22 @@ export const getLogRateAnalysisEmbeddableFactory = (
           ...timeRangeComparators,
           ...titleComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          timeRangeManager.reinitializeState(lastSaved);
-          logRateAnalysisControlsApi.updateUserInput(lastSaved ?? {});
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializeLogRateAnalysisChartState(),
+        }),
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          logRateAnalysisControlsApi.updateUserInput(nextState ?? {});
         },
       });
 
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...containerStateApi,
         ...logRateAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.logRateAnalysis.typeDisplayName', {
@@ -134,7 +133,6 @@ export const getLogRateAnalysisEmbeddableFactory = (
         dataLoading$,
         blockingError$,
         dataViews$,
-        serializeState,
       });
 
       const LogRateAnalysisEmbeddableWrapper = getLogRateAnalysisEmbeddableWrapperComponent(

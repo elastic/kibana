@@ -13,6 +13,12 @@ import type { SnakeToCamelCase } from '../utils/types';
 
 export type WithAllKeys<T extends object> = { [Key in keyof Required<T>]: T[Key] };
 
+export interface StateManagerInitializer<StateType extends object> {
+  initialState: Partial<StateType>;
+  defaultState: WithAllKeys<StateType>;
+  comparators?: StateComparators<StateType>;
+}
+
 export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
   last: StateType[KeyType] | undefined,
   current: StateType[KeyType] | undefined,

@@ -14,7 +14,6 @@ import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
   getViewModeSubject,
   initializeTitleManager,
   titleComparators,
@@ -48,7 +47,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEditorApi
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
-  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+  buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState, parentApi }) => {
     const libraryId = (initialState as MarkdownByReferenceState).ref_id;
     const isByReference = libraryId !== undefined;
     const initialLibraryState = isByReference
@@ -87,9 +86,6 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       };
     };
 
-    const serializeState = () =>
-      isByReference ? serializeByReference(libraryId) : serializeByValue();
-
     const resetEditingState = () => {
       isEditing$.next(false);
       overrideHoverActions$.next(false);
@@ -99,10 +95,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       }
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<MarkdownEmbeddableState>({
-      uuid,
-      parentApi,
-      serializeState,
+    const containerStateApi = linkToContainerState({
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         content$.pipe(map(() => undefined))
@@ -114,8 +107,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           ref_id: 'skip',
         };
       },
-      onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved);
+      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
+      applySerializedState: (nextState) => {
+        titleManager.reinitializeState(nextState);
         // There are no unsaved changes to reset for
         // by reference 'content' since by reference 'content' is saved on apply.
         if (!isByReference) {
@@ -125,11 +119,10 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...containerStateApi,
       ...titleManager.api,
       defaultTitle$,
       defaultDescription$,
-      serializeState,
       onEdit: async ({ isNewPanel = false } = {}) => {
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         isEditing$.next(true);

@@ -19,7 +19,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
@@ -39,7 +38,7 @@ export const getAlertsTableEmbeddableFactory = (
   deps: EmbeddableAlertsTablePublicStartDependencies
 ): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
-  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+  buildEmbeddable: async ({ initialState, finalizeApi, linkToContainerState, uuid }) => {
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const titleManager = initializeTitleManager(initialState ?? {});
     const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -51,31 +50,27 @@ export const getAlertsTableEmbeddableFactory = (
     const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
-    const serializeState = (): EmbeddableAlertsTableSerializedState => ({
-      ...titleManager.getLatestState(),
-      ...timeRangeManager.getLatestState(),
-      tableConfig: tableConfig$.getValue(),
-    });
-
-    const unsavedChangesApi = initializeUnsavedChanges<EmbeddableAlertsTableSerializedState>({
-      uuid,
-      parentApi,
+    const containerStateApi = linkToContainerState({
       anyStateChange$: merge(
         timeRangeManager.anyStateChange$,
         titleManager.anyStateChange$,
         tableConfig$
       ).pipe(map(() => undefined)),
-      serializeState,
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
         tableConfig: 'deepEquality',
       }),
-      onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved);
-        timeRangeManager.reinitializeState(lastSaved);
-        if (lastSaved?.tableConfig) {
-          tableConfig$.next(lastSaved.tableConfig);
+      serializeState: () => ({
+        ...titleManager.getLatestState(),
+        ...timeRangeManager.getLatestState(),
+        tableConfig: tableConfig$.getValue(),
+      }),
+      applySerializedState: (nextState) => {
+        titleManager.reinitializeState(nextState);
+        timeRangeManager.reinitializeState(nextState);
+        if (nextState?.tableConfig) {
+          tableConfig$.next(nextState.tableConfig);
         }
       },
     });
@@ -89,9 +84,8 @@ export const getAlertsTableEmbeddableFactory = (
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...unsavedChangesApi,
+      ...containerStateApi,
       dataLoading$: queryLoading$,
-      serializeState,
       isEditingEnabled: () => {
         // Users cannot edit panels based on a solution they cannot access.
         // The first condition ensures panels are editable even if the table configuration is

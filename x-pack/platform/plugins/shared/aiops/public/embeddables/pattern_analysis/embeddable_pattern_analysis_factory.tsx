@@ -20,7 +20,6 @@ import {
   timeRangeComparators,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -38,7 +37,13 @@ export const getPatternAnalysisEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      linkToContainerState,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -61,18 +66,7 @@ export const getPatternAnalysisEmbeddableFactory = (
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      function serializeState() {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...serializePatternAnalysisChartState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<PatternAnalysisEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+      const containerStateApi = linkToContainerState({
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -87,11 +81,16 @@ export const getPatternAnalysisEmbeddableFactory = (
           ...titleComparators,
           ...patternAnalysisControlsComparators,
         }),
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) {
-            patternAnalysisControlsApi.updateUserInput(lastSaved);
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializePatternAnalysisChartState(),
+        }),
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          if (nextState) {
+            patternAnalysisControlsApi.updateUserInput(nextState);
           }
         },
       });
@@ -99,7 +98,7 @@ export const getPatternAnalysisEmbeddableFactory = (
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...containerStateApi,
         ...patternAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.patternAnalysis.typeDisplayName', {
@@ -131,7 +130,6 @@ export const getPatternAnalysisEmbeddableFactory = (
         dataLoading$,
         blockingError$,
         dataViews$,
-        serializeState,
       });
 
       const PatternAnalysisComponent = getPatternAnalysisComponent(coreStart, pluginStart);

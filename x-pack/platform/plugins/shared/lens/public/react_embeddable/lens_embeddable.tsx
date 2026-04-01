@@ -8,7 +8,6 @@
 import React from 'react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import type { LensRuntimeState } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
@@ -58,6 +57,7 @@ export const createLensEmbeddableFactory = (
       initializeDrilldownsManager,
       initialState,
       finalizeApi,
+      linkToContainerState,
       parentApi,
       uuid,
     }) => {
@@ -140,15 +140,7 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
-        uuid,
-        parentApi,
-        serializeState: () => {
-          if (internalApi.isEditingInProgress()) {
-            return initialState;
-          }
-          return integrationsConfig.api.serializeState();
-        },
+      const containerStateAPi = linkToContainerState({
         anyStateChange$: merge(
           actionsConfig.anyStateChange$,
           dashboardConfig.anyStateChange$,
@@ -174,13 +166,19 @@ export const createLensEmbeddableFactory = (
           }
           return comparators;
         },
-        onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved);
-          dashboardConfig.reinitializeState(lastSaved);
-          searchContextConfig.reinitializeState(lastSaved);
-          if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(services, lastSaved);
-          stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
+        serializeState: () => {
+          if (internalApi.isEditingInProgress()) {
+            return initialState;
+          }
+          return integrationsConfig.api.serializeState();
+        },
+        applySerializedState: async (nextState) => {
+          actionsConfig.reinitializeState(nextState);
+          dashboardConfig.reinitializeState(nextState);
+          searchContextConfig.reinitializeState(nextState);
+          if (!nextState) return;
+          const nextRuntimeState = await deserializeState(services, nextState);
+          stateConfig.reinitializeRuntimeState(nextRuntimeState);
         },
       });
 
@@ -193,7 +191,7 @@ export const createLensEmbeddableFactory = (
         // dashboardConfig who owns the savedObjectId after the
         // stateConfig one who owns the inline editing
         {
-          ...unsavedChangesApi,
+          ...containerStateAPi,
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,
