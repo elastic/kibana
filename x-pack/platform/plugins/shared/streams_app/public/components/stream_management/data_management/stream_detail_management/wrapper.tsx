@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiTourStep,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
@@ -236,6 +245,24 @@ export function Wrapper({
         })}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+        {Streams.ingest.all.GetResponse.is(definition) && definition.replicated && (
+          <>
+            <EuiCallOut
+              announceOnMount={false}
+              title={i18n.translate('xpack.streams.replicated.callout.title', {
+                defaultMessage: 'Replicated stream',
+              })}
+              color="warning"
+              iconType="warning"
+            >
+              {i18n.translate('xpack.streams.replicated.callout.body', {
+                defaultMessage:
+                  'This stream is replicated from a remote cluster via cross-cluster replication. Write operations are not available.',
+              })}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {tabs[tab]?.content}
       </StreamsAppPageTemplate.Body>
     </>

@@ -81,7 +81,7 @@ Use this window consistently in all subsequent queries.
 
 **Always start with a targeted call**, using the symptom from Step A-0 as `search_text`:
 - `stream_names`: the target stream(s) from Step A-1 when known; omit only for discovery (Step A-1)
-- `search_text`: the symptom keyword(s) from Step A-0 (e.g. "database errors", "connection timeout", "OOM killed")
+- `search_text`: a descriptive phrase of the symptom from Step A-0 (e.g. "database connection pool exhaustion", "connection timeout errors", "OOM killed containers"). Prefer natural-language descriptions over single keywords — the search uses semantic ranking.
 - `limit`: **50** when **not** passing `stream_names` (discovery); **20** when passing `stream_names`
 - No `kind` filter (retrieve both features and queries)
 
