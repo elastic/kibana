@@ -14,6 +14,13 @@ export const ADD_DATA_STREAM_BUTTON = i18n.translate(
   }
 );
 
+export const ADD_DATA_STREAM_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.addDataStreamDisabledTooltip',
+  {
+    defaultMessage: 'Enter an integration name and description before adding a data stream.',
+  }
+);
+
 export const DATA_STREAMS_TITLE = i18n.translate(
   'xpack.automaticImportV2.dataStreams.dataStreamsTitle',
   {

@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -106,7 +107,7 @@ export const ManageIntegrationActions: React.FC<{
     setIsDeleting(true);
     (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
       'aiv2_integration_delete_confirmed',
-      {}
+      { sessionId: uuidv4() }
     );
     try {
       await onDelete(integration.integrationId);

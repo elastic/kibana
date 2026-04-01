@@ -40,34 +40,34 @@ export enum AIV2TelemetryEventType {
 }
 
 export interface CreateIntegrationPageLoadedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface DataStreamFlyoutOpenedPayload {
-  sessionId: string;
+  sessionId?: string;
   /** Boolean flag if this is the first data stream being created for a new integration */
   isFirstDataStream: boolean;
 }
 
 export interface EditDataStreamFlyoutOpenedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface AnalyzeLogsTriggeredPayload {
-  sessionId: string;
+  sessionId?: string;
   logsSource: LogsSource;
 }
 
 export interface EditPipelineTabOpenedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface CodeEditorCopyClickedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface DataStreamCreationCompletePayload {
-  sessionId: string;
+  sessionId?: string;
   integrationId: string;
   integrationName: string;
   dataStreamId: string;
@@ -78,7 +78,7 @@ export interface DataStreamCreationCompletePayload {
 }
 
 export interface IntegrationInstalledPayload {
-  sessionId: string;
+  sessionId?: string;
   integrationName: string;
   version: string;
   dataStreamCount: number;
@@ -89,11 +89,11 @@ export type ManageIntegrationsTableViewedPayload = Record<string, never>;
 export type UploadIntegrationClickedPayload = Record<string, never>;
 
 export interface CancelButtonClickedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface DoneButtonClickedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export type ReviewApproveMenuClickedPayload = Record<string, never>;
@@ -101,19 +101,19 @@ export type IntegrationDownloadZipClickedPayload = Record<string, never>;
 export type ApproveModalCancelClickedPayload = Record<string, never>;
 export type ApproveModalApproveClickedPayload = Record<string, never>;
 export interface IntegrationDeleteConfirmedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface DataStreamDeleteConfirmedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface DataStreamRefreshConfirmedPayload {
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface PipelineEditedPayload {
-  sessionId: string;
+  sessionId?: string;
   linesAdded: number;
   linesRemoved: number;
   netLineChange: number;
