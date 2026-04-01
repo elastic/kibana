@@ -20,11 +20,16 @@ import { getStepStatus, isValidationStep } from './helpers';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 interface UseFileChangeCbParams {
+  isEntityStoreV2Enabled: boolean;
   onError: (errorMessage: string, file: File) => void;
   onComplete: (param: OnCompleteParams) => void;
 }
 
-export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams) => {
+export const useFileValidation = ({
+  isEntityStoreV2Enabled,
+  onError,
+  onComplete,
+}: UseFileChangeCbParams) => {
   const formatBytes = useFormatBytes();
   const { telemetry } = useKibana().services;
 
@@ -88,29 +93,54 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
             return;
           }
 
-          const { invalid, valid, errors } = validateParsedContent(parsedFile.data);
-          const validLinesAsText = unparse(valid);
-          const invalidLinesAsText = unparse(invalid);
-          const processingEndTime = Date.now();
-          const tookMs = processingEndTime - processingStartTime;
-          onComplete({
-            processingStartTime: new Date(processingStartTime).toISOString(),
-            processingEndTime: new Date(processingEndTime).toISOString(),
-            tookMs,
-            validatedFile: {
-              name: returnedFile?.name ?? '',
-              size: returnedFile?.size ?? 0,
-              validLines: {
-                text: validLinesAsText,
-                count: valid.length,
+          if (isEntityStoreV2Enabled) {
+            const valid = parsedFile.data;
+            const validLinesAsText = unparse(valid);
+            const processingEndTime = Date.now();
+            const tookMs = processingEndTime - processingStartTime;
+            onComplete({
+              processingStartTime: new Date(processingStartTime).toISOString(),
+              processingEndTime: new Date(processingEndTime).toISOString(),
+              tookMs,
+              validatedFile: {
+                name: returnedFile?.name ?? '',
+                size: returnedFile?.size ?? 0,
+                validLines: {
+                  text: validLinesAsText,
+                  count: valid.length - 1, // Subtracting 1 to not count the header row
+                },
+                invalidLines: {
+                  text: ``,
+                  count: 0,
+                  errors: [],
+                },
               },
-              invalidLines: {
-                text: invalidLinesAsText,
-                count: invalid.length,
-                errors,
+            });
+          } else {
+            const { invalid, valid, errors } = validateParsedContent(parsedFile.data);
+            const validLinesAsText = unparse(valid);
+            const invalidLinesAsText = unparse(invalid);
+            const processingEndTime = Date.now();
+            const tookMs = processingEndTime - processingStartTime;
+            onComplete({
+              processingStartTime: new Date(processingStartTime).toISOString(),
+              processingEndTime: new Date(processingEndTime).toISOString(),
+              tookMs,
+              validatedFile: {
+                name: returnedFile?.name ?? '',
+                size: returnedFile?.size ?? 0,
+                validLines: {
+                  text: validLinesAsText,
+                  count: valid.length,
+                },
+                invalidLines: {
+                  text: invalidLinesAsText,
+                  count: invalid.length,
+                  errors,
+                },
               },
-            },
-          });
+            });
+          }
         },
         error(parserError) {
           onErrorWrapper({ message: parserError.message }, file);
@@ -119,12 +149,13 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
 
       parse(file, parserConfig);
     },
-    [formatBytes, telemetry, onErrorWrapper, onComplete]
+    [formatBytes, isEntityStoreV2Enabled, telemetry, onErrorWrapper, onComplete]
   );
 };
 
 export const useNavigationSteps = (
   state: ReducerState,
+  isEntityStoreV2Enabled: boolean,
   goToFirstStep: () => void
 ): Array<Omit<EuiStepHorizontalProps, 'step'>> => {
   return useMemo(
@@ -143,16 +174,20 @@ export const useNavigationSteps = (
           }
         },
       },
-      {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileValidationStepTitle',
-          {
-            defaultMessage: 'File validation',
-          }
-        ),
-        status: getStepStatus(2, state.step),
-        onClick: noop, // Prevents the user from navigating by clicking on the step
-      },
+      ...(!isEntityStoreV2Enabled
+        ? [
+            {
+              title: i18n.translate(
+                'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileValidationStepTitle',
+                {
+                  defaultMessage: 'File validation',
+                }
+              ),
+              status: getStepStatus(2, state.step),
+              onClick: noop, // Prevents the user from navigating by clicking on the step
+            },
+          ]
+        : []),
       {
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.resultsStepTitle',
@@ -164,6 +199,6 @@ export const useNavigationSteps = (
         onClick: noop, // Prevents the user from navigating by clicking on the step
       },
     ],
-    [goToFirstStep, state]
+    [goToFirstStep, isEntityStoreV2Enabled, state]
   );
 };

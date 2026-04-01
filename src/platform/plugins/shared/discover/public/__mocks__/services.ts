@@ -10,10 +10,12 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
+import type { ProjectRouting } from '@kbn/es-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   analyticsServiceMock,
   coreMock,
@@ -190,6 +192,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
+  const projectPickerAccess$ = new BehaviorSubject(ProjectRoutingAccess.EDITABLE);
+  const projectRouting$ = new BehaviorSubject<ProjectRouting>(undefined);
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -305,6 +309,22 @@ export function createDiscoverServicesMock(): DiscoverServices {
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
+    cps: {
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        fetchProjects: jest.fn().mockResolvedValue(null),
+        getTotalProjectCount: jest.fn().mockReturnValue(0),
+        getProjectRouting$: jest.fn().mockReturnValue(projectRouting$),
+        setProjectRouting: jest.fn((projectRouting: ProjectRouting) => {
+          projectRouting$.next(projectRouting);
+        }),
+        getProjectRouting: jest.fn((overrideValue?: ProjectRouting) => overrideValue),
+        getDefaultProjectRouting: jest.fn().mockReturnValue(undefined),
+        updateDefaultProjectRouting: jest.fn(),
+        getProjectPickerAccess$: jest.fn().mockReturnValue(projectPickerAccess$),
+        registerAppAccess: jest.fn(),
+      },
+    },
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
@@ -317,6 +337,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
       clearEditorState: jest.fn(),
+    },
+    alertingVTwo: {
+      DynamicRuleFormFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;

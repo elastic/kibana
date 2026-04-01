@@ -215,12 +215,22 @@ export class EvaluationScoreRepository {
     return undefined;
   }
 
-  private isExportingToExternalCluster(): boolean {
-    return Boolean(process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY);
+  private shouldSetupExportTarget(): boolean {
+    const esUrl = process.env.EVALUATIONS_ES_URL;
+    if (!esUrl) {
+      return true;
+    }
+
+    try {
+      const hostname = new URL(esUrl).hostname.replace(/\.$/, '').toLowerCase();
+      return hostname === 'localhost' || hostname === '127.0.0.1';
+    } catch {
+      return false;
+    }
   }
 
   private async ensureIndexTemplate(): Promise<void> {
-    if (this.isExportingToExternalCluster()) {
+    if (!this.shouldSetupExportTarget()) {
       return;
     }
 
@@ -355,7 +365,7 @@ export class EvaluationScoreRepository {
   }
 
   private async ensureDatastream(): Promise<void> {
-    if (this.isExportingToExternalCluster()) {
+    if (!this.shouldSetupExportTarget()) {
       return;
     }
 

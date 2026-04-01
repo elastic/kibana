@@ -81,7 +81,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={handleNavigateToIndexManagement}
-                    iconType="popout"
+                    iconType="external"
                     iconSide="right"
                     iconSize="s"
                     flush="both"
