@@ -116,11 +116,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC<{
-  rule?: RuleResponse;
-  sendToAgentChat?: boolean; // allows the user to send the rule to the agent chat as an attachment
-  backComponent?: React.ReactNode;
-}> = ({ rule, sendToAgentChat, backComponent }) => {
+const CreateRulePageComponent: React.FC<{}> = () => {
   const { application, triggersActionsUi, cps } = useKibana().services;
   const { navigateToApp } = application;
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
