@@ -734,6 +734,7 @@
     "@kbn/inference-tracing-config": "link:x-pack/platform/packages/shared/kbn-inference-tracing-config",
     "@kbn/infra-forge": "link:x-pack/platform/packages/private/kbn-infra-forge",
     "@kbn/infra-plugin": "link:x-pack/solutions/observability/plugins/infra",
+    "@kbn/ingest-hub-plugin": "link:x-pack/platform/plugins/shared/ingest_hub",
     "@kbn/ingest-pipelines-plugin": "link:x-pack/platform/plugins/shared/ingest_pipelines",
     "@kbn/ingest-pipelines-shared": "link:x-pack/platform/packages/shared/ingest-pipelines",
     "@kbn/input-control-vis-plugin": "link:src/platform/plugins/private/input_control_vis",
