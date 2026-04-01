@@ -21,7 +21,7 @@ import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import type { Query } from '../../../../common/queries';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
-import { getWiredIngestResponse, upsertWiredIngestRequest } from '../../../../docs/oas_examples';
+import { getWiredIngestResponse, upsertWiredIngestRequest } from '../../oas_examples';
 
 async function getAssets({
   name,

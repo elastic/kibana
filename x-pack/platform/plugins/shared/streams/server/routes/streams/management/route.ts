@@ -11,7 +11,7 @@ import { routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
-import { forkStreamRequest } from '../../../../docs/oas_examples';
+import { forkStreamRequest } from '../../oas_examples';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
