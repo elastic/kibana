@@ -62,18 +62,14 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(
-        screen.getByText('Each episode is dispatched on status change.')
-      ).toBeDefined();
+      expect(screen.getByText('Each episode is dispatched on status change.')).toBeDefined();
     });
 
     it('shows every evaluation summary', () => {
       renderSummary({ groupingMode: 'per_episode', throttleStrategy: 'every_time' });
 
       expect(
-        screen.getByText(
-          'Each episode is dispatched on every evaluation with no throttle.'
-        )
+        screen.getByText('Each episode is dispatched on every evaluation with no throttle.')
       ).toBeDefined();
     });
   });
@@ -86,9 +82,7 @@ describe('DispatchConfigSummary', () => {
         throttleStrategy: 'time_interval',
       });
 
-      expect(
-        screen.getByText('Add group-by fields to configure grouped dispatch.')
-      ).toBeDefined();
+      expect(screen.getByText('Add group-by fields to configure grouped dispatch.')).toBeDefined();
     });
 
     it('shows throttle summary with fields', () => {
@@ -114,9 +108,7 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(
-        screen.getByText('Episodes grouped by host.name are dispatched.')
-      ).toBeDefined();
+      expect(screen.getByText('Episodes grouped by host.name are dispatched.')).toBeDefined();
     });
 
     it('shows every evaluation summary with fields', () => {
@@ -143,9 +135,7 @@ describe('DispatchConfigSummary', () => {
       });
 
       expect(
-        screen.getByText(
-          'All matched episodes are dispatched at most once every 1 hour(s).'
-        )
+        screen.getByText('All matched episodes are dispatched at most once every 1 hour(s).')
       ).toBeDefined();
     });
 
@@ -156,9 +146,7 @@ describe('DispatchConfigSummary', () => {
         throttleInterval: '',
       });
 
-      expect(
-        screen.getByText('All matched episodes are dispatched.')
-      ).toBeDefined();
+      expect(screen.getByText('All matched episodes are dispatched.')).toBeDefined();
     });
 
     it('shows every evaluation summary', () => {
