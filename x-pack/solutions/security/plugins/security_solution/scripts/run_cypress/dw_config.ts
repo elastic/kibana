@@ -66,9 +66,12 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   { pattern: 'artifacts/endpoint_exceptions.cy.ts', weight: 8 },
   { pattern: 'artifacts/endpoint_exceptions.no_ff.cy.ts', weight: 5 },
 
-  // RBAC endpoint_exceptions split specs: getArtifactMockedDataTests with
-  // siemVersionFilter gives weight 5 from FILTERED_RUNNER_WEIGHTS, but actual
-  // runtime is ~3-4 min each. Bumping to 8 rebalances the experimental group.
+  // RBAC mocked data specs: getArtifactMockedDataTests with siemVersionFilter
+  // gives weight 5 from FILTERED_RUNNER_WEIGHTS, but actual CI runtime is much
+  // higher due to dynamic test generation and Fleet/Endpoint setup overhead.
+  // Calibrated from build 420147: hosts_exist ~6 min, trusted_apps ~3 min each.
+  { pattern: 'endpoints_rbac_mocked_data', weight: 16 },
+  { pattern: 'trusted_apps_rbac_siem', weight: 10 },
   { pattern: 'endpoint_exceptions_rbac_siem', weight: 8 },
   { pattern: 'artifacts/trusted_devices.cy.ts', weight: 7 },
   { pattern: 'artifacts/artifacts.cy.ts', weight: 8 },
@@ -90,8 +93,8 @@ const SPEC_WEIGHT_OVERRIDES: LoadBalancerConfig['specWeightOverrides'] = [
   { pattern: 'endpoint_list/endpoints.cy.ts', weight: 8 },
   { pattern: 'endpoint_list/endpoints_mocked_data.cy.ts', weight: 6 },
 
-  // Navigation ESS: dynamic runner (~3 min per version)
-  { pattern: 'navigation_ess_siem_', weight: 8 },
+  // Navigation ESS: dynamic runner (~5 min per version, calibrated from build 420147)
+  { pattern: 'navigation_ess_siem_', weight: 14 },
 
   // Serverless role specs: consolidated from per-page to per-category it() blocks.
   // Each spec still tests all pages (~1.5-2.5 min) despite only 1-3 it() blocks.
@@ -140,13 +143,14 @@ export const DW_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
  * lower targetWeightPerAgent because SL has fewer total specs and lower
  * aggregate weight (~200 vs ~800 on ESS). At the ESS target of 45 the
  * overload penalty never fires for SL, letting the greedy LB pile 5+ specs
- * on one agent. Target of 20 (slightly above the 12-agent avg of ~17)
- * activates the penalty early enough to spread specs evenly.
+ * on one agent. Target of 22 (slightly above the 14-agent avg of ~20 for
+ * default-config agents) activates the penalty early enough to spread specs
+ * evenly while leaving headroom for natural variance.
  *
  * Config isolation stays enabled — SL has productTypes-based non-default
  * configs (essentials, complete+experimental) that need dedicated agents.
  */
 export const DW_SERVERLESS_LOAD_BALANCER_CONFIG: LoadBalancerConfig = {
   ...DW_LOAD_BALANCER_CONFIG,
-  targetWeightPerAgent: 20,
+  targetWeightPerAgent: 22,
 };
