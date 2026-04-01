@@ -363,5 +363,43 @@ describe('StepExecutionRepository', () => {
 
       expect(result).toEqual([{ id: 'step-2', stepId: 'test-step-2' }]);
     });
+
+    it('should pass sourceIncludes as _source_includes to mget', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: { id: 'step-1', output: { data: 'value' } } },
+        ],
+      });
+
+      await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1'],
+        _source_includes: ['id', 'output'],
+      });
+    });
+
+    it('should not include _source_includes when sourceIncludes is undefined', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+
+      await underTest.getStepExecutionsByIds(['step-1']);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1'],
+      });
+    });
+
+    it('should not include _source_includes when sourceIncludes is empty', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+
+      await underTest.getStepExecutionsByIds(['step-1'], []);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1'],
+      });
+    });
   });
 });

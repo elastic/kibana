@@ -1291,6 +1291,17 @@ describe('WorkflowContextManager', () => {
       );
     });
 
+    it('should cache predecessors and call getAllPredecessors only once across multiple getContext calls', () => {
+      const spy = jest.spyOn(testContainer.workflowExecutionGraph, 'getAllPredecessors');
+
+      testContainer.underTest.getContext();
+      testContainer.underTest.getContext();
+      testContainer.underTest.getContext();
+
+      // Should be called exactly once (lazy getter caches the result)
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
     it('should enrich steps context with mocked data', () => {
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
@@ -1777,6 +1788,85 @@ describe('WorkflowContextManager', () => {
         contextVar1: 'value1',
         contextVar2: 'value2',
       });
+    });
+  });
+
+  describe('ensureContextReady', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'Eviction test workflow',
+      enabled: true,
+      triggers: [],
+      steps: [
+        {
+          name: 'step_a',
+          type: 'console',
+          with: { message: 'hello' },
+        } as ConnectorStep,
+        {
+          name: 'step_b',
+          type: 'console',
+          with: { message: '{{steps.step_a.output}}' },
+        } as ConnectorStep,
+      ],
+    };
+    let testContainer: ReturnType<typeof createTestContainer>;
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+    });
+
+    it('should be a no-op when hasEvictedOutputs returns false', async () => {
+      testContainer.workflowExecutionState.hasEvictedOutputs = jest.fn().mockReturnValue(false);
+      testContainer.workflowExecutionState.rehydrateOutputs = jest.fn();
+
+      await testContainer.underTest.ensureContextReady();
+
+      expect(testContainer.workflowExecutionState.rehydrateOutputs).not.toHaveBeenCalled();
+    });
+
+    it('should call rehydrateOutputs when outputs are evicted', async () => {
+      testContainer.workflowExecutionState.hasEvictedOutputs = jest.fn().mockReturnValue(true);
+      testContainer.workflowExecutionState.rehydrateOutputs = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      testContainer.workflowExecutionState.getLatestStepExecution = jest
+        .fn()
+        .mockReturnValue({ id: 'step-exec-a' } as EsWorkflowStepExecution);
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'exec-1',
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: workflow,
+      } as EsWorkflowExecution);
+
+      await testContainer.underTest.ensureContextReady();
+
+      expect(testContainer.workflowExecutionState.rehydrateOutputs).toHaveBeenCalled();
+    });
+
+    it('should include scope stack entries in rehydration IDs', async () => {
+      testContainer.workflowExecutionState.hasEvictedOutputs = jest.fn().mockReturnValue(true);
+      testContainer.workflowExecutionState.rehydrateOutputs = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      testContainer.workflowExecutionState.getLatestStepExecution = jest
+        .fn()
+        .mockReturnValue(undefined);
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'exec-1',
+        scopeStack: [
+          {
+            stepId: 'foreach_step',
+            nestedScopes: [{ nodeId: 'enter-foreach', nodeType: 'foreach' }],
+          },
+        ],
+        workflowDefinition: workflow,
+      } as EsWorkflowExecution);
+
+      await testContainer.underTest.ensureContextReady();
+
+      expect(testContainer.workflowExecutionState.rehydrateOutputs).toHaveBeenCalled();
     });
   });
 });

@@ -79,6 +79,9 @@ describe('runNode', () => {
       node: mockNode,
       scopeStack,
       abortController: new AbortController(),
+      contextManager: {
+        ensureContextReady: jest.fn().mockResolvedValue(undefined),
+      },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockNodeImplementation = {

@@ -48,6 +48,7 @@ describe('DataSetStepImpl', () => {
       finishStep: jest.fn().mockResolvedValue(undefined),
       failStep: jest.fn().mockResolvedValue(undefined),
       setInput: jest.fn().mockResolvedValue(undefined),
+      recordOutputSize: jest.fn(),
       getCurrentStepState: jest.fn(),
       setCurrentStepState: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
@@ -319,6 +320,42 @@ describe('DataSetStepImpl', () => {
       await dataSetStep.run();
 
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalled();
+    });
+
+    describe('output size recording for eviction', () => {
+      it('should call recordOutputSize with correct byte count after successful step', async () => {
+        await dataSetStep.run();
+
+        expect(mockStepExecutionRuntime.recordOutputSize).toHaveBeenCalledTimes(1);
+        expect(mockStepExecutionRuntime.recordOutputSize).toHaveBeenCalledWith(expect.any(Number));
+        // The recorded size should be positive (non-empty output)
+        const recordedSize = mockStepExecutionRuntime.recordOutputSize.mock.calls[0][0];
+        expect(recordedSize).toBeGreaterThan(0);
+      });
+
+      it('should not call recordOutputSize when step fails', async () => {
+        mockContextManager.renderValueAccordingToContext.mockReturnValue(null as any);
+
+        await dataSetStep.run();
+
+        expect(mockStepExecutionRuntime.recordOutputSize).not.toHaveBeenCalled();
+      });
+
+      it('should not call recordOutputSize when maxResponseSize is 0', async () => {
+        (mockContextManager as any).getDependencies = jest.fn().mockReturnValue({
+          config: { maxResponseSize: new ByteSizeValue(0) },
+        });
+        dataSetStep = new DataSetStepImpl(
+          mockNode,
+          mockStepExecutionRuntime,
+          mockWorkflowRuntime,
+          mockWorkflowLogger
+        );
+
+        await dataSetStep.run();
+
+        expect(mockStepExecutionRuntime.recordOutputSize).not.toHaveBeenCalled();
+      });
     });
   });
 });
