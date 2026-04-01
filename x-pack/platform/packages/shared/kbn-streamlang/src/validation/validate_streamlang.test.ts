@@ -2379,7 +2379,7 @@ describe('validateStreamlang', () => {
               else: [
                 {
                   action: 'remove_by_prefix',
-                  prefix: 'attributes.',
+                  from: 'attributes.',
                 },
               ],
             },
@@ -2408,8 +2408,7 @@ describe('validateStreamlang', () => {
               else: [
                 {
                   action: 'manual_ingest_pipeline' as const,
-                  pipeline_name: 'test',
-                  pipeline_body: { processors: [] },
+                  processors: [],
                 },
               ],
             },
