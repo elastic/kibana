@@ -11,9 +11,9 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import type { TerraformImpactResult } from '../src/terraform/check_terraform_impact';
 import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
 import { formatFailure } from '../src/report/format_failure';
+import { writeImpactReport } from '../src/report/write_impact_report';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadTerraformApis } from '../src/terraform/load_terraform_apis';
@@ -32,20 +32,6 @@ interface CheckContractsOptions {
   terraformApisPath?: string;
   reportPath?: string;
 }
-
-const writeImpactReport = (reportPath: string, terraformImpact: TerraformImpactResult): void => {
-  const report = {
-    impactedChanges: terraformImpact.impactedChanges.map((impact) => ({
-      path: impact.change.path,
-      method: impact.change.method,
-      reason: impact.change.reason,
-      terraformResource: impact.terraformResource,
-      owners: impact.owners,
-    })),
-  };
-  mkdirSync(resolve(reportPath, '..'), { recursive: true });
-  writeFileSync(reportPath, JSON.stringify(report, null, 2));
-};
 
 const TMP_DIR = resolve(__dirname, '..', 'target', 'tmp');
 

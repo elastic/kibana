@@ -10,7 +10,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { upsertComment } from '#pipeline-utils';
 
-interface ImpactEntry {
+export interface ImpactEntry {
   path: string;
   method?: string;
   reason: string;
@@ -27,7 +27,7 @@ const COMMENT_CONTEXT = 'api-contracts-tf-breaking';
 const ALLOWLIST_PATH = 'packages/kbn-api-contracts/allowlist.json';
 const README_PATH = 'packages/kbn-api-contracts/README.md';
 
-const buildCommentBody = (entries: ImpactEntry[]): string => {
+export const buildCommentBody = (entries: ImpactEntry[]): string => {
   const allOwners = [...new Set(entries.flatMap((e) => e.owners))];
   const ownerMentions = allOwners.length > 0 ? allOwners.join(' ') : '_unknown_';
 
@@ -85,7 +85,11 @@ async function main() {
     return;
   }
 
-  const body = buildCommentBody(allEntries);
+  const deduped = Array.from(
+    new Map(allEntries.map((e) => [`${e.path}::${e.method ?? ''}`, e])).values()
+  );
+
+  const body = buildCommentBody(deduped);
   console.log('Posting PR comment notifying API owners...');
 
   await upsertComment({
@@ -97,7 +101,9 @@ async function main() {
   console.log('PR comment posted successfully');
 }
 
-main().catch((error) => {
-  console.error('Failed to post API contract notification:', error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error('Failed to post API contract notification:', error);
+    process.exit(1);
+  });
+}

@@ -42,7 +42,7 @@ export const checkTerraformImpact = (
     .map((change) => {
       const matchedApi = findMatchingTerraformApi(change, apiIndex);
       return matchedApi
-        ? { change, terraformResource: matchedApi.resource, owners: matchedApi.owners ?? [] }
+        ? { change, terraformResource: matchedApi.resource, owners: matchedApi.owners }
         : null;
     })
     .filter((impact): impact is TerraformImpact => impact !== null);
