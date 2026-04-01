@@ -103,7 +103,7 @@ const QueryActivityAppWithData: React.FC = () => {
 
         notifications.toasts.addSuccess(
           i18n.translate('xpack.queryActivity.stopQueryToast', {
-            defaultMessage: 'Cancel requested for query {taskId}',
+            defaultMessage: 'Cancellation requested for query {taskId}',
             values: { taskId },
           })
         );
