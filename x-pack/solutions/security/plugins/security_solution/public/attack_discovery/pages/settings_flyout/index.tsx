@@ -10,19 +10,23 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
+  EuiHorizontalRule,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter, Query } from '@kbn/es-query';
 
+import { useKibana } from '../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
+import type { AttackDiscoverySettingsTab } from '../../../common/lib/telemetry';
 import { Footer } from './footer';
 import * as i18n from './translations';
 import { useTabsView } from './hooks/use_tabs_view';
 import type { AlertsSelectionSettings } from './types';
-import { MIN_FLYOUT_WIDTH, SCHEDULE_TAB_ID } from './constants';
+import { MIN_FLYOUT_WIDTH, MONITORING_TAB_ID, SCHEDULE_TAB_ID } from './constants';
 import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
 import { getDefaultQuery } from '../helpers';
 import type { SettingsOverrideOptions } from '../results/history/types';
@@ -64,6 +68,7 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   setStart,
   start,
 }) => {
+  const { telemetry } = useKibana().services;
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoverySettingsFlyoutTitle',
   });
@@ -108,6 +113,16 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
     settings,
   ]);
 
+  useEffect(() => {
+    const tabMap: Record<string, AttackDiscoverySettingsTab> = {
+      [MONITORING_TAB_ID]: 'monitoring',
+      [SCHEDULE_TAB_ID]: 'schedule',
+    };
+    const tab: AttackDiscoverySettingsTab = tabMap[defaultSelectedTabId ?? ''] ?? 'settings';
+
+    telemetry.reportEvent(AttackDiscoveryEventTypes.SettingsFlyoutOpened, { tab });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const { tabsContainer, actionButtons: tabsActionButtons } = useTabsView({
     connectorId,
     defaultSelectedTabId,
@@ -120,11 +135,16 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   });
 
   const title =
-    defaultSelectedTabId === SCHEDULE_TAB_ID
+    defaultSelectedTabId === MONITORING_TAB_ID
+      ? i18n.ACTION_TRIGGERED_RUNS
+      : defaultSelectedTabId === SCHEDULE_TAB_ID
       ? i18n.ATTACK_DISCOVERY_SCHEDULE
       : i18n.ATTACK_DISCOVERY_SETTINGS;
 
-  const closeButtonText = defaultSelectedTabId !== SCHEDULE_TAB_ID ? i18n.CANCEL : undefined;
+  const closeButtonText =
+    defaultSelectedTabId !== MONITORING_TAB_ID && defaultSelectedTabId !== SCHEDULE_TAB_ID
+      ? i18n.CANCEL
+      : undefined;
 
   return (
     <EuiFlyoutResizable
@@ -137,10 +157,11 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
       size="m"
       type="overlay"
     >
-      <EuiFlyoutHeader hasBorder={false}>
+      <EuiFlyoutHeader>
         <EuiTitle data-test-subj="title" size="m">
           <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
+        <EuiHorizontalRule margin="m" />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>{tabsContainer}</EuiFlyoutBody>

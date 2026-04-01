@@ -55,3 +55,17 @@ export const SCHEDULE_TAB_LABEL = i18n.translate(
     defaultMessage: 'Schedule',
   }
 );
+
+export const MONITORING_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.tabs.monitoringTabLabel',
+  {
+    defaultMessage: 'Monitoring',
+  }
+);
+
+export const WORKFLOW_CONFIGURATION_INVALID = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.workflowConfigurationInvalidTooltip',
+  {
+    defaultMessage: 'At least one alert retrieval method must be enabled',
+  }
+);

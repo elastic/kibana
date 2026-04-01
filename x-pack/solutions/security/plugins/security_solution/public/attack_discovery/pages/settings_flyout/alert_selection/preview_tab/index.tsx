@@ -39,6 +39,7 @@ interface Props {
   dataTestSubj?: string;
   embeddableId: string;
   end: string;
+  esqlQuery?: string;
   filters: Filter[];
   getLensAttributes: ({
     defaultPageSize,
@@ -53,10 +54,12 @@ interface Props {
   }) => LensAttributes;
   getPreviewEsqlQuery: ({
     alertsIndexPattern,
+    esqlQuery,
     maxAlerts,
     tableStackBy0,
   }: {
     alertsIndexPattern: string;
+    esqlQuery?: string;
     maxAlerts: number;
     tableStackBy0: string;
   }) => string;
@@ -72,6 +75,7 @@ const PreviewTabComponent = ({
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   embeddableId,
   end,
+  esqlQuery: esqlQueryProp,
   filters,
   getLensAttributes,
   getPreviewEsqlQuery,
@@ -104,10 +108,11 @@ const PreviewTabComponent = ({
     () =>
       getPreviewEsqlQuery({
         alertsIndexPattern: signalIndexName ?? '',
+        esqlQuery: esqlQueryProp,
         maxAlerts,
         tableStackBy0,
       }),
-    [getPreviewEsqlQuery, maxAlerts, signalIndexName, tableStackBy0]
+    [esqlQueryProp, getPreviewEsqlQuery, maxAlerts, signalIndexName, tableStackBy0]
   );
 
   const attributes = useMemo(
@@ -204,7 +209,7 @@ const PreviewTabComponent = ({
                 }
 
                 .euiDataGridHeaderCell {
-                  font-size: ${font.scale.s}${font.defaultUnits};
+                  font-size: ${font.scale.s}${font.defaultUnits} !important;
                 }
 
                 .euiDataGridFooter {
@@ -212,7 +217,7 @@ const PreviewTabComponent = ({
                 }
 
                 .euiDataGridRowCell {
-                  font-size: ${font.scale.xs}${font.defaultUnits} !important;
+                  font-size: ${font.scale.s}${font.defaultUnits} !important;
                 }
 
                 .expExpressionRenderer__expression {

@@ -21,6 +21,13 @@ export const ATTACK_DISCOVERY_SCHEDULE = i18n.translate(
   }
 );
 
+export const ACTION_TRIGGERED_RUNS = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.actionTriggeredRunsTitle',
+  {
+    defaultMessage: 'Action-triggered runs',
+  }
+);
+
 export const CANCEL = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.cancelButtonLabel',
   {
