@@ -201,7 +201,7 @@ export function createNavigationTree({
     footer: [
       {
         id: 'search_getting_started',
-        icon: 'launch',
+        icon: 'rocket',
         link: 'searchGettingStarted',
       },
       {
