@@ -19,7 +19,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('Conversation Flow', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/260441
+  describe.skip('Conversation Flow', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {
