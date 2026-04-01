@@ -658,53 +658,6 @@ export class QueryUtils {
     }
   }
 
-  // ── Convenience accessors (delegate to getAllRoundMetrics) ──────────
-
-  async getTTFTMetrics() {
-    return (await this.getAllRoundMetrics()).ttft;
-  }
-
-  async getTTLTMetrics() {
-    return (await this.getAllRoundMetrics()).ttlt;
-  }
-
-  async getQueryToResultTimeByAgentType() {
-    const { byAgent } = await this.getAllRoundMetrics();
-    return byAgent.map((a) => ({ ...a, sample_count: a.total_samples }));
-  }
-
-  async getQueryToResultTimeByModel() {
-    const { byModel } = await this.getAllRoundMetrics();
-    return byModel.map((m) => ({
-      model: m.model,
-      p50: m.ttlt_p50,
-      p75: m.ttlt_p75,
-      p90: m.ttlt_p90,
-      p95: m.ttlt_p95,
-      p99: m.ttlt_p99,
-      mean: m.ttlt_mean,
-      total_samples: m.ttlt_samples,
-      sample_count: m.ttlt_samples,
-    }));
-  }
-
-  async getTokensByModel() {
-    const { byModel } = await this.getAllRoundMetrics();
-    return byModel.map((m) => ({
-      model: m.model,
-      total_tokens: m.total_tokens,
-      avg_tokens_per_round: m.avg_tokens_per_round,
-      sample_count: m.rounds,
-    }));
-  }
-
-  async getToolCallsByModel() {
-    const { byModel } = await this.getAllRoundMetrics();
-    return byModel
-      .filter((m) => m.tool_calls > 0)
-      .map((m) => ({ model: m.model, count: m.tool_calls }));
-  }
-
   /**
    * Calculate percentiles from bucketed time data
    * @param buckets - Map of bucket name → count
