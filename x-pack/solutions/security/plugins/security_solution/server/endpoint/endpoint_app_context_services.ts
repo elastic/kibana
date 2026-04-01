@@ -356,10 +356,6 @@ export class EndpointAppContextService {
     return this.startDependencies.cases.getCasesClientWithRequest(req);
   }
 
-  public isCasesAttachmentsV2Enabled(): boolean {
-    return this.startDependencies?.cases?.config?.attachments?.enabled === true;
-  }
-
   public getFeatureUsageService(): FeatureUsageService {
     if (this.startDependencies == null) {
       throw new EndpointAppContentServicesNotStartedError();

@@ -172,7 +172,6 @@ export const createMockEndpointAppContextService = (
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
     getAgentBuilder: jest.fn(),
-    isCasesAttachmentsV2Enabled: jest.fn().mockReturnValue(true),
     isEndpointExceptionsPerPolicyEnabled: jest.fn().mockResolvedValue(true),
   } as Omit<
     jest.Mocked<EndpointAppContextService>,

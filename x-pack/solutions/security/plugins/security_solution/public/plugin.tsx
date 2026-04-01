@@ -67,7 +67,6 @@ import { LazyCustomCriblExtension } from './security_integrations/cribl/componen
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
-import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/endpoint/external_reference';
 import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint/unified_attachment';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
@@ -267,9 +266,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
 
-    cases?.attachmentFramework.registerExternalReference(
-      getExternalReferenceAttachmentEndpointRegular()
-    );
     cases?.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
     cases?.attachmentFramework?.registerExternalReference(generateIndicatorAttachmentType());
 

@@ -233,7 +233,7 @@ describe('ResponseActionsClientImpl base class', () => {
       );
     });
 
-    it('should update cases with a v2 unified attachment when attachments FF is enabled', async () => {
+    it('should update cases with a unified attachment', async () => {
       const updateResponse = await baseClassMock.updateCases(updateCasesOptions);
 
       expect(updateResponse).toBeUndefined();
@@ -244,43 +244,6 @@ describe('ResponseActionsClientImpl base class', () => {
             type: 'endpoint',
             attachmentId: 'action-123',
             metadata: {
-              command: 'isolate',
-              comment: 'this is a case comment',
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                  agentType: 'endpoint',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                  agentType: 'endpoint',
-                },
-              ],
-            },
-            owner: 'securitySolution',
-          },
-        ],
-        caseId: 'case-3',
-      });
-    });
-
-    it('should update cases with a v1 legacy attachment when attachments FF is disabled', async () => {
-      jest.spyOn(endpointAppContextService, 'isCasesAttachmentsV2Enabled').mockReturnValue(false);
-
-      const updateResponse = await baseClassMock.updateCases(updateCasesOptions);
-
-      expect(updateResponse).toBeUndefined();
-      expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(4);
-      expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
-        attachments: [
-          {
-            type: 'externalReference',
-            externalReferenceId: 'action-123',
-            externalReferenceStorage: { type: 'elasticSearchDoc' },
-            externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceMetadata: {
               command: 'isolate',
               comment: 'this is a case comment',
               targets: [

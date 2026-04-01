@@ -7,12 +7,16 @@
 
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import { AttachmentType } from '../../../common/types/domain';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../types/attachments_v2';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
+import { endpointAttachmentTransformer } from './endpoint';
+
+const ENDPOINT_ATTACHMENT_TYPE_ID = 'endpoint';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
 export {
@@ -22,16 +26,24 @@ export {
 
 /**
  * Returns the attachment type string from attributes (unified or legacy shape).
- * Used to select the correct transformer.
+ * For legacy external references, returns the more specific `externalReferenceAttachmentTypeId`
+ * so transformer routing can correctly identify the attachment subtype.
  * @throws Error if attributes is null or not an object
  */
 export function getAttachmentTypeFromAttributes(attributes: unknown): string {
   if (attributes === null || typeof attributes !== 'object') {
     throw new Error('Invalid attributes: expected non-null object');
   }
-  const { type } = attributes as Record<string, unknown>;
+  const { type, externalReferenceAttachmentTypeId } = attributes as Record<string, unknown>;
   if (typeof type !== 'string') {
     throw new Error('Invalid attributes: missing attachment type');
+  }
+  // For legacy external references, use the specific type ID for transformer routing
+  if (
+    type === AttachmentType.externalReference &&
+    typeof externalReferenceAttachmentTypeId === 'string'
+  ) {
+    return externalReferenceAttachmentTypeId;
   }
   return type;
 }
@@ -39,8 +51,8 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
 /**
  * Returns the persisted transformer for the given attachment type.
  * Use getAttachmentTypeFromAttributes(attributes) to derive type from decoded attributes.
- * For comment/user types returns the comment transformer; for all other types returns a
- * pass-through transformer (identity for old <-> new schema).
+ * For comment/user types returns the comment transformer; for endpoint types returns
+ * the endpoint transformer; for all other types returns a pass-through transformer.
  */
 export function getAttachmentTypeTransformers(
   type: string
@@ -49,6 +61,9 @@ export function getAttachmentTypeTransformers(
 
   if (normalizedType === COMMENT_ATTACHMENT_TYPE) {
     return commentAttachmentTransformer;
+  }
+  if (normalizedType === ENDPOINT_ATTACHMENT_TYPE_ID) {
+    return endpointAttachmentTransformer;
   }
   return passThroughTransformer;
 }
