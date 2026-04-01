@@ -137,6 +137,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntitySubType = entity.sub_type
 | RENAME actorHostIp        = host.ip
 | RENAME actorLookupEntityId = entity.id
+| RENAME actorEntityEngineType = entity.engine.type
 
 | EVAL entity.id = targetEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -144,7 +145,8 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME targetEntityType    = entity.type
 | RENAME targetEntitySubType = entity.sub_type
 | RENAME targetHostIp        = host.ip
-| RENAME targetLookupEntityId = entity.id`;
+| RENAME targetLookupEntityId = entity.id
+| RENAME targetEntityEngineType = entity.engine.type`;
 };
 
 /**
@@ -291,8 +293,10 @@ export const buildEntityEnrichment = (isLookupIndexAvailable: boolean, spaceId: 
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
+| EVAL actorEntityEngineType = TO_STRING(null)
 | EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)`;
+| EVAL targetHostIp = TO_STRING(null)
+| EVAL targetEntityEngineType = TO_STRING(null)`;
 };
