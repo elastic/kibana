@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -232,6 +233,14 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                     z-index: 1;
                   `}
                 >
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      width: ${euiTheme.size.l};
+                    `}
+                  >
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText
                       size="s"
@@ -255,6 +264,9 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                       />
                     </EuiFlexItem>
                   )}
+                  <EuiFlexItem>
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
                 {hasElseBranch && (
                   <>
