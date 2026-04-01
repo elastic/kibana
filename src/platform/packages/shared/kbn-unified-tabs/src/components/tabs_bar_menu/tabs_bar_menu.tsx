@@ -128,6 +128,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       <EuiPopover
         data-test-subj="unifiedTabs_tabsBarMenu"
         id={contextMenuPopoverId}
+        aria-label={menuButtonLabel}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"

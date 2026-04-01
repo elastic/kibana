@@ -1,1 +1,3 @@
-[]
+[
+  "src/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js"
+]

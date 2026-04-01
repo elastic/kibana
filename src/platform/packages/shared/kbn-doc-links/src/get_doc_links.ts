@@ -939,6 +939,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentReleaseProcess: `${ELASTIC_DOCS}reference/fleet/fleet-agent-release-process`,
       fipsIngest: `${ELASTIC_DOCS}deploy-manage/security/fips-ingest`,
       edotCollector: `${ELASTIC_DOCS}reference/edot-collector`,
+      agentPolicyLimitCpu: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-limit-cpu`,
+      agentDownloadTimeout: `${ELASTIC_DOCS}reference/fleet/enable-custom-policy-settings#configure-agent-download-timeout`,
+      elasticAgentStandaloneDownload: `${ELASTIC_DOCS}reference/fleet/elastic-agent-standalone-download`,
+      elasticAgentStandaloneLoggingConfig: `${ELASTIC_DOCS}reference/fleet/elastic-agent-standalone-logging-config#elastic-agent-standalone-logging-settings`,
+      agentPolicyLogLevel: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-level`,
+      elasticAgentLogFileRetention: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-file-rotation-retention`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,

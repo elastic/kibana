@@ -370,6 +370,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     }
   `;
 
+  const mappingsListPanelStyles = css`
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+      min-width: 600px;
+    }
+  `;
+
   const saveMappingsButton = (
     <EuiButton
       onClick={() => updateMappings()}
@@ -560,13 +569,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiFlexItem>
           )}
           {hasMappings && (
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                min-width: 600px;
-                height: 100%;
-              `}
-            >
+            <EuiFlexItem grow={false} css={mappingsListPanelStyles}>
               <EuiPanel hasShadow={false} paddingSize="none">
                 {isJSONVisible ? jsonBlock : treeViewBlock}
               </EuiPanel>

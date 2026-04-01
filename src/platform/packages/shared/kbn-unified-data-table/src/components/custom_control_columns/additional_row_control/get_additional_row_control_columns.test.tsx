@@ -70,7 +70,7 @@ describe('getAdditionalRowControlColumns', () => {
 
   it('should work correctly for 3 and more controls', async () => {
     // Given
-    const user = userEvent.setup();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     const mocks = [
       mockRowAdditionalLeadingControls[0],
       mockRowAdditionalLeadingControls[1],

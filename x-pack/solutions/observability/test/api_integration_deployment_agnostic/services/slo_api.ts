@@ -23,6 +23,7 @@ interface SavedObject<Attributes extends Record<string, any>> {
   updated_at?: string;
   version?: string;
 }
+
 interface SavedObjectResponse {
   page: number;
   per_page: number;

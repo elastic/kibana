@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cloud-security-posture-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/contextual-security-apps'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cloud-security-posture-common'
+  title: '@kbn/cloud-security-posture-common'
   description: Moon project for @kbn/cloud-security-posture-common
   channel: ''
   owner: '@elastic/contextual-security-apps'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/common
+  sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/common
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/data-views-plugin'
@@ -41,14 +40,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
