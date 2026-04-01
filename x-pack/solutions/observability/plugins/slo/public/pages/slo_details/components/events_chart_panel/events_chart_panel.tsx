@@ -8,33 +8,33 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiLoadingChart,
   EuiPanel,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { TimeRange } from '@kbn/es-query';
 import React from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
-import { useKibana } from '../../../../hooks/use_kibana';
 import type { TimeBounds } from '../../types';
-import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
 import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
+import { EventsChartPanelActionsMenu } from './events_chart_panel_actions_menu';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
   range: { from: Date; to: Date };
-  hideRangeDurationLabel?: boolean;
+  dynamicTimeRange?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, onBrushed }: Props) {
-  const { discover, uiSettings } = useKibana().services;
+export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrushed }: Props) {
+  const timeRange: TimeRange = dynamicTimeRange
+    ? { from: range.from.toISOString(), to: range.to.toISOString() }
+    : { from: 'now-24h', to: 'now', mode: 'relative' };
+
   const { isLoading, data } = useGetPreviewData({
     range,
     isValid: true,
@@ -96,7 +96,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
                 <h2>{getChartTitle()}</h2>
               </EuiTitle>
             </EuiFlexItem>
-            {!hideRangeDurationLabel && (
+            {!dynamicTimeRange && (
               <EuiFlexItem>
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.duration', {
@@ -108,26 +108,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
           </EuiFlexGroup>
 
           <EuiFlexItem grow={0}>
-            <EuiLink
-              color="text"
-              href={getDiscoverLink({
-                slo,
-                timeRange: {
-                  from: 'now-24h',
-                  to: 'now',
-                  mode: 'relative',
-                },
-                discover,
-                uiSettings,
-              })}
-              data-test-subj="sloDetailDiscoverLink"
-            >
-              <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
-              <FormattedMessage
-                id="xpack.slo.sloDetails.viewEventsLink"
-                defaultMessage="View events"
-              />
-            </EuiLink>
+            <EventsChartPanelActionsMenu slo={slo} timeRange={timeRange} />
           </EuiFlexItem>
         </EuiFlexGroup>
 

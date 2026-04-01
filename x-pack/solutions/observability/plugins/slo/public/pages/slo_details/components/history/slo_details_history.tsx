@@ -106,12 +106,7 @@ export function SloDetailsHistory({ slo }: Props) {
         hideHeaderDurationLabel={true}
       />
 
-      <EventsChartPanel
-        slo={slo}
-        range={state.range}
-        hideRangeDurationLabel
-        onBrushed={onBrushed}
-      />
+      <EventsChartPanel slo={slo} range={state.range} dynamicTimeRange onBrushed={onBrushed} />
     </EuiFlexGroup>
   );
 }
