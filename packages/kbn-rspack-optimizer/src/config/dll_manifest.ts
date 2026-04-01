@@ -12,7 +12,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 
 /**
  * Pre-built DLL manifest from @kbn/ui-shared-deps-npm.
- * Contains ~4200 modules (npm deps + transitive deps) that are already bundled
+ * Contains modules (npm deps + transitive deps) that are already bundled
  * into the DLL script (__kbnSharedDeps_npm__). DllReferencePlugin uses this to
  * avoid re-bundling those modules in plugin chunks.
  *
@@ -32,6 +32,8 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  *    property access (e.g. `mod.format`) for each named import.
  *  - Everything else → strip buildMeta entirely (default-only CJS or modules
  *    without export metadata; no named imports expected).
+ * 
+ * NOTE: This can be removed once we delete the legacy optimizer and promote this one to be the optimizer.
  */
 export const DLL_MANIFEST = (() => {
   const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
