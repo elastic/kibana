@@ -122,11 +122,11 @@ ${enrichmentSection}
       'availableInEntityStore',
       'CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false")'
     )},
-    CASE(entity.name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+    CASE(_target_name IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
       ${concatJsonObjectPropertyEsqlExprAsString('name', '_target_name')}), ""),
-    CASE(entity.type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+    CASE(_target_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
       ${concatJsonObjectPropertyEsqlExprAsString('type', '_target_type')}), ""),
-    CASE(entity.sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
+    CASE(_target_sub_type IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
       ${concatJsonObjectPropertyEsqlExprAsString('sub_type', '_target_sub_type')}), ""),
     CASE(
       _target_host_ip IS NOT NULL,
