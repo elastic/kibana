@@ -26,6 +26,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/react-query",
     "@kbn/data-plugin",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/alerting-v2-constants"
   ]
 }

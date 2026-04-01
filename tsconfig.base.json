@@ -84,6 +84,8 @@
       "@kbn/alerting-state-types/*": ["x-pack/platform/packages/private/kbn-alerting-state-types/*"],
       "@kbn/alerting-types": ["src/platform/packages/shared/kbn-alerting-types"],
       "@kbn/alerting-types/*": ["src/platform/packages/shared/kbn-alerting-types/*"],
+      "@kbn/alerting-v2-constants": ["x-pack/platform/packages/shared/response-ops/alerting-v2-constants"],
+      "@kbn/alerting-v2-constants/*": ["x-pack/platform/packages/shared/response-ops/alerting-v2-constants/*"],
       "@kbn/alerting-v2-episodes-ui": ["x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui"],
       "@kbn/alerting-v2-episodes-ui/*": ["x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui/*"],
       "@kbn/alerting-v2-plugin": ["x-pack/platform/plugins/shared/alerting_v2"],
@@ -1176,6 +1178,8 @@
       "@kbn/evals-suite-observability-ai/*": ["x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/*"],
       "@kbn/evals-suite-security-ai-rules": ["x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules"],
       "@kbn/evals-suite-security-ai-rules/*": ["x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/*"],
+      "@kbn/evals-suite-significant-events": ["x-pack/platform/packages/shared/kbn-evals-suite-significant-events"],
+      "@kbn/evals-suite-significant-events/*": ["x-pack/platform/packages/shared/kbn-evals-suite-significant-events/*"],
       "@kbn/evals-suite-streams": ["x-pack/platform/packages/shared/kbn-evals-suite-streams"],
       "@kbn/evals-suite-streams/*": ["x-pack/platform/packages/shared/kbn-evals-suite-streams/*"],
       "@kbn/event-annotation-common": ["src/platform/packages/shared/kbn-event-annotation-common"],
@@ -2404,6 +2408,8 @@
       "@kbn/telemetry-tools/*": ["src/platform/packages/private/kbn-telemetry-tools/*"],
       "@kbn/test": ["src/platform/packages/shared/kbn-test"],
       "@kbn/test/*": ["src/platform/packages/shared/kbn-test/*"],
+      "@kbn/test-docker-servers": ["src/platform/packages/shared/kbn-test-docker-servers"],
+      "@kbn/test-docker-servers/*": ["src/platform/packages/shared/kbn-test-docker-servers/*"],
       "@kbn/test-es-server": ["src/platform/packages/shared/kbn-test-es-server"],
       "@kbn/test-es-server/*": ["src/platform/packages/shared/kbn-test-es-server/*"],
       "@kbn/test-eui-helpers": ["src/platform/packages/private/kbn-test-eui-helpers"],
@@ -2654,15 +2660,20 @@
       ],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
       "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
-      "zod": ["typings/zod/v3"],
-      "zod/v4": ["typings/zod/v4"],
       "vega-lite": ["typings/vega/vega_lite"],
       "vega-tooltip": ["typings/vega/vega_tooltip"],
+      "zod": ["node_modules/zod/v4/index.d.ts"],
+      "zod/v4": ["node_modules/zod/v4/index.d.ts"],
+      "zod/v4/core": ["node_modules/zod/v4/core/index.d.ts"],
       "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"],
       "@langchain/classic/chains": ["node_modules/@langchain/classic/dist/chains"],
       "@langchain/classic/evaluation": ["node_modules/@langchain/classic/dist/evaluation"],
-      "@langchain/classic/document_loaders/fs/directory": ["node_modules/@langchain/classic/dist/document_loaders/fs/directory"],
-      "@langchain/classic/document_loaders/fs/text": ["node_modules/@langchain/classic/dist/document_loaders/fs/text"]
+      "@langchain/classic/document_loaders/fs/directory": [
+        "node_modules/@langchain/classic/dist/document_loaders/fs/directory"
+      ],
+      "@langchain/classic/document_loaders/fs/text": [
+        "node_modules/@langchain/classic/dist/document_loaders/fs/text"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
