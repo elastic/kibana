@@ -12,11 +12,14 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentVisibilityBadge } from '../list/agent_visibility_badge';
@@ -35,83 +38,107 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   docsUrl,
   canEditAgent,
   onEditDetails,
-}) => (
-  <>
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <AgentAvatar agent={agent} size="xl" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiTitle size="l">
-            <h1>{agent.name}</h1>
-          </EuiTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-            {agent.created_by?.username && (
-              <EuiText size="s" color="subdued">
-                {overviewLabels.byAuthor(agent.created_by.username)}
-              </EuiText>
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  const textSubduedStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+  `;
+
+  return (
+    <>
+      <EuiFlexGroup gutterSize="m" responsive={false}>
+        <EuiFlexGroup responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AgentAvatar agent={agent} size="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiTitle size="l">
+                <h1>{agent.name}</h1>
+              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false} wrap>
+                {agent.created_by?.username && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      {overviewLabels.byAuthor(agent.created_by.username)}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="s">
+                        {overviewLabels.agentId(agent.id)}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} css={textSubduedStyles}>
+                      <EuiCopy textToCopy={agent.id}>
+                        {(copy) => (
+                          <EuiButtonIcon
+                            iconType="copy"
+                            onClick={copy}
+                            size="xs"
+                            aria-label={overviewLabels.copyIdAriaLabel}
+                            data-test-subj="agentOverviewCopyId"
+                            css={textSubduedStyles}
+                          />
+                        )}
+                      </EuiCopy>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <AgentVisibilityBadge agent={agent} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {docsUrl && (
+              <EuiButtonEmpty
+                href={docsUrl}
+                target="_blank"
+                iconType="documents"
+                size="s"
+                data-test-subj="agentOverviewDocsLink"
+              >
+                {overviewLabels.docsLink}
+              </EuiButtonEmpty>
             )}
-            <EuiCopy textToCopy={agent.id}>
-              {(copy) => (
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="copy"
-                  onClick={copy}
-                  flush="left"
-                  data-test-subj="agentOverviewCopyId"
-                >
-                  {overviewLabels.agentId(agent.id)}
-                </EuiButtonEmpty>
-              )}
-            </EuiCopy>
-            <AgentVisibilityBadge agent={agent} />
+            {canEditAgent && (
+              <EuiButtonEmpty
+                iconType="pencil"
+                size="s"
+                onClick={onEditDetails}
+                data-test-subj="agentOverviewEditDetailsButton"
+              >
+                {overviewLabels.editDetailsButton}
+              </EuiButtonEmpty>
+            )}
           </EuiFlexGroup>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          {docsUrl && (
-            <EuiButtonEmpty
-              href={docsUrl}
-              target="_blank"
-              iconType="documents"
-              size="s"
-              data-test-subj="agentOverviewDocsLink"
-            >
-              {overviewLabels.docsLink}
-            </EuiButtonEmpty>
-          )}
-          {canEditAgent && (
-            <EuiButtonEmpty
-              iconType="pencil"
-              size="s"
-              onClick={onEditDetails}
-              data-test-subj="agentOverviewEditDetailsButton"
-            >
-              {overviewLabels.editDetailsButton}
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-    <EuiSpacer size="s" />
-    <EuiText size="s" color="subdued">
-      {agent.description}
-    </EuiText>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        {agent.description}
+      </EuiText>
 
-    {agent.labels && agent.labels.length > 0 && (
-      <>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-          {agent.labels.map((label) => (
-            <EuiBadge key={label} color="hollow">
-              {label}
-            </EuiBadge>
-          ))}
-        </EuiFlexGroup>
-      </>
-    )}
-  </>
-);
+      {agent.labels && agent.labels.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+            {agent.labels.map((label) => (
+              <EuiBadge key={label} color="hollow">
+                {label}
+              </EuiBadge>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
+  );
+};
