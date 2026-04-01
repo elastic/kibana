@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
@@ -107,6 +107,22 @@ describe('buildOptimisticAttachments', () => {
     const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
 
     expect(result.fallbackAttachments).toHaveLength(1);
+    expect(result.attachmentRefs).toHaveLength(1);
+  });
+
+  it('creates fallback for origin-only attachment (by-reference)', () => {
+    const attachments: AttachmentInput[] = [{ type: 'visualization', origin: 'dashboard-so-id' }];
+
+    const result = buildOptimisticAttachments({ attachments, conversationAttachments: [] });
+
+    expect(result.fallbackAttachments).toEqual([
+      {
+        id: 'pending-attachment-0',
+        type: 'visualization',
+        data: {},
+        origin: 'dashboard-so-id',
+      },
+    ]);
     expect(result.attachmentRefs).toHaveLength(1);
   });
 });
