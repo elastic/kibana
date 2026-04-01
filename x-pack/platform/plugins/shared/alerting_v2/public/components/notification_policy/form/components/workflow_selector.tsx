@@ -61,6 +61,7 @@ export const WorkflowSelector = () => {
           label={i18n.translate('xpack.alertingV2.notificationPolicy.form.destination', {
             defaultMessage: 'Destinations',
           })}
+          fullWidth
           isInvalid={!!error}
           error={error?.message}
         >
