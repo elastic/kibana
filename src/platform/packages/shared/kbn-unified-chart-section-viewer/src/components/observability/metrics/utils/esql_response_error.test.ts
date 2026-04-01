@@ -48,6 +48,7 @@ describe('extractEsqlEmbeddedError', () => {
         type: 'remote_transport_exception',
         reason: 'ccs query failed',
       },
+      status: undefined,
     });
   });
 
@@ -75,26 +76,26 @@ describe('extractEsqlEmbeddedError', () => {
     });
   });
 
-  it('omits status when absent or not a finite number', () => {
+  it('leaves status undefined when absent or not a finite number', () => {
     expect(
       extractEsqlEmbeddedError({
         error: { type: 'x', reason: 'y' },
       })
-    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+    ).toEqual({ cause: { type: 'x', reason: 'y' }, status: undefined });
 
     expect(
       extractEsqlEmbeddedError({
         error: { type: 'x', reason: 'y' },
         status: '400',
       } as object)
-    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+    ).toEqual({ cause: { type: 'x', reason: 'y' }, status: undefined });
 
     expect(
       extractEsqlEmbeddedError({
         error: { type: 'x', reason: 'y' },
         status: Number.NaN,
       })
-    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+    ).toEqual({ cause: { type: 'x', reason: 'y' }, status: undefined });
   });
 });
 

@@ -45,10 +45,7 @@ export const extractEsqlEmbeddedError = (response: object): EsqlEmbeddedError | 
   const status =
     typeof body.status === 'number' && Number.isFinite(body.status) ? body.status : undefined;
 
-  return {
-    cause: response.error as EsqlResponseErrorCause,
-    ...(status !== undefined ? { status } : {}),
-  };
+  return { cause: response.error as EsqlResponseErrorCause, status };
 };
 
 export class EsqlResponseError extends Error {
