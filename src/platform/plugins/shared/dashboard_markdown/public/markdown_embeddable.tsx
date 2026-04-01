@@ -267,6 +267,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                     title: titleManager.api.title$.getValue() ?? initialLibraryState.title,
                     description:
                       titleManager.api.description$.getValue() ?? initialLibraryState.description,
+                    settings: settings$.getValue(),
                   });
                 }
                 if (isNewPanel$.getValue()) {
