@@ -14,7 +14,7 @@ import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { OAuthStateClient } from '../lib/oauth_state_client';
-import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
+import { OAuthAuthorizationService, type OAuthConfig } from '../lib/oauth_authorization_service';
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import type { ActionsConfigurationUtilities } from '../actions_config';
@@ -26,6 +26,23 @@ const paramsSchema = schema.object({
 const bodySchema = schema.object({
   returnUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
 });
+
+const validateOAuthUrlsAreAllowed = (
+  oauthConfig: OAuthConfig,
+  actionsConfigUtils: ActionsConfigurationUtilities
+): { earsAuthorizationUrl?: string } => {
+  if (oauthConfig.authTypeId === 'oauth_authorization_code') {
+    actionsConfigUtils.ensureUriAllowed(oauthConfig.authorizationUrl);
+    actionsConfigUtils.ensureUriAllowed(oauthConfig.tokenUrl);
+    return {};
+  }
+
+  const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
+  const earsAuthorizationUrl = resolveEarsUrl(authorizeEndpoint, actionsConfigUtils.getEarsUrl());
+  actionsConfigUtils.ensureUriAllowed(earsAuthorizationUrl);
+
+  return { earsAuthorizationUrl };
+};
 
 /**
  * Initiates OAuth2 Authorization Code flow
@@ -118,23 +135,12 @@ export const oauthAuthorizeRoute = (
           }
           const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
 
-          const urlsToValidate: string[] = [];
           let earsAuthorizationUrl: string | undefined;
-          if (oauthConfig.authTypeId === 'ears') {
-            const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
-            earsAuthorizationUrl = resolveEarsUrl(
-              authorizeEndpoint,
-              actionsConfigUtils.getEarsUrl()
-            );
-            urlsToValidate.push(earsAuthorizationUrl);
-          } else {
-            urlsToValidate.push(oauthConfig.authorizationUrl, oauthConfig.tokenUrl);
-          }
-
           try {
-            for (const url of urlsToValidate) {
-              actionsConfigUtils.ensureUriAllowed(url);
-            }
+            ({ earsAuthorizationUrl } = validateOAuthUrlsAreAllowed(
+              oauthConfig,
+              actionsConfigUtils
+            ));
           } catch (allowedHostsErr) {
             const message =
               allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
