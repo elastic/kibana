@@ -139,6 +139,10 @@ const createContextValue = ({
     cascadeGroupingChangeHandler: jest.fn(),
     onUpdateESQLQuery: jest.fn(),
     openInNewTab: jest.fn(),
+    getDataCascadeUiState: jest.fn(),
+    getDataGridUiStateMap: jest.fn(),
+    setDataCascadeUiState: jest.fn(),
+    setDataGridUiState: jest.fn(),
   };
 
   return {

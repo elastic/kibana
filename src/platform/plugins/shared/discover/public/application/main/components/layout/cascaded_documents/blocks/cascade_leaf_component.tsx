@@ -167,7 +167,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     virtualizerController,
     rowIndex,
     onUpdateDataGridDensity,
-    renderDocumentView,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {

@@ -22,6 +22,7 @@ import type { ESQLDataGroupNode } from './blocks/types';
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { BehaviorSubject } from 'rxjs';
 
 /** Captured DataCascade props we assert on in tests. */
 const mockDataCascadeProps: Array<
@@ -123,6 +124,10 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     esqlVariables: undefined,
     timeRange: undefined,
     viewModeToggle: undefined,
+    expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
+    expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
+    getExpandedDocSetter: jest.fn(),
+    getRenderDocumentViewMetaSetter: jest.fn(),
     getDataCascadeUiState: jest.fn(),
     getDataGridUiStateMap: jest.fn().mockReturnValue(undefined),
     setDataCascadeUiState: jest.fn(),
