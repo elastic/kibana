@@ -19,6 +19,10 @@ import type {
   AlertsGroupingTelemetryEventsMap,
 } from './events/alerts_grouping/types';
 import type {
+  AttackDiscoveryEventTypes,
+  AttackDiscoveryTelemetryEventsMap,
+} from './events/attack_discovery/types';
+import type {
   DataQualityEventTypes,
   DataQualityTelemetryEventsMap,
 } from './events/data_quality/types';
@@ -92,6 +96,7 @@ import type {
 
 export * from './events/rule_creation/types';
 export * from './events/app/types';
+export * from './events/attack_discovery/types';
 export * from './events/attacks/types';
 export * from './events/attack_discovery_schedules/types';
 export * from './events/alerts_grouping/types';
@@ -111,7 +116,9 @@ export interface TelemetryServiceSetupParams {
 }
 
 // Combine all event type data
-export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends RuleCreationEventTypes
+export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AttackDiscoveryEventTypes
+  ? AttackDiscoveryTelemetryEventsMap[T]
+  : T extends RuleCreationEventTypes
   ? RuleCreationTelemetryEventsMap[T]
   : T extends AlertsEventTypes
   ? AlertsGroupingTelemetryEventsMap[T]
@@ -160,6 +167,7 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Ru
   : never;
 
 export type TelemetryEventTypes =
+  | AttackDiscoveryEventTypes
   | RuleCreationEventTypes
   | AlertsEventTypes
   | PreviewRuleEventTypes
