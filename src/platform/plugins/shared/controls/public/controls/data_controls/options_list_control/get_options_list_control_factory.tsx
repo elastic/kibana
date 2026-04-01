@@ -232,7 +232,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListDSLControlState {
+      function serializeState(): OptionsListControlState {
         return {
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
@@ -243,7 +243,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
         uuid,
         parentApi,
         serializeState,

@@ -41,6 +41,7 @@ const createControlApi = (
   uuid,
   type,
   serializeState: () => state,
+  applySerializedState: () => undefined,
 });
 
 describe('getEsqlControls', () => {

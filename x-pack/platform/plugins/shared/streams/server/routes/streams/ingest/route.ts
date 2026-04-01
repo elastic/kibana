@@ -21,6 +21,7 @@ import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import type { Query } from '../../../../common/queries';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import { getWiredIngestResponse, upsertWiredIngestRequest } from '../../../oas_examples';
 
 async function getAssets({
   name,
@@ -151,6 +152,19 @@ const readIngestRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          content: {
+            'application/json': {
+              examples: {
+                getWiredIngest: { value: getWiredIngestResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -191,6 +205,17 @@ const upsertIngestRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertWiredIngest: { value: upsertWiredIngestRequest },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
