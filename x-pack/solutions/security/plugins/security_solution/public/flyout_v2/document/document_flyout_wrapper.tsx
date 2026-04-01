@@ -83,7 +83,6 @@ const renderRequestState = ({
 
   return renderErrorCallout(SOMETHING_WENT_WRONG, 'document-overview-something-went-wrong');
 };
-
 export interface DocumentFlyoutWrapperProps {
   /**
    * The ID of the document to display. This is required to fetch the document details.
