@@ -14,7 +14,7 @@ import type {
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
 import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
-import { transformDashboardOut } from '@kbn/dashboard-plugin/server/api/transforms';
+import { toDashboardState } from '../utils/to_dashboard_state';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
 
@@ -79,13 +79,6 @@ const toDashboardSearchContent = (
   return contentParts.filter(Boolean).join('\n');
 };
 
-const toDashboardState = (
-  attributes: DashboardSavedObjectAttributes,
-  references: SavedObjectReference[] | undefined
-): DashboardState => {
-  return transformDashboardOut(attributes, references).dashboardState as DashboardState;
-};
-
 export const dashboardSmlType: SmlTypeDefinition = {
   id: DASHBOARD_SML_TYPE,
   fetchFrequency: () => '30m',
@@ -117,7 +110,7 @@ export const dashboardSmlType: SmlTypeDefinition = {
         'dashboard',
         originId
       );
-      const state = toDashboardState(savedObject.attributes, savedObject.references);
+      const state = toDashboardState(savedObject);
 
       return {
         chunks: [
@@ -151,7 +144,7 @@ export const dashboardSmlType: SmlTypeDefinition = {
       return undefined;
     }
 
-    const state = toDashboardState(resolvedDashboard.attributes, resolvedDashboard.references);
+    const state = toDashboardState(resolvedDashboard);
 
     return {
       type: DASHBOARD_ATTACHMENT_TYPE,

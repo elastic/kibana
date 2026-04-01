@@ -222,4 +222,30 @@ describe('unsavedChangesManager', () => {
       projectRoutingChanges$.next({ project_routing: 'ALL' });
     });
   });
+
+  describe('save events', () => {
+    it('publishes the latest successful save event', (done) => {
+      const unsavedChangesManager = initializeUnsavedChangesManager({
+        viewMode$,
+        lastSavedState: getSampleDashboardState(),
+        layoutManager: layoutManagerMock,
+        savedObjectId$,
+        settingsManager: settingsManagerMock,
+        unifiedSearchManager: unifiedSearchManagerMock,
+        projectRoutingManager: projectRoutingManagerMock,
+        setState: setStateMock,
+      });
+      const saveEvent = {
+        previousSavedObjectId: 'dashboard-a',
+        savedObjectId: 'dashboard-b',
+      };
+
+      unsavedChangesManager.api.onSave$.subscribe((event) => {
+        expect(event).toEqual(saveEvent);
+        done();
+      });
+
+      unsavedChangesManager.internalApi.onSave(getSampleDashboardState(), saveEvent);
+    });
+  });
 });

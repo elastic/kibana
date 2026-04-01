@@ -5,21 +5,60 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentTypeDefinition,
+  AttachmentResolveContext,
+} from '@kbn/agent-builder-server/attachments';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import deepEqual from 'fast-deep-equal';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardAttachmentDataSchema,
+  dashboardStateToAttachment,
   isSection,
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import { toDashboardState } from '../utils/to_dashboard_state';
+
+interface CreateDashboardAttachmentTypeOptions {
+  logger: Logger;
+}
 
 /**
  * Creates the definition for the `dashboard` attachment type.
  */
-export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
+export const createDashboardAttachmentType = ({
+  logger,
+}: CreateDashboardAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
 > => {
+  const fetchDashboard = async (
+    origin: string,
+    context: AttachmentResolveContext
+  ): Promise<SavedObjectsResolveResponse<DashboardSavedObjectAttributes> | undefined> => {
+    const { savedObjectsClient } = context;
+
+    if (!savedObjectsClient) {
+      logger.debug(`Cannot fetch dashboard "${origin}": missing savedObjectsClient`);
+      return undefined;
+    }
+
+    const dashboard = await savedObjectsClient.resolve<DashboardSavedObjectAttributes>(
+      'dashboard',
+      origin
+    );
+
+    if (dashboard.saved_object.error) {
+      return undefined;
+    }
+
+    return dashboard;
+  };
+
   return {
     id: DASHBOARD_ATTACHMENT_TYPE,
     validate: (input) => {
@@ -28,6 +67,58 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
         return { valid: true, data: parseResult.data };
       } else {
         return { valid: false, error: parseResult.error.message };
+      }
+    },
+    resolve: async (
+      origin: string,
+      context: AttachmentResolveContext
+    ): Promise<DashboardAttachmentData | undefined> => {
+      try {
+        const dashboard = await fetchDashboard(origin, context);
+        if (!dashboard) {
+          return undefined;
+        }
+
+        return dashboardStateToAttachment(toDashboardState(dashboard.saved_object));
+      } catch (error) {
+        logger.warn(`Failed to resolve dashboard attachment for origin "${origin}": ${error}`);
+        return undefined;
+      }
+    },
+    isStale: async (
+      attachment: VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData>,
+      context: AttachmentResolveContext
+    ): Promise<boolean> => {
+      if (!attachment.origin || !attachment.origin_snapshot_at) {
+        return false;
+      }
+      try {
+        const dashboard = await fetchDashboard(attachment.origin, context);
+        const dashboardUpdatedAt = dashboard?.saved_object.updated_at;
+        if (!dashboard || !dashboardUpdatedAt) {
+          return false;
+        }
+
+        if (Date.parse(dashboardUpdatedAt) > Date.parse(attachment.origin_snapshot_at)) {
+          const latestVersion = getLatestVersion(attachment);
+          if (!latestVersion) {
+            logger.warn(
+              `Attachment "${attachment.id}" has no version matching current_version ${attachment.current_version}`
+            );
+            return false;
+          }
+          // if the content is equal, we don't consider it stale
+          return !deepEqual(
+            dashboardStateToAttachment(toDashboardState(dashboard.saved_object)),
+            latestVersion.data
+          );
+        }
+        return false;
+      } catch (error) {
+        logger.warn(
+          `Failed to check staleness for dashboard attachment "${attachment.origin}": ${error}`
+        );
+        return false;
       }
     },
     format: (attachment) => {

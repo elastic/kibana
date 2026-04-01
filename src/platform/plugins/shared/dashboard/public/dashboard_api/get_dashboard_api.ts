@@ -204,6 +204,7 @@ export function getDashboardApi({
     setState,
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
+      const previousSavedObjectId = savedObjectId$.value;
 
       const {
         description,
@@ -233,24 +234,26 @@ export function getDashboardApi({
         return;
       }
 
-      if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
-        const settings = settingsManager.api.getSettings();
-        settingsManager.api.setSettings({
-          ...settings,
-          hide_panel_titles: settings.hide_panel_titles ?? false,
-          description: saveResult.savedState.description,
-          tags: saveResult.savedState.tags,
-          title: saveResult.savedState.title,
-        });
-        savedObjectId$.next(saveResult.id);
-      }
+      const settings = settingsManager.api.getSettings();
+      settingsManager.api.setSettings({
+        ...settings,
+        hide_panel_titles: settings.hide_panel_titles ?? false,
+        description: saveResult.savedState.description,
+        tags: saveResult.savedState.tags,
+        title: saveResult.savedState.title,
+      });
+      savedObjectId$.next(saveResult.id);
+      unsavedChangesManager.internalApi.onSave(saveResult.savedState, {
+        previousSavedObjectId,
+        savedObjectId: saveResult.id,
+      });
 
       return saveResult;
     },
     runQuickSave: async () => {
       if (isManaged) return;
       const dashboardState = getState();
+      const previousSavedObjectId = savedObjectId$.value;
       const saveResult = await saveDashboard({
         dashboardState,
         saveOptions: {},
@@ -259,7 +262,10 @@ export function getDashboardApi({
       });
 
       if (saveResult?.error) return;
-      unsavedChangesManager.internalApi.onSave(dashboardState);
+      unsavedChangesManager.internalApi.onSave(dashboardState, {
+        previousSavedObjectId,
+        savedObjectId: saveResult?.id ?? previousSavedObjectId,
+      });
 
       return;
     },

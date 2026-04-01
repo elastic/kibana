@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { DashboardAgentPlugin } from './plugin';
 import { dashboardManagementSkill } from './skills/dashboard_management_skill';
 import { dashboardSmlType } from './sml_types';
@@ -15,7 +16,7 @@ describe('DashboardAgentPlugin', () => {
     const registerSkill = jest.fn();
     const registerSmlType = jest.fn();
 
-    const plugin = new DashboardAgentPlugin();
+    const plugin = new DashboardAgentPlugin(coreMock.createPluginInitializerContext());
 
     plugin.setup(
       {} as never,

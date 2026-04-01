@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
@@ -25,11 +31,21 @@ export class DashboardAgentPlugin
       DashboardAgentStartDependencies
     >
 {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
   setup(
     _coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
-    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
+    setupDeps.agentBuilder.attachments.registerType(
+      createDashboardAttachmentType({
+        logger: this.logger,
+      }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
+    );
     setupDeps.agentBuilder.sml.registerType(dashboardSmlType);
     registerSkills(setupDeps.agentBuilder);
     return {};
