@@ -9,8 +9,14 @@ import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-hel
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../../resources/alert_events';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../../resources/datastreams/alert_actions';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  type AlertEvent,
+} from '../../../resources/datastreams/alert_events';
 import type {
   RuleSavedObjectAttributes,
   NotificationPolicySavedObjectAttributes,
