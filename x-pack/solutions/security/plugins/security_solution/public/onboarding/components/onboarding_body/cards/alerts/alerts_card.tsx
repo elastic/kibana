@@ -98,7 +98,7 @@ export const AlertsCard: OnboardingCardComponent = ({
                     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                       <EuiFlexItem>{i18n.ALERTS_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="arrowRight" color="primary" size="s" />
+                        <EuiIcon type="chevronSingleRight" color="primary" size="s" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiLink>

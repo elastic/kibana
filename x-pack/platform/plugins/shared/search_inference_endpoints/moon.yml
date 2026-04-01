@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

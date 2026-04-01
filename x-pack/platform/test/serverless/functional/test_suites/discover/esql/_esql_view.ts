@@ -379,7 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await testSubjects.click('querySubmitButton');
             await PageObjects.discover.waitUntilTabIsLoaded();
           }
-          await inspector.open();
+          await PageObjects.discover.openInspectorFromTabMenu();
           retries = retries + 1;
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
