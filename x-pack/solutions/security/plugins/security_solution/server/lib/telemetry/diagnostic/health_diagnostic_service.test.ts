@@ -279,7 +279,7 @@ enabled: true`,
           status: 'failed',
           failure: { message: 'Unhandled QueryType: UNKNOWN' },
         });
-        expect(mockLogger.error).toHaveBeenCalledWith('Error running query', expect.any(Object));
+        expect(mockLogger.warn).toHaveBeenCalledWith('Error running query', expect.any(Object));
       });
 
       test('should handle query execution errors', async () => {
@@ -302,7 +302,7 @@ enabled: true`,
             reason: undefined,
           },
         });
-        expect(mockLogger.error).toHaveBeenCalledWith(
+        expect(mockLogger.warn).toHaveBeenCalledWith(
           'Error running query',
           expect.objectContaining({ error })
         );
@@ -334,7 +334,7 @@ enabled: true`,
         });
       });
 
-      test('should log info (not error) for PermissionError', async () => {
+      test('should log debug (not warn) for PermissionError', async () => {
         await startService();
 
         const lastExecutionByQuery = { 'test-query': 1640995200000 };
@@ -352,11 +352,11 @@ enabled: true`,
             reason: undefined,
           },
         });
-        expect(mockLogger.info).toHaveBeenCalledWith(
+        expect(mockLogger.debug).toHaveBeenCalledWith(
           'Permission error running query.',
           expect.objectContaining({ error: permissionError })
         );
-        expect(mockLogger.error).not.toHaveBeenCalled();
+        expect(mockLogger.warn).not.toHaveBeenCalled();
       });
 
       test('should handle artifact service errors gracefully', async () => {
