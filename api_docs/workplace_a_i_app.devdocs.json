@@ -337,28 +337,11 @@
         "label": "ExchangeCodeResponse",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ access_token: string; refresh_token?: string | undefined; }"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
         "lineNumber": 41,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workplaceAIApp",
-        "id": "def-common.exchangeCodeResponseSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "exchangeCodeResponseSchema",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 36,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -399,28 +382,11 @@
         "label": "RefreshTokenResponse",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ access_token: string; }"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
         "lineNumber": 52,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workplaceAIApp",
-        "id": "def-common.refreshTokenResponseSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "refreshTokenResponseSchema",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
-        "lineNumber": 48,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -433,7 +399,7 @@
         "label": "RevokeTokenResponse",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ [x: string]: never; }"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
         "lineNumber": 61,
@@ -507,6 +473,54 @@
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
         "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.exchangeCodeResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "exchangeCodeResponseSchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ access_token: ",
+          "ZodString",
+          "; refresh_token: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.refreshTokenResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "refreshTokenResponseSchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ access_token: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
