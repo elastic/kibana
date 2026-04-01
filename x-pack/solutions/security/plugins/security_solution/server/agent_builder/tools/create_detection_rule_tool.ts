@@ -144,11 +144,12 @@ The tool stores the result as an attachment (creating new or updating existing).
           version = created.current_version;
           logger.debug(`Created rule attachment ${resultAttachmentId} v${version}`);
         } catch (attachmentError) {
-          logger.warn(
+          logger.error(
             `Could not persist rule attachment: ${
               attachmentError instanceof Error ? attachmentError.message : String(attachmentError)
             }`
           );
+          throw Error('Could not persist rule attachment');
         }
 
         return {
