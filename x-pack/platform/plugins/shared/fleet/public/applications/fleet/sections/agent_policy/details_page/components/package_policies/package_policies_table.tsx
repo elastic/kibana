@@ -429,7 +429,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     key="addPackagePolicyButton"
                     fill
                     isDisabled={!canWriteIntegrationPolicies}
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={() => {
                       setShowAddIntegrationFlyout(true);
                     }}

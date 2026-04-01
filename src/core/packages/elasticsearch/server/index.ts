@@ -14,7 +14,6 @@ export type {
   IClusterClient,
   ICustomClusterClient,
   AsScopedOptions,
-  SpaceNPRERouting,
   ScopeableRequest,
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandler,

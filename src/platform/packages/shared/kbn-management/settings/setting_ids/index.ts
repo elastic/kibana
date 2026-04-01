@@ -9,6 +9,7 @@
 
 // General settings
 export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
+export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticConsole:enabled';
 export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
@@ -153,6 +154,7 @@ export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streams
 export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEnableAttachments';
 export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
+export const OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE = 'observability:streamsEnableOverviewPage';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
@@ -190,10 +192,6 @@ export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertT
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
-export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
-  'securitySolution:enableVisualizationsInFlyout' as const;
-export const SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING =
-  'securitySolution:enableGraphVisualization' as const;
 export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
 export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =

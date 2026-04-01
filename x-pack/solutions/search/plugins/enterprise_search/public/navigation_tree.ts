@@ -207,7 +207,7 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              icon: 'launch',
+              icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
             },
@@ -277,6 +277,9 @@ export const getNavigationTreeDefinition = ({
                     },
                     {
                       link: 'management:model_settings',
+                    },
+                    {
+                      link: 'management:elastic_inference_service',
                     },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },

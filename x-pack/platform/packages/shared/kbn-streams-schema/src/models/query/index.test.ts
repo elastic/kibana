@@ -12,6 +12,7 @@ describe('QueryStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'query' as const,
         name: 'query-stream',
         description: '',
         updated_at: new Date().toISOString(),
@@ -19,6 +20,31 @@ describe('QueryStream', () => {
           view: 'stream.query-stream',
           esql: 'FROM logs | WHERE service.name == "query-child"',
         },
+      },
+      {
+        type: 'query' as const,
+        name: 'query-stream-with-descriptions',
+        description: '',
+        updated_at: new Date().toISOString(),
+        query: {
+          view: 'stream.query-stream-with-descriptions',
+          esql: 'FROM logs | WHERE service.name == "query-child"',
+        },
+        field_descriptions: {
+          '@timestamp': 'The timestamp of the event',
+          'service.name': 'The name of the service',
+        },
+      },
+      {
+        type: 'query' as const,
+        name: 'query-stream-empty-descriptions',
+        description: '',
+        updated_at: new Date().toISOString(),
+        query: {
+          view: 'stream.query-stream-empty-descriptions',
+          esql: 'FROM logs',
+        },
+        field_descriptions: {},
       },
     ])('is valid', (val) => {
       expect(QueryStream.Definition.is(val)).toBe(true);
@@ -45,6 +71,26 @@ describe('QueryStream', () => {
           view: null,
         },
       },
+      {
+        name: 'query-stream',
+        description: '',
+        updated_at: new Date().toISOString(),
+        query: {
+          view: 'stream.query-stream',
+          esql: 'FROM logs',
+        },
+        field_descriptions: 'invalid-string',
+      },
+      {
+        name: 'query-stream',
+        description: '',
+        updated_at: new Date().toISOString(),
+        query: {
+          view: 'stream.query-stream',
+          esql: 'FROM logs',
+        },
+        field_descriptions: { field1: 123 },
+      },
     ])('is not valid', (val) => {
       expect(() =>
         QueryStream.Definition.asserts(
@@ -58,6 +104,7 @@ describe('QueryStream', () => {
     it.each([
       {
         stream: {
+          type: 'query' as const,
           name: 'query-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -66,6 +113,25 @@ describe('QueryStream', () => {
             esql: 'FROM logs | WHERE service.name == "query-child"',
           },
           query_streams: [],
+        },
+        inherited_fields: {},
+        ...emptyAssets,
+      },
+      {
+        stream: {
+          type: 'query' as const,
+          name: 'query-stream-with-descriptions',
+          description: '',
+          updated_at: new Date().toISOString(),
+          query: {
+            view: 'stream.query-stream-with-descriptions',
+            esql: 'FROM logs | WHERE service.name == "query-child"',
+          },
+          query_streams: [],
+          field_descriptions: {
+            '@timestamp': 'Event timestamp',
+            'host.name': 'Hostname',
+          },
         },
         inherited_fields: {},
         ...emptyAssets,
@@ -118,11 +184,39 @@ describe('QueryStream', () => {
     it.each([
       {
         stream: {
+          type: 'query' as const,
           description: '',
           query: {
             view: 'stream.query-stream',
             esql: 'FROM logs | WHERE service.name == "query-child"',
           },
+        },
+        ...emptyAssets,
+      },
+      {
+        stream: {
+          type: 'query' as const,
+          description: '',
+          query: {
+            view: 'stream.query-stream',
+            esql: 'FROM logs | WHERE service.name == "query-child"',
+          },
+          field_descriptions: {
+            '@timestamp': 'Event timestamp',
+            message: 'Log message',
+          },
+        },
+        ...emptyAssets,
+      },
+      {
+        stream: {
+          type: 'query' as const,
+          description: '',
+          query: {
+            view: 'stream.query-stream',
+            esql: 'FROM logs',
+          },
+          field_descriptions: {},
         },
         ...emptyAssets,
       },

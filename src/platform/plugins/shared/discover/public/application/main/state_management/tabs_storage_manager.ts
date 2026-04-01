@@ -17,10 +17,15 @@ import {
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
-import type { RecentlyClosedTabState, TabState } from './redux/types';
-import { createTabItem, extractEsqlVariables, parseControlGroupJson } from './redux/utils';
-import type { DiscoverAppState } from './redux';
-import { fromSavedObjectTabToTabState } from './redux';
+import {
+  createTabItem,
+  extractEsqlVariables,
+  fromSavedObjectTabToTabState,
+  parseControlGroupJson,
+  type DiscoverAppState,
+  type RecentlyClosedTabState,
+  type TabState,
+} from './redux';
 import type { TabsUrlState } from '../../../../common/types';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';

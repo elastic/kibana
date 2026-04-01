@@ -6,6 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { mapKeys, snakeCase } from 'lodash';
 
 import type { CaseConnector } from '../../../common/types/domain';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
@@ -120,10 +121,10 @@ const processExtendedFields = (
   callUpdate: ProcessFieldUpdateParams['callUpdate']
 ): void => {
   const extendedFieldsValue = getTypedPayload<Record<string, string>>(value);
-  const extendedFields = {
-    ...(caseData.extendedFields ?? {}),
-    ...(extendedFieldsValue ?? {}),
-  };
+  // caseData.extendedFields has camelCase keys (converted from the server response).
+  // Normalize them back to snake_case so the merged object stays in a consistent format.
+  const existingSnakeCase = mapKeys(caseData.extendedFields ?? {}, (_, k) => snakeCase(k));
+  const extendedFields = { ...existingSnakeCase, ...(extendedFieldsValue ?? {}) };
   callUpdate(CASE_EXTENDED_FIELDS, extendedFields);
 };
 

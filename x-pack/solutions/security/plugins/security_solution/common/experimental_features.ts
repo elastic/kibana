@@ -93,9 +93,9 @@ export const allowedExperimentalValues = Object.freeze({
   entityDetailsHighlightsEnabled: true,
 
   /**
-   * Enables the experimental Threat Hunting home experience.
+   * Enables the new Entity Analytics home page experience.
    */
-  entityThreatHuntingEnabled: false,
+  entityAnalyticsNewHomePageEnabled: false,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
@@ -117,9 +117,10 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables the storing of gaps in the event log
+   * Enables gap reason detection and display in the gaps table.
+   * When off, gap_reason is not calculated or passed to rule metrics/telemetry.
    */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -183,10 +184,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   automaticDashboardsMigration: true,
 
-  /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
   /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0

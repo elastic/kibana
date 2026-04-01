@@ -8,10 +8,10 @@ info:
 paths: {}
 components:
   schemas:
-    EngineMetadata: 
+    EngineMetadata:
       type: object
       additionalProperties: false
-      required: 
+      required:
         - Type
       properties:
         Type:
@@ -20,8 +20,6 @@ components:
     EntityField:
       type: object
       additionalProperties: false
-      required:
-        - id
       properties:
         id:
           type: string
@@ -32,7 +30,9 @@ components:
         sub_type:
           type: string
         source:
-          type: string
+          type: array
+          items:
+            type: string
         EngineMetadata:
           $ref: '#/components/schemas/EngineMetadata'
         attributes:
@@ -69,6 +69,9 @@ components:
           additionalProperties: false
           properties:
             first_seen:
+              type: string
+              format: date-time
+            last_seen:
               type: string
               format: date-time
             last_activity:
@@ -167,8 +170,6 @@ components:
     UserEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -208,8 +209,6 @@ components:
             risk:
              $ref: '#/components/schemas/EntityRiskScoreRecord'
              additionalProperties: false
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -220,12 +219,10 @@ components:
             ingested:
               type: string
               format: date-time
-    
+
     HostEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -266,12 +263,37 @@ components:
               type: array
               items:
                 type: string
+            os:
+              type: object
+              additionalProperties: false
+              description: ECS host.os fields materialized on the entity latest index (v2).
+              properties:
+                name:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                type:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                family:
+                  type: string
+                full:
+                  type: string
+                kernel:
+                  type: string
+                platform:
+                  type: string
+                version:
+                  type: string
             risk:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -282,12 +304,10 @@ components:
             ingested:
               type: string
               format: date-time
-   
+
     ServiceEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -304,8 +324,6 @@ components:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
             entity:
               $ref: '#/components/schemas/EntityField'
-          required:
-            - name
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
@@ -318,16 +336,14 @@ components:
               format: date-time
 
     # The Generic Entity definition maps more than just entity.
-    # however I don't see a reason to duplicate the definition 
-    # of all the fields just for the sake of doing. 
-    # Thus the current mapping maps entity and asset only 
-    # (used in code). If you end up needing the fields mapped 
-    # in the schema just add it.              
+    # however I don't see a reason to duplicate the definition
+    # of all the fields just for the sake of doing.
+    # Thus the current mapping maps entity and asset only
+    # (used in code). If you end up needing the fields mapped
+    # in the schema just add it.
     GenericEntity:
       type: object
       additionalProperties: false
-      required:
-        - entity
       properties:
         "@timestamp":
           type: string
@@ -337,10 +353,10 @@ components:
         asset:
           $ref: '#/components/schemas/Asset'
           additionalProperties: false
-    
+
     # These entities represent the API of Entity Store
     # where entity is a root field, as it's in the final
-    # index for entities. Note that this is different from the 
+    # index for entities. Note that this is different from the
     # source logs mapping where `entity` will be nested under
     # `host`, `user` and `service`
     Entity:
@@ -349,7 +365,7 @@ components:
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
         - $ref: '#/components/schemas/GenericEntity'
-         
+
     # Temporary addition of risk score and asset criticality assets
     AssetCriticalityLevel:
       type: string

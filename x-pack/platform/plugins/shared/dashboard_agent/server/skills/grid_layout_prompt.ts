@@ -28,6 +28,14 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 
 Prefer \`w\` values that divide 48 evenly: **8, 12, 16, 24, 48**.
 
+**Grid Packing Rules:**
+
+- **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
+  placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
+- **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
+  they should generally have the exact same height (\`h\`). If they do not, you must fill the resulting empty vertical
+  space before placing the next full-width panel.
+
 ### Positioning rules
 
 Always set \`x\` and \`y\` so panels tile with **no gaps**:
@@ -39,15 +47,20 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
 6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
 
+### Reflow after removals
+
+- If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
+- If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
+
 ### Section grid rules
 
 - When using \`add_section\`, each section has its own coordinate space.
+- Panels nested under \`add_section.panels\` use that same section-relative coordinate space.
 - Panel coordinates inside a section are section-relative: each section starts at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
 - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.
 - When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`.
 - **Inserting above existing sections:** Top-level panels and sections share the same outer grid coordinates. If a section occupies \`y: 0\`, a new top-level panel at \`y: 0\` will collide and be pushed **below** the section. To place a panel above an existing section, first \`remove_section\` (with \`panelAction: "promote"\` or \`"delete"\`) and re-add it via \`add_section\` at a higher \`y\` to make room, then add the panel at the freed \`y\`.
-- Use \`add_panels_from_attachments.items[].sectionId\` to place new panels inside an existing section.
 
 ### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 

@@ -15,13 +15,13 @@ import {
   EuiText,
   EuiButtonEmpty,
   useCurrentEuiBreakpoint,
-  EuiSkeletonRectangle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
-import { SearchHomepageVersionBadge } from '@kbn/search-shared-ui';
+import { KibanaVersionBadge } from '@kbn/search-shared-ui';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
 import { PLUGIN_NAME } from '../../../common';
@@ -49,7 +49,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem style={{ alignSelf: 'center' }}>
           <EuiPanel color="transparent" paddingSize="none">
-            <SearchGettingStartedSectionHeading title={PLUGIN_NAME} icon="launch" />
+            <SearchGettingStartedSectionHeading title={PLUGIN_NAME} icon="rocket" />
             <EuiSpacer size="s" />
             <EuiTitle size="l">
               <h1>
@@ -72,7 +72,12 @@ export const SearchGettingStartedHeader: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <AddDataButton />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  border-right: ${euiTheme.border.thin};
+                `}
+              >
                 <EuiButtonEmpty
                   aria-label={skipAndGoHomeLabel}
                   data-test-subj="skipAndGoHomeBtn"
@@ -84,13 +89,9 @@ export const SearchGettingStartedHeader: React.FC = () => {
                   {skipAndGoHomeLabel}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiSkeletonRectangle
-                width={euiTheme.size.xxs}
-                height={euiTheme.size.xxl}
-                borderRadius="none"
-              />
+
               <EuiFlexItem grow={false}>
-                <SearchHomepageVersionBadge
+                <KibanaVersionBadge
                   docLink={
                     cloud?.isServerlessEnabled
                       ? docLinks.serverlessReleaseNotes

@@ -276,6 +276,7 @@ export function TransactionsTable({
             onChangeRenderedItems={setRenderedItems}
             tableCaption={title}
             actions={transactionRowActions}
+            tableLayout="auto"
           />
         </OverviewTableContainer>
       </EuiFlexItem>

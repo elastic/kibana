@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -35,6 +36,7 @@ export const invokeAttackDiscoveryGraph = async ({
   end,
   esClient,
   filter,
+  inferenceClient,
   langSmithProject,
   langSmithApiKey,
   latestReplacements,
@@ -52,6 +54,7 @@ export const invokeAttackDiscoveryGraph = async ({
   end?: string;
   esClient: ElasticsearchClient;
   filter?: Record<string, unknown>;
+  inferenceClient?: InferenceClient;
   langSmithProject?: string;
   langSmithApiKey?: string;
   latestReplacements: Replacements;
@@ -67,6 +70,9 @@ export const invokeAttackDiscoveryGraph = async ({
   throwIfInvalidAnonymization(anonymizationFields);
 
   const llmType = getLlmType(apiConfig.actionTypeId);
+  const isInferenceEndpoint =
+    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference) &&
+    inferenceClient != null;
   const model = apiConfig.model;
   const tags = [ATTACK_DISCOVERY_TAG, llmType, model].flatMap((tag) => tag ?? []);
 
@@ -84,6 +90,8 @@ export const invokeAttackDiscoveryGraph = async ({
   const llm = new ActionsClientLlm({
     actionsClient,
     connectorId: apiConfig.connectorId,
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    isInferenceEndpoint,
     llmType,
     logger,
     model,
@@ -100,7 +108,6 @@ export const invokeAttackDiscoveryGraph = async ({
   }
 
   const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
-    actionsClient,
     connectorId: apiConfig.connectorId,
     // if in future oss has different prompt, add it as model here
     model,

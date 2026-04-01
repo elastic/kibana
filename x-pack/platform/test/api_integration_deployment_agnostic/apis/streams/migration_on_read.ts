@@ -137,6 +137,7 @@ const wiredStreamDefinition = {
 };
 
 const expectedStreamsResponse: Streams.ClassicStream.Definition = {
+  type: 'classic',
   name: TEST_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
@@ -157,6 +158,7 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
 };
 
 const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
+  type: 'wired',
   name: WIRED_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),

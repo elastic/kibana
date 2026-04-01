@@ -28,9 +28,10 @@ describe('getTriggerTypeIconType', () => {
 describe('getStepIconType', () => {
   it.each([
     ['globe', 'http'],
-    ['console', 'console'],
+    ['commandLine', 'console'],
     ['database', 'data.set'],
     ['clock', 'wait'],
+    ['user', 'waitForInput'],
     ['branch', 'if'],
     ['tokenBoolean', 'if-branch'],
     ['refresh', 'foreach'],
@@ -49,7 +50,7 @@ describe('getStepIconType', () => {
     ['productStreamsWired', 'exit-case-branch'],
     ['productStreamsWired', 'enter-default-branch'],
     ['productStreamsWired', 'exit-default-branch'],
-    ['email', 'email'],
+    ['mail', 'email'],
     ['logoSlack', 'slack'],
     ['logoSlack', 'slack_api'],
     ['sparkles', 'inference'],

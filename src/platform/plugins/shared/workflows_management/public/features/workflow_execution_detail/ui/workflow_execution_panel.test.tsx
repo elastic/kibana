@@ -185,7 +185,7 @@ describe('WorkflowExecutionPanel', () => {
       expect(screen.getByTestId('cancel-execution-button')).toBeInTheDocument();
     });
 
-    it('should show cancel button for cancelable status (WAITING_FOR_INPUT)', () => {
+    it('should show cancel button for WAITING_FOR_INPUT (it is a cancelable status)', () => {
       renderComponent({
         execution: { ...mockExecution, status: ExecutionStatus.WAITING_FOR_INPUT },
       });

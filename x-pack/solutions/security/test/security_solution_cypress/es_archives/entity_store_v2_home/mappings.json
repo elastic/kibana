@@ -1,0 +1,137 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": ".entities.v2.latest.security_default",
+    "settings": {
+      "index": {
+        "mode": "lookup"
+      }
+    },
+    "mappings": {
+      "_meta": {
+        "version": "2.0.0"
+      },
+      "dynamic_templates": [
+        {
+          "all_strings_to_keywords": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "date_detection": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "asset": {
+          "properties": {
+            "criticality": {
+              "type": "keyword"
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "EngineMetadata": {
+              "properties": {
+                "Type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "id": {
+              "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "relationships": {
+              "properties": {
+                "resolution": {
+                  "properties": {
+                    "resolved_to": {
+                      "type": "keyword"
+                    },
+                    "risk": {
+                      "properties": {
+                        "calculated_score_norm": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "risk": {
+              "properties": {
+                "calculated_score_norm": {
+                  "type": "float"
+                }
+              }
+            },
+            "source": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "ingested": {
+              "type": "date"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "service": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "user": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

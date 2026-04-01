@@ -13,11 +13,15 @@ import type {
   DataViewField,
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
+import type { HttpStart } from '@kbn/core/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   IndexPattern,
   IndexPatternField,
   IndexPatternMap,
   IndexPatternRef,
+  TextBasedPersistedState,
 } from '@kbn/lens-common';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
@@ -155,6 +159,68 @@ function onRestrictionMapping(agg: string): string {
   return agg in renameOperationsMapping ? renameOperationsMapping[agg] : agg;
 }
 
+/**
+ * Ensures ESQL ad-hoc DataView specs have a valid `timeFieldName` if any.
+ *
+ * Persisted specs may be missing time field info. For each text-based layer with
+ * an ES|QL query, this function checks whether the corresponding ad-hoc DataView
+ * spec already has a `timeFieldName`. If it does, the spec is kept as-is. If not,
+ * `getESQLAdHocDataview` is called to detect the time field via the TIMEFIELD_ROUTE.
+ *
+ * After calling this function the DataViewService instance cache is also populated
+ * with the correct DataView, so downstream `dataViews.create(spec)` calls
+ * (in `loadIndexPatterns`, `getUsedDataViews`, etc.) will return the cached instance
+ * with the right time field — even if they receive a stale spec.
+ */
+export async function ensureESQLTimeFieldOnAdHocDataViews({
+  adHocDataViews,
+  textBasedState,
+  dataViewsService,
+  http,
+}: {
+  adHocDataViews: Record<string, DataViewSpec>;
+  textBasedState: TextBasedPersistedState | undefined;
+  dataViewsService: DataViewsContract;
+  http?: HttpStart;
+}): Promise<Record<string, DataViewSpec>> {
+  if (!textBasedState?.layers) {
+    return adHocDataViews;
+  }
+
+  const result = { ...adHocDataViews };
+
+  for (const layer of Object.values(textBasedState.layers)) {
+    if (!layer.query || !isOfAggregateQueryType(layer.query)) {
+      continue;
+    }
+
+    const existingSpec = layer.index ? result[layer.index] : undefined;
+
+    // Skip regeneration when the persisted spec already has a timeFieldName
+    if (existingSpec?.timeFieldName) {
+      continue;
+    }
+
+    const freshDataView = await getESQLAdHocDataview({
+      dataViewsService,
+      query: layer.query.esql,
+      options: {
+        skipFetchFields: true,
+        id: layer.index,
+        createNewInstanceEvenIfCachedOneAvailable: true,
+      },
+      http,
+    });
+    const spec = freshDataView.toSpec(false);
+
+    if (freshDataView.id) {
+      result[freshDataView.id] = spec;
+    }
+  }
+
+  return result;
+}
+
 export async function loadIndexPatterns({
   dataViews,
   patterns,
@@ -199,6 +265,7 @@ export async function loadIndexPatterns({
       }
     }
   }
+
   indexPatterns.push(
     ...(await Promise.all(
       Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))

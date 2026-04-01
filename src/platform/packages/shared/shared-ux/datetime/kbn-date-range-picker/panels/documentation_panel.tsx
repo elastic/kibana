@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import {
   PanelContainer,
@@ -20,9 +20,6 @@ import {
   SubPanelHeading,
 } from '../date_range_picker_panel_ui';
 import { documentationPanelTexts } from '../translations';
-
-// TODO add real URL
-const DETAILED_DOCS_URL = 'https://www.elastic.co/';
 
 const Content = () => (
   <EuiFlexGroup gutterSize="m" direction="column">
@@ -39,11 +36,6 @@ const Content = () => (
       heading={documentationPanelTexts.combinationsHeading}
       markdown={documentationPanelTexts.combinationsBody}
     />
-    <EuiText size="s">
-      <EuiLink href={DETAILED_DOCS_URL} target="_blank" external>
-        {documentationPanelTexts.detailedDocumentationLink}
-      </EuiLink>
-    </EuiText>
   </EuiFlexGroup>
 );
 
@@ -52,7 +44,7 @@ const Content = () => (
  */
 export function DocumentationPanel() {
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerDocumentationPanel">
       <PanelHeader>
         <SubPanelHeading>{documentationPanelTexts.heading}</SubPanelHeading>
       </PanelHeader>

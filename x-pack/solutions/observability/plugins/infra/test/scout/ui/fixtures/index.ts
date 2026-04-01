@@ -12,11 +12,13 @@ import type {
   ObltApiServicesFixture,
 } from '@kbn/scout-oblt';
 import {
+  mergeTests,
   test as base,
   createLazyPageObject,
   globalSetupHook as baseGlobalSetupHook,
-  getSynthtraceClient,
 } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { getSynthtraceClient, synthtraceFixture } from '@kbn/scout-synthtrace';
 import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
@@ -43,7 +45,12 @@ export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
   };
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
+const baseWithSynthtrace = mergeTests(base, synthtraceFixture);
+
+export const test = baseWithSynthtrace.extend<
+  ExtendedScoutTestFixtures,
+  ExtendedScoutWorkerFixtures & SynthtraceFixture
+>({
   pageObjects: async (
     { pageObjects, page, kbnUrl },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
@@ -77,7 +84,9 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
   },
 });
 
-export const globalSetupHook = baseGlobalSetupHook.extend({
+const globalSetupWithSynthtrace = mergeTests(baseGlobalSetupHook, synthtraceFixture);
+
+export const globalSetupHook = globalSetupWithSynthtrace.extend({
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
     const { infraEsClient } = await getSynthtraceClient(
       'infraEsClient',

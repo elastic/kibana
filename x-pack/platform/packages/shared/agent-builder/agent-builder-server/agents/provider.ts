@@ -29,6 +29,7 @@ import type {
   PromptManager,
   ConversationStateManager,
   SkillsService,
+  PluginsService,
   ToolManager,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
@@ -110,6 +111,10 @@ export interface AgentHandlerContext {
    * Skills service to interact with skills.
    */
   skills: SkillsService;
+  /**
+   * Plugins service to resolve plugin-contributed skill IDs during execution.
+   */
+  plugins: PluginsService;
   /**
    * Tool manager to manage active tools for the agent.
    */

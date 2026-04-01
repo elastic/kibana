@@ -16,6 +16,7 @@ import {
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
+  clearEntityStoreIndices,
   seedUserEntity,
   waitForResolution,
   assertNotResolved,
@@ -66,13 +67,14 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
     });
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(
@@ -211,14 +213,22 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
 
       // First batch — email A (uses current timestamp by default)
       await seedUserEntity(esClient, { entityId: entityA1, namespace: 'okta', email: emailA });
-      await seedUserEntity(esClient, { entityId: entityA2, namespace: 'entra_id', email: emailA });
+      await seedUserEntity(esClient, {
+        entityId: entityA2,
+        namespace: 'entra_id',
+        email: emailA,
+      });
 
       await triggerMaintainerRun(apiClient, defaultHeaders);
       await waitForResolution(esClient, entityA2, entityA1);
 
       // Second batch — email B (naturally gets a later timestamp since time has passed)
       await seedUserEntity(esClient, { entityId: entityB1, namespace: 'okta', email: emailB });
-      await seedUserEntity(esClient, { entityId: entityB2, namespace: 'entra_id', email: emailB });
+      await seedUserEntity(esClient, {
+        entityId: entityB2,
+        namespace: 'entra_id',
+        email: emailB,
+      });
 
       await triggerMaintainerRun(apiClient, defaultHeaders);
       await waitForResolution(esClient, entityB2, entityB1);

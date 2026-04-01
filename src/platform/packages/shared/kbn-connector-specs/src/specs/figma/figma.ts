@@ -11,6 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Figma from './types';
+import getFileWorkflow from './workflows/get_file.yaml';
+import listProjectFilesWorkflow from './workflows/list_project_files.yaml';
+import listTeamProjectsWorkflow from './workflows/list_team_projects.yaml';
+import renderNodesWorkflow from './workflows/render_nodes.yaml';
+import whoAmIWorkflow from './workflows/who_am_i.yaml';
 
 const FIGMA_API_BASE = 'https://api.figma.com';
 
@@ -28,7 +33,7 @@ export const FigmaConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -200,6 +205,14 @@ export const FigmaConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [
+    getFileWorkflow,
+    listProjectFilesWorkflow,
+    listTeamProjectsWorkflow,
+    renderNodesWorkflow,
+    whoAmIWorkflow,
+  ],
 };
 
 /** Result of parsing a Figma URL (e.g. team page). Used only by parseFigmaUrlInternal. */

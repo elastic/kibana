@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { runtimeFieldSchema } from './src/schema_runtime_field';
+export type { AsCodeRuntimeField } from './src/types';

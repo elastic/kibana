@@ -17,10 +17,7 @@ import { WatcherMigrationStep } from './enable_alerts_modal';
 export const AlertsDropdown: React.FC<{}> = () => {
   const [shouldShowModal, setShouldShowModal] = useState(false);
   const alertsEnableModalProvider = useAlertsModal();
-  const { navigateToApp, isAppRegistered } =
-    useKibana<MonitoringStartServices>().services.application;
-
-  const unifiedRulesPageEnabled = isAppRegistered('rules');
+  const { navigateToApp } = useKibana<MonitoringStartServices>().services.application;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -47,7 +44,11 @@ export const AlertsDropdown: React.FC<{}> = () => {
   };
 
   const button = (
-    <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={togglePopoverVisibility}>
+    <EuiButtonEmpty
+      iconSide={'right'}
+      iconType={'chevronSingleDown'}
+      onClick={togglePopoverVisibility}
+    >
       <FormattedMessage
         id="xpack.monitoring.alerts.dropdown.button"
         defaultMessage="Alerts and rules"
@@ -67,10 +68,7 @@ export const AlertsDropdown: React.FC<{}> = () => {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
-      onClick: () =>
-        unifiedRulesPageEnabled
-          ? navigateToApp('rules')
-          : navigateToApp('management', { path: '/insightsAndAlerting/triggersActions/rules' }),
+      onClick: () => navigateToApp('rules'),
     },
   ];
 
