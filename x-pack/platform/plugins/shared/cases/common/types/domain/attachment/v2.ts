@@ -24,7 +24,7 @@ import {
 export const UnifiedReferenceAttachmentPayloadRt = rt.intersection([
   rt.strict({
     type: rt.string,
-    attachmentId: rt.string,
+    attachmentId: rt.union([rt.string, rt.array(rt.string)]),
     owner: rt.string,
   }),
   rt.exact(
@@ -90,7 +90,7 @@ const UnifiedReferenceAttachmentPayloadPartialRt = rt.exact(
   rt.partial({
     type: rt.string,
     owner: rt.string,
-    attachmentId: rt.string,
+    attachmentId: rt.union([rt.string, rt.array(rt.string)]),
     data: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
     metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
   })

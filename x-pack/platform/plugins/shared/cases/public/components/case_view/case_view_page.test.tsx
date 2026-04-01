@@ -14,12 +14,21 @@ import { CaseViewPage } from './case_view_page';
 import { caseData, caseViewProps } from './mocks';
 import type { CaseViewPageProps } from './types';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../use_breadcrumbs');
 jest.mock('./use_on_refresh_case_view_page');
 jest.mock('../../common/hooks');
 jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/utils/attachments/migration_utils', () => {
+  const actual = jest.requireActual('../../../common/utils/attachments/migration_utils');
+
+  return {
+    ...actual,
+    toUnifiedAttachmentType: jest.fn(actual.toUnifiedAttachmentType),
+  };
+});
 
 jest.mock('../header_page', () => ({
   HeaderPage: jest.fn(() => <div data-test-subj="test-case-view-header">{'Case view header'}</div>),
@@ -63,6 +72,9 @@ jest.mock('./components/case_view_similar_cases', () => ({
 
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCasesTitleBreadcrumbsMock = useCasesTitleBreadcrumbs as jest.Mock;
+const toUnifiedAttachmentTypeMock = toUnifiedAttachmentType as jest.MockedFunction<
+  typeof toUnifiedAttachmentType
+>;
 
 const caseProps: CaseViewPageProps = {
   ...caseViewProps,
@@ -104,5 +116,13 @@ describe('CaseViewPage', () => {
     await waitFor(() => {
       expect(useCasesTitleBreadcrumbsMock).toHaveBeenCalledWith(caseProps.caseData.title);
     });
+  });
+
+  it('resolves event type using the full case owner', () => {
+    const caseDataWithStringOwner = { ...caseProps.caseData, owner: 'securitySolution' };
+
+    renderWithTestingProviders(<CaseViewPage {...caseProps} caseData={caseDataWithStringOwner} />);
+
+    expect(toUnifiedAttachmentTypeMock).toHaveBeenCalledWith('event', 'securitySolution');
   });
 });

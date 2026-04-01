@@ -9,6 +9,7 @@ import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { toUnifiedAttachmentType } from '../../../../common/utils/attachments';
 import { isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
@@ -24,8 +25,11 @@ import {
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import { buildFilter, combineFilters } from '../../../client/utils';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
+import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../client/utils';
 import type {
   AttachmentMode,
   AttachmentTotals,
@@ -249,22 +253,39 @@ export class AttachmentGetter {
     caseId,
     filter,
     attachmentTypes = [AttachmentType.alert, AttachmentType.event],
+    owner,
   }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
+    const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled;
     try {
       this.context.log.debug(`Attempting to GET all documents for case id ${caseId}`);
-      const documentsFilter = buildFilter({
+      const legacyDocumentsFilter = buildFilter({
         filters: attachmentTypes,
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
       });
 
-      const combinedFilter = combineFilters([documentsFilter, filter]);
+      const unifiedDocumentsFilter = buildFilter({
+        filters: attachmentTypes.map((type) => toUnifiedAttachmentType(type, owner)),
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([
+        combineFilters(
+          [legacyDocumentsFilter, ...(isCasesAttachmentsEnabled ? [unifiedDocumentsFilter] : [])],
+          NodeBuilderOperators.or
+        ),
+        filter,
+      ]);
 
       const finder =
         this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
           {
-            type: CASE_COMMENT_SAVED_OBJECT,
+            type: isCasesAttachmentsEnabled
+              ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
+              : CASE_COMMENT_SAVED_OBJECT,
             hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
             sortField: 'created_at',
             sortOrder: 'asc',
@@ -336,34 +357,67 @@ export class AttachmentGetter {
   /**
    * Retrieves all the events attached to a case.
    */
-  public async getAllEventIds({ caseId }: { caseId: string }): Promise<Set<string>> {
+  public async getAllEventIds({
+    caseId,
+    owner,
+  }: {
+    caseId: string;
+    owner: string;
+  }): Promise<Set<string>> {
+    const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled;
     try {
       this.context.log.debug(`Attempting to GET all event ids for case id ${caseId}`);
-      const eventsFilter = buildFilter({
+      const legacyEventsFilter = buildFilter({
         filters: [AttachmentType.event],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
       });
+      const unifiedEventsFilter = buildFilter({
+        filters: [toUnifiedAttachmentType(AttachmentType.event, owner)],
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      });
+      const eventsFilter = combineFilters(
+        [legacyEventsFilter, ...(isCasesAttachmentsEnabled ? [unifiedEventsFilter] : [])],
+        NodeBuilderOperators.or
+      );
 
       const res = await this.context.unsecuredSavedObjectsClient.find<unknown, EventIdsAggsResult>({
-        type: CASE_COMMENT_SAVED_OBJECT,
+        type: isCasesAttachmentsEnabled
+          ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
+          : CASE_COMMENT_SAVED_OBJECT,
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         sortField: 'created_at',
         sortOrder: 'asc',
         filter: eventsFilter,
         perPage: 0,
         aggs: {
-          eventIds: {
+          legacyEventIds: {
             terms: {
               field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.eventId`,
               size: MAX_ALERTS_PER_CASE,
             },
           },
+          ...(isCasesAttachmentsEnabled
+            ? {
+                unifiedEventIds: {
+                  terms: {
+                    field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                    size: MAX_ALERTS_PER_CASE,
+                  },
+                },
+              }
+            : {}),
         },
       });
 
-      const eventIds = res.aggregations?.eventIds.buckets.map((bucket) => bucket.key) ?? [];
+      const legacyEventIds =
+        res.aggregations?.legacyEventIds.buckets.map((bucket) => bucket.key) ?? [];
+      const unifiedEventIds =
+        res.aggregations?.unifiedEventIds?.buckets.map((bucket) => bucket.key) ?? [];
+      const eventIds = [...legacyEventIds, ...unifiedEventIds];
       return new Set(eventIds);
     } catch (error) {
       this.context.log.error(`Error on GET all event ids for case id ${caseId}: ${error}`);
@@ -483,19 +537,20 @@ export class AttachmentGetter {
       }, new Map<string, AttachmentTotals>()) ?? new Map();
 
     if (this.context.config.attachments?.enabled) {
-      const unifiedCommentsByCase = await this.getUnifiedCommentCountByCaseId(caseIds);
-      for (const [caseId, count] of unifiedCommentsByCase) {
+      const unifiedStatsByCase = await this.getUnifiedAttachmentStatsByCaseId(caseIds);
+      for (const [caseId, unifiedStats] of unifiedStatsByCase) {
         const existing = statsMap.get(caseId);
         if (existing) {
           statsMap.set(caseId, {
             ...existing,
-            userComments: existing.userComments + count,
+            userComments: existing.userComments + unifiedStats.userComments,
+            events: existing.events + unifiedStats.events,
           });
         } else {
           statsMap.set(caseId, {
-            userComments: count,
+            userComments: unifiedStats.userComments,
             alerts: 0,
-            events: 0,
+            events: unifiedStats.events,
           });
         }
       }
@@ -504,46 +559,83 @@ export class AttachmentGetter {
     return statsMap;
   }
 
-  private async getUnifiedCommentCountByCaseId(caseIds: string[]): Promise<Map<string, number>> {
-    interface UnifiedCommentAggs {
+  private async getUnifiedAttachmentStatsByCaseId(
+    caseIds: string[]
+  ): Promise<Map<string, Pick<AttachmentTotals, 'userComments' | 'events'>>> {
+    interface UnifiedAttachmentAggs {
       refs: {
         caseIds: {
-          buckets: Array<{ key: string; doc_count: number }>;
+          buckets: Array<{
+            key: string;
+            reverse: {
+              comments: { doc_count: number };
+              events: { eventIds: { value: number } };
+            };
+          }>;
         };
       };
     }
-    const res = await this.context.unsecuredSavedObjectsClient.find<unknown, UnifiedCommentAggs>({
-      hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
-      hasReferenceOperator: 'OR',
-      type: CASE_ATTACHMENT_SAVED_OBJECT,
-      perPage: 0,
-      filter: buildFilter({
-        filters: [COMMENT_ATTACHMENT_TYPE],
-        field: 'type',
-        operator: 'or',
+    const res = await this.context.unsecuredSavedObjectsClient.find<unknown, UnifiedAttachmentAggs>(
+      {
+        hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
+        hasReferenceOperator: 'OR',
         type: CASE_ATTACHMENT_SAVED_OBJECT,
-      }),
-      aggs: {
-        refs: {
-          nested: {
-            path: `${CASE_ATTACHMENT_SAVED_OBJECT}.references`,
-          },
-          aggregations: {
-            caseIds: {
-              terms: {
-                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
-                size: caseIds.length,
+        perPage: 0,
+        aggs: {
+          refs: {
+            nested: {
+              path: `${CASE_ATTACHMENT_SAVED_OBJECT}.references`,
+            },
+            aggregations: {
+              caseIds: {
+                terms: {
+                  field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
+                  size: caseIds.length,
+                },
+                aggregations: {
+                  reverse: {
+                    reverse_nested: {},
+                    aggregations: {
+                      comments: {
+                        filter: {
+                          term: {
+                            [`${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type`]:
+                              COMMENT_ATTACHMENT_TYPE,
+                          },
+                        },
+                      },
+                      events: {
+                        filter: {
+                          term: {
+                            [`${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type`]:
+                              SECURITY_EVENT_ATTACHMENT_TYPE,
+                          },
+                        },
+                        aggregations: {
+                          eventIds: {
+                            cardinality: {
+                              field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
         },
-      },
-    });
+      }
+    );
 
-    const byCase = new Map<string, number>();
+    const byCase = new Map<string, Pick<AttachmentTotals, 'userComments' | 'events'>>();
     const buckets = res.aggregations?.refs?.caseIds?.buckets ?? [];
     for (const bucket of buckets) {
-      byCase.set(bucket.key, bucket.doc_count);
+      byCase.set(bucket.key, {
+        userComments: bucket.reverse.comments.doc_count,
+        events: bucket.reverse.events.eventIds.value,
+      });
     }
     return byCase;
   }

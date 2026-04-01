@@ -12,12 +12,12 @@ import {
   EventsTableForCases,
   LOADING_EVENTS_TABLE_FOR_CASES_ID,
 } from './table';
-import { TestProviders } from '../../../common/mock';
-import { useCaseEventsDataView } from './use_events_data_view';
+import { TestProviders } from '../../../../common/mock';
+import { useCaseEventsDataView } from '../hooks/use_events_data_view';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { searchEvents } from './search_events';
+import { searchEvents } from '../hooks/search_events';
 /**
  * ## IMPORTANT TODO ##
  * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
@@ -28,8 +28,8 @@ import { searchEvents } from './search_events';
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 
-jest.mock('./use_events_data_view');
-jest.mock('./search_events');
+jest.mock('../hooks/use_events_data_view');
+jest.mock('../hooks/search_events');
 
 describe('EventsTableForCases', () => {
   beforeEach(() => {

@@ -60,7 +60,7 @@ import type {
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
-import { isLegacyAttachmentRequest } from '../../common/utils/attachments';
+import { isLegacyAttachmentRequest, isEventAttachmentType } from '../../common/utils/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -375,10 +375,17 @@ export const countEventsForID = ({
   comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): number | undefined => {
   return comments.saved_objects.reduce((sum, current) => {
-    if (current.attributes.type === AttachmentType.event) {
-      return sum + [current.attributes.eventId].flat().length;
+    const attrs = current.attributes;
+    if (!isEventAttachmentType(attrs.type)) {
+      return sum;
     }
-
+    if ('attachmentId' in attrs && attrs.attachmentId != null) {
+      const id = attrs.attachmentId;
+      return sum + (Array.isArray(id) ? id.length : 1);
+    }
+    if ('eventId' in attrs && attrs.eventId != null) {
+      return sum + [attrs.eventId].flat().length;
+    }
     return sum;
   }, 0);
 };

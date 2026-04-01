@@ -21,7 +21,6 @@ import { createActionAttachmentUserActionBuilder } from '../../attachments/host_
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
-import { createEventAttachmentUserActionBuilder } from '../../attachments/event/event';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
@@ -35,6 +34,7 @@ interface DeleteLabelTitle {
   caseData: UserActionBuilderArgs['caseData'];
   externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
   persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
+  unifiedAttachmentTypeRegistry: UserActionBuilderArgs['unifiedAttachmentTypeRegistry'];
 }
 
 const getDeleteLabelTitle = ({
@@ -42,6 +42,7 @@ const getDeleteLabelTitle = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
   if (isLegacyAttachmentRequest(comment)) {
@@ -119,6 +120,7 @@ const getDeleteCommentUserAction = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
@@ -128,6 +130,7 @@ const getDeleteCommentUserAction = ({
   | 'userProfiles'
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
+  | 'unifiedAttachmentTypeRegistry'
   | 'caseData'
 >): EuiCommentProps[] => {
   const label = getDeleteLabelTitle({
@@ -135,6 +138,7 @@ const getDeleteCommentUserAction = ({
     caseData,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
   });
 
   const commonBuilder = createCommonUpdateUserActionBuilder({
@@ -193,18 +197,6 @@ const getCreateCommentUserAction = ({
 
         return alertBuilder.build();
 
-      case AttachmentType.event:
-        const eventBuilder = createEventAttachmentUserActionBuilder({
-          userProfiles,
-          attachment,
-          userAction,
-          onShowAlertDetails,
-          handleDeleteComment,
-          loadingCommentIds,
-        });
-
-        return eventBuilder.build();
-
       case AttachmentType.actions:
         const actionBuilder = createActionAttachmentUserActionBuilder({
           userProfiles,
@@ -246,8 +238,11 @@ const getCreateCommentUserAction = ({
     }
   }
 
-  const type = toUnifiedAttachmentType(attachment.type);
-  if (isUnifiedAttachmentRequest(attachment) && unifiedAttachmentTypeRegistry.has(type)) {
+  const type = toUnifiedAttachmentType(attachment.type, caseData.owner);
+  const isUnified = isUnifiedAttachmentRequest(attachment);
+  const registryHas = unifiedAttachmentTypeRegistry.has(type);
+
+  if (isUnified && registryHas) {
     const unifiedBuilder = createUnifiedAttachmentUserActionBuilder({
       userAction,
       userProfiles,
@@ -304,6 +299,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         userProfiles,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
       });
     }
 

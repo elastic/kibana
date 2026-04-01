@@ -9,7 +9,6 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridPaginationProps,
 } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import type { CaseViewEventsTableProps } from '@kbn/cases-plugin/common/ui';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import {
@@ -29,15 +28,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
 import { SECURITY_CELL_ACTIONS_CASE_EVENTS } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { RowAction } from '../../../common/components/control_columns/row_action';
-import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
-import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
-import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import type { State } from '../../../common/store/types';
-import { useGetEvents } from './use_get_events';
-import { useCaseEventsDataView } from './use_events_data_view';
-import { TABLE_UNIT, NO_EVENTS_TITLE } from './translations';
+import { RowAction } from '../../../../common/components/control_columns/row_action';
+import { buildBrowserFields } from '../../../../data_view_manager/utils/build_browser_fields';
+import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
+import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
+import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import type { State } from '../../../../common/store/types';
+import { useGetEvents } from '../hooks/use_get_events';
+import { useCaseEventsDataView } from '../hooks/use_events_data_view';
+import { TABLE_UNIT, NO_EVENTS_TITLE } from '../translations';
+
+export interface CaseViewEventsTableProps {
+  events: Event[];
+}
+export interface Event {
+  eventId: string | string[];
+  index: string | string[];
+}
 
 export const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
 export const EMPTY_EVENTS_TABLE_FOR_CASES_ID = `EMPTY_${EVENTS_TABLE_FOR_CASES_ID}` as const;
@@ -200,7 +207,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
       getFieldSpec={getFieldSpec}
       id={EVENTS_TABLE_FOR_CASES_ID}
       totalItems={eventIds.length}
-      unitCountText={TABLE_UNIT}
+      unitCountText={`${eventIds.length} ${TABLE_UNIT}`}
       cellActionsTriggerId={SECURITY_CELL_ACTIONS_CASE_EVENTS}
       leadingControlColumns={leadingControlColumns}
       loadPage={noop}

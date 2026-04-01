@@ -91,6 +91,7 @@ export const getAllDocumentsAttachedToCase = async (
       attachmentTypes,
       caseId: theCase.id,
       filter: combineFilters(filterArray),
+      owner: theCase.owner,
     });
 
     ensureSavedObjectsAreAuthorized(

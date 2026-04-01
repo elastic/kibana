@@ -101,6 +101,21 @@ describe('Unified Attachments', () => {
       }
     });
 
+    it('accepts reference request with attachmentId as string array', () => {
+      const requestWithAttachmentIdArray = {
+        type: 'lens',
+        attachmentId: ['a', 'b'],
+        owner: 'securitySolution',
+      };
+
+      const query = UnifiedAttachmentPayloadRt.decode(requestWithAttachmentIdArray);
+
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        expect(query.right).toMatchObject(requestWithAttachmentIdArray);
+      }
+    });
+
     it('accepts request with attachmentId and metadata', () => {
       const requestWithAttachmentIdAndMetadata = {
         type: 'lens',
