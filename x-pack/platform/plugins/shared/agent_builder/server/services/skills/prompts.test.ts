@@ -100,7 +100,7 @@ describe('getSkillsInstructions', () => {
 
       expect(result).toContain('## SKILLS');
       expect(result).toContain(
-        'Before using any general-purpose tool or model knowledge, you MUST first check the available skills below.'
+        'Always check the skill list above before acting on a user request.'
       );
     });
 

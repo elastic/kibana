@@ -34,10 +34,11 @@ import {
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
+import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { parseError } from '../../../streams/errors/parse_error';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
+import { resolveConnectorIdAndCheckAllowlist } from '../../../../routes/utils/resolve_connector_id_and_check_allowlist';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
 import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
@@ -368,10 +369,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
               const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
+              const connectorId = await resolveConnectorIdAndCheckAllowlist({
                 connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
                 uiSettingsClient,
                 logger: taskLogger,
+                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                request: runContext.fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 

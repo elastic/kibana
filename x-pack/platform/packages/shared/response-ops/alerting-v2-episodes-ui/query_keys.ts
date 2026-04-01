@@ -5,7 +5,14 @@
  * 2.0.
  */
 
+import type { EpisodesFilterState, EpisodesSortState } from './utils/build_episodes_esql_query';
+
 export const queryKeys = {
   all: ['alert-episodes'] as const,
-  list: (pageSize: number) => [...queryKeys.all, 'list', pageSize] as const,
+  list: (
+    pageSize: number,
+    filterState?: EpisodesFilterState,
+    sortState?: EpisodesSortState,
+    timeRange?: { from: string; to: string } | null
+  ) => [...queryKeys.all, 'list', pageSize, filterState, sortState, timeRange] as const,
 };

@@ -30,13 +30,12 @@ test.describe(
 
       await test.step('Click View errors link and wait for navigation', async () => {
         await page.getByRole('link', { name: 'View errors' }).click();
-        await page
-          .getByTestId('apmSettingsHeaderLink')
-          .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('Verify navigated to errors page', async () => {
-        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_OTEL_SENDOTLP}/errors`));
+        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_OTEL_SENDOTLP}/errors`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
     });
 
@@ -102,13 +101,12 @@ test.describe(
 
       await test.step('Click View errors link and wait for navigation', async () => {
         await page.getByRole('link', { name: 'View errors' }).click();
-        await page
-          .getByTestId('apmSettingsHeaderLink')
-          .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('Verify navigated to errors page', async () => {
-        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_EDOT_ADSERVICE}/errors`));
+        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_EDOT_ADSERVICE}/errors`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
     });
 
