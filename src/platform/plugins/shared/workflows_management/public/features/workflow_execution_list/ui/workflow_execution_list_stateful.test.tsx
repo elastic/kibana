@@ -16,14 +16,14 @@ import { createUseKibanaMockValue } from '../../../mocks';
 import { TestWrapper } from '../../../shared/test_utils';
 
 const mockSetSelectedExecution = jest.fn();
-const mockCancelExecution = jest.fn().mockResolvedValue(undefined);
+const mockCancelAllWorkflowExecutions = jest.fn().mockResolvedValue(undefined);
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('../../../hooks/use_kibana');
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsApi: jest.fn(() => ({
-    cancelExecution: (...args: unknown[]) => mockCancelExecution(...args),
+    cancelAllWorkflowExecutions: (...args: unknown[]) => mockCancelAllWorkflowExecutions(...args),
   })),
 }));
 
@@ -184,9 +184,9 @@ describe('WorkflowExecutionList (stateful)', () => {
     });
     renderComponent();
     fireEvent.click(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton'));
-    const dialog = await screen.findByRole('dialog');
+    const dialog = await screen.findByTestId('workflowExecutionListFooterCancelModal');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel all' }));
-    await waitFor(() => expect(mockCancelExecution).toHaveBeenCalledWith('exec-running'));
+    await waitFor(() => expect(mockCancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1'));
     await waitFor(() => expect(mockRefetch).toHaveBeenCalled());
   });
 });

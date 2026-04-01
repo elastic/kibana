@@ -99,7 +99,7 @@ export const WorkflowExecutionListFooter = ({
           <p>
             <FormattedMessage
               id="workflows.workflowExecutionList.footerCancelNonTerminal.modalBody"
-              defaultMessage="In-progress executions in this visible list only. Other pages of results are not included."
+              defaultMessage="All non-terminal executions for this workflow in the current space will be cancelled, including any not shown on the current page."
             />
           </p>
         </EuiConfirmModal>

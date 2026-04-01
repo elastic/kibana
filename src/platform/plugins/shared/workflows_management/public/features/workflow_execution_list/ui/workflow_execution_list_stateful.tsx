@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ExecutionStatus, type ExecutionType, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, type ExecutionType } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
@@ -101,108 +101,40 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   };
 
   const onConfirmCancelLoadedNonTerminal = useCallback(async () => {
-    if (!workflowExecutions || !workflowId) {
-      return;
-    }
-
-    const targets = workflowExecutions.results.filter((e) => !isTerminalStatus(e.status));
-
-    if (targets.length === 0) {
+    if (!workflowId) {
       return;
     }
 
     setIsCancelLoadedNonTerminalInProgress(true);
 
     try {
-      const results = await Promise.allSettled(targets.map((t) => api.cancelExecution(t.id)));
-
-      let failureCount = 0;
-
-      results.forEach((result, i) => {
-        const execution = targets[i];
-        const timeToCancellation = execution.startedAt
-          ? Date.now() - new Date(execution.startedAt).getTime()
-          : undefined;
-
-        if (result.status === 'fulfilled') {
-          telemetry.reportWorkflowRunCancelled({
-            workflowExecutionId: execution.id,
-            workflowId: execution.workflowId ?? workflowId,
-            timeToCancellation,
-            origin: 'workflow_detail',
-          });
-        } else {
-          failureCount += 1;
-          const err =
-            result.reason instanceof Error ? result.reason : new Error(String(result.reason));
-          telemetry.reportWorkflowRunCancelled({
-            workflowExecutionId: execution.id,
-            workflowId: execution.workflowId ?? workflowId,
-            timeToCancellation,
-            origin: 'workflow_detail',
-            error: err,
-          });
-        }
+      await api.cancelAllWorkflowExecutions(workflowId);
+      telemetry.reportWorkflowRunCancelled({
+        workflowExecutionId: 'bulk_workflow_executions',
+        workflowId,
+        origin: 'workflow_detail',
       });
-
-      const totalCount = targets.length;
-      const successCount = totalCount - failureCount;
-
-      if (failureCount > 0 && successCount === 0) {
-        notifications?.toasts.addDanger(
-          i18n.translate('workflows.workflowExecutionList.footerCancelNonTerminal.allFailed', {
-            defaultMessage:
-              'Failed to cancel {count, plural, one {# execution} other {# executions}}',
-            values: { count: totalCount },
-          }),
-          { toastLifeTimeMs: 5000 }
-        );
-      } else if (failureCount > 0) {
-        notifications?.toasts.addWarning(
-          i18n.translate('workflows.workflowExecutionList.footerCancelNonTerminal.partialFailure', {
-            defaultMessage:
-              '{successCount} of {totalCount} executions cancelled. {failureCount, plural, one {# could not be cancelled} other {# could not be cancelled}}.',
-            values: { successCount, totalCount, failureCount },
-          }),
-          { toastLifeTimeMs: 5000 }
-        );
-      } else if (successCount > 0) {
-        notifications?.toasts.addSuccess({
-          title:
-            successCount === 1
-              ? i18n.translate(
-                  'workflows.workflowExecutionList.footerCancelNonTerminal.successSingle',
-                  {
-                    defaultMessage: '1 execution cancelled',
-                  }
-                )
-              : i18n.translate(
-                  'workflows.workflowExecutionList.footerCancelNonTerminal.successMultiple',
-                  {
-                    defaultMessage: '{count} executions cancelled',
-                    values: { count: successCount },
-                  }
-                ),
-        });
-      }
-
-      try {
-        await refetch();
-      } catch (refetchError) {
-        const err = refetchError instanceof Error ? refetchError : new Error(String(refetchError));
-        notifications?.toasts.addError(err, {
-          title: i18n.translate(
-            'workflows.workflowExecutionList.footerCancelNonTerminal.refetchErrorTitle',
-            {
-              defaultMessage: 'Could not refresh execution list',
-            }
-          ),
-        });
-      }
+      notifications?.toasts.addSuccess({
+        title: i18n.translate(
+          'workflows.workflowExecutionList.footerCancelNonTerminal.bulkSuccess',
+          {
+            defaultMessage: 'Cancellation requested for all active executions of this workflow',
+          }
+        ),
+      });
+    } catch (cancelError) {
+      notifications?.toasts.addError(cancelError, {
+        title: i18n.translate(
+          'workflows.workflowExecutionList.footerCancelNonTerminal.bulkFailureTitle',
+          {
+            defaultMessage: 'Could not cancel active executions',
+          }
+        ),
+      });
     } finally {
       setIsCancelLoadedNonTerminalInProgress(false);
     }
-  }, [api, notifications, refetch, telemetry, workflowExecutions, workflowId]);
+  }, [api, notifications, refetch, telemetry, workflowId]);
 
   return (
     <WorkflowExecutionListComponent
