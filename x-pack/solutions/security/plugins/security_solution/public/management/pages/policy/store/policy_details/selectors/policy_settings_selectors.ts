@@ -183,6 +183,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        ransomware: mac.ransomware,
         behavior_protection: mac.behavior_protection,
         memory_protection: mac.memory_protection,
         device_control: mac.device_control,

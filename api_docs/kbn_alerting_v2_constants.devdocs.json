@@ -1,0 +1,79 @@
+{
+  "id": "@kbn/alerting-v2-constants",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_ALERT_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_ALERT_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/alerts\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/notification_policies\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_RULE_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_RULE_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/rules\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

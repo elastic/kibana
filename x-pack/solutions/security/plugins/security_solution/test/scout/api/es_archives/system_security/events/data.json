@@ -1,0 +1,275 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-freq-001",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:00:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "logged-in",
+        "category": ["authentication"],
+        "code": "4624",
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["start"]
+      },
+      "host": {
+        "id": "test-win-host-id-a",
+        "name": "test-win-a",
+        "hostname": "test-win-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a",
+        "domain": "TESTDOMAIN"
+      },
+      "winlog": {
+        "logon": {
+          "type": "RemoteInteractive"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-freq-002",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:01:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "logged-in",
+        "category": ["authentication"],
+        "code": "4624",
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["start"]
+      },
+      "host": {
+        "id": "test-win-host-id-a",
+        "name": "test-win-a",
+        "hostname": "test-win-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a",
+        "domain": "TESTDOMAIN"
+      },
+      "winlog": {
+        "logon": {
+          "type": "Interactive"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-freq-003",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:02:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "logged-in",
+        "category": ["authentication"],
+        "code": "4624",
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["start"]
+      },
+      "host": {
+        "id": "test-win-host-id-a",
+        "name": "test-win-a",
+        "hostname": "test-win-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a",
+        "domain": "TESTDOMAIN"
+      },
+      "winlog": {
+        "logon": {
+          "type": "RemoteInteractive"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-freq-004",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:03:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "logged-in-explicit",
+        "category": ["authentication"],
+        "code": "4648",
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["start"]
+      },
+      "host": {
+        "id": "test-win-host-id-a",
+        "name": "test-win-a",
+        "hostname": "test-win-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a",
+        "domain": "TESTDOMAIN"
+      },
+      "winlog": {
+        "logon": {
+          "type": "Interactive"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-freq-005",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:04:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "logged-in",
+        "category": ["authentication"],
+        "code": "4624",
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["start"]
+      },
+      "host": {
+        "id": "test-win-host-id-a",
+        "name": "test-win-a",
+        "hostname": "test-win-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a",
+        "domain": "TESTDOMAIN"
+      },
+      "winlog": {
+        "logon": {
+          "type": "Interactive"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-infreq-001",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "logged-in",
+        "category": ["authentication"],
+        "code": "4624",
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["start"]
+      },
+      "host": {
+        "id": "test-win-host-id-b",
+        "name": "test-win-b",
+        "hostname": "test-win-b"
+      },
+      "user": {
+        "id": "test-user-b",
+        "name": "test-user-b",
+        "domain": "TESTDOMAIN"
+      },
+      "winlog": {
+        "logon": {
+          "type": "RemoteInteractive"
+        }
+      }
+    }
+  }
+}
