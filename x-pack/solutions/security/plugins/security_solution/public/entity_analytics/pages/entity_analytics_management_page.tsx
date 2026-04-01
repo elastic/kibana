@@ -26,6 +26,7 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab';
 import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
+import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
 import { EntityResolutionTab } from '../components/entity_resolution';
 import { useUiSetting$ } from '../../common/lib/kibana';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
@@ -46,6 +47,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID,
   RISK_SCORE_TAB_TEST_ID,
   ASSET_CRITICALITY_TAB_TEST_ID,
+  WATCHLISTS_TAB_TEST_ID,
   ENGINE_STATUS_TAB_TEST_ID,
   ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
@@ -53,6 +55,7 @@ import {
 export enum TabId {
   RiskScore = 'risk_score',
   AssetCriticality = 'asset_criticality',
+  Watchlists = 'watchlists',
   EntityResolution = 'entity_resolution',
   Status = 'status',
 }
@@ -88,6 +91,7 @@ export const EntityAnalyticsManagementPage = () => {
   }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
+  const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
   const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
 
   const entityStoreStatus = useEntityStoreStatus();
@@ -252,6 +256,19 @@ export const EntityAnalyticsManagementPage = () => {
             defaultMessage="Asset Criticality"
           />
         </EuiTab>
+        {isWatchlistsEnabled && (
+          <EuiTab
+            key={TabId.Watchlists}
+            isSelected={selectedTabId === TabId.Watchlists}
+            onClick={() => handleTabChange(TabId.Watchlists)}
+            data-test-subj={WATCHLISTS_TAB_TEST_ID}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.watchlists.tabTitle"
+              defaultMessage="Watchlists"
+            />
+          </EuiTab>
+        )}
         {isEntityStoreV2Enabled && (
           <EuiTab
             key={TabId.EntityResolution}
@@ -305,6 +322,12 @@ export const EntityAnalyticsManagementPage = () => {
       <div hidden={selectedTabId !== TabId.AssetCriticality}>
         <AssetCriticalityTab />
       </div>
+
+      {isWatchlistsEnabled && (
+        <div hidden={selectedTabId !== TabId.Watchlists}>
+          <WatchlistsTab />
+        </div>
+      )}
 
       {isEntityStoreV2Enabled && (
         <div hidden={selectedTabId !== TabId.EntityResolution}>
