@@ -88,6 +88,12 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
         anchorPosition="rightCenter"
         ownFocus
         panelPaddingSize="none"
+        aria-label={i18n.translate(
+          'xpack.spaces.management.manageSpacePage.customizeCps.settingsPopoverAriaLabel',
+          {
+            defaultMessage: 'Manage linked projects',
+          }
+        )}
       >
         <EuiContextMenu
           initialPanelId={0}

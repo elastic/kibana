@@ -96,6 +96,12 @@ export class ToggleAllFeatures extends Component<Props, State> {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate(
+          'xpack.spaces.management.toggleAllFeatures.popoverAriaLabel',
+          {
+            defaultMessage: 'Change feature visibility',
+          }
+        )}
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
