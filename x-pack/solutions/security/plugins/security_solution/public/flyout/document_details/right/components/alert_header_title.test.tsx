@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
+import { ASSIGNEES_EMPTY_TEST_ID, ASSIGNEES_TEST_ID, NOTES_TITLE_TEST_ID } from './test_ids';
 import { AlertHeaderTitle } from './alert_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
