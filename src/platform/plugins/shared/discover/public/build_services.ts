@@ -208,7 +208,7 @@ export const buildServices = ({
     discoverShared: plugins.discoverShared,
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
-        core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, false),
+        core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
       getIsEsqlDefault: () =>
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
       getEmbeddableTransformsEnabled: () =>
