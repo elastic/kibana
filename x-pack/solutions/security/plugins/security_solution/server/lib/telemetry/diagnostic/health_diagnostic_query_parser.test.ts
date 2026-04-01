@@ -280,6 +280,84 @@ datastreamTypes: logs`;
     });
   });
 
+  describe('invalid type enum', () => {
+    it('returns ParseFailureQuery for v1 descriptor with invalid type', () => {
+      const yaml = `
+id: q1
+name: q1
+index: logs-endpoint.*
+type: foo
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      expect((parseHealthDiagnosticQueries(yaml)[0] as ParseFailureQuery)._raw).toBeDefined();
+    });
+
+    it('returns ParseFailureQuery for v2 descriptor with invalid type', () => {
+      const yaml = `
+id: q1
+name: q1
+version: 2
+integrations: endpoint
+type: foo
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      expect((parseHealthDiagnosticQueries(yaml)[0] as ParseFailureQuery)._raw).toBeDefined();
+    });
+  });
+
+  describe('invalid filterlist', () => {
+    it('returns ParseFailureQuery when filterlist is an array', () => {
+      const yaml = `
+id: q1
+name: q1
+index: logs-endpoint.*
+type: DSL
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  - keep
+enabled: true`;
+      expect((parseHealthDiagnosticQueries(yaml)[0] as ParseFailureQuery)._raw).toBeDefined();
+    });
+
+    it('returns ParseFailureQuery when filterlist contains an invalid action value', () => {
+      const yaml = `
+id: q1
+name: q1
+index: logs-endpoint.*
+type: DSL
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: badvalue
+enabled: true`;
+      expect((parseHealthDiagnosticQueries(yaml)[0] as ParseFailureQuery)._raw).toBeDefined();
+    });
+  });
+
+  describe('invalid integrations', () => {
+    it('returns ParseFailureQuery when integrations normalises to empty array', () => {
+      const yaml = `
+id: q1
+name: q1
+version: 2
+integrations: ' , '
+type: DSL
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      expect((parseHealthDiagnosticQueries(yaml)[0] as ParseFailureQuery)._raw).toBeDefined();
+    });
+  });
+
   describe('unknown version', () => {
     it('returns ParseFailureQuery for an unrecognised version', () => {
       const [q] = parseHealthDiagnosticQueries(UNKNOWN_VERSION_YAML);

@@ -6,11 +6,13 @@
  */
 
 import * as YAML from 'yaml';
-import type {
-  HealthDiagnosticQuery,
-  HealthDiagnosticQueryV1,
-  HealthDiagnosticQueryV2,
-  ParseFailureQuery,
+import {
+  QueryType,
+  Action,
+  type HealthDiagnosticQuery,
+  type HealthDiagnosticQueryV1,
+  type HealthDiagnosticQueryV2,
+  type ParseFailureQuery,
 } from './health_diagnostic_service.types';
 
 export const parseHealthDiagnosticQueries = (input: unknown): HealthDiagnosticQuery[] =>
@@ -37,10 +39,11 @@ const parseV1 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV1 =
   assertRequiredString(raw, 'id');
   assertRequiredString(raw, 'name');
   assertRequiredString(raw, 'index');
-  assertRequiredString(raw, 'type');
+  assertRequiredEnum(raw, 'type', Object.values(QueryType));
   assertRequiredString(raw, 'query');
   assertRequiredString(raw, 'scheduleCron');
   assertRequiredObject(raw, 'filterlist');
+  assertFilterlistActions(raw);
   assertRequiredBoolean(raw, 'enabled');
 
   return { ...(raw as Record<string, unknown>), version: 1 } as HealthDiagnosticQueryV1;
@@ -49,10 +52,11 @@ const parseV1 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV1 =
 const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 => {
   assertRequiredString(raw, 'id');
   assertRequiredString(raw, 'name');
-  assertRequiredString(raw, 'type');
+  assertRequiredEnum(raw, 'type', Object.values(QueryType));
   assertRequiredString(raw, 'query');
   assertRequiredString(raw, 'scheduleCron');
   assertRequiredObject(raw, 'filterlist');
+  assertFilterlistActions(raw);
   assertRequiredBoolean(raw, 'enabled');
 
   const hasIntegrations = raw && typeof raw.integrations === 'string' && raw.integrations !== '';
@@ -70,6 +74,10 @@ const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 =
         .map((p) => p.trim())
         .filter((p) => p.length > 0)
     : undefined;
+
+  if (integrations !== undefined && integrations.length === 0) {
+    throw new Error('integrations must contain at least one non-empty pattern');
+  }
 
   const typesRaw = (raw as Record<string, unknown>).datastreamTypes;
   if (typesRaw !== undefined && typesRaw !== null) {
@@ -110,8 +118,28 @@ const assertRequiredString = (raw: Record<string, unknown> | null, field: string
 };
 
 const assertRequiredObject = (raw: Record<string, unknown> | null, field: string): void => {
-  if (!raw || typeof raw[field] !== 'object' || raw[field] === null) {
+  if (!raw || typeof raw[field] !== 'object' || raw[field] === null || Array.isArray(raw[field])) {
     throw new Error(`Missing or invalid required field: ${field}`);
+  }
+};
+
+const assertRequiredEnum = (
+  raw: Record<string, unknown> | null,
+  field: string,
+  values: readonly string[]
+): void => {
+  if (!raw || !values.includes(raw[field] as string)) {
+    throw new Error(`Missing or invalid required field: ${field}`);
+  }
+};
+
+const assertFilterlistActions = (raw: Record<string, unknown> | null): void => {
+  const fl = raw?.filterlist as Record<string, unknown>;
+  const validActions = Object.values(Action) as string[];
+  for (const value of Object.values(fl)) {
+    if (!validActions.includes(value as string)) {
+      throw new Error(`Invalid filterlist action value: ${value}`);
+    }
   }
 };
 
