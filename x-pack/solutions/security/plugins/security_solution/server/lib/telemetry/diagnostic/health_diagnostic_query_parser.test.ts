@@ -208,6 +208,76 @@ enabled: true`;
       const v2 = q as unknown as HealthDiagnosticQueryV2;
       expect(v2.datastreamTypes).toBeUndefined();
     });
+
+    it('returns ParseFailureQuery when datastreamTypes is a number', () => {
+      const yaml = `
+id: q1
+name: q1
+version: 2
+type: DSL
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true
+integrations: endpoint
+datastreamTypes: 42`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+    });
+
+    it('returns ParseFailureQuery when datastreamTypes is a YAML list', () => {
+      const yaml = `
+id: q1
+name: q1
+version: 2
+type: DSL
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true
+integrations: endpoint
+datastreamTypes:
+  - logs
+  - metrics`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+    });
+
+    it('returns ParseFailureQuery when datastreamTypes is an empty string', () => {
+      const yaml = `
+id: q1
+name: q1
+version: 2
+type: DSL
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true
+integrations: endpoint
+datastreamTypes: ''`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+    });
+
+    it('does not leak datastreamTypes on index-based path', () => {
+      const yaml = `
+id: q1
+name: q1
+version: 2
+type: DSL
+query: '{"query":{"match_all":{}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true
+index: logs-test-*
+datastreamTypes: logs`;
+      const [q] = parseHealthDiagnosticQueries(yaml) as HealthDiagnosticQueryV2[];
+      expect('datastreamTypes' in q).toBe(false);
+    });
   });
 
   describe('unknown version', () => {

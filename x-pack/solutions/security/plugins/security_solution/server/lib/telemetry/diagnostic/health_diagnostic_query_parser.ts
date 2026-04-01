@@ -71,19 +71,26 @@ const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 =
         .filter((p) => p.length > 0)
     : undefined;
 
-  const typesRaw = hasIntegrations ? (raw as Record<string, unknown>).datastreamTypes : undefined;
+  const typesRaw = (raw as Record<string, unknown>).datastreamTypes;
+  if (typesRaw !== undefined && typesRaw !== null) {
+    if (typeof typesRaw !== 'string' || typesRaw.trim() === '') {
+      throw new Error('datastreamTypes must be a non-empty comma-separated string when present');
+    }
+  }
   const types =
-    typeof typesRaw === 'string'
+    hasIntegrations && typeof typesRaw === 'string'
       ? typesRaw
           .split(',')
           .map((p) => p.trim())
           .filter((p) => p.length > 0)
       : undefined;
 
+  const { datastreamTypes: _drop, ...rest } = raw as Record<string, unknown>;
   return {
-    ...(raw as Record<string, unknown>),
+    ...rest,
     version: 2,
-    ...(integrations !== undefined ? { integrations, datastreamTypes: types } : {}),
+    ...(integrations !== undefined ? { integrations } : {}),
+    ...(types !== undefined ? { datastreamTypes: types } : {}),
   } as HealthDiagnosticQueryV2;
 };
 
