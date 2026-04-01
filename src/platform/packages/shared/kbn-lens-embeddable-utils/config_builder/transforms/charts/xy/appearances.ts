@@ -7,27 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYVisualizationState as XYVisualizationState } from '@kbn/lens-common';
 import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
 import type { XYDecorations } from '../../../schema/charts/xy';
 import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
-import { stripUndefined } from '../utils';
-
-const curveTypeAPItoState: Record<$Values<XYApiLineInterpolation>, XYCurveType> = {
-  linear: 'LINEAR',
-  smooth: 'CURVE_MONOTONE_X',
-  stepped: 'CURVE_STEP_AFTER',
-};
-
-const curveTypeStateToAPI: Record<XYCurveType, $Values<XYApiLineInterpolation>> = {
-  LINEAR: 'linear',
-  CURVE_MONOTONE_X: 'smooth',
-  CURVE_STEP_AFTER: 'stepped',
-};
+import { getReversibleMappings, stripUndefined } from '../utils';
 
 type XYLensAppearanceState = Pick<
-  XYLensState,
+  XYVisualizationState,
   | 'valueLabels'
   | 'curveType'
   | 'fillOpacity'
@@ -37,31 +25,39 @@ type XYLensAppearanceState = Pick<
   | 'pointVisibility'
 >;
 
+const curveTypeCompat = getReversibleMappings<$Values<XYApiLineInterpolation>, XYCurveType>([
+  ['linear', 'LINEAR'],
+  ['smooth', 'CURVE_MONOTONE_X'],
+  ['stepped', 'CURVE_STEP_AFTER'],
+]);
+
+const pointVisibilityCompat = getReversibleMappings([
+  ['auto', 'auto'],
+  ['visible', 'always'],
+  ['hidden', 'never'],
+]);
+
 export function convertAppearanceToAPIFormat(config: XYLensAppearanceState): XYDecorations {
   return stripUndefined<XYDecorations>({
-    show_value_labels: config.valueLabels != null ? config.valueLabels === 'show' : undefined,
-    line_interpolation:
-      config.curveType != null ? curveTypeStateToAPI[config.curveType] : undefined,
+    values: config.valueLabels != null ? { visible: config.valueLabels === 'show' } : undefined,
+    line_interpolation: curveTypeCompat.toAPI(config.curveType),
     fill_opacity: config.fillOpacity,
     minimum_bar_height: config.minBarHeight,
-    show_end_zones: config.hideEndzones,
-    show_current_time_marker: config.showCurrentTimeMarker,
-    point_visibility: config.pointVisibility,
+    end_zones: config.hideEndzones != null ? { visible: config.hideEndzones } : undefined,
+    current_time_marker:
+      config.showCurrentTimeMarker != null ? { visible: config.showCurrentTimeMarker } : undefined,
+    point_visibility: pointVisibilityCompat.toAPI(config.pointVisibility),
   });
 }
 
 export function convertAppearanceToStateFormat(config: XYDecorations): XYLensAppearanceState {
   return stripUndefined<XYLensAppearanceState>({
-    valueLabels:
-      config.show_value_labels != null ? (config.show_value_labels ? 'show' : 'hide') : undefined,
-    curveType:
-      config.line_interpolation != null
-        ? curveTypeAPItoState[config.line_interpolation]
-        : undefined,
+    valueLabels: config.values != null ? (config.values.visible ? 'show' : 'hide') : undefined,
+    curveType: curveTypeCompat.toState(config.line_interpolation),
     fillOpacity: config.fill_opacity,
     minBarHeight: config.minimum_bar_height,
-    hideEndzones: config.show_end_zones,
-    showCurrentTimeMarker: config.show_current_time_marker,
-    pointVisibility: config.point_visibility,
+    hideEndzones: config.end_zones?.visible,
+    showCurrentTimeMarker: config.current_time_marker?.visible,
+    pointVisibility: pointVisibilityCompat.toState(config.point_visibility),
   });
 }

@@ -7,7 +7,8 @@
 
 // History table & filters (queryHistoryRework)
 export const UNIFIED_HISTORY_TABLE = 'unifiedHistoryTable';
-export const HISTORY_SEARCH_INPUT = 'history-search-input';
+/** Matches TableToolbar search on history (`data-test-subj="history-toolbar"` + `-search`). */
+export const HISTORY_SEARCH_INPUT = 'history-toolbar-search';
 export const HISTORY_DATE_PICKER = 'history-date-picker';
 export const HISTORY_RUN_BY_FILTER = 'history-run-by-filter-button';
 export const HISTORY_SOURCE_FILTER = 'history-source-filter-button';

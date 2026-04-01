@@ -153,7 +153,7 @@ export const RuleCoveragePanel: React.FC = () => {
                   <EuiButtonEmpty
                     iconSide="right"
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={handleCreateCase}
                     data-test-subj="createNewCaseButton"
                   >

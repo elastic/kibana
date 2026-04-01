@@ -327,27 +327,27 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf12_packetbeat_dns_tunneling',
+            jobId: 'pf12_packetbeat_dns_tunneling_ea',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf12_packetbeat_rare_dns_question',
+            jobId: 'pf12_packetbeat_rare_dns_question_ea',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf12_packetbeat_rare_server_domain',
+            jobId: 'pf12_packetbeat_rare_server_domain_ea',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf12_packetbeat_rare_urls',
+            jobId: 'pf12_packetbeat_rare_urls_ea',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf12_packetbeat_rare_user_agent',
+            jobId: 'pf12_packetbeat_rare_user_agent_ea',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
             datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf20_rare_method_for_a_username',
+            jobId: 'pf20_rare_method_for_a_user_id_ea',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },

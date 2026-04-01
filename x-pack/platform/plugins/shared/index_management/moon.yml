@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/cloud'
   - '@kbn/search-index-documents'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/shared-ux-column-presets'
 tags:
   - plugin
   - prod
@@ -93,26 +94,6 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

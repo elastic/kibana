@@ -672,5 +672,185 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
         }
       });
     });
+
+    it('should associate alerts when KQL uses trailing wildcard on keyword field', async () => {
+      await createMaintenanceWindow({
+        supertest,
+        objectRemover,
+        overwrites: {
+          scoped_query: {
+            kql: 'kibana.alert.rule.name: rule*',
+            filters: [],
+          },
+          category_ids: ['management'],
+        },
+      });
+
+      const action = await await createAction({ supertest, objectRemover });
+
+      const { body: rule } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            name: 'rule-test-rule',
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '24h' },
+            tags: ['test'],
+            throttle: undefined,
+            notify_when: 'onActiveAlert',
+            params: {
+              index: alertAsDataIndex,
+              reference: 'test',
+            },
+            actions: [
+              { id: action.id, group: 'default', params: {} },
+              { id: action.id, group: 'recovered', params: {} },
+            ],
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+      await getRuleEvents({
+        id: rule.id,
+        activeInstance: 2,
+        retry,
+        getService,
+      });
+
+      await expectNoActionsFired({ id: rule.id, supertest, retry });
+    });
+
+    it('should associate alerts when Query DSL wildcard filter includes value with spaces', async () => {
+      const wildcardDslFilter = {
+        meta: {
+          type: 'custom',
+          key: 'query',
+          disabled: false,
+          negate: false,
+        },
+        $state: { store: 'appState' as const },
+        query: {
+          wildcard: {
+            'kibana.alert.rule.name': 'test rule*',
+          },
+        },
+      };
+
+      await createMaintenanceWindow({
+        supertest,
+        objectRemover,
+        overwrites: {
+          scoped_query: {
+            kql: '',
+            filters: [wildcardDslFilter],
+          },
+          category_ids: ['management'],
+        },
+      });
+
+      const action = await await createAction({ supertest, objectRemover });
+
+      const { body: rule } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            name: 'test rule with spaces',
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '24h' },
+            tags: ['test'],
+            throttle: undefined,
+            notify_when: 'onActiveAlert',
+            params: {
+              index: alertAsDataIndex,
+              reference: 'test',
+            },
+            actions: [
+              { id: action.id, group: 'default', params: {} },
+              { id: action.id, group: 'recovered', params: {} },
+            ],
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+      await getRuleEvents({
+        id: rule.id,
+        activeInstance: 2,
+        retry,
+        getService,
+      });
+
+      await expectNoActionsFired({ id: rule.id, supertest, retry });
+    });
+
+    it('should associate alerts when using Query DSL wildcard filter', async () => {
+      const wildcardDslFilter = {
+        meta: {
+          type: 'custom',
+          key: 'query',
+          disabled: false,
+          negate: false,
+        },
+        $state: { store: 'appState' as const },
+        query: {
+          wildcard: {
+            'kibana.alert.rule.name': 'example*',
+          },
+        },
+      };
+
+      await createMaintenanceWindow({
+        supertest,
+        objectRemover,
+        overwrites: {
+          scoped_query: {
+            kql: '',
+            filters: [wildcardDslFilter],
+          },
+          category_ids: ['management'],
+        },
+      });
+
+      const action = await await createAction({ supertest, objectRemover });
+
+      const { body: rule } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            name: 'example-rule-name',
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '24h' },
+            tags: ['test'],
+            throttle: undefined,
+            notify_when: 'onActiveAlert',
+            params: {
+              index: alertAsDataIndex,
+              reference: 'test',
+            },
+            actions: [
+              { id: action.id, group: 'default', params: {} },
+              { id: action.id, group: 'recovered', params: {} },
+            ],
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+
+      await getRuleEvents({
+        id: rule.id,
+        activeInstance: 2,
+        retry,
+        getService,
+      });
+
+      await expectNoActionsFired({ id: rule.id, supertest, retry });
+    });
   });
 }

@@ -412,3 +412,50 @@ export const getToggleCommentLines = (lines: string[]): string[] => {
     return line;
   });
 };
+
+/**
+ * Keeps suggestions alive when the text before the cursor ends with:
+ * - a token character (`[\w`]`)
+ * - a space
+ * - `::`
+ * - `.`
+ */
+export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): boolean => {
+  const lastCharacter = lineContentBeforeCursor.at(-1);
+  const spaceHasBeenTyped = lineContentBeforeCursor.endsWith(' ');
+  const inlineCastHasBeenTyped = lineContentBeforeCursor.endsWith('::');
+  const dotHasBeenTyped = lineContentBeforeCursor.endsWith('.');
+  const currentTokenHasBeenTyped = Boolean(lastCharacter && /[\w`]/.test(lastCharacter));
+
+  return spaceHasBeenTyped || inlineCastHasBeenTyped || dotHasBeenTyped || currentTokenHasBeenTyped;
+};
+
+/**
+ * Tracks the Monaco suggest-widget visibility so the editor can avoid
+ * re-triggering autocomplete while the popup is already open.
+ */
+export const trackSuggestionPopupState = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
+) => {
+  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
+    | (monaco.editor.IEditorContribution & {
+        widget?: {
+          value?: {
+            onDidShow?: (cb: () => void) => void;
+            onDidHide?: (cb: () => void) => void;
+          };
+        };
+      })
+    | undefined;
+  const suggestionWidget = suggestionController?.widget?.value;
+
+  if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
+    suggestionWidget.onDidShow(() => {
+      isSuggestionPopupOpenRef.current = true;
+    });
+    suggestionWidget.onDidHide(() => {
+      isSuggestionPopupOpenRef.current = false;
+    });
+  }
+};

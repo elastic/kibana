@@ -55,7 +55,6 @@ const createMockParsedArchive = (
   },
   skills: [],
   unmanagedAssets: {
-    commands: ['commands/cmd.md'],
     agents: [],
     hooks: [],
     mcp_servers: [],
@@ -82,7 +81,6 @@ const createMockPersistedPlugin = (
   source_url: 'https://github.com/test/repo/tree/main/plugin',
   skill_ids: [],
   unmanaged_assets: {
-    commands: ['commands/cmd.md'],
     agents: [],
     hooks: [],
     mcp_servers: [],
@@ -137,7 +135,7 @@ describe('PluginsService', () => {
     };
 
     const service = createPluginsService();
-    service.setup();
+    service.setup({ skillsSetup: { registerSkill: jest.fn() } });
     start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
@@ -145,16 +143,14 @@ describe('PluginsService', () => {
     });
   });
 
-  describe('getScopedClient', () => {
-    it('creates a client with the correct parameters', () => {
-      const client = start.getScopedClient({ request: mockRequest });
-
-      expect(client).toBe(mockClient);
-      expect(mockCreateClient).toHaveBeenCalledWith(
-        expect.objectContaining({
-          space: 'default',
-        })
-      );
+  describe('getRegistry', () => {
+    it('returns a registry that queries both builtin and persisted providers', async () => {
+      mockClient.has.mockResolvedValue(false);
+      const registry = start.getRegistry({ request: mockRequest });
+      expect(registry).toBeDefined();
+      expect(typeof registry.get).toBe('function');
+      expect(typeof registry.list).toBe('function');
+      expect(typeof registry.findByName).toBe('function');
     });
   });
 
@@ -407,7 +403,8 @@ describe('PluginsService', () => {
   });
 
   describe('deletePlugin', () => {
-    it('deletes associated skills by plugin name, then deletes the plugin', async () => {
+    it('deletes associated skills by plugin name, then deletes via registry', async () => {
+      mockClient.has.mockResolvedValue(true);
       mockClient.get.mockResolvedValue(
         createMockPersistedPlugin({ id: 'plugin-1', name: 'my-plugin' })
       );
@@ -416,17 +413,16 @@ describe('PluginsService', () => {
 
       await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
-      expect(mockClient.get).toHaveBeenCalledWith('plugin-1');
       expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('plugin-1');
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
-    it('propagates errors from client.get', async () => {
-      mockClient.get.mockRejectedValue(new Error('Not found'));
+    it('propagates errors when plugin is not found', async () => {
+      mockClient.has.mockResolvedValue(false);
 
       await expect(
         start.deletePlugin({ request: mockRequest, pluginId: 'missing-id' })
-      ).rejects.toThrow('Not found');
+      ).rejects.toThrow(/not found/i);
 
       expect(mockSkillClient.deleteByPluginId).not.toHaveBeenCalled();
       expect(mockClient.delete).not.toHaveBeenCalled();

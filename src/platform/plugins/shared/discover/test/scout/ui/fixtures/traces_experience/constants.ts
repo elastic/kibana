@@ -42,6 +42,11 @@ export const MINIMAL_TRACE = {
   TRANSACTION_NAME: 'GET /health',
 };
 
+export const DEEP_TRACE = {
+  TRANSACTION_NAME: 'GET /scroll-test',
+  SCROLL_TARGET_SPAN_NAME: 'scroll-target-span',
+};
+
 export const PRODUCER_TRACE = {
   SERVICE_NAME: 'synth-traces-backend',
   TRANSACTION_NAME: 'Background job',

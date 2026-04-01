@@ -7,7 +7,6 @@
 
 import { cli, DEFAULTS } from '@kbn/data-forge';
 import { test } from '@kbn/scout';
-import type { KbnClient } from '@kbn/test';
 
 export interface SloDataFixture {
   generateSloData: () => Promise<void>;
@@ -76,7 +75,7 @@ export const sloDataFixture = test.extend<{}, { sloData: SloDataFixture }>({
         };
 
         try {
-          const { data } = await (kbnClient as KbnClient).request({
+          const { data } = await kbnClient.request({
             description: 'Create SLOs',
             path: '/api/observability/slos',
             body: example,

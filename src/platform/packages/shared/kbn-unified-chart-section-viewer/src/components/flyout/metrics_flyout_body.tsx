@@ -11,8 +11,7 @@ import React, { useState } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ParsedMetricItem } from '../../types';
-import { OverviewTab } from './overview_tab';
-import { EsqlQueryTab } from './esql_query_tab';
+import { OverviewTab, EsqlQueryTab } from './tabs';
 
 const tabIds = {
   OVERVIEW: 'overview',
