@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { createUnackAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  createUnackAlertActionBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateUnackAlertActionRoute = createAlertActionRouteForType({
-  actionType: 'unack',
+  actionType: ALERT_EPISODE_ACTION_TYPE.UNACK,
   pathSuffix: '_unack',
   bodySchema: createUnackAlertActionBodySchema,
 });

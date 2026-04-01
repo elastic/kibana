@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { createTagAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  createTagAlertActionBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 describe('createAlertActionRouteForType', () => {
@@ -30,19 +33,19 @@ describe('createAlertActionRouteForType', () => {
   it('creates a route class with expected static metadata', () => {
     const suffix = '_tag';
     const RouteClass = createAlertActionRouteForType({
-      actionType: 'tag',
+      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: suffix,
       bodySchema: createTagAlertActionBodySchema,
     });
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe(`/internal/alerting/v2/alerts/{group_hash}/action/${suffix}`);
+    expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{group_hash}/action/${suffix}`);
     expect(RouteClass.validate).toBeDefined();
   });
 
   it('injects inferred action_type into createAction payload', async () => {
     const RouteClass = createAlertActionRouteForType({
-      actionType: 'tag',
+      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
       bodySchema: createTagAlertActionBodySchema,
     });
@@ -63,7 +66,7 @@ describe('createAlertActionRouteForType', () => {
 
   it('maps thrown error to customError response', async () => {
     const RouteClass = createAlertActionRouteForType({
-      actionType: 'tag',
+      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
       bodySchema: createTagAlertActionBodySchema,
     });
@@ -79,7 +82,7 @@ describe('createAlertActionRouteForType', () => {
 
   it('applies body mapper when provided', async () => {
     const RouteClass = createAlertActionRouteForType({
-      actionType: 'tag',
+      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
       bodySchema: createTagAlertActionBodySchema,
       mapBody: (body) => ({ ...body, tags: ['mapped'] }),

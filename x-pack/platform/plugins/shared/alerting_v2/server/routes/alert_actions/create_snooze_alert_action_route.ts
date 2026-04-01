@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { createSnoozeAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  createSnoozeAlertActionBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateSnoozeAlertActionRoute = createAlertActionRouteForType({
-  actionType: 'snooze',
+  actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
   pathSuffix: '_snooze',
   bodySchema: createSnoozeAlertActionBodySchema,
 });

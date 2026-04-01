@@ -10,7 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
 import { queryKeys } from '../query_keys';
 
-const INTERNAL_ALERTING_V2_ALERT_API_PATH = '/internal/alerting/v2/alerts';
+const ALERTING_V2_ALERT_API_PATH = '/api/alerting/v2/alerts';
 
 interface CreateAlertActionParams {
   groupHash: string;
@@ -23,7 +23,7 @@ export const useCreateAlertAction = (http: HttpStart) => {
 
   return useMutation({
     mutationFn: async ({ groupHash, actionType, body = {} }: CreateAlertActionParams) => {
-      await http.post(`${INTERNAL_ALERTING_V2_ALERT_API_PATH}/${groupHash}/action/_${actionType}`, {
+      await http.post(`${ALERTING_V2_ALERT_API_PATH}/${groupHash}/action/_${actionType}`, {
         body: JSON.stringify(body),
       });
     },

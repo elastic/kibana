@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { createAckAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  createAckAlertActionBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateAckAlertActionRoute = createAlertActionRouteForType({
-  actionType: 'ack',
+  actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
   pathSuffix: '_ack',
   bodySchema: createAckAlertActionBodySchema,
 });

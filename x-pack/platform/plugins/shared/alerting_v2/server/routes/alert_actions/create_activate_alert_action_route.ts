@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { createActivateAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  createActivateAlertActionBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateActivateAlertActionRoute = createAlertActionRouteForType({
-  actionType: 'activate',
+  actionType: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
   pathSuffix: '_activate',
   bodySchema: createActivateAlertActionBodySchema,
 });

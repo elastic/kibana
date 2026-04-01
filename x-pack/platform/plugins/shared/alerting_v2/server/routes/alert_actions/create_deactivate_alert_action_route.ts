@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { createDeactivateAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  createDeactivateAlertActionBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateDeactivateAlertActionRoute = createAlertActionRouteForType({
-  actionType: 'deactivate',
+  actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
   pathSuffix: '_deactivate',
   bodySchema: createDeactivateAlertActionBodySchema,
 });

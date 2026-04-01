@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { createTagAlertActionBodySchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  createTagAlertActionBodySchema,
+} from '@kbn/alerting-v2-schemas';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateTagAlertActionRoute = createAlertActionRouteForType({
-  actionType: 'tag',
+  actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
   pathSuffix: '_tag',
   bodySchema: createTagAlertActionBodySchema,
 });
