@@ -10,13 +10,16 @@ import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
 import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
 import type {
   DashboardPanel,
+  DashboardPluginStart,
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
-import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
-import { toDashboardState } from '../utils/to_dashboard_state';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
+
+interface CreateDashboardSmlTypeOptions {
+  getDashboardClient: () => Promise<DashboardPluginStart['client']>;
+}
 
 const getReferenceText = (
   references: SavedObjectReference[] | undefined,
@@ -79,7 +82,9 @@ const toDashboardSearchContent = (
   return contentParts.filter(Boolean).join('\n');
 };
 
-export const dashboardSmlType: SmlTypeDefinition = {
+export const createDashboardSmlType = ({
+  getDashboardClient,
+}: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
   id: DASHBOARD_SML_TYPE,
   fetchFrequency: () => '30m',
 
@@ -106,18 +111,23 @@ export const dashboardSmlType: SmlTypeDefinition = {
 
   getSmlData: async (originId, context) => {
     try {
-      const savedObject = await context.savedObjectsClient.get<DashboardSavedObjectAttributes>(
-        'dashboard',
-        originId
-      );
-      const state = toDashboardState(savedObject);
+      if (!context.requestHandlerContext) {
+        return undefined;
+      }
+
+      const dashboardClient = await getDashboardClient();
+      const dashboard = await dashboardClient.read(context.requestHandlerContext, originId);
+
+      if (dashboard.meta.error) {
+        return undefined;
+      }
 
       return {
         chunks: [
           {
             type: DASHBOARD_SML_TYPE,
-            title: state.title ?? originId,
-            content: toDashboardSearchContent(state, savedObject.references),
+            title: dashboard.data.title ?? originId,
+            content: toDashboardSearchContent(dashboard.data, undefined),
             permissions: ['saved_object:dashboard/get'],
           },
         ],
@@ -131,25 +141,21 @@ export const dashboardSmlType: SmlTypeDefinition = {
   },
 
   toAttachment: async (item, context) => {
-    const resolveResult = await context.savedObjectsClient.resolve<DashboardSavedObjectAttributes>(
-      'dashboard',
-      item.origin_id
-    );
-
-    const resolvedDashboard = resolveResult.saved_object as typeof resolveResult.saved_object & {
-      error?: { message?: string };
-    };
-
-    if (resolvedDashboard.error) {
+    if (!context.requestHandlerContext) {
       return undefined;
     }
 
-    const state = toDashboardState(resolvedDashboard);
+    const dashboardClient = await getDashboardClient();
+    const dashboard = await dashboardClient.read(context.requestHandlerContext, item.origin_id);
+
+    if (dashboard.meta.error) {
+      return undefined;
+    }
 
     return {
       type: DASHBOARD_ATTACHMENT_TYPE,
-      data: dashboardStateToAttachment(state),
-      origin: resolvedDashboard.id,
+      data: dashboardStateToAttachment(dashboard.data),
+      origin: dashboard.id,
     };
   },
-};
+});

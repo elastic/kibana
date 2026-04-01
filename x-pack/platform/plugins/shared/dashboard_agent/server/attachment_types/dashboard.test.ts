@@ -5,43 +5,29 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectReference,
-  SavedObjectsClientContract,
-} from '@kbn/core-saved-objects-api-server';
-import type { Logger } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import {
   hashContent,
   type VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  attachmentToDashboardState,
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
-import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import { createDashboardAttachmentType } from './dashboard';
 
-const references: SavedObjectReference[] = [
-  {
-    id: 'lens-1',
-    name: 'panel-panel-1',
-    type: 'lens',
-  },
-];
-
-const dashboardAttributes: DashboardSavedObjectAttributes = {
+const dashboardAttachmentData: DashboardAttachmentData = {
   title: 'System Overview',
   description: 'Main dashboard for key metrics',
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: '{}',
-  },
-  panelsJSON: JSON.stringify([
+  panels: [
     {
       type: 'lens',
-      panelIndex: 'panel-1',
-      gridData: { x: 0, y: 0, w: 24, h: 15, i: 'panel-1' },
-      panelRefName: 'panel-panel-1',
-      embeddableConfig: {
+      uid: 'panel-1',
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+      config: {
         attributes: {
           title: 'CPU Usage',
           visualizationType: 'lnsXY',
@@ -55,32 +41,38 @@ const dashboardAttributes: DashboardSavedObjectAttributes = {
         },
       },
     },
-  ]),
-  optionsJSON: '{}',
+  ],
 };
 
-const createSavedObjectsClient = ({
+const createDashboardClient = ({
   updatedAt = '2025-01-02T00:00:00.000Z',
 }: {
   updatedAt?: string;
-} = {}): jest.Mocked<Pick<SavedObjectsClientContract, 'resolve'>> =>
+} = {}): jest.Mocked<DashboardPluginStart['client']> =>
   ({
-    resolve: jest.fn().mockResolvedValue({
-      outcome: 'exactMatch',
-      saved_object: {
+    read: jest.fn().mockResolvedValue({
+      id: 'dashboard-1',
+      data: attachmentToDashboardState({
         id: 'dashboard-1',
+        type: DASHBOARD_ATTACHMENT_TYPE,
+        data: dashboardAttachmentData,
+      }),
+      meta: {
+        outcome: 'exactMatch',
         updated_at: updatedAt,
-        attributes: dashboardAttributes,
-        references,
+        version: 'v1',
       },
     }),
-  } as jest.Mocked<Pick<SavedObjectsClientContract, 'resolve'>>);
+  } as jest.Mocked<DashboardPluginStart['client']>);
 
 const createLogger = (): Logger =>
   ({
     debug: jest.fn(),
     warn: jest.fn(),
   } as unknown as Logger);
+
+const createRequestHandlerContext = (): RequestHandlerContext =>
+  coreMock.createRequestHandlerContext() as unknown as RequestHandlerContext;
 
 const createAttachment = (
   data: DashboardAttachmentData
@@ -103,17 +95,21 @@ const createAttachment = (
 });
 
 describe('createDashboardAttachmentType', () => {
-  it('resolves dashboard attachments with savedObjectsClient', async () => {
-    const savedObjectsClient = createSavedObjectsClient();
-    const definition = createDashboardAttachmentType({ logger: createLogger() });
+  it('resolves dashboard attachments with dashboard client.read', async () => {
+    const dashboardClient = createDashboardClient();
+    const requestHandlerContext = createRequestHandlerContext();
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => dashboardClient,
+    });
 
     const result = await definition.resolve?.('dashboard-1', {
       request: {} as never,
       spaceId: 'default',
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
+      requestHandlerContext,
     });
 
-    expect(savedObjectsClient.resolve).toHaveBeenCalledWith('dashboard', 'dashboard-1');
+    expect(dashboardClient.read).toHaveBeenCalledWith(requestHandlerContext, 'dashboard-1');
     expect(result).toEqual(
       expect.objectContaining({
         title: 'System Overview',
@@ -124,8 +120,11 @@ describe('createDashboardAttachmentType', () => {
   });
 
   it('returns true when the saved dashboard changed after the snapshot', async () => {
-    const savedObjectsClient = createSavedObjectsClient();
-    const definition = createDashboardAttachmentType({ logger: createLogger() });
+    const dashboardClient = createDashboardClient();
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => dashboardClient,
+    });
 
     const isStale = await definition.isStale?.(
       createAttachment({
@@ -136,7 +135,7 @@ describe('createDashboardAttachmentType', () => {
       {
         request: {} as never,
         spaceId: 'default',
-        savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
+        requestHandlerContext: createRequestHandlerContext(),
       }
     );
 
@@ -144,18 +143,22 @@ describe('createDashboardAttachmentType', () => {
   });
 
   it('returns false when the saved dashboard content matches the attachment', async () => {
-    const savedObjectsClient = createSavedObjectsClient();
-    const definition = createDashboardAttachmentType({ logger: createLogger() });
+    const dashboardClient = createDashboardClient();
+    const requestHandlerContext = createRequestHandlerContext();
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => dashboardClient,
+    });
     const resolvedData = await definition.resolve?.('dashboard-1', {
       request: {} as never,
       spaceId: 'default',
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
+      requestHandlerContext,
     });
 
     const isStale = await definition.isStale?.(createAttachment(resolvedData!), {
       request: {} as never,
       spaceId: 'default',
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
+      requestHandlerContext,
     });
 
     expect(isStale).toBe(false);

@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type { SmlIndexAction, SmlContext } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
@@ -36,6 +37,7 @@ export interface SmlIndexer {
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
     request?: KibanaRequest;
+    requestHandlerContext?: RequestHandlerContext;
   }) => Promise<void>;
 }
 
@@ -61,6 +63,7 @@ class SmlIndexerImpl implements SmlIndexer {
     savedObjectsClient,
     logger: contextLogger,
     request,
+    requestHandlerContext,
   }: {
     originId: string;
     attachmentType: string;
@@ -70,6 +73,7 @@ class SmlIndexerImpl implements SmlIndexer {
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
     request?: KibanaRequest;
+    requestHandlerContext?: RequestHandlerContext;
   }): Promise<void> {
     this.logger.info(
       `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
@@ -99,6 +103,7 @@ class SmlIndexerImpl implements SmlIndexer {
       savedObjectsClient,
       logger: contextLogger,
       request,
+      requestHandlerContext,
     };
 
     this.logger.info(

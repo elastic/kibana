@@ -8,7 +8,6 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { DashboardAgentPlugin } from './plugin';
 import { dashboardManagementSkill } from './skills/dashboard_management_skill';
-import { dashboardSmlType } from './sml_types';
 
 describe('DashboardAgentPlugin', () => {
   it('registers the dashboard attachment type, skill, and SML type', () => {
@@ -31,6 +30,7 @@ describe('DashboardAgentPlugin', () => {
 
     expect(registerAttachmentType).toHaveBeenCalledTimes(1);
     expect(registerSkill).toHaveBeenCalledWith(dashboardManagementSkill);
-    expect(registerSmlType).toHaveBeenCalledWith(dashboardSmlType);
+    expect(registerSmlType).toHaveBeenCalledTimes(1);
+    expect(registerSmlType).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard' }));
   });
 });

@@ -11,7 +11,6 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import deepEqual from 'fast-deep-equal';
-import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardAttachmentDataSchema,
@@ -19,12 +18,12 @@ import {
   isSection,
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
-import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import { toDashboardState } from '../utils/to_dashboard_state';
 
 interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
+  getDashboardClient: () => Promise<DashboardPluginStart['client']>;
 }
 
 /**
@@ -32,6 +31,7 @@ interface CreateDashboardAttachmentTypeOptions {
  */
 export const createDashboardAttachmentType = ({
   logger,
+  getDashboardClient,
 }: CreateDashboardAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
@@ -39,24 +39,17 @@ export const createDashboardAttachmentType = ({
   const fetchDashboard = async (
     origin: string,
     context: AttachmentResolveContext
-  ): Promise<SavedObjectsResolveResponse<DashboardSavedObjectAttributes> | undefined> => {
-    const { savedObjectsClient } = context;
+  ): Promise<Awaited<ReturnType<DashboardPluginStart['client']['read']>> | undefined> => {
+    const { requestHandlerContext } = context;
 
-    if (!savedObjectsClient) {
-      logger.debug(`Cannot fetch dashboard "${origin}": missing savedObjectsClient`);
+    if (!requestHandlerContext) {
+      logger.debug(`Cannot fetch dashboard "${origin}": missing requestHandlerContext`);
       return undefined;
     }
 
-    const dashboard = await savedObjectsClient.resolve<DashboardSavedObjectAttributes>(
-      'dashboard',
-      origin
-    );
-
-    if (dashboard.saved_object.error) {
-      return undefined;
-    }
-
-    return dashboard;
+    const dashboardClient = await getDashboardClient();
+    const dashboard = await dashboardClient.read(requestHandlerContext, origin);
+    return dashboard.meta.error ? undefined : dashboard;
   };
 
   return {
@@ -79,7 +72,7 @@ export const createDashboardAttachmentType = ({
           return undefined;
         }
 
-        return dashboardStateToAttachment(toDashboardState(dashboard.saved_object));
+        return dashboardStateToAttachment(dashboard.data);
       } catch (error) {
         logger.warn(`Failed to resolve dashboard attachment for origin "${origin}": ${error}`);
         return undefined;
@@ -94,7 +87,7 @@ export const createDashboardAttachmentType = ({
       }
       try {
         const dashboard = await fetchDashboard(attachment.origin, context);
-        const dashboardUpdatedAt = dashboard?.saved_object.updated_at;
+        const dashboardUpdatedAt = dashboard?.meta.updated_at;
         if (!dashboard || !dashboardUpdatedAt) {
           return false;
         }
@@ -108,10 +101,7 @@ export const createDashboardAttachmentType = ({
             return false;
           }
           // if the content is equal, we don't consider it stale
-          return !deepEqual(
-            dashboardStateToAttachment(toDashboardState(dashboard.saved_object)),
-            latestVersion.data
-          );
+          return !deepEqual(dashboardStateToAttachment(dashboard.data), latestVersion.data);
         }
         return false;
       } catch (error) {

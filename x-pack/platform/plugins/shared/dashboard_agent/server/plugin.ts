@@ -20,7 +20,7 @@ import type {
 } from './types';
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
-import { dashboardSmlType } from './sml_types';
+import { createDashboardSmlType } from './sml_types';
 
 export class DashboardAgentPlugin
   implements
@@ -38,15 +38,21 @@ export class DashboardAgentPlugin
   }
 
   setup(
-    _coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
+    coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
+    const getDashboardClient = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.dashboard.client;
+    };
+
     setupDeps.agentBuilder.attachments.registerType(
       createDashboardAttachmentType({
         logger: this.logger,
+        getDashboardClient,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
-    setupDeps.agentBuilder.sml.registerType(dashboardSmlType);
+    setupDeps.agentBuilder.sml.registerType(createDashboardSmlType({ getDashboardClient }));
     registerSkills(setupDeps.agentBuilder);
     return {};
   }

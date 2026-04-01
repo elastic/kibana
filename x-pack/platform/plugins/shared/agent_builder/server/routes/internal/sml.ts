@@ -146,6 +146,7 @@ export function registerInternalSmlRoutes({
           sml,
           esClient,
           request,
+          requestHandlerContext: ctx,
           spaceId,
           savedObjectsClient,
           logger,
@@ -172,6 +173,7 @@ export function registerInternalSmlRoutes({
                 request,
                 spaceId,
                 savedObjectsClient,
+                requestHandlerContext: ctx,
               });
 
               return {
