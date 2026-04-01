@@ -26,7 +26,6 @@ export function getAffectedProjectsMoon(
     env: {
       ...process.env,
       MOON_BASE: mergeBase,
-      MOON_NO_ACTIONS: 'true',
     },
     timeout: 30000, // 30 seconds
   });
