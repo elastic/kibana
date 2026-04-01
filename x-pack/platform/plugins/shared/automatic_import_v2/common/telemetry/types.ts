@@ -32,7 +32,6 @@ export enum AIV2TelemetryEventType {
   // Fleet Events
   ManageIntegrationsTableViewed = 'aiv2_manage_integrations_table_viewed',
   UploadIntegrationClicked = 'aiv2_upload_integration_clicked',
-  IntegrationDeleteConfirmed = 'aiv2_integration_delete_confirmed',
   ReviewApproveMenuClicked = 'aiv2_review_approve_menu_clicked',
   IntegrationDownloadZipClicked = 'aiv2_integration_download_zip_clicked',
   ApproveModalCancelClicked = 'aiv2_approve_modal_cancel_clicked',
@@ -100,9 +99,6 @@ export type ReviewApproveMenuClickedPayload = Record<string, never>;
 export type IntegrationDownloadZipClickedPayload = Record<string, never>;
 export type ApproveModalCancelClickedPayload = Record<string, never>;
 export type ApproveModalApproveClickedPayload = Record<string, never>;
-export interface IntegrationDeleteConfirmedPayload {
-  sessionId?: string;
-}
 
 export interface DataStreamDeleteConfirmedPayload {
   sessionId?: string;
@@ -152,8 +148,6 @@ export type AIV2EventPayload<T extends AIV2TelemetryEventType> =
     ? ApproveModalCancelClickedPayload
     : T extends AIV2TelemetryEventType.ApproveModalApproveClicked
     ? ApproveModalApproveClickedPayload
-    : T extends AIV2TelemetryEventType.IntegrationDeleteConfirmed
-    ? IntegrationDeleteConfirmedPayload
     : T extends AIV2TelemetryEventType.DataStreamDeleteConfirmed
     ? DataStreamDeleteConfirmedPayload
     : T extends AIV2TelemetryEventType.DataStreamRefreshConfirmed

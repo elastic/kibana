@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -223,10 +222,6 @@ export const ManageIntegrationsTable: React.FC<{
           `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`,
           { version: '1' }
         );
-        (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-          'aiv2_integration_delete_confirmed',
-          { sessionId: uuidv4() }
-        );
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.fleet.epmList.manageIntegrations.actions.deleteSuccessTitle',
@@ -243,7 +238,7 @@ export const ManageIntegrationsTable: React.FC<{
         throw error;
       }
     },
-    [http, notifications, onRefetch, automaticImportVTwo]
+    [http, notifications, onRefetch]
   );
 
   const fetchIntegrationReviewDetails = useCallback(
