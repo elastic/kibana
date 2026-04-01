@@ -260,7 +260,7 @@ describe('EndpointActionsClient', () => {
     );
   });
 
-  it('should update cases for valid agent ids', async () => {
+  it('should update cases with v2 unified attachment for valid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions({
         endpoint_ids: ['1-2-3'],
@@ -291,7 +291,7 @@ describe('EndpointActionsClient', () => {
     });
   });
 
-  it('should update cases for valid/invalid agent ids', async () => {
+  it('should update cases with v2 unified attachment for valid/invalid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
@@ -314,6 +314,82 @@ describe('EndpointActionsClient', () => {
             ],
           },
           owner: 'securitySolution',
+        },
+      ],
+      caseId: 'case-a',
+    });
+  });
+
+  it('should update cases with v1 legacy attachment for valid agent ids when FF is disabled', async () => {
+    jest
+      .spyOn(classConstructorOptions.endpointService, 'isCasesAttachmentsV2Enabled')
+      .mockReturnValue(false);
+
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions({
+        endpoint_ids: ['1-2-3'],
+        case_ids: ['case-a'],
+      })
+    );
+
+    expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
+      attachments: [
+        {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: expect.any(String),
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment: 'test comment',
+            targets: [
+              {
+                agentType: 'endpoint',
+                endpointId: '1-2-3',
+                hostname: 'Host-ku5jy6j0pw',
+              },
+            ],
+          },
+          externalReferenceStorage: {
+            type: 'elasticSearchDoc',
+          },
+          owner: 'securitySolution',
+          type: 'externalReference',
+        },
+      ],
+      caseId: 'case-a',
+    });
+  });
+
+  it('should update cases with v1 legacy attachment for valid/invalid agent ids when FF is disabled', async () => {
+    jest
+      .spyOn(classConstructorOptions.endpointService, 'isCasesAttachmentsV2Enabled')
+      .mockReturnValue(false);
+
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+    );
+
+    expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
+      attachments: [
+        {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: expect.any(String),
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment:
+              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+            targets: [
+              {
+                agentType: 'endpoint',
+                endpointId: '1-2-3',
+                hostname: 'Host-ku5jy6j0pw',
+              },
+            ],
+          },
+          externalReferenceStorage: {
+            type: 'elasticSearchDoc',
+          },
+          owner: 'securitySolution',
+          type: 'externalReference',
         },
       ],
       caseId: 'case-a',
