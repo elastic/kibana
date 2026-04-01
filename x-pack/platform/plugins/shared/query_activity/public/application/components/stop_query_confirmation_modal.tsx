@@ -54,11 +54,6 @@ export const StopQueryConfirmationModal: React.FC<StopQueryConfirmationModalProp
                   'Canceling this query can’t be undone. It can take a few seconds before the query stops.',
               })}
             </p>
-            <p>
-              {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.bodyFooter', {
-                defaultMessage: 'Are you sure you want to proceed?',
-              })}
-            </p>
           </EuiText>
         </EuiModalBody>
 
