@@ -134,7 +134,7 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
                 data-test-subj="streamsAppPromotionCalloutPromoteButton"
               >
                 {i18n.translate('xpack.streams.significantEvents.promotionCallout.promoteButton', {
-                  defaultMessage: 'Promote',
+                  defaultMessage: 'Create rules',
                 })}
               </EuiButton>
             </EuiFlexItem>

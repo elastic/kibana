@@ -34,7 +34,7 @@ interface RulesTableProps {
   rules: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   searchTerm: string;
-  selectedKnowledgeIndicator: KnowledgeIndicator | null;
+  selectedKnowledgeIndicatorId?: string;
   onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
@@ -43,7 +43,7 @@ export function RulesTable({
   rules,
   occurrencesByQueryId,
   searchTerm,
-  selectedKnowledgeIndicator,
+  selectedKnowledgeIndicatorId,
   onViewDetails,
 }: RulesTableProps) {
   const [selectedRules, setSelectedRules] = useState<KnowledgeIndicator[]>([]);
@@ -113,15 +113,9 @@ export function RulesTable({
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  iconType={
-                    selectedKnowledgeIndicator?.kind === 'query' &&
-                    selectedKnowledgeIndicator.query.id === item.query.id
-                      ? 'minimize'
-                      : 'expand'
-                  }
+                  iconType={selectedKnowledgeIndicatorId === item.query.id ? 'minimize' : 'expand'}
                   aria-label={
-                    selectedKnowledgeIndicator?.kind === 'query' &&
-                    selectedKnowledgeIndicator.query.id === item.query.id
+                    selectedKnowledgeIndicatorId === item.query.id
                       ? MINIMIZE_DETAILS_ARIA_LABEL
                       : VIEW_DETAILS_ARIA_LABEL
                   }
@@ -202,7 +196,7 @@ export function RulesTable({
         ),
       },
     ],
-    [isDeleting, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicator]
+    [isDeleting, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
   );
 
   return (

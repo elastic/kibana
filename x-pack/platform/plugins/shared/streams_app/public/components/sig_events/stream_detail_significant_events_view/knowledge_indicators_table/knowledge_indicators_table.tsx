@@ -28,6 +28,7 @@ import { KnowledgeIndicatorActionsCell } from '../knowledge_indicator_actions_ce
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SparkPlot } from '../../../spark_plot';
 import { TableTitle } from '../../stream_detail_systems/table_title';
+import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 
 interface KnowledgeIndicatorsTableProps {
   definition: Streams.all.Definition;
@@ -36,17 +37,9 @@ interface KnowledgeIndicatorsTableProps {
   searchTerm: string;
   selectedTypes: string[];
   statusFilter: 'active' | 'excluded';
-  selectedKnowledgeIndicator: KnowledgeIndicator | null;
+  selectedKnowledgeIndicatorId?: string;
   onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
-
-const getKnowledgeIndicatorItemId = (knowledgeIndicator: KnowledgeIndicator) => {
-  if (knowledgeIndicator.kind === 'feature') {
-    return `feature:${knowledgeIndicator.feature.uuid}`;
-  }
-
-  return `query:${knowledgeIndicator.query.id}`;
-};
 
 export function KnowledgeIndicatorsTable({
   definition,
@@ -55,7 +48,7 @@ export function KnowledgeIndicatorsTable({
   searchTerm,
   selectedTypes,
   statusFilter,
-  selectedKnowledgeIndicator,
+  selectedKnowledgeIndicatorId,
   onViewDetails,
 }: KnowledgeIndicatorsTableProps) {
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
@@ -146,12 +139,7 @@ export function KnowledgeIndicatorsTable({
               : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
 
           const isExpanded =
-            (knowledgeIndicator.kind === 'feature' &&
-              selectedKnowledgeIndicator?.kind === 'feature' &&
-              selectedKnowledgeIndicator.feature.uuid === knowledgeIndicator.feature.uuid) ||
-            (knowledgeIndicator.kind === 'query' &&
-              selectedKnowledgeIndicator?.kind === 'query' &&
-              selectedKnowledgeIndicator.query.id === knowledgeIndicator.query.id);
+            selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(knowledgeIndicator);
 
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -230,7 +218,7 @@ export function KnowledgeIndicatorsTable({
         ),
       },
     ],
-    [definition, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicator]
+    [definition, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
   );
 
   return (

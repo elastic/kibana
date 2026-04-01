@@ -41,6 +41,7 @@ import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
 import { PromotionCallout } from './promotion_callout/promotion_callout';
 import { SuggestedRulesFlyout } from './suggested_rules_flyout/suggested_rules_flyout';
+import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -152,6 +153,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     [knowledgeIndicators]
   );
   const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
+  const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
+    ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
+    : undefined;
 
   const toggleSelectedKnowledgeIndicator = useCallback((knowledgeIndicator: KnowledgeIndicator) => {
     setSelectedKnowledgeIndicator((currentKnowledgeIndicator) => {
@@ -159,14 +163,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         return knowledgeIndicator;
       }
 
-      const currentId =
-        currentKnowledgeIndicator.kind === 'feature'
-          ? currentKnowledgeIndicator.feature.uuid
-          : currentKnowledgeIndicator.query.id;
-      const nextId =
-        knowledgeIndicator.kind === 'feature'
-          ? knowledgeIndicator.feature.uuid
-          : knowledgeIndicator.query.id;
+      const currentId = getKnowledgeIndicatorItemId(currentKnowledgeIndicator);
+      const nextId = getKnowledgeIndicatorItemId(knowledgeIndicator);
 
       return currentId === nextId ? null : knowledgeIndicator;
     });
@@ -200,12 +198,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem grow={false}>
-          <PromotionCallout
-            streamName={definition.stream.name}
-            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
-          />
-        </EuiFlexItem>
+        <PromotionCallout
+          streamName={definition.stream.name}
+          onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
+        />
 
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
@@ -274,7 +270,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 rules={ruleKnowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
-                selectedKnowledgeIndicator={selectedKnowledgeIndicator}
+                selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
                 onViewDetails={toggleSelectedKnowledgeIndicator}
               />
             ) : (
@@ -285,7 +281,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 searchTerm={debouncedTableSearchValue}
                 selectedTypes={selectedKnowledgeIndicatorTypes}
                 statusFilter={knowledgeIndicatorStatusFilter}
-                selectedKnowledgeIndicator={selectedKnowledgeIndicator}
+                selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
                 onViewDetails={toggleSelectedKnowledgeIndicator}
               />
             )}
