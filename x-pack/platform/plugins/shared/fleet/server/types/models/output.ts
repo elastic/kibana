@@ -361,9 +361,13 @@ const BaseSOSchemaV9 = {
   // ssl is stored as a JSON-serialised string in the SO (binary ES mapping)
   ssl: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  shipper: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  shipper: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })])
+  ),
   allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
-  secrets: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  secrets: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })])
+  ),
 };
 
 // Loose schema used for SO forwardCompatibility at model version 9.
