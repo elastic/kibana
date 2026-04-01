@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageHeader,
+  EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
 import type {
@@ -191,7 +192,7 @@ const NotificationPolicyFormPageContent = ({
         data-test-subj="pageTitle"
       />
       <EuiSpacer size="m" />
-      <div style={{ maxWidth: 750 }}>
+      <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
         <FormProvider {...methods}>
           <NotificationPolicyForm />
         </FormProvider>
@@ -227,7 +228,7 @@ const NotificationPolicyFormPageContent = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </EuiPageTemplate.Section>
     </>
   );
 };
