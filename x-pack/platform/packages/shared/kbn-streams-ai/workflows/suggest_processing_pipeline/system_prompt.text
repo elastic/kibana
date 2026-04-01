@@ -6,13 +6,13 @@ You design ingest pipelines that transform raw log events into clean, well-struc
 
 **Important:** Not all data needs processing. Before designing a pipeline, check if the data is already well-structured:
 
-- If documents already have proper `@timestamp`, `severity_text`, `body.text`, or other schema-compliant fields
+- If documents already have proper `@timestamp`, `{{{severity_field}}}`, `{{{content_field}}}`, or other schema-compliant fields
 - If there's no `event.original` field or raw text that needs parsing
 - If fields are already in the correct format and types
-- If `body.text` contains a simple human-readable message (not a structured log line that needs parsing)
+- If `{{{content_field}}}` contains a simple human-readable message (not a structured log line that needs parsing)
 
 **Do NOT create processors that:**
-- Use grok/dissect patterns that extract a field's entire content unchanged (e.g., dissect `%{body.text}` from `body.text` is a no-op)
+- Use grok/dissect patterns that extract a field's entire content unchanged (e.g., dissect `%{{{content_field}}}` from `{{{content_field}}}` is a no-op)
 - Parse simple messages that don't have embedded structured data
 - Add no-op transformations that don't actually change the data
 

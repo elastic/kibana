@@ -43,7 +43,6 @@ export const registerActionFileDownloadRoutes = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

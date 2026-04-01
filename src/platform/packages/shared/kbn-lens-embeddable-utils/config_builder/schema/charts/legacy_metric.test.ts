@@ -40,7 +40,8 @@ describe('Legacy Metric Schema', () => {
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated.metric.size).toBeUndefined();
-      expect(validated.metric.alignments).toBeUndefined();
+      expect(validated.metric.labels).toBeUndefined();
+      expect(validated.metric.values).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
       expect(validated.metric.color).toBeUndefined();
     });
@@ -53,9 +54,11 @@ describe('Legacy Metric Schema', () => {
           field: 'test_field',
           size: 's',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          alignments: {
-            labels: 'bottom',
-            value: 'right',
+          labels: {
+            alignment: 'bottom',
+          },
+          values: {
+            alignment: 'right',
           },
         },
       } satisfies LegacyMetricInput;
@@ -70,7 +73,8 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'average',
           field: 'temperature',
-          alignments: { labels: 'top', value: 'left' },
+          labels: { alignment: 'top' },
+          values: { alignment: 'left' },
           size: 'l',
           apply_color_to: 'value',
           color: {
@@ -108,9 +112,9 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'count',
           field: 'test_field',
-          alignments: {
+          labels: {
             // @ts-expect-error
-            labels: 'invalid',
+            alignment: 'invalid',
           },
         },
       } satisfies LegacyMetricInput;
@@ -187,10 +191,10 @@ describe('Legacy Metric Schema', () => {
           field: 'sales',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           size: 'xl',
-          alignments: {
-            labels: 'bottom',
-            value: 'right',
+          labels: {
+            alignment: 'bottom',
           },
+          values: { alignment: 'right' },
           apply_color_to: 'background',
           color: {
             type: 'dynamic',
@@ -221,10 +225,8 @@ describe('Legacy Metric Schema', () => {
           operation: 'value',
           column: 'unique_count',
           size: 'xxl',
-          alignments: {
-            labels: 'top',
-            value: 'center',
-          },
+          labels: { alignment: 'top' },
+          values: { alignment: 'center' },
         },
       } satisfies LegacyMetricInput;
 

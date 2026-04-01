@@ -13,15 +13,6 @@ export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
 };
 
-export const API_VERSIONS = {
-  public: {
-    v1: '2023-10-31',
-  },
-  internal: {
-    v2: '2',
-  },
-};
-
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
 // timeout: intentionally excluded from LogExtractionBodyParams
 // TODO: add timeout once we have a way to set it as a task override param

@@ -8,9 +8,8 @@
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { InferenceConnector } from '@kbn/inference-common';
 import type { AssistantStateAnnotation } from './state';
 
 export interface GraphInputs {
@@ -31,7 +30,7 @@ export interface GraphInputs {
 export type AgentState = typeof AssistantStateAnnotation.State;
 
 export interface NodeParamsBase {
-  actionsClient: PublicMethodsOf<ActionsClient>;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   contentReferencesStore: ContentReferencesStore;
