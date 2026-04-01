@@ -203,6 +203,17 @@ describe('transformAlertsOut', () => {
     });
   });
 
+  it('should default missing slo_instance_id to * for pure snake_case items (schema parity)', () => {
+    expect(
+      transformAlertsOut({
+        show_all_group_by_instances: false,
+        slos: [{ slo_id: 'slo-1' }],
+      } as unknown as AlertsEmbeddableState)
+    ).toEqual({
+      slos: [{ slo_id: 'slo-1', slo_instance_id: '*' }],
+    });
+  });
+
   it('should not migrate slo_instance_id when already *', () => {
     expect(
       transformAlertsOut({

@@ -67,8 +67,11 @@ export function transformAlertsOut(storedState: AlertsEmbeddableState): AlertsEm
   const rawSlos =
     state.slos?.map((slo) => {
       const hasLegacy = 'id' in slo || 'instanceId' in slo || 'groupBy' in slo;
-      return { slo_id: mapped.slo_id, slo_instance_id: mapped.slo_instance_id ?? ALL_VALUE };
-      return { slo_id: mapped.slo_id, slo_instance_id: mapped.slo_instance_id };
+      const mapped = hasLegacy ? mapLegacySloItem(slo) : (slo as Partial<SloItem>);
+      return {
+        slo_id: mapped.slo_id ?? '',
+        slo_instance_id: mapped.slo_instance_id ?? ALL_VALUE,
+      };
     }) ?? [];
   const legacyShowAll = state.show_all_group_by_instances ?? state.showAllGroupByInstances ?? false;
   const slos = migrateSlos(rawSlos, legacyShowAll);
