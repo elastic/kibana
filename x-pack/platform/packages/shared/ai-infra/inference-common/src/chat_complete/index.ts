@@ -94,8 +94,6 @@ export type {
   NamedEntityRecognitionRule,
   AnonymizationSettings,
   DeanonymizedMessageData,
-  EffectiveFieldPolicy,
-  EffectivePolicy,
 } from './anonymization';
 
 export { NER_MODEL_ID } from './anonymization';
