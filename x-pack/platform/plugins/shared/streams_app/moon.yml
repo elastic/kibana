@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/stack-connectors-plugin'
   - '@kbn/std'
   - '@kbn/cps'
+  - '@kbn/evals-plugin'
 tags:
   - plugin
   - prod
