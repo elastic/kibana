@@ -21,7 +21,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/share-plugin",
     "@kbn/css-utils",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
     "@kbn/presentation-publishing"
