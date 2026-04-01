@@ -254,68 +254,6 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'Transaction Detail - Legacy waterfall size warning "view in Discover" link opens traces experience',
-      async ({ page, pageObjects, scoutSpace }) => {
-        const transactionDetailParams = {
-          ...APM_TIME_RANGE,
-          transactionName: RICH_TRACE.TRANSACTION_NAME,
-          transactionType: 'request',
-        };
-
-        await spaceTest.step('disable unified waterfall to use legacy waterfall', async () => {
-          await scoutSpace.uiSettings.set({
-            'observability:apmUseUnifiedTraceWaterfall': false,
-          });
-        });
-
-        await spaceTest.step('intercept trace API to force exceedsMax condition', async () => {
-          await page.route('**/internal/apm/traces/**', async (route) => {
-            const url = new URL(route.request().url());
-            url.searchParams.set('maxTraceItems', '2');
-            await route.continue({ url: url.toString() });
-          });
-        });
-
-        await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: transactionDetailParams,
-          });
-
-          // Wait for the legacy waterfall to load, if it doesn't, reload the page and retry.
-          // Legacy waterfall setting should be properly propagated on reload.
-          await page.testSubj
-            .waitForSelector('apmWaterfallTimelineContainer', { timeout: 10000 })
-            .catch(async () => {
-              spaceTest.info().annotations.push({
-                type: 'retry',
-                description:
-                  'Legacy waterfall not detected after navigation, UI setting may not have propagated in time. Reloading page and retrying.',
-              });
-
-              await page.reload();
-              await page.testSubj.waitForSelector('apmWaterfallTimelineContainer', {
-                timeout: 10000,
-              });
-            });
-        });
-
-        await spaceTest.step('waterfall size warning is visible', async () => {
-          await expect(page.testSubj.locator('apmWaterfallSizeWarning')).toBeVisible();
-        });
-
-        await spaceTest.step(
-          'warning "view in Discover" link opens traces experience',
-          async () => {
-            await page.testSubj.locator('apmWaterfallSizeWarningDiscoverLink').click();
-            await expectTracesExperienceEnabled(pageObjects);
-            await page.unrouteAll({ behavior: 'wait' });
-            await scoutSpace.uiSettings.unset('observability:apmUseUnifiedTraceWaterfall');
-          }
-        );
-      }
-    );
-
-    spaceTest(
       'Transaction Detail - Unified waterfall size warning "view in Discover" link opens traces experience',
       async ({ page, pageObjects }) => {
         const transactionDetailParams = {
