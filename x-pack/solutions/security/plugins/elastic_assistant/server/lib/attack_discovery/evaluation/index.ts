@@ -17,10 +17,9 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getConnectorDefaultModel } from '@kbn/inference-common';
 
-import type { CombinedPrompts } from '../graphs/default_attack_discovery_graph/prompts';
+import type { CombinedPrompts, DefaultAttackDiscoveryGraph } from '@kbn/discoveries';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
 import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
-import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
 import { getLlmType } from '../../../routes/utils';
 import { runEvaluations } from './run_evaluations';
 import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';

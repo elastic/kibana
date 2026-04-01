@@ -104,6 +104,9 @@
     "@kbn/agent-builder-plugin",
     "@kbn/cloud-plugin",
     "@kbn/controls-constants",
+    "@kbn/ai-assistant-common",
+    "@kbn/attack-discovery-schedules-common",
+    "@kbn/discoveries"
   ],
   "exclude": [
     "target/**/*",

@@ -13,7 +13,7 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { InferenceConnector } from '@kbn/inference-common';
 
 import { evaluateAttackDiscovery } from '.';
-import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
+import type { DefaultAttackDiscoveryGraph } from '@kbn/discoveries';
 import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { mockExperimentConnector } from './__mocks__/mock_experiment_connector';
 import { getLlmType } from '../../../routes/utils';

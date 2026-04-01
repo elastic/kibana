@@ -34,6 +34,18 @@ components:
         discoveries:
           type: number
           description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
+        duplicates_dropped_count:
+          type: integer
+          description: The number of attack discoveries dropped as duplicates during the persist step
+        generated_count:
+          type: integer
+          description: The number of attack discoveries generated before deduplication and hallucination filtering
+        hallucinations_filtered_count:
+          type: integer
+          description: The number of attack discoveries filtered as hallucinations during the validation step
+        persisted_count:
+          type: integer
+          description: The number of attack discoveries successfully persisted after deduplication and hallucination filtering
         end:
           type: string
           description: When generation ended (max event.end)
@@ -43,6 +55,12 @@ components:
         loading_message:
           type: string
           description: Generation loading message (kibana.alert.rule.execution.status)
+        error_category:
+          type: string
+          description: Structured error category from server classification (optional; absent for successful generations)
+        failed_workflow_id:
+          type: string
+          description: Workflow ID that caused the failure (optional; absent for successful generations)
         reason:
           type: string
           description: Reason for failed generations (event.reason)
@@ -58,3 +76,50 @@ components:
             - failed
             - started
             - succeeded
+        step_event_actions:
+          type: array
+          description: Workflow step lifecycle actions (filtered event.action values) used to infer stubbed per-step execution status
+          items:
+            type: string
+        workflow_executions:
+          $ref: '#/components/schemas/WorkflowExecutionsTracking'
+          description: Workflow execution tracking for alert retrieval, generation, and validation workflows
+        workflow_id:
+          type: string
+          description: The workflow definition ID for deep linking
+        workflow_run_id:
+          type: string
+          description: The workflow execution ID for monitoring
+
+    WorkflowExecutionReference:
+      type: object
+      required:
+        - workflowId
+        - workflowRunId
+      properties:
+        workflowId:
+          type: string
+          description: The workflow definition ID
+        workflowName:
+          type: string
+          description: The human-readable workflow name (optional; used by the UI to display a label)
+        workflowRunId:
+          type: string
+          description: The workflow execution ID
+
+    WorkflowExecutionsTracking:
+      type: object
+      description: Workflow execution tracking for manual orchestration
+      properties:
+        alertRetrieval:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+          description: Alert retrieval workflow executions (one per workflow invoked)
+        generation:
+          $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true
+        validation:
+          $ref: '#/components/schemas/WorkflowExecutionReference'
+          nullable: true

@@ -16,6 +16,35 @@
 
 import { z } from '@kbn/zod/v4';
 
+export type WorkflowExecutionReference = z.infer<typeof WorkflowExecutionReference>;
+export const WorkflowExecutionReference = z.object({
+  /**
+   * The workflow definition ID
+   */
+  workflowId: z.string(),
+  /**
+   * The human-readable workflow name (optional; used by the UI to display a label)
+   */
+  workflowName: z.string().optional(),
+  /**
+   * The workflow execution ID
+   */
+  workflowRunId: z.string(),
+});
+
+/**
+ * Workflow execution tracking for manual orchestration
+ */
+export type WorkflowExecutionsTracking = z.infer<typeof WorkflowExecutionsTracking>;
+export const WorkflowExecutionsTracking = z.object({
+  /**
+   * Alert retrieval workflow executions (one per workflow invoked)
+   */
+  alertRetrieval: z.array(WorkflowExecutionReference).nullable().optional(),
+  generation: WorkflowExecutionReference.nullable().optional(),
+  validation: WorkflowExecutionReference.nullable().optional(),
+});
+
 export type AttackDiscoveryGeneration = z.infer<typeof AttackDiscoveryGeneration>;
 export const AttackDiscoveryGeneration = z.object({
   /**
@@ -46,6 +75,22 @@ export const AttackDiscoveryGeneration = z.object({
    */
   discoveries: z.number(),
   /**
+   * The number of attack discoveries dropped as duplicates during the persist step
+   */
+  duplicates_dropped_count: z.number().int().optional(),
+  /**
+   * The number of attack discoveries generated before deduplication and hallucination filtering
+   */
+  generated_count: z.number().int().optional(),
+  /**
+   * The number of attack discoveries filtered as hallucinations during the validation step
+   */
+  hallucinations_filtered_count: z.number().int().optional(),
+  /**
+   * The number of attack discoveries successfully persisted after deduplication and hallucination filtering
+   */
+  persisted_count: z.number().int().optional(),
+  /**
    * When generation ended (max event.end)
    */
   end: z.string().optional(),
@@ -58,6 +103,14 @@ export const AttackDiscoveryGeneration = z.object({
    */
   loading_message: z.string(),
   /**
+   * Structured error category from server classification (optional; absent for successful generations)
+   */
+  error_category: z.string().optional(),
+  /**
+   * Workflow ID that caused the failure (optional; absent for successful generations)
+   */
+  failed_workflow_id: z.string().optional(),
+  /**
    * Reason for failed generations (event.reason)
    */
   reason: z.string().optional(),
@@ -69,4 +122,20 @@ export const AttackDiscoveryGeneration = z.object({
    * The status of the attack discovery generation
    */
   status: z.enum(['canceled', 'dismissed', 'failed', 'started', 'succeeded']),
+  /**
+   * Workflow step lifecycle actions (filtered event.action values) used to infer stubbed per-step execution status
+   */
+  step_event_actions: z.array(z.string()).optional(),
+  /**
+   * Workflow execution tracking for alert retrieval, generation, and validation workflows
+   */
+  workflow_executions: WorkflowExecutionsTracking.optional(),
+  /**
+   * The workflow definition ID for deep linking
+   */
+  workflow_id: z.string().optional(),
+  /**
+   * The workflow execution ID for monitoring
+   */
+  workflow_run_id: z.string().optional(),
 });

@@ -93,10 +93,19 @@ export const updateAttackDiscoverySchedulesRoute = (
             });
           }
 
+          // Read the existing schedule to preserve internal fields not exposed by the public API
+          const existingSchedule = await dataClient.getSchedule(id);
+
           // Transform API format update properties to internal format
           const internalScheduleData = transformAttackDiscoveryScheduleUpdatePropsFromApi(
             request.body
           );
+
+          // Preserve workflowConfig if it exists on the existing schedule — rulesClient.update()
+          // does a full params replacement, so omitting it would silently strip workflow-mode config
+          if (existingSchedule.params.workflowConfig != null) {
+            internalScheduleData.params.workflowConfig = existingSchedule.params.workflowConfig;
+          }
 
           // Add the actual id from the request params
           const scheduleDataWithId = {

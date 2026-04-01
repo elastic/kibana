@@ -33,6 +33,10 @@ import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
+import {
+  AttackDiscoveryScheduleDataClient,
+  type CreateAttackDiscoveryScheduleDataClientParams,
+} from '@kbn/attack-discovery-schedules-common';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -68,8 +72,6 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
-import type { CreateAttackDiscoveryScheduleDataClientParams } from '../lib/attack_discovery/schedules/data_client';
-import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 import {
   ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE,
   ANONYMIZATION_FIELDS_INDEX_PATTERN,
@@ -760,6 +762,7 @@ export class AIAssistantService {
   ): Promise<AttackDiscoveryScheduleDataClient | null> {
     return new AttackDiscoveryScheduleDataClient({
       actionsClient: opts.actionsClient,
+      filterTags: opts.filterTags,
       logger: opts.logger,
       rulesClient: opts.rulesClient,
     });

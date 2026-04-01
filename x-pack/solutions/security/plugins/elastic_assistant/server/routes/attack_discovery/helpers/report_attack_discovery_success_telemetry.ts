@@ -29,6 +29,7 @@ export const reportAttackDiscoverySuccessTelemetry = ({
   anonymizedAlerts,
   apiConfig,
   attackDiscoveries,
+  duplicatesDroppedCount,
   hasFilter,
   end,
   logger,
@@ -40,6 +41,7 @@ export const reportAttackDiscoverySuccessTelemetry = ({
   anonymizedAlerts: Document[];
   apiConfig: ApiConfig;
   attackDiscoveries: AttackDiscovery[] | null;
+  duplicatesDroppedCount?: number;
   end?: string;
   hasFilter: boolean;
   latestReplacements: Replacements;
@@ -60,6 +62,7 @@ export const reportAttackDiscoverySuccessTelemetry = ({
       alertsContextCount,
       apiConfig,
       attackDiscoveries,
+      duplicatesDroppedCount,
       durationMs,
       end,
       hasFilter,

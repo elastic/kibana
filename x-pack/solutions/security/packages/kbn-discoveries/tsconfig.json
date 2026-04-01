@@ -1,0 +1,37 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/actions-plugin",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/core",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/datemath",
+    "@kbn/elastic-assistant-common",
+    "@kbn/event-log-plugin",
+    "@kbn/langchain",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/rule-data-utils",
+    "@kbn/discoveries-schemas",
+    "@kbn/spaces-plugin",
+    "@kbn/utility-types",
+    "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
+    "@kbn/zod"
+  ]
+}

@@ -53,6 +53,11 @@ export {
 } from './attack_discovery/routes/public/schedules/schedules.gen';
 
 export { AttackDiscoveryApiAlert } from './attack_discovery/attack_discovery_api_alert.gen';
+export {
+  AttackDiscoveryGeneration,
+  WorkflowExecutionReference,
+  WorkflowExecutionsTracking,
+} from './attack_discovery/generation.gen';
 
 export {
   AttackDiscoveryFindRequestQuery,

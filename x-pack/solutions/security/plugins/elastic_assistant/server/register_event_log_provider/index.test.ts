@@ -8,10 +8,7 @@
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 
 import { registerEventLogProvider } from '.';
-import {
-  ATTACK_DISCOVERY_EVENT_ACTIONS,
-  ATTACK_DISCOVERY_EVENT_PROVIDER,
-} from '../../common/constants';
+import { ATTACK_DISCOVERY_EVENT_ACTIONS, ATTACK_DISCOVERY_EVENT_PROVIDER } from '@kbn/discoveries';
 
 describe('registerEventLogProvider', () => {
   let eventLog: IEventLogService;

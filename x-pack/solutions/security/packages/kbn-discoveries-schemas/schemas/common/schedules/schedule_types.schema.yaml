@@ -1,0 +1,357 @@
+openapi: 3.0.0
+info:
+  title: Common Attack Discovery Schedule Types
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    AttackDiscoveryApiConfig:
+      type: object
+      description: LLM API configuration for attack discovery schedules
+      required:
+        - connector_id
+        - action_type_id
+      properties:
+        connector_id:
+          type: string
+          description: Connector ID
+        action_type_id:
+          type: string
+          description: Action type ID
+        default_system_prompt_id:
+          type: string
+          description: Default system prompt ID
+        provider:
+          $ref: '../../common_attributes.schema.yaml#/components/schemas/Provider'
+          description: Provider
+        model:
+          type: string
+          description: Model
+        name:
+          type: string
+          description: The name of the connector
+
+    WorkflowConfig:
+      type: object
+      description: Workflow configuration for alert retrieval and validation
+      properties:
+        alert_retrieval_workflow_ids:
+          type: array
+          description: Array of user-created alert retrieval workflow IDs to execute
+          items:
+            type: string
+          default: []
+        default_alert_retrieval_mode:
+          type: string
+          description: Controls how the built-in default alert retrieval workflow operates
+          enum:
+            - disabled
+            - esql
+            - custom_query
+            - provided
+          default: custom_query
+        esql_query:
+          type: string
+          description: ES|QL query for alert retrieval (required when default_alert_retrieval_mode is 'esql')
+        provided_context:
+          type: array
+          description: Pre-formatted alert context strings to use when default_alert_retrieval_mode is 'provided'
+          items:
+            type: string
+        validation_workflow_id:
+          type: string
+          description: ID of the validation workflow to use (or 'default' for built-in)
+          default: default
+
+    AttackDiscoveryScheduleParams:
+      type: object
+      description: Attack discovery schedule configuration parameters
+      required:
+        - alerts_index_pattern
+        - api_config
+        - size
+      properties:
+        alerts_index_pattern:
+          description: The index pattern to get alerts from
+          type: string
+        api_config:
+          description: LLM API configuration
+          $ref: '#/components/schemas/AttackDiscoveryApiConfig'
+        combined_filter:
+          type: object
+          description: Combined filter for alert retrieval
+          additionalProperties: true
+        end:
+          type: string
+          description: End time for alert retrieval
+        filters:
+          $ref: '#/components/schemas/Filters'
+        query:
+          $ref: '#/components/schemas/Query'
+        size:
+          type: number
+          description: Maximum number of alerts to retrieve
+        start:
+          type: string
+          description: Start time for alert retrieval
+        workflow_config:
+          $ref: '#/components/schemas/WorkflowConfig'
+          description: Workflow configuration for alert retrieval and validation
+
+    Query:
+      type: object
+      description: A query condition to filter alerts
+      required:
+        - query
+        - language
+      properties:
+        query:
+          oneOf:
+            - type: string
+            - type: object
+              additionalProperties: true
+        language:
+          type: string
+
+    Filters:
+      description: The filter array used to define conditions for alert selection. Defaults to an empty array.
+      type: array
+      items: {}
+
+    IntervalSchedule:
+      type: object
+      required:
+        - interval
+      properties:
+        interval:
+          description: The schedule interval
+          type: string
+
+    ScheduleActionThrottle:
+      description: Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
+      type: string
+      pattern: '^[1-9]\d*[smhd]$'
+      example: '1h'
+
+    ScheduleActionNotifyWhen:
+      type: string
+      enum:
+        - 'onActiveAlert'
+        - 'onThrottleInterval'
+        - 'onActionGroupChange'
+      description: 'The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`'
+
+    ScheduleActionFrequency:
+      type: object
+      description: The action frequency defines when the action runs.
+      required:
+        - summary
+        - notify_when
+        - throttle
+      properties:
+        summary:
+          type: boolean
+          description: Whether to send a summary notification about all generated alerts
+        notify_when:
+          $ref: '#/components/schemas/ScheduleActionNotifyWhen'
+        throttle:
+          $ref: '#/components/schemas/ScheduleActionThrottle'
+          nullable: true
+
+    ScheduleActionAlertsFilter:
+      type: object
+      additionalProperties: true
+
+    ScheduleActionParams:
+      type: object
+      description: Object containing the allowed connector fields, which varies according to the connector type.
+      additionalProperties: true
+
+    ScheduleActionGroup:
+      type: string
+      description: Groups actions by use cases. Use `default` for alert notifications.
+
+    ScheduleActionId:
+      type: string
+      description: The connector ID.
+
+    ScheduleGeneralAction:
+      type: object
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
+      properties:
+        action_type_id:
+          type: string
+          description: The action type used for sending notifications.
+        group:
+          $ref: '#/components/schemas/ScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/ScheduleActionId'
+        params:
+          $ref: '#/components/schemas/ScheduleActionParams'
+        uuid:
+          $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        alerts_filter:
+          $ref: '#/components/schemas/ScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/ScheduleActionFrequency'
+
+    ScheduleSystemAction:
+      type: object
+      required:
+        - action_type_id
+        - id
+        - params
+      properties:
+        action_type_id:
+          type: string
+          description: The action type used for sending notifications.
+        id:
+          $ref: '#/components/schemas/ScheduleActionId'
+        params:
+          $ref: '#/components/schemas/ScheduleActionParams'
+        uuid:
+          $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+
+    ScheduleAction:
+      oneOf:
+        - $ref: '#/components/schemas/ScheduleGeneralAction'
+        - $ref: '#/components/schemas/ScheduleSystemAction'
+
+    ScheduleExecutionStatus:
+      type: string
+      description: A schedule execution status
+      enum:
+        - ok
+        - active
+        - error
+        - unknown
+        - warning
+
+    ScheduleExecution:
+      type: object
+      description: Schedule execution information
+      required:
+        - date
+        - status
+        - last_duration
+      properties:
+        date:
+          description: Date of the execution
+          type: string
+          format: date-time
+        duration:
+          description: Duration of the execution
+          type: number
+        status:
+          description: Status of the execution
+          $ref: '#/components/schemas/ScheduleExecutionStatus'
+        message:
+          type: string
+
+    AttackDiscoverySchedule:
+      type: object
+      description: An attack discovery schedule
+      required:
+        - id
+        - name
+        - created_by
+        - updated_by
+        - created_at
+        - updated_at
+        - enabled
+        - params
+        - schedule
+        - actions
+      properties:
+        id:
+          description: UUID of the schedule
+          type: string
+        name:
+          description: The name of the schedule
+          type: string
+        created_by:
+          description: The name of the user that created the schedule
+          type: string
+        updated_by:
+          description: The name of the user that updated the schedule
+          type: string
+        created_at:
+          description: The date the schedule was created
+          type: string
+          format: date-time
+        updated_at:
+          description: The date the schedule was updated
+          type: string
+          format: date-time
+        enabled:
+          description: Indicates whether the schedule is enabled
+          type: boolean
+        params:
+          description: The schedule configuration parameters
+          $ref: '#/components/schemas/AttackDiscoveryScheduleParams'
+        schedule:
+          description: The schedule interval
+          $ref: '#/components/schemas/IntervalSchedule'
+        actions:
+          description: The schedule actions
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleAction'
+        last_execution:
+          description: The schedule last execution summary
+          $ref: '#/components/schemas/ScheduleExecution'
+
+    AttackDiscoveryScheduleCreateProps:
+      type: object
+      description: Properties for creating an attack discovery schedule
+      required:
+        - name
+        - params
+        - schedule
+      properties:
+        name:
+          description: The name of the schedule
+          type: string
+        enabled:
+          description: Indicates whether the schedule is enabled
+          type: boolean
+        params:
+          description: The schedule configuration parameters
+          $ref: '#/components/schemas/AttackDiscoveryScheduleParams'
+        schedule:
+          description: The schedule interval
+          $ref: '#/components/schemas/IntervalSchedule'
+        actions:
+          description: The schedule actions
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleAction'
+
+    AttackDiscoveryScheduleUpdateProps:
+      type: object
+      description: Properties for updating an attack discovery schedule
+      required:
+        - name
+        - params
+        - schedule
+        - actions
+      properties:
+        name:
+          description: The name of the schedule
+          type: string
+        params:
+          description: The schedule configuration parameters
+          $ref: '#/components/schemas/AttackDiscoveryScheduleParams'
+        schedule:
+          description: The schedule interval
+          $ref: '#/components/schemas/IntervalSchedule'
+        actions:
+          description: The schedule actions
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleAction'

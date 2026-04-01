@@ -21,6 +21,7 @@ export const reportAttackDiscoveryGenerationSuccess = ({
   alertsContextCount,
   apiConfig,
   attackDiscoveries,
+  duplicatesDroppedCount,
   durationMs,
   end,
   hasFilter,
@@ -32,6 +33,7 @@ export const reportAttackDiscoveryGenerationSuccess = ({
   alertsContextCount: number;
   apiConfig: ApiConfig;
   attackDiscoveries: AttackDiscovery[] | null;
+  duplicatesDroppedCount?: number;
   durationMs: number;
   end?: string;
   hasFilter: boolean;
@@ -52,6 +54,7 @@ export const reportAttackDiscoveryGenerationSuccess = ({
     configuredAlertsCount: size,
     dateRangeDuration,
     discoveriesGenerated: attackDiscoveries?.length ?? 0,
+    duplicatesDroppedCount,
     durationMs,
     hasFilter,
     isDefaultDateRange,

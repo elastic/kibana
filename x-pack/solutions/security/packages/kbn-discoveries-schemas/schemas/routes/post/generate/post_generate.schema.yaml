@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: Post Generate Internal API endpoint
+  version: '2023-10-31'
+paths:
+  /internal/attack_discovery/_generate:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PostGenerate
+      x-state: Technical Preview
+      summary: Kick off attack discovery pipeline generation
+      description: >-
+        Internal API that kicks off the Attack Discovery pipeline
+        (retrieve → generate → validate). Returns an execution UUID for tracking.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - alerts_index_pattern
+                - api_config
+              properties:
+                alerts_index_pattern:
+                  type: string
+                  description: Alerts index pattern for retrieval
+                replacements:
+                  $ref: '../../../common_attributes.schema.yaml#/components/schemas/Replacements'
+                  description: Anonymization replacements map
+                api_config:
+                  $ref: '../../../common_attributes.schema.yaml#/components/schemas/ApiConfig'
+                  description: Connector configuration
+                end:
+                  type: string
+                  description: End time for alert retrieval
+                filter:
+                  type: object
+                  description: Query filter for alert retrieval
+                  additionalProperties: true
+                size:
+                  type: integer
+                  description: Maximum number of alerts to retrieve
+                  default: 10
+                start:
+                  type: string
+                  description: Start time for alert retrieval
+                source:
+                  type: string
+                  description: How this generation was triggered
+                  enum:
+                    - action
+                    - interactive
+                    - scheduled
+                  default: interactive
+                source_metadata:
+                  type: object
+                  description: Metadata about the trigger source (e.g. rule details for action/scheduled)
+                  properties:
+                    action_execution_uuid:
+                      type: string
+                      description: UUID of the alerting action execution
+                    rule_id:
+                      type: string
+                      description: ID of the alerting rule that triggered this generation
+                    rule_name:
+                      type: string
+                      description: Name of the alerting rule that triggered this generation
+                workflow_config:
+                  type: object
+                  description: Optional workflow configuration for alert retrieval and validation
+                  properties:
+                    alert_retrieval_workflow_ids:
+                      type: array
+                      description: Array of user-created alert retrieval workflow IDs to execute
+                      items:
+                        type: string
+                      default: []
+                    default_alert_retrieval_mode:
+                      type: string
+                      description: Controls how the built-in default alert retrieval workflow operates
+                      enum:
+                        - disabled
+                        - esql
+                        - custom_query
+                        - provided
+                      default: custom_query
+                    provided_context:
+                      type: array
+                      description: Pre-supplied alert context (required when default_alert_retrieval_mode is 'provided')
+                      items:
+                        type: string
+                      minItems: 1
+                    esql_query:
+                      type: string
+                      description: ES|QL query for alert retrieval (required when default_alert_retrieval_mode is 'esql')
+                    validation_workflow_id:
+                      type: string
+                      description: ID of the validation workflow to use (or 'default' for built-in)
+                      default: default
+      responses:
+        '200':
+          description: Generation completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - execution_uuid
+                properties:
+                  execution_uuid:
+                    type: string
+                    format: uuid
+                    description: Unique identifier for this generation execution
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - status_code
+                  - error
+                  - message
+components:
+  x-codegen-enabled: true

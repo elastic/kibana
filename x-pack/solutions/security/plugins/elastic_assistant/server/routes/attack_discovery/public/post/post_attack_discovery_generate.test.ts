@@ -104,6 +104,9 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
     context.elasticAssistant.actions = actionsMock.createStart();
+    (context.elasticAssistant.inference.getClient as jest.Mock).mockReturnValue({
+      chatComplete: jest.fn(),
+    });
     (context.elasticAssistant.inference.getConnectorById as jest.Mock).mockResolvedValue({
       type: mockApiConfig.actionTypeId,
       connectorId: mockApiConfig.connectorId,
@@ -282,6 +285,24 @@ describe('postAttackDiscoveryGenerateRoute', () => {
       expect(response.body).toEqual({
         execution_uuid: 'static-uuid',
       });
+    });
+
+    it('calls generateAndUpdateAttackDiscoveries with an inferenceClient', async () => {
+      const { generateAndUpdateAttackDiscoveries } = jest.requireMock(
+        '../../helpers/generate_and_update_discoveries'
+      );
+      generateAndUpdateAttackDiscoveries.mockClear();
+
+      await server.inject(
+        postAttackDiscoveryRequest(mockRequestBody),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(generateAndUpdateAttackDiscoveries).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inferenceClient: expect.objectContaining({ chatComplete: expect.any(Function) }),
+        })
+      );
     });
 
     it('always calls generateAndUpdateAttackDiscoveries with withReplacements: false for the _generate route', async () => {

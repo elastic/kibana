@@ -60,6 +60,21 @@ export const AttackDiscoveryScheduleParams = z.object({
   combinedFilter: z.object({}).catchall(z.unknown()).optional(),
   size: z.number(),
   start: z.string().optional(),
+  /**
+      * Workflow configuration that signals this schedule should use the orchestrator workflow executor, enabling tracking events (alert retrieval, generation, validation) to be written to the event log.
+
+      */
+  workflowConfig: z
+    .object({
+      alertRetrievalWorkflowIds: z.array(z.string()).optional().default([]),
+      defaultAlertRetrievalMode: z
+        .enum(['disabled', 'esql', 'custom_query', 'provided'])
+        .optional()
+        .default('custom_query'),
+      esqlQuery: z.string().optional(),
+      validationWorkflowId: z.string().optional().default('default'),
+    })
+    .optional(),
 });
 
 export type IntervalSchedule = z.infer<typeof IntervalSchedule>;

@@ -14,12 +14,12 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 
+import type { DefaultAttackDiscoveryGraph } from '@kbn/discoveries';
 import type { AttackDiscoveryGraphState } from '../../../langchain/graphs';
 import { getEvaluatorLlm } from '../helpers/get_evaluator_llm';
 import { getCustomEvaluator } from '../helpers/get_custom_evaluator';
 import { getDefaultPromptTemplate } from '../helpers/get_custom_evaluator/get_default_prompt_template';
 import { getGraphInputOverrides } from '../helpers/get_graph_input_overrides';
-import type { DefaultAttackDiscoveryGraph } from '../../graphs/default_attack_discovery_graph';
 
 /**
  * Runs an evaluation for each graph so they show up separately (resulting in

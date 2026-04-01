@@ -14,7 +14,7 @@ import { serverMock } from '../../../../../__mocks__/server';
 import { requestContextMock } from '../../../../../__mocks__/request_context';
 import { updateAttackDiscoverySchedulesRequest } from '../../../../../__mocks__/request';
 import { getAttackDiscoveryScheduleMock } from '../../../../../__mocks__/attack_discovery_schedules.mock';
-import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
 
 jest.mock('../../../../helpers', () => ({
@@ -25,10 +25,11 @@ const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
 clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
+const getAttackDiscoverySchedule = jest.fn();
 const updateAttackDiscoverySchedule = jest.fn();
 const mockSchedulingDataClient = {
   findSchedules: jest.fn(),
-  getSchedule: jest.fn(),
+  getSchedule: getAttackDiscoverySchedule,
   createSchedule: jest.fn(),
   updateSchedule: updateAttackDiscoverySchedule,
   deleteSchedule: jest.fn(),
@@ -68,6 +69,8 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
       isSuccess: true,
     });
     updateAttackDiscoverySchedulesRoute(server.router);
+    // Default: existing schedule has no workflowConfig (pre-FF schedule)
+    getAttackDiscoverySchedule.mockResolvedValue(getAttackDiscoveryScheduleMock());
     updateAttackDiscoverySchedule.mockResolvedValue(
       getAttackDiscoveryScheduleMock({
         params: {
@@ -120,5 +123,98 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
       },
       status_code: 500,
     });
+  });
+
+  it('calls getSchedule before updateSchedule to read existing workflowConfig', async () => {
+    await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-4', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
+
+    const getOrder = getAttackDiscoverySchedule.mock.invocationCallOrder[0];
+    const updateOrder = updateAttackDiscoverySchedule.mock.invocationCallOrder[0];
+    expect(getAttackDiscoverySchedule).toHaveBeenCalledWith('schedule-4');
+    expect(getOrder).toBeLessThan(updateOrder);
+  });
+
+  it('preserves existing workflowConfig when updating a workflow-mode schedule', async () => {
+    const mockWorkflowConfig = {
+      alertRetrievalWorkflowIds: ['workflow-id-1'],
+      defaultAlertRetrievalMode: 'esql' as const,
+      validationWorkflowId: 'validation-1',
+    };
+    getAttackDiscoverySchedule.mockResolvedValue(
+      getAttackDiscoveryScheduleMock({
+        params: {
+          alertsIndexPattern: '.alerts-security.alerts-default',
+          apiConfig: {
+            actionTypeId: '.gen-ai',
+            connectorId: 'gpt-4o',
+            name: 'Mock GPT-4o',
+          },
+          end: 'now',
+          size: 100,
+          start: 'now-24h',
+          workflowConfig: mockWorkflowConfig,
+        },
+      })
+    );
+
+    await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-5', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(updateAttackDiscoverySchedule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          workflowConfig: mockWorkflowConfig,
+        }),
+      })
+    );
+  });
+
+  it('does not set workflowConfig when updating a pre-FF schedule without workflowConfig', async () => {
+    // Default mock returns schedule without workflowConfig (set in beforeEach)
+    await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-6', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
+
+    const updateCall = updateAttackDiscoverySchedule.mock.calls[0][0];
+    expect(updateCall.params.workflowConfig).toBeUndefined();
+  });
+
+  it('returns 200 and does not expose workflowConfig in the response body', async () => {
+    const mockWorkflowConfig = {
+      alertRetrievalWorkflowIds: ['workflow-id-2'],
+      defaultAlertRetrievalMode: 'esql' as const,
+      validationWorkflowId: 'validation-2',
+    };
+    getAttackDiscoverySchedule.mockResolvedValue(
+      getAttackDiscoveryScheduleMock({
+        params: {
+          alertsIndexPattern: '.alerts-security.alerts-default',
+          apiConfig: {
+            actionTypeId: '.gen-ai',
+            connectorId: 'gpt-4o',
+            name: 'Mock GPT-4o',
+          },
+          end: 'now',
+          size: 100,
+          start: 'now-24h',
+          workflowConfig: mockWorkflowConfig,
+        },
+      })
+    );
+
+    const response = await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-7', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body).not.toHaveProperty('params.workflowConfig');
+    expect(response.body).not.toHaveProperty('params.workflow_config');
   });
 });

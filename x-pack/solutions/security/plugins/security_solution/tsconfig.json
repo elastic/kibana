@@ -291,5 +291,7 @@
     "@kbn/anonymization-common",
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
+    "@kbn/discoveries",
+    "@kbn/discoveries-schemas"
   ]
 }

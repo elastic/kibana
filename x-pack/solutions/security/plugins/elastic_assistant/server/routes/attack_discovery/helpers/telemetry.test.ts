@@ -131,5 +131,34 @@ describe('telemetry', () => {
         scheduleInfo: { id: 'fake-id-2', interval: '32m', actions: ['.slack', '.jest'] },
       });
     });
+
+    it('should report success event with duplicatesDroppedCount when provided', () => {
+      reportAttackDiscoveryGenerationSuccess({
+        alertsContextCount: 2,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        duplicatesDroppedCount: 3,
+        durationMs: 123000,
+        end: 'now',
+        hasFilter: false,
+        size: 10,
+        start: 'now-24h',
+        telemetry: mockTelemetry,
+      });
+
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 18,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 24,
+        discoveriesGenerated: 2,
+        duplicatesDroppedCount: 3,
+        durationMs: 123000,
+        hasFilter: false,
+        isDefaultDateRange: true,
+        model: 'gpt-4',
+      });
+    });
   });
 });

@@ -16,16 +16,17 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { Document } from '@langchain/core/documents';
 
-import type { AttackDiscoveryGraphState } from '../../../../../../lib/langchain/graphs';
-import { getDefaultAttackDiscoveryGraph } from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph';
+import type { AttackDiscoveryGraphState } from '@kbn/discoveries';
 import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
-} from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/constants';
+  getDefaultAttackDiscoveryGraph,
+} from '@kbn/discoveries';
+
+import { getAttackDiscoveryPrompts } from '../../../../../../lib/attack_discovery/prompts';
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 import { getLlmType } from '../../../../../utils';
-import { getAttackDiscoveryPrompts } from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
 
 export const invokeAttackDiscoveryGraph = async ({
   actionsClient,

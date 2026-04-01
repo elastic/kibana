@@ -94,6 +94,31 @@ components:
           type: number
         start:
           type: string
+        workflowConfig:
+          description: >
+            Workflow configuration that signals this schedule should use the
+            orchestrator workflow executor, enabling tracking events (alert
+            retrieval, generation, validation) to be written to the event log.
+          type: object
+          properties:
+            alertRetrievalWorkflowIds:
+              type: array
+              items:
+                type: string
+              default: []
+            defaultAlertRetrievalMode:
+              type: string
+              enum:
+                - disabled
+                - esql
+                - custom_query
+                - provided
+              default: custom_query
+            esqlQuery:
+              type: string
+            validationWorkflowId:
+              type: string
+              default: default
 
     Query:
       type: object

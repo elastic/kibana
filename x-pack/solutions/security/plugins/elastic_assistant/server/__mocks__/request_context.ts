@@ -33,7 +33,7 @@ import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import type { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import type { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { authenticatedUser } from './user';
-import type { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();

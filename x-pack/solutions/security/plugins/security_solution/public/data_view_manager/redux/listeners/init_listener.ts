@@ -160,6 +160,10 @@ export const createInitListener = (
             }
 
             if (scope === PageScope.attacks) {
+              if (!attackDataView.id) {
+                return;
+              }
+
               return listenerApi.dispatch(
                 selectDataViewAsync({
                   id: attackDataView.id,
