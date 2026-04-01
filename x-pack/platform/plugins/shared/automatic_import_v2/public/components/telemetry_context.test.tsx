@@ -204,7 +204,7 @@ describe('useTelemetry', () => {
 
     expect(mockReportEvent).toHaveBeenCalledWith(
       AIV2TelemetryEventType.IntegrationDeleteConfirmed,
-      {}
+      expect.objectContaining({ sessionId: expect.any(String) })
     );
   });
 

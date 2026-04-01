@@ -145,7 +145,9 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   }, [telemetry]);
 
   const reportIntegrationDeleteConfirmed = useCallback<ReportIntegrationDeleteConfirmed>(() => {
-    telemetry?.reportEvent(AIV2TelemetryEventType.IntegrationDeleteConfirmed, {});
+    telemetry?.reportEvent(AIV2TelemetryEventType.IntegrationDeleteConfirmed, {
+      sessionId: sessionData.current.sessionId,
+    });
   }, [telemetry]);
 
   const reportDataStreamRefreshConfirmed = useCallback<ReportDataStreamRefreshConfirmed>(() => {
