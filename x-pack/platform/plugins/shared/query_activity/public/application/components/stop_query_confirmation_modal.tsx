@@ -66,7 +66,7 @@ export const StopQueryConfirmationModal: React.FC<StopQueryConfirmationModalProp
 
           <EuiButton color="danger" fill onClick={onConfirm} isLoading={isLoading}>
             {i18n.translate('xpack.queryActivity.stopQueryConfirmationModal.confirmButton', {
-              defaultMessage: 'Confirm',
+              defaultMessage: 'Cancel the query',
             })}
           </EuiButton>
         </EuiModalFooter>
