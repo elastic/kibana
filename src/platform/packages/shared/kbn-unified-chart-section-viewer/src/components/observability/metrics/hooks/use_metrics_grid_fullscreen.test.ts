@@ -144,7 +144,9 @@ describe('useMetricsGridFullScreen', () => {
     expect(sourceCode).toMatch(/--euiFixedHeadersOffset:\s*0px/);
 
     // Verify the .euiFlyout block sets bottom: 0 to prevent clipping in fullscreen
-    expect(sourceCode).toMatch(/logicalCSS\s*\(\s*['"]bottom['"]\s*,\s*['"]0\s*!important['"]\s*\)/);
+    expect(sourceCode).toMatch(
+      /logicalCSS\s*\(\s*['"]bottom['"]\s*,\s*['"]0\s*!important['"]\s*\)/
+    );
 
     // Verify max-height is set to override any EUI-applied max-height constraint
     expect(sourceCode).toMatch(
