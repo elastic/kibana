@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { i18n } from '@kbn/i18n';
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
@@ -30,6 +31,19 @@ export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
         schema.literal(null),
         schema.any({
           validate: (val: any) => {
+            if (setting.type === 'yaml') {
+              try {
+                parse(val);
+              } catch {
+                return i18n.translate(
+                  'xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage',
+                  {
+                    defaultMessage: 'Must be a valid YAML string',
+                  }
+                );
+              }
+              return;
+            }
             const res = setting.schema.safeParse(val);
             if (!res.success) {
               return stringifyZodError(res.error);
