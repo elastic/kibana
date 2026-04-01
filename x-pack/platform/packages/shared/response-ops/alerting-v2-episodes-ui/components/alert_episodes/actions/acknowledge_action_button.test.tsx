@@ -27,7 +27,7 @@ describe('AcknowledgeActionButton', () => {
     } as any);
   });
 
-  it('renders Unacknowledge when lastAckAction is undefined (treated as acknowledged)', () => {
+  it('renders Acknowledge when lastAckAction is undefined (same as not acknowledged)', () => {
     render(<AcknowledgeActionButton http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toHaveTextContent(
       'Acknowledge'
