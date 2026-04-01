@@ -28,7 +28,6 @@ import { useSyntheticsSettingsContext } from '../../../contexts';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
-import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
@@ -38,6 +37,7 @@ import { UnhealthyCountBadge } from './unhealthy_count_badge';
 import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { isFixableByResetStatus } from '../../common/hooks/status_labels';
+import { DeleteLocationModal } from './delete_location_modal';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -64,6 +64,8 @@ export const PrivateLocationsTable = ({
   } | null>(null);
   const { resetMonitors, getUnhealthyLocationStatuses, getUnhealthyMonitorsForLocation } =
     useMonitorIntegrationHealth();
+
+  const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -185,16 +187,17 @@ export const PrivateLocationsTable = ({
         },
         {
           name: DELETE_LOCATION,
-          description: DELETE_LOCATION,
-          render: (item: ListItem) => (
-            <DeleteLocation
-              id={item.id}
-              label={item.label}
-              locationMonitors={locationMonitors}
-              onDelete={onDelete}
-              loading={deleteLoading}
-            />
-          ),
+          description: (item: ListItem) => getDeleteDescription(item.monitors === 0, item.monitors),
+          icon: 'trash',
+          type: 'icon' as const,
+          color: 'danger',
+          enabled: (item: ListItem) => {            
+            const canDelete = item.monitors === 0;
+            return canDelete && canSave;
+          },
+          onClick: (item: ListItem) => {
+            setLocationPendingDelete(item.id);
+          },
           isPrimary: true,
           'data-test-subj': 'action-delete',
         },
@@ -286,6 +289,19 @@ export const PrivateLocationsTable = ({
           skippedMonitors={monitorPendingReset.skippedMonitors}
         />
       )}
+      {
+        locationPendingDelete && (
+          <DeleteLocationModal
+            label={items.find((item) => item.id === locationPendingDelete)?.label ?? ''}
+            locationId={locationPendingDelete}
+            onDelete={(id) => {
+              onDelete(id);              
+            }}
+            onCancel={() => setLocationPendingDelete(null)}
+            loading={deleteLoading ?? false}
+          />
+        )
+      }
     </div>
   );
 };
@@ -310,6 +326,14 @@ const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',
   {
     defaultMessage: 'Delete private location',
+  }
+);
+
+const getDeleteDescription = (canDelete: boolean, monCount: number) => canDelete ? DELETE_LOCATION : i18n.translate(
+  'xpack.synthetics.monitorManagement.cannotDelete.description',
+  {
+    defaultMessage: `You can't delete this location because it is used in {monCount, number} {monCount, plural,one {monitor} other {monitors}}. Remove all monitors from this location first.`,
+    values: { monCount },
   }
 );
 
