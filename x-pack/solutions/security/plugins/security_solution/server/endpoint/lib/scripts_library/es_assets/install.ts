@@ -29,6 +29,6 @@ export const installScriptsLibraryIndexTemplates = async ({
 
   // ensure template mappings are used by precreating data index
   await esClient.indices
-    .create({ index: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME })
+    .create({ index: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME }, { ignore: [400] })
     .catch(catchAndWrapError);
 };
