@@ -15,6 +15,7 @@ export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
+  experimental: true,
   description:
     'Compose and update in-memory Kibana dashboards using ordered operations, visualization attachments, and inline visualization editing.',
   content: `## When to Use This Skill
@@ -36,7 +37,7 @@ For dashboard discovery:
 - Use specific keywords from the user's request. For a broad listing of available dashboards, you may use \`keywords: ["*"]\`.
 - Summarize matches in plain language by title and description, and include lightweight structure when available such as panel and section counts.
 - Do **not** attach dashboards by default when only listing or comparing available dashboards.
-- When the user wants to inspect or modify a saved dashboard, attach it with \`platform.core.sml_attach\` using the exact \`chunk_id\`, \`attachment_id\`, and \`attachment_type\` from the search result.
+- When the user wants to inspect or modify a saved dashboard, attach it with \`platform.core.sml_attach\` using the exact \`chunk_id\` from the search result.
 - After attaching a saved dashboard, treat the returned dashboard attachment as the editable working copy. Use its \`attachment_id\` in conversation context for later dashboard updates.
 
 Build the request for ${dashboardTools.manageDashboard} as an ordered \

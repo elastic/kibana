@@ -222,10 +222,6 @@ export const ManageIntegrationsTable: React.FC<{
           `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`,
           { version: '1' }
         );
-        (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-          'aiv2_integration_delete_confirmed',
-          {}
-        );
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.fleet.epmList.manageIntegrations.actions.deleteSuccessTitle',
@@ -242,7 +238,7 @@ export const ManageIntegrationsTable: React.FC<{
         throw error;
       }
     },
-    [http, notifications, onRefetch, automaticImportVTwo]
+    [http, notifications, onRefetch]
   );
 
   const fetchIntegrationReviewDetails = useCallback(
@@ -700,6 +696,7 @@ export const ManageIntegrationsTable: React.FC<{
             button={
               <EuiFilterButton
                 iconType="arrowDown"
+                data-test-subj="manageIntegrationsActionsFilterBtn"
                 onClick={() => setIsActionsFilterOpen(!isActionsFilterOpen)}
                 isSelected={isActionsFilterOpen}
                 hasActiveFilters={selectedActions.length > 0}
@@ -730,6 +727,7 @@ export const ManageIntegrationsTable: React.FC<{
             button={
               <EuiFilterButton
                 iconType="arrowDown"
+                data-test-subj="manageIntegrationsStatusFilterBtn"
                 onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
                 isSelected={isStatusFilterOpen}
                 hasActiveFilters={selectedStatuses.length > 0}
@@ -786,6 +784,7 @@ export const ManageIntegrationsTable: React.FC<{
               iconType="trash"
               isLoading={isBulkDeleting}
               onClick={handleBulkDelete}
+              data-test-subj="manageIntegrationsBulkDeleteBtn"
             >
               <FormattedMessage
                 id="xpack.fleet.epmList.manageIntegrations.bulkDelete"
@@ -800,6 +799,7 @@ export const ManageIntegrationsTable: React.FC<{
                 iconType="exportAction"
                 isLoading={isBulkInstalling}
                 onClick={handleBulkInstall}
+                data-test-subj="manageIntegrationsBulkInstallBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
@@ -838,6 +838,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Unable to load integrations"
           />
         }
+        data-test-subj="manageIntegrationsTableError"
       />
     );
   }

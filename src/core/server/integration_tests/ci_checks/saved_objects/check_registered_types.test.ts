@@ -168,7 +168,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "9d54f733fb2bd08978c7059d71e77741574dc2616823745501742d34816a408c",
         "rules-settings": "8a2c9bb693534c347d2a8f99fa50e6e8d3ef0abb567a53284a7545d58f250903",
         "sample-data-telemetry": "4c102e89bdcaee1ccc887d1709c7e176c05f25b4c5ac14c3d013b58fbfd806ac",
-        "search": "c22babd2e893593cef3dceb905dfc5d754bf6edf5eca2deee5ba5f4cf6ba831e",
+        "search": "b2ce1e4bfa6b0bc7f6170bdf49013ad05b99e4e57d110d6371a80861efe2ce66",
         "search-session": "7648bc4e0f7030ea596ab20690f2b6256ce071a206dea4912a00363737f10ba6",
         "search-telemetry": "c152fc7e66d5ac7907e81c0926be9c219a15181e10b418b2fbb86bab2760627c",
         "search_playground": "4b8d7d2bc55cafc3ff7ad479d8d1283568f3edab502d048c49513c3be33e41bc",
@@ -1000,7 +1000,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "markdown|global: 02a5c250e23734d356cd7fd36b1d8bb44a97030f",
         "markdown|mappings: 16e53f65d58da76131a981a0f1bc10e7ead10ee9",
         "markdown|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+<<<<<<< HEAD
         "markdown|10.1.0: 390fd6db7da36935818c7377541ac9d34c7b654d7a155cbbd424bc2a6d5e242c",
+||||||| f7a96025d041
+        "markdown|10.1.0: 9edd32ab95c52a31924622c5a13a42f9ed4355bb0780b9c3b024bd57ff9445d4",
+=======
+        "markdown|10.1.0: 6a24188816fe1b9caf37fd4ab5337a8e62e5ab64219898dcf072842109692eb7",
+>>>>>>> upstream/main
         "=================================================================================",
         "metrics-data-source|global: 356d897223d1b613dbcc230d73ef4d4399f29ede",
         "metrics-data-source|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
@@ -1116,6 +1122,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "search|global: ce649a79d99c5ff5eb68d544635428ef87946d84",
         "search|mappings: 432d4dfdb5a33ce29d00ccdcfcda70d7c5f94b52",
         "search|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
+        "search|10.12.0: 7442d4976ccce79029a1019106a6795d0f21e3232e4c9d1e51eed7bf165f1298",
         "search|10.11.0: 5bc01080ab7e1843af8012fefa4b6360e0b084f3958db79fc4635bda052ce04b",
         "search|10.10.0: 45de2f1aac057a1115e9e6cfbeaf3ba392939f5f5df85519712eae07e93a20e2",
         "search|10.9.0: 4235a3d4c888ecfcb8f6e006c8f07f737ef3123496a3215497b7b3112eca0112",
@@ -1511,7 +1518,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "10.4.0",
         "rules-settings": "10.1.0",
         "sample-data-telemetry": "10.0.0",
-        "search": "10.11.0",
+        "search": "10.12.0",
         "search-session": "10.2.0",
         "search-telemetry": "10.0.0",
         "search_playground": "10.1.0",
@@ -1676,7 +1683,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "10.4.0",
         "rules-settings": "10.1.0",
         "sample-data-telemetry": "0.0.0",
-        "search": "10.11.0",
+        "search": "10.12.0",
         "search-session": "10.2.0",
         "search-telemetry": "7.12.0",
         "search_playground": "10.1.0",

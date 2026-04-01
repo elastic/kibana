@@ -13,10 +13,11 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { searchModeSchema } from '../../../utils/search_mode';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
-const requestParamsSchema = z.object({
+const baseRequestParamsSchema = z.object({
   from: dateFromString.describe('Start of the time range'),
   to: dateFromString.describe('End of the time range'),
   bucketSize: z.string().describe('Size of time buckets for aggregation'),
@@ -25,6 +26,10 @@ const requestParamsSchema = z.object({
     .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
     .optional()
     .describe('Stream names to filter significant events'),
+});
+
+const requestParamsSchema = baseRequestParamsSchema.extend({
+  searchMode: searchModeSchema,
 });
 
 export const getUnbackedQueriesCountRoute = createServerRoute({
@@ -165,6 +170,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       page = 1,
       perPage = 10,
       status,
+      searchMode,
     } = params.query;
 
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
@@ -175,6 +181,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         query,
         streamNames,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );
@@ -188,10 +195,13 @@ const getDiscoveryQueriesRoute = createServerRoute({
   },
 });
 
+// Uses baseRequestParamsSchema (no searchMode) intentionally: the histogram
+// is an aggregate summary, not a list of individual queries. It always uses
+// the default search mode so occurrences reflect the best-available ranking.
 const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries/_occurrences',
   params: z.object({
-    query: requestParamsSchema,
+    query: baseRequestParamsSchema,
   }),
   options: {
     access: 'internal',
