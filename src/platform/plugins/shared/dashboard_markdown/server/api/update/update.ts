@@ -31,5 +31,5 @@ export async function update(
     }
   );
 
-  return getMarkdownCRUResponseBody(savedObject, 'update');
+  return getMarkdownCRUResponseBody(savedObject);
 }
