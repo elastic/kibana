@@ -34,6 +34,7 @@ import {
   SmlService,
   PluginsService,
   EventsService,
+  HeartbeatsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
@@ -131,6 +132,7 @@ export class AgentBuilderPlugin
     const { licensing, inference } = startDependencies;
 
     const agentService = new AgentService({ http });
+    const heartbeatsService = new HeartbeatsService({ http });
     const attachmentsService = new AttachmentsService({ http });
 
     attachmentsService.addAttachmentType(
@@ -213,6 +215,7 @@ export class AgentBuilderPlugin
       skillsService,
       smlService,
       pluginsService,
+      heartbeatsService,
       startDependencies,
       accessChecker,
       eventsService,

@@ -30,6 +30,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
+import { HeartbeatService, createHeartbeatTaskHandler } from './heartbeat';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -224,6 +225,20 @@ export class ServiceManager {
       meteringService: this.services.metering,
     });
 
+    const heartbeats = new HeartbeatService({
+      logger: logger.get('heartbeats'),
+      elasticsearch,
+      conversationService: conversations,
+      taskManager,
+      spaces,
+    });
+
+    const heartbeatTaskHandler = createHeartbeatTaskHandler({
+      logger: logger.get('heartbeat-task-handler'),
+      esClient: elasticsearch.client.asInternalUser,
+      executionService: execution,
+    });
+
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
     this.internalStart = {
@@ -236,6 +251,8 @@ export class ServiceManager {
       auditLogService,
       execution,
       taskHandler,
+      heartbeats,
+      heartbeatTaskHandler,
       hooks,
       spaces,
       featureFlags,

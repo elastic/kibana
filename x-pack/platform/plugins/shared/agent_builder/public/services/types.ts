@@ -19,6 +19,7 @@ import type { SmlService } from './sml/sml_service';
 import type { PluginsService } from './plugins/plugins_service';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
+import type { HeartbeatsService } from './heartbeats';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -31,6 +32,7 @@ export interface AgentBuilderInternalService {
   skillsService: SkillsService;
   smlService: SmlService;
   pluginsService: PluginsService;
+  heartbeatsService: HeartbeatsService;
   startDependencies: AgentBuilderStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;

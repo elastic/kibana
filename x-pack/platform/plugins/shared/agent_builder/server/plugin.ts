@@ -37,6 +37,7 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
+import { registerHeartbeatTaskDefinitions } from './services/heartbeat';
 import { createModelProviderFactory } from './services/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
@@ -124,6 +125,17 @@ export class AgentBuilderPlugin
           throw new Error('getTaskHandler called before service init');
         }
         return services.taskHandler;
+      },
+    });
+
+    registerHeartbeatTaskDefinitions({
+      taskManager: setupDeps.taskManager,
+      getHeartbeatTaskHandler: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getHeartbeatTaskHandler called before service init');
+        }
+        return services.heartbeatTaskHandler;
       },
     });
 

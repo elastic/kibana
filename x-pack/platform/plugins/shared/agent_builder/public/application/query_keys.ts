@@ -9,6 +9,11 @@
  * Query keys for react-query
  */
 export const queryKeys = {
+  heartbeats: {
+    byAgent: (agentId: string) => ['heartbeats', 'list', agentId] as const,
+    byId: (agentId: string, heartbeatId: string) =>
+      ['heartbeats', agentId, heartbeatId] as const,
+  },
   conversations: {
     all: ['conversations'] as const,
     byAgent: (agentId: string) => ['conversations', 'list', { agentId }],

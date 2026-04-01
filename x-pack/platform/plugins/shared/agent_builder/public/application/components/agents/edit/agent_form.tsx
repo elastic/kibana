@@ -57,6 +57,7 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
+import { HeartbeatsTab } from './tabs/heartbeats_tab';
 import { SkillsTab } from './tabs/skills_tab';
 import { PluginsTab } from './tabs/plugins_tab';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
@@ -300,6 +301,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
+      ...(editingAgentId
+        ? [
+            {
+              id: 'heartbeats',
+              name: i18n.translate('xpack.agentBuilder.agents.form.heartbeatsTab', {
+                defaultMessage: 'Heartbeats',
+              }),
+              content: <HeartbeatsTab agentId={editingAgentId} />,
+            },
+          ]
+        : []),
       ...(isExperimentalFeaturesEnabled
         ? [
             {
@@ -374,6 +386,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activeSkillsCount,
       activePluginsCount,
       manageAgents,
+      editingAgentId,
       isExperimentalFeaturesEnabled,
     ]
   );
