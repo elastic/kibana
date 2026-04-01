@@ -112,6 +112,18 @@ describe('aggregationStats', () => {
     );
   });
 
+  it('should use the standard not-null guard for normalized entity.source aggregation', () => {
+    const field: EntityField = {
+      source: 'entity.source',
+      destination: 'entity.source',
+      mapping: { type: 'keyword' },
+      retention: { operation: 'collect_values', maxLength: 50 },
+    };
+    expect(aggregationStats([field], false)).toBe(
+      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE entity.source IS NOT NULL'
+    );
+  });
+
   it('should emit prefer_oldest_value aggregation using FIRST', () => {
     const field: EntityField = {
       source: 'event.created',
@@ -257,14 +269,22 @@ describe('extractPaginationParams', () => {
 });
 
 describe('buildFieldEvaluations', () => {
-  it('should return empty string when the entity has no field evaluations', () => {
-    expect(buildFieldEvaluations(getEntityDefinition('host', 'default'))).toBe('');
+  it('should return an EVAL pipeline fragment for shared field evaluations on single-field identities', () => {
+    const fragment = buildFieldEvaluations(getEntityDefinition('host', 'default'));
+
+    expect(fragment.startsWith('| EVAL ')).toBe(true);
+    expect(fragment).toContain('entity.source = CASE(');
+    expect(fragment).toContain('_src_entity_source0 = MV_FIRST(event.module)');
+    expect(fragment).toContain('_src_entity_source1 = MV_FIRST(event.dataset)');
+    expect(fragment).toContain('_src_entity_source2 = MV_FIRST(data_stream.dataset)');
+    expect(fragment).toContain('NULL');
   });
 
-  it('should return an EVAL pipeline fragment when field evaluations exist', () => {
+  it('should return an EVAL pipeline fragment when shared and identity field evaluations exist', () => {
     const fragment = buildFieldEvaluations(getEntityDefinition('user', 'default'));
     expect(fragment.startsWith('| EVAL ')).toBe(true);
     expect(fragment.length).toBeGreaterThan('| EVAL '.length);
+    expect(fragment).toContain('entity.source = CASE(');
     expect(fragment).toContain('entity.namespace');
   });
 });
@@ -448,8 +468,8 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
 });
 
 describe('hasFieldEvaluations', () => {
-  it('should return false for single-field identity definitions', () => {
-    expect(hasFieldEvaluations(getEntityDefinition('host', 'default'))).toBe(false);
+  it('should return true when shared field evaluations exist on a single-field identity definition', () => {
+    expect(hasFieldEvaluations(getEntityDefinition('host', 'default'))).toBe(true);
   });
 
   it('should return true when calculated identity defines field evaluations', () => {

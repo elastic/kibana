@@ -85,6 +85,19 @@ describe('serializeEditorContent', () => {
 
     expect(serializeEditorContent(div)).toBe('[/Test](skill://skill-1?type=security)');
   });
+
+  it('serializes an SML badge element', () => {
+    const div = document.createElement('div');
+    const badge = createCommandBadgeElement({
+      commandId: CommandId.Sml,
+      label: 'visualization/Pacific Sales',
+      id: 'chunk-1',
+      metadata: {},
+    });
+    div.appendChild(badge);
+
+    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://chunk-1)');
+  });
 });
 
 describe('deserializeBadgeContent', () => {
@@ -171,6 +184,22 @@ describe('deserializeBadgeContent', () => {
       },
     ]);
   });
+
+  it('parses an SML badge', () => {
+    const segments = deserializeCommandBadge('[@visualization/Pacific Sales](sml://chunk-1)');
+
+    expect(segments).toEqual([
+      {
+        type: 'badge',
+        data: {
+          commandId: CommandId.Sml,
+          label: 'visualization/Pacific Sales',
+          id: 'chunk-1',
+          metadata: {},
+        },
+      },
+    ]);
+  });
 });
 
 describe('round-trip serialization', () => {
@@ -193,6 +222,22 @@ describe('round-trip serialization', () => {
 
   it('round-trips badge with additional metadata', () => {
     const original = '[/Test](skill://skill-1?type=security)';
+    const segments = deserializeCommandBadge(original);
+
+    const div = document.createElement('div');
+    for (const segment of segments) {
+      if (segment.type === 'text') {
+        div.appendChild(document.createTextNode(segment.value));
+      } else {
+        div.appendChild(createCommandBadgeElement(segment.data));
+      }
+    }
+
+    expect(serializeEditorContent(div)).toBe(original);
+  });
+
+  it('round-trips SML badge', () => {
+    const original = 'Ref [@visualization/Pacific Sales](sml://chunk-1) here';
     const segments = deserializeCommandBadge(original);
 
     const div = document.createElement('div');

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AGENT_POLICY_ADVANCED_SETTINGS } from './agent_policy_settings';
+export { getAgentPolicyAdvancedSettings } from './agent_policy_settings';

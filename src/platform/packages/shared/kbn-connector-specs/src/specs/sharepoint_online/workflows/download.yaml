@@ -12,21 +12,27 @@ inputs:
       - "downloadDriveItem"
       - "downloadItemFromURL"
       - "getSitePageContents"
+    description: "The download action to perform"
   - name: site_id
     type: string
     required: false
+    description: "Required for getSitePageContents. Use getAllSites (list workflow) to discover site IDs."
   - name: page_id
     type: string
     required: false
+    description: "Required for getSitePageContents. Use getSitePages (list workflow) to discover page IDs."
   - name: drive_id
     type: string
     required: false
+    description: "Required for downloadDriveItem. Use getSiteDrives (list workflow) to discover drive IDs."
   - name: item_id
     type: string
     required: false
+    description: "Required for downloadDriveItem. Use getDriveItems (list workflow) to discover item IDs."
   - name: download_url
     type: string
     required: false
+    description: "Required for downloadItemFromURL. Use getDriveItems (list workflow) to find items with @microsoft.graph.downloadUrl."
 steps:
   - name: download-drive-item
     type: sharepoint-online.downloadDriveItem

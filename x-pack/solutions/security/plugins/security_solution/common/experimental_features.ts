@@ -123,6 +123,11 @@ export const allowedExperimentalValues = Object.freeze({
   gapReasonDetectionEnabled: false,
 
   /**
+   * Enables the redesigned execution results table on the rule details page
+   */
+  newExecutionResultsTableEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: true,

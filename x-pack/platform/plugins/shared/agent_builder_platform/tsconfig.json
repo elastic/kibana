@@ -15,7 +15,6 @@
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-common",
     "@kbn/zod",
-    "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
     "@kbn/core-lifecycle-server",
     "@kbn/esql-language",
@@ -29,6 +28,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/share-plugin",
+    "@kbn/workflows",
     "@kbn/core-logging-server-mocks",
     "@kbn/connector-specs",
     "@kbn/core-saved-objects-api-server"
