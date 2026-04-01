@@ -47,11 +47,7 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
     browserToolExecutor,
   });
 
-  const resumeRound = async ({
-    prompts,
-  }: {
-    prompts: Record<string, { allow: boolean }>;
-  }) => {
+  const resumeRound = async ({ prompts }: { prompts: Record<string, { allow: boolean }> }) => {
     const signal = resumeControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));

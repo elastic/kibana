@@ -329,9 +329,7 @@ const createRound = ({
     status: hasPromptRequests
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
-    pending_prompts: hasPromptRequests
-      ? promptRequestEvents.map((e) => e.data.prompt)
-      : undefined,
+    pending_prompts: hasPromptRequests ? promptRequestEvents.map((e) => e.data.prompt) : undefined,
     state: undefined,
     input: {
       ...input,
