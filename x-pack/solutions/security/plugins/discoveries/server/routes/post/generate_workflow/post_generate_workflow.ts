@@ -17,7 +17,7 @@ import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import { alertRetrievalBuilderSkill } from '../../../skills/alert_retrieval_builder_skill';
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
-import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../../..';
+import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../../constants';
 import type { WorkflowInitializationService } from '../../../lib/workflow_initialization';
 import { buildSkillConfigurationOverrides } from './helpers/build_skill_configuration_overrides';
 import { generateWorkflowWithRetries } from './helpers/generate_workflow_with_retries';
