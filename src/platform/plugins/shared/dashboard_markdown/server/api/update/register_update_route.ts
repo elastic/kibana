@@ -10,6 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
@@ -18,7 +19,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Replace current markdown panel state with the markdown panel state from request body.`,
+    summary: `Upsert markdown library item`,
     ...commonRouteConfig,
   });
 
@@ -28,25 +29,24 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
       validate: {
         request: {
           params: schema.object({
-            id: schema.string({
-              meta: { description: 'A unique identifier for the markdown panel.' },
-            }),
+            id: asCodeIdSchema,
           }),
           body: updateRequestBodySchema,
         },
         response: {
           200: {
             body: () => updateResponseBodySchema,
-            description: 'Indicates that the markdown panel is updated successfully.',
+            description: 'updated',
+          },
+          201: {
+            body: () => updateResponseBodySchema,
+            description: 'created',
           },
           400: {
-            description: 'Indicates an invalid schema or parameters.',
+            description: 'invalid request',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
-          },
-          404: {
-            description: 'Indicates that the markdown panel with the given ID is not found.',
+            description: 'forbidden',
           },
         },
       },
@@ -54,15 +54,10 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       try {
         const result = await update(ctx, req.params.id, req.body);
-        return res.ok({ body: result });
+        return result.meta.created_at === result.meta.updated_at
+          ? res.created({ body: result })
+          : res.ok({ body: result });
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A markdown panel with ID ${req.params.id} was not found.`,
-            },
-          });
-        }
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
         }

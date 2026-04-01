@@ -161,6 +161,7 @@ dependsOn:
   - '@kbn/alerting-v2-plugin'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/expressions-plugin'
+  - '@kbn/ingest-hub-plugin'
 tags:
   - plugin
   - prod
