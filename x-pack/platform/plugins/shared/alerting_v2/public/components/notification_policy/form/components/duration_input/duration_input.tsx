@@ -61,16 +61,14 @@ export function DurationInput({
     }
 
     const num = parseInt(raw, 10);
-    if (!Number.isNaN(num)) {
+    if (!Number.isNaN(num) && num > 0) {
       setDurationValue(num);
-      if (num > 0) {
-        onChange(`${num}${durationUnit}`);
-      }
+      onChange(`${num}${durationUnit}`);
     }
   };
 
   const handleBlur = () => {
-    if (!value || durationValue === '') {
+    if (!value || typeof durationValue !== 'number' || durationValue <= 0) {
       const parsed = parseDuration(DEFAULT_THROTTLE_INTERVAL);
       setDurationValue(parsed.value);
       setDurationUnit(parsed.unit);
