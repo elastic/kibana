@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
@@ -24,7 +24,7 @@ import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
-import type { DashboardSaveEvent, PublishesOnSave } from './types';
+import type { PublishesOnSave } from './types';
 
 const DEBOUNCE_TIME = 100;
 
@@ -38,6 +38,8 @@ export function initializeUnsavedChangesManager({
   unifiedSearchManager,
   projectRoutingManager,
   setState,
+  onSave$,
+  getCurrentState,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -48,22 +50,23 @@ export function initializeUnsavedChangesManager({
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   setState: (state: DashboardState) => void;
+  onSave$: PublishesOnSave['onSave$'];
+  getCurrentState: () => DashboardState;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
-    onSave$: PublishesOnSave['onSave$'];
     asyncResetToLastSavedState: () => Promise<void>;
   } & HasLastSavedChildState;
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
-    onSave: (savedState: DashboardState, event: DashboardSaveEvent) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-  const onSave$ = new Subject<DashboardSaveEvent>();
-
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const onSaveSubscription = onSave$.subscribe(() => {
+    lastSavedState$.next(getCurrentState());
+  });
 
   const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing(lastSavedState$),
@@ -105,20 +108,16 @@ export function initializeUnsavedChangesManager({
         setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
-      onSave$: onSave$.asObservable(),
       lastSavedStateForChild$: (panelId: string) =>
         lastSavedState$.pipe(map(() => getLastSavedStateForChild(panelId))),
       getLastSavedStateForChild,
     },
     cleanup: () => {
       unsavedChangesSubscription.unsubscribe();
+      onSaveSubscription.unsubscribe();
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
-      onSave: (savedState: DashboardState, event: DashboardSaveEvent) => {
-        lastSavedState$.next(savedState);
-        onSave$.next(event);
-      },
     },
   };
 }

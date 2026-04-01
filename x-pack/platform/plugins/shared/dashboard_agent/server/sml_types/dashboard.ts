@@ -118,10 +118,6 @@ export const createDashboardSmlType = ({
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(context.requestHandlerContext, originId);
 
-      if (dashboard.meta.error) {
-        return undefined;
-      }
-
       return {
         chunks: [
           {
@@ -147,10 +143,6 @@ export const createDashboardSmlType = ({
 
     const dashboardClient = await getDashboardClient();
     const dashboard = await dashboardClient.read(context.requestHandlerContext, item.origin_id);
-
-    if (dashboard.meta.error) {
-      return undefined;
-    }
 
     return {
       type: DASHBOARD_ATTACHMENT_TYPE,

@@ -48,8 +48,7 @@ export const createDashboardAttachmentType = ({
     }
 
     const dashboardClient = await getDashboardClient();
-    const dashboard = await dashboardClient.read(requestHandlerContext, origin);
-    return dashboard.meta.error ? undefined : dashboard;
+    return dashboardClient.read(requestHandlerContext, origin);
   };
 
   return {
