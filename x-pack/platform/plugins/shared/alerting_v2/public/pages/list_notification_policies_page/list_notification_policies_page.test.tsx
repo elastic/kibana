@@ -151,7 +151,8 @@ const createPolicy = (
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   groupBy: null,
-  throttle: null,
+  groupingMode: null,
+  throttle: { strategy: undefined, interval: undefined },
   snoozedUntil: null,
   auth: {
     owner: 'elastic',
