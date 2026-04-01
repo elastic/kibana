@@ -44,8 +44,10 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
     });
   });
 
-  test('rejects "Untitled rule" as an explicit name', async ({ pageObjects }) => {
-    await test.step('explicitly type "Untitled rule" as the name', async () => {
+  test('shows name validation error when saving after confirming the default placeholder text', async ({
+    pageObjects,
+  }) => {
+    await test.step('open name edit and save with the default "Untitled rule" text', async () => {
       await pageObjects.ruleForm.setRuleName('Untitled rule');
     });
 
@@ -53,13 +55,13 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
       await pageObjects.ruleForm.clickSave();
       const errorCallout = pageObjects.ruleForm.errorCallout();
       await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toContainText('Please provide a unique rule name');
+      await expect(errorCallout).toContainText('Name is required');
     });
   });
 
   test('error callout scrolls into view on failed submission', async ({ page, pageObjects }) => {
     await test.step('scroll to bottom of the form', async () => {
-      await page.testSubj.locator('ruleV2Form').evaluate((el) => {
+      await page.locator('#ruleV2Form').evaluate((el) => {
         el.scrollTop = el.scrollHeight;
       });
     });

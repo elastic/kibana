@@ -9,7 +9,7 @@ import React, { useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useFormContext, type FieldErrors } from 'react-hook-form';
-import type { FormValues } from '../form/types';
+import type { FormValues } from './types';
 
 /**
  * Recursively extracts all error messages from a nested FieldErrors object.

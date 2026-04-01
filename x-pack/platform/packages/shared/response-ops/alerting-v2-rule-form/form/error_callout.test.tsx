@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FieldErrors } from 'react-hook-form';
-import type { FormValues } from '../form/types';
+import type { FormValues } from './types';
 import { ErrorCallOut } from './error_callout';
 
 // Wrapper component that provides form context with configurable state
