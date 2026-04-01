@@ -45,7 +45,7 @@ interface EntityStoreApiRequestHandlerContext {
 
 ## Key Fields
 
-- `entity.source` — **array of strings** (PR #259813). Priority cascade: `event.module` > `event.dataset` > `data_stream.dataset`
+- `entity.source` — **array of strings**. Priority cascade: `event.module` > `event.dataset` > `data_stream.dataset`
 - `entity.namespace` — from `event.module` (e.g., `'okta'`, `'active_directory'`, `'local'`)
 - `entity.EngineMetadata.Type` — entity type discriminator on shared index
 - `entity.relationships.resolution.resolved_to` — alias target (resolution)

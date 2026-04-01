@@ -70,9 +70,9 @@ x-pack/solutions/security/plugins/entity_store/
 - **Route paths use underscores** — `entity_maintainers` not `entity-maintainers`. All routes follow this pattern.
 - **Unlink skips non-aliases silently** — `UnlinkResult` has a `skipped: string[]` field for entities without `resolved_to`. No error thrown.
 - **`?force=true` required** for CRUD updates to fields without `allowAPIUpdate: true`. Resolution fields have it set, so no force needed for resolution operations.
-- **`entity.source` is an array** (since PR #259813). Previously was a single string. UI must handle arrays.
+- **`entity.source` is an array**. Previously was a single string. UI must handle arrays.
 - **Document `_id` = MD5 hash of EUID** — not the EUID itself.
-- **v1 endpoints being removed** — PR #260415 removes v1 routes. For v1 details, see [references/v1-legacy.md](references/v1-legacy.md).
+- **v1 endpoints being removed** — v1 routes are deprecated and being removed. For v1 details, see [references/v1-legacy.md](references/v1-legacy.md).
 - **EUID stored scripts must be registered** before entity store init — they're deployed during install.
 - **CCS indices excluded** from extraction queries — cross-cluster data handled by separate `ccsLogsExtractionClient`.
 - **ES bulk `update` with partial `doc` does NOT run `default_pipeline`** — known upstream bug ([elastic/elasticsearch#105804](https://github.com/elastic/elasticsearch/issues/105804), fix targeted for ES v9.4.0). The latest index has a `dot_expander` pipeline, but it's bypassed by partial updates. Always use `unflattenObject` from `@kbn/object-utils` when writing partial docs with dotted keys (see `bulkUpdateEntityDocs` in `infra/elasticsearch/resolution.ts`).

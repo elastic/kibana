@@ -49,7 +49,7 @@ interface EntityMaintainerTaskMethodContext {
 - **Task type**: `entity_store:v2:entity_maintainer_task:{id}`
 - **`setup()` runs once**: When `status.metadata.runs === 0`
 - **State persistence**: Via task manager (survives restarts)
-- **Telemetry**: `entity_maintainer` event (PR #257278)
+- **Telemetry**: `entity_maintainer` event
 - **Licensing**: Per-maintainer gating possible via `minLicenseLevel` on registration
 
 ## Available Context Clients

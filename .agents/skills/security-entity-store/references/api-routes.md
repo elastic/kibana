@@ -13,7 +13,7 @@
 | POST | `/internal/security/entity_store/uninstall` | Uninstall entity store |
 | GET | `/internal/security/entity_store/status` | Status (`?include_components=true`) |
 
-## CRUD (PR #252052, updated by PR #258368)
+## CRUD
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -31,7 +31,7 @@
 - **Delete**: `esClient.delete()` on LATEST index by hashed EUID
 - **`?force=true`** needed to update fields without `allowAPIUpdate: true`
 
-## Resolution (PR #255334)
+## Resolution
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -39,13 +39,13 @@
 | POST | `/internal/security/entity_store/resolution/unlink` | Remove resolution links |
 | GET | `/internal/security/entity_store/resolution/group` | Get resolution group |
 
-## Configuration (PR #257819)
+## Configuration
 
 | Method | Path | Description |
 |--------|------|-------------|
 | PUT | `/internal/security/entity_store` | Update `logExtraction` config without reinstall |
 
-## Entity Maintainers (PR #254952)
+## Entity Maintainers
 
 | Method | Path | Description |
 |--------|------|-------------|

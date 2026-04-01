@@ -51,13 +51,13 @@ FROM .entities.v2.latest.security_default
 
 > **INLINESTATS pattern:** To distinguish standalone from target-with-aliases, ALWAYS use `INLINESTATS` in a single query. Never suggest a two-step approach.
 
-## Automated Resolution (PR #257479)
+## Automated Resolution
 
 Email-based resolution using Entity Maintainers Framework:
 1. Collect email values from entities
 2. Find matching groups (same email across namespaces)
 3. Apply resolutions (IDP entity becomes target)
-4. Update `last_seen` watermark (PR #258574)
+4. Update `last_seen` watermark
 
 **Non-IDP gap:** Non-IDP entities (`namespace: 'local'`) with `user.email` will be matched with IDP entities. Target selection prioritizes IDP, but false-positive links are possible.
 

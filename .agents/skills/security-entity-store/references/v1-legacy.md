@@ -50,7 +50,7 @@ All use `API_VERSIONS.public.v1` versioning.
 | GET | `/api/entity_store/privileges` | Check privileges (internal) |
 | POST | `/api/entity_store/apply_dataview_indices` | Apply data view indices |
 
-> **Removal:** PR #260415 (kubasobon) removes v1 endpoints. After 9.4, these routes will not exist.
+> **Removal:** v1 endpoints are being removed. After 9.4, these routes will not exist.
 
 ## v1 Background Tasks
 
