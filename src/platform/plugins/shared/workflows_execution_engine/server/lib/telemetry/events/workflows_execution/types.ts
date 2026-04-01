@@ -228,6 +228,16 @@ export interface WorkflowExecutionCompletedParams extends BaseWorkflowExecutionT
    * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
    */
   stepAvgDurationsByType?: Record<string, number>;
+  /**
+   * Total output size in bytes across all steps with recorded sizes.
+   * Only includes atomic steps measured by Layer 2 enforcement.
+   */
+  totalOutputSizeBytes?: number;
+  /**
+   * Average output size per step in bytes.
+   * Computed from steps with recorded sizes only.
+   */
+  averageOutputSizeBytes?: number;
 }
 
 /**
@@ -369,6 +379,14 @@ export interface WorkflowExecutionFailedParams extends BaseWorkflowExecutionTele
    * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
    */
   stepAvgDurationsByType?: Record<string, number>;
+  /**
+   * Total output size in bytes across all steps with recorded sizes.
+   */
+  totalOutputSizeBytes?: number;
+  /**
+   * Average output size per step in bytes.
+   */
+  averageOutputSizeBytes?: number;
 }
 
 /**
@@ -498,6 +516,14 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
    * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
    */
   stepAvgDurationsByType?: Record<string, number>;
+  /**
+   * Total output size in bytes across all steps with recorded sizes.
+   */
+  totalOutputSizeBytes?: number;
+  /**
+   * Average output size per step in bytes.
+   */
+  averageOutputSizeBytes?: number;
 }
 
 /**

@@ -120,6 +120,14 @@ export interface WorkflowExecutionTelemetryMetadata {
    * Distinct from `compositionDepth` (sub-workflow nesting). Omitted when not an event-chain execution.
    */
   eventChainDepth?: number;
+  /**
+   * Total output size in bytes across all steps with recorded sizes.
+   */
+  totalOutputSizeBytes?: number;
+  /**
+   * Average output size per step in bytes (only steps with recorded sizes).
+   */
+  averageOutputSizeBytes?: number;
 }
 
 /**
@@ -179,7 +187,8 @@ function extractTimeoutInfo(
  */
 export function extractExecutionMetadata(
   workflowExecution: EsWorkflowExecution,
-  stepExecutions: EsWorkflowStepExecution[]
+  stepExecutions: EsWorkflowStepExecution[],
+  outputSizeStats?: { totalBytes: number; stepCount: number }
 ): WorkflowExecutionTelemetryMetadata {
   const executedStepCount = stepExecutions.length;
   const successfulStepCount = stepExecutions.filter((step) => step.status === 'completed').length;
@@ -268,6 +277,11 @@ export function extractExecutionMetadata(
     }),
     ...(stepDurations.length > 0 && { stepDurations }),
     ...(Object.keys(stepAvgDurationsByType).length > 0 && { stepAvgDurationsByType }),
+    ...(outputSizeStats &&
+      outputSizeStats.stepCount > 0 && {
+        totalOutputSizeBytes: outputSizeStats.totalBytes,
+        averageOutputSizeBytes: Math.round(outputSizeStats.totalBytes / outputSizeStats.stepCount),
+      }),
   };
 }
 

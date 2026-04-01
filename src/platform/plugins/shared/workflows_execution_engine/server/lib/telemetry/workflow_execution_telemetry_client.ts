@@ -131,13 +131,15 @@ export class WorkflowExecutionTelemetryClient {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
     finalStatus: ExecutionStatus;
+    outputSizeStats?: { totalBytes: number; stepCount: number };
   }): void {
-    const { workflowExecution, stepExecutions, finalStatus } = params;
+    const { workflowExecution, stepExecutions, finalStatus, outputSizeStats } = params;
 
     if (finalStatus === ExecutionStatus.COMPLETED) {
       this.reportWorkflowExecutionCompleted({
         workflowExecution,
         stepExecutions,
+        outputSizeStats,
       });
     } else if (
       finalStatus === ExecutionStatus.FAILED ||
@@ -146,11 +148,13 @@ export class WorkflowExecutionTelemetryClient {
       this.reportWorkflowExecutionFailed({
         workflowExecution,
         stepExecutions,
+        outputSizeStats,
       });
     } else if (finalStatus === ExecutionStatus.CANCELLED) {
       this.reportWorkflowExecutionCancelled({
         workflowExecution,
         stepExecutions,
+        outputSizeStats,
       });
     }
     // Note: SKIPPED status is not currently tracked in telemetry
@@ -163,10 +167,15 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionCompleted(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
+    outputSizeStats?: { totalBytes: number; stepCount: number };
   }): void {
-    const { workflowExecution, stepExecutions } = params;
+    const { workflowExecution, stepExecutions, outputSizeStats } = params;
     const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
-    const executionMetadata = extractExecutionMetadata(workflowExecution, stepExecutions);
+    const executionMetadata = extractExecutionMetadata(
+      workflowExecution,
+      stepExecutions,
+      outputSizeStats
+    );
 
     const completedAt = workflowExecution.finishedAt || new Date().toISOString();
     const startedAt = new Date(workflowExecution.createdAt);
@@ -220,6 +229,12 @@ export class WorkflowExecutionTelemetryClient {
         Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
           stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
         }),
+      ...(executionMetadata.totalOutputSizeBytes !== undefined && {
+        totalOutputSizeBytes: executionMetadata.totalOutputSizeBytes,
+      }),
+      ...(executionMetadata.averageOutputSizeBytes !== undefined && {
+        averageOutputSizeBytes: executionMetadata.averageOutputSizeBytes,
+      }),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted, eventData);
@@ -231,10 +246,15 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionFailed(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
+    outputSizeStats?: { totalBytes: number; stepCount: number };
   }): void {
-    const { workflowExecution, stepExecutions } = params;
+    const { workflowExecution, stepExecutions, outputSizeStats } = params;
     const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
-    const executionMetadata = extractExecutionMetadata(workflowExecution, stepExecutions);
+    const executionMetadata = extractExecutionMetadata(
+      workflowExecution,
+      stepExecutions,
+      outputSizeStats
+    );
 
     const failedAt = workflowExecution.finishedAt || new Date().toISOString();
     const startedAt = new Date(workflowExecution.createdAt);
@@ -300,6 +320,12 @@ export class WorkflowExecutionTelemetryClient {
         Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
           stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
         }),
+      ...(executionMetadata.totalOutputSizeBytes !== undefined && {
+        totalOutputSizeBytes: executionMetadata.totalOutputSizeBytes,
+      }),
+      ...(executionMetadata.averageOutputSizeBytes !== undefined && {
+        averageOutputSizeBytes: executionMetadata.averageOutputSizeBytes,
+      }),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed, eventData);
@@ -311,10 +337,15 @@ export class WorkflowExecutionTelemetryClient {
   reportWorkflowExecutionCancelled(params: {
     workflowExecution: EsWorkflowExecution;
     stepExecutions: EsWorkflowStepExecution[];
+    outputSizeStats?: { totalBytes: number; stepCount: number };
   }): void {
-    const { workflowExecution, stepExecutions } = params;
+    const { workflowExecution, stepExecutions, outputSizeStats } = params;
     const workflowMetadata = extractWorkflowMetadata(workflowExecution.workflowDefinition);
-    const executionMetadata = extractExecutionMetadata(workflowExecution, stepExecutions);
+    const executionMetadata = extractExecutionMetadata(
+      workflowExecution,
+      stepExecutions,
+      outputSizeStats
+    );
 
     const cancelledAt = workflowExecution.cancelledAt || new Date().toISOString();
     const startedAt = new Date(workflowExecution.createdAt);
@@ -372,6 +403,12 @@ export class WorkflowExecutionTelemetryClient {
         Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
           stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
         }),
+      ...(executionMetadata.totalOutputSizeBytes !== undefined && {
+        totalOutputSizeBytes: executionMetadata.totalOutputSizeBytes,
+      }),
+      ...(executionMetadata.averageOutputSizeBytes !== undefined && {
+        averageOutputSizeBytes: executionMetadata.averageOutputSizeBytes,
+      }),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled, eventData);

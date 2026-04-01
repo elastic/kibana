@@ -370,6 +370,21 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
       optional: true,
     },
   },
+  totalOutputSizeBytes: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total output size in bytes across all steps with recorded sizes (atomic steps measured by Layer 2 enforcement)',
+      optional: true,
+    },
+  },
+  averageOutputSizeBytes: {
+    type: 'long',
+    _meta: {
+      description: 'Average output size per step in bytes (only steps with recorded sizes)',
+      optional: true,
+    },
+  },
 };
 
 const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> = {
@@ -622,6 +637,21 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
       optional: true,
     },
   },
+  totalOutputSizeBytes: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total output size in bytes across all steps with recorded sizes (atomic steps measured by Layer 2 enforcement)',
+      optional: true,
+    },
+  },
+  averageOutputSizeBytes: {
+    type: 'long',
+    _meta: {
+      description: 'Average output size per step in bytes (only steps with recorded sizes)',
+      optional: true,
+    },
+  },
 };
 
 const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledParams> = {
@@ -849,6 +879,21 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
     _meta: {
       description:
         'Average duration per step type (dictionary with sanitized step type as key). Step types with dots are sanitized (dots replaced with underscores) for proper ES field indexing. E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }',
+      optional: true,
+    },
+  },
+  totalOutputSizeBytes: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total output size in bytes across all steps with recorded sizes (atomic steps measured by Layer 2 enforcement)',
+      optional: true,
+    },
+  },
+  averageOutputSizeBytes: {
+    type: 'long',
+    _meta: {
+      description: 'Average output size per step in bytes (only steps with recorded sizes)',
       optional: true,
     },
   },
