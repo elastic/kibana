@@ -8,7 +8,13 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
-import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, SLO_ALERTS_EMBEDDABLE_ID } from '../fixtures';
+import {
+  apiTest,
+  assertDashboardCreateSuccess,
+  COMMON_HEADERS,
+  DASHBOARD_API_PATH,
+  SLO_ALERTS_EMBEDDABLE_ID,
+} from '../fixtures';
 
 apiTest.describe(
   'SLO Alerts Embeddable',
@@ -58,7 +64,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(201);
+        assertDashboardCreateSuccess(response);
         expect(response.body.id).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.title).toBe(dashboardTitle);
@@ -105,7 +111,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(201);
+        assertDashboardCreateSuccess(response);
 
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slos).toHaveLength(2);
@@ -141,7 +147,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(201);
+        assertDashboardCreateSuccess(response);
 
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slos).toHaveLength(0);
@@ -204,7 +210,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(201);
+        assertDashboardCreateSuccess(response);
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slos).toHaveLength(1);
         expect(createdPanel.config.slos[0].slo_id).toBe(sloId);

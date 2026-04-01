@@ -84,6 +84,7 @@ export const apiTest = sloScoutApiTestCore.extend<{}, SloHostsDataForgeWorkerFix
   ],
 });
 
+export { assertDashboardCreateSuccess } from './dashboard_assertions';
 export {
   COMMON_HEADERS,
   DASHBOARD_API_PATH,
