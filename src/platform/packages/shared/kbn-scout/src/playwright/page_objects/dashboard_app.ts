@@ -129,7 +129,7 @@ export class DashboardApp {
 
   async goto() {
     await this.page.gotoApp('dashboards');
-    // The dashboard listing performs an initial fetch; in cloud/serverless targets this can exceed Scout's default 10s.
+    // The dashboard listing performs an initial fetch and can take longer than Scout's default action timeout in CI.
     await expect(this.page.testSubj.locator('dashboardLandingPage')).toBeVisible({
       timeout: 30_000,
     });
