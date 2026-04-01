@@ -18,7 +18,11 @@ import { errors } from '@elastic/elasticsearch';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../../common';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../../../common';
 import type { WorkflowsRouter } from '../../../types';
 import { WorkflowsManagementApi } from '../../workflows_management_api';
 import { WorkflowsService } from '../../workflows_management_service';
@@ -52,8 +56,6 @@ interface PrivilegeScope {
 
 const READ_METHODS = new Set(['search', 'get', 'mget', 'openPointInTime', 'closePointInTime']);
 const WRITE_METHODS = new Set(['index', 'bulk', 'update', 'delete']);
-
-const WORKFLOWS_INDEX = '.workflows-workflows';
 
 /**
  * Strict privilege-to-scope mapping.

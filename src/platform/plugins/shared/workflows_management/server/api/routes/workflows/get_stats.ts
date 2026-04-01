@@ -23,7 +23,7 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
       security: WORKFLOW_READ_WITH_OPTIONAL_EXECUTIONS_SECURITY,
       summary: 'Get workflow statistics',
       description:
-        'Retrieve summary statistics about workflows, including total, enabled, and disabled counts, as well as execution history metrics for the last 30 days.',
+        'Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
