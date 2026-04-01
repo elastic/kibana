@@ -7,7 +7,6 @@
 
 import type { EuiStepProps } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -35,6 +34,7 @@ interface ReferenceSetDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingReferenceSet: string[];
   onComplete: OnResourcesCreated;
+  onSkip: () => void;
 }
 
 export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
@@ -67,20 +67,6 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
                   <b>{i18n.REFERENCE_SET_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
-              {dataInputStatus === 'current' && onComplete && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={onComplete}
-                    iconType="arrowRight"
-                    iconSide="right"
-                    size="s"
-                    aria-label={i18n.REFERENCE_SET_CONTINUE_BUTTON_ARIA_LABEL}
-                    data-test-subj="referenceSetsSkipButton"
-                  >
-                    {i18n.REFERENCE_SET_CONTINUE_BUTTON}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           {dataInputStatus === 'current' && migrationStats && missingReferenceSet && onComplete && (
@@ -95,6 +81,7 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
                   migrationStats={migrationStats}
                   missingReferenceSet={missingReferenceSet}
                   onComplete={onComplete}
+                  onSkip={onComplete}
                 />
               </EuiFlexItem>
             </>
@@ -109,7 +96,7 @@ ReferenceSetDataInput.displayName = 'ReferenceSetDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | typeof END;
 export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSubStepsProps>(
-  ({ migrationStats, missingReferenceSet, onComplete }) => {
+  ({ migrationStats, missingReferenceSet, onComplete, onSkip }) => {
     const { telemetry } = useKibana().services.siemMigrations.rules;
     const [subStep, setSubStep] = useState<SubStep>(1);
     const [uploadedLookups, setUploadedLookups] = useState<UploadedLookups>({});
@@ -152,6 +139,7 @@ export const ReferenceSetDataInputSubSteps = React.memo<ReferenceSetDataInputSub
       migrationStats,
       missingLookups: missingReferenceSet,
       addUploadedLookups,
+      onSkip,
     });
 
     const steps = useMemo<EuiStepProps[]>(() => [copyStep, uploadStep], [copyStep, uploadStep]);
