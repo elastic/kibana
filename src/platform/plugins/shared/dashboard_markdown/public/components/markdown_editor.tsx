@@ -145,7 +145,11 @@ export const MarkdownEditor = ({
         />
       </div>
       {isPreview && (
-        <MarkdownRenderer parsingPluginList={parsingPluginList} processingPluginList={processingPluginList} content={value} />
+        <MarkdownRenderer
+          parsingPluginList={parsingPluginList}
+          processingPluginList={processingPluginList}
+          content={value}
+        />
       )}
       <MarkdownFooter
         onCancel={onCancel}
