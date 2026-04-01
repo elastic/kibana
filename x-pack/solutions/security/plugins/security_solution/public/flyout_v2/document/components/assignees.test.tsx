@@ -75,7 +75,7 @@ const renderAssignees = (
 };
 
 describe('<Assignees />', () => {
-  let setAlertAssigneesMock: jest.Mocked<SetAlertAssigneesFunc>;
+  let setAlertAssigneesMock: jest.MockedFunction<SetAlertAssigneesFunc>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -91,7 +91,10 @@ describe('<Assignees />', () => {
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
     (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
 
-    setAlertAssigneesMock = jest.fn().mockResolvedValue(undefined);
+    setAlertAssigneesMock = jest.fn<
+      ReturnType<SetAlertAssigneesFunc>,
+      Parameters<SetAlertAssigneesFunc>
+    >();
     (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);
   });
 

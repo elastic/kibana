@@ -11,7 +11,7 @@ export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPr
 
 /* Header */
 
-export const ALERT_SUMMARY_PANEL_TEST_ID = `${PREFIX}HeaderAlertSumaryPanel` as const;
+export const ALERT_SUMMARY_PANEL_TEST_ID = `${PREFIX}HeaderAlertSummaryPanel` as const;
 export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
 export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
 export const HEADER_EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
