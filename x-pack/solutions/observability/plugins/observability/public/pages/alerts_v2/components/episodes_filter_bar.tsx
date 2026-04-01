@@ -125,6 +125,9 @@ export function EpisodesFilterBar({
           onRefresh={onRefresh}
           isLoading={isLoading}
           showUpdateButton="iconOnly"
+          updateButtonProps={{
+            fill: false,
+          }}
           width="auto"
         />
       </EuiFlexItem>
