@@ -26,22 +26,6 @@ export const zodStringWithDurationValidation = z
     ),
   });
 
-export const zodStringWithYamlValidation = z.string().refine(
-  (val) => {
-    try {
-      load(val);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  },
-  {
-    message: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage', {
-      defaultMessage: 'Must be a valid YAML string',
-    }),
-  }
-);
-
 export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): SettingsConfig[] => [
   {
     name: 'agent.limits.go_max_procs',
