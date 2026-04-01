@@ -541,29 +541,37 @@ export const getSparklineColumns = (esql: string): string[] => {
   }
   const columns: string[] = [];
 
-  const sparklineArgs = statsCommand.args.filter((arg) => {
-    if ((arg as ESQLCommandOption).type === 'option') return false;
-    return (arg as ESQLFunction).text?.toLowerCase().includes('sparkline');
-  }) as ESQLFunction[];
-
-  sparklineArgs.forEach((arg) => {
-    if (isFunctionExpression(arg) && arg.name === 'sparkline') {
+  for (const arg of statsCommand.args) {
+    if ((arg as ESQLCommandOption).type === 'option') {
+      continue;
+    }
+    if (!isFunctionExpression(arg)) {
+      continue;
+    }
+    if (arg.name === 'sparkline') {
       // STATS SPARKLINE(field)
       columns.push(arg.text);
-    } else {
-      // STATS col = SPARKLINE(field)
-      const columnArgs = arg.args.filter((a) => isColumn(a));
-      columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+      continue;
     }
-  });
+    if (
+      arg.name === '=' &&
+      isColumn(arg.args[0]) &&
+      Walker.match(arg, { type: 'function', name: 'sparkline' })
+    ) {
+      // STATS col = SPARKLINE(...) — Walker finds the call regardless of RHS shape (e.g. array-wrapped)
+      columns.push((arg.args[0] as ESQLColumn).name);
+    }
+  }
 
-  const renameCommand = root.commands.find(({ name }) => name === 'rename');
-  if (!renameCommand) {
+  const renameCommands = root.commands.filter(({ name }) => name === 'rename');
+  if (renameCommands.length === 0) {
     return columns;
   }
   const renameFunctions: ESQLFunction[] = [];
-  walk(renameCommand, {
-    visitFunction: (node) => renameFunctions.push(node),
+  renameCommands.forEach((renameCommand) => {
+    walk(renameCommand, {
+      visitFunction: (node) => renameFunctions.push(node),
+    });
   });
 
   renameFunctions.forEach((renameFunction) => {
