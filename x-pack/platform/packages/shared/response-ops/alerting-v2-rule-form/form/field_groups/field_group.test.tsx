@@ -164,7 +164,7 @@ describe('FieldGroup', () => {
       );
 
       await user.click(screen.getByRole('button', { name: 'Test Section' }));
-      expect(screen.getByText('Child content')).toBeInTheDocument();
+      expect(screen.getByText('Child content')).toBeVisible();
     });
 
     it('calls onToggle when accordion is toggled (controlled variant)', async () => {

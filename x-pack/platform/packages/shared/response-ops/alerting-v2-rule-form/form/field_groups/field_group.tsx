@@ -87,7 +87,7 @@ export const FieldGroup = (props: FieldGroupProps) => {
     const accordionProps = isControlled
       ? {
           forceState: props.isOpen ? ('open' as const) : ('closed' as const),
-          onToggle: props.onToggle,
+          onToggle: () => props.onToggle(),
         }
       : isUncontrolled
       ? { initialIsOpen: props.defaultOpen ?? false }
@@ -97,8 +97,10 @@ export const FieldGroup = (props: FieldGroupProps) => {
       <EuiAccordion
         id={id}
         buttonContent={
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
+          <EuiTitle size="xxs">
+            <h3>
+              <strong>{title}</strong>
+            </h3>
           </EuiTitle>
         }
         paddingSize="s"
