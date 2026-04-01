@@ -1,8 +1,21 @@
+# Continuous KI (Knowledge Indicator) extraction workflow.
+#
+# Runs on a schedule and orchestrates feature identification across managed streams:
+#   1. select_streams: picks eligible streams (respects interval, exclusions, concurrency)
+#      and schedules a Task Manager task for each.
+#   2. foreach scheduled stream: polls the task status endpoint until the task
+#      reaches a terminal state (completed/failed), then captures the result.
+#
+# Values below (timeouts, intervals, defaults) must stay in sync with the
+# constants in common/constants.ts — see continuous_extraction_workflow.test.ts.
+
 version: "1"
 name: ".streams-continuous-ki-extraction"
 description: "This workflow is used by the system and should not be modified."
 settings:
+  # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
   timeout: "9m"
+  # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
   concurrency:
     key: streams-continuous-ki-extraction
     strategy: drop
@@ -25,22 +38,31 @@ inputs:
     default: 12
     description: "Min hours between extractions for a stream. Use 0 to always extract."
 steps:
+  # Step 1: Select eligible streams and schedule tasks.
+  # The custom step filters out query streams, excluded patterns, already-running
+  # and up-to-date streams, then schedules Task Manager tasks for the rest.
   - name: select_streams
     type: streams.ki_select_streams
     with:
       maxScheduledStreams: "${{ inputs.maxScheduledStreams }}"
       lookbackHours: "${{ inputs.lookbackHours }}"
       extractionIntervalHours: "${{ inputs.extractionIntervalHours }}"
+
+  # Step 2: Only proceed if at least one stream was scheduled.
   - name: has_scheduled_streams
     type: if
     condition: "steps.select_streams.output.scheduled[0].streamName:*"
     steps:
+      # Iterate over each scheduled stream. If one stream fails, the rest continue.
       - name: extract_ki_features
         type: foreach
         foreach: "${{ steps.select_streams.output.scheduled }}"
         iteration-on-failure:
           continue: true
         steps:
+          # Poll the task status endpoint until the task is no longer in_progress.
+          # On the first iteration the condition evaluates to true because
+          # check_status hasn't run yet (workflow engine treats missing refs as truthy).
           - name: poll_task
             type: while
             max-iterations: 108
@@ -59,6 +81,7 @@ steps:
                     max-attempts: 3
                     delay: "5s"
                     strategy: exponential
+              # Only wait if the task is still running; skip the delay on terminal status.
               - name: if_poll_delay
                 type: if
                 condition: "steps.check_status.output.status:in_progress"
@@ -67,6 +90,7 @@ steps:
                     type: wait
                     with:
                       duration: "5s"
+          # Capture the final task result for this stream.
           - name: task_result
             type: data.set
             with:

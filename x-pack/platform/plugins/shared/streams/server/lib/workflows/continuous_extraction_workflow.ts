@@ -27,57 +27,67 @@ export const createContinuousKiExtractionWorkflowService = (
 
   return {
     async ensureWorkflow({ enabled, request, spaceId }) {
-      const existing = await managementApi.getWorkflow(
-        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-        spaceId
-      );
+      try {
+        const existing = await managementApi.getWorkflow(
+          CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+          spaceId
+        );
 
-      if (existing) {
-        const yamlChanged = existing.yaml !== WORKFLOW_YAML;
-        const enabledChanged = existing.enabled !== enabled;
+        if (existing) {
+          const yamlChanged = existing.yaml !== WORKFLOW_YAML;
+          const enabledChanged = existing.enabled !== enabled;
 
-        if (!yamlChanged && !enabledChanged) {
-          log.debug(
-            `Continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID} is already up to date`
+          if (!yamlChanged && !enabledChanged) {
+            log.debug(
+              `Continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID} is already up to date`
+            );
+            return;
+          }
+
+          const patch: { yaml?: string; enabled?: boolean } = {};
+          if (yamlChanged) patch.yaml = WORKFLOW_YAML;
+          if (enabledChanged) patch.enabled = enabled;
+
+          await managementApi.updateWorkflow(
+            CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+            patch,
+            spaceId,
+            request
+          );
+
+          log.info(
+            `Updated continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
           );
           return;
         }
 
-        const patch: { yaml?: string; enabled?: boolean } = {};
-        if (yamlChanged) patch.yaml = WORKFLOW_YAML;
-        if (enabledChanged) patch.enabled = enabled;
+        if (!enabled) {
+          return;
+        }
+
+        await managementApi.createWorkflow(
+          { yaml: WORKFLOW_YAML, id: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID },
+          spaceId,
+          request
+        );
 
         await managementApi.updateWorkflow(
           CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-          patch,
+          { enabled: true },
           spaceId,
           request
         );
 
         log.info(
-          `Updated continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
+          `Created continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
         );
-        return;
+      } catch (error) {
+        log.error(
+          `Failed to ensure continuous KI extraction workflow: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
-
-      if (!enabled) {
-        return;
-      }
-
-      await managementApi.createWorkflow(
-        { yaml: WORKFLOW_YAML, id: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID },
-        spaceId,
-        request
-      );
-
-      await managementApi.updateWorkflow(
-        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-        { enabled: true },
-        spaceId,
-        request
-      );
-
-      log.info(`Created continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
     },
   };
 };

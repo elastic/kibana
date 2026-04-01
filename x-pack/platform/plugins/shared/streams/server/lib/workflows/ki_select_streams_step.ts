@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { StepCategory } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
@@ -18,6 +18,9 @@ import {
   getFeaturesIdentificationTaskId,
   type FeaturesIdentificationTaskParams,
 } from '../tasks/task_definitions/features_identification';
+import type { PersistedTask } from '../tasks/types';
+import type { TaskClient } from '../tasks/task_client';
+import type { StreamsTaskType } from '../tasks/task_definitions';
 import { isStale } from '../tasks/is_stale';
 import { resolveConnectorId } from '../../routes/utils/resolve_connector_id';
 import {
@@ -34,6 +37,151 @@ import {
 const DEFAULT_LOOKBACK_HOURS = 24;
 
 type StreamCandidate = z.infer<typeof streamCandidateSchema>;
+
+interface StreamSelectionResult {
+  alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }>;
+  candidates: StreamCandidate[];
+  upToDate: StreamCandidate[];
+  excluded: string[];
+  excludePatterns: string[];
+  eligibleNames: Set<string>;
+}
+
+/**
+ * Classifies streams into buckets (excluded, already-running, candidates, up-to-date)
+ * by walking the ES-sorted task list and comparing each stream's last activity
+ * against the configured extraction interval.
+ */
+const classifyStreams = ({
+  allStreams,
+  sortedTasks,
+  excludedStreamPatterns,
+  intervalHours,
+}: {
+  allStreams: Streams.all.Definition[];
+  sortedTasks: Array<PersistedTask<FeaturesIdentificationTaskParams>>;
+  excludedStreamPatterns: string;
+  intervalHours: number;
+}): StreamSelectionResult => {
+  const excludePatterns = (excludedStreamPatterns ?? '')
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const isExcluded = (name: string) => excludePatterns.some((pattern) => minimatch(name, pattern));
+
+  const excluded: string[] = [];
+  const eligibleNames = new Set<string>();
+  for (const stream of allStreams) {
+    if (Streams.QueryStream.Definition.is(stream)) continue;
+    if (isExcluded(stream.name)) {
+      excluded.push(stream.name);
+    } else {
+      eligibleNames.add(stream.name);
+    }
+  }
+
+  const intervalMs = intervalHours * 3_600_000;
+  const now = Date.now();
+  const alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }> = [];
+  const candidates: StreamCandidate[] = [];
+  const upToDate: StreamCandidate[] = [];
+  const streamsWithTask = new Set<string>();
+
+  // Walk tasks in ES-sorted order (null last_completed_at first, then oldest).
+  // This preserves the sort for the candidates list without an in-memory re-sort.
+  for (const task of sortedTasks) {
+    const streamName = task.task.params.streamName;
+    if (!eligibleNames.has(streamName)) continue;
+    streamsWithTask.add(streamName);
+
+    if (task.status === TaskStatus.InProgress && !isStale(task.created_at)) {
+      alreadyRunning.push({ streamName, scheduledAt: task.created_at || null });
+    } else {
+      const lastActivityAt =
+        task.status === TaskStatus.Failed ? task.last_failed_at : task.last_completed_at;
+      const lastActivityMs = lastActivityAt ? new Date(lastActivityAt).getTime() : 0;
+      if (now - lastActivityMs >= intervalMs) {
+        candidates.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
+      } else {
+        upToDate.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
+      }
+    }
+  }
+
+  // Streams without any task have never been processed — same priority as never-completed.
+  const noTaskStreams = [...eligibleNames].filter((name) => !streamsWithTask.has(name));
+  const allCandidates = [
+    ...noTaskStreams.map((name) => ({ streamName: name, lastCompletedAt: null })),
+    ...candidates,
+  ];
+
+  return {
+    alreadyRunning,
+    candidates: allCandidates,
+    upToDate,
+    excluded,
+    excludePatterns,
+    eligibleNames,
+  };
+};
+
+interface MinimalLogger {
+  warn(message: string): void;
+}
+
+/**
+ * Schedules feature identification tasks for the given candidates, handling
+ * failures gracefully via Promise.allSettled.
+ */
+const scheduleCandidates = async ({
+  toSchedule,
+  taskClient,
+  request,
+  start,
+  end,
+  logger,
+}: {
+  toSchedule: StreamCandidate[];
+  taskClient: TaskClient<StreamsTaskType>;
+  request: KibanaRequest;
+  start: number;
+  end: number;
+  logger: MinimalLogger;
+}): Promise<{ scheduled: StreamCandidate[]; failedToSchedule: StreamCandidate[] }> => {
+  const results = await Promise.allSettled(
+    toSchedule.map((candidate) =>
+      taskClient
+        .schedule({
+          task: {
+            id: getFeaturesIdentificationTaskId(candidate.streamName),
+            type: FEATURES_IDENTIFICATION_TASK_TYPE,
+            space: DEFAULT_SPACE_ID,
+          },
+          params: { start, end, streamName: candidate.streamName },
+          request,
+        })
+        .then(() => candidate)
+    )
+  );
+
+  const scheduled: StreamCandidate[] = [];
+  const failedToSchedule: StreamCandidate[] = [];
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === 'fulfilled') {
+      scheduled.push(result.value);
+    } else {
+      failedToSchedule.push(toSchedule[i]);
+      logger.warn(
+        `Failed to schedule KI extraction for stream ${toSchedule[i].streamName}: ${
+          result.reason instanceof Error ? result.reason.message : String(result.reason)
+        }`
+      );
+    }
+  }
+
+  return { scheduled, failedToSchedule };
+};
 
 export const registerKiSelectStreamsStep = ({
   workflowsExtensions,
@@ -91,100 +239,34 @@ export const registerKiSelectStreamsStep = ({
         streamsClient.listStreams(),
       ]);
 
-      const excludePatterns = (continuousKiExtraction.excludedStreamPatterns ?? '')
-        .split(',')
-        .map((p) => p.trim())
-        .filter(Boolean);
-      const isExcluded = (name: string) =>
-        excludePatterns.some((pattern) => minimatch(name, pattern));
-      const excluded: string[] = [];
-      const eligibleNames = new Set<string>();
-      for (const stream of allStreams) {
-        if (Streams.QueryStream.Definition.is(stream)) continue;
-        if (isExcluded(stream.name)) {
-          excluded.push(stream.name);
-        } else {
-          eligibleNames.add(stream.name);
-        }
-      }
-
-      // Walk tasks in ES-sorted order (null last_completed_at first, then oldest).
-      // This preserves the sort for the candidates list without an in-memory re-sort.
       const intervalHours =
         extractionIntervalHours ??
         continuousKiExtraction.intervalHours ??
         DEFAULT_EXTRACTION_INTERVAL_HOURS;
-      const intervalMs = intervalHours * 3_600_000;
-      const now = Date.now();
-      const alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }> = [];
-      const candidates: StreamCandidate[] = [];
-      const upToDate: StreamCandidate[] = [];
-      const streamsWithTask = new Set<string>();
 
-      for (const task of sortedTasks) {
-        const streamName = task.task.params.streamName;
-        if (!eligibleNames.has(streamName)) continue;
-        streamsWithTask.add(streamName);
-
-        if (task.status === TaskStatus.InProgress && !isStale(task.created_at)) {
-          alreadyRunning.push({ streamName, scheduledAt: task.created_at || null });
-        } else {
-          const lastActivityAt =
-            task.status === TaskStatus.Failed ? task.last_failed_at : task.last_completed_at;
-          const lastActivityMs = lastActivityAt ? new Date(lastActivityAt).getTime() : 0;
-          if (now - lastActivityMs >= intervalMs) {
-            candidates.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
-          } else {
-            upToDate.push({ streamName, lastCompletedAt: task.last_completed_at ?? null });
-          }
-        }
-      }
-
-      // Streams without any task have never been processed — same priority as never-completed.
-      const noTaskStreams = [...eligibleNames].filter((name) => !streamsWithTask.has(name));
-      const allCandidates = [
-        ...noTaskStreams.map((name) => ({ streamName: name, lastCompletedAt: null })),
-        ...candidates,
-      ];
+      const { alreadyRunning, candidates, upToDate, excluded, excludePatterns } = classifyStreams({
+        allStreams,
+        sortedTasks,
+        excludedStreamPatterns: continuousKiExtraction.excludedStreamPatterns ?? '',
+        intervalHours,
+      });
 
       const availableSlots = Math.max(0, maxScheduledStreams - alreadyRunning.length);
-      const toSchedule = allCandidates.slice(0, availableSlots);
-      const skipped = allCandidates.slice(availableSlots);
+      const toSchedule = candidates.slice(0, availableSlots);
+      const skipped = candidates.slice(availableSlots);
 
+      const now = Date.now();
       const end = now;
       const start = end - lookbackHours * 3_600_000;
 
-      const results = await Promise.allSettled(
-        toSchedule.map((candidate) =>
-          taskClient
-            .schedule({
-              task: {
-                id: getFeaturesIdentificationTaskId(candidate.streamName),
-                type: FEATURES_IDENTIFICATION_TASK_TYPE,
-                space: DEFAULT_SPACE_ID,
-              },
-              params: { start, end, streamName: candidate.streamName },
-              request,
-            })
-            .then(() => candidate)
-        )
-      );
-
-      const scheduled: StreamCandidate[] = [];
-      const failedToSchedule: StreamCandidate[] = [];
-      for (let i = 0; i < results.length; i++) {
-        const result = results[i];
-        if (result.status === 'fulfilled') {
-          scheduled.push(result.value);
-        } else {
-          failedToSchedule.push(toSchedule[i]);
-          context.logger.warn(
-            `Failed to schedule KI extraction for stream ${toSchedule[i].streamName}: ${
-              result.reason instanceof Error ? result.reason.message : String(result.reason)
-            }`
-          );
-        }
-      }
+      const { scheduled, failedToSchedule } = await scheduleCandidates({
+        toSchedule,
+        taskClient,
+        request,
+        start,
+        end,
+        logger: context.logger,
+      });
 
       context.logger.info(
         `KI extraction: ${scheduled.length} scheduled, ${failedToSchedule.length} failed, ${alreadyRunning.length} running, ${skipped.length} skipped, ${upToDate.length} up-to-date`

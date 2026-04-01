@@ -29,5 +29,5 @@ export type TaskResult<TPayload> =
         | TaskStatus.BeingCanceled
         | TaskStatus.Canceled;
     }
-  | { status: TaskStatus.Failed; error: string }
+  | ({ status: TaskStatus.Failed; error: string } & Partial<TPayload>)
   | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged } & TPayload);

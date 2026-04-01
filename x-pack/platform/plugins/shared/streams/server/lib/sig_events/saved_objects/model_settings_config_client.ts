@@ -58,16 +58,18 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
   async updateSettings(settings: Partial<ModelSettings>): Promise<void> {
     const { continuousKiExtraction, ...soFields } = settings;
 
-    const soEntries = Object.entries(soFields).filter(([, v]) => v !== undefined);
+    const soEntries: Array<[keyof ModelSettingsConfigAttributes, string]> = [];
+    for (const [key, value] of Object.entries(soFields)) {
+      if (value !== undefined) {
+        soEntries.push([key as keyof ModelSettingsConfigAttributes, value]);
+      }
+    }
 
     const promises: Promise<void>[] = [];
 
     if (soEntries.length > 0) {
-      promises.push(
-        this.updateSOSettings(
-          Object.fromEntries(soEntries) as Partial<ModelSettingsConfigAttributes>
-        )
-      );
+      const soUpdate: Partial<ModelSettingsConfigAttributes> = Object.fromEntries(soEntries);
+      promises.push(this.updateSOSettings(soUpdate));
     }
 
     if (continuousKiExtraction) {
