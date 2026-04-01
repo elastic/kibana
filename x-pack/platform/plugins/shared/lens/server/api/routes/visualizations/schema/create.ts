@@ -15,7 +15,7 @@ import { lensResponseItemSchema } from './common';
 
 export const lensCreateRequestParamsSchema = schema.object(
   {
-    id: asCodeIdSchema,
+    id: schema.maybe(asCodeIdSchema),
   },
   { unknowns: 'forbid' }
 );
