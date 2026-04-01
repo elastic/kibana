@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type {
   GeneratedSignificantEventQuery,
@@ -105,7 +105,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       featuresTaskResult = await waitForSubtask<
                         FeaturesIdentificationTaskParams,
                         IdentifyFeaturesResult
-                      >(featuresTaskId, runContext.taskInstance.id, taskClient);
+                      >(featuresTaskId, runContext.taskInstance.id, taskClient, taskContext.logger);
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
@@ -127,7 +127,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       queriesTaskResult = await waitForSubtask<
                         SignificantEventsQueriesGenerationTaskParams,
                         SignificantEventsQueriesGenerationResult
-                      >(queriesTaskId, runContext.taskInstance.id, taskClient);
+                      >(queriesTaskId, runContext.taskInstance.id, taskClient, taskContext.logger);
 
                       if (queriesTaskResult.status !== TaskStatus.Completed) {
                         return;
@@ -218,9 +218,15 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>(
   subtaskId: string,
   parentTaskId: string,
-  taskClient: TaskClient<StreamsTaskType>
+  taskClient: TaskClient<StreamsTaskType>,
+  logger: Logger
 ): Promise<TaskResult<TPayload>> {
+  let lastStatus: string | undefined;
+  let pollCount = 0;
+  const startedAt = Date.now();
+
   while (true) {
+    pollCount++;
     const parentTask = await taskClient.get(parentTaskId);
 
     if (parentTask.status === TaskStatus.BeingCanceled) {
@@ -229,11 +235,19 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
 
     const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
+    if (result.status !== lastStatus) {
+      logger.debug(`Subtask ${subtaskId}: status changed to ${result.status}`);
+      lastStatus = result.status;
+    }
+
     if (result.status === TaskStatus.Failed) {
       throw new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`);
     }
 
     if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+      logger.debug(
+        `Subtask ${subtaskId} finished with status ${result.status} after ${pollCount} polls (${Date.now() - startedAt}ms)`
+      );
       return result;
     }
 
