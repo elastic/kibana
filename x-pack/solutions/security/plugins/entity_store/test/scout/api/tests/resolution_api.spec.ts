@@ -12,7 +12,7 @@ import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
@@ -35,7 +35,7 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     });
 
     await esClient.indices.delete({
-      index: [LATEST_INDEX, UPDATES_INDEX],
+      index: [LATEST_ALIAS, UPDATES_INDEX],
       ignore_unavailable: true,
     });
 
@@ -365,9 +365,9 @@ async function getEntitySource(
   esClient: Client,
   entityId: string
 ): Promise<Record<string, unknown>> {
-  await esClient.indices.refresh({ index: LATEST_INDEX });
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
   const response = await esClient.search({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     query: {
       bool: {
         filter: [{ term: { 'entity.id': entityId } }],
@@ -377,7 +377,7 @@ async function getEntitySource(
   });
 
   if (response.hits.hits.length === 0) {
-    throw new Error(`Entity '${entityId}' not found in ${LATEST_INDEX}`);
+    throw new Error(`Entity '${entityId}' not found in ${LATEST_ALIAS}`);
   }
 
   return response.hits.hits[0]._source as Record<string, unknown>;

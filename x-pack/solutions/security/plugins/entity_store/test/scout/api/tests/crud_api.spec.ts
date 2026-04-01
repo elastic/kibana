@@ -14,7 +14,7 @@ import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
@@ -67,9 +67,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.statusCode).toBe(200);
     expect(create.body).toStrictEqual({ ok: true });
 
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity!.id!)).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, entityObj.entity!.id!)).toBe(1);
     const euid = getEuidFromObject('generic', entityObj) as string;
-    const check = await esClient.get({ index: LATEST_INDEX, id: hashEuid(euid) });
+    const check = await esClient.get({ index: LATEST_ALIAS, id: hashEuid(euid) });
     expect(check.found).toBe(true);
   });
 
@@ -115,7 +115,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       // Entity should be stored using the generated EUID
       const byGenerated = await esClient.get({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         id: hashEuid(expectedEuid),
       });
       expect(byGenerated.found).toBe(true);
@@ -199,7 +199,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       body: entityObj,
     });
     expect(create.statusCode).toBe(200);
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, 'host:this-is-update')).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, 'host:this-is-update')).toBe(1);
 
     // Update the entity with the same ID
     const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
@@ -218,7 +218,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(update.statusCode).toBe(200);
 
     const entities = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: {
         term: {
           'entity.id': 'host:this-is-update',
@@ -262,7 +262,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { term: { 'entity.id': 'host:update-id-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
@@ -302,7 +302,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { term: { 'entity.id': 'host:update-identity-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
@@ -352,7 +352,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(bulkUpdate.body.errors).toHaveLength(0);
 
     const resp = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: {
         wildcard: {
           'entity.id': 'required-id-*-bulk',
@@ -374,7 +374,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.statusCode).toBe(200);
     expect(create.body).toStrictEqual({ ok: true });
 
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, 'flat-create-id')).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, 'flat-create-id')).toBe(1);
   });
 
   apiTest('Should update an entity from a flat document', async ({ apiClient, esClient }) => {
@@ -404,7 +404,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(update.statusCode).toBe(200);
 
     const entities = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: { term: { 'entity.id': 'host:flat-update' } },
     });
     expect(entities.hits.hits).toHaveLength(1);
@@ -458,7 +458,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(secondUpdate.statusCode).toBe(200);
 
       const entities = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { term: { 'entity.id': 'host:flat-double-update' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
@@ -485,7 +485,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     });
     expect(create.statusCode).toBe(200);
     const resp = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: {
         match: {
           'entity.id': entityObj.entity!.id!,
@@ -513,7 +513,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     await expect(
       esClient.get({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         id: hashedEntityId,
       })
     ).rejects.toThrow(`"found":false`);
@@ -541,7 +541,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       body: entityObj,
     });
     expect(create.statusCode).toBe(200);
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity!.id!)).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, entityObj.entity!.id!)).toBe(1);
 
     const list = await apiClient.get(ENTITY_STORE_ROUTES.CRUD_GET, {
       headers: defaultHeaders,

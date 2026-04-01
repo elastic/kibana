@@ -12,7 +12,7 @@ import type { EntityType } from '../../../../common';
 import {
   ENTITY_STORE_ROUTES,
   HISTORY_INDEX_PATTERN,
-  LATEST_INDEX,
+  LATEST_ALIAS,
   UPDATES_INDEX,
 } from './constants';
 
@@ -25,7 +25,7 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
   const historyIndices = resolved.indices.map((i) => i.name);
 
-  const toDelete = [LATEST_INDEX, UPDATES_INDEX, ...historyIndices];
+  const toDelete = [LATEST_ALIAS, UPDATES_INDEX, ...historyIndices];
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 };
 
@@ -52,9 +52,9 @@ export const ingestDoc = async (esClient: EsClient, body: Record<string, unknown
   });
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
-  await esClient.indices.refresh({ index: LATEST_INDEX });
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
   return await esClient.search({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     version: true,
     query: {
       bool: {
@@ -88,7 +88,7 @@ export const seedUserEntity = async (
   { entityId, namespace, email, timestamp }: SeedUserEntityOptions
 ) => {
   await esClient.index({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     id: hashEuid(entityId),
     refresh: 'wait_for',
     pipeline: '_none',
@@ -124,9 +124,9 @@ export const waitForResolution = async (
   let lastSource: Record<string, unknown> | undefined;
 
   while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_INDEX });
+    await esClient.indices.refresh({ index: LATEST_ALIAS });
     const response = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
       size: 1,
     });
@@ -167,9 +167,9 @@ export const assertNotResolved = async (
   const start = Date.now();
 
   while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_INDEX });
+    await esClient.indices.refresh({ index: LATEST_ALIAS });
     const response = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
       size: 1,
     });

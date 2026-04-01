@@ -11,7 +11,7 @@ import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
@@ -38,7 +38,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
     });
 
     await esClient.indices.delete({
-      index: [LATEST_INDEX, UPDATES_INDEX],
+      index: [LATEST_ALIAS, UPDATES_INDEX],
       ignore_unavailable: true,
     });
 
@@ -60,7 +60,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
   apiTest.beforeEach(async ({ esClient }) => {
     // Clean up all entities from the LATEST index so tests are independent
     await esClient.deleteByQuery({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       refresh: true,
       query: { match_all: {} },
       ignore_unavailable: true,

@@ -13,7 +13,7 @@ import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
@@ -198,10 +198,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
@@ -337,10 +337,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
@@ -449,10 +449,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
@@ -524,10 +524,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
