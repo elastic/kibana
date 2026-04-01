@@ -25,7 +25,7 @@ import {
   extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
@@ -236,7 +236,7 @@ export class LogsExtractionClient {
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns
     );
-    const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const latestIndex = getEntitiesAlias(ENTITY_LATEST, this.namespace);
 
     const { fromDateISO, toDateISO } =
       opts?.specificWindow || this.getExtractionWindow(config, engineState, delayMs);

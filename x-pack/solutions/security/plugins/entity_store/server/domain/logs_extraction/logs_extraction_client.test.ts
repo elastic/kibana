@@ -167,7 +167,7 @@ describe('LogsExtractionClient', () => {
         esqlResponse: mockEsqlResponse,
         esIdField: HASHED_ID_FIELD,
         fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
-        targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
+        targetIndex: expect.stringContaining('entities-latest-default'),
         logger: expect.any(Object),
         abortController: undefined,
       });
@@ -669,7 +669,7 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledWith(
         expect.objectContaining({
-          targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
+          targetIndex: expect.stringContaining('entities-latest-default'),
         })
       );
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
