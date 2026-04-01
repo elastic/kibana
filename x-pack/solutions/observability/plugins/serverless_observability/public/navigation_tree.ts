@@ -504,6 +504,7 @@ export const createNavigationTree = ({
                   defaultMessage: 'V2 Alerting Preview',
                 }
               ),
+              renderAs: 'panelOpener' as const,
               breadcrumbStatus: 'hidden',
               children: [
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },

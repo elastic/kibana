@@ -254,6 +254,7 @@ export function createNavigationTree({
                 {
                   id: 'v2_alerting_preview',
                   title: 'V2 Alerting Preview',
+                  renderAs: 'panelOpener' as const,
                   breadcrumbStatus: 'hidden' as const,
                   children: [
                     { link: 'management:rules' as const, breadcrumbStatus: 'hidden' as const },

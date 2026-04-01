@@ -267,6 +267,7 @@ export const getNavigationTreeDefinition = ({
                             defaultMessage: 'V2 Alerting Preview',
                           }
                         ),
+                        renderAs: 'panelOpener' as const,
                         children: [
                           { link: 'management:rules' as const },
                           { link: 'management:notification_policies' as const },

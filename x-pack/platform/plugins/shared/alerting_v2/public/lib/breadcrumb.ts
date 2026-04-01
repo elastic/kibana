@@ -68,11 +68,5 @@ export const getAlertingV2Breadcrumb = (
           defaultMessage: 'Edit',
         }),
       };
-    default:
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.rulesListTitle', {
-          defaultMessage: 'Alerting V2',
-        }),
-      };
   }
 };

@@ -13,10 +13,10 @@ import { NotificationPolicyFormPage } from '../pages/notification_policy_form_pa
 export const NotificationPoliciesApp = () => {
   return (
     <Routes>
-      <Route path="/create">
+      <Route exact path="/create">
         <NotificationPolicyFormPage />
       </Route>
-      <Route path="/edit/:id">
+      <Route exact path="/edit/:id">
         <NotificationPolicyFormPage />
       </Route>
       <Route exact path="/">
