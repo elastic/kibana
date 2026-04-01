@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { QueryActivityStartDependencies } from '../types';
@@ -20,8 +20,9 @@ export const renderApp = (
   params: ManagementAppMountParams
 ) => {
   const apiService = new QueryActivityApiService(coreStart.http);
+  const root = createRoot(params.element);
 
-  ReactDOM.render(
+  root.render(
     coreStart.rendering.addContext(
       <QueryActivityAppContextProvider
         chrome={coreStart.chrome}
@@ -34,11 +35,10 @@ export const renderApp = (
       >
         <QueryActivityApp />
       </QueryActivityAppContextProvider>
-    ),
-    params.element
+    )
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 };
