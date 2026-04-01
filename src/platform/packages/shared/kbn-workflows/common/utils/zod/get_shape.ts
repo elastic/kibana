@@ -11,6 +11,9 @@ import { z } from '@kbn/zod/v4';
 
 export function getShape(schema: z.ZodType): Record<string, z.ZodType> {
   let current: unknown = schema;
+  if (current instanceof z.ZodLazy) {
+    current = current.unwrap();
+  }
   if (current instanceof z.ZodOptional) {
     current = current.unwrap();
   }
