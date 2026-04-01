@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { INTERNAL_API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from './constants';
+export { API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from './constants';

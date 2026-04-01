@@ -17,9 +17,8 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
+import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -147,14 +146,6 @@ export class AgentBuilderPlugin
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
-
-    const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-      false
-    );
-    if (isExperimentalFeaturesEnabled) {
-      enableSkillsDeepLink(this.appUpdater$);
-    }
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');

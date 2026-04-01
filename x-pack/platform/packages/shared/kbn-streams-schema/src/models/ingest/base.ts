@@ -122,6 +122,7 @@ export namespace IngestBaseStream {
   > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
     index_mode?: IngestStreamIndexMode;
+    replicated?: boolean;
   }
 
   export type UpsertRequest<
@@ -156,6 +157,7 @@ export const ingestBaseStreamGetResponseSchema = baseStreamGetResponseSchema.ext
   stream: ingestBaseStreamDefinitionSchema,
   privileges: ingestStreamPrivilegesSchema,
   index_mode: z.optional(ingestStreamIndexModeSchema),
+  replicated: z.optional(z.boolean()),
 });
 
 export const ingestBaseStreamUpsertDefinitionSchema = baseStreamUpsertDefinitionSchema.extend({
