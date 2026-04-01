@@ -62,13 +62,10 @@ export const createDashboardAttachmentMountSync$ = ({
           attachment.type === DASHBOARD_ATTACHMENT_TYPE &&
           event.data.round.input.attachment_refs?.some(
             (ref) =>
-              (ref.attachment_id === attachment.id &&
-                ref.operation === ATTACHMENT_REF_OPERATION.updated) ||
-              ref.operation === ATTACHMENT_REF_OPERATION.created
-ref.attachment_id === attachment.id &&
-(ref.operation === ATTACHMENT_REF_OPERATION.updated) ||
-ref.operation === ATTACHMENT_REF_OPERATION.created
-) === true
+              ref.attachment_id === attachment.id &&
+              (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
+                ref.operation === ATTACHMENT_REF_OPERATION.created)
+          ) === true
       );
 
       if (!updatedVersionedAttachment) {
