@@ -10,17 +10,18 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
+import { AccordionButtonContent, FieldLabel, Tooltip } from './shared';
 
 interface AlertsSectionProps {
-  alertCount: number;
-  candidateCount: number | null | undefined;
+  alertCount: number | null;
+  candidateCount: number | null;
 }
 
 export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candidateCount }) => {
@@ -53,20 +54,26 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
     >
       <EuiSpacer size="s" />
       <EuiPanel hasBorder paddingSize="m">
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
+          {candidateCount !== null && (
+            <>
+              <EuiFlexItem>
+                <FieldLabel label={i18n.FLYOUT_CANDIDATE_ALERTS} />
+                <EuiSpacer size="xs" />
+                <EuiText size="s" data-test-subj="executionDetailsFlyoutCandidateCount">
+                  {candidateCount}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="sortRight" aria-hidden={true} />
+              </EuiFlexItem>
+            </>
+          )}
           <EuiFlexItem>
             <FieldLabel label={i18n.COLUMN_ALERTS_CREATED} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutAlertCount">
-              {alertCount}
-            </EuiText>
-          </EuiFlexItem>
-          <SectionSeparator />
-          <EuiFlexItem>
-            <FieldLabel label={i18n.FLYOUT_CANDIDATE_ALERTS} />
-            <EuiSpacer size="xs" />
-            <EuiText size="s" data-test-subj="executionDetailsFlyoutCandidateCount">
-              {candidateCount ?? '—'}
+              {alertCount ?? '—'}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

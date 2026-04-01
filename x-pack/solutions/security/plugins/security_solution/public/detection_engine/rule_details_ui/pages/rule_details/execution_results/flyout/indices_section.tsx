@@ -19,8 +19,8 @@ import * as i18n from '../translations';
 import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
 
 interface IndicesSectionProps {
-  matchedIndicesCount: number | null | undefined;
-  frozenIndicesQueriedCount: number | null | undefined;
+  matchedIndicesCount: number | null;
+  frozenIndicesQueriedCount: number | null;
 }
 
 export const IndicesSection: React.FC<IndicesSectionProps> = ({
@@ -57,21 +57,27 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
       <EuiSpacer size="s" />
       <EuiPanel hasBorder paddingSize="m">
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <FieldLabel label={i18n.FLYOUT_MATCHED_INDICES} />
-            <EuiSpacer size="xs" />
-            <EuiText size="s" data-test-subj="executionDetailsFlyoutMatchedIndices">
-              {matchedIndicesCount ?? '—'}
-            </EuiText>
-          </EuiFlexItem>
-          <SectionSeparator />
-          <EuiFlexItem>
-            <FieldLabel label={i18n.FLYOUT_FROZEN_INDICES_QUERIED} />
-            <EuiSpacer size="xs" />
-            <EuiText size="s" data-test-subj="executionDetailsFlyoutFrozenIndices">
-              {frozenIndicesQueriedCount ?? '—'}
-            </EuiText>
-          </EuiFlexItem>
+          {matchedIndicesCount !== null && (
+            <EuiFlexItem>
+              <FieldLabel label={i18n.FLYOUT_MATCHED_INDICES} />
+              <EuiSpacer size="xs" />
+              <EuiText size="s" data-test-subj="executionDetailsFlyoutMatchedIndices">
+                {matchedIndicesCount}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          {matchedIndicesCount !== null && frozenIndicesQueriedCount !== null && (
+            <SectionSeparator />
+          )}
+          {frozenIndicesQueriedCount !== null && (
+            <EuiFlexItem>
+              <FieldLabel label={i18n.FLYOUT_FROZEN_INDICES_QUERIED} />
+              <EuiSpacer size="xs" />
+              <EuiText size="s" data-test-subj="executionDetailsFlyoutFrozenIndices">
+                {frozenIndicesQueriedCount}
+              </EuiText>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     </EuiAccordion>
