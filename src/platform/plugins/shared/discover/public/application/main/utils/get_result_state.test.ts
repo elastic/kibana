@@ -12,37 +12,42 @@ import { FetchStatus } from '../../types';
 
 describe('getResultState', () => {
   test(`should return 'uninitialized' when fetching uninitialized`, () => {
-    const actual = getResultState(FetchStatus.UNINITIALIZED, false);
+    const actual = getResultState(FetchStatus.UNINITIALIZED, false, false);
     expect(actual).toBe(resultStatuses.UNINITIALIZED);
   });
 
   test(`should return 'loading' when fetching is loading`, () => {
-    const actual = getResultState(FetchStatus.LOADING, false);
+    const actual = getResultState(FetchStatus.LOADING, false, false);
     expect(actual).toBe(resultStatuses.LOADING);
   });
 
   test(`should return 'none' when fetching is complete with no records`, () => {
-    const actual = getResultState(FetchStatus.COMPLETE, false);
+    const actual = getResultState(FetchStatus.COMPLETE, false, false);
     expect(actual).toBe(resultStatuses.NO_RESULTS);
   });
 
   test(`should return 'none' after a fetch error`, () => {
-    const actual = getResultState(FetchStatus.ERROR, false);
+    const actual = getResultState(FetchStatus.ERROR, false, false);
     expect(actual).toBe(resultStatuses.NO_RESULTS);
   });
 
   test(`should return 'ready' when fetching completes with records`, () => {
-    const actual = getResultState(FetchStatus.COMPLETE, true);
+    const actual = getResultState(FetchStatus.COMPLETE, true, false);
     expect(actual).toBe(resultStatuses.READY);
   });
 
   test(`should reurn 'ready' when re-fetching after already data is available`, () => {
-    const actual = getResultState(FetchStatus.LOADING, true);
+    const actual = getResultState(FetchStatus.LOADING, true, false);
     expect(actual).toBe(resultStatuses.READY);
   });
 
+  test(`should return 'loading' when re-fetching in ES|QL mode after data is available`, () => {
+    const actual = getResultState(FetchStatus.LOADING, true, true);
+    expect(actual).toBe(resultStatuses.LOADING);
+  });
+
   test(`should return 'none' after a fetch error when data was successfully fetched before`, () => {
-    const actual = getResultState(FetchStatus.ERROR, true);
+    const actual = getResultState(FetchStatus.ERROR, true, false);
     expect(actual).toBe(resultStatuses.NO_RESULTS);
   });
 });
