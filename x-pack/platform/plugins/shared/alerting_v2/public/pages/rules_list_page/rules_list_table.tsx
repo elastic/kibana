@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -166,6 +167,7 @@ export interface RulesListTableProps {
   onBulkDelete: () => void;
 
   /** Row action callbacks */
+  onNavigateToDetails: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
@@ -196,6 +198,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onNavigateToDetails,
   onEdit,
   onClone,
   onDelete,
@@ -263,7 +266,12 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         sortable: true,
         render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
           <div>
-            {metadata?.name ?? rule.id}
+            <EuiLink
+              onClick={() => onNavigateToDetails(rule)}
+              data-test-subj={`ruleNameLink-${rule.id}`}
+            >
+              {metadata?.name ?? rule.id}
+            </EuiLink>
             {metadata?.description && (
               <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
                 {metadata.description}
@@ -387,6 +395,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       isRowSelected,
       onSelectPage,
       onSelectRow,
+      onNavigateToDetails,
       onEdit,
       onClone,
       onDelete,
