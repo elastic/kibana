@@ -107,7 +107,7 @@ describe('NotificationPolicyFormFlyout', () => {
     renderFlyout({ onClose, onSave: jest.fn() });
 
     expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Create notification policy');
-    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Save');
+    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
 
     await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -173,7 +173,7 @@ describe('NotificationPolicyFormFlyout', () => {
     renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });
 
     expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit notification policy');
-    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update');
+    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
 
     await user.click(screen.getByTestId(TEST_SUBJ.nameInput));
     await user.tab();
