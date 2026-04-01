@@ -44,11 +44,11 @@ interface MockChildApi {
   applySerializedState: jest.Mock;
 }
 
-const mockSavedDashboardState: DashboardSaveEvent['dashboardState'] = {
+const mockSavedDashboardState = {
   title: 'Saved Dashboard',
   description: '',
   panels: [],
-};
+} as unknown as DashboardSaveEvent['dashboardState'];
 
 const createMockDashboardApi = (): MockDashboardApi => ({
   savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
