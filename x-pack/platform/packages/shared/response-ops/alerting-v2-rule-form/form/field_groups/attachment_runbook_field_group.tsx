@@ -19,11 +19,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
+import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { RunbookField } from '../fields/runbook_field';
 import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
-
-const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 
 export const AttachmentRunbookFieldGroup: React.FC = () => {
   const { setValue, control } = useFormContext<FormValues>();
