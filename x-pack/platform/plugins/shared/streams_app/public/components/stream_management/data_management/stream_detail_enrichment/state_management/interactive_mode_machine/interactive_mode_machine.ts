@@ -118,7 +118,7 @@ export const interactiveModeMachine = setup({
         // When a condition has both if and else branches, all documents are covered,
         // so filtering would not be useful.
         const parentId = conversionOptions.parentId;
-        if (parentId) {
+        if (parentId && conversionOptions.branch !== 'else') {
           const parentStep = assignArgs.context.stepRefs
             .find((ref) => ref.id === parentId)
             ?.getSnapshot()?.context.step;
