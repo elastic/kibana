@@ -267,13 +267,13 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
           if (querySources.length === 0) {
             errors.push(
               new Error(
-                `Query stream "${this._definition.name}" must have a FROM clause referencing the parent stream "${expectedParentSource}"`
+                `Query stream "${this._definition.name}" must have a FROM clause referencing the parent stream "${parentId}"`
               )
             );
           } else if (!querySources.includes(expectedParentSource)) {
             errors.push(
               new Error(
-                `Query stream "${this._definition.name}" must reference its parent stream "${expectedParentSource}" in the FROM clause. ` +
+                `Query stream "${this._definition.name}" must reference its parent stream "${parentId}" in the FROM clause. ` +
                   `Found: FROM ${querySources.join(', ')}`
               )
             );
