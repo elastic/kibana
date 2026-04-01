@@ -12,8 +12,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./autocomplete_entities'));
-    loadTestFile(require.resolve('./es_config'));
-    loadTestFile(require.resolve('./proxy_route'));
-    loadTestFile(require.resolve('./spec_definitions'));
   });
 }
