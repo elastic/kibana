@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
@@ -21,7 +21,6 @@ import { useSuggestUsers } from '../../../common/components/user_profiles/use_su
 import type { SetAlertAssigneesFunc } from '../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useSetAlertAssignees } from '../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { TestProviders } from '../../../common/mock';
-import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../common/components/assignees/test_ids';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
 import {
@@ -29,6 +28,45 @@ import {
   USERS_AVATARS_PANEL_TEST_ID,
 } from '../../../common/components/user_profiles/test_ids';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+
+  return {
+    ...actual,
+    EuiPopover: ({
+      button,
+      children,
+      isOpen,
+    }: {
+      button: React.ReactNode;
+      children: React.ReactNode;
+      isOpen: boolean;
+    }) => (
+      <div>
+        {button}
+        {isOpen ? children : null}
+      </div>
+    ),
+    useGeneratedHtmlId: () => 'mock-search-input',
+  };
+});
+
+jest.mock('../../../common/components/assignees/assignees_apply_panel', () => ({
+  AssigneesApplyPanel: ({
+    onApply,
+  }: {
+    onApply: (assignees: { add: string[]; remove: string[] }) => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="mock-assignees-apply-panel"
+      onClick={() => onApply({ add: ['user-id-3'], remove: [] })}
+    >
+      {'Apply assignees'}
+    </button>
+  ),
+}));
 
 jest.mock('../../../common/components/user_profiles/use_get_current_user_profile');
 jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles');
@@ -109,11 +147,10 @@ describe('<Assignees />', () => {
 
   it('applies updated assignees and calls the success callback', async () => {
     const onAssigneesUpdated = jest.fn();
-    const { getByTestId, getByText, queryByTestId } = renderAssignees({ onAssigneesUpdated });
+    const { getByTestId, queryByTestId } = renderAssignees({ onAssigneesUpdated });
 
     fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
-    fireEvent.click(getByText('User 3'));
-    fireEvent.click(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+    fireEvent.click(getByTestId('mock-assignees-apply-panel'));
 
     expect(setAlertAssigneesMock).toHaveBeenCalledWith(
       {
@@ -126,7 +163,9 @@ describe('<Assignees />', () => {
     );
 
     const onSuccess = setAlertAssigneesMock.mock.calls[0][2];
-    onSuccess();
+    act(() => {
+      onSuccess();
+    });
 
     expect(onAssigneesUpdated).toHaveBeenCalled();
 
