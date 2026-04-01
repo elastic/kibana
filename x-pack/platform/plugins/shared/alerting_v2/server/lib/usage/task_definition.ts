@@ -13,7 +13,7 @@ import { stateSchemaByVersion } from './task_state';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_v2_telemetry';
 export const TASK_ID = `AlertingV2-${TELEMETRY_TASK_TYPE}`;
-export const SCHEDULE: IntervalSchedule = { interval: '1d' };
+export const SCHEDULE: IntervalSchedule = { interval: '1m' };
 
 export function registerTelemetryTask(
   logger: Logger,
