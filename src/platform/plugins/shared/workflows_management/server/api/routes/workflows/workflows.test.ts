@@ -13,6 +13,7 @@ import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { registerWorkflowRoutes } from '.';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 jest.mock('../utils/route_error_handlers', () => ({
   handleRouteError: jest.fn((response: { customError: jest.Mock }, error: Error) =>
@@ -27,6 +28,17 @@ const createLicensingContext = () => ({
       isActive: true,
       hasAtLeast: jest.fn().mockReturnValue(true),
       type: 'enterprise',
+    },
+  }),
+  core: Promise.resolve({
+    security: {
+      audit: {
+        logger: {
+          enabled: false,
+          log: jest.fn(),
+          includeSavedObjectNames: false,
+        },
+      },
     },
   }),
 });
@@ -101,6 +113,7 @@ describe('Workflow routes', () => {
       api: mockApi as any,
       logger: mockLogger,
       spaces: mockSpaces as any,
+      audit: new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined }),
     } as unknown as RouteDependencies);
   });
 
@@ -349,8 +362,13 @@ describe('Workflow routes', () => {
     });
 
     it('should call api.deleteWorkflows with ids, space id, and request (soft delete)', async () => {
-      const bodyResult = { total: 2, deleted: 2, failures: [] };
-      mockApi.deleteWorkflows.mockResolvedValue(bodyResult);
+      const apiResult = {
+        total: 2,
+        deleted: 2,
+        failures: [] as Array<{ id: string; error: string }>,
+        successfulIds: ['a', 'b'],
+      };
+      mockApi.deleteWorkflows.mockResolvedValue(apiResult);
       const request = httpServerMock.createKibanaRequest({
         body: { ids: ['a', 'b'] },
         query: { force: false },
@@ -363,12 +381,19 @@ describe('Workflow routes', () => {
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
         force: false,
       });
-      expect(response.ok).toHaveBeenCalledWith({ body: bodyResult });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { total: 2, deleted: 2, failures: [] },
+      });
     });
 
     it('should call api.deleteWorkflows with force=true (hard delete)', async () => {
-      const bodyResult = { total: 2, deleted: 2, failures: [] };
-      mockApi.deleteWorkflows.mockResolvedValue(bodyResult);
+      const apiResult = {
+        total: 2,
+        deleted: 2,
+        failures: [] as Array<{ id: string; error: string }>,
+        successfulIds: ['a', 'b'],
+      };
+      mockApi.deleteWorkflows.mockResolvedValue(apiResult);
       const request = httpServerMock.createKibanaRequest({
         body: { ids: ['a', 'b'] },
         query: { force: true },
@@ -381,7 +406,9 @@ describe('Workflow routes', () => {
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
         force: true,
       });
-      expect(response.ok).toHaveBeenCalledWith({ body: bodyResult });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { total: 2, deleted: 2, failures: [] },
+      });
     });
   });
 

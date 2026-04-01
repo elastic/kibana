@@ -6,8 +6,8 @@
  */
 
 import { injectable } from 'inversify';
-import type { AlertEpisodeStatus } from '../../../resources/alert_events';
-import { alertEpisodeStatus } from '../../../resources/alert_events';
+import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import { parseDurationToMs } from '../../duration';
 import { BasicTransitionStrategy } from './basic_strategy';
