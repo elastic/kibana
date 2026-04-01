@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, common } = getPageObjects(['dashboard', 'common']);
   const filterBar = getService('filterBar');
 
-  describe.only('full screen mode', () => {
+  describe('full screen mode', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
