@@ -38,7 +38,7 @@ import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/stre
 import { parseError } from '../../../streams/errors/parse_error';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorIdAndCheckAllowlist } from '../../../../routes/utils/resolve_connector_id_and_check_allowlist';
+import { StatusError } from '../../../streams/errors/status_error';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
 import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
@@ -325,6 +325,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
               const { start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
@@ -361,22 +362,26 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 streamsClient,
                 inferenceClient,
                 soClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorIdAndCheckAllowlist({
-                connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
-                uiSettingsClient,
-                logger: taskLogger,
-                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                request: runContext.fakeRequest,
-              });
+              if (!taskContext.server.searchInferenceEndpoints) {
+                throw new StatusError('Inference endpoints plugin is unavailable.', 503);
+              }
+              const { endpoints } =
+                await taskContext.server.searchInferenceEndpoints.endpoints.getForFeature(
+                  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                  fakeRequest
+                );
+              if (endpoints.length === 0) {
+                throw new StatusError(
+                  'No connector configured for knowledge indicator extraction. Configure one in Stack Management > Model Settings.',
+                  400
+                );
+              }
+              const connectorId = endpoints[0].connectorId;
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               let hasTrackedIteration = false;

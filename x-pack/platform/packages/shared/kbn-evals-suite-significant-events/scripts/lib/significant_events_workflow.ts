@@ -52,22 +52,27 @@ export async function configureModelSelectionSettings(
   log: ToolingLog,
   connectorId: string
 ): Promise<void> {
-  log.info(`Configuring model selection (connector: ${connectorId})...`);
+  log.info(`Configuring model override via inference settings (connector: ${connectorId})...`);
   const { status, data } = await kibanaRequest(
     config,
     'PUT',
-    '/internal/streams/_significant_events/settings',
-    { connectorIdKnowledgeIndicatorExtraction: connectorId }
+    '/internal/search_inference_endpoints/settings',
+    {
+      features: [
+        {
+          feature_id: 'streams-sig-events-knowledge-indicator-extraction',
+          endpoints: [{ id: connectorId }],
+        },
+      ],
+    }
   );
 
   if (status >= 200 && status < 300) {
-    log.info('Model selection settings configured');
+    log.info('Model selection settings configured via inference settings');
     return;
   }
 
-  throw new Error(
-    `Failed to configure model selection settings: ${status} ${JSON.stringify(data)}`
-  );
+  throw new Error(`Failed to configure inference settings: ${status} ${JSON.stringify(data)}`);
 }
 export async function triggerSigEventsKIFeatureExtraction(
   config: ConnectionConfig,

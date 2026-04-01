@@ -6,33 +6,29 @@
  */
 
 import { useMemo } from 'react';
-import { streamMatchesIndexPatterns } from '@kbn/streams-schema';
-import { useStreamsAppFetch } from './use_streams_app_fetch';
+import { streamMatchesIndexPatterns, DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
 /**
  * Hook to get configured index patterns and utilities.
- * Uses indexPatternsResolved from the API (server applies default); no client-side default.
+ * Reads from the uiSettings store (per-space, hidden from Advanced Settings).
  */
 export function useIndexPatternsConfig() {
-  const {
-    dependencies: {
-      start: { streams },
-    },
-  } = useKibana();
+  const { core } = useKibana();
 
-  const settingsFetch = useStreamsAppFetch(
-    async ({ signal }) =>
-      streams.streamsRepositoryClient.fetch('GET /internal/streams/_significant_events/settings', {
-        signal,
-      }),
-    [streams.streamsRepositoryClient]
+  const rawValue = core.uiSettings.get<string>(
+    OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+    DEFAULT_INDEX_PATTERNS
   );
 
-  const indexPatterns = useMemo(
-    () => settingsFetch.value?.indexPatternsResolved ?? [],
-    [settingsFetch.value?.indexPatternsResolved]
-  );
+  const indexPatterns = useMemo(() => {
+    const patterns = rawValue
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    return patterns.length > 0 ? patterns : [DEFAULT_INDEX_PATTERNS];
+  }, [rawValue]);
 
   const filterStreamsByIndexPatterns = useMemo(() => {
     return <T extends { stream: { name: string } }>(streamsToFilter: T[]): T[] => {
@@ -48,7 +44,7 @@ export function useIndexPatternsConfig() {
   return {
     indexPatterns,
     filterStreamsByIndexPatterns,
-    isLoading: settingsFetch.loading,
-    error: settingsFetch.error,
+    isLoading: false,
+    error: undefined,
   };
 }
