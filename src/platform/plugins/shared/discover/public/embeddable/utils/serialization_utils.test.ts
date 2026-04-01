@@ -8,7 +8,6 @@
  */
 
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -41,7 +40,7 @@ describe('Serialization utils', () => {
       getIsEsqlDefault: jest.fn(() => false),
       getEmbeddableTransformsEnabled: jest.fn(() => false),
     },
-  } as unknown as DiscoverServices;
+  } satisfies DiscoverServices;
 
   const mockedSavedSearchAttributes: SearchEmbeddableByValueState['attributes'] = {
     kibanaSavedObjectMeta: {
@@ -326,9 +325,9 @@ describe('Serialization utils', () => {
         initialState: {
           ...mockedSavedSearchAttributes,
           tabs: [],
-          serializedSearchSource: {} as SerializedSearchSourceFields,
+          serializedSearchSource: {},
         },
-        savedSearch: savedSearch as Parameters<typeof serializeState>[0]['savedSearch'],
+        savedSearch,
         serializeTitles: jest.fn().mockReturnValue({ title: 'test1', description: 'description' }),
         serializeTimeRange: jest.fn(),
         serializeDynamicActions: jest.fn(),

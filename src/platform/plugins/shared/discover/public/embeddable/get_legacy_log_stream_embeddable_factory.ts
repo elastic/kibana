@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { DiscoverSessionEmbeddableState } from '../../server';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
+import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import { LEGACY_LOG_STREAM_EMBEDDABLE } from './constants';
 
@@ -18,21 +20,40 @@ export const getLegacyLogStreamEmbeddableFactory = (
   const searchEmbeddableFactory = getSearchEmbeddableFactory({ startServices, discoverServices });
   const logStreamEmbeddableFactory: ReturnType<typeof getSearchEmbeddableFactory> = {
     type: LEGACY_LOG_STREAM_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState: logsInitialState, ...restParams }) => {
-      const initialState = {
-        ...logsInitialState,
-        tabs: [
-          {
-            data_source: {
-              type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-              index_pattern: discoverServices.logsDataAccess
-                ? await discoverServices.logsDataAccess.services.logSourcesService.getFlattenedLogSources()
-                : 'logs-*-*',
-              time_field: '@timestamp',
-            },
-          },
-        ],
-      } as DiscoverSessionEmbeddableState;
+    buildEmbeddable: async ({ initialState, ...restParams }) => {
+      const searchSource = await discoverServices.data.search.searchSource.create();
+      let fallbackPattern = 'logs-*-*';
+      // Given that the logDataAccess service is an optional dependency with discover, we need to check if it exists
+      if (discoverServices.logsDataAccess) {
+        fallbackPattern =
+          await discoverServices.logsDataAccess.services.logSourcesService.getFlattenedLogSources();
+      }
+
+      const spec = getAllLogsDataViewSpec({ allLogsIndexPattern: fallbackPattern });
+      const dataView: DataView = await discoverServices.data.dataViews.create(spec);
+
+      // Finally assign the data view to the search source
+      searchSource.setField('index', dataView);
+
+      const savedSearch: SavedSearch = {
+        title: initialState.title,
+        description: initialState.description,
+        timeRange: initialState.time_range,
+        sort: 'sort' in initialState ? initialState.sort : [],
+        columns: 'columns' in initialState ? initialState.columns : [],
+        searchSource,
+        managed: false,
+      };
+      const { searchSourceJSON, references } = searchSource.serialize();
+
+      initialState = {
+        ...initialState,
+        attributes: {
+          ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
+          references,
+        },
+      };
+
       return searchEmbeddableFactory.buildEmbeddable({ initialState, ...restParams });
     },
   };

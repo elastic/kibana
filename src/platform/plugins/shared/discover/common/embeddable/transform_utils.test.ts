@@ -36,7 +36,11 @@ import type {
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
-import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
+import {
+  DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_ID,
+  DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_LABEL,
+  SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
+} from './constants';
 import { SavedSearchType, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
   DiscoverSessionEmbeddableByReferenceState,
@@ -483,6 +487,10 @@ describe('search embeddable transform utils', () => {
       expect(result.state.title).toBe('Panel Title');
       expect(result.state.description).toBe('Panel description');
       expect(result.state.attributes.tabs).toHaveLength(1);
+      expect(result.state.attributes.tabs[0].id).toBe(DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_ID);
+      expect(result.state.attributes.tabs[0].label).toBe(
+        DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_LABEL
+      );
       expect(result.state.attributes.tabs[0].attributes.columns).toEqual(['message', '@timestamp']);
       expect(result.state.attributes.tabs[0].attributes.sort).toEqual([['@timestamp', 'desc']]);
       expect(result.state.attributes.tabs[0].attributes.grid).toEqual({
@@ -613,6 +621,10 @@ describe('search embeddable transform utils', () => {
       expect(reverted.attributes.title).toBe(storedState.title);
       expect(reverted.attributes.description).toBe(storedState.description);
       expect(reverted.attributes.tabs).toHaveLength(storedState.attributes.tabs!.length);
+      expect(reverted.attributes.tabs[0].id).toBe(DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_ID);
+      expect(reverted.attributes.tabs[0].label).toBe(
+        DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_LABEL
+      );
 
       const initialTabAttrs = storedState.attributes.tabs![0].attributes;
       const revertedTabAttrs = reverted.attributes.tabs[0].attributes;

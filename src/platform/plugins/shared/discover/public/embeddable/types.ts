@@ -44,9 +44,7 @@ import type {
 export type { SearchEmbeddablePanelApiState };
 
 /**
- * Input state accepted by the search embeddable factory. Extends the persisted
- * session state with optional display options passed by solutions (e.g. APM, Infra)
- * when using SavedSearchComponent outside of dashboards. These options are not persisted.
+ * Input state accepted by the search embeddable factory.
  */
 export type SearchEmbeddableInputState = SearchEmbeddablePanelApiState & {
   nonPersistedDisplayOptions?: NonPersistedDisplayOptions;

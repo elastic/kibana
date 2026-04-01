@@ -29,11 +29,10 @@ export function fromStoredDataView(
   if (typeof index === 'string') {
     return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: index };
   }
-  const title = index.title ?? index.id;
-  if (!title) throw new Error('Cannot derive data view without `title` or `id`');
+  if (!index.title) throw new Error('Cannot derive data view without `title` or `id`');
   return {
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-    index_pattern: title,
+    index_pattern: index.title,
     time_field: index.timeFieldName,
     runtime_fields: fromStoredRuntimeFields(
       index.runtimeFieldMap,
