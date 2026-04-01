@@ -28,7 +28,6 @@ import {
 } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
@@ -180,8 +179,8 @@ export function SettingsTab() {
     );
   }, [
     settingsFetch.value,
-    knowledgeIndicatorExtraction,
-    ruleGeneration,
+    kiExtraction,
+    kiQueryGeneration,
     discovery,
     indexPatterns,
     continuousKiExtraction,
