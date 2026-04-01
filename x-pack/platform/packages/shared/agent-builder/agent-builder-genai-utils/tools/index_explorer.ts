@@ -30,11 +30,16 @@ export interface IndexExplorerResponse {
   resources: RelevantResource[];
 }
 
+export interface ResourceFieldDescriptor {
+  path: string;
+  type: string;
+}
+
 export interface ResourceDescriptor {
   type: EsResourceType;
   name: string;
   description?: string;
-  fields?: string[];
+  fields?: ResourceFieldDescriptor[];
 }
 
 const truncateList = (fields: string[], max: number): string[] => {
@@ -66,7 +71,7 @@ const createIndexSummaries = async ({
       type: EsResourceType.index,
       name,
       description: entry?.rawMapping?._meta?.description,
-      fields: (entry?.fields ?? []).map((f) => f.path),
+      fields: (entry?.fields ?? []).map((f) => ({ path: f.path, type: f.type })),
     };
   });
 };
@@ -111,7 +116,7 @@ const createDatastreamSummaries = async ({
         type: EsResourceType.dataStream,
         name,
         description: mappings?.mappings._meta?.description,
-        fields: flattened.map((field) => field.path),
+        fields: flattened.map((field) => ({ path: field.path, type: field.type })),
       });
     }
   }
@@ -127,12 +132,55 @@ const createDatastreamSummaries = async ({
       descriptors.push({
         type: EsResourceType.dataStream,
         name,
-        fields: (fieldsByDs[name] ?? []).map((f) => f.path),
+        fields: (fieldsByDs[name] ?? []).map((f) => ({ path: f.path, type: f.type })),
       });
     }
   }
 
   return descriptors;
+};
+
+/**
+ * Gathers resource descriptors (with field names and types) for all resources
+ * matching the given pattern.
+ */
+export const gatherResourceDescriptors = async ({
+  indexPattern = '*',
+  includeAliases = true,
+  includeDatastream = true,
+  esClient,
+}: {
+  indexPattern?: string;
+  includeAliases?: boolean;
+  includeDatastream?: boolean;
+  esClient: ElasticsearchClient;
+}): Promise<ResourceDescriptor[]> => {
+  const sources = await listSearchSources({
+    pattern: indexPattern,
+    excludeIndicesRepresentedAsDatastream: true,
+    excludeIndicesRepresentedAsAlias: false,
+    esClient,
+    includeKibanaIndices: indexPattern !== '*',
+  });
+
+  const resources: ResourceDescriptor[] = [];
+  if (sources.indices.length > 0) {
+    const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
+    resources.push(...indexDescriptors);
+  }
+  if (sources.data_streams.length > 0 && includeDatastream) {
+    const dsDescriptors = await createDatastreamSummaries({
+      datastreams: sources.data_streams,
+      esClient,
+    });
+    resources.push(...dsDescriptors);
+  }
+  if (sources.aliases.length > 0 && includeAliases) {
+    const aliasDescriptors = await createAliasSummaries({ aliases: sources.aliases });
+    resources.push(...aliasDescriptors);
+  }
+
+  return resources;
 };
 
 export const indexExplorer = async ({
@@ -222,9 +270,14 @@ export interface SelectedResource {
 }
 
 export const formatResource = (res: ResourceDescriptor): string => {
-  const topFields = truncateList(res.fields ?? [], 10);
+  const allFields = res.fields ?? [];
+  const topFields = allFields.slice(0, 10);
+  const formatted = topFields.map((f) => `${f.path} [${f.type}]`);
+  if (allFields.length > 10) {
+    formatted.push(`[and ${allFields.length - 10} more]`);
+  }
   const description = res.description ? `: ${res.description}` : '';
-  const fields = topFields.length > 0 ? `\n  fields: ${topFields.join(', ')}` : '';
+  const fields = formatted.length > 0 ? `\n  fields: ${formatted.join(', ')}` : '';
   return `- ${res.name} (${res.type})${description}${fields}`;
 };
 

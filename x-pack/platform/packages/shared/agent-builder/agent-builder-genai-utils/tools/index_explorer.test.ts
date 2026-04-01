@@ -23,7 +23,10 @@ describe('createIndexSelectorPrompt', () => {
     type: EsResourceType.index,
     name: 'some_index',
     description: 'some description',
-    fields: ['foo', 'bar'],
+    fields: [
+      { path: 'foo', type: 'keyword' },
+      { path: 'bar', type: 'text' },
+    ],
   };
 
   it('returns a prompt containing the nl query', () => {
@@ -55,10 +58,14 @@ describe('formatResource', () => {
       type: EsResourceType.index,
       name: 'my-index',
       description: 'My index description',
-      fields: ['field1', 'field2', 'field3'],
+      fields: [
+        { path: 'field1', type: 'keyword' },
+        { path: 'field2', type: 'text' },
+        { path: 'field3', type: 'long' },
+      ],
     });
     expect(result).toEqual(
-      '- my-index (index): My index description\n  fields: field1, field2, field3'
+      '- my-index (index): My index description\n  fields: field1 [keyword], field2 [text], field3 [long]'
     );
   });
 
@@ -66,9 +73,14 @@ describe('formatResource', () => {
     const result = formatResource({
       type: EsResourceType.dataStream,
       name: 'logs-nginx',
-      fields: ['@timestamp', 'message'],
+      fields: [
+        { path: '@timestamp', type: 'date' },
+        { path: 'message', type: 'text' },
+      ],
     });
-    expect(result).toEqual('- logs-nginx (data_stream)\n  fields: @timestamp, message');
+    expect(result).toEqual(
+      '- logs-nginx (data_stream)\n  fields: @timestamp [date], message [text]'
+    );
   });
 
   it('omits fields line when fields is empty', () => {
@@ -90,13 +102,16 @@ describe('formatResource', () => {
   });
 
   it('truncates fields to 10 entries', () => {
-    const fields = Array.from({ length: 15 }, (_, i) => `field${i + 1}`);
+    const fields = Array.from({ length: 15 }, (_, i) => ({
+      path: `field${i + 1}`,
+      type: 'keyword',
+    }));
     const result = formatResource({
       type: EsResourceType.index,
       name: 'big-index',
       fields,
     });
-    expect(result).toContain('fields: field1,');
+    expect(result).toContain('fields: field1 [keyword],');
     expect(result).toContain('[and 5 more]');
     expect(result).not.toContain('field11');
   });

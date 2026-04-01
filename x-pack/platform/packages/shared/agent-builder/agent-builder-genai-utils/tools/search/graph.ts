@@ -13,19 +13,17 @@ import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import { EsResourceType } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createToolCallMessage, extractTextContent, generateFakeToolCallId } from '../../langchain';
-import { indexExplorer } from '../index_explorer';
+import { gatherResourceDescriptors } from '../index_explorer';
 import { listSearchSources } from '../steps/list_search_sources';
 import {
   createNaturalLanguageSearchTool,
   createRelevanceSearchTool,
   naturalLanguageSearchToolName,
 } from './inner_tools';
-import { getSearchPrompt } from './prompts';
+import { getSearchDispatcherPrompt } from './prompts';
 import { isIndexPattern } from './target_patterns';
-import type { SearchTarget } from './types';
 import { progressMessages } from './i18n';
 
 const StateAnnotation = Annotation.Root({
@@ -38,8 +36,6 @@ const StateAnnotation = Annotation.Root({
   allowPatternTarget: Annotation<boolean>(),
   timeRange: Annotation<TimeRange>(),
   // inner
-  indexIsValid: Annotation<boolean>(),
-  searchTarget: Annotation<SearchTarget>(),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
@@ -59,7 +55,7 @@ const isPatternTargetEnabled = (state: StateType): state is StateType & { target
     state.allowPatternTarget &&
       state.targetPattern &&
       isIndexPattern(state.targetPattern) &&
-      state.targetPattern !== '*' // When no index pattern is specified, we rather use the index explorer
+      state.targetPattern !== '*'
   );
 
 export const createSearchToolGraph = ({
@@ -87,7 +83,7 @@ export const createSearchToolGraph = ({
     return [relevanceTool, nlSearchTool];
   };
 
-  const selectAndValidateIndex = async (state: StateType) => {
+  const selectAndDispatch = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
 
     if (isPatternTargetEnabled(state)) {
@@ -102,57 +98,34 @@ export const createSearchToolGraph = ({
         sources.indices.length + sources.aliases.length + sources.data_streams.length;
 
       if (matchedResourceCount === 0) {
-        return {
-          indexIsValid: false,
-          error: `No resources found for pattern "${state.targetPattern}"`,
-        };
+        return { error: `No resources found for pattern "${state.targetPattern}"` };
       }
 
       return {
-        indexIsValid: true,
-        searchTarget: {
-          type: EsResourceType.indexPattern,
-          name: state.targetPattern,
-        },
+        messages: [
+          createToolCallMessage({
+            toolCallId: generateFakeToolCallId(),
+            toolName: naturalLanguageSearchToolName,
+            args: {
+              query: state.nlQuery,
+              index: state.targetPattern,
+            },
+          }),
+        ],
       };
     }
 
-    const explorerRes = await indexExplorer({
-      nlQuery: state.nlQuery,
+    const resources = await gatherResourceDescriptors({
       indexPattern: state.targetPattern ?? '*',
       esClient,
-      model,
-      logger,
-      limit: 1,
     });
 
-    if (explorerRes.resources.length > 0) {
-      const selectedResource = explorerRes.resources[0];
-      return {
-        indexIsValid: true,
-        searchTarget: { type: selectedResource.type, name: selectedResource.name },
-      };
-    } else {
-      return {
-        indexIsValid: false,
-        error: `Could not figure out which index to use`,
-      };
+    if (resources.length === 0) {
+      return { error: 'Could not find any matching resources' };
     }
-  };
 
-  const routeAfterIndexValidation = async (state: StateType) => {
-    if (!state.indexIsValid) {
-      return '__end__';
-    }
-    // If the target is an index pattern, we need to call the NL search tool
-    return state.searchTarget.type === EsResourceType.indexPattern ? 'get_nl_search_tool' : 'agent';
-  };
-
-  const callSearchAgent = async (state: StateType) => {
     events?.reportProgress(
-      progressMessages.resolvingSearchStrategy({
-        target: state.searchTarget.name,
-      })
+      progressMessages.resolvingSearchStrategy({ target: state.targetPattern ?? '*' })
     );
 
     const tools = getTools(state);
@@ -161,39 +134,21 @@ export const createSearchToolGraph = ({
     });
 
     const response = await searchModel.invoke(
-      getSearchPrompt({
+      getSearchDispatcherPrompt({
         nlQuery: state.nlQuery,
-        searchTarget: state.searchTarget,
+        resources,
         customInstructions: state.customInstructions,
       })
     );
-    return {
-      messages: [response],
-    };
+
+    return { messages: [response] };
   };
 
-  const decideContinueOrEnd = async (state: StateType) => {
-    // only one call for now
-    return '__end__';
-  };
-
-  const getNlSearchTool = async (state: StateType) => {
-    if (state.searchTarget.type !== EsResourceType.indexPattern) {
-      throw new Error('get_nl_search_tool should only be called for index pattern targets');
+  const routeAfterDispatch = (state: StateType) => {
+    if (state.error || state.messages.length === 0) {
+      return '__end__';
     }
-
-    return {
-      messages: [
-        createToolCallMessage({
-          toolCallId: generateFakeToolCallId(),
-          toolName: naturalLanguageSearchToolName,
-          args: {
-            query: state.nlQuery,
-            index: state.searchTarget.name,
-          },
-        }),
-      ],
-    };
+    return 'execute_tool';
   };
 
   const executeTool = async (state: StateType) => {
@@ -210,24 +165,14 @@ export const createSearchToolGraph = ({
   };
 
   const graph = new StateGraph(StateAnnotation)
-    // nodes
-    .addNode('check_index', selectAndValidateIndex)
-    .addNode('get_nl_search_tool', getNlSearchTool)
-    .addNode('agent', callSearchAgent)
+    .addNode('select_and_dispatch', selectAndDispatch)
     .addNode('execute_tool', executeTool)
-    // edges
-    .addEdge('__start__', 'check_index')
-    .addConditionalEdges('check_index', routeAfterIndexValidation, {
-      get_nl_search_tool: 'get_nl_search_tool',
-      agent: 'agent',
+    .addEdge('__start__', 'select_and_dispatch')
+    .addConditionalEdges('select_and_dispatch', routeAfterDispatch, {
+      execute_tool: 'execute_tool',
       __end__: '__end__',
     })
-    .addEdge('get_nl_search_tool', 'execute_tool')
-    .addEdge('agent', 'execute_tool')
-    .addConditionalEdges('execute_tool', decideContinueOrEnd, {
-      agent: 'agent',
-      __end__: '__end__',
-    })
+    .addEdge('execute_tool', '__end__')
     .compile();
 
   return graph;
