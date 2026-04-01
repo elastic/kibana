@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FieldErrors } from 'react-hook-form';
-import type { FormValues } from '../form/types';
+import type { FormValues } from './types';
 import { ErrorCallOut } from './error_callout';
 
 // Wrapper component that provides form context with configurable state
@@ -146,6 +146,26 @@ describe('ErrorCallOut', () => {
 
       const callout = container.querySelector('.euiCallOut');
       expect(callout).toHaveClass('euiCallOut--danger');
+    });
+
+    it('scrolls the callout into view when errors are shown', () => {
+      const scrollIntoViewMock = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoViewMock;
+
+      const errors = createErrors({
+        metadata: { message: 'Name is required' },
+      });
+
+      render(
+        <TestWrapper errors={errors} isSubmitted={true}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
+
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
     });
   });
 });
