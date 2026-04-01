@@ -48,7 +48,7 @@ async function updateWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
   const { id, data } = params;
-  const { title, enabled, duration, rRule, schedule, scope, categoryIds } = data;
+  const { title, enabled, schedule, scope } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -117,12 +117,6 @@ async function updateWithOCC(
       transformMaintenanceWindowToMaintenanceWindowAttributes({
         ...maintenanceWindow,
         ...(title ? { title } : {}),
-        ...(rRule ? { rRule: rRule as MaintenanceWindow['rRule'] } : {}),
-        ...(categoryIds !== undefined ? { categoryIds } : {}),
-        ...(scopedQueryWithGeneratedValue !== undefined
-          ? { scopedQuery: scopedQueryWithGeneratedValue }
-          : {}),
-        ...(typeof duration === 'number' ? { duration } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,
         events,

@@ -115,23 +115,7 @@ describe('updateMaintenanceWindowRoute', () => {
       id: 'foo-bar',
       data: {
         title: 'test-update-maintenance-window',
-        duration: 864000000,
         enabled: true,
-        rRule: {
-          bymonth: undefined,
-          bymonthday: undefined,
-          byweekday: ['MO', 'FR'],
-          count: undefined,
-          dtstart: '2021-03-07T00:00:00.000Z',
-          freq: 3,
-          interval: 1,
-          tzid: 'UTC',
-          until: '2022-05-17T05:05:00.000Z',
-        },
-        scopedQuery: {
-          filters: [],
-          kql: "_id: '1234'",
-        },
         schedule: {
           custom: {
             duration: '10d',

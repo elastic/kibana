@@ -30,7 +30,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
-  const { title, schedule, scope, rRule, categoryIds, duration, enabled = true } = data;
+  const { title, schedule, scope, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -82,10 +82,6 @@ export async function createMaintenanceWindow(
     title,
     enabled,
     expirationDate,
-    categoryIds,
-    scopedQuery: scopedQueryWithGeneratedValue,
-    rRule,
-    duration,
     events,
     schedule,
     ...(scopedQueryWithGeneratedValue

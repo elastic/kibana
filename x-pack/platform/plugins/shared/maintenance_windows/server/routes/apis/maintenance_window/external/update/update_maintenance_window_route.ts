@@ -25,7 +25,7 @@ import {
 } from '../../../../schemas/maintenance_window/external/request/update';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../schemas/maintenance_window/external/response';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
-import { getDurationInMilliseconds } from '../../../../../lib/transforms/custom_to_rrule/util';
+import { getDurationInMilliseconds } from '../../../../../../common/transforms';
 
 import { transformUpdateBodyV1 } from './transform_update_body';
 

@@ -29,12 +29,6 @@ const transformUpdateBodySchema = (
     title: updateParams.title,
     duration: updateParams.duration,
     r_rule: updateParams.rRule as UpdateMaintenanceWindowRequestBody['r_rule'],
-    ...(updateParams.categoryIds !== undefined
-      ? {
-          category_ids:
-            updateParams.categoryIds as UpdateMaintenanceWindowRequestBody['category_ids'],
-        }
-      : {}),
     ...(updateParams.scopedQuery !== undefined ? { scoped_query: updateParams.scopedQuery } : {}),
   };
 };

@@ -11,7 +11,6 @@
     "@kbn/rule-data-utils",
     "@kbn/core",
     "@kbn/i18n-react",
-    "@kbn/rrule",
     "@kbn/triggers-actions-ui-types",
     "@kbn/alerting-types",
     "@kbn/actions-types",

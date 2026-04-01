@@ -7,7 +7,7 @@
 
 import type { CreateMaintenanceWindowRequestBodyV1 } from '../../../../../../schemas/maintenance_window/internal/request/create';
 import type { CreateMaintenanceWindowParams } from '../../../../../../../application/methods/create/types';
-import { transformRRuleToCustomSchedule } from '../../../../../../../lib/transforms/rrule_to_custom/latest';
+import { transformRRuleToCustomSchedule } from '../../../../../../../../common/transforms/rrule_to_custom/latest';
 
 export const transformCreateBody = (
   createBody: CreateMaintenanceWindowRequestBodyV1
@@ -18,10 +18,6 @@ export const transformCreateBody = (
   });
   return {
     title: createBody.title,
-    duration: createBody.duration,
-    rRule: createBody.r_rule,
-    categoryIds: createBody.category_ids,
-    scopedQuery: createBody.scoped_query,
     schedule: { custom: schedule },
     ...(createBody.scoped_query ? { scope: { alerting: createBody.scoped_query } } : {}),
   };

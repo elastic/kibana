@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Frequency } from '@kbn/rrule';
 import moment from 'moment-timezone';
 import { archiveMaintenanceWindow } from './archive_maintenance_window';
 import {
@@ -17,7 +16,6 @@ import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import type { MaintenanceWindowClientContext } from '../../../../common';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 import { getMockMaintenanceWindow } from '../../../data/test_helpers';
-import type { MaintenanceWindowAttributes } from '../../../data/types/maintenance_window_attributes';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -85,6 +83,14 @@ describe('MaintenanceWindowClient - archive', () => {
       'test-id',
       {
         ...mockMaintenanceWindow,
+        duration: 3600000,
+        rRule: {
+          count: 2,
+          dtstart: '2023-02-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'UTC',
+        },
         events: [],
         expirationDate: new Date().toISOString(),
         updatedAt: updatedMetadata.updatedAt,
@@ -96,12 +102,6 @@ describe('MaintenanceWindowClient - archive', () => {
 
   it('should unarchive maintenance window', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
-    const rRule = {
-      tzid: 'UTC',
-      dtstart: '2023-02-26T00:00:00.000Z',
-      freq: Frequency.WEEKLY,
-      count: 4,
-    } as MaintenanceWindowAttributes['rRule'];
 
     const schedule = {
       custom: {
@@ -121,7 +121,6 @@ describe('MaintenanceWindowClient - archive', () => {
     savedObjectsClient.get.mockResolvedValueOnce({
       attributes: {
         ...mockMaintenanceWindow,
-        rRule,
         events: [],
         expirationDate: new Date().toISOString(),
         schedule,
@@ -151,7 +150,14 @@ describe('MaintenanceWindowClient - archive', () => {
       'test-id',
       {
         ...mockMaintenanceWindow,
-        rRule,
+        duration: 3600000,
+        rRule: {
+          count: 4,
+          dtstart: '2023-02-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'UTC',
+        },
         schedule,
         events: [
           { gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T01:00:00.000Z' },
