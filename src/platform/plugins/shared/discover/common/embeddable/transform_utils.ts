@@ -226,6 +226,7 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
     columns: columnOrder ?? [],
     grid: toStoredGrid(columnSettings),
     hideChart: false,
+    hideTable: false,
     isTextBasedQuery: isOfAggregateQueryType(apiTab.query),
     kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSourceFields) },
     ...('view_mode' in apiTab && { viewMode: apiTab.view_mode }),
