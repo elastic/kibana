@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useInsightsDiscovery } from '../../../hooks/sig_events/use_insights_discovery';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { FeedbackButton } from '../../feedback_button';
@@ -18,6 +19,7 @@ import { InsightsTab } from './components/insights/tab';
 
 export function SignificantEventsDiscoveryPage() {
   const router = useStreamsAppRouter();
+  const discoveryState = useInsightsDiscovery();
 
   const {
     features: { significantEventsDiscovery },
@@ -32,6 +34,11 @@ export function SignificantEventsDiscoveryPage() {
   if (!significantEventsDiscovery.available || !significantEventsDiscovery.enabled) {
     return <RedirectTo path="/" />;
   }
+
+  const { insights, onRunDiscovery, isSchedulingTask } = discoveryState;
+
+  // Only show "Run a discovery" when there are already insights to re-run against.
+  const showRunDiscovery = insights !== null && insights.length > 0;
 
   return (
     <>
@@ -57,6 +64,22 @@ export function SignificantEventsDiscoveryPage() {
                 <EuiFlexItem grow={false}>
                   <FeedbackButton />
                 </EuiFlexItem>
+                {showRunDiscovery && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      iconType="sparkles"
+                      onClick={onRunDiscovery}
+                      isLoading={isSchedulingTask}
+                      isDisabled={isSchedulingTask}
+                      data-test-subj="significant_events_run_discovery_button"
+                    >
+                      {i18n.translate('xpack.streams.insights.runDiscoveryButtonLabel', {
+                        defaultMessage: 'Run a discovery',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
@@ -76,7 +99,7 @@ export function SignificantEventsDiscoveryPage() {
         }
       />
       <StreamsAppPageTemplate.Body grow>
-        <InsightsTab />
+        <InsightsTab discoveryState={discoveryState} />
       </StreamsAppPageTemplate.Body>
     </>
   );

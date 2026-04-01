@@ -7,12 +7,17 @@
 
 import React from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
+import type { InsightsDiscoveryState } from '../../../../../hooks/sig_events/use_insights_discovery';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 import { SignificantEventsOnboardingEmptyPrompt } from '../../significant_events_onboarding_empty_prompt';
 import { Summary } from './summary';
 
-export function InsightsTab() {
+export function InsightsTab({
+  discoveryState,
+}: {
+  discoveryState: InsightsDiscoveryState;
+}) {
   const {
     dependencies: {
       start: {
@@ -46,5 +51,5 @@ export function InsightsTab() {
     return <SignificantEventsOnboardingEmptyPrompt />;
   }
 
-  return <Summary count={totalEvents} />;
+  return <Summary count={totalEvents} discoveryState={discoveryState} />;
 }
