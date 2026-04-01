@@ -174,6 +174,7 @@ export class StreamsPlugin
           insightService.getInternalClient(),
           contentService.getClient(),
           queryService.getClient({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
             rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
               request,
@@ -356,7 +357,7 @@ export class StreamsPlugin
           const [attachmentClient, featureClient, queryClient] = await Promise.all([
             attachmentService.getClient({ soClient, rulesClient }),
             featureService.getClient(),
-            queryService.getClient({ soClient, rulesClient }),
+            queryService.getClient({ esClient, soClient, rulesClient }),
           ]);
 
           const streamsClient = await streamsService.getClient({
@@ -411,6 +412,7 @@ export class StreamsPlugin
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.inference = plugins.inference;
+      this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     }
