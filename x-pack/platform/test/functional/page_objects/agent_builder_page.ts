@@ -871,7 +871,11 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async setAgentFormDisplayName(name: string) {
-    await this.testSubjects.setValue('agentSettingsDisplayNameInput', name);
+    // clearWithKeyboard ensures React Hook Form's controlled input receives proper
+    // keyboard events and doesn't restore the stale value after the JS clear.
+    await this.testSubjects.setValue('agentSettingsDisplayNameInput', name, {
+      clearWithKeyboard: true,
+    });
   }
 
   agentFormSaveButton() {
@@ -883,6 +887,8 @@ export class AgentBuilderPageObject extends FtrService {
       },
       click: async () => {
         await this.testSubjects.click(saveButtonSelector);
+        // Wait for the save to complete and navigation back to the agents list.
+        await this.testSubjects.existOrFail('agentBuilderAgentsListPageTitle');
       },
     };
   }
