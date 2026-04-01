@@ -19,11 +19,16 @@ import type {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import { i18nLoader } from '@kbn/i18n';
 import type { I18nConfigType } from './i18n_config';
 import { config as i18nConfigDef } from './i18n_config';
-import { getKibanaTranslationFiles } from './get_kibana_translation_files';
+import {
+  getKibanaTranslationFiles,
+  getAllKibanaTranslationFiles,
+} from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
+import { supportedLocales } from './constants';
 
 export interface PrebootDeps {
   http: InternalHttpServicePreboot;
@@ -52,7 +57,7 @@ export class I18nService {
     const { locale, translationHash } = await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
-      registerRoutes({ router, locale, isDist, translationHash })
+      registerRoutes({ router, locale, isDist, translationHash, supportedLocales })
     );
 
     return {
@@ -65,7 +70,7 @@ export class I18nService {
 
     const router = http.createRouter('');
     const { dist: isDist } = this.coreContext.env.packageInfo;
-    registerRoutes({ router, locale, isDist, translationHash });
+    registerRoutes({ router, locale, isDist, translationHash, supportedLocales });
 
     return {
       getLocale: () => locale,
@@ -86,6 +91,11 @@ export class I18nService {
 
     this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
     await initTranslations(locale, translationFiles);
+
+    // Register translation files for all supported locales so they can be served on demand.
+    // This only stores file paths — no disk I/O occurs until a locale is first requested.
+    const allTranslationFiles = await getAllKibanaTranslationFiles(pluginPaths);
+    i18nLoader.registerTranslationFiles(allTranslationFiles);
 
     const translationHash = getTranslationHash(i18n.getTranslation());
 

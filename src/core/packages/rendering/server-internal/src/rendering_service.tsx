@@ -50,6 +50,47 @@ import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 import { isThemeBundled } from './theme';
 
+// POC: Supported locales for Accept-Language matching.
+// TODO: Import from a shared location once this moves beyond POC.
+const SUPPORTED_LOCALES = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'];
+
+/**
+ * Parse the Accept-Language header and return the best matching supported locale,
+ * or undefined if no match is found.
+ */
+function parseBrowserLocale(acceptLanguage: string | string[] | undefined): string | undefined {
+  if (!acceptLanguage || Array.isArray(acceptLanguage)) {
+    return undefined;
+  }
+
+  // Parse entries like "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7"
+  const entries = acceptLanguage.split(',').map((entry) => {
+    const [langTag, qParam] = entry.trim().split(';');
+    const q = qParam ? parseFloat(qParam.replace('q=', '')) : 1.0;
+    return { lang: langTag.trim(), q };
+  });
+
+  // Sort by quality descending
+  entries.sort((a, b) => b.q - a.q);
+
+  for (const { lang } of entries) {
+    // Exact match (case-insensitive)
+    const exactMatch = SUPPORTED_LOCALES.find(
+      (supported) => supported.toLowerCase() === lang.toLowerCase()
+    );
+    if (exactMatch) return exactMatch;
+
+    // Language-only match (e.g. "fr" matches "fr-FR")
+    const langPrefix = lang.split('-')[0].toLowerCase();
+    const prefixMatch = SUPPORTED_LOCALES.find((supported) =>
+      supported.toLowerCase().startsWith(langPrefix)
+    );
+    if (prefixMatch) return prefixMatch;
+  }
+
+  return undefined;
+}
+
 type RenderOptions =
   | RenderingSetupDeps
   | (RenderingPrebootDeps & {
@@ -279,6 +320,9 @@ export class RenderingService {
       translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
     }
 
+    // Parse Accept-Language header to find the best matching supported locale
+    const browserLocale = parseBrowserLocale(request.headers['accept-language']);
+
     const apmConfig = getApmConfig(request.url.pathname);
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
@@ -318,6 +362,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          ...(browserLocale ? { browserLocale } : {}),
         },
         theme: {
           darkMode,
