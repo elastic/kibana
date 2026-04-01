@@ -21,19 +21,15 @@ import {
   EuiPopoverTitle,
   EuiSelect,
 } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   firstFieldOption,
-  getFields,
-  getIndexOptions,
+  getIndexOptionsByDataView,
   getTimeFieldOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { convertFieldSpecToFieldOption } from '../es_query/util';
 
-interface KibanaDeps {
-  http: HttpSetup;
-}
 interface Props {
   index: string[];
   esFields: Array<{
@@ -45,6 +41,7 @@ interface Props {
   }>;
   timeField: string | undefined;
   errors: IErrorObject;
+  dataViews: DataViewsPublicPluginStart;
   onIndexChange: (indices: string[]) => void;
   onTimeFieldChange: (timeField: string) => void;
 }
@@ -54,11 +51,10 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
   esFields,
   timeField,
   errors,
+  dataViews,
   onIndexChange,
   onTimeFieldChange,
 }) => {
-  const { http } = useKibana<KibanaDeps>().services;
-
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [areIndicesLoading, setAreIndicesLoading] = useState<boolean>(false);
@@ -66,7 +62,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
 
   const loadIndexOptions = debounce(async (search: string) => {
     setAreIndicesLoading(true);
-    setIndexOptions(await getIndexOptions(http!, search));
+    setIndexOptions(await getIndexOptionsByDataView(dataViews, search));
     setAreIndicesLoading(false);
   }, 250);
 
@@ -193,7 +189,11 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               if (selectedIndices.length === 0) {
                 setTimeFieldOptions([firstFieldOption]);
               } else {
-                const currentEsFields = await getFields(http!, selectedIndices);
+                const fieldSpecs = await dataViews.getFieldsForWildcard({
+                  pattern: selectedIndices.join(','),
+                  allowNoIndex: true,
+                });
+                const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
                 const timeFields = getTimeFieldOptions(currentEsFields);
                 setTimeFieldOptions([firstFieldOption, ...timeFields]);
               }

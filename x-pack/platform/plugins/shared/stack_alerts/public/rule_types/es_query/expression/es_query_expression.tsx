@@ -16,7 +16,6 @@ import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
@@ -35,15 +34,19 @@ import { SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
+import {
+  convertFieldSpecToFieldOption,
+  convertRawRuntimeFieldtoFieldOption,
+  useTriggerUiActionServices,
+} from '../util';
 
 const { useXJsonMode } = XJson;
 
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
+> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data, dataViews }) => {
   const services = useTriggerUiActionServices();
-  const { http, docLinks, isServerless } = services;
+  const { docLinks, isServerless } = services;
 
   const {
     index,
@@ -115,7 +118,11 @@ export const EsQueryExpression: React.FC<
   }, []);
 
   const refreshEsFields = async (indices: string[], initialRuntimeFields?: FieldOption[]) => {
-    const currentEsFields = await getFields(http, indices);
+    const fieldSpecs = await dataViews.getFieldsForWildcard({
+      pattern: indices.join(','),
+      allowNoIndex: true,
+    });
+    const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
     setEsFields(currentEsFields);
 
     const combined = currentEsFields.concat(
@@ -220,6 +227,7 @@ export const EsQueryExpression: React.FC<
           esFields={esFields}
           timeField={timeField}
           errors={errors}
+          dataViews={dataViews}
           onIndexChange={async (indices: string[]) => {
             setParam('index', indices);
 

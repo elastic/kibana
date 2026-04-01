@@ -108,6 +108,7 @@ export {
   builtInAggregationTypes,
   getFields,
   getIndexOptions,
+  getIndexOptionsByDataView,
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,

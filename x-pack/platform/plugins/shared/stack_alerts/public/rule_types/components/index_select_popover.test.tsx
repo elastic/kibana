@@ -10,6 +10,8 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { IndexSelectPopover } from './index_select_popover';
 import { EuiComboBox } from '@elastic/eui';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 jest.mock('lodash', () => {
   const module = jest.requireActual('lodash');
@@ -23,9 +25,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
-    getIndexPatterns: () => {
-      return ['index1', 'index2'];
-    },
     getTimeFieldOptions: () => {
       return [
         {
@@ -34,37 +33,37 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
       ];
     },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
-    getIndexOptions: () => {
-      return Promise.resolve([
-        {
-          label: 'indexOption',
-          options: [
-            {
-              label: 'index1',
-              value: 'index1',
-            },
-            {
-              label: 'index2',
-              value: 'index2',
-            },
-          ],
-        },
-      ]);
-    },
   };
 });
+
+const dataViewsMock =
+  dataViewPluginMocks.createStartContract() as jest.Mocked<DataViewsPublicPluginStart>;
+
+const setupDataViewsMock = () => {
+  dataViewsMock.getFieldsForWildcard = jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]);
+  dataViewsMock.getIndices = jest.fn().mockResolvedValue([
+    { name: 'index1', tags: [] },
+    { name: 'index2', tags: [] },
+  ]);
+  dataViewsMock.find = jest.fn().mockResolvedValue([]);
+};
 
 describe('IndexSelectPopover', () => {
   const onIndexChange = jest.fn();
@@ -77,12 +76,14 @@ describe('IndexSelectPopover', () => {
       index: [],
       timeField: [],
     },
+    dataViews: dataViewsMock,
     onIndexChange,
     onTimeFieldChange,
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
+    setupDataViewsMock();
   });
 
   test('renders closed popover initially and opens on click', async () => {
@@ -116,18 +117,17 @@ describe('IndexSelectPopover', () => {
     const indexSearchBoxValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
     expect(indexSearchBoxValue.first().props().value).toEqual('');
 
-    const indexComboBox = wrapper.find('#indexSelectSearchBox');
-    indexComboBox.first().simulate('click');
+    const comboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="thresholdIndexesComboBox"]');
 
     await act(async () => {
-      const event = { target: { value: 'indexPattern1' } };
-      indexComboBox.find('input').first().simulate('change', event);
-      await nextTick();
+      comboBox.prop('onSearchChange')!('indexPattern1');
+      await new Promise((resolve) => setTimeout(resolve, 0));
       wrapper.update();
     });
 
-    const updatedIndexSearchValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
-    expect(updatedIndexSearchValue.first().props().value).toEqual('indexPattern1');
+    expect(dataViewsMock.getIndices).toHaveBeenCalled();
 
     const thresholdComboBox = wrapper
       .find(EuiComboBox)
@@ -137,7 +137,9 @@ describe('IndexSelectPopover', () => {
 
     await act(async () => {
       thresholdComboBox.prop('onChange')!([thresholdOptions[0].options![0]]);
-      await nextTick();
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
       wrapper.update();
     });
     expect(onIndexChange).toHaveBeenCalledWith(

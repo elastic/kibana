@@ -67,18 +67,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
       ];
     },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
     getIndexOptions: () => {
       return Promise.resolve([
         {
@@ -112,7 +100,28 @@ const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
 ));
 
 const dataMock = createDataPluginMock();
-const dataViewMock = dataViewPluginMocks.createStartContract();
+const dataViewMock = {
+  ...dataViewPluginMocks.createStartContract(),
+  getFieldsForWildcard: jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]),
+  getIndices: jest.fn().mockResolvedValue([]),
+};
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
