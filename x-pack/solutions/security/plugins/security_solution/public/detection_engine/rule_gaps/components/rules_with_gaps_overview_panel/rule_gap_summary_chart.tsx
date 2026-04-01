@@ -27,6 +27,7 @@ import {
 } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { defaultRangeValue } from '../../constants';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { DONUT_HEIGHT } from './constants';
 import * as i18n from './translations';
 
@@ -49,6 +50,8 @@ interface RuleGapSummaryChartProps {
 
 export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enabled = true }) => {
   const { euiTheme } = useEuiTheme();
+  const { scheduler } = useGapAutoFillSchedulerContext();
+  const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
 
   const {
     data: gapsData,
@@ -58,6 +61,7 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
     {
       gapRange: defaultRangeValue,
       gapFillStatuses: [],
+      schedulerId: activeSchedulerId,
     },
     { enabled }
   );
@@ -85,9 +89,10 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
     const { summary } = gapsData;
 
     const colors = {
-      filled: euiTheme.colors.success,
-      inProgress: euiTheme.colors.warning,
-      unfilled: euiTheme.colors.danger,
+      filled: euiTheme.colors.vis.euiColorVis0,
+      inProgress: euiTheme.colors.vis.euiColorVis2,
+      unfilled: euiTheme.colors.vis.euiColorVis6,
+      error: euiTheme.colors.vis.euiColorVis8,
     };
 
     const data: GapStatusRow[] = [
@@ -112,6 +117,13 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
         duration: formatDuration(summary.total_unfilled_duration_ms),
         color: colors.unfilled,
       },
+      {
+        status: i18n.GAP_STATUS_ERROR,
+        rulesCount: summary.rules_by_gap_fill_status.error,
+        durationMs: summary.total_error_duration_ms,
+        duration: formatDuration(summary.total_error_duration_ms),
+        color: colors.error,
+      },
     ];
 
     const donutData = data.map((item) => ({
@@ -124,6 +136,7 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
       [i18n.GAP_STATUS_FILLED]: colors.filled,
       [i18n.GAP_STATUS_IN_PROGRESS]: colors.inProgress,
       [i18n.GAP_STATUS_UNFILLED]: colors.unfilled,
+      [i18n.GAP_STATUS_ERROR]: colors.error,
     };
 
     const total = summary.total_duration_ms;
@@ -145,11 +158,6 @@ export const RuleGapSummaryChart: React.FC<RuleGapSummaryChartProps> = ({ enable
         render: (status: string, item: GapStatusRow) => (
           <EuiHealth color={item.color}>{status}</EuiHealth>
         ),
-      },
-      {
-        field: 'rulesCount',
-        name: i18n.TABLE_COLUMN_RULES,
-        align: 'right',
       },
       {
         field: 'duration',

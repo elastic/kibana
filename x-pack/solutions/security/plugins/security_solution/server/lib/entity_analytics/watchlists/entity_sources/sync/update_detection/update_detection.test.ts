@@ -11,9 +11,21 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { createUpdateDetectionService } from './update_detection';
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
-import type { EntityStoreEntityIdsByType } from '../../../entities/service';
+import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
+import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
+import type { CorrelationMap } from '../../../entities/types';
+
+const emptyWatchlistsByEuid: WatchlistsByEuid = new Map();
+
+const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
+  ({
+    searchLatestEntities: jest
+      .fn()
+      .mockResolvedValue({ records: [], total: 0, inspect: { dsl: [], response: [] } }),
+    bulkUpdateEntity: jest.fn().mockResolvedValue([]),
+  } as unknown as jest.Mocked<CRUDClient>);
 
 jest.mock('../../infra/entity_source_client');
 
@@ -39,15 +51,16 @@ type CapturedSearchRequest = SearchRequest & {
   };
 };
 
-const indexSource: MonitoringEntitySource = {
+const indexSource: WatchlistDataSources.MonitoringEntitySource = {
   id: 'index-source-1',
   type: 'index',
   name: 'test-index',
   indexPattern: 'logs-*',
+  identifierField: 'user.name',
   enabled: true,
 };
 
-const integrationSource: MonitoringEntitySource = {
+const integrationSource: WatchlistDataSources.MonitoringEntitySource = {
   id: 'integration-source-1',
   type: 'entity_analytics_integration',
   name: 'test-integration',
@@ -80,23 +93,32 @@ describe('Watchlist update detection service', () => {
     logger = loggingSystemMock.createLogger();
   });
 
-  describe('index source (plain sync)', () => {
-    it('uses buildEntitiesSearchBody without syncMarker and applies bulk upsert', async () => {
+  describe('index source (correlation-based sync)', () => {
+    it('queries source index by identifierField and correlation values, then applies bulk upsert', async () => {
       const searchCalls: CapturedSearchRequest[] = [];
-      const targetIndex = '.watchlist-entities-default';
+      const watchlist = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: '.watchlist-entities-default',
+      };
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      const correlationMap: CorrelationMap = new Map([
+        ['jdoe', { euid: 'user:jdoe', entityType: 'user' as const }],
+      ]);
+
       esClient.search.mockImplementation((params?: SearchRequest) => {
         if (!params) {
           throw new Error('Expected search params');
         }
         searchCalls.push(params as CapturedSearchRequest);
-        if (params.index === targetIndex) {
+        if (params.index === watchlist.index) {
           return Promise.resolve({ hits: { hits: [] } } as never);
         }
         return Promise.resolve({
           aggregations: {
-            entities: {
-              buckets: [{ key: { euid: 'user:jdoe' }, doc_count: 1 }],
+            identifiers: {
+              buckets: [{ key: { identifier: 'jdoe' }, doc_count: 1 }],
               after_key: undefined,
             },
           },
@@ -107,38 +129,80 @@ describe('Watchlist update detection service', () => {
       const service = createUpdateDetectionService({
         esClient,
         logger,
-        targetIndex,
+        crudClient: createMockCrudClient(),
+        watchlist,
       });
 
       await service.updateDetection(
         indexSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        correlationMap,
+        emptyWatchlistsByEuid
       );
 
       expect(searchCalls.length).toBeGreaterThan(0);
-      const firstSearchParams = searchCalls[0];
-      expect(firstSearchParams.aggs?.entities?.aggs).toBeUndefined();
-      expect(firstSearchParams.query?.bool?.must).toHaveLength(2);
-      expect(firstSearchParams.query?.bool?.must).toContainEqual({
-        terms: { euid: ['user:jdoe'] },
+      const sourceSearchParams = searchCalls[0];
+      expect(sourceSearchParams.index).toBe('logs-*');
+      expect(sourceSearchParams.query?.bool?.must).toContainEqual({
+        terms: { 'user.name': ['jdoe'] },
       });
       expect(esClient.bulk).toHaveBeenCalled();
     });
 
-    it('skips source searching when the allowlist is empty for all entity types', async () => {
+    it('skips sync when correlation map is empty', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
+      const watchlist2 = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: '.watchlist-entities-default',
+      };
       const service = createUpdateDetectionService({
         esClient,
         logger,
-        targetIndex: '.watchlist-entities-default',
+        crudClient: createMockCrudClient(),
+        watchlist: watchlist2,
       });
 
-      const result = await service.updateDetection(indexSource, createEntityStoreEntityIdsByType());
+      const correlationMap: CorrelationMap = new Map();
+      const result = await service.updateDetection(
+        indexSource,
+        createEntityStoreEntityIdsByType(),
+        correlationMap,
+        emptyWatchlistsByEuid
+      );
 
       expect(result).toEqual([]);
       expect(esClient.search).not.toHaveBeenCalled();
       expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('logs warning and returns empty when correlationMap is not provided', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      const watchlist3 = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: '.watchlist-entities-default',
+      };
+      const service = createUpdateDetectionService({
+        esClient,
+        logger,
+        crudClient: createMockCrudClient(),
+        watchlist: watchlist3,
+      });
+
+      const result = await service.updateDetection(
+        indexSource,
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
+      );
+
+      expect(result).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('correlationMap not provided')
+      );
     });
   });
 
@@ -146,15 +210,23 @@ describe('Watchlist update detection service', () => {
     it('logs warning and returns empty array without calling search or bulk', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
+      const watchlist4 = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: '.watchlist-entities-default',
+      };
       const service = createUpdateDetectionService({
         esClient,
         logger,
-        targetIndex: '.watchlist-entities-default',
+        crudClient: createMockCrudClient(),
+        watchlist: watchlist4,
       });
 
       const result = await service.updateDetection(
         integrationSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
       );
 
       expect(result).toEqual([]);
@@ -191,16 +263,24 @@ describe('Watchlist update detection service', () => {
       });
       esClient.bulk.mockResolvedValue({ errors: false } as never);
 
+      const watchlist5 = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: '.watchlist-entities-default',
+      };
       const service = createUpdateDetectionService({
         esClient,
         logger,
-        targetIndex: '.watchlist-entities-default',
         descriptorClient,
+        crudClient: createMockCrudClient(),
+        watchlist: watchlist5,
       });
 
       await service.updateDetection(
         integrationSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
       );
 
       expect(mockGetLastProcessedMarker).toHaveBeenCalledWith(integrationSource);
@@ -252,16 +332,24 @@ describe('Watchlist update detection service', () => {
       });
       esClient.bulk.mockResolvedValue({ errors: false } as never);
 
+      const watchlist6 = {
+        id: 'test-watchlist-id',
+        name: 'test-watchlist',
+        index: '.watchlist-entities-default',
+      };
       const service = createUpdateDetectionService({
         esClient,
         logger,
-        targetIndex: '.watchlist-entities-default',
         descriptorClient,
+        crudClient: createMockCrudClient(),
+        watchlist: watchlist6,
       });
 
       await service.updateDetection(
         integrationSource,
-        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] }),
+        undefined,
+        emptyWatchlistsByEuid
       );
 
       expect(mockUpdateLastProcessedMarker).toHaveBeenCalledWith(integrationSource, maxTimestamp);
