@@ -75,6 +75,7 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
 
   const styles = useMemo(() => {
     const fullScreenZIndex = Number(euiTheme.levels.header) - 1;
+    const menuZIndex = Number(euiTheme.levels.menu);
     return {
       [METRICS_GRID_FULL_SCREEN_CLASS]: css`
         z-index: ${fullScreenZIndex} !important;
@@ -109,10 +110,11 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         .euiFlyout {
           ${logicalCSS('top', '0 !important')}
           ${logicalCSS('height', '100%')}
+          z-index: ${menuZIndex + 1} !important;
         }
 
         [id^='echTooltipPortalMainTooltip'] {
-          z-index: ${fullScreenZIndex + 1} !important;
+          z-index: ${menuZIndex} !important;
         }
       `,
     };
