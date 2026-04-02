@@ -13,6 +13,7 @@ import {
   collectDescendantProcessorIdsForCondition,
   collectDocumentsAffectedByProcessors,
   getOriginalSampleDocument,
+  getAdditionalSourceFields,
   getSourceField,
   getTargetField,
   getTableColumns,
@@ -360,6 +361,94 @@ describe('Simulation utils', () => {
         previewDocsFilter: 'outcome_filter_all',
       });
       expect(result).toEqual(['tags', 'detected']);
+    });
+
+    it('includes additional source fields for multi-source processors', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: 'combined',
+        additionalSourceFields: ['field_a', 'field_b'],
+        detectedFields: [],
+        previewDocsFilter: 'outcome_filter_all',
+      });
+      expect(result).toEqual(['combined', 'field_a', 'field_b']);
+    });
+
+    it('includes additional source fields even for failed/skipped docs', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: 'combined',
+        additionalSourceFields: ['field_a', 'field_b'],
+        detectedFields: [],
+        previewDocsFilter: 'outcome_filter_failed',
+      });
+      expect(result).toEqual(['combined', 'field_a', 'field_b']);
+    });
+
+    it('deduplicates additional source fields with source and detected', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: 'field_a',
+        additionalSourceFields: ['field_a', 'field_b'],
+        detectedFields: [{ name: 'field_b' }] as any,
+        previewDocsFilter: 'outcome_filter_all',
+      });
+      expect(result).toEqual(['field_a', 'field_b']);
+    });
+  });
+
+  describe('getAdditionalSourceFields', () => {
+    it('returns field entries for concat processor', () => {
+      expect(
+        getAdditionalSourceFields({
+          action: 'concat',
+          from: [
+            { type: 'field', value: 'first_name' },
+            { type: 'literal', value: ' ' },
+            { type: 'field', value: 'last_name' },
+          ],
+          to: 'full_name',
+          customIdentifier: 'test',
+          parentId: null,
+        } as any)
+      ).toEqual(['first_name', 'last_name']);
+    });
+
+    it('returns all source fields for join processor', () => {
+      expect(
+        getAdditionalSourceFields({
+          action: 'join',
+          from: ['field_a', 'field_b', 'field_c'],
+          to: 'combined',
+          separator: ',',
+          customIdentifier: 'test',
+          parentId: null,
+        } as any)
+      ).toEqual(['field_a', 'field_b', 'field_c']);
+    });
+
+    it('returns empty for processors without multiple sources', () => {
+      expect(
+        getAdditionalSourceFields({
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{WORD:level}'],
+          customIdentifier: 'test',
+          parentId: null,
+        } as any)
+      ).toEqual([]);
+    });
+
+    it('filters out empty field values for concat', () => {
+      expect(
+        getAdditionalSourceFields({
+          action: 'concat',
+          from: [
+            { type: 'field', value: 'valid_field' },
+            { type: 'field', value: '  ' },
+          ],
+          to: 'target',
+          customIdentifier: 'test',
+          parentId: null,
+        } as any)
+      ).toEqual(['valid_field']);
     });
   });
 });

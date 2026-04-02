@@ -48,6 +48,7 @@ import { useDataSourceSelector } from './state_management/data_source_state_mach
 import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
+  getAdditionalSourceFields,
   getAllFieldsInOrder,
   getOriginalSampleDocument,
   getSourceField,
@@ -311,42 +312,50 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const { currentProcessorSourceField, currentProcessorTargetField, currentStepId, stepIds } =
-    useStreamEnrichmentSelector((state) => {
-      const isInteractiveMode = selectIsInteractiveMode(state);
-      if (!isInteractiveMode || !state.context.interactiveModeRef) {
-        return {
-          currentProcessorSourceField: undefined,
-          currentProcessorTargetField: undefined,
-          currentStepId: undefined,
-          stepIds: [],
-        };
-      }
-
-      const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
-      const allStepIds = stepRefs.map((ref) => ref.id);
-
-      for (const stepRef of stepRefs) {
-        const snapshot = stepRef.getSnapshot();
-        const step = snapshot.context.step;
-
-        if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
-          return {
-            currentProcessorSourceField: getSourceField(step),
-            currentProcessorTargetField: getTargetField(step),
-            currentStepId: stepRef.id,
-            stepIds: allStepIds,
-          };
-        }
-      }
-
+  const {
+    currentProcessorSourceField,
+    currentProcessorTargetField,
+    currentProcessorAdditionalSourceFields,
+    currentStepId,
+    stepIds,
+  } = useStreamEnrichmentSelector((state) => {
+    const isInteractiveMode = selectIsInteractiveMode(state);
+    if (!isInteractiveMode || !state.context.interactiveModeRef) {
       return {
         currentProcessorSourceField: undefined,
         currentProcessorTargetField: undefined,
+        currentProcessorAdditionalSourceFields: [] as string[],
         currentStepId: undefined,
-        stepIds: allStepIds,
+        stepIds: [],
       };
-    });
+    }
+
+    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
+    const allStepIds = stepRefs.map((ref) => ref.id);
+
+    for (const stepRef of stepRefs) {
+      const snapshot = stepRef.getSnapshot();
+      const step = snapshot.context.step;
+
+      if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+        return {
+          currentProcessorSourceField: getSourceField(step),
+          currentProcessorTargetField: getTargetField(step),
+          currentProcessorAdditionalSourceFields: getAdditionalSourceFields(step),
+          currentStepId: stepRef.id,
+          stepIds: allStepIds,
+        };
+      }
+    }
+
+    return {
+      currentProcessorSourceField: undefined,
+      currentProcessorTargetField: undefined,
+      currentProcessorAdditionalSourceFields: [] as string[],
+      currentStepId: undefined,
+      stepIds: allStepIds,
+    };
+  });
 
   const processorsMetrics = useSimulatorSelector(
     (snapshot) => snapshot.context.simulation?.processors_metrics
@@ -439,14 +448,17 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const validGrokField = grokMode ? validGrokSourceField : undefined;
 
-  const validCurrentProcessorSourceField =
-    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
-      ? currentProcessorSourceField
-      : undefined;
+  // Always show the source field when a processor is being edited, even if it's
+  // not yet in allColumns (e.g., when simulation fails during pattern typing).
+  // getSourceField() already trims and validates the field name.
+  const validCurrentProcessorSourceField = currentProcessorSourceField;
 
   // Calculate if view mode should be forced to 'columns'
   const isViewModeForced = Boolean(
-    validGrokField || validCurrentProcessorSourceField || currentProcessorTargetField
+    validGrokField ||
+      validCurrentProcessorSourceField ||
+      currentProcessorTargetField ||
+      currentProcessorAdditionalSourceFields.length > 0
   );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
@@ -456,6 +468,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     let cols = getTableColumns({
       currentProcessorSourceField: validCurrentProcessorSourceField,
       currentProcessorTargetField,
+      additionalSourceFields: currentProcessorAdditionalSourceFields,
       detectedFields,
       previewDocsFilter,
     });
@@ -476,6 +489,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     return filteredCols;
   }, [
     allColumns,
+    currentProcessorAdditionalSourceFields,
     currentProcessorTargetField,
     detectedFields,
     explicitlyDisabledPreviewColumns,
@@ -485,13 +499,23 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   ]);
 
   /**
-   * If we are in Grok mode and the field matches an existing field,
-   * we exclude the detected fields and only use the Grok field since it is highlighting extracted values
+   * In Grok mode, show the source field plus all fields extracted by the grok patterns.
+   * As the user types patterns (e.g. %{DATA:attributes.ad.category}), the extracted field
+   * names are parsed from the expressions and auto-activated as preview columns.
    */
-  const grokColumns = useMemo(
-    () => (validGrokField ? [validGrokField] : undefined),
-    [validGrokField]
-  );
+  const grokColumns = useMemo(() => {
+    if (!validGrokField) return undefined;
+    const extractedFields: string[] = [];
+    grokExpressions.forEach((expr) => {
+      const fieldsMap = expr.getFields();
+      fieldsMap.forEach((fieldDef) => {
+        if (fieldDef.name && !extractedFields.includes(fieldDef.name)) {
+          extractedFields.push(fieldDef.name);
+        }
+      });
+    });
+    return [validGrokField, ...extractedFields];
+  }, [validGrokField, grokExpressions]);
 
   /**
    * Map from preview document to the original (pre-transformation) value of the grok field.

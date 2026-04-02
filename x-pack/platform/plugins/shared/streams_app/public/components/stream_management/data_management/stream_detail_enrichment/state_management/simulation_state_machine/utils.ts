@@ -124,6 +124,31 @@ export function getTargetField(
   return trimmedField;
 }
 
+/**
+ * Returns additional source fields for multi-source processors (concat, join).
+ * These are fields that should be shown in the preview table alongside the
+ * primary source field returned by getSourceField().
+ */
+export function getAdditionalSourceFields(
+  processor: StreamlangProcessorDefinitionWithUIAttributes
+): string[] {
+  switch (processor.action) {
+    case 'concat':
+      // Show all field references from the concat 'from' array (filter out literals)
+      return processor.from
+        .filter((item: { type: string; value: string }) => item.type === 'field')
+        .map((item: { type: string; value: string }) => item.value)
+        .filter((value: string) => value.trim().length > 0);
+    case 'join':
+      // Show all source fields (getSourceField only returns the first one)
+      return (processor.from ?? [])
+        .map((field: string) => field.trim())
+        .filter((field: string) => field.length > 0);
+    default:
+      return [];
+  }
+}
+
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
 }
@@ -209,27 +234,33 @@ export function getAllFieldsInOrder(
 export function getTableColumns({
   currentProcessorSourceField,
   currentProcessorTargetField,
+  additionalSourceFields = [],
   detectedFields = [],
   previewDocsFilter,
 }: {
   currentProcessorSourceField?: string;
   currentProcessorTargetField?: string;
+  additionalSourceFields?: string[];
   detectedFields?: DetectedField[];
   previewDocsFilter: PreviewDocsFilterOption;
 }) {
-  if (!currentProcessorSourceField) {
+  if (!currentProcessorSourceField && additionalSourceFields.length === 0) {
     return [];
   }
 
   if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
-    return [currentProcessorSourceField];
+    return uniq([
+      ...(currentProcessorSourceField ? [currentProcessorSourceField] : []),
+      ...additionalSourceFields,
+    ]);
   }
 
   const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
 
   return uniq([
-    currentProcessorSourceField,
+    ...(currentProcessorSourceField ? [currentProcessorSourceField] : []),
     ...(currentProcessorTargetField ? [currentProcessorTargetField] : []),
+    ...additionalSourceFields,
     ...uniqueDetectedFields,
   ]);
 }
