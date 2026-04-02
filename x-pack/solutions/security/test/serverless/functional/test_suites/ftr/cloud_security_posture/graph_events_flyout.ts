@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Create v2 lookup index so the graph ESQL query can use LOOKUP JOIN for entity enrichment.
       await es.indices.create({
-        index: '.entities.v2.latest.security_default',
+        index: '.entities.v2.latest.security_default-00001',
         settings: { index: { mode: 'lookup' } },
         mappings: {
           properties: {
@@ -96,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await cleanupEntityStore({ supertest: adminSupertest, logger });
       await es.indices.delete({
-        index: '.entities.v2.latest.security_default',
+        index: '.entities.v2.latest.security_default-00001',
         ignore_unavailable: true,
       });
       // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests

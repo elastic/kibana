@@ -4,7 +4,7 @@
     "aliases": {
       "entities-generic-latest": {}
     },
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "settings": {
       "index": {
         "mode": "lookup"
