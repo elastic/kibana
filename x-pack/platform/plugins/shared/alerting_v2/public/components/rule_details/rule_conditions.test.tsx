@@ -98,7 +98,7 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsTimeField')).toHaveTextContent('@timestamp');
     expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
-    expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alert');
+    expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alerting');
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 3');
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataConfig')).toHaveTextContent('No data');
   });
