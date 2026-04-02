@@ -24,6 +24,7 @@ import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { PublishesOnSave } from './types';
 
 const DEBOUNCE_TIME = 100;
 
@@ -37,6 +38,7 @@ export function initializeUnsavedChangesManager({
   unifiedSearchManager,
   projectRoutingManager,
   setState,
+  onSave$,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -47,6 +49,7 @@ export function initializeUnsavedChangesManager({
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   setState: (state: DashboardState) => void;
+  onSave$: PublishesOnSave['onSave$'];
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -55,12 +58,13 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
-    onSave: (savedState: DashboardState) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
+    lastSavedState$.next(dashboardState);
+  });
 
   const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing(lastSavedState$),
@@ -108,12 +112,10 @@ export function initializeUnsavedChangesManager({
     },
     cleanup: () => {
       unsavedChangesSubscription.unsubscribe();
+      onSaveSubscription.unsubscribe();
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
-      onSave: (savedState: DashboardState) => {
-        lastSavedState$.next(savedState);
-      },
     },
   };
 }

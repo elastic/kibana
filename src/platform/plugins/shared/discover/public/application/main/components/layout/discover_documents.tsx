@@ -90,6 +90,7 @@ import { useScopedServices } from '../../../../components/scoped_services_provid
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
+import { SaveDiscoverTableButton } from './save_discover_table_button';
 
 // export needs for testing
 export const onResize = (
@@ -450,9 +451,17 @@ function DiscoverDocumentsComponent({
     [isDataLoading, styles.progress]
   );
 
+  const canSaveDiscoverTable = services.embeddableEditor.canSaveToDashboard();
+
+  const saveToDashboardButton = useMemo(
+    () => (canSaveDiscoverTable ? <SaveDiscoverTableButton /> : undefined),
+    [canSaveDiscoverTable]
+  );
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
+        saveToDashboardButton,
         leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
@@ -461,7 +470,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
   );
 
   const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));

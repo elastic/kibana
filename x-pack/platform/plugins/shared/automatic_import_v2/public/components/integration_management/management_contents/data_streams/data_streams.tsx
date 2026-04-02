@@ -11,8 +11,9 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
@@ -21,6 +22,7 @@ import { useGetIntegrationById } from '../../../../common';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
+import { useIntegrationForm } from '../../forms/integration_form';
 
 export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const {
@@ -34,8 +36,18 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration } = useGetIntegrationById(integrationId);
   const { reportDataStreamFlyoutOpened } = useTelemetry();
+  const { formData } = useIntegrationForm();
 
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
+
+  const isCreateIntegrationPage = !integrationId;
+
+  const canAddDataStream = useMemo(() => {
+    if (!isCreateIntegrationPage) {
+      return true;
+    }
+    return Boolean(formData?.title?.trim()) && Boolean(formData?.description?.trim());
+  }, [formData?.description, formData?.title, isCreateIntegrationPage]);
 
   const handleOpenCreateDataStreamFlyout = useCallback(() => {
     openCreateDataStreamFlyout();
@@ -43,6 +55,34 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
       isFirstDataStream: !hasDataStreams,
     });
   }, [hasDataStreams, reportDataStreamFlyoutOpened, openCreateDataStreamFlyout]);
+
+  const renderAddDataStreamButton = useCallback(
+    (layout: 'header' | 'zeroState') => {
+      const button = (
+        <EuiButton
+          iconType="plusCircle"
+          onClick={handleOpenCreateDataStreamFlyout}
+          data-test-subj="addDataStreamButton"
+          isDisabled={!canAddDataStream}
+        >
+          {i18n.ADD_DATA_STREAM_BUTTON}
+        </EuiButton>
+      );
+
+      if (canAddDataStream) {
+        return layout === 'zeroState' ? <EuiFlexItem grow={false}>{button}</EuiFlexItem> : button;
+      }
+
+      const wrapped = (
+        <EuiToolTip content={i18n.ADD_DATA_STREAM_DISABLED_TOOLTIP} position="top">
+          <span tabIndex={0}>{button}</span>
+        </EuiToolTip>
+      );
+
+      return layout === 'zeroState' ? <EuiFlexItem grow={false}>{wrapped}</EuiFlexItem> : wrapped;
+    },
+    [canAddDataStream, handleOpenCreateDataStreamFlyout]
+  );
 
   return (
     <>
@@ -60,15 +100,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {hasDataStreams && (
-                <EuiButton
-                  iconType="plusCircle"
-                  onClick={handleOpenCreateDataStreamFlyout}
-                  data-test-subj="addDataStreamButton"
-                >
-                  {i18n.ADD_DATA_STREAM_BUTTON}
-                </EuiButton>
-              )}
+              {hasDataStreams && renderAddDataStreamButton('header')}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -81,15 +113,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
           <EuiText size="s" color="subdued">
             {i18n.ZERO_STATE_DESCRIPTION}
           </EuiText>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="plusCircle"
-              onClick={handleOpenCreateDataStreamFlyout}
-              data-test-subj="addDataStreamButton"
-            >
-              {i18n.ADD_DATA_STREAM_BUTTON}
-            </EuiButton>
-          </EuiFlexItem>
+          {renderAddDataStreamButton('zeroState')}
         </EuiFlexGroup>
       )}
 
