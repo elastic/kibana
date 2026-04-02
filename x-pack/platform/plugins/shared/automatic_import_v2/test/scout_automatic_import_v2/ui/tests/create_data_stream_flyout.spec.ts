@@ -9,7 +9,12 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { CONNECTORS_API, CONNECTORS_WITH_ONE } from '../fixtures/mock_data';
+import {
+  CONNECTORS_API,
+  CONNECTORS_WITH_ONE,
+  FLEET_PACKAGES_API,
+  INTEGRATIONS_LIST_API,
+} from '../fixtures/mock_data';
 
 // The flyout fetches indices for the "Select index" card
 const INDICES_API = '**/api/index_management/indices**';
@@ -34,6 +39,26 @@ test.describe(
           body: JSON.stringify([]),
         })
       );
+
+      await page.route(FLEET_PACKAGES_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [] }),
+        })
+      );
+
+      await page.route(INTEGRATIONS_LIST_API, (route) => {
+        if (route.request().method() === 'GET') {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([]),
+          });
+        } else {
+          route.continue();
+        }
+      });
 
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.integrationManagement.navigateToCreate();
@@ -102,6 +127,9 @@ test.describe(
       await pageObjects.integrationManagement
         .getDataStreamTitleInput()
         .fill('Audit Logs Data Stream');
+      await pageObjects.integrationManagement
+        .getDataStreamDescriptionInput()
+        .fill('Audit log events from security appliances');
 
       const comboInput = pageObjects.integrationManagement
         .getDataCollectionMethodSelect()
@@ -156,6 +184,12 @@ test.describe(
             contentType: 'application/json',
             body: JSON.stringify({ integration_id: 'new-integration-id' }),
           });
+        } else if (route.request().method() === 'GET') {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([]),
+          });
         } else {
           route.continue();
         }
@@ -164,6 +198,9 @@ test.describe(
       const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
 
       await pageObjects.integrationManagement.getDataStreamTitleInput().fill('Audit Logs');
+      await pageObjects.integrationManagement
+        .getDataStreamDescriptionInput()
+        .fill('Audit log sample stream');
 
       const comboInput = pageObjects.integrationManagement
         .getDataCollectionMethodSelect()

@@ -13,6 +13,8 @@ import {
   CONNECTORS_API,
   CONNECTORS_WITH_ONE,
   CONNECTORS_EMPTY_RESPONSE,
+  FLEET_PACKAGES_API,
+  INTEGRATIONS_LIST_API,
 } from '../fixtures/mock_data';
 
 test.describe(
@@ -27,6 +29,27 @@ test.describe(
           body: JSON.stringify(CONNECTORS_WITH_ONE),
         })
       );
+
+      await page.route(FLEET_PACKAGES_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [] }),
+        })
+      );
+
+      await page.route(INTEGRATIONS_LIST_API, (route) => {
+        if (route.request().method() === 'GET') {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([]),
+          });
+        } else {
+          route.continue();
+        }
+      });
+
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.integrationManagement.navigateToCreate();
     });

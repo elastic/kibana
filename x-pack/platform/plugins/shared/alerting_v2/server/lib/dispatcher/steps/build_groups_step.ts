@@ -6,13 +6,14 @@
  */
 
 import { injectable } from 'inversify';
+import { get } from 'lodash';
 import objectHash from 'object-hash';
 import type {
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
   MatchedPair,
   NotificationGroup,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
 } from '../types';
 
 @injectable()
@@ -32,18 +33,25 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
   const groupMap = new Map<string, NotificationGroup>();
 
   for (const { episode, policy } of matched) {
-    let groupKey: Record<string, unknown> = {};
-    if (policy.groupBy.length === 0) {
-      groupKey = {
-        groupHash: episode.group_hash,
-        episodeId: episode.episode_id,
-      };
-    } else {
-      throw new Error('Grouping by fields is not supported yet');
+    let groupKey: Record<string, unknown>;
+    switch (policy.groupingMode ?? 'per_episode') {
+      case 'per_episode':
+        groupKey = {
+          groupHash: episode.group_hash,
+          episodeId: episode.episode_id,
+        };
+        break;
+      case 'all':
+        groupKey = {};
+        break;
+      case 'per_field':
+        groupKey = Object.fromEntries(
+          policy.groupBy.map((field) => [field, get(episode, field, null)])
+        );
+        break;
     }
 
     const notificationGroupId = objectHash({
-      ruleId: episode.rule_id,
       policyId: policy.id,
       groupKey,
     });
@@ -52,7 +60,6 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
       groupMap.set(notificationGroupId, {
         id: notificationGroupId,
         spaceId: policy.spaceId,
-        ruleId: episode.rule_id,
         policyId: policy.id,
         destinations: policy.destinations,
         groupKey,

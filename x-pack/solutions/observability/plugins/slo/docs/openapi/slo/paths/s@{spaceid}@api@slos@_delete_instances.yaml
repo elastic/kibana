@@ -16,6 +16,15 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/delete_slo_instances_request.yaml'
+        examples:
+          deleteInstancesExample:
+            summary: Delete specific SLO instances
+            value:
+              list:
+                - sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                  instanceId: host-abc123
+                - sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                  instanceId: host-def456
   responses:
     '204':
       description: Successful request
@@ -25,15 +34,36 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestExample:
+              summary: Bad request
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: "Invalid value 'foo' supplied to: list/0/sloId"
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedExample:
+              summary: Unauthorized
+              value:
+                statusCode: 401
+                error: Unauthorized
+                message: "security_exception: unable to authenticate user for REST request [/api/observability/slos]"
     '403':
-      description: Unauthorized response
+      description: Forbidden response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/403_response.yaml'
+          examples:
+            forbiddenExample:
+              summary: Forbidden
+              value:
+                statusCode: 403
+                error: Forbidden
+                message: "security_exception: action [slo_write] is unauthorized for user"

@@ -22,7 +22,12 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
-import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+import {
+  createSAMLResponse,
+  MOCK_IDP_LOGIN_PATH,
+  MOCK_IDP_LOGOUT_PATH,
+  projectTypeToAlias,
+} from '@kbn/mock-idp-utils';
 import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
 
 import type { ConfigType } from './config';
@@ -39,14 +44,6 @@ const createSAMLResponseSchema = schema.object({
   url: schema.string(),
 });
 
-// BOOKMARK - List of Kibana project types
-const projectToAlias = new Map<string, string>([
-  ['observability', 'oblt'],
-  ['security', 'security'],
-  ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
-]);
-
 const tierSpecificRolesFileExists = (filePath: string): boolean => {
   try {
     return existsSync(filePath);
@@ -56,8 +53,8 @@ const tierSpecificRolesFileExists = (filePath: string): boolean => {
 };
 
 const readServerlessRoles = (projectType: string, productTier?: ServerlessProductTier) => {
-  if (projectToAlias.has(projectType)) {
-    const alias = projectToAlias.get(projectType)!;
+  if (projectTypeToAlias.has(projectType)) {
+    const alias = projectTypeToAlias.get(projectType)!;
 
     const tierSpecificRolesResourcePath =
       productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml');

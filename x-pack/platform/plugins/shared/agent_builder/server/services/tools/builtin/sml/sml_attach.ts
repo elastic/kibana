@@ -15,29 +15,12 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { resolveSmlAttachItems } from '../../../sml/execute_sml_attach_items';
 import type { SmlToolsOptions } from './types';
 
-const smlAttachItemSchema = z.object({
-  chunk_id: z
-    .string()
-    .describe('The chunk_id value from an sml_search result item (identifies the indexed chunk)'),
-  attachment_id: z
-    .string()
-    .describe(
-      'The attachment_id value from an sml_search result item (identifies the source asset, e.g. a saved object ID)'
-    ),
-  attachment_type: z
-    .string()
-    .describe('The attachment_type value from an sml_search result item (e.g. "visualization")'),
-});
-
 const smlAttachSchema = z.object({
-  items: z
-    .array(smlAttachItemSchema)
+  chunk_ids: z
+    .array(z.string())
     .min(1)
     .max(50)
-    .describe(
-      'One or more items from sml_search results to attach. ' +
-        'Copy chunk_id, attachment_id, and attachment_type exactly as returned by sml_search.'
-    ),
+    .describe('One or more chunk_id values exactly as returned by sml_search.'),
 });
 
 /**
@@ -51,9 +34,10 @@ export const createSmlAttachTool = ({
   type: ToolType.builtin,
   description:
     'Attach assets found by sml_search to the conversation. ' +
-    'Pass one or more items using the chunk_id, attachment_id, and attachment_type fields exactly as returned by sml_search. ' +
-    'Each item is resolved into a full conversation attachment (e.g. a Lens visualization). ' +
-    'Items that cannot be resolved return individual errors without failing the entire call.',
+    'Pass one or more chunk_id strings exactly as returned by sml_search. ' +
+    'Chunk id follows the format: attachment_type:origin_id:uuid and could be referenced by sml://{attachment_type}/{origin_id}. ' +
+    'Each chunk is resolved into a full conversation attachment (e.g. a Lens visualization). ' +
+    'Chunks that cannot be resolved return individual errors without failing the entire call.',
   schema: smlAttachSchema,
   tags: ['sml', 'attachment'],
   availability: {
@@ -68,12 +52,12 @@ export const createSmlAttachTool = ({
           };
     },
   },
-  handler: async ({ items }, context) => {
+  handler: async ({ chunk_ids: chunkIds }, context) => {
     const smlService = getSmlService();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
     const resolvedItems = await resolveSmlAttachItems({
-      items,
+      chunkIds,
       sml: smlService,
       esClient: esClient.asCurrentUser,
       request,
