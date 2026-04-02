@@ -20,7 +20,7 @@ export function resolveEsqlVariables(
 
   let resolved = query.esql;
   for (const { key, value } of variables) {
-    const literal = typeof value === 'string' ? `"${value}"` : String(value);
+    const literal = typeof value === 'string' ? `"${value.replaceAll('"', '""')}"` : String(value);
     resolved = resolved.replaceAll(`?${key}`, literal);
   }
 

@@ -50,6 +50,14 @@ describe('resolveEsqlVariables', () => {
     expect(resolveEsqlVariables(query, undefined)).toBe(query);
   });
 
+  it('escapes double quotes in string values to produce valid ES|QL', () => {
+    expect(
+      resolveEsqlVariables({ esql: 'FROM logs* | WHERE host.name == ?host_name' }, [
+        { key: 'host_name', value: 'host"01', type: ESQLVariableType.VALUES },
+      ])
+    ).toEqual({ esql: 'FROM logs* | WHERE host.name == "host""01"' });
+  });
+
   it('passes non-esql queries through unchanged', () => {
     const query = { query: 'service.name: my-service', language: 'kuery' };
     expect(
