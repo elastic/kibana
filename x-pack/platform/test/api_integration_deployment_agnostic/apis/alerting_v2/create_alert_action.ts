@@ -10,7 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { RoleCredentials } from '../../services';
 import { createAlertEvent, indexAlertEvents } from './fixtures';
 
-const ALERT_ACTION_API_PATH = '/internal/alerting/v2/alerts';
+const ALERT_ACTION_API_PATH = '/api/alerting/v2/alerts';
 const ALERTING_EVENTS_INDEX = '.rule-events';
 const ALERTING_ACTIONS_INDEX = '.alert-actions';
 
