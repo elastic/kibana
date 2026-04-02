@@ -50,6 +50,7 @@
     "@kbn/deeplinks-management",
     "@kbn/index-management-plugin",
     "@kbn/cloud-connect-plugin",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -292,5 +292,6 @@
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
     "@kbn/shared-ux-column-presets",
+    "@kbn/core-mount-utils-browser",
   ]
 }

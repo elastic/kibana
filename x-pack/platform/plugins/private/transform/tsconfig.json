@@ -89,7 +89,8 @@
     "@kbn/kql",
     "@kbn/scout",
     "@kbn/core-http-common",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": ["target/**/*"]
 }

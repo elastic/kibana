@@ -63,6 +63,7 @@
     "@kbn/cps-common",
     "@kbn/cps-utils",
     "@kbn/tour-queue",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": ["target/**/*"]
 }

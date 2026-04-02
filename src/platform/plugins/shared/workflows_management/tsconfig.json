@@ -91,7 +91,8 @@
     "@kbn/share-plugin",
     "@kbn/core-security-server",
     "@kbn/test",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": ["target/**/*"]
 }
