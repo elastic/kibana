@@ -8,3 +8,4 @@
  */
 
 export { asCodeIdSchema } from './id';
+export { asCodeMetaSchema, getMeta } from './meta';
