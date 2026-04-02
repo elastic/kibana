@@ -46,6 +46,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         destinations: doc.attributes.destinations ?? [],
         matcher: doc.attributes.matcher ?? undefined,
         groupBy: doc.attributes.groupBy ?? [],
+        groupingMode: doc.attributes.groupingMode ?? undefined,
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
         apiKey: doc.attributes.auth.apiKey,

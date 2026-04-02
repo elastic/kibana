@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { NotificationPolicyDestination } from './notification_policy_data_schema';
+import type {
+  GroupingMode,
+  NotificationPolicyDestination,
+  ThrottleStrategy,
+} from './notification_policy_data_schema';
 
 export interface NotificationPolicyResponse {
   id: string;
@@ -16,7 +20,8 @@ export interface NotificationPolicyResponse {
   destinations: NotificationPolicyDestination[];
   matcher: string | null;
   groupBy: string[] | null;
-  throttle: { interval: string } | null;
+  groupingMode: GroupingMode | null;
+  throttle: { strategy?: ThrottleStrategy; interval?: string } | null;
   snoozedUntil: string | null;
   auth: {
     owner: string;
