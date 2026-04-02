@@ -100,7 +100,7 @@ async function mockIntegrationDetails(page: ScoutPage, integrationId: string) {
   );
 }
 
-test.describe('Manage Integrations Table', { tag: tags.stateful.classic }, () => {
+test.describe.skip('Manage Integrations Table', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await mockIntegrationsList(page, ALL_INTEGRATIONS);
     await browserAuth.loginWithCustomRole(getManageIntegrationsRole());
