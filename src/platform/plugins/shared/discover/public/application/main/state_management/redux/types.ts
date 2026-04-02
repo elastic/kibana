@@ -67,6 +67,10 @@ export interface DiscoverAppState {
    */
   hideChart?: boolean;
   /**
+   * Hide table
+   */
+  hideTable?: boolean;
+  /**
    * The current data source
    */
   dataSource?: DiscoverDataSource;
@@ -139,6 +143,7 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
   'rowHeight',
   'breakdownField',
   'hideChart',
+  'hideTable',
 ] as const;
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];

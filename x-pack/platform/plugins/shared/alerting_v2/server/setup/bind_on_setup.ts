@@ -12,6 +12,7 @@ import type { AlertingServerSetupDependencies } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
+import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -32,6 +33,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     container.get(CoreSetup('capabilities')).registerProvider(() => ({
       alertingVTwo: {},
     }));
+
+    container.get(CoreSetup('uiSettings')).registerGlobal(dispatcherUiSettings);
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
