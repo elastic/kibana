@@ -30,6 +30,7 @@ export interface RuleMigrationIntegration {
   data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
   elser_embedding: string;
   fields_metadata: Record<string, Record<string, unknown>> | undefined;
+  knowledge_base?: string;
 }
 
 export interface RuleMigrationPrebuiltRule {

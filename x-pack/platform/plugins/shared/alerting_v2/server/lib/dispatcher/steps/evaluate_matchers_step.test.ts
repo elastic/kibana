@@ -275,4 +275,103 @@ describe('evaluateMatchers', () => {
       expect(matched).toHaveLength(0);
     });
   });
+
+  describe('data field KQL matching', () => {
+    it('matches on data.severity', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        data: { severity: 'critical' },
+      });
+      const rule = createRule({ id: 'r1' });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'data.severity: "critical"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match when data field value differs', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        data: { env: 'staging' },
+      });
+      const rule = createRule({ id: 'r1' });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'data.env: "production"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('does not match when episode has no data', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'data.severity: "critical"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('matches combined data and rule conditions', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        data: { severity: 'critical' },
+      });
+      const rule = createRule({ id: 'r1', name: 'CPU Alert' });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'data.severity: "critical" and rule.name: "CPU Alert"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('matches on nested data fields (unflattened dot-separated keys)', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        data: { host: { name: 'my-host.com' } },
+      });
+      const rule = createRule({ id: 'r1' });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'data.host.name: "my-host.com"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+  });
 });
