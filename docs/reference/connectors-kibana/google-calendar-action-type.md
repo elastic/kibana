@@ -24,11 +24,13 @@ Bearer Token
 :   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get API credentials**.
 
 OAuth 2.0 authorization code
-:   Uses a **Web application** OAuth client in Google Cloud. Default **Authorization URL**
-    `https://accounts.google.com/o/oauth2/v2/auth` and **Token URL** `https://oauth2.googleapis.com/token`. **Client ID**
-    and **Client Secret** come from that client. Default **Scope** is
-    `https://www.googleapis.com/auth/calendar.readonly`. Register {{kib}}’s OAuth redirect URI in Google Cloud as
-    described under **Get API credentials**.
+:   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you typically provide:
+
+    - **Authorization URL** (default): `https://accounts.google.com/o/oauth2/v2/auth`
+    - **Token URL** (default): `https://oauth2.googleapis.com/token`
+    - **Client ID** and **Client Secret**: from that OAuth client
+    - **Scope** (default): `https://www.googleapis.com/auth/calendar.readonly`
+    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
 
 ## Test connectors [google-calendar-action-configuration]
 
@@ -79,9 +81,9 @@ such as proxies, certificates, or TLS settings. You can set configurations that 
 
 ### OAuth 2.0 authorization code (recommended for ongoing use)
 
-Use this path when you select **OAuth 2.0 authorization code** in {{kib}}. In **Google Cloud Console**, create a **Web
-application** OAuth client and set **Authorized JavaScript origins** and **Authorized redirect URIs** (same pattern as
-common Google OAuth setup guides for web apps).
+Use this path when you select **OAuth 2.0 authorization code** in {{kib}}. In **Google Cloud Console**, create a
+**Web application** OAuth client and set **Authorized JavaScript origins** and **Authorized redirect URIs** (same pattern
+as common Google OAuth setup guides for web apps).
 
 1. Select or create a project. Enable the **Google Calendar API** (**APIs & Services** > **Library**).
 2. **APIs & Services** > **OAuth consent screen**: configure the app and add Calendar scopes (at minimum

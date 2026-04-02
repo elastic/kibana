@@ -25,12 +25,14 @@ Bearer Token
 :   A Google OAuth 2.0 access token with Google Drive API scopes. See **Get API credentials**.
 
 OAuth 2.0 authorization code
-:   Uses a **Web application** OAuth client in Google Cloud. {{kib}} defaults are **Authorization URL**
-    `https://accounts.google.com/o/oauth2/v2/auth` and **Token URL** `https://oauth2.googleapis.com/token`. **Client ID**
-    and **Client Secret** come from that client. **Scope** should include
-    `https://www.googleapis.com/auth/drive.readonly` and
-    `https://www.googleapis.com/auth/drive.metadata.readonly` (matching the connector defaults). Register {{kib}}’s OAuth
-    redirect URI in Google Cloud as described under **Get API credentials**.
+:   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you typically provide:
+
+    - **Authorization URL** (default): `https://accounts.google.com/o/oauth2/v2/auth`
+    - **Token URL** (default): `https://oauth2.googleapis.com/token`
+    - **Client ID** and **Client Secret**: from that OAuth client
+    - **Scope** (defaults): `https://www.googleapis.com/auth/drive.readonly` and
+      `https://www.googleapis.com/auth/drive.metadata.readonly`
+    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
 
 ## Test connectors [google-drive-action-configuration]
 
