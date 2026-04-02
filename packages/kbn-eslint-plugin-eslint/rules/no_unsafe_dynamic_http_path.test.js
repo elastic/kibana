@@ -38,25 +38,18 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
       `,
     },
     {
-      code: dedent`
-        const path = \`/api/dashboards/${'${id}'}\`;
-        http.delete(path);
-      `,
+      code: ['const path = `/api/dashboards/${id}`;', 'http.delete(path);'].join('\n'),
+    },
+    {
+      code: 'http.post(`/api/dashboards/${encodeURIComponent(id)}`);',
     },
     {
       code: dedent`
-        http.post(\`/api/dashboards/${'${encodeURIComponent(id)}'}\`);
+        client.delete(\`/api/dashboards/\${id}\`);
       `,
     },
     {
-      code: dedent`
-        client.delete(\`/api/dashboards/${'${id}'}\`);
-      `,
-    },
-    {
-      code: dedent`
-        http.delete(\`/api/dashboards/${'${encodeURIComponent(id)}'}\`);
-      `,
+      code: 'http.delete(`/api/dashboards/${encodeURIComponent(id)}`);',
     },
     {
       code: dedent`
@@ -94,11 +87,11 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
       `,
     },
     {
-      code: dedent`
-        return await this.http.delete<void>(
-          \`${'${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}'}/${'${encodeURIComponent(jobId)}'}\`
-        );
-      `,
+      code: [
+        'return await this.http.delete<void>(',
+        '  `${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${encodeURIComponent(jobId)}`',
+        ');',
+      ].join('\n'),
     },
     {
       code: dedent`
@@ -108,22 +101,16 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
       `,
     },
     {
-      code: dedent`
-        http.get({ path: \`${'${MY_CONSTANT.path}'}/${'${encodeURIComponent(id)}'}\` });
-      `,
+      code: 'http.get({ path: `${MY_CONSTANT.path}/${encodeURIComponent(id)}` });',
     },
   ],
   invalid: [
     {
-      code: dedent`
-        http.delete(\`/api/dashboards/${'${id}'}\`);
-      `,
+      code: 'http.delete(`/api/dashboards/${id}`);',
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
-      code: dedent`
-        this.http.get(\`/api/dashboards/${'${id}'}\`);
-      `,
+      code: 'this.http.get(`/api/dashboards/${id}`);',
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
@@ -139,15 +126,11 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
-      code: dedent`
-        http.options(condition ? \`/api/dashboards/${'${id}'}\` : '/api/dashboards/default');
-      `,
+      code: "http.options(condition ? `/api/dashboards/${id}` : '/api/dashboards/default');",
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
-      code: dedent`
-        http.head({ path: condition ? \`/api/dashboards/${'${id}'}\` : '/api/dashboards/default' });
-      `,
+      code: "http.head({ path: condition ? `/api/dashboards/${id}` : '/api/dashboards/default' });",
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
@@ -163,15 +146,11 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
-      code: dedent`
-        this.http.fetch({ path: \`/api/dashboards/${'${id}'}\`, method: 'POST', body });
-      `,
+      code: "this.http.fetch({ path: `/api/dashboards/${id}`, method: 'POST', body });",
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
-      code: dedent`
-        this.http.delete(\`${'${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}'}/${'${jobId}'}\`);
-      `,
+      code: 'this.http.delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${jobId}`);',
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
@@ -181,15 +160,11 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
-      code: dedent`
-        this.http.get(\`${'${prefix}'}/${'${encodeURIComponent(id)}'}\`);
-      `,
+      code: 'this.http.get(`${prefix}/${encodeURIComponent(id)}`);',
       errors: [{ line: 1, message: WARN_MSG }],
     },
     {
-      code: dedent`
-        this.http.get(\`${'${MY_CONSTANT.path}'}/${'${MY_CONSTANT.path2}'}\`);
-      `,
+      code: 'this.http.get(`${MY_CONSTANT.path}/${MY_CONSTANT.path2}`);',
       errors: [{ line: 1, message: WARN_MSG }],
     },
   ],
