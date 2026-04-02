@@ -13,7 +13,7 @@ import { MessageSection } from './sections/message';
 import { BackfillSection } from './sections/backfill';
 import { AlertsSection } from './sections/alerts';
 import { IndicesSection } from './sections/indices';
-import { ExecutionMetricsSection } from './sections/execution';
+import { TimingSection } from './sections/timing';
 import { DurationBreakdownSection } from './sections/duration';
 
 const flyoutBodyCss = css`
@@ -57,7 +57,7 @@ export const FlyoutBody: React.FC<FlyoutBodyProps> = ({ item }) => {
       />
       <EuiHorizontalRule margin="m" />
 
-      <ExecutionMetricsSection
+      <TimingSection
         gapSeconds={gapSeconds}
         scheduleDelayMs={item.schedule_delay_ms}
         executionDurationMs={item.execution_duration_ms}

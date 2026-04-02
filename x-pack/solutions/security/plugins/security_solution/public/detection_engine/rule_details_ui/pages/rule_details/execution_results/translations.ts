@@ -269,8 +269,8 @@ export const FLYOUT_TOOLTIP_INDEXING_TOTAL = i18n.translate(
   }
 );
 
-export const FLYOUT_ACCORDION_EXECUTION_METRICS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionExecutionMetrics',
+export const FLYOUT_ACCORDION_TIMING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutAccordionTiming',
   {
     defaultMessage: 'Timing',
   }
