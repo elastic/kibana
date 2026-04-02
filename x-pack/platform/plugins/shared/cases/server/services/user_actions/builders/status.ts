@@ -35,7 +35,7 @@ export class StatusUserActionBuilder extends UserActionBuilder {
     };
     const getMessage = (id?: string) =>
       shouldLogCloseReasonSyncMessage
-        ? `User closed case id: ${args.caseId} and synced alerts with close reason: ${args.payload.closeReason} - user action id: ${id}`
+        ? `User closed case id: ${args.caseId} and synced alerts with a close reason - user action id: ${id}`
         : `User updated the status for case id: ${args.caseId} - user action id: ${id}`;
 
     const eventDetails: EventDetails = {

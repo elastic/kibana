@@ -409,7 +409,7 @@ describe('UserActionPersister', () => {
       );
 
       expect(statusAction?.eventDetails.getMessage('status-user-action-id')).toBe(
-        'User closed case id: 1 and synced alerts with close reason: false_positive - user action id: status-user-action-id'
+        'User closed case id: 1 and synced alerts with a close reason - user action id: status-user-action-id'
       );
       expect(statusAction?.parameters.attributes.payload).toEqual({
         status: 'closed',

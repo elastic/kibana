@@ -414,9 +414,10 @@ export const updateCases = async ({
   });
 
   const decodedResponse = decodeCasesWithUpdateSummaryResponse(response);
-  return convertArrayToCamelCase(decodedResponse) as Array<
-    CaseUI & { updateSummary?: UpdateSummary }
-  >;
+  return decodedResponse.map(({ updateSummary, ...theCase }) => ({
+    ...convertCaseToCamelCase(theCase),
+    ...(updateSummary != null ? { updateSummary } : {}),
+  }));
 };
 
 export const replaceCustomField = async ({

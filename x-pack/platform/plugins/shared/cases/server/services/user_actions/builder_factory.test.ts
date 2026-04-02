@@ -1119,7 +1119,7 @@ describe('UserActionBuilder', () => {
       });
 
       expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
-        `"User closed case id: 123 and synced alerts with close reason: false_positive - user action id: 123"`
+        `"User closed case id: 123 and synced alerts with a close reason - user action id: 123"`
       );
       expect(userAction!.parameters.attributes.payload).toEqual({
         status: 'closed',
