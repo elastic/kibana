@@ -307,7 +307,7 @@ export const validateImportExceptionListFailedOnArtifactTypePrecheck = () => {
     .invoke('text')
     .should((bodyText) => {
       expect(bodyText).to.match(
-        /On this page only shared exception lists can be imported, but at least one file contains Endpoint artifacts. Endpoint artifacts can be imported on their respective pages/i
+        /You can only import shared exception lists here, but at least one of the imported files contains endpoint artifacts. Import endpoint artifacts from their dedicated pages instead./i
       );
     });
 };
