@@ -15,8 +15,18 @@ import getResourceWorkflow from './workflows/get_resource.yaml';
 import searchIssuesWithJqlWorkflow from './workflows/search_issues_with_jql.yaml';
 import searchUsersWorkflow from './workflows/search_users.yaml';
 
-const buildBaseUrl = (ctx: ActionContext) =>
-  `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
+const buildBaseUrl = (ctx: ActionContext): string => {
+  if (ctx.secrets?.authType === 'oauth_authorization_code') {
+    const cloudId = String(ctx.config?.cloudId ?? '').trim();
+    if (cloudId === '') {
+      throw new Error(
+        'Jira Cloud ID is required in connector configuration when using OAuth authentication.'
+      );
+    }
+    return `https://api.atlassian.com/ex/jira/${cloudId}`;
+  }
+  return `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
+};
 
 export const JiraConnector: ConnectorSpec = {
   metadata: {
@@ -74,7 +84,24 @@ export const JiraConnector: ConnectorSpec = {
         placeholder: 'your-domain',
         helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.subdomain.helpText', {
           defaultMessage:
-            'The subdomain for your Jira Cloud site (e.g. your-domain for https://your-domain.atlassian.com)',
+            'The subdomain for your Jira Cloud site (e.g. your-domain for https://your-domain.atlassian.net)',
+        }),
+      }),
+    cloudId: z
+      .string()
+      .optional()
+      .describe(
+        i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.description', {
+          defaultMessage: 'Atlassian cloud ID (OAuth)',
+        })
+      )
+      .meta({
+        widget: 'text',
+        label: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.label', {
+          defaultMessage: 'Cloud ID',
+        }),
+        helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.helpText', {
+          defaultMessage: 'Required for OAuth. Ignored when using an API token.',
         }),
       }),
   }),
