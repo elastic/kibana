@@ -13,10 +13,6 @@ import type {
   SavedObjectReference,
 } from '@kbn/core/server';
 import type { SetOptional } from 'type-fest';
-import type {
-  AggregationsStringTermsAggregate,
-  AggregationsStringTermsBucket,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { validateWatchlistUpdate } from './validation';
