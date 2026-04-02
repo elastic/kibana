@@ -96,28 +96,6 @@ export class AppMenuRegistry {
   }
 
   /**
-   * Remove a menu item by ID.
-   * @param id The ID of the menu item to remove
-   */
-  public deleteItem(id: string): void {
-    this.items.delete(id);
-  }
-
-  /**
-   * Get a menu item by ID.
-   * @param id The ID of the menu item to retrieve
-   * @returns The menu item or undefined if not found
-   */
-  public getItem(id: string): DiscoverAppMenuItemType | undefined {
-    const item = this.items.get(id);
-    if (item) {
-      const { isCustom, ...cleanItem } = item;
-      return cleanItem;
-    }
-    return undefined;
-  }
-
-  /**
    * Get the complete AppMenuConfig.
    * Items with registered popover items will have their items property populated.
    */
