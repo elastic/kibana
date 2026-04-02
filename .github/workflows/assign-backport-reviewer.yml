@@ -43,34 +43,33 @@ jobs:
             const codeownerTeams = new Set(
               affectedCodeowners.map(normalize).filter((t) => t.startsWith('elastic/'))
             );
-            if (codeownerTeams.size === 0) {
-              core.info('No elastic teams found in CODEOWNERS for changed files');
-              return;
-            }
 
-            let authorTeams;
-            try {
-              const result = await github.graphql(
-                `query($login: String!) {
-                  organization(login: "elastic") {
-                    teams(first: 100, userLogins: [$login]) {
-                      nodes { combinedSlug }
+            if (codeownerTeams.size > 0) {
+              try {
+                const result = await github.graphql(
+                  `query($login: String!) {
+                    organization(login: "elastic") {
+                      teams(first: 100, userLogins: [$login]) {
+                        nodes { combinedSlug }
+                      }
                     }
-                  }
-                }`,
-                { login: prAuthor }
-              );
-              authorTeams = new Set(result.organization.teams.nodes.map((t) => normalize(t.combinedSlug)));
-            } catch (error) {
-              core.warning(`Failed to query author's org teams: ${error.message}`);
-              return;
-            }
+                  }`,
+                  { login: prAuthor }
+                );
+                const authorTeams = new Set(
+                  result.organization.teams.nodes.map((t) => normalize(t.combinedSlug))
+                );
+                const matchedTeams = [...codeownerTeams.intersection(authorTeams)];
 
-            const matchedTeams = [...codeownerTeams.intersection(authorTeams)];
-
-            if (matchedTeams.length > 0) {
-              core.setOutput('team_reviewers', matchedTeams.join(','));
-              return;
+                if (matchedTeams.length > 0) {
+                  core.setOutput('team_reviewers', matchedTeams.join(','));
+                  return;
+                }
+              } catch (error) {
+                core.warning(`Failed to query author's org teams: ${error.message}`);
+              }
+            } else {
+              core.info('No elastic teams found in CODEOWNERS for changed files');
             }
 
             const title = context.payload.pull_request.title ?? '';
