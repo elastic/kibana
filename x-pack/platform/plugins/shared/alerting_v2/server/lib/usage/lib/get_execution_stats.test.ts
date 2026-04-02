@@ -6,13 +6,35 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getExecutionStats } from './get_execution_stats';
+import { getExecutionStats, nanosToMillis } from './get_execution_stats';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
 
 beforeEach(() => {
   jest.resetAllMocks();
+});
+
+describe('nanosToMillis', () => {
+  test('should return 0 when passing 0 nanos', () => {
+    expect(nanosToMillis(0)).toEqual(0);
+  });
+
+  test('should return 1 when passing 1000000 nanos', () => {
+    expect(nanosToMillis(1000000)).toEqual(1);
+  });
+
+  test('should return null when passing null', () => {
+    expect(nanosToMillis(null)).toEqual(null);
+  });
+
+  test('should return null when passing undefined', () => {
+    expect(nanosToMillis(undefined)).toEqual(null);
+  });
+
+  test('should round to 1 when passing 750000 nanos (0.75ms)', () => {
+    expect(nanosToMillis(750000)).toEqual(1);
+  });
 });
 
 describe('getExecutionStats', () => {
@@ -30,7 +52,7 @@ describe('getExecutionStats', () => {
           ],
         },
         delay_percentiles: {
-          values: { '50.0': 100, '75.0': 250, '95.0': 1200, '99.0': 5000 },
+          values: { '50.0': 100000000, '75.0': 250000000, '95.0': 1200000000, '99.0': 5000000000 },
         },
       },
     } as any);

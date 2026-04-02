@@ -11,6 +11,10 @@ import { DISPATCHER_TASK_TYPE } from '../../dispatcher/task_definition';
 import { bucketsToRecord } from './constants';
 import type { ExecutionStatsAggregations, ExecutionStatsResults } from './types';
 
+const NS_PER_MS = 1000000;
+export const nanosToMillis = (nanos?: number | null): number | null =>
+  nanos != null ? Math.round(nanos / NS_PER_MS) : null;
+
 const EVENT_LOG_INDEX = '.kibana-event-log-*';
 const EVENT_LOG_PROVIDER = 'taskManager';
 const EVENT_LOG_ACTION_TASK_RUN = 'task-run';
@@ -76,10 +80,10 @@ export async function getExecutionStats(
   return {
     executions_count_24hr: total,
     executions_count_by_status_24hr: bucketsToRecord(aggs?.count_by_status.buckets),
-    executions_delay_p50_ms: pcts?.['50.0'] ?? null,
-    executions_delay_p75_ms: pcts?.['75.0'] ?? null,
-    executions_delay_p95_ms: pcts?.['95.0'] ?? null,
-    executions_delay_p99_ms: pcts?.['99.0'] ?? null,
+    executions_delay_p50_ms: nanosToMillis(pcts?.['50.0']),
+    executions_delay_p75_ms: nanosToMillis(pcts?.['75.0']),
+    executions_delay_p95_ms: nanosToMillis(pcts?.['95.0']),
+    executions_delay_p99_ms: nanosToMillis(pcts?.['99.0']),
     dispatcher_executions_count_24hr: dispatcherResponse.count,
   };
 }

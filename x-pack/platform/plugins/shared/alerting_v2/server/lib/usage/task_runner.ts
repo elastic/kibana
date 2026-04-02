@@ -44,7 +44,7 @@ export function telemetryTaskRunner(
 
           return { state: updatedState, schedule };
         } catch (err) {
-          const errorMessage = err && err.message ? err.message : err.toString();
+          const errorMessage = err && err.message ? err.message : String(err);
           logger.warn(`Error executing alerting v2 telemetry task: ${errorMessage}`);
 
           return {
