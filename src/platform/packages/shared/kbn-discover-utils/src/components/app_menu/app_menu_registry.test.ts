@@ -566,5 +566,4 @@ describe('AppMenuRegistry', () => {
       expect(config.items?.[0].id).toBe('keep');
     });
   });
-
 });

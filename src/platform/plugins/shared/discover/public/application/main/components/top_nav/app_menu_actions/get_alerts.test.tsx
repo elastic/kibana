@@ -180,9 +180,7 @@ describe('getAlertsAppMenuItem', () => {
     it('should prepend the v2 row with order 0 when showCreateRuleV2 is true', async () => {
       const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
 
-      const v2Row = alertsMenuItem.items?.find(
-        (item) => item.id === 'create-esql-rule-v2'
-      );
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
       expect(v2Row).toBeDefined();
       expect(v2Row?.order).toBe(0);
       expect(v2Row?.testId).toBe('discoverCreateEsqlRuleV2Button');
@@ -191,27 +189,21 @@ describe('getAlertsAppMenuItem', () => {
     it('should include a New badge on the v2 row', async () => {
       const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
 
-      const v2Row = alertsMenuItem.items?.find(
-        (item) => item.id === 'create-esql-rule-v2'
-      );
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
       expect(v2Row?.labelBadgeText).toBe('New');
     });
 
     it('should NOT include the v2 row when showCreateRuleV2 is false', async () => {
       const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: false });
 
-      const v2Row = alertsMenuItem.items?.find(
-        (item) => item.id === 'create-esql-rule-v2'
-      );
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
       expect(v2Row).toBeUndefined();
     });
 
     it('should NOT include the v2 row when showCreateRuleV2 is undefined', async () => {
       const alertsMenuItem = await getAlertsMenuItem();
 
-      const v2Row = alertsMenuItem.items?.find(
-        (item) => item.id === 'create-esql-rule-v2'
-      );
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
       expect(v2Row).toBeUndefined();
     });
 
