@@ -63,14 +63,15 @@ export function registerReadRoute(
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(
+        const { body, resolveHeaders } = await read(
           ctx,
           getCachedDashboardStateSchema(),
           req.params.id,
           isDashboardAppRequest
         );
         return res.ok({
-          body: result,
+          body,
+          ...(isDashboardAppRequest && { headers: resolveHeaders }),
         });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
