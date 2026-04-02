@@ -48,6 +48,8 @@ apiTest.describe(
         ).toBe(true);
         expect(Array.isArray(response.body.triggers)).toBe(true);
 
+        // Registered ⊆ approved: every trigger returned by the server must be listed in the fixture
+        // with a matching schema hash (catches new or changed schemas not yet approved).
         for (const trigger of response.body.triggers) {
           const approvedTrigger = APPROVED_TRIGGER_DEFINITIONS.find(({ id }) => id === trigger.id);
 
@@ -58,6 +60,22 @@ apiTest.describe(
           expect(approvedTrigger?.schemaHash, {
             message: `Trigger "${trigger.id}" has an invalid schema hash`,
           }).toBe(trigger.schemaHash);
+        }
+
+        // Approved ⊆ registered: every fixture row must still exist on the server with the same hash
+        // (catches stale rows left after a trigger was removed or the list was not updated).
+        for (const approved of APPROVED_TRIGGER_DEFINITIONS) {
+          const registeredTrigger = response.body.triggers.find(
+            (trigger: { id: string; schemaHash: string }) => trigger.id === approved.id
+          );
+
+          expect(registeredTrigger, {
+            message: `Approved list contains stale entry "${approved.id}" that is not registered`,
+          }).toBeDefined();
+
+          expect(registeredTrigger?.schemaHash, {
+            message: `Approved entry "${approved.id}" has an invalid schema hash (does not match registered trigger)`,
+          }).toBe(approved.schemaHash);
         }
       }
     );

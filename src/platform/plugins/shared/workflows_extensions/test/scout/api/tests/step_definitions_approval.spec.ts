@@ -46,6 +46,8 @@ apiTest.describe(
         expect(response.body.steps).toBeDefined();
         expect(Array.isArray(response.body.steps)).toBe(true);
 
+        // Registered ⊆ approved: every step returned by the server must be listed in the fixture
+        // with a matching handler hash (catches new or changed handlers not yet approved).
         for (const step of response.body.steps) {
           const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
 
@@ -56,6 +58,22 @@ apiTest.describe(
           expect(step.handlerHash, {
             message: `Step "${step.id}" has an invalid handler hash`,
           }).toBe(approvedStep?.handlerHash);
+        }
+
+        // Approved ⊆ registered: every fixture row must still exist on the server with the same hash
+        // (catches stale rows left after a step was removed or the list was not updated).
+        for (const approved of APPROVED_STEP_DEFINITIONS) {
+          const registeredStep = response.body.steps.find(
+            (step: { id: string; handlerHash: string }) => step.id === approved.id
+          );
+
+          expect(registeredStep, {
+            message: `Approved list contains stale entry "${approved.id}" that is not registered`,
+          }).toBeDefined();
+
+          expect(registeredStep?.handlerHash, {
+            message: `Approved entry "${approved.id}" has an invalid handler hash (does not match registered step)`,
+          }).toBe(approved.handlerHash);
         }
       }
     );
