@@ -7,6 +7,7 @@
 
 import type { Feature, QueryType, Streams } from '@kbn/streams-schema';
 import {
+  QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
   deriveQueryType,
   ensureMetadata,
@@ -205,12 +206,14 @@ export async function generateSignificantEvents({
 
   const queries: Query[] = response.input.flatMap((message) => {
     if (message.role === MessageRole.Tool && message.name === 'add_queries') {
-      // Type was already derived authoritatively in the add_queries callback (line 149/173).
-      // Re-derive here to guarantee a defined QueryType even if the tool transcript
-      // drops the property during serialization.
-      return message.response.queries.flatMap(({ valid, query }) =>
-        valid ? [{ ...query, type: (query.type as QueryType) ?? deriveQueryType(query.esql) }] : []
-      );
+      return message.response.queries.flatMap(({ valid, query }) => {
+        if (!valid) return [];
+        const type: QueryType =
+          query.type === QUERY_TYPE_MATCH || query.type === QUERY_TYPE_STATS
+            ? query.type
+            : deriveQueryType(query.esql);
+        return [{ ...query, type }];
+      });
     }
 
     return [];

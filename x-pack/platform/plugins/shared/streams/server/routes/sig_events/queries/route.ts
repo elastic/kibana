@@ -227,7 +227,7 @@ const bulkQueriesRoute = createServerRoute({
     const definition = await streamsClient.getStream(streamName);
 
     const validationErrors: Array<{ id: string; message: string }> = [];
-    for (const operation of operations) {
+    const typedOperations = operations.map((operation) => {
       if ('index' in operation && operation.index) {
         try {
           validateEsqlQueryForStreamOrThrow({
@@ -238,17 +238,6 @@ const bulkQueriesRoute = createServerRoute({
           const message = error instanceof Error ? error.message : String(error);
           validationErrors.push({ id: operation.index.id, message });
         }
-      }
-    }
-
-    if (validationErrors.length > 0) {
-      throw new EsqlQueryValidationError('One or more ES|QL queries are invalid', {
-        errors: validationErrors,
-      });
-    }
-
-    const typedOperations = operations.map((operation) => {
-      if ('index' in operation && operation.index) {
         return {
           index: {
             ...operation.index,
@@ -258,6 +247,12 @@ const bulkQueriesRoute = createServerRoute({
       }
       return operation;
     });
+
+    if (validationErrors.length > 0) {
+      throw new EsqlQueryValidationError('One or more ES|QL queries are invalid', {
+        errors: validationErrors,
+      });
+    }
 
     await queryClient.bulk(definition, typedOperations);
 

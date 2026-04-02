@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
@@ -100,14 +100,12 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.query.severity_score);
   };
   const handleSaveQuery = async () => {
-    const trimmedEsql = query.trim();
     await onSave(
       {
         ...item.query,
         title: title.trim(),
         description: description.trim(),
-        esql: { query: trimmedEsql },
-        type: deriveQueryType(trimmedEsql),
+        esql: { query: query.trim() },
         severity_score: severityScore,
       },
       item.stream_name

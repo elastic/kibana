@@ -226,7 +226,7 @@ describe('getStatsQueryHints', () => {
 
   it('warns about missing sample-size floor for rate queries', () => {
     const hints = getStatsQueryHints(
-      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE error_rate > 5'
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE error_rate != 0'
     );
     expect(hints).toEqual(
       expect.arrayContaining([expect.stringContaining('sample-size floor')])

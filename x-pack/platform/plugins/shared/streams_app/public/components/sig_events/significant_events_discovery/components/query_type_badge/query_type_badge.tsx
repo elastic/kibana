@@ -21,6 +21,8 @@ const MATCH_LABEL = i18n.translate('xpack.streams.queryTypeBadge.matchLabel', {
 export function QueryTypeBadge({ type }: { type: QueryType }) {
   const isStats = type === QUERY_TYPE_STATS;
   return (
-    <EuiBadge color={isStats ? 'hollow' : 'default'}>{isStats ? STATS_LABEL : MATCH_LABEL}</EuiBadge>
+    <EuiBadge color={isStats ? 'hollow' : 'default'}>
+      {isStats ? STATS_LABEL : MATCH_LABEL}
+    </EuiBadge>
   );
 }

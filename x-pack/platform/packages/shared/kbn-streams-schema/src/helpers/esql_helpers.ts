@@ -55,7 +55,7 @@ function matchTimeBucket(esql: string): RegExpMatchArray | null {
   );
 }
 
-const STATS_REGEX = /\|\s*STATS\s/i;
+const STATS_REGEX = /\|\s*STATS\b/i;
 
 function tryParseEsql(esql: string) {
   try {
@@ -176,13 +176,13 @@ export function deriveQueryType(esql: string): QueryType {
   return hasStatsCommand(esql) ? 'stats' : 'match';
 }
 
-const RATE_PATTERN = /\b(\w+)\s*\*\s*[\d.]+\s*\/\s*(\w+)\b/i;
-const TOTAL_FLOOR_PATTERN = /\btotal\s*>\s*\d+/i;
-const IS_NOT_NULL_PATTERN = /\bIS\s+NOT\s+NULL\b/i;
-const COUNT_WHERE_PATTERN = /COUNT\s*\(\s*\*\s*\)\s*WHERE\b/i;
+// Detects `<var> * <number> / <var>` — a rate computation — regardless of variable names.
+const RATE_PATTERN = /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b/i;
+// Detects any `<identifier> > <number>` guard in a WHERE clause after STATS.
+const SAMPLE_SIZE_FLOOR_PATTERN = /\bWHERE\b[^|]*\b\w+\s*>\s*\d+/i;
 
 function checkSampleSizeFloor(esql: string, hints: string[]): void {
-  if (RATE_PATTERN.test(esql) && !TOTAL_FLOOR_PATTERN.test(esql)) {
+  if (RATE_PATTERN.test(esql) && !SAMPLE_SIZE_FLOOR_PATTERN.test(esql)) {
     hints.push(
       'Warning: This query computes a rate but has no sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance rates that trigger false alerts.'
     );
@@ -190,18 +190,19 @@ function checkSampleSizeFloor(esql: string, hints: string[]): void {
 }
 
 function checkIsNotNullDenominator(esql: string, hints: string[]): void {
-  const hasCountWhere = COUNT_WHERE_PATTERN.test(esql);
-  if (!hasCountWhere) return;
+  if (!RATE_PATTERN.test(esql)) return;
 
-  const hasDenominatorCountWhere =
-    /total\s*=\s*COUNT\s*\(\s*\*\s*\)\s*WHERE\b/i.test(esql);
-  if (hasDenominatorCountWhere && IS_NOT_NULL_PATTERN.test(esql)) return;
+  // Count how many `COUNT(*) WHERE` fragments exist. If only one appears
+  // (the numerator filter) and the query has no IS NOT NULL, the denominator
+  // is likely unfiltered.
+  const countWhereMatches = esql.match(/COUNT\s*\(\s*\*\s*\)\s*WHERE\b/gi);
+  if (!countWhereMatches) return;
+  if (countWhereMatches.length >= 2) return;
+  if (/\bIS\s+NOT\s+NULL\b/i.test(esql)) return;
 
-  if (RATE_PATTERN.test(esql) && !hasDenominatorCountWhere) {
-    hints.push(
-      'Note: The total denominator uses unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'
-    );
-  }
+  hints.push(
+    'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'
+  );
 }
 
 /**
@@ -274,55 +275,9 @@ export function getStatsQueryHints(esql: string): string[] {
   return hints;
 }
 
-/**
- * Extracts the output column names from the STATS command's BY clause.
- * Used to identify group-by dimensions for alert identity hashing,
- * avoiding the fragile numeric-type heuristic.
- *
- * Returns column names in sorted order for deterministic hashing.
- * Returns an empty array when no STATS or BY clause is found, or on parse failure.
- */
-export function extractStatsGroupColumns(esql: string): string[] {
-  try {
-    const { root } = Parser.parse(esql);
-    const statsCmd = root.commands.find(
-      (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'stats'
-    );
-    if (!statsCmd) return [];
+type ByArg = ESQLCommand['args'][number];
 
-    const byOption = statsCmd.args.find(
-      (arg) => !Array.isArray(arg) && 'type' in arg && arg.type === 'option' && 'name' in arg && arg.name === 'by'
-    );
-    if (!byOption || Array.isArray(byOption) || !('args' in byOption)) return [];
-
-    const names: string[] = [];
-    for (const arg of (byOption as { args: ESQLCommand['args'] }).args) {
-      if (Array.isArray(arg)) continue;
-      if (!('type' in arg)) continue;
-
-      if (arg.type === 'column' && 'name' in arg) {
-        names.push(arg.name as string);
-      } else if (arg.type === 'function' && 'name' in arg && arg.name === '=') {
-        const lhs = (arg as { args: ESQLCommand['args'] }).args[0];
-        if (lhs && !Array.isArray(lhs) && 'type' in lhs && lhs.type === 'column' && 'name' in lhs) {
-          names.push(lhs.name as string);
-        }
-      }
-    }
-
-    return names.sort();
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Extracts the output column name for the temporal BUCKET/TBUCKET call
- * in the STATS command's BY clause. Returns `null` when no aliased
- * bucket call is found, signaling the caller to fall back to type-based
- * column detection.
- */
-export function extractBucketColumnName(esql: string): string | null {
+function findStatsByArgs(esql: string): ByArg[] | null {
   try {
     const { root } = Parser.parse(esql);
     const statsCmd = root.commands.find(
@@ -340,40 +295,78 @@ export function extractBucketColumnName(esql: string): string | null {
     );
     if (!byOption || Array.isArray(byOption) || !('args' in byOption)) return null;
 
-    for (const arg of (byOption as { args: ESQLCommand['args'] }).args) {
-      if (Array.isArray(arg)) continue;
-      if (!('type' in arg)) continue;
-
-      if (arg.type === 'function' && 'name' in arg && arg.name === '=') {
-        const rhs = (arg as { args: ESQLCommand['args'] }).args[1];
-        if (
-          rhs &&
-          !Array.isArray(rhs) &&
-          'type' in rhs &&
-          rhs.type === 'function' &&
-          'name' in rhs
-        ) {
-          const fnName = (rhs.name as string).toLowerCase();
-          if (fnName === 'bucket' || fnName === 'tbucket') {
-            const lhs = (arg as { args: ESQLCommand['args'] }).args[0];
-            if (
-              lhs &&
-              !Array.isArray(lhs) &&
-              'type' in lhs &&
-              lhs.type === 'column' &&
-              'name' in lhs
-            ) {
-              return lhs.name as string;
-            }
-          }
-        }
-      }
-    }
-
-    return null;
+    return (byOption as { args: ESQLCommand['args'] }).args;
   } catch {
     return null;
   }
+}
+
+function getAssignmentLhsName(arg: ByArg): string | null {
+  if (Array.isArray(arg) || !('type' in arg)) return null;
+  if (arg.type === 'column' && 'name' in arg) return arg.name as string;
+  if (arg.type === 'function' && 'name' in arg && arg.name === '=') {
+    const lhs = (arg as { args: ESQLCommand['args'] }).args[0];
+    if (lhs && !Array.isArray(lhs) && 'type' in lhs && lhs.type === 'column' && 'name' in lhs) {
+      return lhs.name as string;
+    }
+  }
+  return null;
+}
+
+function getAssignmentRhsFnName(arg: ByArg): string | null {
+  if (Array.isArray(arg) || !('type' in arg)) return null;
+  if (arg.type !== 'function' || !('name' in arg) || arg.name !== '=') return null;
+  const rhs = (arg as { args: ESQLCommand['args'] }).args[1];
+  if (rhs && !Array.isArray(rhs) && 'type' in rhs && rhs.type === 'function' && 'name' in rhs) {
+    return (rhs.name as string).toLowerCase();
+  }
+  return null;
+}
+
+/**
+ * Extracts the output column names from the STATS command's BY clause.
+ * Used to identify group-by dimensions for alert identity hashing,
+ * avoiding the fragile numeric-type heuristic.
+ *
+ * Returns column names in sorted order for deterministic hashing.
+ * Returns an empty array when no STATS or BY clause is found, or on parse failure.
+ */
+export function extractStatsGroupColumns(esql: string): string[] {
+  const byArgs = findStatsByArgs(esql);
+  if (!byArgs) return [];
+
+  const names: string[] = [];
+  for (const arg of byArgs) {
+    const name = getAssignmentLhsName(arg);
+    if (name) names.push(name);
+  }
+  return names.sort();
+}
+
+/**
+ * Extracts the output column name for the temporal BUCKET/TBUCKET call
+ * in the STATS command's BY clause. Falls back to regex when the AST
+ * doesn't expose the alias (known parser limitation with some BUCKET forms).
+ *
+ * Returns `null` when no bucket call is found.
+ */
+export function extractBucketColumnName(esql: string): string | null {
+  const byArgs = findStatsByArgs(esql);
+  if (byArgs) {
+    for (const arg of byArgs) {
+      const fnName = getAssignmentRhsFnName(arg);
+      if (fnName === 'bucket' || fnName === 'tbucket') {
+        const name = getAssignmentLhsName(arg);
+        if (name) return name;
+      }
+    }
+  }
+
+  // Regex fallback for cases where the AST doesn't expose the alias
+  const match = esql.match(
+    /(\w+)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i
+  );
+  return match?.[1] ?? null;
 }
 
 export const MS_PER_UNIT: Record<string, number> = {

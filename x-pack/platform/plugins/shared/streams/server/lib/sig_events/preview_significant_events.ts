@@ -33,7 +33,7 @@ function msToEsqlBucketSize(ms: number): string {
   if (ms >= 86_400_000 && ms % 86_400_000 === 0) return `${ms / 86_400_000}d`;
   if (ms >= 3_600_000 && ms % 3_600_000 === 0) return `${ms / 3_600_000}h`;
   if (ms >= 60_000 && ms % 60_000 === 0) return `${ms / 60_000}m`;
-  return `${ms / 1000}s`;
+  return `${Math.round(ms / 1000)}s`;
 }
 
 function stripLimitCommand(esql: string): string {
@@ -128,7 +128,11 @@ function fillBucketGaps(
   bucketSize: string
 ): Array<{ date: string; count: number }> {
   const { value, unit } = parseBucketSize(bucketSize);
-  const intervalMs = value * (MS_PER_UNIT[unit] || 1000);
+  const msPerUnit = MS_PER_UNIT[unit];
+  if (!msPerUnit) {
+    throw new Error(`Unrecognized bucket unit "${unit}" in bucket size "${bucketSize}"`);
+  }
+  const intervalMs = value * msPerUnit;
   const existingBuckets = new Map(occurrences.map((o) => [new Date(o.date).getTime(), o.count]));
 
   const result: Array<{ date: string; count: number }> = [];

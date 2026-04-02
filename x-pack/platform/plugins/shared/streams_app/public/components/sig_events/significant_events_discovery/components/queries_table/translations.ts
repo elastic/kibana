@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const getPromoteAllSuccessToast = (
   promoted: number,
   skippedStats: number
-): { text: string; isInfoOnly: boolean } => {
+): { text: string; severity: 'success' | 'info' } => {
   if (promoted === 0 && skippedStats > 0) {
     return {
       text: i18n.translate(
@@ -21,7 +21,7 @@ export const getPromoteAllSuccessToast = (
           values: { skippedStats },
         }
       ),
-      isInfoOnly: true,
+      severity: 'info',
     };
   }
   if (skippedStats > 0) {
@@ -34,7 +34,7 @@ export const getPromoteAllSuccessToast = (
           values: { promoted, skippedStats },
         }
       ),
-      isInfoOnly: false,
+      severity: 'success',
     };
   }
   return {
@@ -45,7 +45,7 @@ export const getPromoteAllSuccessToast = (
         values: { promoted },
       }
     ),
-    isInfoOnly: false,
+    severity: 'success',
   };
 };
 

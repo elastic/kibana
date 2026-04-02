@@ -128,14 +128,15 @@ export function QueriesTable() {
     perPage: pagination.size,
     status: ['active', 'draft'],
   });
+  const queriesList = queriesData?.queries;
   useEffect(() => {
-    if (!queriesData?.queries) return;
+    if (!queriesList) return;
     setSelectedQuery((prev) => {
       if (!prev) return prev;
-      const refreshed = queriesData.queries.find((item) => item.query.id === prev.query.id);
+      const refreshed = queriesList.find((item) => item.query.id === prev.query.id);
       return refreshed ?? null;
     });
-  }, [queriesData]);
+  }, [queriesList]);
 
   const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
 
@@ -157,7 +158,7 @@ export function QueriesTable() {
     mutationFn: promoteAll,
     onSuccess: async ({ promoted, skipped_stats: skippedStats }) => {
       const toast = getPromoteAllSuccessToast(promoted, skippedStats);
-      if (toast.isInfoOnly) {
+      if (toast.severity === 'info') {
         toasts.add({ title: toast.text, color: 'primary' });
       } else {
         toasts.addSuccess(toast.text);

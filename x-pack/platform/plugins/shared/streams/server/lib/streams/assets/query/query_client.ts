@@ -749,10 +749,10 @@ export class QueryClient {
     );
 
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
-    const ruleBackedFilter = (link: QueryLink) => link.rule_backed;
+    const isRuleBacked = (link: QueryLink) => link.rule_backed;
     await this.installQueries(
-      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(ruleBackedFilter),
-      nextQueriesUpdatedWithoutBreakingChange.filter(ruleBackedFilter),
+      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(isRuleBacked),
+      nextQueriesUpdatedWithoutBreakingChange.filter(isRuleBacked),
       definition
     );
 
@@ -889,10 +889,10 @@ export class QueryClient {
     const idSet = new Set(queryIds);
     const candidates = unbacked.filter((link) => idSet.has(link.query.id));
 
-    const statsSkipped = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
-    if (statsSkipped.length > 0) {
+    const skippedStats = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
+    if (skippedStats.length > 0) {
       this.dependencies.logger.debug(
-        `Skipping ${statsSkipped.length} STATS queries from promotion (not yet supported as rules).`
+        `Skipping ${skippedStats.length} STATS queries from promotion (not yet supported as rules).`
       );
     }
 
@@ -901,7 +901,7 @@ export class QueryClient {
       .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
 
     if (toPromote.length === 0) {
-      return { promoted: 0, skipped_stats: statsSkipped.length };
+      return { promoted: 0, skipped_stats: skippedStats.length };
     }
 
     await this.installQueries(toPromote, [], definition);
@@ -921,7 +921,7 @@ export class QueryClient {
       }))
     );
 
-    return { promoted: toPromote.length, skipped_stats: statsSkipped.length };
+    return { promoted: toPromote.length, skipped_stats: skippedStats.length };
   }
 
   private async installQueries(
