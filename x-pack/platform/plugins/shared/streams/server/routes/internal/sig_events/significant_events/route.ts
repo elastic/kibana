@@ -44,7 +44,7 @@ const sanitizeTaskResult = (
       ...result,
       queries: result.queries.map((q) => ({
         ...q,
-        type: q.type ?? deriveQueryType(q.esql.query),
+        type: deriveQueryType(q.esql.query),
       })),
     };
   }

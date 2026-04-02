@@ -54,7 +54,7 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
   let ariaLabel: string;
   if (isStats) {
     tooltipContent = STATS_PROMOTE_DISABLED_TOOLTIP;
-    ariaLabel = PROMOTE_QUERY_ACTION_TITLE;
+    ariaLabel = STATS_PROMOTE_DISABLED_TOOLTIP;
   } else if (item.rule_backed) {
     tooltipContent = PROMOTED_TOOLTIP_CONTENT;
     ariaLabel = PROMOTED_TOOLTIP_CONTENT;

@@ -176,6 +176,34 @@ export function deriveQueryType(esql: string): QueryType {
   return hasStatsCommand(esql) ? 'stats' : 'match';
 }
 
+const RATE_PATTERN = /\b(\w+)\s*\*\s*[\d.]+\s*\/\s*(\w+)\b/i;
+const TOTAL_FLOOR_PATTERN = /\btotal\s*>\s*\d+/i;
+const IS_NOT_NULL_PATTERN = /\bIS\s+NOT\s+NULL\b/i;
+const COUNT_WHERE_PATTERN = /COUNT\s*\(\s*\*\s*\)\s*WHERE\b/i;
+
+function checkSampleSizeFloor(esql: string, hints: string[]): void {
+  if (RATE_PATTERN.test(esql) && !TOTAL_FLOOR_PATTERN.test(esql)) {
+    hints.push(
+      'Warning: This query computes a rate but has no sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance rates that trigger false alerts.'
+    );
+  }
+}
+
+function checkIsNotNullDenominator(esql: string, hints: string[]): void {
+  const hasCountWhere = COUNT_WHERE_PATTERN.test(esql);
+  if (!hasCountWhere) return;
+
+  const hasDenominatorCountWhere =
+    /total\s*=\s*COUNT\s*\(\s*\*\s*\)\s*WHERE\b/i.test(esql);
+  if (hasDenominatorCountWhere && IS_NOT_NULL_PATTERN.test(esql)) return;
+
+  if (RATE_PATTERN.test(esql) && !hasDenominatorCountWhere) {
+    hints.push(
+      'Note: The total denominator uses unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'
+    );
+  }
+}
+
 /**
  * Returns quality hints for STATS queries to feed back to the LLM.
  * Checks for common structural issues in aggregate queries.
@@ -226,6 +254,12 @@ export function getStatsQueryHints(esql: string): string[] {
       'Warning: No threshold filter after STATS. For alerting, add | WHERE <metric> > <threshold> to distinguish normal from anomalous conditions.'
     );
   }
+
+  if (hasWhereAfterStats) {
+    checkSampleSizeFloor(esql, hints);
+  }
+
+  checkIsNotNullDenominator(esql, hints);
 
   const disallowed = ['sort', 'limit', 'keep'];
   const found = commands

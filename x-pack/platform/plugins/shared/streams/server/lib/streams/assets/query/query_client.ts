@@ -13,7 +13,6 @@ import type { IStorageClient } from '@kbn/storage-adapter';
 import {
   type StreamQuery,
   type Streams,
-  type QueryType,
   QUERY_TYPE_STATS,
   deriveQueryType,
 } from '@kbn/streams-schema';
@@ -174,13 +173,11 @@ function fromStorage(link: StoredQueryLink, logger?: Logger): QueryLink {
 
   const esql = storageFields[QUERY_ESQL_QUERY];
   const storedType = storageFields[QUERY_TYPE];
-  const derivedType = deriveQueryType(esql);
-  const type: QueryType =
-    storedType === 'match' || storedType === 'stats' ? storedType : derivedType;
+  const type = deriveQueryType(esql);
 
-  if (storedType && storedType !== derivedType) {
+  if (storedType && storedType !== type) {
     logger?.warn(
-      `Query ${storageFields[ASSET_ID]}: stored type "${storedType}" disagrees with derived type "${derivedType}" — using stored type. Investigate and re-sync if needed.`
+      `Query ${storageFields[ASSET_ID]}: stored type "${storedType}" disagrees with derived type "${type}" — using derived type as authoritative.`
     );
   }
 

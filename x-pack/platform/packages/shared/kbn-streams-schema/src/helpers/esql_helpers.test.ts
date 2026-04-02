@@ -223,6 +223,42 @@ describe('getStatsQueryHints', () => {
   it('returns empty array on parse failure', () => {
     expect(getStatsQueryHints('INVALID {{{')).toEqual([]);
   });
+
+  it('warns about missing sample-size floor for rate queries', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE error_rate > 5'
+    );
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('sample-size floor')])
+    );
+  });
+
+  it('does not warn about sample-size floor when total > N guard is present', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
+    );
+    expect(hints).not.toEqual(
+      expect.arrayContaining([expect.stringContaining('sample-size floor')])
+    );
+  });
+
+  it('notes missing IS NOT NULL on unfiltered total denominator', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
+    );
+    expect(hints).toEqual(
+      expect.arrayContaining([expect.stringContaining('IS NOT NULL')])
+    );
+  });
+
+  it('does not note IS NOT NULL when denominator already filters', () => {
+    const hints = getStatsQueryHints(
+      'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5m) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 5'
+    );
+    expect(hints).not.toEqual(
+      expect.arrayContaining([expect.stringContaining('IS NOT NULL')])
+    );
+  });
 });
 
 describe('extractBucketColumnName', () => {

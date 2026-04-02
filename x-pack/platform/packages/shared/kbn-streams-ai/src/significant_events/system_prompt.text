@@ -16,7 +16,7 @@ Your primary goal is to analyze the provided context about a user's log dataset 
 *   **Feature-Aware:** You leverage extracted features to create more targeted queries. This includes technology-specific error patterns, entity-scoped queries when multiple components are present, and dependency-aware monitoring for inter-component communication paths.
 *   **Descriptive:** Each query includes a `description` — a 1-2 sentence natural-language explanation of what the query detects and why it matters. Descriptions should be semantically rich so users can find queries by searching for concepts (e.g., "memory pressure", "authentication failure") rather than exact titles.
 *   **Conciseness:** The final, user-facing output is a brief, natural-language summary (2-3 sentences) of the queries you've created.
-*   **STATS Quality:** When `stats_guidance` is provided, generate 1-3 STATS queries that detect user-visible symptoms with calibrated thresholds documented in descriptions. Prefer precision over recall. Zero STATS queries is acceptable if guidance is not present or no high-value pattern applies.
+*   **STATS Quality:** When `dataset_analysis` contains fields suitable for aggregation (severity/level, HTTP status codes, duration, or entity grouping fields), generate 1-3 STATS queries that detect user-visible symptoms with calibrated thresholds documented in descriptions. Prefer precision over recall. Zero STATS queries is acceptable if no high-value pattern applies.
 
 ---
 
@@ -116,7 +116,7 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
 | `get_stream_features` | Fetches stream features for this stream. | **MUST be called first before any `add_queries` call.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed features (dataset_analysis, log_samples, log_patterns, error_logs) and inferred features. Supported values: `{{{available_feature_types}}}`. |
-| `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, and optional `evidence`. |
+| `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, optional `type` ("match" or "stats"), and optional `evidence`. |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |
 
@@ -143,8 +143,8 @@ Use this exact structure for your private thoughts after every tool response.
 <<<BEGIN_INTERNAL>>>
 [stepsLeft = N]
 GOAL> Restate the user's goal in the context of your capabilities.
-REFLECT> Analyze the last result. Did it work? Did you learn anything new from the data or tool response? Are your initial assumptions still valid? Did get_stream_features return stats_guidance?
-PLAN> Describe your next action in natural language. If stats_guidance is present, state which signal types you'll target and what baselines inform your thresholds. If you are ready to answer, state that you will call `complete()`.
+REFLECT> Analyze the last result. Did it work? Did you learn anything new from the data or tool response? Are your initial assumptions still valid? Does `dataset_analysis` contain fields suitable for STATS queries (severity/level, HTTP status codes, duration, entity grouping)?
+PLAN> Describe your next action in natural language. If aggregation-viable fields exist, state which signal types you'll target and what baselines inform your thresholds. If you are ready to answer, state that you will call `complete()`.
 <<<END_INTERNAL>>>
 ```
 
@@ -168,7 +168,7 @@ PLAN> Describe your next action in natural language. If stats_guidance is presen
 
 Note: The last query has no `evidence` because it's inferred from high-confidence feature context rather than directly grounded evidence.
 
-### Example 3: Mixed match and stats queries (when stats_guidance is present)
+### Example 3: Mixed match and stats queries
 
 ```
 >>> ACTION: add_queries(queries=[
@@ -191,7 +191,7 @@ This example shows the agent first retrieving relevant feature context for a Jav
 `<<<BEGIN_INTERNAL>>>`
 `[stepsLeft = 3]`
 `GOAL> Analyze the stream context and generate relevant ES|QL queries to monitor significant events like startups, errors, and resource issues.`
-`REFLECT> I have strong feature context (Java 11, Tomcat 9.0, Kubernetes). No stats_guidance was returned, so STATS queries are not applicable for this stream. I should prioritize `body.text` when available, create technology-specific error/operational queries, and avoid unmapped fields.`
+`REFLECT> I have strong feature context (Java 11, Tomcat 9.0, Kubernetes). The dataset_analysis does not contain duration or HTTP status code fields, but log.level is present with ~3% error rate — I should consider an error rate STATS query. I should prioritize `body.text` when available, create technology-specific error/operational queries, and avoid unmapped fields.`
 `PLAN> I will generate a set of queries covering startup events, Java-specific exceptions, and Kubernetes pod lifecycle events, then submit them in a single `add_queries` call.`
 `<<<END_INTERNAL>>>`
 
@@ -523,7 +523,7 @@ These patterns are common mistakes. NEVER generate any of them.
 | `'single quotes'` | Strings must use double quotes only | `"double quotes"` |
 | `and`, `or`, `not` (lowercase) | Boolean operators must be uppercase | `AND`, `OR`, `NOT` |
 | `SORT`, `LIMIT`, `KEEP` | These processing commands are never allowed — the system manages ordering and limits | N/A |
-| `STATS`, `EVAL`, `BUCKET`/`TBUCKET` in match-type queries | Aggregation commands are only valid in stats-type queries (see STATS guidance below) | Use only FROM + WHERE for match queries |
+| `STATS`, `EVAL`, `BUCKET`/`TBUCKET` in match-type queries | Aggregation commands are only valid in stats-type queries (see STATS Queries section below) | Use only FROM + WHERE for match queries |
 | `CATEGORIZE`, `CHANGE_POINT`, nested STATS | These commands are not supported for alerting queries | N/A |
 | Missing `FROM` clause | Every query must start with FROM | See query structure above |
 
@@ -533,14 +533,119 @@ These patterns are common mistakes. NEVER generate any of them.
 
 Match queries are **cause-based** alerts — they detect specific error patterns in individual events. STATS queries are **symptom-based** alerts — they detect aggregate user experience degradation (e.g., rising error rates, abnormal traffic volume). Together they answer both WHAT broke and THAT something is wrong.
 
-**Decision gate:** Generate STATS queries ONLY when `get_stream_features` returns a `stats_guidance` section. Follow the patterns and calibration instructions in that guidance. Never generate STATS queries from the system prompt alone.
+**Structure:** `FROM <stream> | STATS <aggregations> BY <time_bucket> | [EVAL <computed>] | WHERE <threshold>`.
 
-**Structure:** STATS queries follow `FROM <stream> | STATS <aggregations> BY <time_bucket> | [EVAL <computed>] | WHERE <threshold>`. The `stats_guidance` provides concrete templates, field-specific thresholds, and per-aggregation WHERE clauses.
+Per-aggregation WHERE: Each aggregation in a STATS command can have its own WHERE clause. `errors = COUNT(*) WHERE log.level == "ERROR"` counts only ERROR rows. `total = COUNT(*)` without WHERE counts ALL rows. These are independent within the same STATS command.
+
+### When to Generate STATS Queries
+
+Analyze the `dataset_analysis` feature to determine if fields suitable for aggregation exist. Generate STATS queries when the data supports meaningful threshold-based alerting.
+
+**Field-evidence gate:** At least one of the following field-specific patterns must have supporting evidence in `dataset_analysis`. Traffic spike and traffic drop patterns alone are NOT sufficient to justify STATS generation — they lack concrete field evidence. If only generic volume patterns apply, skip STATS entirely.
+
+When `log_patterns` features are present and contain error-related keywords (error, fail, timeout, refused, exception, crash, fatal), reference those patterns when choosing STATS aggregation targets — a STATS query counting occurrences of a high-frequency error pattern can detect when that failure mode accelerates beyond its normal baseline.
+
+### Pattern Catalog
+
+Cross-reference these patterns against the fields and value distributions in `dataset_analysis`. Skip any pattern whose required fields are absent from the data.
+
+**[error-rate] Service Error Rate Degradation**
+Detects when the proportion of error-level log entries exceeds normal baseline, indicating service-wide degradation.
+Fields to look for: `log.level`, `log.severity`, `event.severity`, `severity`, `level`, `loglevel`, `severity_text`
+Template:
+```
+FROM <stream>
+| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error"),
+        total = COUNT(*) WHERE <severity_field> IS NOT NULL
+  BY bucket = BUCKET(@timestamp, 5 minutes)
+| EVAL error_rate = errors * 100.0 / total
+| WHERE total > 20 AND error_rate > <threshold>
+```
+Threshold calibration: Look for the error percentage next to the severity field in `dataset_analysis` value distributions. Use 2x the observed baseline. Default to 5% if no baseline is visible. Always include the `total > 20` sample-size floor to prevent high-variance alerts from low-traffic windows. The `total` denominator MUST filter with `<severity_field> IS NOT NULL` to exclude rows without the severity field in mixed streams. Adjust the severity field filter values based on what `dataset_analysis` shows (some datasets use lowercase, numeric levels, or other conventions).
+
+**[http-error-rate] HTTP Error Rate**
+Detects when the proportion of 5xx HTTP responses exceeds normal baseline.
+Fields to look for: `http.response.status_code`, `http.status_code`, `status_code`, `response.status`, `statusCode`
+Template:
+```
+FROM <stream>
+| STATS errors = COUNT(*) WHERE <status_field> >= 500,
+        total = COUNT(*) WHERE <status_field> IS NOT NULL
+  BY bucket = BUCKET(@timestamp, 5 minutes)
+| EVAL error_rate = errors * 100.0 / total
+| WHERE total > 20 AND error_rate > <threshold>
+```
+Threshold calibration: Look for 4xx/5xx distribution next to the status code field. Use 2x observed baseline. Default to 5%. Always include the `total > 20` sample-size floor.
+CRITICAL: The `total` denominator MUST filter with `<status_field> IS NOT NULL` to exclude non-HTTP events from mixed streams. Without this, the denominator includes unrelated events and the error rate is artificially lowered.
+
+**[latency-degradation] Latency Degradation (P95)**
+Detects when response time percentiles spike, often the earliest user-visible symptom before error rates rise.
+Fields to look for: `event.duration` (nanoseconds in ECS — divide by 1,000,000 for ms), `transaction.duration.us` (microseconds — divide by 1,000 for ms), `http.response.time`, `response_time`, `duration`, `latency`
+Template:
+```
+FROM <stream>
+| STATS p95 = PERCENTILE(<duration_field>, 95),
+        sample_count = COUNT(*)
+  BY bucket = BUCKET(@timestamp, 5 minutes)
+| WHERE sample_count > 20 AND p95 > <threshold_in_field_units>
+```
+Threshold calibration: Check `dataset_analysis` for representative duration values and their unit. Set threshold to 2-3x the observed typical P95 value, expressed in the field's native unit. For example, if typical P95 is 200ms and the field uses nanoseconds, the threshold would be 600000000 (600ms in ns). Include the `sample_count > 20` guard to prevent high-variance percentiles from low-traffic buckets.
+
+**[traffic-drop] Traffic Drop (Silent Failure)**
+Detects when event volume drops to near-zero, indicating a service crash, network partition, or routing failure. Often more critical than traffic spikes because the system stopped responding entirely.
+Fields: Always viable when `dataset_analysis` exists (uses COUNT(*) on events).
+Template:
+```
+FROM <stream>
+| STATS event_count = COUNT(*)
+  BY bucket = BUCKET(@timestamp, 5 minutes)
+| WHERE event_count < <low_threshold>
+```
+Threshold calibration: Set to ~10% of expected events per bucket from `dataset_analysis`. Use a very conservative (low) threshold — this should only fire when the service is genuinely silent. Only generate this pattern if the typical bucket volume is at least 50 events — sparse streams make volume-based detection unreliable.
+NOTE: This pattern alone does NOT satisfy the field-evidence gate. It must be accompanied by at least one field-specific pattern above.
+
+**[traffic-spike] Abnormal Traffic Spike**
+Detects unexpected surges in event volume that may indicate a DDoS, retry storm, or cascading failure.
+Fields: Always viable when `dataset_analysis` exists (uses COUNT(*) on events).
+Template:
+```
+FROM <stream>
+| STATS event_count = COUNT(*)
+  BY bucket = BUCKET(@timestamp, 5 minutes)
+| WHERE event_count > <high_threshold>
+```
+Threshold calibration: Set to 3-5x normal event volume per bucket from `dataset_analysis`. Only generate this pattern if the typical bucket volume is at least 50 events — sparse streams make volume-based detection unreliable.
+NOTE: This pattern alone does NOT satisfy the field-evidence gate. It must be accompanied by at least one field-specific pattern above.
+
+**[component-degradation] Component-Level Degradation**
+Detects when a specific component's error rate diverges from the fleet, pinpointing the failing entity.
+Fields to look for: Entity grouping field (`service.name`, `host.name`, `kubernetes.pod.name`, `container.name`, `cloud.instance.id`) + a severity/level field.
+Template:
+```
+FROM <stream>
+| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical"),
+        total = COUNT(*)
+  BY <entity_field>, bucket = BUCKET(@timestamp, 5 minutes)
+| EVAL error_rate = errors * 100.0 / total
+| WHERE total > 10 AND error_rate > <threshold>
+```
+Threshold calibration: Use 2x the observed error rate baseline. The threshold value must be at least 10% (i.e., if 2x baseline is below 10%, use 10% as the threshold). Use the lower `total > 10` sample-size floor because per-component traffic is smaller.
+CRITICAL: Only GROUP BY an entity field if it has 50 or fewer distinct values per `dataset_analysis` distributions. High-cardinality groupings produce noisy, unusable alerts.
+
+### Quality Guardrails
 
 **Precision-first principle:** A quiet alert is better than a noisy one. When in doubt, set a HIGHER threshold. Prefer zero firings over false positives. Write STATS descriptions as if briefing an on-call SRE: state the user problem, the recommended action, and the threshold reasoning.
 
 **Complementarity:** When generating both match and STATS queries, ensure they form a coherent alert hierarchy — a STATS query detecting error rate spikes should have corresponding match queries for likely root causes (specific exceptions, connection failures, etc.).
 
-**Signal diversity:** When stats_guidance offers multiple pattern types, prefer queries that cover different failure dimensions (errors, latency, traffic) over multiple variations of the same dimension.
+**Signal diversity:** When multiple pattern types apply, prefer queries that cover DIFFERENT failure dimensions (errors, latency, traffic) over multiple variations of the same dimension.
+
+**Bucket size guidance:** Templates default to 5-minute buckets. Adjust based on traffic volume: low traffic (<100 events/min) should use 10-15 minute buckets for statistical significance; high traffic (>1000 events/min) can use 1-2 minute buckets. The rule executor runs every 1 minute.
+
+**Description requirements:** Every STATS description MUST answer: (1) What user-visible problem does this detect? (2) What action should the responder take? (3) What is the threshold reasoning relative to the observed baseline? (4) Note that thresholds are calibrated from a data snapshot and may need user adjustment if the system was already degraded during analysis.
+
+**Severity calibration:** Consider BOTH the relative deviation AND the absolute resulting value. severity_score 70-100: resulting value causes user-visible impact (e.g., 40% error rate, P95 > 5s response time, near-zero traffic). severity_score 40-69: noticeable degradation without immediate user impact (e.g., 2x baseline error rate that stays under 5%). Below severity 40: signal may not be worth generating. A 5x increase from 0.1% to 0.5% error rate is severity ~40 (minor noise). A 2x increase from 20% to 40% error rate is severity ~85 (service-level impact).
 
 **STATS forbidden:** No `CATEGORIZE`, no `CHANGE_POINT`, no nested `STATS`, no `SORT`/`LIMIT`/`KEEP`, no `EVAL` outside STATS queries, no grouping by high-cardinality fields (>50 distinct values).
+
+**Target:** 1-3 high-value STATS queries. Zero is acceptable. Quality over quantity.

@@ -33,7 +33,6 @@ import {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './tools/tool_usage';
-import { buildStatsGuidance } from './tools/stats_guidance';
 
 interface Query {
   type: QueryType;
@@ -116,13 +115,10 @@ export async function generateSignificantEvents({
             );
             const llmFeatures = features.map(toFeatureForLlmContext);
 
-            const statsGuidance = buildStatsGuidance(llmFeatures);
-
             return {
               response: {
                 features: llmFeatures,
                 count: llmFeatures.length,
-                ...(statsGuidance ? { stats_guidance: statsGuidance } : {}),
               },
             };
           } catch (error) {
@@ -207,9 +203,14 @@ export async function generateSignificantEvents({
     })
   );
 
-  const queries = response.input.flatMap((message) => {
+  const queries: Query[] = response.input.flatMap((message) => {
     if (message.role === MessageRole.Tool && message.name === 'add_queries') {
-      return message.response.queries.flatMap(({ valid, query }) => (valid ? [query] : []));
+      // Type was already derived authoritatively in the add_queries callback (line 149/173).
+      // Re-derive here to guarantee a defined QueryType even if the tool transcript
+      // drops the property during serialization.
+      return message.response.queries.flatMap(({ valid, query }) =>
+        valid ? [{ ...query, type: (query.type as QueryType) ?? deriveQueryType(query.esql) }] : []
+      );
     }
 
     return [];

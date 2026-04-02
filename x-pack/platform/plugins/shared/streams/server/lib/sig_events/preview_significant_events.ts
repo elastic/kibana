@@ -61,7 +61,13 @@ function stripLimitCommand(esql: string): string {
  * insufficient data points (< 22 buckets), so it is always included.
  */
 function buildHistogramQuery(esqlQuery: string, bucketSize: string): string {
-  const { root } = Parser.parse(esqlQuery);
+  let root;
+  try {
+    ({ root } = Parser.parse(esqlQuery));
+  } catch {
+    throw new Error(`Failed to parse ES|QL query for preview histogram: ${esqlQuery}`);
+  }
+
   const { value, unit } = parseBucketSize(bucketSize);
 
   const fromCmd = root.commands.find(
