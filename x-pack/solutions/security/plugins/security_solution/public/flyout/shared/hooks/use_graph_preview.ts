@@ -64,6 +64,11 @@ export interface UseGraphPreviewResult {
   action?: string[];
 
   /**
+   * Boolean indicating if the event has all required data fields for graph visualization
+   */
+  hasGraphData: boolean;
+
+  /**
    * Boolean indicating if graph visualization is fully available
    * Combines: valid license + feature enabled in settings
    */
@@ -123,6 +128,7 @@ export const useGraphPreview = ({
     actorIds,
     action,
     targetIds,
+    hasGraphData: hasGraphRepresentation,
     shouldShowGraph,
     isAlert,
   };
