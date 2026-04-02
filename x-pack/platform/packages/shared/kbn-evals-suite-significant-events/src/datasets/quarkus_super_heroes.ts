@@ -467,7 +467,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'affected-services-query',
-            text: 'Should generate a query detecting failures in both rest-fights and event-statistics due to the Kafka outage',
+            text: 'Should generate queries detecting Kafka failures in rest-fights and event-statistics — separate queries per service are acceptable',
             score: 2,
           },
           {
@@ -570,7 +570,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         criteria: [
           {
             id: 'reactive-db-error-query',
-            text: 'Must generate an ES|QL query that catches Vert.x reactive pool timeout errors from rest-heroes (NoStackTraceThrowable, HR000021)',
+            text: 'Must generate an ES|QL query that catches Vert.x reactive pool timeout errors from rest-heroes (NoStackTraceThrowable or HR000021 — either signature is sufficient)',
             score: 3,
           },
           {
