@@ -82,6 +82,7 @@ describe('VisualizationsSection', () => {
 
   const openSystemFlyout = jest.fn();
   const renderCellActions = jest.fn();
+  const onAlertUpdated = jest.fn();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
@@ -90,7 +91,11 @@ describe('VisualizationsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <VisualizationsSection hit={mockHit} renderCellActions={renderCellActions} />
+            <VisualizationsSection
+              hit={mockHit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
           </Router>
         </Provider>
       </IntlProvider>
