@@ -70,7 +70,6 @@ export {
   type ReviewApproveMenuClickedPayload,
   type ApproveModalCancelClickedPayload,
   type ApproveModalApproveClickedPayload,
-  type IntegrationDeleteConfirmedPayload,
   type DataStreamDeleteConfirmedPayload,
   type DataStreamRefreshConfirmedPayload,
   type PipelineEditedPayload,

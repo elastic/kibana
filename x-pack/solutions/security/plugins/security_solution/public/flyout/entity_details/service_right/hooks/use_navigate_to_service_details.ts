@@ -18,6 +18,7 @@ interface UseNavigateToServiceDetailsParams {
   serviceName: string;
   scopeId: string;
   isRiskScoreExist: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const useNavigateToServiceDetails = ({
@@ -25,6 +26,7 @@ export const useNavigateToServiceDetails = ({
   serviceName,
   scopeId,
   isRiskScoreExist,
+  entityStoreEntityId,
 }: UseNavigateToServiceDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -42,10 +44,19 @@ export const useNavigateToServiceDetails = ({
           scopeId,
           entityId,
           serviceName,
+          entityStoreEntityId,
           path,
         },
       });
     },
-    [isRiskScoreExist, openLeftPanel, scopeId, entityId, serviceName, telemetry]
+    [
+      isRiskScoreExist,
+      openLeftPanel,
+      scopeId,
+      entityId,
+      serviceName,
+      entityStoreEntityId,
+      telemetry,
+    ]
   );
 };
