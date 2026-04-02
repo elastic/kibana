@@ -17,9 +17,12 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {
       data_stream_id: {
-        type: 'text',
+        type: 'keyword',
       },
       integration_id: {
+        type: 'keyword',
+      },
+      title: {
         type: 'text',
       },
       created_by: {
@@ -53,15 +56,29 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
   },
   management: {
     icon: 'data_stream',
-    defaultSearchField: 'data_stream_id',
+    defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.data_stream_id;
+      return obj.attributes.title;
     },
   },
   modelVersions: {
     1: {
       changes: [],
+      schemas: {
+        forwardCompatibility: dataStreamSchemaV1.extends({}, { unknowns: 'ignore' }),
+        create: dataStreamSchemaV1,
+      },
+    },
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            title: { type: 'text' },
+          },
+        },
+      ],
       schemas: {
         forwardCompatibility: dataStreamSchemaV1.extends({}, { unknowns: 'ignore' }),
         create: dataStreamSchemaV1,

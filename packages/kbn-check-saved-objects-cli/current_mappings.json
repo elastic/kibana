@@ -1366,9 +1366,12 @@
         "type": "keyword"
       },
       "data_stream_id": {
-        "type": "text"
+        "type": "keyword"
       },
       "integration_id": {
+        "type": "keyword"
+      },
+      "title": {
         "type": "text"
       },
       "job_info": {
@@ -3144,7 +3147,7 @@
         "type": "integer"
       },
       "integration_id": {
-        "type": "text"
+        "type": "keyword"
       },
       "metadata": {
         "properties": {}

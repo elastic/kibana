@@ -16,7 +16,7 @@ export const integrationSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      integration_id: { type: 'text' },
+      integration_id: { type: 'keyword' },
       // Deprecated: kept for backwards compatibility with existing saved objects.
       data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },
@@ -32,10 +32,9 @@ export const integrationSavedObjectType: SavedObjectsType = {
   },
   management: {
     icon: 'integration',
-    defaultSearchField: 'integration_id',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.integration_id;
+      return obj.attributes.metadata?.title ?? obj.attributes.integration_id;
     },
   },
   modelVersions: {
