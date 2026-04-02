@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { lensApiStateSchema } from '@kbn/lens-embeddable-utils';
 
-import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management';
+import { lensCommonSavedObjectSchemaV3 } from '../../../../content_management';
 
-const savedObjectProps = lensCommonSavedObjectSchemaV2.getPropSchemas();
+const savedObjectProps = lensCommonSavedObjectSchemaV3.getPropSchemas();
 
 /**
  * The Lens item meta returned from the server

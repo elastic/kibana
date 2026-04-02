@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-// When we introduce a new version we need to export a union of all the version schemas
-export * from './v3';
+export * from './common';
+export * from './get';
+export * from './create';
+export * from './update';
+export * from './search';
+export * from './m_search';
