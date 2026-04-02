@@ -11,11 +11,17 @@ import {
   AI_ASSISTANT_INFERENCE_FEATURE_ID,
   ELASTIC_AI_ASSISTANT_INFERENCE_FEATURE_ID,
 } from '../common/constants';
+import {
+  AI_ASSISTANT_FEATURE_DESCRIPTION,
+  AI_ASSISTANT_FEATURE_NAME,
+  ELASTIC_AI_ASSISTANT_FEATURE_DESCRIPTION,
+  ELASTIC_AI_ASSISTANT_FEATURE_NAME,
+} from './inference_feature_translations';
 
 export const aiAssistantParentInferenceFeature: InferenceFeatureConfig = {
   featureId: AI_ASSISTANT_INFERENCE_FEATURE_ID,
-  featureName: 'AI Assistant',
-  featureDescription: 'Parent feature for AI Assistant',
+  featureName: AI_ASSISTANT_FEATURE_NAME,
+  featureDescription: AI_ASSISTANT_FEATURE_DESCRIPTION,
   taskType: 'chat_completion',
   recommendedEndpoints: [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION],
 };
@@ -23,8 +29,8 @@ export const aiAssistantParentInferenceFeature: InferenceFeatureConfig = {
 export const elasticAiAssistantInferenceFeature: InferenceFeatureConfig = {
   parentFeatureId: AI_ASSISTANT_INFERENCE_FEATURE_ID,
   featureId: ELASTIC_AI_ASSISTANT_INFERENCE_FEATURE_ID,
-  featureName: 'AI Assistant for Security',
-  featureDescription: 'AI Assistant for Security inference endpoint configuration',
+  featureName: ELASTIC_AI_ASSISTANT_FEATURE_NAME,
+  featureDescription: ELASTIC_AI_ASSISTANT_FEATURE_DESCRIPTION,
   taskType: 'chat_completion',
   recommendedEndpoints: [
     defaultInferenceEndpoints.OPENAI_GPT_5_2,
