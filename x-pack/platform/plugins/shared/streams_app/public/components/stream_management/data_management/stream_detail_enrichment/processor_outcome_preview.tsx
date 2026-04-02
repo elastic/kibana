@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -85,15 +84,6 @@ export const ProcessorOutcomePreview = () => {
     snapshot ? snapshot.matches({ enabled: 'loadingData' }) : false
   );
 
-  // Fall back to original samples when simulation produces no preview documents
-  // (e.g., while typing an incomplete processor pattern). This ensures the user
-  // can always see source field data while editing.
-  const fallbackDocuments = useMemo(
-    () => samples.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[],
-    [samples]
-  );
-  const documentsToShow = isEmpty(previewDocuments) ? fallbackDocuments : previewDocuments;
-
   if (isEmpty(samples)) {
     if (isDataSourceLoading) {
       return (
@@ -114,10 +104,10 @@ export const ProcessorOutcomePreview = () => {
         <PreviewDocumentsGroupBy />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      {isEmpty(documentsToShow) ? (
+      {isEmpty(previewDocuments) ? (
         <NoPreviewDocumentsEmptyPrompt />
       ) : (
-        <OutcomePreviewTable previewDocuments={documentsToShow} />
+        <OutcomePreviewTable previewDocuments={previewDocuments} />
       )}
     </>
   );
