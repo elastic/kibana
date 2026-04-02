@@ -63,6 +63,11 @@ describe('TemporalStateModule', () => {
     expect(module.isEnabled()).toBe(true);
   });
 
+  it('exposes module weight for weighted scoring', () => {
+    const module = createTemporalStateModule({ esClient, logger, spaceId });
+    expect(module.config.weight).toBe(0.25);
+  });
+
   it('detects privilege escalation when entity was not privileged historically', async () => {
     const entity = createPrivilegedEntity('user', 'alice');
     esClient.search.mockResolvedValue(
