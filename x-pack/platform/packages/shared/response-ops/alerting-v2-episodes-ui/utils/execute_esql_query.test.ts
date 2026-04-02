@@ -44,8 +44,9 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | STATS count() BY status'",
-      null
+      "esql 'FROM index | STATS count() BY status' timeField='@timestamp'",
+      null,
+      undefined
     );
     expect(result).toEqual(mockDatatable);
   });
@@ -72,7 +73,11 @@ describe('executeEsqlQuery', () => {
       input,
     });
 
-    expect(mockExpressionsService.execute).toHaveBeenCalledWith("esql 'FROM logs'", input);
+    expect(mockExpressionsService.execute).toHaveBeenCalledWith(
+      "esql 'FROM logs' timeField='@timestamp'",
+      input,
+      undefined
+    );
   });
 
   it('should handle query with single quotes correctly', async () => {
@@ -96,8 +101,9 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | WHERE status == 'active''",
-      null
+      "esql 'FROM index | WHERE status == \\'active\\'' timeField='@timestamp'",
+      null,
+      undefined
     );
   });
 

@@ -23,6 +23,9 @@ import { useQueryInspector } from '../page/manage_query';
 
 const ENTITY_ID_FIELD = 'entity.id';
 
+/** Stable empty map so callers passing inline `{}` do not invalidate query memoization every render. */
+const EMPTY_IDENTITY_FIELDS: Record<string, string> = {};
+
 const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
   if (type === EntityType.host || type === 'host') {
     return 'host';
@@ -41,6 +44,11 @@ export interface AlertCountByRuleByStatusItem {
 
 export interface UseAlertCountByRuleByStatusProps {
   additionalFilters?: ESBoolQuery[];
+  /**
+   * Resolved entity identifiers (e.g. `host.id`, `entity.id`), aligned with {@link useAlertsByStatus}.
+   * When empty or omitted, {@link field} / {@link value} are used as a single legacy term filter.
+   */
+  identityFields?: Record<string, string> | null;
   field: string;
   value: string;
   entityType?: string;
@@ -59,6 +67,7 @@ const ALERTS_BY_RULE_AGG = 'alertsByRuleAggregation';
 
 export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   additionalFilters,
+  identityFields,
   field,
   value,
   entityType,
@@ -73,31 +82,40 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
-  const isEntityIdField = field === ENTITY_ID_FIELD;
+  const identityFieldsStable =
+    identityFields != null && Object.keys(identityFields).length > 0
+      ? identityFields
+      : EMPTY_IDENTITY_FIELDS;
+  const entityIdValue = identityFieldsStable[ENTITY_ID_FIELD];
   const storeEntityType = toStoreEntityType(entityType);
-
-  const shouldFetchFromEntityStore =
-    isEntityIdField && entityStoreV2Enabled && storeEntityType != null;
+  const shouldResolveEntityIdFromStore =
+    Boolean(entityIdValue) && entityStoreV2Enabled && storeEntityType != null;
 
   const entityFromStore = useEntityFromStore({
-    entityId: value,
+    entityId: entityIdValue,
     entityType: storeEntityType ?? 'host',
-    skip: skip || !shouldFetchFromEntityStore,
+    skip: skip || !shouldResolveEntityIdFromStore,
   });
 
   const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
 
   const euidApi = useEntityStoreEuidApi();
-  const identityFieldsForQuery = useMemo<Record<string, string>>(
+  const identityFieldsForQuery = useMemo(
     () =>
-      euidApi?.euid?.getEntityIdentifiersFromDocument(storeEntityType ?? 'generic', entityRecord) ??
-      {},
-    [euidApi?.euid, entityRecord, storeEntityType]
+      entityStoreV2Enabled
+        ? euidApi?.euid?.getEntityIdentifiersFromDocument(
+            storeEntityType ?? 'generic',
+            entityRecord
+          )
+        : identityFieldsStable,
+    [entityStoreV2Enabled, euidApi?.euid, storeEntityType, entityRecord, identityFieldsStable]
   );
 
   const skipAlertsQuery =
     skip ||
-    (shouldFetchFromEntityStore && (entityFromStoreLoading || identityFieldsForQuery == null));
+    (shouldResolveEntityIdFromStore && (entityFromStoreLoading || identityFieldsForQuery == null));
+
+  const isResolvingEntityId = shouldResolveEntityIdFromStore && entityFromStoreLoading;
 
   const {
     loading: isLoading,
@@ -114,7 +132,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       field,
       value,
       statuses,
-      identityFields: identityFieldsForQuery,
+      identityFields: identityFieldsForQuery ?? identityFieldsStable,
     }),
     skip: skipAlertsQuery,
     queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
@@ -130,10 +148,20 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
         field,
         value,
         statuses,
-        identityFields: identityFieldsForQuery,
+        identityFields: identityFieldsForQuery ?? identityFieldsStable,
       })
     );
-  }, [setAlertsQuery, from, to, field, value, statuses, additionalFilters, identityFieldsForQuery]);
+  }, [
+    setAlertsQuery,
+    from,
+    to,
+    field,
+    value,
+    statuses,
+    additionalFilters,
+    identityFieldsForQuery,
+    identityFieldsStable,
+  ]);
 
   useEffect(() => {
     if (!data) {
@@ -159,10 +187,10 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
     refetch,
     setQuery,
     queryId,
-    loading: isLoading,
+    loading: isLoading || isResolvingEntityId,
   });
 
-  return { items, isLoading, updatedAt };
+  return { items, isLoading: isLoading || isResolvingEntityId, updatedAt };
 };
 
 export const KIBANA_RULE_ID = 'kibana.alert.rule.uuid';
