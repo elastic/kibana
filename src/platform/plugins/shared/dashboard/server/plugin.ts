@@ -179,8 +179,8 @@ export class DashboardPlugin
     return {
       scanDashboards,
       client: {
-        read: (requestCtx: RequestHandlerContext, id: string) =>
-          read(requestCtx, getCachedDashboardStateSchema(), id),
+        read: async (requestCtx: RequestHandlerContext, id: string) =>
+          (await read(requestCtx, getCachedDashboardStateSchema(), id)).body,
       },
     };
   }
