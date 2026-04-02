@@ -23,7 +23,6 @@ import type {
 } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
-  FailedRunResult,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -45,14 +44,14 @@ interface AutomaticImportServicePrivate {
     | Partial<Record<'removeDataStreamCreationTask', jest.Mock>>;
 }
 
-type TaskManagerWithPrivate = TaskManagerService & {
+interface TaskManagerWithPrivate {
   automaticImportSavedObjectService:
     | AutomaticImportSavedObjectService
     | Record<string, unknown>
     | null;
   agentService: { invokeAutomaticImportAgent: jest.Mock };
   runTask: (...args: unknown[]) => Promise<unknown>;
-};
+}
 
 const asPrivate = (svc: AutomaticImportService): AutomaticImportServicePrivate =>
   svc as unknown as AutomaticImportServicePrivate;
@@ -1080,7 +1079,7 @@ describe('AutomaticImportSetupService', () => {
           }
         );
 
-      const result = (await taskRunner.run()) as FailedRunResult;
+      const result = (await taskRunner.run()) as { state: Record<string, unknown>; error: unknown };
 
       expect(mockUpdateDataStream).toHaveBeenCalledTimes(1);
       expect(mockUpdateDataStream).toHaveBeenCalledWith({

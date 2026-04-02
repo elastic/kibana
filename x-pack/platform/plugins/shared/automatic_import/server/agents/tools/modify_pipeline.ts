@@ -35,15 +35,115 @@ interface Operation {
 
 const isBoilerplate = (idx: number) => idx >= 0 && idx < BOILERPLATE_PROCESSOR_COUNT;
 
-const applyOperations = (
-  processors: unknown[],
-  operations: Operation[]
-): { processors: unknown[]; applied: string[]; warnings: string[] } => {
+interface OperationResult {
+  processors: unknown[];
+  applied: string[];
+  warnings: string[];
+}
+
+const applyInsertOps = (processors: unknown[], operations: Operation[]): OperationResult => {
   const applied: string[] = [];
   const warnings: string[] = [];
+  const insertAfterMap = new Map<number, unknown[]>();
 
+  for (const { index: idx, processors: procs = [] } of operations) {
+    const label = `insert@${idx}`;
+    if (idx < -1) {
+      warnings.push(
+        `${label}: negative index ${idx} is not supported; only -1 (prepend) is allowed. Skipped.`
+      );
+      applied.push(`${label}: skipped (unsupported negative index)`);
+    } else if (procs.length === 0) {
+      applied.push(`${label}: skipped (no processors provided)`);
+    } else {
+      const existing = insertAfterMap.get(idx);
+      if (existing) {
+        existing.push(...procs);
+      } else {
+        insertAfterMap.set(idx, [...procs]);
+      }
+      applied.push(`${label}: inserted ${procs.length} processor(s) after index ${idx}`);
+    }
+  }
+
+  const result: unknown[] = [];
+  const prepend = insertAfterMap.get(-1);
+  if (prepend) result.push(...prepend);
+  for (let i = 0; i < processors.length; i++) {
+    result.push(processors[i]);
+    const after = insertAfterMap.get(i);
+    if (after) result.push(...after);
+  }
+  for (const [idx, procs] of insertAfterMap.entries()) {
+    if (idx >= processors.length) result.push(...procs);
+  }
+  return { processors: result, applied, warnings };
+};
+
+const applyReplaceOps = (processors: unknown[], operations: Operation[]): OperationResult => {
+  const applied: string[] = [];
+  const warnings: string[] = [];
+  const replaceMap = new Map<number, unknown[]>();
+
+  for (const { index: idx, processors: procs = [] } of operations) {
+    const label = `replace@${idx}`;
+    if (isBoilerplate(idx)) {
+      warnings.push(
+        `${label}: targets a boilerplate processor (indices 0–${
+          BOILERPLATE_PROCESSOR_COUNT - 1
+        } are pre-seeded). Skipped.`
+      );
+      applied.push(`${label}: skipped (boilerplate protected)`);
+    } else if (procs.length === 0) {
+      applied.push(`${label}: skipped (no processors provided)`);
+    } else if (idx < 0 || idx >= processors.length) {
+      applied.push(`${label}: skipped (index ${idx} out of range)`);
+    } else {
+      replaceMap.set(idx, procs);
+      applied.push(`${label}: replaced with ${procs.length} processor(s)`);
+    }
+  }
+  const result = processors.flatMap((p, i) => {
+    const replacement = replaceMap.get(i);
+    return replacement !== undefined ? replacement : [p];
+  });
+  return { processors: result, applied, warnings };
+};
+
+const applyRemoveOps = (processors: unknown[], operations: Operation[]): OperationResult => {
+  const applied: string[] = [];
+  const warnings: string[] = [];
+  const removeSet = new Set<number>();
+
+  for (const { index: idx } of operations) {
+    const label = `remove@${idx}`;
+    if (isBoilerplate(idx)) {
+      warnings.push(
+        `${label}: targets a boilerplate processor (indices 0–${
+          BOILERPLATE_PROCESSOR_COUNT - 1
+        } are pre-seeded). Skipped.`
+      );
+      applied.push(`${label}: skipped (boilerplate protected)`);
+    } else if (idx < 0 || idx >= processors.length) {
+      applied.push(`${label}: skipped (index ${idx} out of range)`);
+    } else {
+      removeSet.add(idx);
+      applied.push(`${label}: removed`);
+    }
+  }
+  const result = processors.filter((_, i) => !removeSet.has(i));
+  return { processors: result, applied, warnings };
+};
+
+const ACTION_HANDLERS: Record<string, (p: unknown[], ops: Operation[]) => OperationResult> = {
+  insert: applyInsertOps,
+  replace: applyReplaceOps,
+  remove: applyRemoveOps,
+};
+
+const applyOperations = (processors: unknown[], operations: Operation[]): OperationResult => {
   if (operations.length === 0) {
-    return { processors, applied, warnings };
+    return { processors, applied: [], warnings: [] };
   }
 
   const action = operations[0].action;
@@ -56,92 +156,12 @@ const applyOperations = (
     );
   }
 
-  if (action === 'insert') {
-    const insertAfterMap = new Map<number, unknown[]>();
-    for (const { index: idx, processors: procs = [] } of operations) {
-      const label = `insert@${idx}`;
-      if (idx < -1) {
-        warnings.push(
-          `${label}: negative index ${idx} is not supported; only -1 (prepend) is allowed. Skipped.`
-        );
-        applied.push(`${label}: skipped (unsupported negative index)`);
-      } else if (procs.length === 0) {
-        applied.push(`${label}: skipped (no processors provided)`);
-      } else {
-        const existing = insertAfterMap.get(idx);
-        if (existing) {
-          existing.push(...procs);
-        } else {
-          insertAfterMap.set(idx, [...procs]);
-        }
-        applied.push(`${label}: inserted ${procs.length} processor(s) after index ${idx}`);
-      }
-    }
-
-    const result: unknown[] = [];
-    const prepend = insertAfterMap.get(-1);
-    if (prepend) result.push(...prepend);
-    for (let i = 0; i < processors.length; i++) {
-      result.push(processors[i]);
-      const after = insertAfterMap.get(i);
-      if (after) result.push(...after);
-    }
-    for (const [idx, procs] of insertAfterMap.entries()) {
-      if (idx >= processors.length) result.push(...procs);
-    }
-    return { processors: result, applied, warnings };
+  const handler = ACTION_HANDLERS[action];
+  if (handler) {
+    return handler(processors, operations);
   }
 
-  if (action === 'replace') {
-    const replaceMap = new Map<number, unknown[]>();
-    for (const { index: idx, processors: procs = [] } of operations) {
-      const label = `replace@${idx}`;
-      if (isBoilerplate(idx)) {
-        warnings.push(
-          `${label}: targets a boilerplate processor (indices 0–${
-            BOILERPLATE_PROCESSOR_COUNT - 1
-          } are pre-seeded). Skipped.`
-        );
-        applied.push(`${label}: skipped (boilerplate protected)`);
-      } else if (procs.length === 0) {
-        applied.push(`${label}: skipped (no processors provided)`);
-      } else if (idx < 0 || idx >= processors.length) {
-        applied.push(`${label}: skipped (index ${idx} out of range)`);
-      } else {
-        replaceMap.set(idx, procs);
-        applied.push(`${label}: replaced with ${procs.length} processor(s)`);
-      }
-    }
-    const result = processors.flatMap((p, i) => {
-      const replacement = replaceMap.get(i);
-      return replacement !== undefined ? replacement : [p];
-    });
-    return { processors: result, applied, warnings };
-  }
-
-  if (action === 'remove') {
-    const removeSet = new Set<number>();
-    for (const { index: idx } of operations) {
-      const label = `remove@${idx}`;
-      if (isBoilerplate(idx)) {
-        warnings.push(
-          `${label}: targets a boilerplate processor (indices 0–${
-            BOILERPLATE_PROCESSOR_COUNT - 1
-          } are pre-seeded). Skipped.`
-        );
-        applied.push(`${label}: skipped (boilerplate protected)`);
-      } else if (idx < 0 || idx >= processors.length) {
-        applied.push(`${label}: skipped (index ${idx} out of range)`);
-      } else {
-        removeSet.add(idx);
-        applied.push(`${label}: removed`);
-      }
-    }
-    const result = processors.filter((_, i) => !removeSet.has(i));
-    return { processors: result, applied, warnings };
-  }
-
-  return { processors, applied, warnings };
+  return { processors, applied: [], warnings: [] };
 };
 
 export function modifyPipelineTool(options: ModifyPipelineToolOptions): DynamicStructuredTool {
