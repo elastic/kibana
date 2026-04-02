@@ -63,7 +63,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -116,7 +116,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -164,7 +164,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -210,7 +210,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -257,7 +257,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -322,7 +322,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -388,7 +388,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -449,7 +449,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -509,7 +509,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -586,7 +586,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -663,7 +663,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -722,7 +722,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -782,7 +782,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -859,7 +859,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -969,7 +969,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -1041,7 +1041,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -1152,7 +1152,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       position: 'outside',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -1246,7 +1246,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -1340,7 +1340,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -1420,7 +1420,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },
@@ -1584,7 +1584,7 @@ export const esqlCharts: Array<PartitionConfig> = [
       mode: 'percentage',
     },
     query: {
-      query: '',
+      expression: 'test: true',
       language: 'kuery',
     },
   },

@@ -610,7 +610,7 @@ function extractFilterReferences(filters: Filter[], references: SavedObjectRefer
 }
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
-  return { query: query.query, language: query.language as 'kuery' | 'lucene' };
+  return { query: query.expression, language: query.language as 'kuery' | 'lucene' };
 };
 
 export const filtersAndQueryToApiFormat = (
@@ -632,7 +632,7 @@ export const filtersAndQueryToApiFormat = (
 
   return {
     ...(filters.length ? { filters } : {}),
-    ...(query?.query.length ? { query } : {}),
+    ...(query?.expression.length ? { query } : {}),
   };
 };
 

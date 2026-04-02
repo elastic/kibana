@@ -28,7 +28,10 @@ export function fromFiltersLensApiToLensState(
         // do not propagate advanced filters within dimensions
         .filter((filter) => filter.filter.language != null)
         .map((filter) => ({
-          input: filter.filter,
+          input: {
+            query: filter.filter.expression,
+            language: filter.filter.language,
+          },
           label: filter.label ?? 'Filter',
         })),
     },

@@ -14,7 +14,7 @@ describe('Filter Schemas', () => {
     it('validates a valid KQL filter', () => {
       const input = {
         language: 'kuery' as const,
-        query: 'status:active AND category:electronics',
+        expression: 'status:active AND category:electronics',
       };
 
       const validated = filterSchema.validate(input);
@@ -24,7 +24,7 @@ describe('Filter Schemas', () => {
     it('validates a valid Lucene filter', () => {
       const input = {
         language: 'lucene' as const,
-        query: 'status:active AND category:electronics',
+        expression: 'status:active AND category:electronics',
       };
 
       const validated = filterSchema.validate(input);
@@ -34,18 +34,18 @@ describe('Filter Schemas', () => {
     it('throws on invalid language', () => {
       const input = {
         language: 'invalid' as const,
-        query: 'status:active',
+        expression: 'status:active',
       };
 
       expect(() => filterSchema.validate(input)).toThrow();
     });
 
-    it('throws on missing query', () => {
+    it('throws on missing expression', () => {
       const input = {
         language: 'kuery' as const,
       };
 
-      expect(() => filterSchema.validate(input)).toThrow(/\[query\]: expected value of type/);
+      expect(() => filterSchema.validate(input)).toThrow(/\[expression\]: expected value of type/);
     });
   });
 
@@ -54,7 +54,7 @@ describe('Filter Schemas', () => {
       const input = {
         filter: {
           language: 'kuery' as const,
-          query: 'status:active',
+          expression: 'status:active',
         },
         label: 'Active Status',
       };
@@ -67,7 +67,7 @@ describe('Filter Schemas', () => {
       const input = {
         filter: {
           language: 'lucene' as const,
-          query: 'status:active',
+          expression: 'status:active',
         },
       };
 
@@ -87,7 +87,7 @@ describe('Filter Schemas', () => {
       const input = {
         filter: {
           language: 'invalid' as const,
-          query: 'status:active',
+          expression: 'status:active',
         },
         label: 'Active Status',
       };
@@ -99,7 +99,7 @@ describe('Filter Schemas', () => {
       const input = {
         filter: {
           language: 'kuery' as const,
-          query: 'status:active OR (category:electronics AND price >= 100)',
+          expression: 'status:active OR (category:electronics AND price >= 100)',
         },
         label: 'Complex Filter',
       };
@@ -112,7 +112,7 @@ describe('Filter Schemas', () => {
       const input = {
         filter: {
           language: 'lucene' as const,
-          query: 'status:active OR (category:electronics AND price:[100 TO *])',
+          expression: 'status:active OR (category:electronics AND price:[100 TO *])',
         },
         label: 'Complex Filter',
       };

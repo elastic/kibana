@@ -449,9 +449,10 @@ export function buildAPIAnnotationsLayer(
             ? {
                 language: annotation.filter.language as 'kuery' | 'lucene',
                 // it should never be a non-string here as schema ensures that
-                query: typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
+                expression:
+                  typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
               }
-            : { language: 'kuery', query: '' },
+            : { language: 'kuery', expression: '' },
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),

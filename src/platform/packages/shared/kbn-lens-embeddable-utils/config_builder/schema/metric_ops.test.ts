@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expression } from 'joi';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 import {
   LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
@@ -87,7 +88,7 @@ describe('Metric Operations Schemas', () => {
         time_scale: 's' as const,
         filter: {
           language: 'kuery' as const,
-          query: 'status:active',
+          expression: 'status:active',
         },
       };
 

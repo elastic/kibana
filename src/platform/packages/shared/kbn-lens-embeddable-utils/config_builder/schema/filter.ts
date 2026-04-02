@@ -14,7 +14,7 @@ export const filterSchema = schema.object(
     language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
       defaultValue: 'kuery',
     }),
-    query: schema.string({
+    expression: schema.string({
       meta: {
         description: 'A query expression in KQL or Lucene syntax',
       },

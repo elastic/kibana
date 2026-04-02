@@ -152,7 +152,11 @@ function buildByValueAnnotationLayer(
       return {
         type: 'query',
         id: `${layer.type}_event_${index}`,
-        filter: { type: 'kibana_query', ...annotation.query },
+        filter: {
+          type: 'kibana_query',
+          query: annotation.query.expression,
+          language: annotation.query.language,
+        },
         label: annotation.label ?? 'Event',
         color: annotation.color?.color,
         ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),

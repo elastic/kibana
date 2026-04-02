@@ -17,7 +17,7 @@ export function fromFilterAPIToLensState(filter: LensApiFilterType | undefined):
 
   return {
     language: filter.language,
-    query: filter.query,
+    query: filter.expression,
   };
 }
 
@@ -31,10 +31,10 @@ export function fromFilterLensStateToAPI({
   if (language !== 'kuery' && language !== 'lucene') {
     return;
   }
-  return { query, language };
+  return { expression: query, language };
 }
 
 export const DEFAULT_FILTER = {
-  query: '*',
+  expression: '*',
   language: 'kuery',
 } satisfies LensApiFilterType;

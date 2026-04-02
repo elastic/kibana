@@ -126,7 +126,7 @@ describe('Bucket Operation Schemas', () => {
             label: 'My Filter',
             filter: {
               language: 'kuery',
-              query: 'category: "electronics"',
+              expression: 'category: "electronics"',
             },
           },
         ],
@@ -219,7 +219,7 @@ describe('Bucket Operation Schemas', () => {
           filters: [
             {
               label: 'Filter',
-              filter: { language: 'kuery', query: 'status:active' },
+              filter: { language: 'kuery', expression: 'status:active' },
             },
           ],
         },
