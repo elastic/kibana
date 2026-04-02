@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git *)",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/git_remote_guard_hook.js --claude"
+          },
+          {
+            "type": "command",
+            "if": "Bash(gh *)",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/git_remote_guard_hook.js --claude"
+          }
+        ]
+      }
+    ]
+  }
+}
