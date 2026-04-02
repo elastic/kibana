@@ -196,7 +196,7 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <FeedbackButtons onFeedback={handleFeedback} />
+        <FeedbackButtons key={insight.id} onFeedback={handleFeedback} />
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
