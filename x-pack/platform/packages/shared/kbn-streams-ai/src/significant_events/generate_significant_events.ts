@@ -98,7 +98,7 @@ export async function generateSignificantEvents({
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
-      maxSteps: additionalToolCallbacks ? 8 : 4,
+      maxSteps: additionalToolCallbacks ? 6 : 4,
       prompt,
       inferenceClient,
       toolCallbacks: {

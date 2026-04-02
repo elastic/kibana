@@ -154,7 +154,6 @@ export interface MemoryService {
   // History
   getHistory(params: { entryId: string; size?: number }): Promise<MemoryVersionRecord[]>;
   getVersion(params: { entryId: string; version: number }): Promise<MemoryVersionRecord>;
-  rollback(params: { entryId: string; version: number; user: string }): Promise<MemoryEntry>;
 
   // Recent changes across all entries
   getRecentChanges(params: { size?: number }): Promise<MemoryVersionRecord[]>;

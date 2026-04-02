@@ -219,11 +219,11 @@ export const createMemoryPatchTool = ({
         }
       }
 
-      if (appliedCount === 0) {
+      if (errors.length > 0) {
         return {
           results: [
             createErrorResult({
-              message: `No operations could be applied. Errors: ${errors.join('; ')}`,
+              message: `Patch failed — all operations rolled back. Errors: ${errors.join('; ')}`,
             }),
           ],
         };
@@ -236,22 +236,17 @@ export const createMemoryPatchTool = ({
         changeSummary,
       });
 
-      const resultData: Record<string, unknown> = {
-        id: updated.id,
-        name: updated.name,
-        version: updated.version,
-        operations_applied: appliedCount,
-      };
-      if (errors.length > 0) {
-        resultData.warnings = errors;
-      }
-
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: resultData,
+            data: {
+              id: updated.id,
+              name: updated.name,
+              version: updated.version,
+              operations_applied: appliedCount,
+            },
           },
         ],
       };

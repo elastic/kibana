@@ -13,11 +13,15 @@ import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
-import { MemoryServiceImpl } from '../../memory';
+import {
+  MemoryServiceImpl,
+  formatExistingPages,
+  createReadMemoryPageCallback,
+  createWriteMemoryPageCallback,
+} from '../../memory';
 import { MemoryConsolidationPrompt } from './memory_consolidation_prompt';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MemoryConsolidationTaskParams {}
+export type MemoryConsolidationTaskParams = Record<string, never>;
 
 export interface MemoryConsolidationTaskResult {
   entriesProcessed: number;
@@ -93,14 +97,7 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                   `Starting memory consolidation: ${entries.length} entries to review`
                 );
 
-                const existingPages = entries
-                  .map(
-                    (e) =>
-                      `- **${e.name}** — ${e.title} [categories: ${e.categories.join(', ')}] (v${
-                        e.version
-                      }, updated ${e.updated_at})`
-                  )
-                  .join('\n');
+                const existingPages = formatExistingPages(entries);
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
@@ -113,68 +110,14 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                   },
                   maxSteps: 30,
                   toolCallbacks: {
-                    read_memory_page: async (toolCall) => {
-                      const { name } = toolCall.function.arguments;
-                      const entry = await memory.getByName({ name });
-                      if (!entry) {
-                        return { response: { error: `No page found with name "${name}"` } };
-                      }
-                      return {
-                        response: {
-                          id: entry.id,
-                          name: entry.name,
-                          title: entry.title,
-                          content: entry.content,
-                          categories: entry.categories,
-                          references: entry.references,
-                          tags: entry.tags,
-                          version: entry.version,
-                          updated_at: entry.updated_at,
-                          updated_by: entry.updated_by,
-                        },
-                      };
-                    },
+                    read_memory_page: createReadMemoryPageCallback({ memory }),
 
-                    write_memory_page: async (toolCall) => {
-                      const { name, title, content, categories, references, tags } =
-                        toolCall.function.arguments;
-                      const user = 'agent:memory_consolidation';
-
-                      const existing = await memory.getByName({ name });
-
-                      if (existing) {
-                        await memory.update({
-                          id: existing.id,
-                          content,
-                          title,
-                          categories,
-                          references,
-                          tags,
-                          user,
-                          changeSummary: 'Updated during memory consolidation',
-                        });
-                        taskLogger.info(`Updated memory page: ${name}`);
-                      } else {
-                        await memory.create({
-                          name,
-                          title,
-                          content,
-                          categories: categories ?? [],
-                          references: references ?? [],
-                          tags: [...(tags ?? []), 'auto-generated'],
-                          user,
-                        });
-                        taskLogger.info(`Created memory page: ${name}`);
-                      }
-
-                      return {
-                        response: {
-                          success: true,
-                          action: existing ? 'updated' : 'created',
-                          name,
-                        },
-                      };
-                    },
+                    write_memory_page: createWriteMemoryPageCallback({
+                      memory,
+                      user: 'agent:memory_consolidation',
+                      logger: taskLogger,
+                      changeSummary: 'Updated during memory consolidation',
+                    }),
 
                     get_recent_changes: async (toolCall) => {
                       const { size } = toolCall.function.arguments;

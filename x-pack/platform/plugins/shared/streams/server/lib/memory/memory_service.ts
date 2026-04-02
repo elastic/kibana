@@ -28,6 +28,8 @@ import type {
 interface MemoryDocument {
   _id: string;
   _source: MemoryEntry;
+  _seq_no: number;
+  _primary_term: number;
 }
 
 interface HistoryDocument {
@@ -38,7 +40,9 @@ interface HistoryDocument {
 export class MemoryServiceImpl implements MemoryService {
   private readonly storage: MemoryStorage;
   private readonly historyStorage: MemoryHistoryStorage;
+  private readonly logger: Logger;
   constructor({ logger, esClient }: { logger: Logger; esClient: ElasticsearchClient }) {
+    this.logger = logger;
     this.storage = createMemoryStorage({ logger, esClient });
     this.historyStorage = createMemoryHistoryStorage({ logger, esClient });
   }
@@ -69,7 +73,7 @@ export class MemoryServiceImpl implements MemoryService {
       updated_by: user,
     };
 
-    await this.storage.getClient().index({ document: entry });
+    await this.storage.getClient().index({ id, document: entry });
     await this._writeHistory(entry, 'create', `Created entry "${name}"`, user);
 
     return entry;
@@ -121,6 +125,8 @@ export class MemoryServiceImpl implements MemoryService {
     await this.storage.getClient().index({
       id: doc._id,
       document: updatedEntry,
+      if_seq_no: doc._seq_no,
+      if_primary_term: doc._primary_term,
     });
 
     const changeType: MemoryChangeType =
@@ -142,7 +148,11 @@ export class MemoryServiceImpl implements MemoryService {
     }
 
     const now = new Date().toISOString();
-    await this.storage.getClient().delete({ id: doc._id });
+    await this.storage.getClient().delete({
+      id: doc._id,
+      if_seq_no: doc._seq_no,
+      if_primary_term: doc._primary_term,
+    });
     await this._writeHistory(
       { ...doc._source, updated_at: now },
       'delete',
@@ -290,11 +300,33 @@ export class MemoryServiceImpl implements MemoryService {
           ...(filters.length > 0 ? { filter: filters } : {}),
           must: [
             {
-              multi_match: {
-                query,
-                fields: ['title^3', 'content', 'tags^2', 'name^2', 'categories^2'],
-                type: 'best_fields',
-                fuzziness: 'AUTO',
+              bool: {
+                should: [
+                  {
+                    multi_match: {
+                      query,
+                      fields: ['title^3', 'content'],
+                      type: 'best_fields',
+                      fuzziness: 'AUTO',
+                    },
+                  },
+                  {
+                    wildcard: {
+                      name: { value: `*${query.toLowerCase()}*`, boost: 2 },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      categories: { value: `*${query.toLowerCase()}*`, boost: 2 },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      tags: { value: `*${query.toLowerCase()}*`, boost: 2 },
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
               },
             },
           ],
@@ -331,11 +363,18 @@ export class MemoryServiceImpl implements MemoryService {
 
   async listAll(): Promise<MemoryEntry[]> {
     const response = await this.storage.getClient().search({
-      track_total_hits: false,
+      track_total_hits: true,
       query: { match_all: {} },
       size: 10000,
       sort: [{ name: { order: 'asc' } }],
     });
+
+    const total = response.hits.total as { value: number; relation: string } | undefined;
+    if (total && total.value > 10000) {
+      this.logger.warn(
+        `Memory listAll returned 10000 entries but total is ${total.value}. Some entries may be missing.`
+      );
+    }
 
     return response.hits.hits.map((hit) => (hit as MemoryDocument)._source);
   }
@@ -403,42 +442,6 @@ export class MemoryServiceImpl implements MemoryService {
     return (response.hits.hits[0] as HistoryDocument)._source;
   }
 
-  async rollback({
-    entryId,
-    version,
-    user,
-  }: {
-    entryId: string;
-    version: number;
-    user: string;
-  }): Promise<MemoryEntry> {
-    const targetVersion = await this.getVersion({ entryId, version });
-    const doc = await this._getById(entryId);
-    if (!doc) {
-      throw notFound(`Memory entry with id '${entryId}' not found`);
-    }
-
-    const now = new Date().toISOString();
-    const rolledBackEntry: MemoryEntry = {
-      ...doc._source,
-      content: targetVersion.content,
-      title: targetVersion.title,
-      name: targetVersion.name,
-      version: doc._source.version + 1,
-      updated_at: now,
-      updated_by: user,
-    };
-
-    await this.storage.getClient().index({
-      id: doc._id,
-      document: rolledBackEntry,
-    });
-
-    await this._writeHistory(rolledBackEntry, 'update', `Rolled back to version ${version}`, user);
-
-    return rolledBackEntry;
-  }
-
   async getRecentChanges({ size = 20 }: { size?: number }): Promise<MemoryVersionRecord[]> {
     const response = await this.historyStorage.getClient().search({
       track_total_hits: false,
@@ -457,6 +460,7 @@ export class MemoryServiceImpl implements MemoryService {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [{ term: { id } }],
@@ -474,6 +478,7 @@ export class MemoryServiceImpl implements MemoryService {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [{ term: { name } }],

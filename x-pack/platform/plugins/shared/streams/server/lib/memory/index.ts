@@ -18,3 +18,9 @@ export type {
 } from './types';
 
 export { MemoryServiceImpl } from './memory_service';
+
+export {
+  formatExistingPages,
+  createReadMemoryPageCallback,
+  createWriteMemoryPageCallback,
+} from './tool_callbacks';

@@ -14,7 +14,12 @@ import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
-import { MemoryServiceImpl } from '../../memory';
+import {
+  MemoryServiceImpl,
+  formatExistingPages,
+  createReadMemoryPageCallback,
+  createWriteMemoryPageCallback,
+} from '../../memory';
 import { MemorySynthesisPrompt } from './memory_generation_prompt';
 
 export interface MemoryGenerationTaskParams {
@@ -96,6 +101,11 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
               try {
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
+                const allEntries = await memory.listAll();
+                const existingPages = formatExistingPages(allEntries);
+
+                taskLogger.info(`Found ${allEntries.length} existing memory entries total`);
+
                 for (const { streamName, indicators } of streamGroups) {
                   taskLogger.info(
                     `Processing stream "${streamName}" with ${indicators.length} indicator(s) via reasoning agent`
@@ -103,23 +113,14 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
                   const indicatorSummaries = buildIndicatorSummaries(indicators);
 
-                  const allEntries = await memory.listAll();
-
-                  const existingPages =
-                    allEntries.length > 0
-                      ? allEntries
-                          .map(
-                            (e) =>
-                              `- **${e.name}** — ${e.title} [categories: ${e.categories.join(
-                                ', '
-                              )}]`
-                          )
-                          .join('\n')
-                      : 'No existing pages.';
-
-                  taskLogger.info(`Found ${allEntries.length} existing memory entries total`);
-
                   let pagesWritten = 0;
+
+                  const writeCallback = createWriteMemoryPageCallback({
+                    memory,
+                    user: 'agent:memory_generation',
+                    logger: taskLogger,
+                    changeSummary: 'Updated from discovery indicators',
+                  });
 
                   const response = await executeAsReasoningAgent({
                     inferenceClient: boundInferenceClient,
@@ -153,71 +154,12 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                         };
                       },
 
-                      read_memory_page: async (toolCall) => {
-                        const { name } = toolCall.function.arguments;
-                        taskLogger.info(
-                          `Stream "${streamName}": agent reading memory page "${name}"`
-                        );
-
-                        const entry = await memory.getByName({ name });
-                        if (!entry) {
-                          return {
-                            response: { error: `No page found with name "${name}"` },
-                          };
-                        }
-
-                        return {
-                          response: {
-                            id: entry.id,
-                            name: entry.name,
-                            title: entry.title,
-                            content: entry.content,
-                            categories: entry.categories,
-                            references: entry.references,
-                          },
-                        };
-                      },
+                      read_memory_page: createReadMemoryPageCallback({ memory }),
 
                       write_memory_page: async (toolCall) => {
-                        const { name, title, content, categories, references, tags } =
-                          toolCall.function.arguments;
-                        const user = 'agent:memory_generation';
-
-                        const existing = await memory.getByName({ name });
-
-                        if (existing) {
-                          await memory.update({
-                            id: existing.id,
-                            content,
-                            title,
-                            categories,
-                            references,
-                            user,
-                            changeSummary: 'Updated from discovery indicators',
-                          });
-                          taskLogger.info(`Updated existing wiki page: ${name}`);
-                        } else {
-                          await memory.create({
-                            name,
-                            title,
-                            content,
-                            categories: categories ?? [],
-                            references: references ?? [],
-                            tags: [...(tags ?? []), 'auto-generated'],
-                            user,
-                          });
-                          taskLogger.info(`Created new wiki page: ${name}`);
-                        }
-
+                        const result = await writeCallback(toolCall);
                         pagesWritten++;
-
-                        return {
-                          response: {
-                            success: true,
-                            action: existing ? 'updated' : 'created',
-                            name,
-                          },
-                        };
+                        return result;
                       },
                     },
                   });
@@ -317,6 +259,10 @@ const groupInputsByStream = ({
  * Build concise one-line summaries for each indicator so the LLM can
  * decide which ones to fetch details for. The index matches the array
  * position used by the `get_indicator_details` tool.
+ *
+ * Indicators are identified by duck-typing their properties since they
+ * come from heterogeneous sources (Insight, BaseFeature, GeneratedSignificantEventQuery)
+ * mixed into a single array.
  */
 const buildIndicatorSummaries = (indicators: unknown[]): string => {
   return indicators

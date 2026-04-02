@@ -29,7 +29,7 @@ export const getUserFromRequest = async ({
   if (!request.isFakeRequest) {
     const authUser = security.authc.getCurrentUser(request);
     if (authUser) {
-      return { id: authUser.profile_uid!, username: authUser.username };
+      return { id: authUser.profile_uid ?? undefined, username: authUser.username };
     }
   }
 

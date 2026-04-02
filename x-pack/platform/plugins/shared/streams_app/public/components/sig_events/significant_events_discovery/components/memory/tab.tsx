@@ -29,6 +29,7 @@ import {
   EuiTitle,
   EuiTreeView,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -45,7 +46,7 @@ import {
   useScrapeConversations,
   useConsolidateMemory,
 } from './use_memory';
-import type { MemoryTreeNode, MemoryVersionRecord } from './types';
+import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
 
 export function MemoryTab() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,7 +152,7 @@ export function MemoryTab() {
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="xs" color="subdued">
-                          {result.path}
+                          {result.name}
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem>
@@ -250,22 +251,29 @@ export function MemoryTab() {
 }
 
 const toTreeItems = (
-  nodes: MemoryTreeNode[],
+  nodes: MemoryCategoryNode[],
   onSelect: (id: string) => void
 ): Array<{
   id: string;
   label: React.ReactNode;
   children?: Array<{ id: string; label: React.ReactNode }>;
 }> => {
-  return nodes.map((node) => ({
-    id: node.path,
-    label: node.id ? (
-      <EuiLink onClick={() => onSelect(node.id!)}>{node.title}</EuiLink>
-    ) : (
-      <EuiText size="s">{node.title}</EuiText>
-    ),
-    ...(node.children.length > 0 ? { children: toTreeItems(node.children, onSelect) } : {}),
-  }));
+  return nodes.map((node) => {
+    const pageItems = node.pages.map((page) => ({
+      id: page.id,
+      label: <EuiLink onClick={() => onSelect(page.id)}>{page.title}</EuiLink>,
+    }));
+
+    const childItems = node.children.length > 0 ? toTreeItems(node.children, onSelect) : [];
+
+    const allChildren = [...pageItems, ...childItems];
+
+    return {
+      id: node.category,
+      label: <EuiText size="s">{node.name}</EuiText>,
+      ...(allChildren.length > 0 ? { children: allChildren } : {}),
+    };
+  });
 };
 
 function EntryFlyout({
@@ -282,6 +290,7 @@ function EntryFlyout({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
 
   const handleEdit = useCallback(() => {
     if (entry) {
@@ -307,10 +316,24 @@ function EntryFlyout({
     }
   }, [entry, deleteEntry, onClose]);
 
+  const handleClose = useCallback(() => {
+    if (isEditing && entry && editContent !== entry.content) {
+      setShowDiscardModal(true);
+    } else {
+      onClose();
+    }
+  }, [isEditing, entry, editContent, onClose]);
+
+  const handleConfirmDiscard = useCallback(() => {
+    setShowDiscardModal(false);
+    setIsEditing(false);
+    onClose();
+  }, [onClose]);
+
   return (
     <>
       <EuiFlyout
-        onClose={onClose}
+        onClose={handleClose}
         size="m"
         data-test-subj="streamsMemoryEntryFlyout"
         aria-label={i18n.translate('xpack.streams.memory.entryFlyoutAriaLabel', {
@@ -326,7 +349,7 @@ function EntryFlyout({
                 <h2>{entry.title}</h2>
               </EuiTitle>
               <EuiText size="xs" color="subdued">
-                {entry.path}
+                {entry.categories.join(', ')}
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiFlexGroup gutterSize="s" wrap>
@@ -450,6 +473,31 @@ function EntryFlyout({
           })}
         </EuiConfirmModal>
       )}
+
+      {showDiscardModal && (
+        <EuiConfirmModal
+          aria-label={i18n.translate('xpack.streams.memory.discardConfirmAriaLabel', {
+            defaultMessage: 'Confirm discard changes',
+          })}
+          title={i18n.translate('xpack.streams.memory.discardConfirmTitle', {
+            defaultMessage: 'Discard unsaved changes?',
+          })}
+          onCancel={() => setShowDiscardModal(false)}
+          onConfirm={handleConfirmDiscard}
+          cancelButtonText={i18n.translate('xpack.streams.memory.discardConfirmCancel', {
+            defaultMessage: 'Keep editing',
+          })}
+          confirmButtonText={i18n.translate('xpack.streams.memory.discardConfirmButton', {
+            defaultMessage: 'Discard',
+          })}
+          buttonColor="danger"
+        >
+          {i18n.translate('xpack.streams.memory.discardConfirmBody', {
+            defaultMessage:
+              'You have unsaved changes. Are you sure you want to discard them?',
+          })}
+        </EuiConfirmModal>
+      )}
     </>
   );
 }
@@ -465,7 +513,6 @@ function HistoryFlyout({
 }) {
   const { data: entry } = useMemoryEntry(entryId);
   const { data: historyData, isLoading } = useMemoryHistory(entryId);
-  const { rollbackEntry } = useMemoryMutations();
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
 
   const selectedRecord = useMemo(() => {
@@ -479,12 +526,8 @@ function HistoryFlyout({
     previousVersion && previousVersion >= 1 ? previousVersion : undefined
   );
 
-  const handleRollback = useCallback(
-    (version: number) => {
-      rollbackEntry.mutate({ entryId, version });
-    },
-    [entryId, rollbackEntry]
-  );
+  const { euiTheme } = useEuiTheme();
+  const selectedRowBackground = transparentize(euiTheme.colors.primary, 0.1);
 
   const columns: Array<EuiBasicTableColumn<MemoryVersionRecord>> = [
     {
@@ -517,8 +560,8 @@ function HistoryFlyout({
       render: (date: string) => new Date(date).toLocaleString(),
     },
     {
-      name: i18n.translate('xpack.streams.memory.history.actionsColumn', {
-        defaultMessage: 'Actions',
+      name: i18n.translate('xpack.streams.memory.history.statusColumn', {
+        defaultMessage: 'Status',
       }),
       width: '90px',
       render: (record: MemoryVersionRecord) => {
@@ -529,20 +572,7 @@ function HistoryFlyout({
               defaultMessage: 'Current',
             })}
           </EuiText>
-        ) : (
-          <EuiButton
-            size="s"
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              handleRollback(record.version);
-            }}
-            isLoading={rollbackEntry.isLoading}
-          >
-            {i18n.translate('xpack.streams.memory.history.rollbackButton', {
-              defaultMessage: 'Rollback',
-            })}
-          </EuiButton>
-        );
+        ) : null;
       },
     },
   ];
@@ -598,7 +628,7 @@ function HistoryFlyout({
                 style: {
                   cursor: 'pointer',
                   ...(selectedVersion === record.version
-                    ? { backgroundColor: 'rgba(0, 119, 204, 0.1)' }
+                    ? { backgroundColor: selectedRowBackground }
                     : {}),
                 },
               })}
@@ -714,14 +744,14 @@ const changeTypeIcons: Record<string, string> = {
   create: 'plusInCircle',
   update: 'pencil',
   delete: 'trash',
-  move: 'sortRight',
+  rename: 'sortRight',
 };
 
 const changeTypeColors: Record<string, 'success' | 'primary' | 'danger' | 'warning'> = {
   create: 'success',
   update: 'primary',
   delete: 'danger',
-  move: 'warning',
+  rename: 'warning',
 };
 
 const formatRelativeTime = (dateString: string): string => {
@@ -732,10 +762,29 @@ const formatRelativeTime = (dateString: string): string => {
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffMinutes < 1) return 'just now';
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffMinutes < 1) {
+    return i18n.translate('xpack.streams.memory.relativeTime.justNow', {
+      defaultMessage: 'just now',
+    });
+  }
+  if (diffMinutes < 60) {
+    return i18n.translate('xpack.streams.memory.relativeTime.minutesAgo', {
+      defaultMessage: '{minutes}m ago',
+      values: { minutes: diffMinutes },
+    });
+  }
+  if (diffHours < 24) {
+    return i18n.translate('xpack.streams.memory.relativeTime.hoursAgo', {
+      defaultMessage: '{hours}h ago',
+      values: { hours: diffHours },
+    });
+  }
+  if (diffDays < 7) {
+    return i18n.translate('xpack.streams.memory.relativeTime.daysAgo', {
+      defaultMessage: '{days}d ago',
+      values: { days: diffDays },
+    });
+  }
   return date.toLocaleDateString();
 };
 
@@ -746,6 +795,9 @@ function RecentChangeItem({
   change: MemoryVersionRecord;
   onClick: () => void;
 }) {
+  const { euiTheme } = useEuiTheme();
+  const hoverBackground = transparentize(euiTheme.colors.primary, 0.05);
+
   return (
     <EuiPanel
       paddingSize="s"
@@ -755,7 +807,7 @@ function RecentChangeItem({
       className={css`
         cursor: pointer;
         &:hover {
-          background-color: rgba(0, 119, 204, 0.05);
+          background-color: ${hoverBackground};
         }
       `}
     >

@@ -6,14 +6,20 @@
  */
 
 import { useQuery, useMutation, useQueryClient, type UseMutationResult } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import type { MemoryEntry, MemoryTreeNode, MemorySearchResult, MemoryVersionRecord } from './types';
+import type {
+  MemoryEntry,
+  MemoryCategoryNode,
+  MemorySearchResult,
+  MemoryVersionRecord,
+} from './types';
 
 const MEMORY_BASE = '/internal/streams/memory';
 
 const memoryKeys = {
   all: ['memory'] as const,
-  tree: ['memory', 'tree'] as const,
+  categories: ['memory', 'categories'] as const,
   search: (query: string) => ['memory', 'search', query] as const,
   byId: (id: string) => ['memory', 'entry', id] as const,
   history: (entryId: string) => ['memory', 'history', entryId] as const,
@@ -24,8 +30,9 @@ const memoryKeys = {
 export const useMemoryTree = () => {
   const { core } = useKibana();
   return useQuery({
-    queryKey: memoryKeys.tree,
-    queryFn: () => core.http.get<{ tree: MemoryTreeNode[] }>(`${MEMORY_BASE}/tree`),
+    queryKey: memoryKeys.categories,
+    queryFn: () =>
+      core.http.get<{ tree: MemoryCategoryNode[] }>(`${MEMORY_BASE}/categories`),
   });
 };
 
@@ -90,7 +97,7 @@ export const useMemoryMutations = () => {
   };
 
   const createEntry = useMutation({
-    mutationFn: (params: { path: string; title: string; content: string; tags?: string[] }) =>
+    mutationFn: (params: { name: string; title: string; content: string; tags?: string[] }) =>
       core.http.post<MemoryEntry>(`${MEMORY_BASE}/entries`, {
         body: JSON.stringify(params),
       }),
@@ -120,18 +127,13 @@ export const useMemoryMutations = () => {
     onSuccess: invalidateMemory,
   });
 
-  const rollbackEntry = useMutation({
-    mutationFn: ({ entryId, version }: { entryId: string; version: number }) =>
-      core.http.post<MemoryEntry>(`${MEMORY_BASE}/entries/${entryId}/rollback`, {
-        body: JSON.stringify({ version }),
-      }),
-    onSuccess: invalidateMemory,
-  });
-
-  return { createEntry, updateEntry, deleteEntry, rollbackEntry };
+  return { createEntry, updateEntry, deleteEntry };
 };
 
-const useMemoryTaskAction = (endpoint: string): UseMutationResult<unknown, unknown, void> => {
+const useMemoryTaskAction = (
+  endpoint: string,
+  actionName: string
+): UseMutationResult<unknown, unknown, void> => {
   const { core } = useKibana();
   const queryClient = useQueryClient();
 
@@ -142,14 +144,38 @@ const useMemoryTaskAction = (endpoint: string): UseMutationResult<unknown, unkno
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memoryKeys.all });
+      core.notifications.toasts.addSuccess(
+        i18n.translate('xpack.streams.memory.taskSuccess', {
+          defaultMessage: '{actionName} started successfully.',
+          values: { actionName },
+        })
+      );
+    },
+    onError: (error) => {
+      core.notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate('xpack.streams.memory.taskError', {
+          defaultMessage: '{actionName} failed.',
+          values: { actionName },
+        }),
+      });
     },
   });
 };
 
 export const useScrapeConversations = () => {
-  return useMemoryTaskAction(`${MEMORY_BASE}/_scrape_conversations`);
+  return useMemoryTaskAction(
+    `${MEMORY_BASE}/_scrape_conversations`,
+    i18n.translate('xpack.streams.memory.scrapeActionName', {
+      defaultMessage: 'Scrape conversations',
+    })
+  );
 };
 
 export const useConsolidateMemory = () => {
-  return useMemoryTaskAction(`${MEMORY_BASE}/_consolidate`);
+  return useMemoryTaskAction(
+    `${MEMORY_BASE}/_consolidate`,
+    i18n.translate('xpack.streams.memory.consolidateActionName', {
+      defaultMessage: 'Consolidate memory',
+    })
+  );
 };

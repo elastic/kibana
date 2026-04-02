@@ -15,11 +15,15 @@ import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
-import { MemoryServiceImpl } from '../../memory';
+import {
+  MemoryServiceImpl,
+  formatExistingPages,
+  createReadMemoryPageCallback,
+  createWriteMemoryPageCallback,
+} from '../../memory';
 import { ConversationScraperPrompt } from './conversation_scraper_prompt';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ConversationScraperTaskParams {}
+export type ConversationScraperTaskParams = Record<string, never>;
 
 export interface ConversationScraperTaskResult {
   conversationsProcessed: number;
@@ -134,19 +138,18 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
 
                 // Load existing memory tree for context
                 const allEntries = await memory.listAll();
-                const existingPages =
-                  allEntries.length > 0
-                    ? allEntries
-                        .map(
-                          (e) =>
-                            `- **${e.name}** — ${e.title} [categories: ${e.categories.join(', ')}]`
-                        )
-                        .join('\n')
-                    : 'No existing memory pages.';
+                const existingPages = formatExistingPages(allEntries);
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
                 let pagesWritten = 0;
+
+                const writeCallback = createWriteMemoryPageCallback({
+                  memory,
+                  user: 'agent:conversation_scraper',
+                  logger: taskLogger,
+                  changeSummary: 'Updated from conversation scraping',
+                });
 
                 await executeAsReasoningAgent({
                   inferenceClient: boundInferenceClient,
@@ -197,63 +200,12 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                       };
                     },
 
-                    read_memory_page: async (toolCall) => {
-                      const { name } = toolCall.function.arguments;
-                      const entry = await memory.getByName({ name });
-                      if (!entry) {
-                        return { response: { error: `No page found with name "${name}"` } };
-                      }
-                      return {
-                        response: {
-                          id: entry.id,
-                          name: entry.name,
-                          title: entry.title,
-                          content: entry.content,
-                          categories: entry.categories,
-                          references: entry.references,
-                        },
-                      };
-                    },
+                    read_memory_page: createReadMemoryPageCallback({ memory }),
 
                     write_memory_page: async (toolCall) => {
-                      const { name, title, content, categories, references, tags } =
-                        toolCall.function.arguments;
-                      const user = 'agent:conversation_scraper';
-
-                      const existing = await memory.getByName({ name });
-
-                      if (existing) {
-                        await memory.update({
-                          id: existing.id,
-                          content,
-                          title,
-                          categories,
-                          references,
-                          user,
-                          changeSummary: 'Updated from conversation scraping',
-                        });
-                        taskLogger.info(`Updated memory page: ${name}`);
-                      } else {
-                        await memory.create({
-                          name,
-                          title,
-                          content,
-                          categories: categories ?? [],
-                          references: references ?? [],
-                          tags: [...(tags ?? []), 'auto-generated', 'conversation-scraper'],
-                          user,
-                        });
-                        taskLogger.info(`Created memory page: ${name}`);
-                      }
-
+                      const result = await writeCallback(toolCall);
                       pagesWritten++;
-                      return {
-                        response: {
-                          success: true,
-                          action: existing ? 'updated' : 'created',
-                          name,
-                        },
-                      };
+                      return result;
                     },
                   },
                 });

@@ -7,11 +7,11 @@
 
 export interface MemoryEntry {
   id: string;
-  path: string;
+  name: string;
   title: string;
   content: string;
-  parent_path: string;
-  space: string;
+  categories: string[];
+  references: string[];
   version: number;
   tags: string[];
   created_at: string;
@@ -20,35 +20,34 @@ export interface MemoryEntry {
   updated_by: string;
 }
 
-export interface MemoryTreeNode {
-  path: string;
-  title: string;
-  id?: string;
-  has_children: boolean;
-  children: MemoryTreeNode[];
+export interface MemoryCategoryNode {
+  name: string;
+  category: string;
+  pages: Array<{ id: string; name: string; title: string }>;
+  children: MemoryCategoryNode[];
 }
 
 export interface MemorySearchResult {
   id: string;
-  path: string;
+  name: string;
   title: string;
   snippet: string;
   score: number;
   updated_at: string;
   updated_by: string;
   tags: string[];
+  categories: string[];
 }
 
 export interface MemoryVersionRecord {
   id: string;
   entry_id: string;
   version: number;
-  path: string;
+  name: string;
   title: string;
   content: string;
-  change_type: 'create' | 'update' | 'delete' | 'move';
+  change_type: 'create' | 'update' | 'delete' | 'rename';
   change_summary: string;
-  space: string;
   created_at: string;
   created_by: string;
 }

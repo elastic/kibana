@@ -105,7 +105,7 @@ export async function generateInsights({
         streamInsights: JSON.stringify(streamInsightsWithData),
       },
       inferenceClient,
-      maxSteps: memoryTools ? 6 : 2,
+      maxSteps: memoryTools ? 4 : 2,
       finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
       toolCallbacks: {
         ...(memoryTools?.callbacks ?? {}),
@@ -194,7 +194,7 @@ async function generateStreamInsights({
         queries: JSON.stringify(queryDataList),
       },
       inferenceClient,
-      maxSteps: memoryTools ? 6 : 2,
+      maxSteps: memoryTools ? 4 : 2,
       finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
       toolCallbacks: {
         ...(memoryTools?.callbacks ?? {}),

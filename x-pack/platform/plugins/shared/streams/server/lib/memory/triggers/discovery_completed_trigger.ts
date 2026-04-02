@@ -7,6 +7,11 @@
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { SigeventsSynthesisPrompt } from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
+import {
+  formatExistingPages,
+  createReadMemoryPageCallback,
+  createWriteMemoryPageCallback,
+} from '../tool_callbacks';
 import type { MemoryUpdateTrigger } from './types';
 
 export const DISCOVERY_COMPLETED_TRIGGER_ID = 'discovery-completed';
@@ -58,12 +63,7 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
 
     for (const { streamName, streamInsights } of streamGroups) {
       try {
-        const existingPages =
-          allEntries.length > 0
-            ? allEntries
-                .map((e) => `- **${e.name}** — ${e.title} [categories: ${e.categories.join(', ')}]`)
-                .join('\n')
-            : 'No existing pages.';
+        const existingPages = formatExistingPages(allEntries);
 
         const user = 'system:discovery-completed-trigger';
 
@@ -77,62 +77,13 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
           },
           maxSteps: 10,
           toolCallbacks: {
-            read_memory_page: async (toolCall) => {
-              const { name } = toolCall.function.arguments;
-              const entry = await memory.getByName({ name });
-              if (!entry) {
-                return { response: { error: `No page found with name "${name}"` } };
-              }
-              return {
-                response: {
-                  id: entry.id,
-                  name: entry.name,
-                  title: entry.title,
-                  content: entry.content,
-                  categories: entry.categories,
-                  references: entry.references,
-                },
-              };
-            },
-
-            write_memory_page: async (toolCall) => {
-              const { name, title, content, categories, references, tags } =
-                toolCall.function.arguments;
-
-              const existing = await memory.getByName({ name });
-
-              if (existing) {
-                await memory.update({
-                  id: existing.id,
-                  content,
-                  title,
-                  categories,
-                  references,
-                  user,
-                  changeSummary: 'Updated from discovery insights',
-                });
-                logger.info(`Updated wiki page: ${name}`);
-              } else {
-                await memory.create({
-                  name,
-                  title,
-                  content,
-                  categories: categories ?? [],
-                  references: references ?? [],
-                  tags: [...(tags ?? []), 'auto-generated'],
-                  user,
-                });
-                logger.info(`Created wiki page: ${name}`);
-              }
-
-              return {
-                response: {
-                  success: true,
-                  action: existing ? 'updated' : 'created',
-                  name,
-                },
-              };
-            },
+            read_memory_page: createReadMemoryPageCallback({ memory }),
+            write_memory_page: createWriteMemoryPageCallback({
+              memory,
+              user,
+              logger,
+              changeSummary: 'Updated from discovery insights',
+            }),
           },
         });
 

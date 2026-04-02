@@ -373,36 +373,6 @@ const getVersionRoute = createServerRoute({
   },
 });
 
-const rollbackRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/memory/entries/{id}/rollback',
-  options: {
-    access: 'internal',
-    summary: 'Rollback a memory page to a specific version',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ id: z.string() }),
-    body: z.object({ version: z.number() }),
-  }),
-  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    await assertMemoryEnabled(getScopedClients, request);
-    const memory = getMemoryService(server, logger);
-
-    const authUser = server.core.security.authc.getCurrentUser(request);
-    const user = authUser?.username ?? 'unknown';
-
-    return memory.rollback({
-      entryId: params.path.id,
-      version: params.body.version,
-      user,
-    });
-  },
-});
-
 const recentChangesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/recent-changes',
   options: {
@@ -549,7 +519,6 @@ export const internalMemoryRoutes = {
   ...getCategoryTreeRoute,
   ...getHistoryRoute,
   ...getVersionRoute,
-  ...rollbackRoute,
   ...recentChangesRoute,
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,

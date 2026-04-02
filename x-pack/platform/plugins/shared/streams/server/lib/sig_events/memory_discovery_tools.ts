@@ -106,6 +106,9 @@ export const createMemoryDiscoveryTools = ({
     },
     memory_read: async (toolCall) => {
       const { name, id } = toolCall.function.arguments as { name?: string; id?: string };
+      if (!name && !id) {
+        return { response: { error: 'Either "name" or "id" must be provided.' } };
+      }
       try {
         let entry;
         if (id) {
@@ -152,12 +155,12 @@ export const createMemoryDiscoveryTools = ({
   };
 
   const promptSnippet = `
-You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, and operational patterns. Pages are organized by categories (like Wikipedia). Use the memory tools to look up relevant context before generating your analysis:
+You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, and operational patterns. Pages are organized by categories (like Wikipedia). After analyzing the current data independently, you may use memory tools to enrich your findings with additional context:
 - **memory_search** — Search by keyword to find relevant pages (supports category filter)
 - **memory_read** — Read the full content of a specific page by name or ID
 - **memory_list** — List all pages to discover what knowledge exists
 
-Check the knowledge base first if the stream or service being analyzed might have existing documentation.`;
+Analyze the data on its own merits first. Use the knowledge base to add context or cross-reference, not as a starting point.`;
 
   return { tools, callbacks, promptSnippet };
 };
