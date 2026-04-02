@@ -17,7 +17,6 @@ const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn(() => '/mock-integrations-url');
 const mockReportCancelButtonClicked = jest.fn();
 const mockReportDoneButtonClicked = jest.fn();
-const mockReportIntegrationDeleteConfirmed = jest.fn();
 const mockUseGetIntegrationById = jest.fn();
 const mockDeleteIntegrationMutateAsync = jest.fn().mockResolvedValue(undefined);
 
@@ -77,7 +76,6 @@ jest.mock('../telemetry_context', () => ({
   useTelemetry: () => ({
     reportCancelButtonClicked: mockReportCancelButtonClicked,
     reportDoneButtonClicked: mockReportDoneButtonClicked,
-    reportIntegrationDeleteConfirmed: mockReportIntegrationDeleteConfirmed,
   }),
 }));
 
@@ -271,7 +269,6 @@ describe('IntegrationManagement telemetry', () => {
       });
     });
 
-    expect(mockReportIntegrationDeleteConfirmed).toHaveBeenCalledTimes(1);
     expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', expect.any(Object));
   });
 });

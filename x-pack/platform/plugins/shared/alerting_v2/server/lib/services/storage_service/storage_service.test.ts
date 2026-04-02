@@ -72,6 +72,23 @@ describe('StorageService', () => {
       });
     });
 
+    it('should pass custom refresh option when provided', async () => {
+      const mockBulkResponse = {
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      await storageService.bulkIndexDocs({ index, docs: [mockDocs[0]], refresh: 'wait_for' });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledWith({
+        operations: [{ create: { _index: index } }, mockDocs[0]],
+        refresh: 'wait_for',
+      });
+    });
+
     it('should format operations correctly for bulk indexing', async () => {
       const mockBulkResponse = {
         items: [{ create: { _id: '1', status: 201 } }],
