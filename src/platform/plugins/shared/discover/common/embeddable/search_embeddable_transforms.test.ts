@@ -170,7 +170,10 @@ describe('searchEmbeddableTransforms', () => {
         title: 'Test Title',
         description: 'Test Description',
       };
-      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(state, [
+      const result = getSearchEmbeddableTransforms(
+        mockDrilldownTransforms,
+        whenEnabled
+      ).transformOut?.(state, [
         {
           id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
           name: 'savedObjectRef',
