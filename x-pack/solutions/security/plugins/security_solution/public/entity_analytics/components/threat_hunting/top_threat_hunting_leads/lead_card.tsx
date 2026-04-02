@@ -6,61 +6,43 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiTextTruncate,
+  useEuiTheme,
+} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HuntingLead } from './types';
 import { VIEW_LEAD_DETAILS } from './translations';
+import { getEntityIcon } from './utils';
 
 const MAX_VISIBLE_TAGS = 3;
 
-const cardStyles = css`
+const getCardStyles = (euiTheme: EuiThemeComputed) => css`
   position: relative;
   cursor: pointer;
   min-width: 260px;
   max-width: 360px;
+  transition: transform ${euiTheme.animation.normal} ease,
+    box-shadow ${euiTheme.animation.normal} ease;
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px ${euiTheme.colors.shadow};
   }
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
 `;
 
 const infoIconStyles = css`
   position: absolute;
   top: 8px;
   right: 8px;
-  cursor: pointer;
-  &:hover {
-    opacity: 0.7;
-  }
 `;
-
-const titleStyles = css`
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-right: 24px;
-`;
-
-const bylineStyles = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-const getEntityIcon = (entityType: string): string => {
-  switch (entityType) {
-    case 'user':
-      return 'user';
-    case 'host':
-      return 'desktop';
-    case 'service':
-      return 'gear';
-    default:
-      return 'questionInCircle';
-  }
-};
 
 interface LeadCardProps {
   lead: HuntingLead;
@@ -69,6 +51,7 @@ interface LeadCardProps {
 }
 
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }) => {
+  const { euiTheme } = useEuiTheme();
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const handleInfoClick = useCallback(
     (e: React.MouseEvent) => {
@@ -82,39 +65,36 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
     <EuiPanel
       hasBorder
       paddingSize="m"
-      css={cardStyles}
+      css={getCardStyles(euiTheme)}
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
     >
       {onInfoClick && (
-        <span
-          role="button"
-          tabIndex={0}
-          css={infoIconStyles}
+        <EuiButtonIcon
+          iconType="iInCircle"
           aria-label={VIEW_LEAD_DETAILS}
           onClick={handleInfoClick}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              onInfoClick?.(lead);
-            }
-          }}
           data-test-subj={`leadInfoButton-${lead.id}`}
-        >
-          <EuiIcon type="info" size="m" aria-hidden={true} />
-        </span>
+          css={infoIconStyles}
+        />
       )}
 
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText size="s" css={titleStyles}>
-            {lead.title}
+          <EuiText
+            size="s"
+            css={css`
+              font-weight: 600;
+              padding-right: 24px;
+            `}
+          >
+            <EuiTextTruncate text={lead.title} />
           </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" css={bylineStyles}>
-            {lead.byline}
+          <EuiText size="xs" color="subdued">
+            <EuiTextTruncate text={lead.byline} />
           </EuiText>
         </EuiFlexItem>
 

@@ -205,3 +205,25 @@ export const getStalenessLabel = (staleness: string): string => {
       return staleness;
   }
 };
+
+export const SEARCH_LEADS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.searchPlaceholder',
+  { defaultMessage: 'Search leads...' }
+);
+
+export const RELATIVE_TIME_JUST_NOW = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.relativeTime.justNow',
+  { defaultMessage: 'Just now' }
+);
+
+export const getRelativeTimeHours = (hours: number) =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.threatHunting.leads.relativeTime.hoursAgo',
+    { defaultMessage: '{hours}h ago', values: { hours } }
+  );
+
+export const getRelativeTimeDays = (days: number) =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.threatHunting.leads.relativeTime.daysAgo',
+    { defaultMessage: '{days}d ago', values: { days } }
+  );

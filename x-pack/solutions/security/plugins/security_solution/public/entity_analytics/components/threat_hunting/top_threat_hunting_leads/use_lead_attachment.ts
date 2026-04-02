@@ -11,6 +11,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { LEAD_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { HuntingLead } from './types';
 
+// This markdown is sent as an AI agent prompt and must remain in English
+// regardless of user locale — intentionally not using i18n here.
 const formatLeadAsMarkdown = (lead: HuntingLead): string => {
   const entityList = lead.entities.map((e) => `- **${e.type}**: ${e.name}`).join('\n');
   const observationList = lead.observations

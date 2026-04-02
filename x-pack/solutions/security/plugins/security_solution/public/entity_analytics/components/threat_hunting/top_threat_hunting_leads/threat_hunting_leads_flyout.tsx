@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,21 +27,9 @@ import { useEntityAnalyticsRoutes } from '../../../api/api';
 import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
+import { getEntityIcon } from './utils';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
-
-const getEntityIcon = (entityType: string): string => {
-  switch (entityType) {
-    case 'user':
-      return 'user';
-    case 'host':
-      return 'desktop';
-    case 'service':
-      return 'gear';
-    default:
-      return 'questionInCircle';
-  }
-};
 
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
@@ -109,7 +98,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
 
       <EuiFlyoutBody>
         <EuiFieldSearch
-          placeholder="Search leads..."
+          placeholder={i18n.SEARCH_LEADS_PLACEHOLDER}
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
@@ -170,10 +159,10 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
   const relativeTime = useMemo(() => {
     const diff = Date.now() - new Date(lead.timestamp).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 1) return i18n.RELATIVE_TIME_JUST_NOW;
+    if (hours < 24) return i18n.getRelativeTimeHours(hours);
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return i18n.getRelativeTimeDays(days);
   }, [lead.timestamp]);
 
   return (
@@ -181,7 +170,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
       hasBorder
       paddingSize="s"
       onClick={handleClick}
-      style={{ cursor: 'pointer' }}
       data-test-subj={`leadListItem-${lead.id}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -212,11 +200,10 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
         </EuiFlexItem>
         {onInfoClick && (
           <EuiFlexItem grow={false}>
-            <EuiIcon
-              type="iInCircle"
+            <EuiButtonIcon
+              iconType="iInCircle"
               aria-label={i18n.VIEW_LEAD_DETAILS}
               onClick={handleInfoClick}
-              style={{ cursor: 'pointer' }}
               data-test-subj={`leadListInfoButton-${lead.id}`}
             />
           </EuiFlexItem>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
@@ -19,6 +20,16 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
 
+const FETCH_LEADS_PARAMS = {
+  params: {
+    page: 1 as const,
+    perPage: 10 as const,
+    sortField: 'priority' as const,
+    sortOrder: 'desc' as const,
+    status: 'active' as const,
+  },
+};
+
 export const useHuntingLeads = () => {
   const {
     fetchLeads,
@@ -29,30 +40,32 @@ export const useHuntingLeads = () => {
   } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
   const { addSuccess, addError } = useAppToasts();
+  const abortCtrl = useRef(new AbortController());
 
-  const fetchLeadsParams = {
-    params: {
-      page: 1 as const,
-      perPage: 10 as const,
-      sortField: 'priority' as const,
-      sortOrder: 'desc' as const,
-      status: 'active' as const,
-    },
-  };
+  useEffect(() => {
+    return () => {
+      abortCtrl.current.abort();
+    };
+  }, []);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
-    queryFn: ({ signal }) => fetchLeads({ signal, ...fetchLeadsParams }),
+    queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
   });
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
     mutationFn: async () => {
+      abortCtrl.current = new AbortController();
+      const { signal } = abortCtrl.current;
+
       await generateLeadsApi({ params: {} });
 
       const deadline = Date.now() + POLL_TIMEOUT_MS;
       while (Date.now() < deadline) {
+        if (signal.aborted) return;
         await delay(POLL_INTERVAL_MS);
-        const result = await fetchLeads(fetchLeadsParams);
+        if (signal.aborted) return;
+        const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
         if (result.leads && result.leads.length > 0) {
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
           return;

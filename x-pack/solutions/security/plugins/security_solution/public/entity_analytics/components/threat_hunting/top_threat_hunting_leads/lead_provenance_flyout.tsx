@@ -24,37 +24,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { HuntingLead, Observation } from './types';
 import { getModuleLabel } from './translations';
 import * as i18n from './translations';
-
-const getSeverityColor = (severity: string): string => {
-  switch (severity) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'warning';
-    case 'medium':
-      return 'default';
-    case 'low':
-      return 'hollow';
-    default:
-      return 'default';
-  }
-};
-
-const getEntityIcon = (entityType: string): string => {
-  switch (entityType) {
-    case 'user':
-      return 'user';
-    case 'host':
-      return 'desktop';
-    case 'service':
-      return 'gear';
-    default:
-      return 'questionInCircle';
-  }
-};
+import { getEntityIcon } from './utils';
+import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 
 interface LeadProvenanceFlyoutProps {
   lead: HuntingLead;
@@ -69,6 +45,8 @@ export const LeadProvenanceFlyout: React.FC<LeadProvenanceFlyoutProps> = ({
   onInvestigateInChat,
   onDismiss,
 }) => {
+  const severityColors = useRiskSeverityColors();
+
   const observationsByModule = useMemo(() => {
     const grouped: Record<string, Observation[]> = {};
     for (const obs of lead.observations) {
@@ -104,7 +82,7 @@ export const LeadProvenanceFlyout: React.FC<LeadProvenanceFlyoutProps> = ({
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          {new Date(lead.timestamp).toLocaleString()}
+          <PreferenceFormattedDate value={new Date(lead.timestamp)} />
         </EuiText>
       </EuiFlyoutHeader>
 
@@ -169,7 +147,11 @@ export const LeadProvenanceFlyout: React.FC<LeadProvenanceFlyoutProps> = ({
                   <EuiPanel hasBorder paddingSize="s" data-test-subj={`observation-${obs.type}`}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiBadge color={getSeverityColor(obs.severity)}>{obs.severity}</EuiBadge>
+                        <EuiBadge
+                          color={severityColors[obs.severity as Severity] ?? severityColors.medium}
+                        >
+                          {obs.severity}
+                        </EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs">

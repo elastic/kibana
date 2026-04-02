@@ -59,9 +59,13 @@ describe('useHuntingLeads', () => {
 
   it('calls fetchLeads with correct params when queryFn executes', async () => {
     let capturedQueryFn: ((context: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
+    let queryCallCount = 0;
     mockUseQuery.mockImplementation(
       (config: { queryFn?: (ctx: { signal?: AbortSignal }) => Promise<unknown> }) => {
-        capturedQueryFn = config.queryFn;
+        queryCallCount++;
+        if (queryCallCount === 1) {
+          capturedQueryFn = config.queryFn;
+        }
         return {
           data: undefined,
           isLoading: false,

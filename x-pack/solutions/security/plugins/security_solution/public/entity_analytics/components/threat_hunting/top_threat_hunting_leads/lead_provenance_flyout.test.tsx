@@ -11,6 +11,19 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { LeadProvenanceFlyout } from './lead_provenance_flyout';
 import type { HuntingLead } from './types';
 
+jest.mock('../../../../common/components/formatted_date', () => ({
+  PreferenceFormattedDate: ({ value }: { value: Date }) => value.toISOString(),
+}));
+
+jest.mock('../../../../common/utils/risk_color_palette', () => ({
+  useRiskSeverityColors: () => ({
+    low: '#54B399',
+    medium: '#D6BF57',
+    high: '#DA8B45',
+    critical: '#E7664C',
+  }),
+}));
+
 const mockLead: HuntingLead = {
   id: 'lead-1',
   title: 'Multi-Tactic Attack',
