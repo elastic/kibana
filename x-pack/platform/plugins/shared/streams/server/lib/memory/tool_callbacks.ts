@@ -57,7 +57,18 @@ export const createWriteMemoryPageCallback = ({
   logger: Logger;
   changeSummary: string;
 }) => {
-  return async (toolCall: { function: { arguments: Record<string, any> } }) => {
+  return async (toolCall: {
+    function: {
+      arguments: {
+        name: string;
+        title: string;
+        content: string;
+        categories?: string[];
+        references?: string[];
+        tags?: string[];
+      };
+    };
+  }) => {
     const { name, title, content, categories, references, tags } = toolCall.function.arguments;
 
     const existing = await memory.getByName({ name });
