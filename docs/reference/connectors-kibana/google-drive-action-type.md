@@ -65,9 +65,7 @@ Get file metadata
 
 ## Connector networking configuration [google-drive-connector-networking-configuration]
 
-Use the **Action configuration settings** in the configuration reference for alerting to customize connector networking,
-such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use
-`xpack.actions.customHostSettings` to set per-host configurations.
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [google-drive-api-credentials]
 
@@ -102,7 +100,7 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
 To use **Bearer Token** authentication, you need a Google OAuth 2.0 access token with Drive API scopes. One way to obtain
 a token for testing is Google’s **OAuth 2.0 Playground** (`https://developers.google.com/oauthplayground/`).
 
-1. Open the OAuth 2.0 Playground in your browser using that URL.
+1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 2. In the list of APIs, select **Drive API v3** and select the `https://www.googleapis.com/auth/drive.readonly` scope (or `https://www.googleapis.com/auth/drive` for full access).
 3. Select **Authorize APIs** and sign in with your Google account.
 4. Select **Exchange authorization code for tokens**.

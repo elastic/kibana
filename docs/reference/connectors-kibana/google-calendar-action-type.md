@@ -17,8 +17,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-calendar-connector-configuration]
 
-Google Calendar connectors support **Bearer Token** or **OAuth 2.0 authorization code** authentication. Choose the type
-when you create or edit the connector.
+Google Calendar connectors have the following configuration properties:
 
 Bearer Token
 :   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get API credentials**.
@@ -104,7 +103,7 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
 To use **Bearer Token** authentication, obtain a Google OAuth 2.0 access token with Calendar API scopes—for example via
 Google’s **OAuth 2.0 Playground** (`https://developers.google.com/oauthplayground/`).
 
-1. Open the OAuth 2.0 Playground in your browser using that URL.
+1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 2. In the list of APIs, select **Calendar API v3** and select the `https://www.googleapis.com/auth/calendar.readonly` scope (or `https://www.googleapis.com/auth/calendar` for full access).
 3. Select **Authorize APIs** and sign in with your Google account.
 4. Select **Exchange authorization code for tokens**.
