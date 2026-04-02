@@ -76,7 +76,7 @@ export const useHuntingLeads = () => {
   const { mutate: toggleSchedule } = useMutation({
     mutationFn: (enabled: boolean) => (enabled ? enableLeadGeneration() : disableLeadGeneration()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [LEAD_SCHEDULE_QUERY_KEY] }),
-    onError: (error: Error) => addError(error, { title: 'Failed to update schedule' }),
+    onError: (error: Error) => addError(error, { title: i18n.SCHEDULE_UPDATE_ERROR }),
   });
 
   return {

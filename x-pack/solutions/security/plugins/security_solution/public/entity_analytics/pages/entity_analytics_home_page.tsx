@@ -121,7 +121,7 @@ export const EntityAnalyticsHomePage = () => {
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
-  const handleLeadClick = useCallback(
+  const handleOpenLeadInChat = useCallback(
     (lead: HuntingLead) => openAgentBuilderWithLead(lead),
     [openAgentBuilderWithLead]
   );
@@ -136,16 +136,6 @@ export const EntityAnalyticsHomePage = () => {
       openAgentBuilderWithLead(firstLead);
     }
   }, [leads, openAgentBuilderWithLead]);
-
-  const handleSelectLeadInFlyout = useCallback(
-    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
-    [openAgentBuilderWithLead]
-  );
-
-  const handleInvestigateInChat = useCallback(
-    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
-    [openAgentBuilderWithLead]
-  );
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -192,7 +182,7 @@ export const EntityAnalyticsHomePage = () => {
                 isLoading={isLeadsLoading}
                 isGenerating={isGenerating}
                 onSeeAll={handleOpenFlyout}
-                onLeadClick={handleLeadClick}
+                onLeadClick={handleOpenLeadInChat}
                 onHuntInChat={handleHuntInChat}
                 onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
                 onGenerate={generate}
@@ -230,7 +220,7 @@ export const EntityAnalyticsHomePage = () => {
       {isFlyoutOpen && (
         <ThreatHuntingLeadsFlyout
           onClose={handleCloseFlyout}
-          onSelectLead={handleSelectLeadInFlyout}
+          onSelectLead={handleOpenLeadInChat}
           onInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
         />
       )}
@@ -239,7 +229,7 @@ export const EntityAnalyticsHomePage = () => {
         <LeadProvenanceFlyout
           lead={provenanceLead}
           onClose={handleCloseProvenance}
-          onInvestigateInChat={handleInvestigateInChat}
+          onInvestigateInChat={handleOpenLeadInChat}
         />
       )}
 

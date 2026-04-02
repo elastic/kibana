@@ -188,6 +188,11 @@ export const SCHEDULE_TOOLTIP = i18n.translate(
   { defaultMessage: 'When enabled, leads are automatically regenerated every 24 hours' }
 );
 
+export const SCHEDULE_UPDATE_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError',
+  { defaultMessage: 'Failed to update schedule' }
+);
+
 export const getStalenessLabel = (staleness: string): string => {
   switch (staleness) {
     case 'fresh':

@@ -35,6 +35,9 @@ describe('useHuntingLeads', () => {
     mockUseEntityAnalyticsRoutes.mockReturnValue({
       fetchLeads: mockFetchLeads,
       generateLeads: mockGenerateLeads,
+      fetchLeadGenerationStatus: jest.fn().mockResolvedValue({ isEnabled: false }),
+      enableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
+      disableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
     });
     mockUseAppToasts.mockReturnValue({
       addSuccess: mockAddSuccess,
