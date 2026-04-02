@@ -47,11 +47,7 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
   const { promote } = useQueriesApi();
 
   const promoteMutation = useMutation<{ promoted: number }, Error>({
-    mutationFn: async () => {
-      if (queries.length === 0) {
-        return { promoted: 0 };
-      }
-
+    mutationFn: () => {
       return promote({ queryIds: queries.map(({ query }) => query.id) });
     },
     onSuccess: async ({ promoted }) => {
