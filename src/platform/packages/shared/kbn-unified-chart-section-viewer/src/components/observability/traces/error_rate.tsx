@@ -15,13 +15,14 @@ import { Chart } from '../../chart';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getErrorRateChart } from './trace_charts_definition';
 import { getLensMetricFormat } from '../../../common/utils';
+import type { MetricUnit } from '../../../types';
 
 const ERROR_RATE_Y_BOUNDS: LensYBoundsConfig = { mode: 'custom', lowerBound: 0, upperBound: 1 };
 
 interface ErrorRateChartContentProps {
   query: string;
   seriesType: LensSeriesLayer['seriesType'];
-  unit: string;
+  unit: MetricUnit;
   color: string;
   title: string;
 }
