@@ -20,8 +20,8 @@ export class ElasticConsolePlugin implements Plugin {
 
   setup(core: CoreSetup) {
     core.application.register({
-      id: 'sreAgent',
-      title: 'SRE Agent',
+      id: 'elasticRamen',
+      title: 'Elastic Ramen',
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
@@ -35,7 +35,7 @@ export class ElasticConsolePlugin implements Plugin {
         );
         if (!featureFlagEnabled || !advancedSettingEnabled) {
           const { element } = params;
-          element.innerHTML = '<div>SRE Agent is not enabled.</div>';
+          element.innerHTML = '<div>Elastic Ramen is not enabled.</div>';
           return () => {};
         }
         const { renderApp } = await import('./application');

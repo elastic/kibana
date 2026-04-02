@@ -20,7 +20,7 @@ export const registerModelsRoute = ({
 }) => {
   router.get(
     {
-      path: '/internal/sre_agent/v1/models',
+      path: '/internal/elastic_ramen/v1/models',
       security: {
         authz: { enabled: false, reason: 'This route delegates to the inference plugin' },
       },

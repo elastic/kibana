@@ -15,8 +15,8 @@ import { ELASTIC_CONSOLE_ENABLED_FLAG } from '../common/feature_flags';
 export const featureFlags: FeatureFlagDefinitions = [
   {
     key: ELASTIC_CONSOLE_ENABLED_FLAG,
-    name: 'SRE Agent',
-    description: 'Enables the SRE Agent plugin and its API routes (experimental)',
+    name: 'Elastic Ramen',
+    description: 'Enables the Elastic Ramen plugin and its API routes (experimental)',
     tags: ['elastic-console'],
     variationType: 'boolean',
     variations: [
