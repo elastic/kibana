@@ -1,0 +1,5 @@
+- version: "1.0.0"
+  changes:
+    - description: Initial version for OTel receiver-specific routing tests.
+      type: enhancement
+      link: https://github.com/elastic/kibana/pull/1

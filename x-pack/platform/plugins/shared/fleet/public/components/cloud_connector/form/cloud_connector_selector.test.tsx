@@ -303,6 +303,8 @@ describe('CloudConnectorSelector', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: SINGLE_ACCOUNT,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -312,6 +314,8 @@ describe('CloudConnectorSelector', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: undefined,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
   });
@@ -468,6 +472,8 @@ describe('CloudConnectorSelector', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'gcp',
         accountType: ORGANIZATION_ACCOUNT,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
   });

@@ -6,6 +6,8 @@
  */
 
 export const CONNECTORS_API = '**/internal/search_inference_endpoints/connectors**';
+export const FLEET_PACKAGES_API = '**/api/fleet/epm/packages**';
+export const INTEGRATIONS_LIST_API = '**/api/automatic_import_v2/integrations**';
 
 export const MOCK_CONNECTOR = {
   connectorId: 'test-bedrock-connector',

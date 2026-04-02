@@ -14,9 +14,10 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHealth,
   EuiHorizontalRule,
-  EuiPanel,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -25,6 +26,8 @@ import { i18n } from '@kbn/i18n';
 import type { Insight } from '@kbn/streams-schema';
 import { InfoPanel } from '../../../../info_panel';
 import { impactBadgeColors, impactLabels } from './insight_constants';
+import { FeedbackButtons } from './feedback_buttons';
+import { formatGeneratedAt } from './utils';
 
 interface InsightFlyoutProps {
   insight: Insight;
@@ -33,6 +36,29 @@ interface InsightFlyoutProps {
 
 export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'insightFlyoutTitle' });
+
+  const detailItems = [
+    {
+      title: i18n.translate('xpack.streams.insightFlyout.impactLabel', {
+        defaultMessage: 'Severity',
+      }),
+      description: (
+        <EuiBadge color={impactBadgeColors[insight.impact]}>
+          {impactLabels[insight.impact]}
+        </EuiBadge>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.streams.insightFlyout.discoveredAtLabel', {
+        defaultMessage: 'Discovered at',
+      }),
+      description: (
+        <EuiText size="s" color="subdued">
+          {formatGeneratedAt(insight.generated_at)}
+        </EuiText>
+      ),
+    },
+  ];
 
   return (
     <EuiFlyout
@@ -72,37 +98,27 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
                 defaultMessage: 'Significant event details',
               })}
             >
-              <EuiDescriptionList
-                type="column"
-                columnWidths={[1, 2]}
-                compressed
-                listItems={[
-                  {
-                    title: i18n.translate('xpack.streams.insightFlyout.impactLabel', {
-                      defaultMessage: 'Severity',
-                    }),
-                    description: (
-                      <EuiBadge color={impactBadgeColors[insight.impact]}>
-                        {impactLabels[insight.impact]}
-                      </EuiBadge>
-                    ),
-                  },
-                ]}
-              />
-              <EuiHorizontalRule margin="m" />
-              <EuiDescriptionList
-                type="column"
-                columnWidths={[1, 2]}
-                compressed
-                listItems={[
-                  {
-                    title: i18n.translate('xpack.streams.insightFlyout.summaryLabel', {
-                      defaultMessage: 'Summary',
-                    }),
-                    description: <EuiText size="s">{insight.description}</EuiText>,
-                  },
-                ]}
-              />
+              {detailItems.map((item, index) => (
+                <React.Fragment key={item.title}>
+                  <EuiDescriptionList
+                    type="column"
+                    columnWidths={[1, 2]}
+                    compressed
+                    listItems={[item]}
+                  />
+                  {index < detailItems.length - 1 && <EuiHorizontalRule margin="m" />}
+                </React.Fragment>
+              ))}
+            </InfoPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <InfoPanel
+              title={i18n.translate('xpack.streams.insightFlyout.summaryTitle', {
+                defaultMessage: 'Summary',
+              })}
+            >
+              <EuiText size="s">{insight.description}</EuiText>
             </InfoPanel>
           </EuiFlexItem>
 
@@ -113,16 +129,16 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
                   defaultMessage: 'Evidence',
                 })}
               >
-                <EuiFlexGroup direction="column" gutterSize="xs">
-                  {insight.evidence.map((ev, idx) => (
-                    <EuiFlexItem key={idx}>
-                      <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
-                        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                {insight.evidence.map((ev, idx) => (
+                  <React.Fragment key={idx}>
+                    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiHealth color="subdued" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
                           <EuiFlexItem grow={false}>
-                            <EuiBadge color="hollow">{ev.stream_name}</EuiBadge>
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <EuiText size="xs">
+                            <EuiText size="s">
                               {i18n.translate('xpack.streams.insightFlyout.evidenceDescription', {
                                 defaultMessage: '{queryTitle} ({eventCount} events)',
                                 values: {
@@ -132,11 +148,15 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
                               })}
                             </EuiText>
                           </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge color="hollow">{ev.stream_name}</EuiBadge>
+                          </EuiFlexItem>
                         </EuiFlexGroup>
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    {idx < insight.evidence.length - 1 && <EuiHorizontalRule margin="m" />}
+                  </React.Fragment>
+                ))}
               </InfoPanel>
             </EuiFlexItem>
           )}
@@ -160,6 +180,10 @@ export const InsightFlyout = ({ insight, onClose }: InsightFlyoutProps) => {
           )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <FeedbackButtons />
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

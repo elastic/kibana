@@ -206,13 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('x-elastic-internal-origin', 'kibana')
           .send({
             conversation_id: 'non-existent-conversation-id-for-sml-attach-ftr',
-            items: [
-              {
-                chunk_id: 'irrelevant',
-                attachment_id: 'irrelevant',
-                attachment_type: 'visualization',
-              },
-            ],
+            chunk_ids: ['irrelevant-chunk-id-for-sml-attach-ftr'],
           })
           .expect(404);
 
@@ -247,13 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('x-elastic-internal-origin', 'kibana')
           .send({
             conversation_id: converseResponse.conversation_id,
-            items: [
-              {
-                chunk_id: chunkId,
-                attachment_id: connectorId,
-                attachment_type: 'connector',
-              },
-            ],
+            chunk_ids: [chunkId],
           })
           .expect(200);
 
