@@ -16,10 +16,8 @@ export type UseSanitizedDashboardStateResult = ExportJsonSanitizedState & { retr
 
 export function useSanitizedDashboardState({
   dashboardState,
-  onLoadStart,
 }: {
   dashboardState: DashboardState;
-  onLoadStart?: () => void;
 }): UseSanitizedDashboardStateResult {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -39,7 +37,6 @@ export function useSanitizedDashboardState({
     setError(undefined);
     setData(undefined);
     setWarnings([]);
-    onLoadStart?.();
 
     sanitizeDashboard(dashboardState)
       .then(({ data: responseData, warnings: responseWarnings }) => {
@@ -57,7 +54,7 @@ export function useSanitizedDashboardState({
     return () => {
       isMounted = false;
     };
-  }, [dashboardState, reloadCount, onLoadStart]);
+  }, [dashboardState, reloadCount]);
 
   return { status, data, warnings, error, retry };
 }
