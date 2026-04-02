@@ -11,7 +11,7 @@ import { parseIntervalAsMillisecond } from './lib/intervals';
 
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_CAPACITY = 10;
-export const MAX_CAPACITY = 50;
+export const MAX_CAPACITY = 100;
 export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
@@ -97,6 +97,12 @@ export const configSchema = schema.object(
     api_key_type: schema.oneOf([schema.literal(ApiKeyType.ES), schema.literal(ApiKeyType.UIAM)], {
       defaultValue: ApiKeyType.ES,
     }),
+    /**
+     * When false, task capacity ignores the Elasticsearch error window (429s, script errors, and
+     * the gradual recovery toward the ceiling). Poll interval still reacts to those errors.
+     * With dynamic_capacity enabled, concurrency is driven by Kibana metrics only.
+     */
+    adjust_capacity_for_elasticsearch_errors: schema.boolean({ defaultValue: false }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
     discovery: schema.object({
@@ -221,6 +227,45 @@ export const configSchema = schema.object(
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
+    /**
+     * When enabled, Task Manager may raise concurrency above xpack.task_manager.capacity toward
+     * upper_bound while process metrics are healthy, and scale back down when they are not — never
+     * below the configured capacity (floor).
+     */
+    dynamic_capacity: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      upper_bound: schema.number({
+        min: MIN_CAPACITY,
+        max: MAX_CAPACITY,
+        defaultValue: MAX_CAPACITY,
+      }),
+      scale_interval_ms: schema.number({ defaultValue: 30_000, min: 5000, max: 300_000 }),
+      scale_up_step: schema.number({ defaultValue: 1, min: 1, max: 10 }),
+      /** Subtracted from capacity per interval when process signals exceed thresholds (floor: xpack.task_manager.capacity). */
+      scale_down_step: schema.number({ defaultValue: 1, min: 1, max: 10 }),
+      /**
+       * Scale up only when worker utilization after the last successful claim/poll cycle is at least this
+       * percentage (0–100). The poller also treats full saturation as 100% when tasks are left unclaimed,
+       * the pool returns RanOutOfCapacity (claimed work does not all fit), or RunningAtCapacity.
+       */
+      scale_up_min_post_claim_utilization_pct: schema.number({
+        defaultValue: 90,
+        min: 1,
+        max: 100,
+      }),
+      max_event_loop_utilization: schema.number({ defaultValue: 0.65, min: 0.05, max: 1 }),
+      /**
+       * Max event loop delay (milliseconds) from ops metrics: `process.event_loop_delay` is the max
+       * delay since the last collection. Above this, process signals are unhealthy for dynamic capacity.
+       * Set to 0 to disable this check (ELU / heap / load still apply).
+       */
+      max_event_loop_delay_ms: schema.number({ defaultValue: 250, min: 0, max: 120_000 }),
+      max_heap_used_fraction: schema.number({ defaultValue: 0.75, min: 0.1, max: 0.99 }),
+      /**
+       * Scale up only when os.load['1m'] / os.cpus().length is below this ratio (approx. CPU pressure).
+       */
+      max_load_average_ratio: schema.number({ defaultValue: 0.85, min: 0.1, max: 5 }),
+    }),
   },
   {
     validate: (config) => {
@@ -231,11 +276,39 @@ export const configSchema = schema.object(
       ) {
         return `The specified monitored_stats_required_freshness (${config.monitored_stats_required_freshness}) is invalid, as it is below the poll_interval (${config.poll_interval})`;
       }
+      if (config.dynamic_capacity.enabled) {
+        const configuredFloor =
+          config.capacity ??
+          (config.max_workers !== undefined
+            ? Math.min(config.max_workers, MAX_CAPACITY)
+            : undefined);
+        if (
+          configuredFloor !== undefined &&
+          config.dynamic_capacity.upper_bound < configuredFloor
+        ) {
+          return `dynamic_capacity.upper_bound (${config.dynamic_capacity.upper_bound}) must be greater than or equal to the configured task manager capacity (${configuredFloor})`;
+        }
+      }
     },
   }
 );
 
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
+
+/** Default `dynamic_capacity` values (same as config schema defaults); use in tests and fixtures. */
+export const DEFAULT_DYNAMIC_CAPACITY: TaskManagerConfig['dynamic_capacity'] = {
+  enabled: true,
+  upper_bound: MAX_CAPACITY,
+  scale_interval_ms: 30_000,
+  scale_up_step: 1,
+  scale_down_step: 1,
+  scale_up_min_post_claim_utilization_pct: 90,
+  max_event_loop_utilization: 0.65,
+  max_event_loop_delay_ms: 250,
+  max_heap_used_fraction: 0.75,
+  max_load_average_ratio: 0.85,
+};
+
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
 export type RequestTimeoutsConfig = TypeOf<typeof requestTimeoutsConfig>;

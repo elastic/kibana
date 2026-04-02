@@ -107,6 +107,9 @@ describe('managed configuration', () => {
     },
     auto_calculate_default_ech_capacity: false,
     api_key_type: ApiKeyType.ES,
+    dynamic_capacity: {
+      enabled: false,
+    },
   };
 
   async function runSetTimeout0() {

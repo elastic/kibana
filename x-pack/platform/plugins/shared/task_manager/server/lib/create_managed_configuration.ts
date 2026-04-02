@@ -16,6 +16,7 @@ import type { TaskManagerConfig } from '../config';
 import { CLAIM_STRATEGY_MGET, DEFAULT_POLL_INTERVAL, MAX_CAPACITY } from '../config';
 import { TaskCost } from '../task';
 import { getBulkUpdateStatusCode, isClusterBlockException, getMsearchStatusCode } from './errors';
+import { logTaskManagerCapacityToConsole } from './task_manager_capacity_console_log';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -42,53 +43,82 @@ const CAPACITY_INCREASE_PERCENTAGE = 1.05;
 const POLL_INTERVAL_DECREASE_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
-interface ErrorScanResult {
+export interface ErrorScanResult {
   count: number;
   isBlockException: boolean;
+}
+
+/**
+ * Applies one Elasticsearch error-window sample to the current capacity (used by the managed
+ * configuration scan and by the dynamic-capacity merger).
+ */
+export function applyErrorWindowToCapacity(
+  previousCapacity: number,
+  { count: errorCount, isBlockException }: ErrorScanResult,
+  config: TaskManagerConfig,
+  logger: Logger,
+  recoveryCeiling: number,
+  configuredCapacity: number
+): number {
+  logTaskManagerCapacityToConsole(
+    `*** Task Manager capacity: evaluating ES error window (current=${previousCapacity}, errorCount=${errorCount}, isBlockException=${isBlockException}, recoveryCeiling=${recoveryCeiling}, configuredCapacity=${configuredCapacity})`
+  );
+
+  let newCapacity: number;
+  if (isBlockException) {
+    newCapacity = previousCapacity;
+  } else {
+    if (errorCount > 0) {
+      const minCapacity = getMinCapacity(config);
+      // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
+      // Using Math.floor to make sure the number is different than previous while not being a decimal value.
+      newCapacity = Math.max(
+        Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
+        minCapacity
+      );
+    } else {
+      // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
+      // higher than recoveryCeiling. Using Math.ceil to make sure the number is different than
+      // previous while not being a decimal value
+      newCapacity = Math.min(
+        recoveryCeiling,
+        Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
+      );
+    }
+  }
+
+  if (newCapacity !== previousCapacity) {
+    logTaskManagerCapacityToConsole(
+      `*** Task Manager capacity: capacity changed ${previousCapacity} -> ${newCapacity} (Elasticsearch / managed configuration)`
+    );
+    logger.debug(
+      `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
+    );
+    if (previousCapacity === configuredCapacity) {
+      logger.warn(
+        `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
+      );
+    }
+  }
+  return newCapacity;
 }
 
 export function createCapacityScan(
   config: TaskManagerConfig,
   logger: Logger,
-  startingCapacity: number
+  startingCapacity: number,
+  recoveryCeiling: number = startingCapacity
 ) {
   return scan(
-    (previousCapacity: number, { count: errorCount, isBlockException }: ErrorScanResult) => {
-      let newCapacity: number;
-      if (isBlockException) {
-        newCapacity = previousCapacity;
-      } else {
-        if (errorCount > 0) {
-          const minCapacity = getMinCapacity(config);
-          // Decrease capacity by CAPACITY_DECREASE_PERCENTAGE while making sure it doesn't go lower than minCapacity.
-          // Using Math.floor to make sure the number is different than previous while not being a decimal value.
-          newCapacity = Math.max(
-            Math.floor(previousCapacity * CAPACITY_DECREASE_PERCENTAGE),
-            minCapacity
-          );
-        } else {
-          // Increase capacity by CAPACITY_INCREASE_PERCENTAGE while making sure it doesn't go
-          // higher than the starting value. Using Math.ceil to make sure the number is different than
-          // previous while not being a decimal value
-          newCapacity = Math.min(
-            startingCapacity,
-            Math.ceil(previousCapacity * CAPACITY_INCREASE_PERCENTAGE)
-          );
-        }
-      }
-
-      if (newCapacity !== previousCapacity) {
-        logger.debug(
-          `Capacity configuration changing from ${previousCapacity} to ${newCapacity} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
-        );
-        if (previousCapacity === startingCapacity) {
-          logger.warn(
-            `Capacity configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
-          );
-        }
-      }
-      return newCapacity;
-    },
+    (previousCapacity: number, errorResult: ErrorScanResult) =>
+      applyErrorWindowToCapacity(
+        previousCapacity,
+        errorResult,
+        config,
+        logger,
+        recoveryCeiling,
+        startingCapacity
+      ),
     startingCapacity
   );
 }

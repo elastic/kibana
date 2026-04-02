@@ -6,7 +6,9 @@
  */
 
 import sinon from 'sinon';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
+
+import type { OpsMetrics } from '@kbn/core/server';
 
 import type { TaskLifecycleEvent } from './polling_lifecycle';
 import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
@@ -26,7 +28,12 @@ import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
-import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
+import {
+  ApiKeyType,
+  CLAIM_STRATEGY_MGET,
+  DEFAULT_DYNAMIC_CAPACITY,
+  DEFAULT_KIBANAS_PER_PARTITION,
+} from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
@@ -58,6 +65,39 @@ interface EsError extends Error {
 }
 
 const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
+
+const testOpsMetrics: OpsMetrics = {
+  collected_at: new Date(),
+  elasticsearch_client: {
+    totalActiveSockets: 0,
+    totalIdleSockets: 0,
+    totalQueuedRequests: 0,
+  },
+  process: {
+    pid: 1,
+    uptime_in_millis: 1,
+    memory: {
+      heap: { total_in_bytes: 200, used_in_bytes: 40, size_limit: 1000 },
+      resident_set_size_in_bytes: 1,
+      external_in_bytes: 1,
+      array_buffers_in_bytes: 1,
+    },
+    event_loop_delay: 1,
+    event_loop_delay_histogram: {} as OpsMetrics['process']['event_loop_delay_histogram'],
+    event_loop_utilization: { active: 1, idle: 9, utilization: 0.1 },
+  },
+  processes: [],
+  os: {
+    platform: 'linux',
+    platformRelease: 'test',
+    load: { '1m': 0.2, '5m': 0.2, '15m': 0.2 },
+    memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
+    uptime_in_millis: 1,
+  },
+  response_times: { avg_in_millis: 1, max_in_millis: 1 },
+  requests: { disconnects: 0, total: 0, statusCodes: {} },
+  concurrent_connections: 0,
+};
 
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
@@ -112,7 +152,9 @@ describe('TaskPollingLifecycle', () => {
       },
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
+      dynamic_capacity: { ...DEFAULT_DYNAMIC_CAPACITY, enabled: false },
     },
+    opsMetrics$: of(testOpsMetrics),
     basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,
     logger: taskManagerLogger,

@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
-import { ApiKeyType, type TaskManagerConfig } from '../config';
+import { ApiKeyType, DEFAULT_DYNAMIC_CAPACITY, type TaskManagerConfig } from '../config';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 
 describe('Configuration Statistics Aggregator', () => {
@@ -70,6 +70,7 @@ describe('Configuration Statistics Aggregator', () => {
       },
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
+      dynamic_capacity: DEFAULT_DYNAMIC_CAPACITY,
     };
 
     return new Promise<void>(async (resolve, reject) => {

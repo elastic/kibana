@@ -322,7 +322,7 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    { http, savedObjects, elasticsearch, executionContext, security, metrics }: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
@@ -419,6 +419,7 @@ export class TaskManagerPlugin
         taskPartitioner,
         startingCapacity,
         eventLogger: this.taskEventLogger!,
+        opsMetrics$: metrics.getOpsMetrics$(),
       });
     }
 

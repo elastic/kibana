@@ -12,7 +12,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
+import type { Logger, ExecutionContextStart, IBasePath, OpsMetrics } from '@kbn/core/server';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -55,7 +55,10 @@ import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
 import type { TaskPoller } from './polling/task_poller';
 import {
-  createCapacityScan,
+  createTaskManagerCapacityConfiguration$,
+  getTaskManagerRecoveryCeiling,
+} from './lib/capacity_configuration_stream';
+import {
   createPollIntervalScan,
   countErrors,
   ADJUST_THROUGHPUT_INTERVAL,
@@ -81,6 +84,7 @@ export interface TaskPollingLifecycleOpts {
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
   eventLogger: TaskEventLogger;
+  opsMetrics$: Observable<OpsMetrics>;
 }
 
 export type TaskLifecycleEvent =
@@ -123,6 +127,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private currentPollInterval: number;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
 
+  /**
+   * Worker utilization % after the last successful poll (claim + pool fill). Used to gate dynamic
+   * capacity scale-up so we do not raise the ceiling while idle.
+   */
+  private readonly postClaimUtilizationPct$ = new BehaviorSubject<number>(0);
+
   private eventLogger: TaskEventLogger;
 
   /**
@@ -144,6 +154,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     taskPartitioner,
     startingCapacity,
     eventLogger,
+    opsMetrics$,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -160,11 +171,16 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
     const tmUtilizationQueue = createRunningAveragedStat<number>(window);
-    this.capacityConfiguration$ = errorCheck$.pipe(
-      createCapacityScan(config, logger, startingCapacity),
-      startWith(startingCapacity),
-      distinctUntilChanged()
-    );
+    const recoveryCeiling = getTaskManagerRecoveryCeiling(config, startingCapacity);
+    this.capacityConfiguration$ = createTaskManagerCapacityConfiguration$({
+      errorCheck$,
+      config,
+      logger,
+      startingCapacity,
+      recoveryCeiling,
+      opsMetrics$,
+      postClaimUtilizationPct$: this.postClaimUtilizationPct$,
+    });
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),
       createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationQueue),
@@ -344,6 +360,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
             this.emitEvent(
               asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
             );
+            // Do not use stale utilization for dynamic scale-up after a failed poll cycle
+            this.postClaimUtilizationPct$.next(0);
           })
         )
       )
@@ -363,7 +381,19 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
               tmUtilization = 100;
             }
 
+            // Claim budget was exhausted but the pool could not start every claimed runner (e.g. cost
+            // fragmentation: remaining capacity too small for the next task). Treat as saturated for
+            // dynamic scale-up and poll-interval heuristics.
+            if (tmUtilization < 100 && results.result === FillPoolResult.RanOutOfCapacity) {
+              tmUtilization = 100;
+            }
+
+            if (tmUtilization < 100 && results.result === FillPoolResult.RunningAtCapacity) {
+              tmUtilization = 100;
+            }
+
             this.currentTmUtilization$.next(tmUtilization);
+            this.postClaimUtilizationPct$.next(tmUtilization);
             this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(tmUtilization)));
           })
         )
