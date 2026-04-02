@@ -18,11 +18,17 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
+import {
+  Streams,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+} from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useStreamsTour } from '../streams_tour';
@@ -436,6 +442,21 @@ export function StreamsTreeTable({
                     />
                   )}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {(item.stream.name === LOGS_ECS_STREAM_NAME ||
+                    item.stream.name === LOGS_OTEL_STREAM_NAME) && (
+                    <EuiBetaBadge
+                      tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+                        defaultMessage:
+                          'This feature is in technical preview. We are working on it...',
+                      })}
+                      label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+                        defaultMessage: 'Technical preview',
+                      })}
+                      iconType="flask"
+                      size="s"
+                      css={{ display: 'block' }}
+                    />
+                  )}
                 </EuiFlexGroup>
               </EuiFlexGroup>
             );

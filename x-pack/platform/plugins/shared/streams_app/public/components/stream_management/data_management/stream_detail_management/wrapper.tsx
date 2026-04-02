@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +22,10 @@ import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import {
+  LOGS_ECS_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+} from '@kbn/streams-schema/src/shared/hierarchy';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
@@ -140,6 +145,27 @@ export function Wrapper({
     streamBadges.push({ key: 'classic', node: <ClassicStreamBadge /> });
   }
   if (Streams.WiredStream.GetResponse.is(definition)) {
+    if (
+      definition.stream.name === LOGS_ECS_STREAM_NAME ||
+      definition.stream.name === LOGS_OTEL_STREAM_NAME
+    ) {
+      streamBadges.push({
+        key: 'technicalPreview',
+        node: (
+          <EuiBetaBadge
+            tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+              defaultMessage: 'This feature is in technical preview. We are working on it...',
+            })}
+            label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+              defaultMessage: 'Technical preview',
+            })}
+            iconType="flask"
+            size="s"
+            css={{ display: 'block' }}
+          />
+        ),
+      });
+    }
     streamBadges.push({ key: 'wired', node: <WiredStreamBadge /> });
   }
   if (Streams.ingest.all.GetResponse.is(definition)) {
