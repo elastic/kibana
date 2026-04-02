@@ -57,20 +57,6 @@ export const MetricsExperienceGrid = ({
     selectedDimensionNames: selectedDimensions,
   });
 
-  // WIP: Remove this
-  useEffect(() => {
-    if (metricsInfoError == null) {
-      return;
-    }
-    const isAbortError =
-      metricsInfoError instanceof Error && metricsInfoError.name === 'AbortError';
-    if (isAbortError) {
-      return;
-    }
-    // eslint-disable-next-line no-console
-    console.error('[MetricsExperience] METRICS_INFO fetch failed');
-  }, [metricsInfoError]);
-
   const { filteredMetricItems } = useMetricFieldsFilter({
     metricItems,
     searchTerm,
