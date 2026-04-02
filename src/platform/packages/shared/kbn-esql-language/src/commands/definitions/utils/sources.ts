@@ -11,7 +11,6 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
-import { getStreamNameFromViewName } from '@kbn/streams-schema';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
@@ -92,6 +91,21 @@ export const buildSourcesDefinitions = (
   });
 
 /**
+ * Extracts the friendly name from an ES|QL view name.
+ * @param viewName - The ES|QL view name
+ * @returns The friendly name if the view name has the correct prefix, null otherwise
+ * @example getFriendlyViewName('$.cars.electric') => 'cars.electric'
+ * @example getFriendlyViewName('other.name') => null
+ */
+export function getFriendlyViewName(viewName: string): string | null {
+  const ESQL_VIEW_PREFIX = '$.';
+  if (viewName.startsWith(ESQL_VIEW_PREFIX)) {
+    return viewName.slice(ESQL_VIEW_PREFIX.length);
+  }
+  return null;
+}
+
+/**
  * Builds suggestion items for ES|QL views (GET _query/view).
  */
 export const buildViewsDefinitions = (
@@ -101,7 +115,7 @@ export const buildViewsDefinitions = (
   views
     .filter(({ name }) => !alreadyUsed.includes(name))
     .map(({ name }) => {
-      const friendlyName = getStreamNameFromViewName(name) ?? name;
+      const friendlyName = getFriendlyViewName(name) ?? name;
       const text = getSafeInsertSourceText(name);
       return withAutoSuggest({
         label: friendlyName,
