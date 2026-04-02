@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createAgent } from 'langchain';
-import type { StructuredTool } from '@langchain/core/tools';
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import type { ClientTool } from '@langchain/core/tools';
 import { createTaskTool } from './sub_agents';
 import type { AutomaticImportAgentParams } from './types';
 import { AUTOMATIC_IMPORT_AGENT_PROMPT } from './prompts';
@@ -34,14 +34,14 @@ export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) =
     recursionLimit: AGENT_RECURSION_LIMIT,
   });
 
-  const allTools: StructuredTool[] = [taskTool];
+  const allTools: ClientTool[] = [taskTool];
 
-  const baseAgent = createAgent({
+  const baseAgent = createReactAgent<typeof stateSchema, typeof AutomaticImportAgentState>({
     name: 'automatic_import_agent',
-    model,
+    llm: model,
     tools: allTools,
     stateSchema,
-    systemPrompt: AUTOMATIC_IMPORT_AGENT_PROMPT,
+    prompt: AUTOMATIC_IMPORT_AGENT_PROMPT,
   });
 
   return baseAgent.withConfig({

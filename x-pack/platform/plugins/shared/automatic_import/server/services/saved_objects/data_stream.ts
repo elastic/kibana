@@ -17,12 +17,10 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {
       data_stream_id: {
-        // Unique identifier for this data_stream
-        type: 'keyword',
+        type: 'text',
       },
       integration_id: {
-        // Foreign key to parent integration
-        type: 'keyword',
+        type: 'text',
       },
       created_by: {
         type: 'keyword',

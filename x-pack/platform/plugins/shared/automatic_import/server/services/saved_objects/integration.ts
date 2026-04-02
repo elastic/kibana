@@ -16,7 +16,7 @@ export const integrationSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      integration_id: { type: 'keyword' },
+      integration_id: { type: 'text' },
       // Deprecated: kept for backwards compatibility with existing saved objects.
       data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },

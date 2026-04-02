@@ -1366,10 +1366,10 @@
         "type": "keyword"
       },
       "data_stream_id": {
-        "type": "keyword"
+        "type": "text"
       },
       "integration_id": {
-        "type": "keyword"
+        "type": "text"
       },
       "job_info": {
         "properties": {
@@ -3144,7 +3144,7 @@
         "type": "integer"
       },
       "integration_id": {
-        "type": "keyword"
+        "type": "text"
       },
       "metadata": {
         "properties": {}

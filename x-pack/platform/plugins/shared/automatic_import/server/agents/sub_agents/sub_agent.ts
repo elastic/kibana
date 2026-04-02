@@ -9,7 +9,7 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command, getCurrentTaskInput } from '@langchain/langgraph';
-import { createAgent } from 'langchain';
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { TASK_TOOL_DESCRIPTION } from '../prompts';
@@ -216,16 +216,16 @@ const injectPipelineState = (
   return taskDescription;
 };
 
-type AutomaticImportSubAgent = ReturnType<typeof createAgent>;
+type AutomaticImportSubAgent = ReturnType<typeof createReactAgent>;
 
 export const createTaskTool = (params: TaskToolParams) => {
   const { subagents, model, samples, recursionLimit } = params;
   const agentsMap = new Map<string, AutomaticImportSubAgent>();
   for (const subagent of subagents) {
-    const baseSubAgent = createAgent({
-      model,
+    const baseSubAgent = createReactAgent({
+      llm: model,
       tools: subagent.tools || [],
-      systemPrompt: subagent.prompt,
+      prompt: subagent.prompt,
       stateSchema: AutomaticImportAgentState,
     });
     const ReActSubAgent =
