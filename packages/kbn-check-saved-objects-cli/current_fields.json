@@ -109,8 +109,11 @@
     "destinations.type",
     "enabled",
     "groupBy",
+    "groupingMode",
     "name",
     "snoozedUntil",
+    "throttle",
+    "throttle.strategy",
     "updatedAt",
     "updatedBy",
     "updatedByUsername"
@@ -1338,7 +1341,6 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
-  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",

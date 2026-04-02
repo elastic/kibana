@@ -16,7 +16,8 @@ import { WORKFLOW_DELETE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerDeleteWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .delete({
       path: '/api/workflows/workflow/{id}',
@@ -51,13 +52,19 @@ export function registerDeleteWorkflowRoute({ router, api, spaces }: RouteDepend
         },
       },
       withLicenseCheck(async (context, request, response) => {
+        const { force } = request.query;
         try {
           const { id } = request.params;
-          const { force } = request.query;
           const spaceId = spaces.getSpaceId(request);
           await api.deleteWorkflows([id], spaceId, request, { force });
+          audit.logWorkflowDeleted(request, { id, force });
           return response.ok();
         } catch (error) {
+          audit.logWorkflowDeleted(request, {
+            id: request.params.id,
+            force,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

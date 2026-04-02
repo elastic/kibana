@@ -18,7 +18,8 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerExportWorkflowsRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerExportWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/export',
@@ -90,8 +91,13 @@ export function registerExportWorkflowsRoute({ router, api, logger, spaces }: Ro
             },
           };
 
+          audit.logWorkflowsExported(request, {
+            ids: entries.map((e) => e.id),
+          });
+
           return response.ok({ body });
         } catch (error) {
+          audit.logWorkflowsExported(request, { error });
           return handleRouteError(response, error);
         }
       })

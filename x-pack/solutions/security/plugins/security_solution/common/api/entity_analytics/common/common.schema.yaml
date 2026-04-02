@@ -141,6 +141,9 @@ components:
         contribution_score:
           type: number
           format: double
+        entity_id:
+          type: string
+          description: The EUID of the entity within the graph that generated this alert.
 
     RiskScoreCategories:
       type: string
@@ -183,6 +186,9 @@ components:
           type: string
           example: "example.host"
           description: The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
+        calculation_run_id:
+          type: string
+          description: Unique identifier for the scoring run that produced this document.
         calculated_level:
           $ref: "#/components/schemas/EntityRiskLevels"
           example: "Critical"
@@ -246,6 +252,14 @@ components:
             required:
               - type
               - contribution
+        score_type:
+          type: string
+          enum:
+            - base
+            - propagated
+            - resolution
+          description: >-
+            Distinguishes base, propagated, and resolution scores.
 
     RiskScoreEntityIdentifierWeights:
       type: number

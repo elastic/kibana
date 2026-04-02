@@ -17,15 +17,9 @@ import { DataIngestStatus } from './data_ingest_status';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useKubernetesFlow } from './use_kubernetes_flow';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
-import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 
 export const KubernetesPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
-      defaultMessage: 'Kubernetes: Logs & Metrics',
-    }),
-  });
   const { data, status, error, refetch } = useKubernetesFlow();
   const { onPageReady } = usePerformanceContext();
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');

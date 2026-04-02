@@ -13,7 +13,7 @@ import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
 const sortFieldSchema = z.enum([
   'name',
@@ -40,13 +40,20 @@ const listNotificationPoliciesQuerySchema = z.object({
 @injectable()
 export class ListNotificationPoliciesRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'public',
+    summary: 'List notification policies',
+    description:
+      'Get a paginated list of notification policies with optional filtering and sorting.',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  } as const;
   static validate = {
     request: {
       query: buildRouteValidationWithZod(listNotificationPoliciesQuerySchema),

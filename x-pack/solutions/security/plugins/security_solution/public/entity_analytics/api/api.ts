@@ -54,6 +54,11 @@ import type {
   UpdateWatchlistRequestBodyInput,
   UpdateWatchlistResponse,
 } from '../../../common/api/entity_analytics/watchlists/management/update.gen';
+import type { ListWatchlistEntitySourcesResponse } from '../../../common/api/entity_analytics/watchlists/data_source/list.gen';
+import type {
+  UpdateWatchlistEntitySourceRequestBodyInput,
+  UpdateWatchlistEntitySourceResponse,
+} from '../../../common/api/entity_analytics/watchlists/data_source/update.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
@@ -83,7 +88,10 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
-import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
+import {
+  WATCHLISTS_URL,
+  WATCHLISTS_INDICES_URL,
+} from '../../../common/entity_analytics/watchlists/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -720,6 +728,55 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
+    /**
+     * List entity sources linked to a specific watchlist
+     */
+    const listWatchlistEntitySources = async (params: {
+      watchlistId: string;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<ListWatchlistEntitySourcesResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source/list`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'GET',
+          signal: params.signal,
+        }
+      );
+
+    /**
+     * Update an entity source linked to a watchlist
+     */
+    const updateWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      entitySourceId: string;
+      body: UpdateWatchlistEntitySourceRequestBodyInput;
+    }) =>
+      http.fetch<UpdateWatchlistEntitySourceResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source/${params.entitySourceId}`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'PUT',
+          body: JSON.stringify(params.body),
+        }
+      );
+
+    /**
+     * Search indices with entity fields for watchlists
+     */
+    const searchWatchlistIndices = async (params: {
+      query: string | undefined;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<string[]>(WATCHLISTS_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          searchQuery: params.query,
+        },
+        signal: params.signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -749,6 +806,9 @@ export const useEntityAnalyticsRoutes = () => {
       getWatchlist,
       updateWatchlist,
       deleteWatchlist,
+      listWatchlistEntitySources,
+      updateWatchlistEntitySource,
+      searchWatchlistIndices,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,

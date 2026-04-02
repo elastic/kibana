@@ -8,8 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import type { PageScope } from '../../data_view_manager/constants';
-import type { SelectedDataView, SourcererDataView } from './model';
-import type { SecurityDataView } from '../containers/create_sourcerer_data_view';
+import type { SelectedDataView, SecurityDataView, SourcererDataView } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
