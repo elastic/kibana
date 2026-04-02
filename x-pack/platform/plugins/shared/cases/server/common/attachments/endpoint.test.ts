@@ -145,9 +145,21 @@ describe('endpointAttachmentTransformer', () => {
       expect(result).toEqual(unifiedPayload);
     });
 
+    it('toUnifiedPayload throws for non-legacy payload', () => {
+      expect(() => endpointAttachmentTransformer.toUnifiedPayload(unifiedPayload)).toThrow(
+        'Expected legacy endpoint attachment payload'
+      );
+    });
+
     it('toLegacyPayload converts unified payload', () => {
       const result = endpointAttachmentTransformer.toLegacyPayload(unifiedPayload);
       expect(result).toEqual(legacyPayload);
+    });
+
+    it('toLegacyPayload throws for non-unified payload', () => {
+      expect(() => endpointAttachmentTransformer.toLegacyPayload(legacyPayload)).toThrow(
+        'Expected unified endpoint attachment payload'
+      );
     });
 
     it('isLegacyPayload detects legacy payloads', () => {

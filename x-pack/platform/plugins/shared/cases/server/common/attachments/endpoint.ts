@@ -113,6 +113,9 @@ export const endpointAttachmentTransformer: AttachmentTypeTransformer<
   },
 
   toUnifiedPayload(attachment: AttachmentRequestV2): UnifiedAttachmentPayload {
+    if (!isLegacyEndpointAttachment(attachment)) {
+      throw new Error('Expected legacy endpoint attachment payload');
+    }
     const legacyAttachment = attachment as ExternalReferenceNoSOAttachmentPayload;
     return {
       type: ENDPOINT_ATTACHMENT_TYPE_ID,
@@ -123,6 +126,9 @@ export const endpointAttachmentTransformer: AttachmentTypeTransformer<
   },
 
   toLegacyPayload(attachment: AttachmentRequestV2): AttachmentRequest {
+    if (!isUnifiedEndpointAttachment(attachment)) {
+      throw new Error('Expected unified endpoint attachment payload');
+    }
     const unifiedAttachment = attachment as UnifiedReferenceAttachmentPayload;
     return {
       type: AttachmentType.externalReference,
