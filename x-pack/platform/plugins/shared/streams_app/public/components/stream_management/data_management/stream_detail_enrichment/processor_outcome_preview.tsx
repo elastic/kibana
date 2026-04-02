@@ -534,7 +534,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     clearTimeout(grokDebounceRef.current);
     grokDebounceRef.current = setTimeout(() => {
       setGrokColumns(immediateGrokColumns);
-    }, 500);
+    }, 1000);
     return () => clearTimeout(grokDebounceRef.current);
   }, [immediateGrokColumns]);
 

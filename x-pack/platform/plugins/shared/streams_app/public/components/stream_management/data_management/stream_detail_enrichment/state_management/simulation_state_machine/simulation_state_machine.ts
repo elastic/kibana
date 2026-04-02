@@ -170,7 +170,7 @@ export const simulationMachine = setup({
     }),
   },
   delays: {
-    processorChangeDebounceTime: 300,
+    processorChangeDebounceTime: 1000,
   },
   guards: {
     canSimulate: ({ context }) => hasAnyValidSteps(context.steps),
