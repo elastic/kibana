@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/core-security-server-mocks'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/object-utils'
   - '@kbn/alerting-v2-constants'
 tags:
   - plugin
