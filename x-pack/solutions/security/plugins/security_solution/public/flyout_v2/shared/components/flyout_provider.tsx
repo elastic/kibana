@@ -21,6 +21,7 @@ import { UserPrivilegesProvider } from '../../../common/components/user_privileg
 import { UpsellingProvider } from '../../../common/components/upselling_provider';
 import { DiscoverInTimelineContextProvider } from '../../../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../../../assistant/provider';
+import { CaseProvider } from '../../../cases/components/provider/provider';
 
 export const flyoutProviders = ({
   services,
@@ -54,7 +55,9 @@ export const flyoutProviders = ({
               <UserPrivilegesProvider kibanaCapabilities={services.application.capabilities}>
                 <UpsellingProvider upsellingService={services.upselling}>
                   <DiscoverInTimelineContextProvider>
-                    <AssistantProvider>{flyoutContent}</AssistantProvider>
+                    <CaseProvider>
+                      <AssistantProvider>{flyoutContent}</AssistantProvider>
+                    </CaseProvider>
                   </DiscoverInTimelineContextProvider>
                 </UpsellingProvider>
               </UserPrivilegesProvider>
