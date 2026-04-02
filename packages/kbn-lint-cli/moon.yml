@@ -32,6 +32,26 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
-tasks: {}
+tasks:
+  jest:
+    command: node
+    args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
+      - '--config'
+      - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      - '@group(src)'
+  jestCI:
+    command: node
+    args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
+      - '--config'
+      - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      - '@group(src)'
