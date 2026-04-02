@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { elasticsearchOnboardingAgent } from '@kbn/search-agent';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import anthropicIcon from '../../assets/anthropic.svg';
 import cursorIcon from '../../assets/cursor.svg';
@@ -144,17 +145,16 @@ export const AgentInstallSection = () => {
                   </EuiText>
                   <EuiFlexItem>
                     <EuiFlexGroup direction="row" gutterSize="s">
-                      <EuiButton
-                        color="text"
-                        iconSide="left"
+                      <AiButton
                         iconType="productAgent"
+                        variant="outlined"
                         onClick={handleOpenInAgentBuilder}
                         data-test-subj="agentInstallOpenInAgentBuilder"
                       >
                         {i18n.translate('xpack.gettingStarted.agentInstall.menuAgentBuilder', {
                           defaultMessage: 'Open Elastic Agent',
                         })}
-                      </EuiButton>
+                      </AiButton>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
