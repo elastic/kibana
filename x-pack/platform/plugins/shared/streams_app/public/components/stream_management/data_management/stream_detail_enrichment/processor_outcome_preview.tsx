@@ -21,9 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useGrokExpressions, GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../../hooks/use_doc_viewer_setup';
@@ -84,6 +85,15 @@ export const ProcessorOutcomePreview = () => {
     snapshot ? snapshot.matches({ enabled: 'loadingData' }) : false
   );
 
+  // Fall back to original samples when simulation produces no preview documents
+  // (e.g., while typing an incomplete processor pattern). This ensures the user
+  // can always see source field data while editing.
+  const fallbackDocuments = useMemo(
+    () => samples.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[],
+    [samples]
+  );
+  const documentsToShow = isEmpty(previewDocuments) ? fallbackDocuments : previewDocuments;
+
   if (isEmpty(samples)) {
     if (isDataSourceLoading) {
       return (
@@ -104,10 +114,10 @@ export const ProcessorOutcomePreview = () => {
         <PreviewDocumentsGroupBy />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      {isEmpty(previewDocuments) ? (
+      {isEmpty(documentsToShow) ? (
         <NoPreviewDocumentsEmptyPrompt />
       ) : (
-        <OutcomePreviewTable previewDocuments={previewDocuments} />
+        <OutcomePreviewTable previewDocuments={documentsToShow} />
       )}
     </>
   );
@@ -502,8 +512,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
    * In Grok mode, show the source field plus all fields extracted by the grok patterns.
    * As the user types patterns (e.g. %{DATA:attributes.ad.category}), the extracted field
    * names are parsed from the expressions and auto-activated as preview columns.
+   * Debounced to avoid excessive re-renders on every keystroke (500ms).
    */
-  const grokColumns = useMemo(() => {
+  const immediateGrokColumns = useMemo(() => {
     if (!validGrokField) return undefined;
     const extractedFields: string[] = [];
     grokExpressions.forEach((expr) => {
@@ -516,6 +527,16 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     });
     return [validGrokField, ...extractedFields];
   }, [validGrokField, grokExpressions]);
+
+  const [grokColumns, setGrokColumns] = useState(immediateGrokColumns);
+  const grokDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    clearTimeout(grokDebounceRef.current);
+    grokDebounceRef.current = setTimeout(() => {
+      setGrokColumns(immediateGrokColumns);
+    }, 500);
+    return () => clearTimeout(grokDebounceRef.current);
+  }, [immediateGrokColumns]);
 
   /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
