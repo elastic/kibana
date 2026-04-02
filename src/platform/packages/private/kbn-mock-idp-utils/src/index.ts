@@ -47,4 +47,5 @@ export {
   getSAMLRequestId,
   createUiamSessionTokens,
   createUiamOAuthAccessToken,
+  projectTypeToAlias,
 } from './utils';

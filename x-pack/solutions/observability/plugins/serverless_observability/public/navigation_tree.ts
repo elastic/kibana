@@ -495,6 +495,24 @@ export const createNavigationTree = ({
               },
             ],
           },
+          ...filterForFeatureAvailability(
+            {
+              id: 'v2_alerting_preview',
+              title: i18n.translate(
+                'xpack.serverlessObservability.nav.projectSettings.v2AlertingPreview',
+                {
+                  defaultMessage: 'V2 Alerting Preview',
+                }
+              ),
+              renderAs: 'panelOpener' as const,
+              breadcrumbStatus: 'hidden',
+              children: [
+                { link: 'management:rules', breadcrumbStatus: 'hidden' },
+                { link: 'management:notification_policies', breadcrumbStatus: 'hidden' },
+              ],
+            },
+            showAlertingV2
+          ),
           {
             id: 'alerts_and_insights',
             title: i18n.translate(
