@@ -34,6 +34,25 @@ describe('getApmTracesEsqlLink', () => {
     ).toBeUndefined();
   });
 
+  it('opens a new Discover tab labelled with "Good vs bad events" and the SLO name', () => {
+    const getRedirectUrl = jest.fn(() => 'url');
+    const discover = { locator: { getRedirectUrl } } as unknown as DiscoverStart;
+    const slo = buildSlo({ indicator: buildApmLatencyIndicator(), name: 'My APM SLO' });
+
+    getApmTracesEsqlLink({
+      slo,
+      timeRange: TIME_RANGE,
+      discover,
+      transactionIndex: TRANSACTION_INDEX,
+    });
+
+    expect(getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tab: { id: 'new', label: 'Good vs bad events - My APM SLO' },
+      })
+    );
+  });
+
   it('returns undefined when transactionIndex is empty', () => {
     const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
 

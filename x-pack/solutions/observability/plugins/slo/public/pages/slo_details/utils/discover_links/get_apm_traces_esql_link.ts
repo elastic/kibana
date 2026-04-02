@@ -163,5 +163,12 @@ export function getApmTracesEsqlLink({
     timeRange,
     query: { esql: esqlQuery },
     esqlControls: buildSloEventControl(),
+    tab: {
+      id: 'new',
+      label: i18n.translate('xpack.slo.sloDetails.discoverTabLabel', {
+        defaultMessage: 'Good vs bad events - {sloName}',
+        values: { sloName: slo.name },
+      }),
+    },
   } as Parameters<typeof discover.locator.getRedirectUrl>[0]);
 }
