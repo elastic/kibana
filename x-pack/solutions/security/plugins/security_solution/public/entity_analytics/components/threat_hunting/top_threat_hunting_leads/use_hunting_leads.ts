@@ -12,30 +12,44 @@ import { fromApiLead } from './types';
 import * as i18n from './translations';
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
+const POLL_INTERVAL_MS = 2_000;
+const POLL_TIMEOUT_MS = 120_000;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useHuntingLeads = () => {
   const { fetchLeads, generateLeads: generateLeadsApi } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
   const { addSuccess, addError } = useAppToasts();
 
+  const fetchLeadsParams = {
+    params: {
+      page: 1 as const,
+      perPage: 10 as const,
+      sortField: 'priority' as const,
+      sortOrder: 'desc' as const,
+      status: 'active' as const,
+    },
+  };
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
-    queryFn: ({ signal }) =>
-      fetchLeads({
-        signal,
-        params: {
-          page: 1,
-          perPage: 10,
-          sortField: 'priority',
-          sortOrder: 'desc',
-          status: 'active',
-        },
-      }),
+    queryFn: ({ signal }) => fetchLeads({ signal, ...fetchLeadsParams }),
   });
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
     mutationFn: async () => {
       await generateLeadsApi({ params: {} });
+
+      const deadline = Date.now() + POLL_TIMEOUT_MS;
+      while (Date.now() < deadline) {
+        await delay(POLL_INTERVAL_MS);
+        const result = await fetchLeads(fetchLeadsParams);
+        if (result.leads && result.leads.length > 0) {
+          queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+          return;
+        }
+      }
       await queryClient.invalidateQueries({ queryKey: [HUNTING_LEADS_QUERY_KEY] });
     },
     onSuccess: () => {

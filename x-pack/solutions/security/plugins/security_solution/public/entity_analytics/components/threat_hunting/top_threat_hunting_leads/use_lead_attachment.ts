@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import { THREAT_HUNTING_AGENT_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { LEAD_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { HuntingLead } from './types';
 
@@ -47,11 +46,10 @@ const buildLeadPrompt = (lead: HuntingLead): string => {
 
 export const useLeadAttachment = () => {
   const { agentBuilder } = useKibana().services;
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
 
   const openWithLead = useCallback(
     (lead: HuntingLead) => {
-      if (!isAgentBuilderEnabled || !agentBuilder?.openChat) {
+      if (!agentBuilder?.openChat) {
         return;
       }
 
@@ -63,7 +61,7 @@ export const useLeadAttachment = () => {
         agentId: THREAT_HUNTING_AGENT_ID,
       });
     },
-    [isAgentBuilderEnabled, agentBuilder]
+    [agentBuilder]
   );
 
   return openWithLead;

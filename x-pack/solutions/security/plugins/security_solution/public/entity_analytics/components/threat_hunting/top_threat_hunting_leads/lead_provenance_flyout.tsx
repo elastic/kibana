@@ -25,8 +25,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { HuntingLead, Observation } from './types';
-import { PriorityBadge } from './priority_badge';
-import { getModuleLabel, getStalenessLabel } from './translations';
+import { getModuleLabel } from './translations';
 import * as i18n from './translations';
 
 const getSeverityColor = (severity: string): string => {
@@ -39,19 +38,6 @@ const getSeverityColor = (severity: string): string => {
       return 'default';
     case 'low':
       return 'hollow';
-    default:
-      return 'default';
-  }
-};
-
-const getStalenessColor = (staleness: string): string => {
-  switch (staleness) {
-    case 'fresh':
-      return 'success';
-    case 'stale':
-      return 'warning';
-    case 'expired':
-      return 'danger';
     default:
       return 'default';
   }
@@ -103,44 +89,23 @@ export const LeadProvenanceFlyout: React.FC<LeadProvenanceFlyoutProps> = ({
   return (
     <EuiFlyoutResizable
       onClose={onClose}
-      size="s"
+      size="m"
       ownFocus
       aria-label={i18n.LEAD_PROVENANCE_TITLE}
       data-test-subj="leadProvenanceFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <PriorityBadge priority={lead.priority} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2>{lead.title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="s">
+          <h2>{lead.title}</h2>
+        </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           {lead.byline}
         </EuiText>
         <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={getStalenessColor(lead.staleness)}>
-              {getStalenessLabel(lead.staleness)}
-            </EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {new Date(lead.timestamp).toLocaleString()}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={lead.status === 'active' ? 'success' : 'default'}>
-              {lead.status}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="xs" color="subdued">
+          {new Date(lead.timestamp).toLocaleString()}
+        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -150,7 +115,14 @@ export const LeadProvenanceFlyout: React.FC<LeadProvenanceFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">
-          <p>{lead.description}</p>
+          <ul>
+            {lead.description
+              .split('\n')
+              .filter(Boolean)
+              .map((line, idx) => (
+                <li key={idx}>{line}</li>
+              ))}
+          </ul>
         </EuiText>
 
         <EuiSpacer size="l" />
@@ -241,13 +213,14 @@ export const LeadProvenanceFlyout: React.FC<LeadProvenanceFlyoutProps> = ({
               <h3>{i18n.CHAT_RECOMMENDATIONS_SECTION}</h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiListGroup flush>
+            <EuiListGroup flush maxWidth={false}>
               {lead.chatRecommendations.map((rec, idx) => (
                 <EuiListGroupItem
                   key={idx}
                   label={rec}
                   iconType="discuss"
                   size="s"
+                  wrapText
                   data-test-subj={`chatRecommendation-${idx}`}
                 />
               ))}

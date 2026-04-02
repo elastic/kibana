@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButtonGroup,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,8 +25,6 @@ import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
-import { PriorityBadge } from './priority_badge';
-import { getStalenessLabel } from './translations';
 import * as i18n from './translations';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -45,25 +42,6 @@ const getEntityIcon = (entityType: string): string => {
   }
 };
 
-const getStalenessColor = (staleness: string): string => {
-  switch (staleness) {
-    case 'fresh':
-      return 'success';
-    case 'stale':
-      return 'warning';
-    case 'expired':
-      return 'danger';
-    default:
-      return 'default';
-  }
-};
-
-const STATUS_FILTER_OPTIONS = [
-  { id: 'all', label: i18n.FILTER_ALL },
-  { id: 'active', label: i18n.FILTER_ACTIVE },
-  { id: 'dismissed', label: i18n.FILTER_DISMISSED },
-];
-
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
   onSelectLead: (lead: HuntingLead) => void;
@@ -77,16 +55,12 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
-  const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const { fetchLeads } = useEntityAnalyticsRoutes();
 
-  const statusParam =
-    statusFilter === 'all' ? undefined : (statusFilter as 'active' | 'dismissed' | 'expired');
-
   const { data, isLoading } = useQuery({
-    queryKey: ['hunting-leads-flyout', pageIndex, pageSize, statusParam],
+    queryKey: ['hunting-leads-flyout', pageIndex, pageSize],
     queryFn: ({ signal }) =>
       fetchLeads({
         signal,
@@ -95,7 +69,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
           perPage: pageSize,
           sortField: 'priority',
           sortOrder: 'desc',
-          status: statusParam,
         },
       }),
   });
@@ -120,11 +93,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
     setPageIndex(0);
   }, []);
 
-  const handleStatusChange = useCallback((id: string) => {
-    setStatusFilter(id);
-    setPageIndex(0);
-  }, []);
-
   return (
     <EuiFlyoutResizable
       onClose={onClose}
@@ -137,15 +105,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
         <EuiTitle size="m">
           <h2>{i18n.ALL_HUNTING_LEADS_TITLE}</h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiButtonGroup
-          legend="Status filter"
-          options={STATUS_FILTER_OPTIONS}
-          idSelected={statusFilter}
-          onChange={handleStatusChange}
-          buttonSize="compressed"
-          data-test-subj="leadStatusFilter"
-        />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -223,9 +182,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
       data-test-subj={`leadListItem-${lead.id}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <PriorityBadge priority={lead.priority} />
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
             <strong>{lead.title}</strong>
@@ -245,11 +201,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={getStalenessColor(lead.staleness)}>
-            {getStalenessLabel(lead.staleness)}
-          </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
