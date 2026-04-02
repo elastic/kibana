@@ -392,7 +392,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('maps recovery_policy with condition-only mode using evaluation base query', async () => {
+  it('ignores condition fields when mapping recovery_policy', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
 
@@ -409,13 +409,14 @@ describe('useCreateRule', () => {
       schedule: { every: '5m', lookback: '1m' },
       evaluation: {
         query: {
-          base: 'FROM logs | STATS count() BY host',
+          base: 'FROM logs | STATS count() BY host | WHERE count > 100',
           condition: 'WHERE count > 100',
         },
       },
       recoveryPolicy: {
         type: 'query',
         query: {
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
           condition: 'WHERE count <= 50',
         },
       },
@@ -431,11 +432,14 @@ describe('useCreateRule', () => {
       const payload = JSON.parse(
         (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
       );
+      expect(payload.evaluation.query).toEqual({
+        base: 'FROM logs | STATS count() BY host | WHERE count > 100',
+      });
+      expect(payload.evaluation.query).not.toHaveProperty('condition');
       expect(payload.recovery_policy).toEqual({
         type: 'query',
         query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count <= 50',
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
         },
       });
     });

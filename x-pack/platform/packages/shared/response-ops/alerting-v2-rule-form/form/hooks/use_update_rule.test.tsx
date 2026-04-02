@@ -170,7 +170,7 @@ describe('useUpdateRule', () => {
     });
   });
 
-  it('includes evaluation condition when non-empty', async () => {
+  it('ignores evaluation condition even when non-empty', async () => {
     const { http, result } = setupUseUpdateRule();
 
     http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'Condition Rule' } });
@@ -179,7 +179,7 @@ describe('useUpdateRule', () => {
       ...validFormData,
       evaluation: {
         query: {
-          base: 'FROM logs | STATS count() BY host',
+          base: 'FROM logs | STATS count() BY host | WHERE count > 100',
           condition: 'WHERE count > 100',
         },
       },
@@ -192,13 +192,13 @@ describe('useUpdateRule', () => {
     await waitFor(() => {
       const body = getLastPatchedBody(http);
       expect(body.evaluation.query).toEqual({
-        base: 'FROM logs | STATS count() BY host',
-        condition: 'WHERE count > 100',
+        base: 'FROM logs | STATS count() BY host | WHERE count > 100',
       });
+      expect(body.evaluation.query).not.toHaveProperty('condition');
     });
   });
 
-  it('includes recovery_policy with condition-only mode using evaluation base', async () => {
+  it('ignores condition fields in recovery_policy', async () => {
     const { http, result } = setupUseUpdateRule();
 
     http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'Recovery Rule' } });
@@ -209,12 +209,14 @@ describe('useUpdateRule', () => {
       evaluation: {
         query: {
           base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count > 100',
         },
       },
       recoveryPolicy: {
         type: 'query',
-        query: { condition: 'WHERE count <= 50' },
+        query: {
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
+          condition: 'WHERE count <= 50',
+        },
       },
     };
 
@@ -227,8 +229,7 @@ describe('useUpdateRule', () => {
       expect(body.recovery_policy).toEqual({
         type: 'query',
         query: {
-          base: 'FROM logs | STATS count() BY host',
-          condition: 'WHERE count <= 50',
+          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
         },
       });
     });

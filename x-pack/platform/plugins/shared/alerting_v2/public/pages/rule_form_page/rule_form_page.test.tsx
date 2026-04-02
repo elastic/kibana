@@ -339,10 +339,10 @@ describe('RuleFormPage', () => {
       expect(schedule.every).toBe('10m');
       expect(schedule.lookback).toBe('2m');
 
-      // Evaluation
+      // Evaluation (condition is ignored from API response)
       const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
       expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
-      expect(evaluation.query.condition).toBe('WHERE count > 5');
+      expect(evaluation.query).not.toHaveProperty('condition');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };
@@ -523,10 +523,10 @@ describe('RuleFormPage', () => {
       expect(schedule.every).toBe('10m');
       expect(schedule.lookback).toBe('2m');
 
-      // Evaluation
+      // Evaluation (condition is ignored from API response)
       const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
       expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
-      expect(evaluation.query.condition).toBe('WHERE count > 5');
+      expect(evaluation.query).not.toHaveProperty('condition');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };

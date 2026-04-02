@@ -37,7 +37,7 @@ describe('RecoveryPolicy', () => {
     );
   });
 
-  it('renders combined base and condition in code block', () => {
+  it('renders only base query and ignores condition when both are present', () => {
     const policy: RuleApiResponse['recovery_policy'] = {
       type: 'query',
       query: { base: 'FROM metrics-*', condition: 'WHERE cpu < 0.5' },
@@ -46,9 +46,9 @@ describe('RecoveryPolicy', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQueryBase')).toHaveTextContent(
       'FROM metrics-*'
     );
-    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQueryCondition')).toHaveTextContent(
-      'WHERE cpu < 0.5'
-    );
+    expect(
+      screen.queryByTestId('alertingV2RuleDetailsRecoveryQueryCondition')
+    ).not.toBeInTheDocument();
   });
 
   it('renders only type label for query policy without actual queries', () => {

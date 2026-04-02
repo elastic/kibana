@@ -72,20 +72,8 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders alert condition for alert mode when condition is present', () => {
+  it('does not render alert condition even when condition is present in data', () => {
     renderConditions(alertRule);
-    expect(screen.getByTestId('alertingV2RuleDetailsAlertCondition')).toHaveTextContent(
-      'WHERE cpu > 0.9'
-    );
-  });
-
-  it('does not render alert condition for signal mode', () => {
-    renderConditions(baseRule);
-    expect(screen.queryByTestId('alertingV2RuleDetailsAlertCondition')).not.toBeInTheDocument();
-  });
-
-  it('does not render alert condition when alert mode has no condition', () => {
-    renderConditions({ ...alertRule, evaluation: { query: { base: 'FROM logs-*' } } });
     expect(screen.queryByTestId('alertingV2RuleDetailsAlertCondition')).not.toBeInTheDocument();
   });
 
