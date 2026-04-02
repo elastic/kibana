@@ -38,7 +38,7 @@ export async function search(
           ...(description && { description }),
           title: title ?? '',
         },
-        meta: getMarkdownMeta(so, 'search'),
+        meta: getMarkdownMeta(so),
       };
     }),
     page: soResponse.page,

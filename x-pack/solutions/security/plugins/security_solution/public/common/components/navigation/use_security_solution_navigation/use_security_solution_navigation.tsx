@@ -24,7 +24,7 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
 });
 
 export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] | null => {
-  const { chrome } = useKibana().services;
+  const { chrome, notifications, application, spaces } = useKibana().services;
   const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
   const chromeStyle = useObservable(chromeStyle$, undefined);
 
@@ -39,11 +39,22 @@ export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['soluti
     return null;
   }
 
+  const areAnnouncementsEnabled = notifications?.tours.isEnabled();
+  const canManageSpaces = application?.capabilities.spaces?.manage;
+
+  const SolutionViewSwitchCallout = spaces?.ui?.components?.getSolutionViewSwitchCallout;
+  const solutionNavFooter =
+    areAnnouncementsEnabled && canManageSpaces && SolutionViewSwitchCallout ? (
+      <SolutionViewSwitchCallout currentSolution="security" />
+    ) : undefined;
+
   return {
     canBeCollapsed: true,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     children: <SecuritySideNav />,
     closeFlyoutButtonPosition: 'inside',
+    footer: solutionNavFooter,
+    ...(solutionNavFooter ? { hasPinnedBottomNavItems: true } : {}),
   };
 };

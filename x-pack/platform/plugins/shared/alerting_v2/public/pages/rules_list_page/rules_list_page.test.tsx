@@ -17,8 +17,11 @@ const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) =>
   const path = options?.path ?? '';
   return `/app/${appId}${path}`;
 });
-const mockSetBreadcrumbs = jest.fn();
 const mockDocTitleChange = jest.fn();
+
+jest.mock('../../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => jest.fn(),
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -26,7 +29,7 @@ jest.mock('@kbn/core-di-browser', () => ({
       return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
     }
     if (token === 'chrome') {
-      return { setBreadcrumbs: mockSetBreadcrumbs, docTitle: { change: mockDocTitleChange } };
+      return { docTitle: { change: mockDocTitleChange } };
     }
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
@@ -378,7 +381,7 @@ describe('RulesListPage', () => {
 
     expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
       'href',
-      '/app/management/insightsAndAlerting/alerting_v2/create'
+      '/app/management/alertingV2/rules/create'
     );
   });
 
@@ -517,7 +520,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
+      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
     );
   });
 

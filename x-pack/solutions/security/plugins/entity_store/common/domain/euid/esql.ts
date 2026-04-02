@@ -30,6 +30,7 @@ import {
 } from './commons';
 import {
   applyFieldEvaluations,
+  getFieldEvaluationsFromDefinition,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
@@ -77,8 +78,9 @@ export function getEuidEsqlFilterBasedOnDocument(
     return `(${identityField.singleField} == "${escapeEsqlString(value)}")`;
   }
 
-  if (identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
@@ -96,9 +98,7 @@ export function getEuidEsqlFilterBasedOnDocument(
     return undefined;
   }
 
-  const evaluatedDestinations = new Set(
-    identityField.fieldEvaluations?.map((e) => e.destination) ?? []
-  );
+  const evaluatedDestinations = new Set(fieldEvaluations.map((e) => e.destination));
 
   const onExpressions = Object.entries(fieldsToBeFilteredOn.values)
     .filter(([field]) => !evaluatedDestinations.has(field))
@@ -112,8 +112,8 @@ export function getEuidEsqlFilterBasedOnDocument(
 
   const allParts: string[] = [...onExpressions, ...outExpressions];
 
-  if (identityField.fieldEvaluations?.length) {
-    for (const evaluation of identityField.fieldEvaluations) {
+  if (fieldEvaluations.length > 0) {
+    for (const evaluation of fieldEvaluations) {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
       const sourceFields = [...exactMatchFields, ...prefixMatchFields];
       const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
@@ -151,10 +151,10 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const sourceExpressions = sources.map(sourceToEsqlExpression);
   const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
   const effectiveSourceName = sourceVariablesBaseName;
+  const fallbackExpression =
+    fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
   const destinationCaseParts: string[] = [
-    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), "${escapeEsqlString(
-      fallbackValue
-    )}"`,
+    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`,
   ];
   for (const clause of whenClauses) {
     const conditions = clause.sourceMatchesAny
@@ -215,12 +215,10 @@ export function getFieldEvaluationsEsql(entityType: EntityType): string | undefi
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
 export function getFieldEvaluationsEsqlFromDefinition({
+  fieldEvaluations,
   identityField,
 }: EntityDefinitionWithoutId): string | undefined {
-  if (isSingleFieldIdentity(identityField)) {
-    return undefined;
-  }
-  const evaluations = identityField.fieldEvaluations;
+  const evaluations = getFieldEvaluationsFromDefinition({ fieldEvaluations, identityField });
   if (!evaluations || evaluations.length === 0) {
     return undefined;
   }

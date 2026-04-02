@@ -208,7 +208,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
             />
           ),
           link: riskScoreData.loading ? undefined : link,
-          iconType: !isPreviewMode ? 'arrowStart' : undefined,
+          iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
         }}
         expand={{
           expandable: false,

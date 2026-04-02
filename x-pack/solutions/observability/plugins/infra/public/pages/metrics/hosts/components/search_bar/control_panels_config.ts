@@ -9,7 +9,7 @@ import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   CLOUD_PROVIDER,
   HOST_OS_NAME,
-  OS_NAME,
+  OS_TYPE,
   SERVICE_NAME,
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -50,12 +50,12 @@ const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
     },
   },
   semconv: {
-    [OS_NAME]: {
+    [OS_TYPE]: {
       order: 0,
       width: 'medium',
       grow: false,
       type: OPTIONS_LIST_CONTROL,
-      fieldName: OS_NAME,
+      fieldName: OS_TYPE,
       title: 'Operating System',
     },
   },
@@ -63,15 +63,15 @@ const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
 
 const replaceableControlPanels: Record<DataSchemaFormat, ReplaceableControl> = {
   ecs: {
-    [OS_NAME]: {
+    [OS_TYPE]: {
       key: HOST_OS_NAME,
       control: controlPanelConfig.ecs[HOST_OS_NAME],
     },
   },
   semconv: {
     [HOST_OS_NAME]: {
-      key: OS_NAME,
-      control: controlPanelConfig.semconv[OS_NAME],
+      key: OS_TYPE,
+      control: controlPanelConfig.semconv[OS_TYPE],
     },
   },
 };

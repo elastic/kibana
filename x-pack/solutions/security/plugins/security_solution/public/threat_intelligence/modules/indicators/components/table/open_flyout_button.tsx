@@ -45,7 +45,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
         aria-label={VIEW_DETAILS_BUTTON_LABEL}
         data-test-subj={BUTTON_TEST_ID}
         color="text"
-        iconType="expand"
+        iconType="maximize"
         onClick={open}
         size="s"
       />

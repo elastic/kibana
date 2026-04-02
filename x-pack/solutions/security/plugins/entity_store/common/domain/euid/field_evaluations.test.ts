@@ -8,7 +8,12 @@
 import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
-import { applyFieldEvaluations, getFieldValue, getSourceMatchSpec } from './field_evaluations';
+import {
+  applyFieldEvaluations,
+  getFieldEvaluationsFromDefinition,
+  getFieldValue,
+  getSourceMatchSpec,
+} from './field_evaluations';
 
 describe('getFieldValue', () => {
   it('should return string value when doc has flat field', () => {
@@ -207,6 +212,74 @@ describe('applyFieldEvaluations', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: '' } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
     });
+  });
+});
+
+describe('shared entity.source field evaluation', () => {
+  const hostSourceEvaluation = getEntityDefinitionWithoutId('host').fieldEvaluations ?? [];
+
+  it('should prefer event.module over event.dataset and data_stream.dataset', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          event: { module: 'aws', dataset: 'cloudtrail' },
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'aws',
+    });
+  });
+
+  it('should fall back from event.dataset to data_stream.dataset and then null', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          event: { dataset: 'cloudtrail' },
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'cloudtrail',
+    });
+
+    expect(
+      applyFieldEvaluations(
+        {
+          data_stream: { dataset: 'logs-endpoint.alerts' },
+        },
+        hostSourceEvaluation
+      )
+    ).toEqual({
+      'entity.source': 'logs-endpoint.alerts',
+    });
+
+    expect(applyFieldEvaluations({}, hostSourceEvaluation)).toEqual({
+      'entity.source': null,
+    });
+  });
+});
+
+describe('getFieldEvaluationsFromDefinition', () => {
+  it('should include shared field evaluations for single-field identities', () => {
+    const serviceDefinition = getEntityDefinitionWithoutId('service');
+
+    expect(getFieldEvaluationsFromDefinition(serviceDefinition)).toEqual(
+      serviceDefinition.fieldEvaluations
+    );
+  });
+
+  it('should include both shared and identity field evaluations for calculated identities', () => {
+    const userDefinition = getEntityDefinitionWithoutId('user');
+
+    expect(getFieldEvaluationsFromDefinition(userDefinition)).toHaveLength(
+      (userDefinition.fieldEvaluations?.length ?? 0) +
+        ('fieldEvaluations' in userDefinition.identityField
+          ? userDefinition.identityField.fieldEvaluations?.length ?? 0
+          : 0)
+    );
   });
 });
 

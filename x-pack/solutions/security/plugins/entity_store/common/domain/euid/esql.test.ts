@@ -9,6 +9,7 @@ import {
   getEuidEsqlEvaluation,
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlFilterBasedOnDocument,
+  getFieldEvaluationsEsql,
   getFieldEvaluationsEsqlFromDefinition,
 } from './esql';
 import { getEntityDefinition } from '../definitions/registry';
@@ -218,17 +219,19 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
 });
 
 describe('getFieldEvaluationsEsql', () => {
-  it('returns empty string for entity types without field evaluations', () => {
-    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('generic', 'default'))).toBe(
-      undefined
-    );
-    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('host', 'default'))).toBe(
-      undefined
-    );
-    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('service', 'default'))).toBe(
-      undefined
-    );
-  });
+  it.each(['generic', 'host', 'service'] as const)(
+    'returns shared entity.source EVAL fragment for %s',
+    (entityType) => {
+      const result = getFieldEvaluationsEsql(entityType);
+
+      expect(result).toContain('_src_entity_source0 = MV_FIRST(event.module)');
+      expect(result).toContain('_src_entity_source1 = MV_FIRST(event.dataset)');
+      expect(result).toContain('_src_entity_source2 = MV_FIRST(data_stream.dataset)');
+      expect(result).toContain('_src_entity_source = CASE(');
+      expect(result).toContain('entity.source = CASE(');
+      expect(result).toContain('NULL, _src_entity_source)');
+    }
+  );
 
   it('returns EVAL fragment for user entity.namespace', () => {
     const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
