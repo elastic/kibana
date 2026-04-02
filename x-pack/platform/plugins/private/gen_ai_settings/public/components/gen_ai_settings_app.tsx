@@ -50,6 +50,8 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
   (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
 
+const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
   const { application, http, docLinks, productDocBase, analytics } = services;
@@ -63,6 +65,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
+
+  const isModelSettingsPageEnabled = services.settings?.client?.get<boolean>(
+    MODEL_SETTINGS_FEATURE_FLAG_ID,
+    false
+  );
 
   // Determine current chat experience (including unsaved changes)
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
@@ -310,38 +317,41 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               </EuiTitle>
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner>
-              <EuiDescribedFormGroup
-                data-test-subj="connectorsSection"
-                fullWidth
-                title={
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h3 data-test-subj="connectorsTitle">
-                          <FormattedMessage
-                            id="genAiSettings.aiConnectorLabel"
-                            defaultMessage="Default AI Connector"
-                          />
-                        </h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                description={connectorDescription}
-              >
-                <EuiFormRow fullWidth>
-                  <EuiFlexGroup gutterSize="m" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <DefaultAIConnector connectors={connectors} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFormRow>
-              </EuiDescribedFormGroup>
-
-              {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+              {!isModelSettingsPageEnabled && (
+                <>
+                  <EuiDescribedFormGroup
+                    data-test-subj="connectorsSection"
+                    fullWidth
+                    title={
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size="xs">
+                            <h3 data-test-subj="connectorsTitle">
+                              <FormattedMessage
+                                id="genAiSettings.aiConnectorLabel"
+                                defaultMessage="Default AI Connector"
+                              />
+                            </h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                    description={connectorDescription}
+                  >
+                    <EuiFormRow fullWidth>
+                      <EuiFlexGroup gutterSize="m" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <DefaultAIConnector connectors={connectors} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFormRow>
+                  </EuiDescribedFormGroup>
+                  {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+                </>
+              )}
 
               {showSpacesIntegration && canManageSpaces && (
                 <EuiDescribedFormGroup
