@@ -65,6 +65,20 @@ describe('scripts library client', () => {
     });
   });
 
+  it('should initialize file data index prior to creating a file record', async () => {
+    soClientMock.find.mockResolvedValue({
+      page: 0,
+      per_page: 0,
+      total: 0,
+      saved_objects: [],
+    });
+    await scriptsClient.create(ScriptsLibraryMock.generateCreateScriptBody());
+
+    expect(endpointAppServicesMock.createLogger().debug).toHaveBeenCalledWith(
+      'initializing indexes (if needed)'
+    );
+  });
+
   describe('#create()', () => {
     let createBodyMock: CreateScriptRequestBody;
 

@@ -55,6 +55,14 @@ describe('RiskScoreModule', () => {
     expect(module.isEnabled()).toBe(true);
   });
 
+  it('exposes module weight for weighted scoring', () => {
+    const module = createRiskScoreModule({
+      riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+      logger,
+    });
+    expect(module.config.weight).toBe(0.35);
+  });
+
   describe('current risk level observations', () => {
     it('produces a critical observation for Critical calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'alice', 95, 'Critical');
