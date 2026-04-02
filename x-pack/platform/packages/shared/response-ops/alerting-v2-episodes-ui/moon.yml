@@ -17,6 +17,7 @@ project:
   owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui
 dependsOn:
+  - '@kbn/alerting-v2-schemas'
   - '@kbn/core-http-browser'
   - '@kbn/data-views-plugin'
   - '@kbn/field-formats-plugin'
@@ -28,6 +29,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/data-plugin'
   - '@kbn/discover-utils'
+  - '@kbn/i18n-react'
   - '@kbn/es-query'
   - '@kbn/react-hooks'
   - '@kbn/alerting-v2-constants'
