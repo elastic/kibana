@@ -16,7 +16,7 @@ export function isHttpFetchError<T>(error: T | IHttpFetchError): error is IHttpF
 
 type HttpPathParamPrimitive = string | number | boolean;
 type HttpPathParamValue = HttpPathParamPrimitive | readonly HttpPathParamPrimitive[];
-type HttpPathParams = Record<string, HttpPathParamValue>;
+type HttpPathParams = Record<string, HttpPathParamValue | undefined>;
 
 const OPTIONAL_PATH_SEGMENT_REGEX = /\/\{(\w+)\?\}/g;
 const REQUIRED_PATH_PARAM_REGEX = /\{(\w+)(\*(\d*))?\}/g;

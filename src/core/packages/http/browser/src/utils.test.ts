@@ -37,6 +37,15 @@ describe('buildPath', () => {
     expect(buildPath('/api/myapi/{section}/{id?}', { section: 'test' })).toBe('/api/myapi/test');
   });
 
+  it('removes optional path segments when the parameter is undefined', () => {
+    const params: { section: string; id: string | undefined } = {
+      section: 'test',
+      id: undefined,
+    };
+
+    expect(buildPath('/api/myapi/{section}/{id?}', params)).toBe('/api/myapi/test');
+  });
+
   it('encodes multi-segment path parameters', () => {
     expect(
       buildPath('/api/myapi/{filePath*}', {

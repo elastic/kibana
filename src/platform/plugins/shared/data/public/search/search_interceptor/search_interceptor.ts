@@ -498,7 +498,10 @@ export class SearchInterceptor {
     const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,
+        buildPath('/internal/search/{strategy}/{id?}', {
+          strategy: strategyToString(strategy),
+          id: request.id,
+        }),
         {
           version: '1',
           signal: abortSignal,
