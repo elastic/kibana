@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import type { SourceFilter } from '../../common/api/unified_history/types';
@@ -111,6 +111,12 @@ export const useHistoryUrlParams = () => {
   const { search } = useLocation();
 
   const filters = useMemo(() => parseHistoryUrlParams(search), [search]);
+
+  // Sync sessionStorage with the current URL on mount and whenever the
+  // search string changes (e.g. user manually edits the URL bar).
+  useEffect(() => {
+    saveHistoryFilters(search);
+  }, [search]);
 
   const replaceUrl = useCallback(
     (nextFilters: HistoryUrlFilters) => {
