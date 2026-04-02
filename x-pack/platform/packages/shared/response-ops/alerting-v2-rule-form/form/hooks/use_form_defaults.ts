@@ -55,6 +55,8 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
       recoveryPolicy: {
         type: 'no_breach',
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     }),
     [baseQuery, condition, defaultGroupBy]
   );

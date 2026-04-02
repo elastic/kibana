@@ -55,6 +55,8 @@ describe('useUpdateRule', () => {
       },
     },
     grouping: { fields: ['host.name'] },
+    stateTransitionAlertDelayMode: 'immediate',
+    stateTransitionRecoveryDelayMode: 'immediate',
   };
 
   it('calls the correct API endpoint with encoded ruleId', async () => {
@@ -100,6 +102,8 @@ describe('useUpdateRule', () => {
       timeField: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
       evaluation: { query: { base: 'FROM logs | LIMIT 10' } },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     await act(async () => {
@@ -238,6 +242,8 @@ describe('useUpdateRule', () => {
     const formData: FormValues = {
       ...validFormData,
       kind: 'alert',
+      stateTransitionAlertDelayMode: 'duration',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: { pendingCount: 3, pendingTimeframe: '10m' },
     };
 

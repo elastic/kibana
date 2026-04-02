@@ -15,6 +15,24 @@ import { DEFAULT_FORM_STATE } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
 
+const mockGetUrlForApp = jest.fn(
+  (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
+);
+let mockWorkflowsEnabled = true;
+
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (token === 'application') {
+      return { getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'uiSettings') {
+      return { get: () => mockWorkflowsEnabled };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
 jest.mock('./components/matcher_input', () => ({
   MatcherInput: (props: {
     value: string;
@@ -27,6 +45,10 @@ jest.mock('./components/matcher_input', () => ({
       onChange={(e) => props.onChange(e.target.value)}
     />
   ),
+}));
+
+jest.mock('../../../hooks/use_fetch_data_fields', () => ({
+  useFetchDataFields: () => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -57,12 +79,18 @@ const renderForm = (defaultValues: NotificationPolicyFormState = DEFAULT_FORM_ST
 
 const TEST_SUBJ = {
   nameInput: 'nameInput',
-  descriptionInput: 'descriptionInput',
-  frequencySelect: 'frequencySelect',
+  groupingModeToggle: 'groupingModeToggle',
+  strategySelect: 'strategySelect',
   throttleIntervalInput: 'throttleIntervalInput',
+  groupByInput: 'groupByInput',
 } as const;
 
 describe('NotificationPolicyForm', () => {
+  beforeEach(() => {
+    mockWorkflowsEnabled = true;
+    jest.clearAllMocks();
+  });
+
   it('shows required errors for name on blur', async () => {
     const user = userEvent.setup();
     renderForm();
@@ -72,30 +100,147 @@ describe('NotificationPolicyForm', () => {
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
   });
 
-  it('shows throttle interval input only when throttle frequency is selected', async () => {
+  it('renders grouping mode toggle with Per Episode selected by default', () => {
+    renderForm();
+
+    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
+    expect(toggle).toBeInTheDocument();
+    const perEpisodeButton = toggle.querySelector('button[aria-pressed="true"]');
+    expect(perEpisodeButton).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
+  });
+
+  it('shows strategy select for per_episode mode', () => {
+    renderForm();
+
+    const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
+    expect(strategySelect).toBeInTheDocument();
+    expect(strategySelect).toHaveValue('on_status_change');
+  });
+
+  it('shows interval input when per_status_interval strategy is selected', async () => {
     const user = userEvent.setup();
     renderForm();
 
     expect(screen.queryByTestId(TEST_SUBJ.throttleIntervalInput)).not.toBeInTheDocument();
 
-    await user.selectOptions(screen.getByTestId(TEST_SUBJ.frequencySelect), 'throttle');
+    await user.selectOptions(screen.getByTestId(TEST_SUBJ.strategySelect), 'per_status_interval');
 
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toBeInTheDocument();
   });
 
-  it('validates throttle interval format when in throttle mode', async () => {
+  it('shows group by and strategy when Per Group mode is selected', async () => {
     const user = userEvent.setup();
     renderForm();
 
-    await user.selectOptions(screen.getByTestId(TEST_SUBJ.frequencySelect), 'throttle');
+    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
+    const buttons = toggle.querySelectorAll('button');
+    await user.click(buttons[1]); // Per Group is the second button
 
-    const intervalInput = screen.getByTestId(TEST_SUBJ.throttleIntervalInput);
-    await user.clear(intervalInput);
-    await user.type(intervalInput, '10x');
-    await user.tab();
+    expect(screen.getByTestId(TEST_SUBJ.groupByInput)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toBeInTheDocument();
+  });
 
-    expect(
-      await screen.findByText('Invalid throttle interval. Must be in the format of 1h, 5m, 30s')
-    ).toBeInTheDocument();
+  it('shows strategy select with time_interval when Digest mode is selected', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
+    const buttons = toggle.querySelectorAll('button');
+    await user.click(buttons[2]); // Digest is the third button
+
+    const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
+    expect(strategySelect).toBeInTheDocument();
+    expect(strategySelect).toHaveValue('time_interval');
+  });
+
+  it('shows interval input when time_interval is the default strategy in digest mode', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
+    const buttons = toggle.querySelectorAll('button');
+    await user.click(buttons[2]); // Digest is the third button
+
+    expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toBeInTheDocument();
+  });
+
+  it('pre-fills interval with 5m when switching to digest mode', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
+    const buttons = toggle.querySelectorAll('button');
+    await user.click(buttons[2]); // Digest
+
+    expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
+  });
+
+  it('pre-fills interval with 5m when selecting per_status_interval strategy', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.selectOptions(screen.getByTestId(TEST_SUBJ.strategySelect), 'per_status_interval');
+
+    expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
+  });
+
+  it('preserves groupBy fields when switching away from per_field and back', async () => {
+    const user = userEvent.setup();
+    renderForm({
+      ...DEFAULT_FORM_STATE,
+      groupingMode: 'per_field',
+      groupBy: ['host.name', 'service.name'],
+      throttleStrategy: 'time_interval',
+      throttleInterval: '5m',
+    });
+
+    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
+    const buttons = toggle.querySelectorAll('button');
+
+    // Switch to Per Episode
+    await user.click(buttons[0]);
+    expect(screen.queryByTestId(TEST_SUBJ.groupByInput)).not.toBeInTheDocument();
+
+    // Switch back to Per Group
+    await user.click(buttons[1]);
+    const groupByInput = screen.getByTestId(TEST_SUBJ.groupByInput);
+    expect(groupByInput).toBeInTheDocument();
+
+    // The previously selected groupBy values should still be present as pills
+    expect(screen.getByTitle('host.name')).toBeInTheDocument();
+    expect(screen.getByTitle('service.name')).toBeInTheDocument();
+  });
+
+  it('pre-fills interval with 5m on mount when strategy needs interval and interval is empty', () => {
+    renderForm({
+      ...DEFAULT_FORM_STATE,
+      groupingMode: 'all',
+      throttleStrategy: 'time_interval',
+      throttleInterval: '',
+    });
+
+    expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
+  });
+
+  it('renders create workflow link when workflows are enabled', () => {
+    renderForm();
+
+    expect(screen.getByTestId('createWorkflowLink')).toBeInTheDocument();
+    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute(
+      'href',
+      '/app/workflows/create'
+    );
+    expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders warning callout when workflows are disabled', () => {
+    mockWorkflowsEnabled = false;
+    renderForm();
+
+    expect(screen.getByTestId('workflowsDisabledCallout')).toBeInTheDocument();
+    expect(screen.getByText('Workflows are not enabled')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowsDisabledSettingsLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
   });
 });
