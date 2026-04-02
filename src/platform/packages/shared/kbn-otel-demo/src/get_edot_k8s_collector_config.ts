@@ -279,23 +279,17 @@ export function getEdotK8sCollectorConfig({
 
   base.processors.cumulativetodelta = {};
 
-  base.processors['filter/drop_otlp_logs'] = {
-    error_mode: 'ignore',
-    logs: { log_record: ['true'] },
-  };
-
   // -- Exporters -----------------------------------------------------------
   base.exporters.debug = { verbosity: 'basic' };
 
   // -- Pipelines -----------------------------------------------------------
   const pipelines = base.service.pipelines;
 
-  // OTLP logs: feed to elasticapm for APM processing, but drop from ES
-  // (container logs come from filelog/k8s below)
+  // OTLP logs: feed to elasticapm for APM error detection, but not to ES
+  // (container logs come from filelog/k8s below instead)
   delete pipelines.logs;
   pipelines['logs/otlp'] = {
     receivers: ['otlp'],
-    processors: ['filter/drop_otlp_logs'],
     exporters: ['elasticapm', 'debug'],
   };
 
