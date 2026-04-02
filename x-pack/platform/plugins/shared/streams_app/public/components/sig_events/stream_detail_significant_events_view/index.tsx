@@ -113,6 +113,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       void Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['features', definition.stream.name] }),
+        queryClient.invalidateQueries({
+          queryKey: ['onboardingTaskStatus', definition.stream.name],
+        }),
       ]);
     },
     [definition.stream.name, queryClient, toasts]
@@ -198,10 +201,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <PromotionCallout
-          streamName={definition.stream.name}
-          onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
-        />
+        <EuiFlexItem grow={false}>
+          <PromotionCallout
+            streamName={definition.stream.name}
+            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
+          />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>

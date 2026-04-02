@@ -883,6 +883,52 @@ export class QueryClient {
     return { promoted: toPromote.length };
   }
 
+  /**
+   * Removes backing Kibana rules for stored rule-backed queries, then marks them as unbacked.
+   */
+  public async demoteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[]
+  ): Promise<{ demoted: number }> {
+    const streamName = definition.name;
+
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping demoteQueries because significant events feature is disabled.`
+      );
+      return { demoted: 0 };
+    }
+
+    const { [streamName]: currentQueryLinks } = await this.getStreamToQueryLinksMap([streamName]);
+    const idSet = new Set(queryIds);
+    const toDemote = currentQueryLinks.filter(
+      (link) => link.rule_backed && idSet.has(link.query.id)
+    );
+
+    if (toDemote.length === 0) {
+      return { demoted: 0 };
+    }
+
+    await this.uninstallQueries(toDemote);
+
+    await this.bulkStorage(
+      definition,
+      toDemote.map((link) => ({
+        index: {
+          asset: {
+            [ASSET_ID]: link[ASSET_ID],
+            [ASSET_TYPE]: link[ASSET_TYPE],
+            query: link.query,
+            rule_backed: false,
+            rule_id: link.rule_id,
+          },
+        },
+      }))
+    );
+
+    return { demoted: toDemote.length };
+  }
+
   private async installQueries(
     queriesToCreate: QueryLink[],
     queriesToUpdate: QueryLink[],

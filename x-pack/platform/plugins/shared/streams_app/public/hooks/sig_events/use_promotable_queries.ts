@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { TaskStatus } from '@kbn/streams-schema';
+import { useQuery } from '@kbn/react-query';
+import { useMemo } from 'react';
 import { useFetchDiscoveryQueries } from './use_fetch_discovery_queries';
+import { useOnboardingApi } from '../use_onboarding_api';
 
 /**
  * Returns the count and IDs of promotable (draft/not-yet-promoted) queries for a specific stream.
@@ -17,18 +21,41 @@ import { useFetchDiscoveryQueries } from './use_fetch_discovery_queries';
  * In practice a stream will never have anywhere near 1000 simultaneous draft queries.
  */
 export function usePromotableQueries(streamName: string) {
-  const result = useFetchDiscoveryQueries({
+  const discoveryQueriesResult = useFetchDiscoveryQueries({
     name: streamName,
     status: ['draft'],
     page: 1,
     perPage: 1_000,
   });
 
+  const { getOnboardingTaskStatus } = useOnboardingApi({ saveQueries: true });
+
+  const onboardingTaskStatusResult = useQuery({
+    queryKey: ['onboardingTaskStatus', streamName, 'promotableQueries'],
+    queryFn: () => getOnboardingTaskStatus(streamName),
+  });
+
+  const onboardingTaskStatus = onboardingTaskStatusResult.data;
+  const filteredQueries = useMemo(() => {
+    const taskStatus = onboardingTaskStatus?.status;
+    const queriesTaskResult =
+      taskStatus === TaskStatus.Completed ? onboardingTaskStatus?.queriesTaskResult : undefined;
+    const generatedQueries =
+      queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries : [];
+    const generatedQueriesEsqlSet = new Set(
+      generatedQueries.map((query) => query.esql.query.trim()).filter((esql) => esql.length > 0)
+    );
+
+    return (discoveryQueriesResult.data?.queries ?? []).filter((queryRow) =>
+      generatedQueriesEsqlSet.has(queryRow.query.esql.query.trim())
+    );
+  }, [discoveryQueriesResult.data?.queries, onboardingTaskStatus]);
+
   return {
-    count: result.data?.total ?? 0,
-    queries: result.data?.queries ?? [],
-    queryIds: result.data?.queries.map((q) => q.query.id) ?? [],
-    isLoading: result.isLoading,
-    refetch: result.refetch,
+    queries: filteredQueries,
+    isLoading: discoveryQueriesResult.isLoading || onboardingTaskStatusResult.isLoading,
+    refetch: async () => {
+      await Promise.all([discoveryQueriesResult.refetch(), onboardingTaskStatusResult.refetch()]);
+    },
   };
 }
