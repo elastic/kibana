@@ -37,9 +37,9 @@ export const OnboardingRouter = React.memo(() => {
     <Routes>
       <Route
         path={`${ONBOARDING_PATH}/siem_migrations`}
-        render={() => {
-          return <Redirect to={SIEM_MIGRATIONS_CREATE_PATH} />;
-        }}
+        render={({ location }) => (
+          <Redirect to={{ pathname: SIEM_MIGRATIONS_CREATE_PATH, hash: location.hash }} />
+        )}
       />
       <Route path={`${ONBOARDING_PATH}${topicPathParam}`} exact component={OnboardingRoute} />
       <Route path={`${ONBOARDING_PATH}/*`} render={() => <Redirect to={ONBOARDING_PATH} />} />
@@ -55,6 +55,7 @@ const OnboardingRoute = React.memo<OnboardingRouteProps>(({ match: { params }, l
     pathTopicId: params.topicId || null,
     hashCardId: getCardIdFromHash(location.hash),
   });
+
   if (isLoading) {
     return <CenteredLoadingSpinner />;
   }
@@ -62,7 +63,7 @@ const OnboardingRoute = React.memo<OnboardingRouteProps>(({ match: { params }, l
   return (
     <>
       <OnboardingHeader />
-      <OnboardingBody topicId={OnboardingTopicId.default} />
+      <OnboardingBody />
     </>
   );
 });

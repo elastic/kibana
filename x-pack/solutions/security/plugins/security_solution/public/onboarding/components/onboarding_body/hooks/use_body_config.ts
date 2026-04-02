@@ -7,13 +7,14 @@
 
 import { useMemo } from 'react';
 import { useOnboardingContext } from '../../onboarding_context';
-import type { OnboardingTopicId } from '../../../constants';
+import { useTopicId } from '../../hooks/use_topic_id';
 import type { OnboardingGroupConfig } from '../../../types';
 
 /**
  * Hook that returns the body config for the selected topic
  */
-export const useBodyConfig = (topicId: OnboardingTopicId): OnboardingGroupConfig[] => {
+export const useBodyConfig = (): OnboardingGroupConfig[] => {
+  const topicId = useTopicId();
   const { config } = useOnboardingContext();
   const topicBodyConfig = useMemo(() => {
     let bodyConfig: OnboardingGroupConfig[] = [];

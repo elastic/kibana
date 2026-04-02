@@ -5,22 +5,64 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CenteredLoadingSpinner } from '../../../common/components/centered_loading_spinner';
-import type { OnboardingCardId } from '../../constants';
-import { useBodyConfig } from './hooks/use_body_config';
-import { OnboardingCardGroup } from './onboarding_card_group';
-import { OnboardingCardPanel } from './onboarding_card_panel';
-import { useExpandedCard } from './hooks/use_expanded_card';
-import { useCompletedCards } from './hooks/use_completed_cards';
-import type { IsCardAvailable } from '../../types';
+import { CenteredLoadingSpinner } from '../../common/components/centered_loading_spinner';
+import type { OnboardingCardId } from '../../onboarding/constants';
+import type { IsCardAvailable, SetExpandedCardId } from '../../onboarding/types';
+import { OnboardingCardGroup } from '../../onboarding/components/onboarding_body/onboarding_card_group';
+import { OnboardingCardPanel } from '../../onboarding/components/onboarding_body/onboarding_card_panel';
+import { useCompletedCards } from '../../onboarding/components/onboarding_body/hooks/use_completed_cards';
+import { siemMigrationsBodyConfig } from './body_config';
 
-export const OnboardingBody = React.memo(() => {
-  const bodyConfig = useBodyConfig();
-  const { expandedCardId, setExpandedCardId } = useExpandedCard();
+const HEIGHT_ANIMATION_DURATION = 250;
+
+const scrollToCard = (cardId: OnboardingCardId) => {
+  setTimeout(() => {
+    const element = document.getElementById(cardId);
+    if (element) {
+      element.focus({ preventScroll: true });
+      window.scrollTo({ top: element.offsetTop - 40, behavior: 'smooth' });
+    }
+  }, HEIGHT_ANIMATION_DURATION);
+};
+
+/**
+ * Thin wrapper that reuses the onboarding card framework to render
+ * the SIEM migrations body config on a standalone page (outside the onboarding router).
+ */
+const getCardIdFromHash = (hash: string): OnboardingCardId | null =>
+  (hash.split('?')[0].replace('#', '') as OnboardingCardId) || null;
+
+export const SiemMigrationsOnboardingBody = React.memo(() => {
+  const bodyConfig = siemMigrationsBodyConfig;
+  const history = useHistory();
+  const { hash } = useLocation();
+  const cardIdFromHash = useMemo(() => getCardIdFromHash(hash), [hash]);
+
+  const [expandedCardId, _setExpandedCardId] = useState<OnboardingCardId | null>(null);
+
+  useEffect(() => {
+    if (cardIdFromHash) {
+      _setExpandedCardId(cardIdFromHash);
+      scrollToCard(cardIdFromHash);
+    }
+  }, [cardIdFromHash]);
+
   const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
     useCompletedCards(bodyConfig);
+
+  const setExpandedCardId = useCallback<SetExpandedCardId>(
+    (newCardId, options) => {
+      _setExpandedCardId(newCardId);
+      history.replace({ hash: newCardId ? `#${newCardId}` : undefined });
+      if (newCardId != null && options?.scroll) {
+        scrollToCard(newCardId);
+      }
+    },
+    [history]
+  );
 
   const createOnToggleExpanded = useCallback(
     (cardId: OnboardingCardId) => () => {
@@ -99,4 +141,4 @@ export const OnboardingBody = React.memo(() => {
   );
 });
 
-OnboardingBody.displayName = 'OnboardingBody';
+SiemMigrationsOnboardingBody.displayName = 'SiemMigrationsOnboardingBody';

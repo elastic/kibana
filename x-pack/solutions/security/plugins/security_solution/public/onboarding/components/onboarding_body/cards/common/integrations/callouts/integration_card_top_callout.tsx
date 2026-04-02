@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
@@ -14,7 +13,6 @@ import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { ActiveIntegrationsCallout } from './active_integrations_callout';
 import { EndpointCallout } from './endpoint_callout';
 import { IntegrationTabId } from '../../../../../../../common/lib/integrations/types';
-import { MigrationsCallout } from './migrations_callout';
 
 export const IntegrationCardTopCallout = React.memo<{
   activeIntegrationsCount: number;
@@ -34,12 +32,12 @@ export const IntegrationCardTopCallout = React.memo<{
   const showEndpointCallout =
     activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
 
-  const showAnyLegacyCallout = showAgentlessCallout || showEndpointCallout || showActiveCallout;
+  if (!showAgentlessCallout && !showEndpointCallout && !showActiveCallout) {
+    return null;
+  }
 
   return (
     <>
-      <MigrationsCallout />
-      {showAnyLegacyCallout && <EuiSpacer size="s" />}
       {showEndpointCallout && <EndpointCallout />}
       {showAgentlessCallout && <AgentlessAvailableCallout />}
       {showActiveCallout && (

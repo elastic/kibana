@@ -8,10 +8,19 @@
 import { renderHook } from '@testing-library/react';
 import { useBodyConfig } from './use_body_config';
 import { mockOnboardingContext, onboardingContext } from '../../__mocks__/mocks';
-import { OnboardingTopicId } from '../../../constants';
+
+const topicId = 'topic-id';
+const mockUseTopicId = jest.fn(() => topicId);
+jest.mock('../../hooks/use_topic_id', () => ({
+  useTopicId: () => mockUseTopicId(),
+}));
 
 const defaultBodyConfig = [{ title: 'Default Group 1', cards: [] }];
-const config = new Map([[OnboardingTopicId.default, { body: defaultBodyConfig }]]);
+const bodyConfig = [{ title: 'Group 1', cards: [] }];
+const config = new Map([
+  ['default', { body: defaultBodyConfig }],
+  [topicId, { body: bodyConfig }],
+]);
 
 jest.mock('../../onboarding_context');
 
@@ -26,7 +35,7 @@ describe('useBodyConfig', () => {
     });
 
     it('should return an empty array', () => {
-      const { result } = renderHook(() => useBodyConfig(OnboardingTopicId.default));
+      const { result } = renderHook(() => useBodyConfig());
       expect(result.current).toEqual([]);
     });
   });
@@ -37,8 +46,20 @@ describe('useBodyConfig', () => {
     });
 
     it('should return the body config for the selected topic', () => {
-      const { result } = renderHook(() => useBodyConfig(OnboardingTopicId.default));
-      expect(result.current).toEqual(defaultBodyConfig);
+      const { result } = renderHook(() => useBodyConfig());
+      expect(result.current).toEqual(bodyConfig);
+    });
+  });
+
+  describe('when the selected topic does not exist (not expected)', () => {
+    beforeEach(() => {
+      mockUseTopicId.mockReturnValue('non-existent-topic');
+      mockOnboardingContext.mockReturnValue({ ...onboardingContext, config });
+    });
+
+    it('should return the body config for the selected topic', () => {
+      const { result } = renderHook(() => useBodyConfig());
+      expect(result.current).toEqual([]);
     });
   });
 });
