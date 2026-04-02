@@ -32,7 +32,8 @@ import {
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
 } from '@kbn/lens-common';
-import { getUpdatedMetricState } from '../../../common/content_management/v1/transforms/metric';
+import { getUpdatedMetricState as getUpdatedMetricStateV1 } from '../../../common/content_management/v1/transforms/metric';
+import { getUpdatedMetricState as getUpdatedMetricStateV3 } from '../../../common/content_management/v3/transforms/metric';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -453,7 +454,7 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return getUpdatedMetricState(state);
+    if (state) return getUpdatedMetricStateV3(getUpdatedMetricStateV1(state));
 
     return {
       layerId: addNewLayer(),

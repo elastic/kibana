@@ -20,7 +20,7 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
   const state = attributes.state as {
     visualization: MetricVisualizationState & { titleWeight?: unknown };
   };
-  const { titleWeight: _titleWeight, ...newVisualizationState } = state.visualization;
+  const newVisualizationState = getUpdatedMetricState(state.visualization);
 
   return {
     ...attributes,
@@ -30,3 +30,11 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
     },
   };
 }
+
+export const getUpdatedMetricState = (
+  state: MetricVisualizationState & { titleWeight?: unknown }
+): MetricVisualizationState => {
+  const { titleWeight: _titleWeight, ...newState } = state;
+
+  return newState;
+};
