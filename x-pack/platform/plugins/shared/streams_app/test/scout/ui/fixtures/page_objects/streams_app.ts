@@ -85,7 +85,7 @@ export class StreamsApp {
     );
     this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
     this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
-    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated successfully');
+    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
     this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
       'queryStreamDetailsQueryViewerCodeBlock'
     );
@@ -1311,7 +1311,7 @@ export class StreamsApp {
   }
 
   async clickQueryStreamFormCreateButton() {
-    await this.page.getByTestId('streamsAppQueryStreamFormCreateButton').click();
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
   }
 
   async clickQueryStreamLink(streamName: string) {
@@ -1336,5 +1336,17 @@ export class StreamsApp {
 
   async clickDeleteQueryStreamModalDeleteButton() {
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
+  }
+
+  async clickQueryStreamEditButton(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEditButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamFormSaveButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
+  }
+
+  async clickQueryStreamFormDeleteButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
   }
 }

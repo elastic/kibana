@@ -26,6 +26,7 @@ import {
   createDeleteStreamActor,
   createQueryStreamActor,
   createQueryStreamSuccessNotifier,
+  updateQueryStreamSuccessNotifier,
 } from './stream_actors';
 import { routingConverter } from '../../utils';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
@@ -97,6 +98,7 @@ export const streamRoutingMachine = setup({
         currentRuleId: null,
         initialRouting: routing,
         routing,
+        editingQueryStreamName: null,
       };
     }),
     storeCurrentRuleId: assign((_, params: { id: StreamRoutingContext['currentRuleId'] }) => ({
@@ -135,6 +137,7 @@ export const streamRoutingMachine = setup({
       isConditionEditorValid: params.isValid,
     })),
     notifyQueryStreamSuccess: getPlaceholderFor(createQueryStreamSuccessNotifier),
+    notifyQueryStreamUpdate: getPlaceholderFor(updateQueryStreamSuccessNotifier),
     storeBulkForkItems: assign((_, params: { items: BulkForkItem[] }) => ({
       bulkFork: { items: params.items, results: [] },
     })),
@@ -218,6 +221,7 @@ export const streamRoutingMachine = setup({
     isRefreshing: false,
     isConditionEditorValid: true,
     bulkFork: null,
+    editingQueryStreamName: null,
   }),
   initial: 'initializing',
   states: {
@@ -792,7 +796,10 @@ export const streamRoutingMachine = setup({
           id: 'queryMode',
           initial: 'idle',
           on: {
-            'childStreams.mode.changeToIngestMode': '#ingestMode',
+            'childStreams.mode.changeToIngestMode': {
+              target: '#ingestMode',
+              actions: assign({ editingQueryStreamName: null }),
+            },
           },
           states: {
             idle: {
@@ -800,6 +807,13 @@ export const streamRoutingMachine = setup({
                 'queryStream.create': {
                   guard: 'hasManagePrivileges',
                   target: 'creating',
+                },
+                'queryStream.edit': {
+                  guard: 'hasManagePrivileges',
+                  target: 'editing',
+                  actions: assign(({ event }) => ({
+                    editingQueryStreamName: event.name,
+                  })),
                 },
               },
             },
@@ -828,6 +842,49 @@ export const streamRoutingMachine = setup({
                       target: '#queryMode.idle',
                       actions: [
                         { type: 'notifyQueryStreamSuccess' },
+                        { type: 'setRefreshing' },
+                        { type: 'refreshDefinition' },
+                      ],
+                    },
+                    onError: {
+                      target: 'changing',
+                      actions: [{ type: 'notifyStreamFailure' }],
+                    },
+                  },
+                },
+              },
+            },
+            editing: {
+              initial: 'changing',
+              on: {
+                'queryStream.cancelEdit': {
+                  target: 'idle',
+                  actions: assign(() => ({
+                    editingQueryStreamName: null,
+                  })),
+                },
+              },
+              states: {
+                changing: {
+                  on: {
+                    'queryStream.update': 'saving',
+                  },
+                },
+                saving: {
+                  invoke: {
+                    src: 'createQueryStream',
+                    input: ({ event }) => {
+                      assertEvent(event, 'queryStream.update');
+                      return {
+                        name: event.name,
+                        esqlQuery: event.esqlQuery,
+                      };
+                    },
+                    onDone: {
+                      target: '#queryMode.idle',
+                      actions: [
+                        assign(() => ({ editingQueryStreamName: null })),
+                        { type: 'notifyQueryStreamUpdate' },
                         { type: 'setRefreshing' },
                         { type: 'refreshDefinition' },
                       ],
@@ -882,6 +939,9 @@ export const createStreamRoutingMachineImplementations = ({
       toasts: core.notifications.toasts,
     }),
     notifyQueryStreamSuccess: createQueryStreamSuccessNotifier({
+      toasts: core.notifications.toasts,
+    }),
+    notifyQueryStreamUpdate: updateQueryStreamSuccessNotifier({
       toasts: core.notifications.toasts,
     }),
   },

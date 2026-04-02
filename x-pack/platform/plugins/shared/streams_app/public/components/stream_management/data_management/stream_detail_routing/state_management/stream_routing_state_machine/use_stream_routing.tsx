@@ -148,6 +148,15 @@ export const useStreamRoutingEvents = () => {
       saveQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
         service.send({ type: 'queryStream.save', name, esqlQuery });
       },
+      editQueryStream: (name: string) => {
+        service.send({ type: 'queryStream.edit', name });
+      },
+      cancelQueryStreamEdit: () => {
+        service.send({ type: 'queryStream.cancelEdit' });
+      },
+      updateQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
+        service.send({ type: 'queryStream.update', name, esqlQuery });
+      },
     };
   }, [service]);
 };
@@ -199,7 +208,7 @@ export const useStreamSamplesSelector = <T,>(
 
   if (!routingSamplesRef) {
     throw new Error(
-      'useStreamSamplesSelector must be used within a StreamEnrichmentContextProvider'
+      'useStreamSamplesSelector must be used within a StreamRoutingContextProvider'
     );
   }
 

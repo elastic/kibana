@@ -16,12 +16,15 @@ import {
   EuiLink,
   EuiSkeletonText,
   EuiCodeBlock,
+  EuiCallOut,
+  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { css as cssReact } from '@emotion/react';
 import { Streams, getEsqlViewName, isChildOf } from '@kbn/streams-schema';
-import { useDebounceFn } from '@kbn/react-hooks';
+import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -32,6 +35,7 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { useQueryStreamCreation } from './query_stream_creation_context';
 import { QueryStreamBadge } from '../../../stream_badges';
+import { StreamDeleteModal } from '../../../stream_delete_modal';
 
 interface IdleQueryStreamEntryProps {
   streamName: string;
@@ -114,6 +118,7 @@ export function IdleQueryStreamEntry({ streamName, onEdit }: IdleQueryStreamEntr
                   aria-label={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
                     defaultMessage: 'Edit query stream',
                   })}
+                  data-test-subj={`streamsAppQueryStreamEditButton-${streamName}`}
                   onClick={() => onEdit(streamName)}
                 />
               </EuiFlexItem>
@@ -195,5 +200,144 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
       onQueryChange={debouncedExecuteQuery}
       isSaving={isSaving}
     />
+  );
+}
+
+interface EditingQueryStreamEntryProps {
+  streamName: string;
+  parentStreamName: string;
+}
+
+/**
+ * Inline form for editing an existing query stream within the routing page.
+ * Mirrors CreatingQueryStreamEntry but pre-fills data and calls update instead of create.
+ */
+export function EditingQueryStreamEntry({
+  streamName,
+  parentStreamName,
+}: EditingQueryStreamEntryProps) {
+  const { cancelQueryStreamEdit, updateQueryStream } = useStreamRoutingEvents();
+  const { executeQuery } = useQueryStreamCreation();
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+    core: {
+      application: { navigateToUrl },
+    },
+  } = useKibana();
+  const router = useStreamsAppRouter();
+
+  const isSaving = useStreamsRoutingSelector((state) =>
+    state.matches({ ready: { queryMode: { editing: 'saving' } } })
+  );
+
+  const [isDeleteModalOpen, { on: openDeleteModal, off: closeDeleteModal }] = useBoolean(false);
+
+  // Fetch the current stream definition to get the existing ES|QL query
+  const streamDetailsFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        signal,
+        params: { path: { name: streamName } },
+      });
+    },
+    [streamsRepositoryClient, streamName]
+  );
+
+  const currentEsql =
+    streamDetailsFetch.value && Streams.QueryStream.GetResponse.is(streamDetailsFetch.value)
+      ? streamDetailsFetch.value.stream.query.esql
+      : undefined;
+
+  // Debounced query execution for preview
+  const { run: debouncedExecuteQuery } = useDebounceFn((query: string) => {
+    if (query && query.trim() !== '') {
+      executeQuery(query);
+    }
+  }, deboucingOptions);
+
+  const handleSave = useCallback(
+    ({ esqlQuery }: { name: string; esqlQuery: string }) => {
+      if (!esqlQuery || esqlQuery.trim() === '') {
+        return;
+      }
+      updateQueryStream({ name: streamName, esqlQuery });
+    },
+    [streamName, updateQueryStream]
+  );
+
+  const handleDelete = useCallback(async () => {
+    await streamsRepositoryClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+      signal: null,
+      params: { path: { name: streamName } },
+    });
+    navigateToUrl(
+      router.link('/{key}/management/{tab}', {
+        path: { key: parentStreamName, tab: 'partitioning' },
+      })
+    );
+  }, [streamsRepositoryClient, streamName, navigateToUrl, router, parentStreamName]);
+
+  // Extract suffix for the inline form (remove parent prefix)
+  const suffix = streamName.replace(`${parentStreamName}.`, '');
+
+  if (streamDetailsFetch.loading) {
+    return (
+      <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+        <EuiSkeletonText lines={3} />
+      </EuiPanel>
+    );
+  }
+
+  if (!currentEsql) {
+    return (
+      <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+        <EuiCallOut
+          title={i18n.translate('xpack.streams.editingQueryStreamEntry.fetchError', {
+            defaultMessage: 'Unable to load query stream details',
+          })}
+          color="danger"
+          iconType="error"
+          size="s"
+        />
+        <EuiSpacer size="s" />
+        <EuiButtonEmpty onClick={cancelQueryStreamEdit} size="s">
+          {i18n.translate('xpack.streams.editingQueryStreamEntry.cancelButton', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+      </EuiPanel>
+    );
+  }
+
+  return (
+    <>
+      <InlineQueryStreamForm
+        parentStreamName={parentStreamName}
+        initialName={suffix}
+        initialEsqlQuery={currentEsql}
+        onSave={handleSave}
+        onCancel={cancelQueryStreamEdit}
+        onQueryChange={debouncedExecuteQuery}
+        isSaving={isSaving}
+        readOnly={isSaving}
+        nameReadOnly
+        saveButtonLabel={i18n.translate('xpack.streams.editingQueryStreamEntry.updateButton', {
+          defaultMessage: 'Update',
+        })}
+        onDelete={openDeleteModal}
+      />
+      {isDeleteModalOpen && (
+        <StreamDeleteModal
+          onClose={closeDeleteModal}
+          onCancel={closeDeleteModal}
+          onDelete={handleDelete}
+          name={streamName}
+        />
+      )}
+    </>
   );
 }
