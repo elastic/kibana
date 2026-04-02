@@ -911,8 +911,6 @@ export class QueryClient {
       return { demoted: 0 };
     }
 
-    await this.uninstallQueries(toDemote);
-
     await this.bulkStorage(
       definition,
       toDemote.map((link) => ({
@@ -927,6 +925,8 @@ export class QueryClient {
         },
       }))
     );
+
+    await this.uninstallQueries(toDemote);
 
     return { demoted: toDemote.length };
   }
