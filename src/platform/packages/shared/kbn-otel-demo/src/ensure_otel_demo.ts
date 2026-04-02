@@ -296,6 +296,7 @@ export async function deployDemo({
         username: kibanaCredentials.username,
         password: kibanaCredentials.password,
         namespace: demoConfig.namespace,
+        demoId: demoConfig.id,
       })
     : getFullOtelCollectorConfig({
         elasticsearchEndpoint: elasticsearchHost,
@@ -303,6 +304,7 @@ export async function deployDemo({
         password: kibanaCredentials.password,
         logsIndex,
         namespace: demoConfig.namespace,
+        demoId: demoConfig.id,
       });
 
   // Resolve host gateway IP so pods can reach host.minikube.internal via hostAliases.

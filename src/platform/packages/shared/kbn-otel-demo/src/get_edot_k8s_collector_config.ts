@@ -20,11 +20,13 @@ export function getEdotK8sCollectorConfig({
   username,
   password,
   namespace = 'otel-demo',
+  demoId = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
   namespace?: string;
+  demoId?: string;
 }): string {
   const base = getEdotCollectorConfig({ elasticsearchEndpoint, username, password }) as {
     extensions: Record<string, unknown>;
@@ -271,7 +273,7 @@ export function getEdotK8sCollectorConfig({
   base.processors.resource = {
     attributes: [
       { key: 'service.namespace', value: namespace, action: 'upsert' },
-      { key: 'deployment.environment', value: 'otel', action: 'upsert' },
+      { key: 'deployment.environment', value: demoId, action: 'upsert' },
     ],
   };
 
