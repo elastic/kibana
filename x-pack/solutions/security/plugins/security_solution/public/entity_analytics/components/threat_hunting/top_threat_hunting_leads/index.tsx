@@ -105,11 +105,21 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isLoading ? (
-        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 120 }}>
+      {isLoading || isGenerating ? (
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+          style={{ minHeight: 120 }}
+        >
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="l" data-test-subj="leadsLoadingSpinner" />
           </EuiFlexItem>
+          {isGenerating && (
+            <EuiFlexItem grow={false}>
+              <p>{i18n.GENERATING_LEADS_DESCRIPTION}</p>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ) : leads.length === 0 ? (
         <EuiEmptyPrompt

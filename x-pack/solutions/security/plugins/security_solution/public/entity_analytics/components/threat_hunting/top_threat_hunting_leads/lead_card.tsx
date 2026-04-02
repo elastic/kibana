@@ -18,8 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HuntingLead } from './types';
-import { PriorityBadge } from './priority_badge';
-import { getStalenessLabel, VIEW_LEAD_DETAILS } from './translations';
+import { VIEW_LEAD_DETAILS } from './translations';
 
 const MAX_VISIBLE_TAGS = 3;
 
@@ -60,19 +59,6 @@ const getEntityIcon = (entityType: string): string => {
   }
 };
 
-const getStalenessColor = (staleness: string): string => {
-  switch (staleness) {
-    case 'fresh':
-      return 'success';
-    case 'stale':
-      return 'warning';
-    case 'expired':
-      return 'danger';
-    default:
-      return 'default';
-  }
-};
-
 interface LeadCardProps {
   lead: HuntingLead;
   onClick: (lead: HuntingLead) => void;
@@ -100,36 +86,24 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onInfoClick }
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <PriorityBadge priority={lead.priority} />
-            </EuiFlexItem>
             <EuiFlexItem css={titleStyles}>
               <EuiText size="s" css={titleStyles}>
                 {lead.title}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color={getStalenessColor(lead.staleness)}>
-                    {getStalenessLabel(lead.staleness)}
-                  </EuiBadge>
-                </EuiFlexItem>
-                {onInfoClick && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={VIEW_LEAD_DETAILS} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        aria-label={VIEW_LEAD_DETAILS}
-                        iconType="iInCircle"
-                        size="xs"
-                        onClick={handleInfoClick}
-                        data-test-subj={`leadInfoButton-${lead.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {onInfoClick && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={VIEW_LEAD_DETAILS} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={VIEW_LEAD_DETAILS}
+                    iconType="iInCircle"
+                    size="xs"
+                    onClick={handleInfoClick}
+                    data-test-subj={`leadInfoButton-${lead.id}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 

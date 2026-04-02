@@ -34,10 +34,12 @@ export const useHuntingLeads = () => {
   });
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
-    mutationFn: () => generateLeadsApi({ params: {} }),
+    mutationFn: async () => {
+      await generateLeadsApi({ params: {} });
+      await queryClient.invalidateQueries({ queryKey: [HUNTING_LEADS_QUERY_KEY] });
+    },
     onSuccess: () => {
       addSuccess(i18n.GENERATE_SUCCESS);
-      queryClient.invalidateQueries({ queryKey: [HUNTING_LEADS_QUERY_KEY] });
     },
     onError: (error: Error) => {
       addError(error, { title: i18n.GENERATE_ERROR });

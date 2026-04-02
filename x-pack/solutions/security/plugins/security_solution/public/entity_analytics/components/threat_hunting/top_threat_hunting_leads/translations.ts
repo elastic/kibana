@@ -27,6 +27,11 @@ export const GENERATING_LEADS = i18n.translate(
   { defaultMessage: 'Generating...' }
 );
 
+export const GENERATING_LEADS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generatingDescription',
+  { defaultMessage: 'Analyzing entities, risk scores, and alerts to surface hunting leads...' }
+);
+
 export const HUNT_IN_CHAT = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.huntInChat',
   { defaultMessage: 'Hunt in Chat' }

@@ -100,7 +100,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
       }),
   });
 
-  const leads = useMemo(() => data?.leads?.map(fromApiLead) ?? [], [data?.leads]);
+  const leads: HuntingLead[] = useMemo(() => data?.leads?.map(fromApiLead) ?? [], [data?.leads]);
   const totalCount = data?.total ?? 0;
 
   const filteredLeads = useMemo(() => {
