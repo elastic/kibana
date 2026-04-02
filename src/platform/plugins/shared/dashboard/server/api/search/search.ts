@@ -65,7 +65,7 @@ export async function search(
           }),
           title: title ?? '',
         },
-        meta: getDashboardMeta(so, 'search'),
+        meta: getDashboardMeta(so),
       };
     }),
     page: soResponse.page,
