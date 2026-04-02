@@ -63,12 +63,12 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'entity-fights-mongodb',
-            text: 'Must identify Fights MongoDB as an entity (evidence: resource.attributes.app=flights-db)',
+            text: 'Must identify Fights MongoDB as an entity (evidence: resource.attributes.app=fights-db)',
             score: 2,
           },
           {
             id: 'entity-fights-kafka',
-            text: 'Must identify Fights Kafka Broker as an entity (evidence: resource.attributes.app=flights-kafka)',
+            text: 'Must identify Fights Kafka Broker as an entity (evidence: resource.attributes.app=fights-kafka)',
             score: 2,
           },
           {
