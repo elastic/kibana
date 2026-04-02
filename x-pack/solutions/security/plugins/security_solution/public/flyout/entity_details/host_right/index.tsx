@@ -289,7 +289,8 @@ export const HostPanel = ({
       <HostPanelHeader
         hostName={hostName}
         lastSeen={observedHost.lastSeen}
-        entityId={entityStoreV2Enabled ? panelDisplayEntityId : undefined}
+        entityId={panelDisplayEntityId}
+        identityFields={documentEntityIdentifiers}
       />
       {noEntityInStore && (
         <EuiCallOut

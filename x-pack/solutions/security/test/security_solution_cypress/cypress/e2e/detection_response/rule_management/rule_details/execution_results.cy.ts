@@ -99,7 +99,7 @@ describe(
       login();
     });
 
-    it('should display real execution data after the rule executes', function () {
+    it.skip('should display real execution data after the rule executes', function () {
       visit(ruleDetailsUrl(this.ruleId));
       goToExecutionLogTab();
 

@@ -6,10 +6,8 @@
  */
 
 import {
-  EuiComboBox,
   EuiFieldText,
   EuiFormRow,
-  EuiSelect,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
@@ -19,15 +17,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { FREQUENCY_OPTIONS, THROTTLE_INTERVAL_PATTERN } from './constants';
+import { Controller, useFormContext } from 'react-hook-form';
 import { MatcherInput } from './components/matcher_input';
+import { DispatchSection } from './components/dispatch_section';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { NotificationPolicyFormState } from './types';
+import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
 
 export const NotificationPolicyForm = () => {
   const { control } = useFormContext<NotificationPolicyFormState>();
-  const frequency = useWatch({ control, name: 'frequency' });
+  const { data: dataFieldNames } = useFetchDataFields();
 
   return (
     <>
@@ -122,7 +121,7 @@ export const NotificationPolicyForm = () => {
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertingV2.notificationPolicy.form.matchConditions.description"
-              defaultMessage="Define conditions that must be met for this policy to trigger"
+              defaultMessage="Define conditions that must be met for this policy to trigger. Leave empty to match all alert episodes."
             />
           </EuiText>
         </EuiSplitPanel.Inner>
@@ -142,9 +141,10 @@ export const NotificationPolicyForm = () => {
                   onChange={field.onChange}
                   fullWidth
                   data-test-subj="matcherInput"
+                  dataFieldNames={dataFieldNames}
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.matcher.placeholder',
-                    { defaultMessage: 'e.g. episode_status : "active" and rule.name : "my-rule"' }
+                    { defaultMessage: 'e.g. data.host.name : "my-host.com" and rule.id : "uuid"' }
                   )}
                 />
               </EuiFormRow>
@@ -160,139 +160,20 @@ export const NotificationPolicyForm = () => {
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.form.grouping.title"
-                defaultMessage="Grouping configuration"
+                id="xpack.alertingV2.notificationPolicy.form.dispatch.title"
+                defaultMessage="Dispatch"
               />
             </h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.grouping.description"
-              defaultMessage="Group notifications by specific fields to reduce alert noise"
+              id="xpack.alertingV2.notificationPolicy.form.dispatch.description"
+              defaultMessage="How should matched episodes be grouped, and how often should they be dispatched?"
             />
           </EuiText>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
-          <Controller
-            name="groupBy"
-            control={control}
-            render={({ field }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.groupBy', {
-                  defaultMessage: 'Fields',
-                })}
-                fullWidth
-              >
-                <EuiComboBox
-                  fullWidth
-                  data-test-subj="groupByInput"
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.notificationPolicy.form.groupBy.placeholder',
-                    { defaultMessage: 'Select or type a field name' }
-                  )}
-                  selectedOptions={field.value.map((g: string) => ({ label: g }))}
-                  noSuggestions
-                  onCreateOption={(val) => {
-                    field.onChange([...field.value, val]);
-                  }}
-                  onChange={(options) => {
-                    field.onChange(options.map((o) => o.label));
-                  }}
-                />
-              </EuiFormRow>
-            )}
-          />
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-
-      <EuiSpacer size="m" />
-
-      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
-        <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.form.frequency.title"
-                defaultMessage="Frequency and timing configuration"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.frequency.description"
-              defaultMessage="Control when and how often notifications are sent"
-            />
-          </EuiText>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <Controller
-            name="frequency.type"
-            control={control}
-            render={({ field: { ref, ...field } }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.frequencyType', {
-                  defaultMessage: 'Frequency',
-                })}
-                fullWidth
-              >
-                <EuiSelect
-                  {...field}
-                  inputRef={ref}
-                  fullWidth
-                  options={FREQUENCY_OPTIONS}
-                  data-test-subj="frequencySelect"
-                />
-              </EuiFormRow>
-            )}
-          />
-          {frequency.type === 'throttle' && (
-            <Controller
-              name="frequency.interval"
-              control={control}
-              rules={{
-                pattern: {
-                  value: THROTTLE_INTERVAL_PATTERN,
-                  message: i18n.translate(
-                    'xpack.alertingV2.notificationPolicy.form.throttleInterval.pattern',
-                    {
-                      defaultMessage:
-                        'Invalid throttle interval. Must be in the format of 1h, 5m, 30s',
-                    }
-                  ),
-                },
-                required: i18n.translate(
-                  'xpack.alertingV2.notificationPolicy.form.throttleInterval.required',
-                  { defaultMessage: 'Throttle interval is required.' }
-                ),
-              }}
-              render={({ field: { ref, ...field }, fieldState: { error } }) => (
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.alertingV2.notificationPolicy.form.throttleInterval',
-                    {
-                      defaultMessage: 'Throttle interval',
-                    }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.alertingV2.notificationPolicy.form.throttleInterval.help',
-                    { defaultMessage: 'e.g. 1h, 5m, 30s' }
-                  )}
-                  fullWidth
-                  isInvalid={!!error}
-                  error={error?.message}
-                >
-                  <EuiFieldText
-                    {...field}
-                    inputRef={ref}
-                    value={field.value ?? ''}
-                    fullWidth
-                    isInvalid={!!error}
-                    data-test-subj="throttleIntervalInput"
-                  />
-                </EuiFormRow>
-              )}
-            />
-          )}
+          <DispatchSection />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
 
@@ -308,6 +189,12 @@ export const NotificationPolicyForm = () => {
               />
             </h3>
           </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.alertingV2.notificationPolicy.form.destination.description"
+              defaultMessage="Where should dispatches be sent."
+            />
+          </EuiText>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
           <WorkflowSelector />
