@@ -332,22 +332,42 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
         );
       }
     }
-    stmts.push(`if (_src != null) {`);
-    let first = true;
+
+    let branchFirst = true;
     for (const clause of ev.whenClauses) {
-      const conds = clause.sourceMatchesAny
-        .map((v) => `_src == "${escapePainlessString(v)}"`)
-        .join(' || ');
-      const prefix = first ? '  if ' : '  else if ';
-      stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
-      first = false;
+      if ('sourceMatchesAny' in clause) {
+        const conds = clause.sourceMatchesAny
+          .map((v) => `_src == "${escapePainlessString(v)}"`)
+          .join(' || ');
+        const prefix = branchFirst ? 'if' : 'else if';
+        stmts.push(
+          `${prefix} (_src != null && (${conds})) { ${varName} = "${escapePainlessString(
+            clause.then
+          )}"; }`
+        );
+        branchFirst = false;
+      } else {
+        const cond = streamlangConditionToPainlessDoc(clause.condition);
+        const prefix = branchFirst ? 'if' : 'else if';
+        stmts.push(`${prefix} (${cond}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
+        branchFirst = false;
+      }
     }
-    if (first) {
-      stmts.push(`  ${varName} = _src;`);
+
+    if (branchFirst) {
+      stmts.push(
+        `if (_src != null) { ${varName} = _src; } else { ${varName} = ${toPainlessNullableStringLiteral(
+          ev.fallbackValue
+        )}; }`
+      );
     } else {
-      stmts.push(`  else { ${varName} = _src; }`);
+      stmts.push(
+        `else if (_src != null) { ${varName} = _src; } else { ${varName} = ${toPainlessNullableStringLiteral(
+          ev.fallbackValue
+        )}; }`
+      );
     }
-    stmts.push(`} else { ${varName} = ${toPainlessNullableStringLiteral(ev.fallbackValue)}; }`);
+
     parts.push(stmts.join(' '));
   }
   const preamble = parts.join(' ');
