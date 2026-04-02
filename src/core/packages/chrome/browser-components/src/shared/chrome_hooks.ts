@@ -23,7 +23,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
+import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useChromeComponentsDeps } from '../context';
 
 /**
@@ -253,5 +253,5 @@ export function useNextHeader(): ChromeNextHeaderConfig | undefined {
 /** Returns whether the next-chrome experience is enabled via feature flag. */
 export function useIsNextChrome(): boolean {
   const { featureFlags } = useChromeComponentsDeps();
-  return featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false);
+  return isNextChrome(featureFlags);
 }
