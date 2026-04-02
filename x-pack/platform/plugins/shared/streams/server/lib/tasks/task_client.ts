@@ -309,4 +309,23 @@ export class TaskClient<TaskType extends string> {
     }
     this.logger.debug(`Successfully deleted task ${id}`);
   }
+
+  /**
+   * Deletes all tasks of a given type in a single bulk request.
+   * @returns the number of tasks deleted
+   */
+  public async deleteByType(type: string): Promise<number> {
+    const tasks = await this.findByType(type);
+    if (tasks.length === 0) {
+      return 0;
+    }
+
+    this.logger.debug(`Bulk-deleting ${tasks.length} task(s) of type ${type}`);
+
+    await this.storageClient.bulk({
+      operations: tasks.map((task) => ({ delete: { _id: task.id } })),
+    });
+
+    return tasks.length;
+  }
 }

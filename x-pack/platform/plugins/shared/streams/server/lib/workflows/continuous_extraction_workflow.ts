@@ -11,10 +11,16 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 
 import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+import type { TaskClient } from '../tasks/task_client';
+import { FEATURES_IDENTIFICATION_TASK_TYPE } from '../tasks/task_definitions/features_identification';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
 export interface ContinuousKiExtractionWorkflowService {
-  ensureWorkflow(params: { enabled: boolean; request: KibanaRequest }): Promise<void>;
+  ensureWorkflow(params: {
+    enabled: boolean;
+    request: KibanaRequest;
+    taskClient: TaskClient<string>;
+  }): Promise<void>;
 }
 
 export const createContinuousKiExtractionWorkflowService = (
@@ -81,11 +87,16 @@ export const createContinuousKiExtractionWorkflowService = (
   };
 
   return {
-    async ensureWorkflow({ enabled, request }) {
+    async ensureWorkflow({ enabled, request, taskClient }) {
       await hardDeleteIfExists(request);
 
       if (!enabled) {
         return;
+      }
+
+      const deleted = await taskClient.deleteByType(FEATURES_IDENTIFICATION_TASK_TYPE);
+      if (deleted > 0) {
+        log.info(`Purged ${deleted} feature-identification task(s) for clean-slate re-extraction`);
       }
 
       await managementApi.createWorkflow(
