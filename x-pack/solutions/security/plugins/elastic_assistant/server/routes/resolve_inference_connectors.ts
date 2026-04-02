@@ -29,10 +29,9 @@ export async function resolveConnectorById({
   request: KibanaRequest;
   connectorId: string;
 }): Promise<InferenceConnector | undefined> {
-  const modelSettingsEnabled = await assistantContext.core.uiSettings.client.get<boolean>(
-    MODEL_SETTINGS_FEATURE_FLAG_ID,
-    false
-  );
+  const modelSettingsEnabled = await assistantContext.core.uiSettings.client
+    .get<boolean>(MODEL_SETTINGS_FEATURE_FLAG_ID)
+    .catch(() => false);
 
   if (modelSettingsEnabled && assistantContext.searchInferenceEndpoints) {
     let endpoints: InferenceConnector[];
