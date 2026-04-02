@@ -8,23 +8,20 @@
 import React, { useMemo } from 'react';
 
 import {
+  EuiButtonIcon,
+  EuiCopy,
   EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayout,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-  EuiAccordion,
-  EuiFieldText,
-  useEuiTheme,
-  EuiTextColor,
-  EuiButtonGroup,
-  EuiPanel,
-  EuiCopy,
-  EuiButton,
-  EuiText,
   EuiFormAppend,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
@@ -37,23 +34,10 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as LABELS from '../translations';
 import { CHAT_COMPLETION_TASK_TYPE, DEFAULT_TASK_TYPE } from '../constants';
 import type { Config } from '../types/types';
-import type { TaskTypeOption } from '../utils/helpers';
-import { buttonCss, accordionCss } from './inference_service_form_fields';
-
-const taskTypeConfig = {
-  validations: [
-    {
-      validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
-      isBlocking: true,
-    },
-  ],
-};
 
 interface AdditionalOptionsFieldsProps {
   config: Config;
-  onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;
   selectedTaskType?: string;
-  taskTypeOptions: TaskTypeOption[];
   isEdit?: boolean;
   allowContextWindowLength?: boolean;
   allowTemperature?: boolean;
@@ -61,21 +45,16 @@ interface AdditionalOptionsFieldsProps {
 
 export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
   config,
-  taskTypeOptions,
   selectedTaskType,
-  onTaskTypeOptionsSelect,
   isEdit,
   allowContextWindowLength,
   allowTemperature,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { setFieldValue } = useFormContext();
 
   const contextWindowLengthSettings = useMemo(
     () =>
-      (taskTypeOptions?.some((option) => option.id === CHAT_COMPLETION_TASK_TYPE) ||
-        (isEdit && selectedTaskType === CHAT_COMPLETION_TASK_TYPE)) &&
-      allowContextWindowLength ? (
+      selectedTaskType === CHAT_COMPLETION_TASK_TYPE && allowContextWindowLength ? (
         <>
           <EuiTitle size="xxs" data-test-subj="context-window-length-details-label">
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -128,7 +107,6 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           >
             {(field) => {
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-              // This ensures the check happens when task type changes, as well.
               const taskTypeError =
                 config.contextWindowLength && selectedTaskType !== CHAT_COMPLETION_TASK_TYPE
                   ? LABELS.CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE
@@ -144,7 +122,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   <EuiFormControlLayout
                     fullWidth
                     clear={{
-                      onClick: (e) => {
+                      onClick: () => {
                         setFieldValue('config.contextWindowLength', '');
                       },
                     }}
@@ -167,14 +145,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           <EuiSpacer size="m" />
         </>
       ) : null,
-    [
-      selectedTaskType,
-      setFieldValue,
-      config.contextWindowLength,
-      isEdit,
-      allowContextWindowLength,
-      taskTypeOptions,
-    ]
+    [selectedTaskType, setFieldValue, config.contextWindowLength, allowContextWindowLength]
   );
 
   const temperatureSettings = useMemo(
@@ -242,7 +213,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   <EuiFormControlLayout
                     fullWidth
                     clear={{
-                      onClick: (e) => {
+                      onClick: () => {
                         setFieldValue('config.temperature', undefined);
                       },
                     }}
@@ -271,136 +242,31 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
     [setFieldValue, config.temperature, selectedTaskType, allowTemperature]
   );
 
-  const taskTypeSettings = useMemo(
-    () =>
-      selectedTaskType || config.taskType?.length ? (
-        <>
-          <EuiTitle size="xxs" data-test-subj="task-type-details-label">
-            <h4>
-              <FormattedMessage
-                id="xpack.inferenceEndpointUICommon.components.additionalInfo.taskTypeLabel"
-                defaultMessage="Task type"
-              />
-            </h4>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.inferenceEndpointUICommon.components.additionalInfo.taskTypeHelpInfo"
-              defaultMessage="Configure the inference task. Task types are specific to the service and model selected."
-            />
-          </EuiText>
-          <EuiSpacer size="m" />
-          <UseField path="config.taskType" config={taskTypeConfig}>
-            {(field) => {
-              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-              return (
-                <EuiFormRow id="taskType" fullWidth isInvalid={isInvalid} error={errorMessage}>
-                  {isEdit ? (
-                    <EuiButton data-test-subj="taskTypeSelectDisabled" isDisabled>
-                      {config.taskType}
-                    </EuiButton>
-                  ) : taskTypeOptions.length === 1 ? (
-                    <EuiButton
-                      data-test-subj="taskTypeSelectSingle"
-                      isDisabled
-                      onClick={() => onTaskTypeOptionsSelect(config.taskType)}
-                    >
-                      {config.taskType}
-                    </EuiButton>
-                  ) : (
-                    <EuiButtonGroup
-                      data-test-subj="taskTypeSelect"
-                      buttonSize="m"
-                      legend="Task type"
-                      defaultValue={DEFAULT_TASK_TYPE}
-                      idSelected={config.taskType}
-                      onChange={(id) => onTaskTypeOptionsSelect(id)}
-                      options={taskTypeOptions}
-                      color="text"
-                      type="single"
-                    />
-                  )}
-                </EuiFormRow>
-              );
-            }}
-          </UseField>
-        </>
-      ) : null,
-    [selectedTaskType, config.taskType, isEdit, taskTypeOptions, onTaskTypeOptionsSelect]
-  );
-
   const inferenceUri = useMemo(() => `_inference/${selectedTaskType}/`, [selectedTaskType]);
 
   return (
-    <EuiAccordion
-      id="inferenceAdditionalOptions"
-      data-test-subj="inference-endpoint-additional-settings"
-      buttonProps={{ css: buttonCss }}
-      css={accordionCss}
-      element="fieldset"
-      arrowDisplay="right"
-      arrowProps={{
-        color: 'primary',
-      }}
-      buttonElement="button"
-      borders="none"
-      buttonContent={
-        <EuiTextColor
-          color={euiTheme.colors.primary}
-          data-test-subj="inference-endpoint-additional-settings-button"
-        >
+    <>
+      <EuiFormRow
+        id="inferenceId"
+        label={
           <FormattedMessage
-            id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalSettingsLabel"
-            defaultMessage="Additional settings"
+            id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdLabel"
+            defaultMessage="Inference endpoint ID"
           />
-        </EuiTextColor>
-      }
-      initialIsOpen={false}
-    >
-      <EuiSpacer size="m" />
-      <EuiPanel hasBorder={true}>
-        {taskTypeSettings}
-        <EuiSpacer size="m" />
-        <EuiTitle size="xxs" data-test-subj="inference-endpoint-details-label">
-          <h4>
-            <FormattedMessage
-              id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointLabel"
-              defaultMessage="Inference Endpoint"
-            />
-          </h4>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued">
+        }
+        fullWidth
+        helpText={
           <FormattedMessage
-            id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointHelpLabel"
-            defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
+            id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdHelpLabel"
+            defaultMessage="This ID cannot be changed once created."
           />
-        </EuiText>
-        <EuiSpacer size="s" />
-
+        }
+      >
         <UseField path="config.inferenceId">
           {(field) => {
             const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
             return (
-              <EuiFormRow
-                id="inferenceId"
-                label={
-                  <FormattedMessage
-                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdLabel"
-                    defaultMessage="Inference ID"
-                  />
-                }
-                isInvalid={isInvalid}
-                error={errorMessage}
-                fullWidth
-                helpText={
-                  <FormattedMessage
-                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdHelpLabel"
-                    defaultMessage="This ID cannot be changed once created."
-                  />
-                }
-              >
+              <>
                 <EuiFieldText
                   isInvalid={isInvalid}
                   data-test-subj="inference-endpoint-input-field"
@@ -410,12 +276,11 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   onChange={(e) => {
                     setFieldValue('config.inferenceId', e.target.value);
                   }}
-                  prepend={inferenceUri}
                   append={
                     <EuiCopy
                       beforeMessage={LABELS.COPY_TOOLTIP}
                       afterMessage={LABELS.COPIED_TOOLTIP}
-                      textToCopy={`${inferenceUri}${config.inferenceId}`}
+                      textToCopy={config.inferenceId}
                     >
                       {(copy) => (
                         <EuiFormAppend
@@ -433,14 +298,53 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                     </EuiCopy>
                   }
                 />
-              </EuiFormRow>
+                {isInvalid && errorMessage && (
+                  <EuiText size="xs" color="danger">
+                    {errorMessage}
+                  </EuiText>
+                )}
+              </>
             );
           }}
         </UseField>
-        <EuiSpacer size="m" />
-        {contextWindowLengthSettings}
-        {temperatureSettings}
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiTitle size="xxxs">
+        <h5>
+          <FormattedMessage
+            id="xpack.inferenceEndpointUICommon.components.additionalInfo.apiReferenceLabel"
+            defaultMessage="API reference"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiPanel color="subdued" paddingSize="m">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+          <EuiFlexItem grow>
+            <EuiText size="s">
+              <code>{`${inferenceUri}${config.inferenceId}`}</code>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCopy
+              beforeMessage={LABELS.COPY_TOOLTIP}
+              afterMessage={LABELS.COPIED_TOOLTIP}
+              textToCopy={`${inferenceUri}${config.inferenceId}`}
+            >
+              {(copy) => (
+                <EuiButtonIcon
+                  iconType="copy"
+                  aria-label={LABELS.COPY_TOOLTIP}
+                  onClick={copy}
+                  data-test-subj="inference-endpoint-api-reference-copy"
+                />
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
-    </EuiAccordion>
+      {contextWindowLengthSettings}
+      {temperatureSettings}
+    </>
   );
 };
