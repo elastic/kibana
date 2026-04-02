@@ -14,6 +14,7 @@ import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-com
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
 import { toEmbeddablePanel, type VisualizationContent } from '@kbn/dashboard-agent-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 /**
  * Failure record for tracking visualization errors.
@@ -44,7 +45,7 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): VisualizationC
 
   return [
     {
-      type: 'lens',
+      type: LENS_EMBEDDABLE_TYPE,
       config: visualization as LensApiSchemaType,
     },
   ];
