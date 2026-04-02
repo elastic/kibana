@@ -159,6 +159,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }): Promise<void> {
     await this.client.update<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, attrs, {
       ...(version ? { version } : {}),
+      mergeAttributes: false,
     });
   }
 
