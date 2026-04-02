@@ -159,13 +159,15 @@ export function replaceFromSources(esql: string, newSources: string[]): string {
  * Returns `true` when the ES|QL query contains a STATS command,
  * indicating an aggregation-based (symptom) query rather than a
  * row-level (cause / match) query.
+ *
+ * Defaults to `false` on parse failure — treating unparseable queries
+ * as 'match' is safe because ensureMetadata also gracefully handles
+ * parse errors (returns the query unchanged).
  */
 export function hasStatsCommand(esql: string): boolean {
   const { root, parsed } = tryParseEsql(esql);
-  if (parsed) {
-    return root.commands.some((cmd) => 'name' in cmd && cmd.name === 'stats');
-  }
-  return STATS_REGEX.test(esql);
+  if (!parsed) return false;
+  return root.commands.some((cmd) => 'name' in cmd && cmd.name === 'stats');
 }
 
 /**
@@ -179,21 +181,21 @@ export function deriveQueryType(esql: string): QueryType {
 // Detects `<var> * <number> / <var>` — a rate computation — regardless of variable names.
 const RATE_PATTERN = /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b/i;
 
-// Matches `<identifier> > <number>` or `<identifier> >= <number>` in the portion
-// of the query AFTER the STATS command. This avoids false positives from unrelated
-// WHERE conditions before STATS (e.g., `WHERE status > 500`).
-const SAMPLE_SIZE_FLOOR_PATTERN = /\b\w+\s*>=?\s*\d+/i;
+const COMPARISON_PATTERN = /\b\w+\s*>=?\s*\d+/gi;
 
 function checkSampleSizeFloor(esql: string, hints: string[]): void {
   if (!RATE_PATTERN.test(esql)) return;
 
-  // Only inspect the portion after `| STATS` for the floor guard, since
-  // pre-STATS WHERE clauses contain unrelated filter predicates.
   const statsIdx = esql.search(/\|\s*STATS\b/i);
   const postStats = statsIdx >= 0 ? esql.slice(statsIdx) : esql;
   const postStatsWhere = postStats.match(/\bWHERE\b(.*)/is);
 
-  if (!postStatsWhere || !SAMPLE_SIZE_FLOOR_PATTERN.test(postStatsWhere[1])) {
+  // A rate query needs at least two comparisons in the post-STATS WHERE:
+  // one for the volume floor (e.g. total > 20) and one for the metric
+  // threshold (e.g. error_rate > 10). A single comparison is likely just
+  // the threshold without a floor.
+  const matches = postStatsWhere?.[1].match(COMPARISON_PATTERN);
+  if (!matches || matches.length < 2) {
     hints.push(
       'Warning: This query computes a rate but has no sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance rates that trigger false alerts.'
     );
@@ -203,13 +205,15 @@ function checkSampleSizeFloor(esql: string, hints: string[]): void {
 function checkIsNotNullDenominator(esql: string, hints: string[]): void {
   if (!RATE_PATTERN.test(esql)) return;
 
-  // Count how many `COUNT(*) WHERE` fragments exist. If only one appears
-  // (the numerator filter) and the query has no IS NOT NULL, the denominator
-  // is likely unfiltered.
   const countWhereMatches = esql.match(/COUNT\s*\(\s*\*\s*\)\s*WHERE\b/gi);
   if (!countWhereMatches) return;
   if (countWhereMatches.length >= 2) return;
-  if (/\bIS\s+NOT\s+NULL\b/i.test(esql)) return;
+
+  // Scope the IS NOT NULL check to the STATS clause itself, not the
+  // entire query — a pre-STATS WHERE IS NOT NULL is unrelated.
+  const statsIdx = esql.search(/\|\s*STATS\b/i);
+  const postStats = statsIdx >= 0 ? esql.slice(statsIdx) : esql;
+  if (/\bIS\s+NOT\s+NULL\b/i.test(postStats)) return;
 
   hints.push(
     'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'

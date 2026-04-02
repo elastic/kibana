@@ -82,6 +82,7 @@ import {
   TABLE_CAPTION,
   TITLE_COLUMN,
   STATS_DRAFT_BADGE_LABEL,
+  STATS_LAST_OCCURRED_PLACEHOLDER,
   STATS_NOT_PROMOTED_TOOLTIP_CONTENT,
   UNABLE_TO_LOAD_QUERIES_BODY,
   UNABLE_TO_LOAD_QUERIES_TITLE,
@@ -269,6 +270,13 @@ export function QueriesTable() {
         name: LAST_OCCURRED_COLUMN,
         width: '240px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
+          if (item.query.type === QUERY_TYPE_STATS && !item.rule_backed) {
+            return (
+              <EuiText size="s" color="subdued">
+                {STATS_LAST_OCCURRED_PLACEHOLDER}
+              </EuiText>
+            );
+          }
           return <EuiText size="s">{formatLastOccurredAt(item.occurrences)}</EuiText>;
         },
       },
@@ -364,9 +372,7 @@ export function QueriesTable() {
             color: 'primary',
             name: PROMOTE_QUERY_ACTION_TITLE,
             description: PROMOTE_QUERY_ACTION_DESCRIPTION,
-            render: (item: SignificantEventQueryRow) => {
-              return <PromoteAction item={item} />;
-            },
+            render: (item: SignificantEventQueryRow) => <PromoteAction item={item} />,
           },
         ],
       },

@@ -630,7 +630,7 @@ Template:
 ```
 FROM <stream>
 | STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical"),
-        total = COUNT(*)
+        total = COUNT(*) WHERE <severity_field> IS NOT NULL
   BY <entity_field>, bucket = BUCKET(@timestamp, 5 minutes)
 | EVAL error_rate = errors * 100.0 / total
 | WHERE total > 10 AND error_rate > <threshold>

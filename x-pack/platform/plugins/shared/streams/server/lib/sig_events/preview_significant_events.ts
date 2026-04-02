@@ -316,11 +316,18 @@ async function previewStatsQuery(
       .map((row) => row[bucketIdx] as string)
       .filter(Boolean);
 
+    // The query's own BUCKET interval may differ from the UI's requested
+    // bucketSize (e.g. query uses 5m but the UI requests 1h). We honour the
+    // query's interval so the sparkline granularity matches what the user wrote.
+    // Caveat: ES BUCKET boundaries are absolute (epoch-aligned), so from/to
+    // edges may not align perfectly — fillBucketGaps pads to cover the range.
     const queryBucketMs = extractBucketIntervalMs(esqlQuery);
     const effectiveBucketSize = queryBucketMs ? msToEsqlBucketSize(queryBucketMs) : bucketSize;
 
-    // Multiple groups firing in the same bucket are summed, showing total
-    // firing density (how active the threshold was) rather than unique buckets.
+    // For multi-dimensional STATS (GROUP BY entity + bucket), multiple groups
+    // firing in the same bucket are summed. The sparkline shows total firing
+    // density (how many entity × bucket cells breached) rather than unique
+    // time buckets. This is intentional — it surfaces "how bad" each moment is.
     const aggregatedByBucket = new Map<string, number>();
     for (const date of firingDates) {
       aggregatedByBucket.set(date, (aggregatedByBucket.get(date) ?? 0) + 1);

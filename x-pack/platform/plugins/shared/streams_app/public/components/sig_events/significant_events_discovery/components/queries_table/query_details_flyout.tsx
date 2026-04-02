@@ -258,7 +258,13 @@ export function QueryDetailsFlyout({
                 </InfoPanel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <InfoPanel title={OCCURRENCES_COLUMN}>
+                <InfoPanel
+                  title={
+                    queryType === QUERY_TYPE_STATS
+                      ? THRESHOLD_BREACHES_TOOLTIP_NAME
+                      : OCCURRENCES_COLUMN
+                  }
+                >
                   {hasDetectedOccurrences ? (
                     <SparkPlot
                       id={`query-details-occurrences-${item.query.id}`}

@@ -285,6 +285,7 @@ function toStorage(
 ): StoredQueryLink {
   const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
+  const derivedType = deriveQueryType(query.esql.query);
   return {
     ...rest,
     [STREAM_NAME]: definition.name,
@@ -292,7 +293,7 @@ function toStorage(
     [QUERY_DESCRIPTION]: query.description,
     [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_SEVERITY_SCORE]: query.severity_score,
-    [QUERY_TYPE]: query.type,
+    [QUERY_TYPE]: derivedType,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
@@ -362,7 +363,11 @@ export class QueryClient {
     const existingQueryLinks = mapSearchHits(assetsResponse, this.dependencies.logger);
 
     const nextQueryLinks = links.map((link) => {
-      return { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
+      const ql = { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
+      if (ql.query.type === QUERY_TYPE_STATS) {
+        ql.rule_backed = false;
+      }
+      return ql;
     });
 
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
@@ -729,10 +734,12 @@ export class QueryClient {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
-      } else if (!currentLink.rule_backed) {
+      } else if (!currentLink.rule_backed || query.type === QUERY_TYPE_STATS) {
         // Non-rule-backed queries (STATS or pre-promotion match queries): keep
         // them in storage with updated content but skip rule create/update.
-        allNextQueryLinks.push({ ...currentLink, query });
+        // STATS queries always land here regardless of stored rule_backed to
+        // prevent a stale rule_backed=true from sending them to installQueries.
+        allNextQueryLinks.push({ ...currentLink, query, rule_backed: false });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesUpdatedWithBreakingChange.push(link);

@@ -119,6 +119,9 @@ export class QueryService {
             try {
               migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
             } catch (metadataError) {
+              // Safe to continue: fromStorage re-derives the type from ES|QL,
+              // so the stored type value is never authoritative. The query will
+              // still work; metadata is only required for document-level alerting rules.
               this.logger.warn(
                 `ensureMetadata failed during migration for stream "${migrated[STREAM_NAME]}", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${metadataError instanceof Error ? metadataError.message : String(metadataError)}`
               );
