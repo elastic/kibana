@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ComponentType } from 'react';
+import React, { Suspense, lazy, type ComponentType } from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import type {
   CommonAttachmentTabViewProps,
@@ -18,8 +18,6 @@ import {
   toStringArray,
 } from '@kbn/cases-plugin/common';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { ShowEventButton } from './components/show_event_button';
-import { EventTabContent } from './components/event_tab_content';
 import { getNonEmptyField } from './utils';
 import {
   MultipleEventsCommentLabel,
@@ -31,11 +29,28 @@ import {
   REMOVED_EVENTS_LABEL_TITLE,
 } from './translations';
 
+const ShowEventButton = lazy(async () => {
+  const { ShowEventButton: Component } = await import('./components/show_event_button');
+  return { default: Component };
+});
+
+const EventTabContent = lazy(async () => {
+  const { EventTabContent: Component } = await import('./components/event_tab_content');
+  return { default: Component };
+});
+
+const EventTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (props) => (
+  <Suspense fallback={null}>
+    <EventTabContent {...props} />
+  </Suspense>
+);
+
 const getAttachmentViewObject = (props: UnifiedReferenceAttachmentViewProps) => {
   const { savedObjectId, attachmentId, metadata } = props;
   const eventIds = toStringArray(attachmentId);
   const isSingleEvent = eventIds.length === 1;
-  const index = getNonEmptyField(isIndexMetadata(metadata) ? metadata.index : undefined);
+  const validMetadata = metadata != null && isIndexMetadata(metadata) ? metadata : undefined;
+  const index = getNonEmptyField(validMetadata?.index);
 
   return {
     event: isSingleEvent ? (
@@ -52,7 +67,9 @@ const getAttachmentViewObject = (props: UnifiedReferenceAttachmentViewProps) => 
           type: AttachmentActionType.CUSTOM as const,
           isPrimary: true,
           render: () => (
-            <ShowEventButton id={actionProps.savedObjectId} eventId={eventIds[0]} index={index} />
+            <Suspense fallback={null}>
+              <ShowEventButton id={actionProps.savedObjectId} eventId={eventIds[0]} index={index} />
+            </Suspense>
           ),
         });
       }
@@ -79,6 +96,6 @@ export const getEventType = (): UnifiedReferenceAttachmentType => ({
   getAttachmentViewObject: (props) => getAttachmentViewObject(props),
   getAttachmentRemovalObject: (props) => getAttachmentRemovalObject(props),
   getAttachmentTabViewObject: () => ({
-    children: EventTabContent as ComponentType<CommonAttachmentTabViewProps>,
+    children: EventTabContentWrapper,
   }),
 });

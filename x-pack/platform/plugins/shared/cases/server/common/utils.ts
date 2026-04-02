@@ -60,7 +60,13 @@ import type {
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
-import { isLegacyAttachmentRequest, isEventAttachmentType } from '../../common/utils/attachments';
+import {
+  isLegacyAttachmentRequest,
+  isEventAttachmentType,
+  getIndexFromMetadata,
+  toStringArray,
+} from '../../common/utils/attachments';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../common/constants/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -172,7 +178,14 @@ export const flattenAttachmentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload | EventAttachmentPayload
+  comment:
+    | AlertAttachmentPayload
+    | EventAttachmentPayload
+    | {
+        type: typeof SECURITY_EVENT_ATTACHMENT_TYPE;
+        attachmentId: string | string[];
+        metadata?: unknown;
+      }
 ): { ids: string[]; indices: string[] } => {
   if (comment.type === AttachmentType.alert) {
     return {
@@ -181,9 +194,24 @@ export const getIDsAndIndicesAsArrays = (
     };
   }
 
+  if (comment.type === AttachmentType.event) {
+    return {
+      ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
+  if (comment.type === SECURITY_EVENT_ATTACHMENT_TYPE) {
+    const metadataIndex = getIndexFromMetadata(comment.metadata);
+    return {
+      ids: toStringArray(comment.attachmentId),
+      indices: toStringArray(metadataIndex),
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
-    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    ids: [],
+    indices: [],
   };
 };
 

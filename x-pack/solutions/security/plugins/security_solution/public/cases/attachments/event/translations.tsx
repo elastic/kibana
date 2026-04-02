@@ -11,9 +11,11 @@ export const DATA_VIEW_ERROR = i18n.translate('xpack.securitySolution.caseEvents
   defaultMessage: 'Data View Error',
 });
 
-export const TABLE_UNIT = i18n.translate('xpack.securitySolution.caseEvents.unit', {
-  defaultMessage: 'events',
-});
+export const TABLE_UNIT = (totalEvents: number) =>
+  i18n.translate('xpack.securitySolution.caseEvents.unit', {
+    defaultMessage: '{totalEvents, plural, =1 {event} other {events}}',
+    values: { totalEvents },
+  });
 
 export const EVENTS_ERROR_TITLE = i18n.translate('xpack.securitySolution.caseEvents.errorTitle', {
   defaultMessage: 'Error Searching Events',

@@ -11,7 +11,9 @@ export interface IndexMetadata {
   index?: string | string[];
 }
 
-export const isIndexMetadata = (metadata: unknown): metadata is IndexMetadata => {
+export const isIndexMetadata = (
+  metadata: unknown
+): metadata is IndexMetadata | null | undefined => {
   if (metadata == null) {
     return true;
   }
@@ -32,4 +34,12 @@ export const assertValidIndexMetadata = (metadata: unknown): void => {
   if (!isIndexMetadata(metadata)) {
     throw new Error('metadata.index must be a string or an array of strings');
   }
+};
+
+export const getIndexFromMetadata = (metadata: unknown): string | string[] | undefined => {
+  if (metadata == null || !isIndexMetadata(metadata)) {
+    return undefined;
+  }
+
+  return metadata.index;
 };

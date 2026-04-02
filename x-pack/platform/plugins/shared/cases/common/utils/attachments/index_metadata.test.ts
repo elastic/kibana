@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assertValidIndexMetadata, isIndexMetadata } from './index_metadata';
+import { assertValidIndexMetadata, getIndexFromMetadata, isIndexMetadata } from './index_metadata';
 
 describe('index_metadata', () => {
   describe('isIndexMetadata', () => {
@@ -37,6 +37,19 @@ describe('index_metadata', () => {
     it('does not throw for valid metadata values', () => {
       expect(() => assertValidIndexMetadata({ index: 'logs-endpoint-*' })).not.toThrow();
       expect(() => assertValidIndexMetadata({ index: ['logs-endpoint-*'] })).not.toThrow();
+    });
+  });
+
+  describe('getIndexFromMetadata', () => {
+    it('returns index when metadata is valid', () => {
+      expect(getIndexFromMetadata({ index: 'logs-endpoint-*' })).toBe('logs-endpoint-*');
+      expect(getIndexFromMetadata({ index: ['logs-a', 'logs-b'] })).toEqual(['logs-a', 'logs-b']);
+    });
+
+    it('returns undefined when metadata is invalid or nullish', () => {
+      expect(getIndexFromMetadata(undefined)).toBeUndefined();
+      expect(getIndexFromMetadata(null)).toBeUndefined();
+      expect(getIndexFromMetadata({ index: 1 })).toBeUndefined();
     });
   });
 });

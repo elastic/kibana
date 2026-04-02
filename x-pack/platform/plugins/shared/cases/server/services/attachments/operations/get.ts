@@ -33,9 +33,9 @@ import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../clie
 import type {
   AttachmentMode,
   AttachmentTotals,
-  DocumentAttachmentAttributes,
+  DocumentAttachmentAttributesV2,
 } from '../../../../common/types/domain';
-import { AttachmentType, DocumentAttachmentAttributesRt } from '../../../../common/types/domain';
+import { AttachmentType, DocumentAttachmentAttributesRtV2 } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
@@ -254,7 +254,9 @@ export class AttachmentGetter {
     filter,
     attachmentTypes = [AttachmentType.alert, AttachmentType.event],
     owner,
-  }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
+  }: GetAllDocumentsAttachedToCaseArgs): Promise<
+    Array<SavedObject<DocumentAttachmentAttributesV2>>
+  > {
     const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled;
     try {
       this.context.log.debug(`Attempting to GET all documents for case id ${caseId}`);
@@ -281,20 +283,18 @@ export class AttachmentGetter {
       ]);
 
       const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
-          {
-            type: isCasesAttachmentsEnabled
-              ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
-              : CASE_COMMENT_SAVED_OBJECT,
-            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            sortField: 'created_at',
-            sortOrder: 'asc',
-            filter: combinedFilter,
-            perPage: MAX_DOCS_PER_PAGE,
-          }
-        );
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentAttributesV2>({
+          type: isCasesAttachmentsEnabled
+            ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
+            : CASE_COMMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          filter: combinedFilter,
+          perPage: MAX_DOCS_PER_PAGE,
+        });
 
-      let result: Array<SavedObject<DocumentAttachmentAttributes>> = [];
+      let result: Array<SavedObject<DocumentAttachmentAttributesV2>> = [];
       for await (const userActionSavedObject of finder.find()) {
         result = result.concat(AttachmentGetter.decodeDocuments(userActionSavedObject));
       }
@@ -307,10 +307,10 @@ export class AttachmentGetter {
   }
 
   private static decodeDocuments(
-    response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
-  ): Array<SavedObject<DocumentAttachmentAttributes>> {
+    response: SavedObjectsFindResponse<AttachmentAttributesV2>
+  ): Array<SavedObject<DocumentAttachmentAttributesV2>> {
     return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRt)(so.attributes);
+      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRtV2)(so.attributes);
 
       return Object.assign(so, { attributes: validatedAttributes });
     });

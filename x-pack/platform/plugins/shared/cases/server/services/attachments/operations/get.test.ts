@@ -192,6 +192,51 @@ describe('AttachmentService getter', () => {
         expect(res).toStrictEqual([{ ...createAlertAttachment(), score: 0 }]);
       });
 
+      it('decodes unified event attachments from cases-attachments SO when feature flag is enabled', async () => {
+        const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+        const soFindRes = createSOFindResponse([
+          {
+            id: 'event-so-1',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            references: [],
+            score: 0,
+            attributes: {
+              type: SECURITY_EVENT_ATTACHMENT_TYPE,
+              attachmentId: 'event-1',
+              metadata: { index: 'logs-1' },
+              owner: 'securitySolution',
+              created_at: '2020-01-01T00:00:00.000Z',
+              created_by: {
+                username: 'elastic',
+                full_name: null,
+                email: null,
+              },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: null,
+              updated_by: null,
+            },
+          },
+        ]);
+
+        mockFinder(soFindRes);
+
+        const res = await attachmentGetterWithFlagOn.getAllDocumentsAttachedToCase({
+          caseId: '1',
+          owner: 'securitySolution',
+        });
+
+        expect(res).toEqual([
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              type: SECURITY_EVENT_ATTACHMENT_TYPE,
+              attachmentId: 'event-1',
+              metadata: { index: 'logs-1' },
+            }),
+          }),
+        ]);
+      });
+
       it('throws when the response is missing the attributes.alertId field', async () => {
         const invalidAlert = { ...createAlertAttachment(), score: 0 };
         unset(invalidAlert, 'attributes.alertId');

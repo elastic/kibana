@@ -10,8 +10,10 @@ import {
   UnifiedAttachmentAttributesRt,
   UnifiedAttachmentRt,
   AttachmentRtV2,
+  DocumentAttachmentAttributesRtV2,
 } from './v2';
 import { AttachmentType } from './v1';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../../constants/attachments';
 
 describe('Unified Attachments', () => {
   describe('UnifiedAttachmentPayloadRt', () => {
@@ -471,6 +473,42 @@ describe('Unified Attachments', () => {
         _tag: 'Right',
         right: v1Attachment,
       });
+    });
+  });
+
+  describe('DocumentAttachmentAttributesRtV2', () => {
+    it('accepts legacy event attributes', () => {
+      const legacyEvent = {
+        type: AttachmentType.event,
+        eventId: 'event-1',
+        index: 'logs-1',
+        owner: 'securitySolution',
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+      };
+
+      expect(DocumentAttachmentAttributesRtV2.decode(legacyEvent)._tag).toBe('Right');
+    });
+
+    it('accepts unified security.event attributes', () => {
+      const unifiedEvent = {
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        attachmentId: ['event-1', 'event-2'],
+        metadata: { index: ['logs-1', 'logs-2'] },
+        owner: 'securitySolution',
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+      };
+
+      expect(DocumentAttachmentAttributesRtV2.decode(unifiedEvent)._tag).toBe('Right');
     });
   });
 });
