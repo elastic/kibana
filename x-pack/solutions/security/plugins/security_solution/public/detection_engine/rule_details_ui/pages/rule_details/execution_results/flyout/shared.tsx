@@ -71,5 +71,8 @@ export const FieldLabel: React.FC<{ label: string }> = ({ label }) => (
 
 export const SectionSeparator: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  return <EuiFlexItem grow={false} css={{ borderLeft: `${euiTheme.border.thin}` }} />;
+  const separatorCss = css`
+    border-left: ${euiTheme.border.thin};
+  `;
+  return <EuiFlexItem grow={false} css={separatorCss} />;
 };

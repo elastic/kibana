@@ -15,16 +15,16 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
+import * as i18n from '../../translations';
+import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from '../shared';
+import { FormattedDate } from '../../../../../../../common/components/formatted_date';
 
-interface AlertsSectionProps {
-  alertCount: number;
-  candidateCount: number | null | undefined;
+interface BackfillSectionProps {
+  backfill: { from: string; to: string };
 }
 
-export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candidateCount }) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'alerts' });
+export const BackfillSection: React.FC<BackfillSectionProps> = ({ backfill }) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'sourceEventTimeRange' });
 
   return (
     <EuiAccordion
@@ -34,19 +34,13 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
           tooltip={
             <Tooltip
               items={[
-                {
-                  title: i18n.COLUMN_ALERTS_CREATED,
-                  description: i18n.FLYOUT_TOOLTIP_ALERTS_CREATED,
-                },
-                {
-                  title: i18n.FLYOUT_CANDIDATE_ALERTS,
-                  description: i18n.FLYOUT_TOOLTIP_CANDIDATE_ALERTS,
-                },
+                { title: i18n.FLYOUT_FROM, description: i18n.FLYOUT_TOOLTIP_FROM },
+                { title: i18n.FLYOUT_TO, description: i18n.FLYOUT_TOOLTIP_TO },
               ]}
             />
           }
         >
-          {i18n.FLYOUT_ACCORDION_ALERTS}
+          {i18n.FLYOUT_ACCORDION_SOURCE_EVENT_TIME_RANGE}
         </AccordionButtonContent>
       }
       initialIsOpen
@@ -55,18 +49,18 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
       <EuiPanel hasBorder paddingSize="m">
         <EuiFlexGroup>
           <EuiFlexItem>
-            <FieldLabel label={i18n.COLUMN_ALERTS_CREATED} />
+            <FieldLabel label={i18n.FLYOUT_FROM} />
             <EuiSpacer size="xs" />
-            <EuiText size="s" data-test-subj="executionDetailsFlyoutAlertCount">
-              {alertCount}
+            <EuiText size="s">
+              <FormattedDate value={backfill.from} fieldName="from" />
             </EuiText>
           </EuiFlexItem>
           <SectionSeparator />
           <EuiFlexItem>
-            <FieldLabel label={i18n.FLYOUT_CANDIDATE_ALERTS} />
+            <FieldLabel label={i18n.FLYOUT_TO} />
             <EuiSpacer size="xs" />
-            <EuiText size="s" data-test-subj="executionDetailsFlyoutCandidateCount">
-              {candidateCount ?? '—'}
+            <EuiText size="s">
+              <FormattedDate value={backfill.to} fieldName="to" />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
