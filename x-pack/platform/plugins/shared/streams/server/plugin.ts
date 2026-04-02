@@ -63,6 +63,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -127,18 +128,19 @@ export class StreamsPlugin
 
     registerRules({ plugins, logger: this.logger.get('rules') });
     registerStreamsSavedObjects(core.savedObjects);
-
     registerSignificantEventsInferenceFeatures(
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
     );
 
+    const inferenceResolver = createInferenceResolver(this.logger);
+
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger);
+    const featureService = new FeatureService(core, inferenceResolver, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger);
+    const queryService = new QueryService(core, inferenceResolver, this.logger);
     const taskService = new TaskService(plugins.taskManager);
     const modelSettingsConfigService = new ModelSettingsConfigService(this.logger);
 

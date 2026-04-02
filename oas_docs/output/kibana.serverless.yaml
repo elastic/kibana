@@ -3834,7 +3834,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
+        Delete a user-created skill by ID. If agents still reference the skill, the request returns 409 unless force=true, which removes the skill from agents first. Built-in skills cannot be deleted.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3849,11 +3849,39 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
-      responses: {}
+        - description: If true, removes the skill from agents that use it and then deletes it. If false and any agent uses the skill, the request returns 409 Conflict with the list of agents.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSkillResponseExample:
+                  description: Example response showing that the deletion operation was successful
+                  value:
+                    success: true
+          description: Indicates a successful response
       summary: Delete a skill
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "https://${KIBANA_URL}/api/agent_builder/skills/{skillId}?force=false" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/agent_builder/skills/{skillId}
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3874,6 +3902,8 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
       responses: {}
       summary: Get a skill by id
@@ -3906,6 +3936,8 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -62976,7 +63008,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -64091,7 +64123,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts, as well as execution history metrics for the last 30 days.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -64142,7 +64174,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64253,7 +64285,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64755,7 +64787,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64845,7 +64877,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
