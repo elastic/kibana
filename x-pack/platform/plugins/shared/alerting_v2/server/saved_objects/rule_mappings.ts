@@ -34,6 +34,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         query: {
           properties: {
             base: { type: 'text' },
+            condition: { type: 'text' },
           },
         },
       },
@@ -44,6 +45,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         query: {
           properties: {
             base: { type: 'text' },
+            condition: { type: 'text' },
           },
         },
       },
