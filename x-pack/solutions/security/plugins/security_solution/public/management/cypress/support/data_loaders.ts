@@ -194,8 +194,13 @@ export const dataLoaders = (
     },
 
     deleteIndexedFleetEndpointPolicies: async (indexData: IndexedFleetEndpointPolicyResponse) => {
-      const { kbnClient } = await stackServicesPromise;
-      return deleteIndexedFleetEndpointPolicies(kbnClient, indexData);
+      const { kbnClient, log } = await stackServicesPromise;
+      return deleteIndexedFleetEndpointPolicies(kbnClient, indexData).catch((error) => {
+        // Don't return rejected promise during cleanup, since that can cause a test to fail during the
+        // cleanup phase (normally in a `after()` or `afterEach()`).
+        log.warning(`Failed to delete indexed fleet endpoint policies: ${error.message}`, error);
+        return null;
+      });
     },
 
     indexCase: async (newCase: Partial<CasePostRequest> = {}): Promise<IndexedCase['data']> => {
@@ -311,9 +316,16 @@ export const dataLoaders = (
       endpointAgentIds,
     }: {
       endpointAgentIds: string[];
-    }): Promise<DeleteAllEndpointDataResponse> => {
+    }): Promise<DeleteAllEndpointDataResponse | null> => {
       const { esClient, log } = await stackServicesPromise;
-      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless);
+      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless).catch(
+        (error) => {
+          // Don't return rejected promise during cleanup, since that can cause a test to fail during the
+          // cleanup phase (normally in a `after()` or `afterEach()`).
+          log.warning(`Failed to delete all endpoint data: ${error.message}`, error);
+          return null;
+        }
+      );
     },
 
     /**
@@ -474,8 +486,18 @@ ${s1Info.status}
     destroyEndpointHost: async (
       createdHost: CreateAndEnrollEndpointHostResponse
     ): Promise<null> => {
-      const { kbnClient } = await stackServicesPromise;
-      return destroyEndpointHost(kbnClient, createdHost).then(() => null);
+      const { kbnClient, log } = await stackServicesPromise;
+      return destroyEndpointHost(kbnClient, createdHost)
+        .then(() => null)
+        .catch((error) => {
+          // Don't return rejected promise during cleanup, since that can cause a test to fail during the
+          // cleanup phase (normally in a `after()` or `afterEach()`).
+          log.warning(
+            `Failed to destroy endpoint host ${createdHost.agentId}: ${error.message}`,
+            error
+          );
+          return null;
+        });
     },
 
     createFileOnEndpoint: async ({
