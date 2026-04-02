@@ -138,7 +138,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.getAllAttachments',
-    handlerHash: '2e850030eee644712eae2ab87b45ddb756bc66fc2899685efef063132b70283a',
+    handlerHash: '457c9c81535a0207aade08cf2bcc9f7a354f5760307da976ae8faca2d43338ee',
   },
   {
     id: 'cases.getCase',
@@ -146,11 +146,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.getCases',
-    handlerHash: 'be2387b803b05a68d781184c0d6d7ab4abcf288383226adaa0ebb5d23f4f080a',
+    handlerHash: 'f5bb45aa044adfd07898a0ecd172f49d3d7580ca75a6c7fe5261487c6c6ae9e3',
   },
   {
     id: 'cases.getCasesByAlertId',
-    handlerHash: '0b3a636d8afb0495e36f0b00e75d73a90d3bcf67b15595a2b9836b0259a68830',
+    handlerHash: 'e2b50fd7bbbb6122db65f3a52ed78a4c24cb10304abf3927c69288ebb0f75fa7',
   },
   {
     id: 'cases.setCategory',
