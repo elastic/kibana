@@ -73,7 +73,7 @@ async function resolveEdotCollectorVersion(log: ToolingLog): Promise<string> {
       patch = 0;
     } else {
       major--;
-      minor = 0;
+      minor = 20;
       patch = 0;
     }
   }
