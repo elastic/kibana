@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { getEsqlViewName, emptyAssets } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import type { Client } from '@elastic/elasticsearch';
+import expect from '@kbn/expect';
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
+import type { Streams } from '@kbn/streams-schema';
+import { emptyAssets, getEsqlViewName } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -136,7 +136,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should reject child query stream that does not reference parent stream', async () => {
         const childName = `${PARENT_STREAM_NAME}.errors`;
         const childViewName = getEsqlViewName(childName);
-        const parentViewName = getEsqlViewName(PARENT_STREAM_NAME);
 
         // Try to create a child query stream that references a different source
         const response = (await putStream(
@@ -151,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(response.message).to.contain('must reference its parent stream');
         // Parent is a wired stream, so it should be referenced by ES|QL view name
-        expect(response.message).to.contain(parentViewName);
+        expect(response.message).to.contain(PARENT_STREAM_NAME);
       });
 
       it('should accept child query stream that correctly references parent wired stream', async () => {
@@ -184,7 +183,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should reject query stream without FROM clause', async () => {
         const childName = `${PARENT_STREAM_NAME}.info`;
         const childViewName = getEsqlViewName(childName);
-        const parentViewName = getEsqlViewName(PARENT_STREAM_NAME);
 
         // Try to create a child query stream without a FROM clause
         const response = (await putStream(
@@ -196,7 +194,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(response.message).to.contain('must have a FROM clause');
         // Parent is a wired stream, so it should be referenced by ES|QL view name
-        expect(response.message).to.contain(parentViewName);
+        expect(response.message).to.contain(PARENT_STREAM_NAME);
       });
 
       it('should allow root-level query stream without parent view reference', async () => {
@@ -251,8 +249,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )) as unknown as { message: string };
 
         expect(response.message).to.contain('must reference its parent stream');
-        // Parent is a query stream, so it should be referenced by view name
-        expect(response.message).to.contain(intermediateViewName);
+        // Parent is a query stream, referenced by friendly name
+        expect(response.message).to.contain(intermediateChildName);
 
         // Clean up intermediate stream
         await deleteStream(apiClient, intermediateChildName);
