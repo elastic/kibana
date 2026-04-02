@@ -39,7 +39,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
-  cancelAllActiveWorkflowExecutions: cancelAllActiveWorkflowExecutions;
+  cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
   resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
@@ -83,7 +83,7 @@ export type CancelWorkflowExecution = (
   spaceId: string
 ) => Promise<void>;
 
-export type cancelAllActiveWorkflowExecutions = (params: {
+export type CancelAllActiveWorkflowExecutions = (params: {
   spaceId: string;
   workflowId: string;
 }) => Promise<void>;

@@ -44,7 +44,7 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
-  cancelAllActiveWorkflowExecutions,
+  CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
@@ -847,7 +847,7 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
-    const cancelAllActiveWorkflowExecutions: cancelAllActiveWorkflowExecutions = async ({
+    const cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions = async ({
       spaceId,
       workflowId,
     }) => {
