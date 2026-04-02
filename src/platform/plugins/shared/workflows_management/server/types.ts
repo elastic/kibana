@@ -12,6 +12,7 @@ import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -66,6 +67,9 @@ export interface AgentBuilderPluginSetupContract {
   hooks: HooksServiceSetup;
   skills: {
     register: (definition: SkillDefinition) => void;
+  };
+  sml: {
+    registerType: (definition: SmlTypeDefinition) => void;
   };
 }
 

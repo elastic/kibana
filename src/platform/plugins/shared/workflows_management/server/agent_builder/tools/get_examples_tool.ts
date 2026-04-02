@@ -22,7 +22,7 @@ export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetupCon
     description: `Search and retrieve example workflow YAML files from the bundled library.
 
 **When to use:** Before generating workflow YAML, to learn correct syntax patterns for triggers, steps, inputs, on-failure handling, etc.
-**When NOT to use:** To find workflows in the user's environment (use list_workflows instead).
+**When NOT to use:** To find workflows in the user's environment (use sml_search instead).
 
 Available categories: security, integrations, examples, utilities, search.
 Supports keyword search across names, descriptions, and tags.`,
