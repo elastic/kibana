@@ -201,11 +201,9 @@ export const useEntityGrouping = ({
     () => ({
       groupById: {
         [LOCAL_STORAGE_GROUPING_KEY]: {
-          activeGroups: [
-            hasResolutionLicense
-              ? ENTITY_GROUPING_OPTIONS.RESOLUTION
-              : ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
-          ],
+          activeGroups: hasResolutionLicense
+            ? [ENTITY_GROUPING_OPTIONS.RESOLUTION]
+            : [ENTITY_GROUPING_OPTIONS.NONE],
           options: defaultGroupingOptions,
         },
       },
