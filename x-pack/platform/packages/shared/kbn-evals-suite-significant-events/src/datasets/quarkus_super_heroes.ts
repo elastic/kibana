@@ -1,0 +1,617 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  GCS_BUCKET,
+  QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX,
+  QUARKUS_SUPER_HEROES_NAMESPACE,
+} from '../constants';
+import type { DatasetConfig } from './types';
+
+// TODO: None of the scenarios have validated criteria and GCS snapshots yet.
+// These are unvalidated placeholders — snapshots and criteria will be added as
+// each scenario is validated.
+export const quarkusSuperHeroesDataset: DatasetConfig = {
+  id: QUARKUS_SUPER_HEROES_NAMESPACE,
+  description: 'Quarkus Super Heroes sample microservices application',
+  gcs: { bucket: GCS_BUCKET, basePathPrefix: QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX },
+  kiFeatureExtraction: [
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+      },
+      output: {
+        criteria: [
+          {
+            id: 'entity-rest-heroes',
+            text: 'Must identify rest-heroes service as an entity (evidence: resource.attributes.app=rest-heroes)',
+            score: 2,
+          },
+          {
+            id: 'entity-rest-villains',
+            text: 'Must identify rest-villains service as an entity (evidence: resource.attributes.app=rest-villains)',
+            score: 2,
+          },
+          {
+            id: 'entity-rest-fights',
+            text: 'Must identify rest-fights service as an entity (evidence: resource.attributes.app=rest-fights)',
+            score: 2,
+          },
+          {
+            id: 'entity-rest-narration',
+            text: 'Must identify rest-narration service as an entity (evidence: resource.attributes.app=rest-narration)',
+            score: 2,
+          },
+          {
+            id: 'entity-event-statistics',
+            text: 'Must identify event-statistics service as an entity (evidence: resource.attributes.app=event-statistics)',
+            score: 2,
+          },
+          {
+            id: 'entity-apicurio-registry',
+            text: 'Must identify Apicurio Registry as an entity (evidence: resource.attributes.app=apicurio)',
+            score: 2,
+          },
+          {
+            id: 'entity-heroes-db',
+            text: 'Must identify Heroes PostgreSQL DB as an entity (evidence: resource.attributes.app=heroes-db)',
+            score: 2,
+          },
+          {
+            id: 'entity-fights-mongodb',
+            text: 'Must identify Fights MongoDB as an entity (evidence: resource.attributes.app=flights-db)',
+            score: 2,
+          },
+          {
+            id: 'entity-fights-kafka',
+            text: 'Must identify Fights Kafka Broker as an entity (evidence: resource.attributes.app=flights-kafka)',
+            score: 2,
+          },
+          {
+            id: 'entity-villains-db',
+            text: 'Must identify Villains PostgreSQL DB as an entity (evidence: resource.attributes.app=villains-db)',
+            score: 1,
+          },
+          {
+            id: 'entity-grpc-locations',
+            text: 'Must identify grpc-locations service as an entity (evidence: resource.attributes.app=grpc-locations)',
+            score: 1,
+          },
+          {
+            id: 'entity-locations-db',
+            text: 'Must identify Locations MariaDB as an entity (evidence: resource.attributes.app=locations-db)',
+            score: 1,
+          },
+          {
+            id: 'entity-ui-super-heroes',
+            text: 'Must identify ui-super-heroes as an entity (evidence: resource.attributes.app=ui-super-heroes)',
+            score: 1,
+          },
+          {
+            id: 'dep-rest-fights-rest-heroes',
+            text: 'Must identify the dependency rest-fights -> rest-heroes (evidence: REST calls for hero lookup during fights)',
+            score: 2,
+          },
+          {
+            id: 'dep-rest-heroes-heroes-db',
+            text: 'Must identify the dependency rest-heroes -> heroes-db (evidence: reactive PostgreSQL database connection)',
+            score: 2,
+          },
+          {
+            id: 'dep-rest-fights-rest-villains',
+            text: 'Must identify the dependency rest-fights -> rest-villains (evidence: REST calls for villain lookup during fights)',
+            score: 2,
+          },
+          {
+            id: 'dep-rest-fights-fights-db',
+            text: 'Must identify the dependency rest-fights -> fights-db (evidence: MongoDB connection for fight persistence)',
+            score: 2,
+          },
+          {
+            id: 'dep-rest-villains-villains-db',
+            text: 'Must identify the dependency rest-villains -> villains-db (evidence: JDBC PostgreSQL database connection)',
+            score: 2,
+          },
+          {
+            id: 'dep-event-statistics-fights-kafka',
+            text: 'Must identify the dependency event-statistics -> fights-kafka (evidence: Kafka connection for event consumption)',
+            score: 2,
+          },
+          {
+            id: 'dep-grpc-locations-locations-db',
+            text: 'Must identify the dependency grpc-locations -> locations-db (evidence: JDBC MariaDB database connection)',
+            score: 1,
+          },
+          {
+            id: 'dep-rest-narration-open-ai',
+            text: 'Must identify the dependency rest-narration -> OpenAI/Azure OpenAI (evidence: langchain4j-openai and langchain4j-azure-openai Quarkus extensions)',
+            score: 1,
+          },
+          {
+            id: 'tech-kubernetes',
+            text: 'Must identify Kubernetes as infrastructure (k8s pod/container metadata present)',
+            score: 1,
+          },
+        ],
+        min_features: 8,
+        max_features: 40,
+        required_types: ['entity'],
+        expect_entity_filters: true,
+        expected_ground_truth:
+          'entities=[rest-heroes, rest-villains, rest-fights, heroes-db, fights-db, villains-db, fights-kafka, grpc-locations, locations-db, ui-super-heroes], deps=[rest-fights->rest-heroes, rest-heroes->heroes-db, rest-fights->rest-villains, rest-fights->fights-db, rest-villains->villains-db, grpc-locations->locations-db, rest-narration->open-ai], infra=[kubernetes]',
+      },
+      metadata: {
+        difficulty: 'easy',
+        failure_domain: 'none',
+        failure_mode: 'healthy_baseline',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'kafka-disconnect',
+        log_query_filter: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'resource.attributes.app': ['rest-fights', 'event-statistics'],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'SRMSG18206' } },
+                    { match_phrase: { 'body.text': 'SRMSG18212' } },
+                    { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
+                    { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
+                    {
+                      match_phrase: {
+                        'body.text': 'org.apache.kafka.common.errors.TimeoutException',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      },
+      output: {
+        criteria: [
+          {
+            id: 'entity-rest-fights',
+            text: 'Must identify rest-fights as a failing entity (evidence: SRMSG18206 unable to write to Kafka, SRMSG18212 message nacked, Unable to write to Kafka errors in rest-fights logs)',
+            score: 2,
+          },
+          {
+            id: 'entity-event-statistics',
+            text: 'Must identify event-statistics as a failing entity (evidence: Kafka consumer timeout errors — org.apache.kafka.common.errors.TimeoutException, Topic fights not present in metadata)',
+            score: 2,
+          },
+          {
+            id: 'dep-event-statistics-fights-kafka',
+            text: 'Must identify the dependency event-statistics -> fights-kafka (evidence: Kafka consumer TimeoutException, topic metadata unavailable)',
+            score: 1,
+          },
+          {
+            id: 'dep-rest-fights-fights-kafka',
+            text: 'Must identify the dependency rest-fights -> fights-kafka (evidence: SRMSG18206 unable to write, SRMSG18212 message nacked)',
+            score: 3,
+          },
+          {
+            id: 'tech-kafka',
+            text: 'Must identify Kafka as the affected technology (evidence: SmallRye Reactive Messaging error codes SRMSG18206/SRMSG18212 and org.apache.kafka.common.errors.TimeoutException in producer/consumer logs)',
+            score: 2,
+          },
+          {
+            id: 'error-signatures',
+            text: 'Must reference Kafka error signatures such as SRMSG18206 (unable to write), SRMSG18212 (message nacked), or TimeoutException (topic not present in metadata)',
+            score: 2,
+          },
+        ],
+        min_features: 3,
+        max_features: 20,
+        required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
+        expected_ground_truth:
+          'entities=[rest-fights, event-statistics], deps=[rest-fights->kafka (failed), event-statistics->kafka (failed)], tech=[kafka], error_signatures=[SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'kafka',
+        failure_mode: 'message_broker_disconnect',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'fights-db-disconnect',
+        log_query_filter: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'resource.attributes.app': ['rest-fights'],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'MongoTimeoutException' } },
+                    { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
+                    { match_phrase: { 'body.text': 'Timed out while waiting for a server' } },
+                    { match_phrase: { 'body.text': 'HTTP Request to /api/fights failed' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      },
+      output: {
+        criteria: [
+          {
+            id: 'entity-rest-fights',
+            text: 'Must identify rest-fights as the failing entity (evidence: MongoTimeoutException and MongoSocketOpenException in rest-fights logs, HTTP Request to /api/fights failed)',
+            score: 2,
+          },
+          {
+            id: 'dep-rest-fights-mongodb',
+            text: 'Must identify the dependency rest-fights -> fights-db/MongoDB (evidence: MongoTimeoutException: Timed out while waiting for a server, MongoSocketOpenException connecting to dead port)',
+            score: 3,
+          },
+          {
+            id: 'tech-mongodb',
+            text: 'Must identify MongoDB as the affected technology (evidence: com.mongodb driver exception classes MongoTimeoutException / MongoSocketOpenException in rest-fights error logs)',
+            score: 2,
+          },
+          {
+            id: 'error-signatures',
+            text: 'Must reference MongoDB error signatures such as MongoTimeoutException (Timed out while waiting for a server that matches WritableServerSelector) or MongoSocketOpenException (Exception opening socket)',
+            score: 2,
+          },
+        ],
+        min_features: 3,
+        max_features: 20,
+        required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
+        expected_ground_truth:
+          'entities=[rest-fights], deps=[rest-fights->mongodb (failed)], tech=[mongodb], error_signatures=[MongoTimeoutException: Timed out while waiting for a server, MongoSocketOpenException: Exception opening socket, HTTP Request to /api/fights failed]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'fights-db',
+        failure_mode: 'database_disconnect',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'heroes-service-unreachable',
+        log_query_filter: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'resource.attributes.app': ['rest-fights'],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      },
+      output: {
+        criteria: [
+          {
+            id: 'entity-rest-heroes',
+            text: 'Must identify rest-heroes as the unreachable target entity (inferred from rest-fights fallback logs — no logs emitted by rest-heroes itself when Stork service discovery redirects to a dead address)',
+            score: 2,
+          },
+          {
+            id: 'entity-rest-fights',
+            text: 'Must identify rest-fights as the affected entity (evidence: "Falling back on Hero" WARN and "Fallback hero" fight results in rest-fights logs)',
+            score: 2,
+          },
+          {
+            id: 'dep-rest-fights-rest-heroes',
+            text: 'Must identify the dependency rest-fights -> rest-heroes (fight simulation broken)',
+            score: 3,
+          },
+          {
+            id: 'degradation-signatures',
+            text: 'Must reference fault tolerance fallback signals: "Falling back on Hero" (WARN) and fights won by "Fallback hero" — indicating rest-heroes is unreachable and SmallRye Fault Tolerance activated the fallback',
+            score: 2,
+          },
+        ],
+        min_features: 3,
+        max_features: 20,
+        required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
+        expected_ground_truth:
+          'entities=[rest-heroes, rest-fights], deps=[rest-fights->rest-heroes (unreachable, fallback activated)], degradation_signatures=[Falling back on Hero, Villain won over Fallback hero]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'rest-heroes',
+        failure_mode: 'service_unreachable',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'heroes-db-disconnect',
+        log_query_filter: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'resource.attributes.app': ['rest-heroes', 'rest-fights'],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    { match_phrase: { 'body.text': 'NoStackTraceThrowable' } },
+                    { match_phrase: { 'body.text': 'HR000021' } },
+                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                    { match_phrase: { 'body.text': 'Fallback hero' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      },
+      output: {
+        criteria: [
+          {
+            id: 'entity-rest-heroes',
+            text: 'Must identify rest-heroes as the failing entity (evidence: Vert.x reactive connection pool timeout at startup — NoStackTraceThrowable: Timeout, HR000021: DDL command failed)',
+            score: 2,
+          },
+          {
+            id: 'entity-rest-fights',
+            text: 'Must identify rest-fights as an affected upstream entity (evidence: Falling back on Hero / Fallback hero in fight results)',
+            score: 1,
+          },
+          {
+            id: 'dep-rest-heroes-heroes-db',
+            text: 'Must identify the broken dependency rest-heroes -> heroes-db (evidence: Vert.x reactive pool NoStackTraceThrowable: Timeout connecting to heroes-db)',
+            score: 3,
+          },
+          {
+            id: 'error-signatures',
+            text: 'Must reference reactive connection failure signatures (NoStackTraceThrowable: Timeout, HR000021: DDL command failed, Vert.x reactive pool timeout)',
+            score: 2,
+          },
+        ],
+        min_features: 3,
+        max_features: 20,
+        required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
+        expected_ground_truth:
+          'entities=[rest-heroes (reactive pool timeout), rest-fights (degraded)], deps=[rest-heroes->heroes-db (Vert.x timeout)], error_signatures=[NoStackTraceThrowable: Timeout, HR000021: DDL command failed]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'heroes-db',
+        failure_mode: 'database_disconnect',
+      },
+    },
+  ],
+  kiFeatureDuplication: [
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        runs: 5,
+      },
+    },
+  ],
+  kiFeatureExclusion: [
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 4,
+        follow_up_runs: 3,
+      },
+    },
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 1,
+        follow_up_runs: 3,
+      },
+    },
+  ],
+  kiQueryGeneration: [
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        stream_name: 'logs',
+        stream_description:
+          'Quarkus Super Heroes application logs under healthy conditions with normal fight simulations across all microservices',
+      },
+      output: {
+        criteria: [
+          {
+            id: 'healthy-baseline-queries',
+            text: 'Should generate queries for operational monitoring (e.g., fight throughput, service health, request volume) rather than error-focused detection since this is healthy traffic',
+            score: 2,
+          },
+          {
+            id: 'multi-service-coverage',
+            text: 'Generated queries should cover multiple services present in the logs (e.g., rest-fights, rest-heroes, rest-villains, event-statistics) rather than a single service only',
+            score: 2,
+          },
+        ],
+        expected_categories: ['operational'],
+        expected_ground_truth:
+          'queries=[operational monitoring for fight throughput/service health across rest-heroes/rest-villains/rest-fights/event-statistics]',
+      },
+      metadata: {
+        difficulty: 'easy',
+        failure_domain: 'none',
+        failure_mode: 'healthy_baseline',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'kafka-disconnect',
+        stream_name: 'logs',
+        stream_description:
+          'Quarkus Super Heroes logs where the Kafka broker becomes unreachable, causing rest-fights to fail publishing fight events (SRMSG18206, SRMSG18212, TimeoutException: topic not present in metadata) and event-statistics to fail consuming them',
+      },
+      output: {
+        criteria: [
+          {
+            id: 'kafka-error-query',
+            text: 'Must generate an ES|QL query that catches SmallRye Kafka write/nack errors (SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata)',
+            score: 3,
+          },
+          {
+            id: 'affected-services-query',
+            text: 'Should generate a query detecting failures in both rest-fights and event-statistics due to the Kafka outage',
+            score: 2,
+          },
+          {
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax that can be parsed without errors',
+            score: 2,
+          },
+        ],
+        expected_categories: ['error', 'operational'],
+        esql_substrings: ['SRMSG18206', 'SRMSG18212', 'TimeoutException'],
+        expected_ground_truth:
+          'queries=[error detection for SmallRye Kafka write failures (SRMSG18206/SRMSG18212/TimeoutException) from rest-fights and event-statistics]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'kafka',
+        failure_mode: 'message_broker_disconnect',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'fights-db-disconnect',
+        stream_name: 'logs',
+        stream_description:
+          'Quarkus Super Heroes logs where the MongoDB database backing rest-fights becomes unreachable, causing fight persistence to fail with MongoTimeoutException (Timed out while waiting for a server that matches WritableServerSelector) and MongoSocketOpenException errors',
+      },
+      output: {
+        criteria: [
+          {
+            id: 'mongo-error-query',
+            text: 'Must generate an ES|QL query that catches MongoDB connection errors (MongoTimeoutException: Timed out while waiting for a server, MongoSocketOpenException: Exception opening socket)',
+            score: 3,
+          },
+          {
+            id: 'fights-failure-query',
+            text: 'Should generate a query detecting fight simulation failures in rest-fights (HTTP Request to /api/fights failed)',
+            score: 2,
+          },
+          {
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
+            score: 2,
+          },
+        ],
+        expected_categories: ['error', 'operational'],
+        esql_substrings: ['MongoTimeoutException', 'MongoSocketOpenException'],
+        expected_ground_truth:
+          'queries=[error detection for MongoTimeoutException/MongoSocketOpenException from rest-fights, fight HTTP failures]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'fights-db',
+        failure_mode: 'database_disconnect',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'heroes-service-unreachable',
+        stream_name: 'logs',
+        stream_description:
+          'Quarkus Super Heroes logs where the rest-heroes service becomes unreachable — SmallRye Fault Tolerance activates the fallback, producing "Falling back on Hero" WARN logs and fights won by "Fallback hero" in rest-fights. No hard connection errors are surfaced.',
+      },
+      output: {
+        criteria: [
+          {
+            id: 'fallback-detection-query',
+            text: 'Must generate an ES|QL query that detects the fault tolerance fallback activation ("Falling back on Hero" or "Fallback hero") in rest-fights logs',
+            score: 3,
+          },
+          {
+            id: 'fight-degradation-query',
+            text: 'Should generate a query detecting fight simulation degradation (villains always winning due to fallback hero)',
+            score: 2,
+          },
+          {
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
+            score: 2,
+          },
+        ],
+        expected_categories: ['degradation', 'operational'],
+        esql_substrings: ['Falling back on Hero', 'Fallback hero'],
+        expected_ground_truth:
+          'queries=[fallback activation detection for rest-heroes unreachable (Falling back on Hero, Fallback hero in fight results)]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'rest-heroes',
+        failure_mode: 'service_unreachable',
+      },
+    },
+    {
+      input: {
+        scenario_id: 'heroes-db-disconnect',
+        stream_name: 'logs',
+        stream_description:
+          'Quarkus Super Heroes logs where the heroes PostgreSQL database becomes unreachable via the Vert.x reactive driver, causing rest-heroes to log Vert.x pool timeouts (NoStackTraceThrowable: Timeout, HR000021: DDL command failed) at startup and rest-fights to fall back to a fallback hero for all fight simulations',
+      },
+      output: {
+        criteria: [
+          {
+            id: 'reactive-db-error-query',
+            text: 'Must generate an ES|QL query that catches Vert.x reactive pool timeout errors from rest-heroes (NoStackTraceThrowable, HR000021)',
+            score: 3,
+          },
+          {
+            id: 'fight-degradation-query',
+            text: 'Should generate a query detecting fight degradation in rest-fights (Falling back on Hero / Fallback hero)',
+            score: 2,
+          },
+          {
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
+            score: 2,
+          },
+        ],
+        expected_categories: ['error', 'operational'],
+        expected_ground_truth:
+          'queries=[Vert.x reactive pool timeout errors in rest-heroes (NoStackTraceThrowable / HR000021), fight fallback degradation in rest-fights]',
+      },
+      metadata: {
+        difficulty: 'medium',
+        failure_domain: 'heroes-db',
+        failure_mode: 'database_disconnect',
+      },
+    },
+  ],
+};
