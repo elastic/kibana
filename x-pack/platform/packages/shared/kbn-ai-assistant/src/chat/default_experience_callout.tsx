@@ -47,7 +47,7 @@ export const DefaultExperienceCallout = ({ isConversationApp }: DefaultExperienc
     return null;
   }
 
-  const gradientBackground = `linear-gradient(135deg, ${euiTheme.colors.backgroundLightPrimary} 3%, ${euiTheme.colors.backgroundLightAssistance} 66%)`;
+  const gradientBackground = `linear-gradient(135deg, ${euiTheme.colors.backgroundLightPrimary} 2.98%, ${euiTheme.colors.backgroundLightAssistance} 66.24%)`;
 
   const calloutClassName = css`
     margin: ${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.m};
