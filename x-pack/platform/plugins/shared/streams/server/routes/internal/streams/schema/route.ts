@@ -134,11 +134,14 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     simulationError: string | null;
     documentsWithRuntimeFieldsApplied: DocumentWithIgnoredFields[] | null;
   }> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
 
     if (!read) {
@@ -299,11 +302,14 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
 
     if (!read) {

@@ -186,6 +186,7 @@ import type {
   EndpointGetActionsStatusRequestQueryInput,
   EndpointGetActionsStatusResponse,
 } from './endpoint/actions/status/status.gen';
+import type { GetEndpointExceptionsPerPolicyOptInResponse } from './endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 import type {
   GetEndpointMetadataListRequestQueryInput,
   GetEndpointMetadataListResponse,
@@ -1872,6 +1873,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getEndpointExceptionsPerPolicyOptIn() {
+    this.log.info(`${new Date().toISOString()} Calling API GetEndpointExceptionsPerPolicyOptIn`);
+    return this.kbnClient
+      .request<GetEndpointExceptionsPerPolicyOptInResponse>({
+        path: '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
     return this.kbnClient
@@ -2650,6 +2663,20 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'PATCH',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async performEndpointExceptionsPerPolicyOptIn() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API PerformEndpointExceptionsPerPolicyOptIn`
+    );
+    return this.kbnClient
+      .request({
+        path: '/internal/api/endpoint/endpoint_exceptions_per_policy_opt_in',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }

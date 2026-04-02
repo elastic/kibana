@@ -9,7 +9,7 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertEpisode, AlertEpisodeSuppression, LastNotifiedRecord } from '../types';
 
 export const createDispatchableAlertEventsResponse = (
-  alertEpisodes: AlertEpisode[]
+  alertEpisodes: Array<AlertEpisode & { data_json?: string | null }>
 ): EsqlQueryResponse => {
   return {
     columns: [
@@ -18,6 +18,7 @@ export const createDispatchableAlertEventsResponse = (
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'episode_status', type: 'keyword' },
+      { name: 'data_json', type: 'keyword' },
     ],
     values: alertEpisodes.map((alertEpisode) => [
       alertEpisode.last_event_timestamp,
@@ -25,6 +26,7 @@ export const createDispatchableAlertEventsResponse = (
       alertEpisode.group_hash,
       alertEpisode.episode_id,
       alertEpisode.episode_status,
+      alertEpisode.data_json ?? null,
     ]),
   };
 };

@@ -7,7 +7,10 @@
 
 import { StoreActionsStep } from './store_actions_step';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../../resources/datastreams/alert_actions';
 import {
   createDispatcherPipelineState,
   createAlertEpisode,
@@ -157,7 +160,7 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  it('records dispatched episodes with fire action type when policy has no throttle interval', async () => {
+  it('records dispatched episodes with fire and notified actions', async () => {
     const mockService = createMockStorageService();
     const step = new StoreActionsStep(mockService);
 
@@ -169,7 +172,6 @@ describe('StoreActionsStep', () => {
 
     const group = createNotificationGroup({
       id: 'group-1',
-      ruleId: 'rule-1',
       policyId: 'policy-1',
       episodes: [episode],
     });
@@ -184,36 +186,45 @@ describe('StoreActionsStep', () => {
 
     expect(result).toEqual({ type: 'continue' });
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-    expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        {
-          '@timestamp': mockDate.toISOString(),
-          group_hash: 'hash-1',
-          last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
-          action_type: 'fire',
-          rule_id: 'rule-1',
-          source: 'internal',
-          reason: 'dispatched by policy policy-1',
-        },
-      ],
+    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+    expect(callArgs.docs).toHaveLength(2);
+    expect(callArgs.docs[0]).toEqual({
+      '@timestamp': mockDate.toISOString(),
+      group_hash: 'hash-1',
+      last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
+      actor: 'system',
+      action_type: 'fire',
+      rule_id: 'rule-1',
+      source: 'internal',
+      reason: 'dispatched by policy policy-1',
+    });
+    expect(callArgs.docs[1]).toEqual({
+      '@timestamp': mockDate.toISOString(),
+      actor: 'system',
+      action_type: 'notified',
+      rule_id: 'rule-1',
+      group_hash: 'hash-1',
+      last_series_event_timestamp: mockDate.toISOString(),
+      notification_group_id: 'group-1',
+      source: 'internal',
+      reason: 'notified by policy policy-1',
+      episode_status: 'active',
     });
   });
 
-  it('records notified action when dispatch policy has a throttle interval', async () => {
+  it('includes episode_status on notified record for per_episode mode', async () => {
     const mockService = createMockStorageService();
     const step = new StoreActionsStep(mockService);
 
     const episode = createAlertEpisode({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
+      episode_status: 'recovering',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
     const group = createNotificationGroup({
       id: 'group-1',
-      ruleId: 'rule-1',
       policyId: 'policy-1',
       episodes: [episode],
     });
@@ -229,32 +240,60 @@ describe('StoreActionsStep', () => {
 
     expect(result).toEqual({ type: 'continue' });
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-    expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        {
-          '@timestamp': mockDate.toISOString(),
-          group_hash: 'hash-1',
-          last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
-          action_type: 'fire',
-          rule_id: 'rule-1',
-          source: 'internal',
-          reason: 'dispatched by policy policy-1',
-        },
-        {
-          '@timestamp': mockDate.toISOString(),
-          actor: 'system',
-          action_type: 'notified',
-          rule_id: 'rule-1',
-          group_hash: 'irrelevant',
-          last_series_event_timestamp: mockDate.toISOString(),
-          notification_group_id: 'group-1',
-          source: 'internal',
-          reason: 'notified by policy policy-1 with throttle interval',
-        },
-      ],
+    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+    const notifiedDoc = callArgs.docs.find(
+      (d: Record<string, unknown>) => d.action_type === 'notified'
+    );
+    expect(notifiedDoc).toEqual(
+      expect.objectContaining({
+        action_type: 'notified',
+        group_hash: 'hash-1',
+        notification_group_id: 'group-1',
+        episode_status: 'recovering',
+        reason: 'notified by policy policy-1',
+      })
+    );
+  });
+
+  it('omits episode_status on notified record for all mode', async () => {
+    const mockService = createMockStorageService();
+    const step = new StoreActionsStep(mockService);
+
+    const episode = createAlertEpisode({
+      rule_id: 'rule-1',
+      group_hash: 'hash-1',
+      last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
+
+    const group = createNotificationGroup({
+      id: 'group-1',
+      policyId: 'policy-1',
+      episodes: [episode],
+    });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([
+        [
+          'policy-1',
+          createNotificationPolicy({
+            id: 'policy-1',
+            groupingMode: 'all',
+            throttle: { strategy: 'time_interval', interval: '5m' },
+          }),
+        ],
+      ]),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'continue' });
+    const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+    const notifiedDoc = callArgs.docs.find(
+      (d: Record<string, unknown>) => d.action_type === 'notified'
+    );
+    expect(notifiedDoc).toBeDefined();
+    expect(notifiedDoc?.episode_status).toBeUndefined();
   });
 
   it('handles combined suppressed, throttled, and dispatch arrays', async () => {
@@ -290,7 +329,6 @@ describe('StoreActionsStep', () => {
 
     const dispatchGroup = createNotificationGroup({
       id: 'dispatch-group',
-      ruleId: 'rule-dispatch',
       policyId: 'dispatch-policy',
       episodes: [dispatchEpisode],
     });
@@ -349,17 +387,16 @@ describe('StoreActionsStep', () => {
       reason: 'dispatched by policy dispatch-policy',
     });
 
-    expect(callArgs.docs[3]).toEqual({
-      '@timestamp': mockDate.toISOString(),
-      actor: 'system',
-      action_type: 'notified',
-      rule_id: 'rule-dispatch',
-      group_hash: 'irrelevant',
-      last_series_event_timestamp: mockDate.toISOString(),
-      notification_group_id: 'dispatch-group',
-      source: 'internal',
-      reason: 'notified by policy dispatch-policy with throttle interval',
-    });
+    expect(callArgs.docs[3]).toEqual(
+      expect.objectContaining({
+        action_type: 'notified',
+        rule_id: 'rule-dispatch',
+        group_hash: 'hash-dispatch',
+        notification_group_id: 'dispatch-group',
+        episode_status: 'active',
+        reason: 'notified by policy dispatch-policy',
+      })
+    );
   });
 
   it('records unmatched episodes with action_type unmatched', async () => {
@@ -462,7 +499,6 @@ describe('StoreActionsStep', () => {
 
     const dispatchGroup = createNotificationGroup({
       id: 'dispatch-group',
-      ruleId: 'rule-dispatch',
       policyId: 'dispatch-policy',
       episodes: [dispatchedEpisode],
     });
@@ -529,7 +565,6 @@ describe('StoreActionsStep', () => {
 
     const group = createNotificationGroup({
       id: 'group-1',
-      ruleId: 'rule-1',
       policyId: 'policy-1',
       episodes: [episode1, episode2],
     });
@@ -544,10 +579,12 @@ describe('StoreActionsStep', () => {
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
-    expect(callArgs.docs).toHaveLength(2);
+    expect(callArgs.docs).toHaveLength(3);
     expect(callArgs.docs[0].action_type).toBe('fire');
     expect(callArgs.docs[0].group_hash).toBe('hash-1');
     expect(callArgs.docs[1].action_type).toBe('fire');
     expect(callArgs.docs[1].group_hash).toBe('hash-2');
+    expect(callArgs.docs[2].action_type).toBe('notified');
+    expect(callArgs.docs[2].group_hash).toBe('hash-1');
   });
 });

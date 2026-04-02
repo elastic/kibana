@@ -107,7 +107,8 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     }
 
     const result = await this.client.bulkGet<RuleSavedObjectAttributes>(
-      ids.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id }), namespace ? { namespace } : undefined)
+      ids.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id })),
+      namespace ? { namespace } : undefined
     );
 
     return result.saved_objects.map((doc) => {
@@ -158,6 +159,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }): Promise<void> {
     await this.client.update<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, attrs, {
       ...(version ? { version } : {}),
+      mergeAttributes: false,
     });
   }
 
@@ -221,13 +223,14 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     filter?: string;
     search?: string;
   }) {
+    const trimmedSearch = search?.trim();
     return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,
       perPage,
       sortField: 'updatedAt',
       sortOrder: 'desc',
-      ...(search ? { search, searchFields: ['metadata.name'] } : {}),
+      ...(trimmedSearch ? { search: trimmedSearch, searchFields: ['metadata.name'] } : {}),
       ...(filter ? { filter } : {}),
     });
   }

@@ -28,7 +28,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { type DataView, type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
 import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
@@ -503,6 +503,7 @@ export function DiscoverLayout() {
                       <PanelsToggle
                         sidebarToggleState$={sidebarToggleState$}
                         omitChartButton
+                        omitTableButton
                         dataTestSubjSuffix="InPage"
                       />
                     </div>
