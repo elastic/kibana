@@ -29,12 +29,9 @@ export class GetNotificationPolicyRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Get a notification policy',
     description: 'Get a notification policy by identifier.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

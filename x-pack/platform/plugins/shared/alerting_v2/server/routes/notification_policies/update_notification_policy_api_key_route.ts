@@ -29,12 +29,9 @@ export class UpdateNotificationPolicyApiKeyRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Update a notification policy API key',
     description: 'Rotate the API key for a notification policy.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

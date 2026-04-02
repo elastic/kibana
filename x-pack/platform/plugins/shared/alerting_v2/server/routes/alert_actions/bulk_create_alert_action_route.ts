@@ -28,12 +28,9 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Bulk create alert actions',
     description: 'Create actions for multiple alert groups in a single request.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

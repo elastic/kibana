@@ -28,12 +28,9 @@ export class BulkActionNotificationPoliciesRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Bulk action notification policies',
     description: 'Perform bulk actions on notification policies.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

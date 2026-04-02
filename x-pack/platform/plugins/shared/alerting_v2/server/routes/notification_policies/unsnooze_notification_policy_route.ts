@@ -29,12 +29,9 @@ export class UnsnoozeNotificationPolicyRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Unsnooze a notification policy',
     description: 'Remove the snooze from a notification policy.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

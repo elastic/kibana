@@ -45,11 +45,8 @@ export class GetRulesRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'List rules',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

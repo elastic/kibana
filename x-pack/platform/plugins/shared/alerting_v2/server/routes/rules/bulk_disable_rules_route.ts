@@ -27,11 +27,8 @@ export class BulkDisableRulesRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Disable rules in bulk',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

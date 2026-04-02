@@ -6,19 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { AlertingRouteContext } from './alerting_route_context';
+import type { KibanaResponseFactory, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import { BaseAlertingRoute } from './base_alerting_route';
-
-const createMockContext = (
-  response: KibanaResponseFactory,
-  logger: Logger
-): AlertingRouteContext => ({ response, logger });
+import { createRouteDependencies } from './test_utils';
 
 class TestRoute extends BaseAlertingRoute {
+  static routeOptions: RouteConfigOptions<RouteMethod> = {};
+
   protected readonly routeName = 'test route';
   public executeFn = jest.fn();
   public onErrorSpy = jest.fn();
@@ -40,13 +34,12 @@ class TestRoute extends BaseAlertingRoute {
 
 describe('BaseAlertingRoute', () => {
   let response: jest.Mocked<KibanaResponseFactory>;
-  let logger: jest.Mocked<Logger>;
   let route: TestRoute;
 
   beforeEach(() => {
-    response = httpServerMock.createResponseFactory();
-    logger = loggingSystemMock.createLogger();
-    route = new TestRoute(createMockContext(response, logger));
+    const deps = createRouteDependencies();
+    response = deps.response;
+    route = new TestRoute(deps.ctx);
   });
 
   it('delegates to execute() and returns the result', async () => {
@@ -81,6 +74,61 @@ describe('BaseAlertingRoute', () => {
         statusCode: 500,
         error: 'Internal Server Error',
       }),
+    });
+  });
+
+  describe('static options merging', () => {
+    afterEach(() => {
+      TestRoute.routeOptions = {};
+    });
+
+    it('returns default options when no routeOptions are declared', () => {
+      expect(TestRoute.options).toEqual({
+        access: 'public',
+        tags: ['oas-tag:alerting-v2'],
+        availability: { stability: 'experimental' },
+      });
+    });
+
+    it('merges routeOptions with defaults', () => {
+      TestRoute.routeOptions = { summary: 'Get a rule' };
+
+      expect(TestRoute.options).toEqual({
+        access: 'public',
+        tags: ['oas-tag:alerting-v2'],
+        availability: { stability: 'experimental' },
+        summary: 'Get a rule',
+      });
+    });
+
+    it('overrides defaults with child values', () => {
+      TestRoute.routeOptions = { access: 'internal' };
+
+      expect(TestRoute.options).toEqual({
+        access: 'internal',
+        tags: ['oas-tag:alerting-v2'],
+        availability: { stability: 'experimental' },
+      });
+    });
+
+    it('concatenates arrays from parent and child', () => {
+      TestRoute.routeOptions = { tags: ['extra-tag'] };
+
+      expect(TestRoute.options).toEqual({
+        access: 'public',
+        tags: ['oas-tag:alerting-v2', 'extra-tag'],
+        availability: { stability: 'experimental' },
+      });
+    });
+
+    it('deep merges nested objects', () => {
+      TestRoute.routeOptions = { availability: { since: '1.0' } };
+
+      expect(TestRoute.options).toEqual({
+        access: 'public',
+        tags: ['oas-tag:alerting-v2'],
+        availability: { stability: 'experimental', since: '1.0' },
+      });
     });
   });
 });

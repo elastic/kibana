@@ -47,13 +47,10 @@ export class ListNotificationPoliciesRoute extends BaseAlertingRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'List notification policies',
     description:
       'Get a paginated list of notification policies with optional filtering and sorting.',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

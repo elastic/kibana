@@ -6,13 +6,26 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { IKibanaResponse, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { injectable } from 'inversify';
 import type { AlertingRouteContext } from './alerting_route_context';
+import { deepMergeRouteOptions } from './deep_merge_route_options';
 
 @injectable()
 export abstract class BaseAlertingRoute implements RouteHandler {
+  protected static readonly defaultOptions: RouteConfigOptions<RouteMethod> = {
+    access: 'public',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  };
+
+  protected static readonly routeOptions: RouteConfigOptions<RouteMethod> = {};
+
+  public static get options(): RouteConfigOptions<RouteMethod> {
+    return deepMergeRouteOptions(BaseAlertingRoute.defaultOptions, this.routeOptions);
+  }
+
   protected abstract readonly routeName: string;
 
   constructor(protected readonly ctx: AlertingRouteContext) {}
