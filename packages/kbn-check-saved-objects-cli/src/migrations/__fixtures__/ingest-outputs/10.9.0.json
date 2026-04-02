@@ -16,8 +16,7 @@
       "is_default": true,
       "is_default_monitoring": true,
       "hosts": ["https://localhost:9200"],
-      "preset": "balanced",
-      "otel_exporter_config_yaml": null
+      "preset": "balanced"
     }
   ]
 }
