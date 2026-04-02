@@ -72,6 +72,7 @@ const LEGACY_RUNTIME_MAPPINGS = {
 
 export interface QueryLinkFilters {
   ruleUnbacked?: RuleUnbackedFilter;
+  queryIds?: string[];
 }
 
 interface TermQueryOpts {
@@ -401,6 +402,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
+      ...termsQuery(ASSET_ID, filters?.queryIds),
       ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 

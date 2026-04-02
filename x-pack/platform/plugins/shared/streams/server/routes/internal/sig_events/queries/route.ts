@@ -159,9 +159,10 @@ export const demoteBackedQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const requestedQueryIds = new Set(params.body.queryIds);
-    const allBacked = await queryClient.getQueryLinks([], { ruleUnbacked: 'exclude' });
-    const toDemote = allBacked.filter((queryLink) => requestedQueryIds.has(queryLink.query.id));
+    const toDemote = await queryClient.getQueryLinks([], {
+      ruleUnbacked: 'exclude',
+      queryIds: params.body.queryIds,
+    });
 
     const byStream = toDemote.reduce<Record<string, string[]>>((acc, link) => {
       const stream = link.stream_name;
