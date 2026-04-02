@@ -45,20 +45,20 @@ export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup)
          * - timesliceEndAsPercentageOfTimeRange -> end_percentage_of_time_range
          * - timesliceStartAsPercentageOfTimeRange -> start_percentage_of_time_range
          */
-        const startPercentage = Math.max(
-          start_percentage_of_time_range ?? timeslice_start_as_percentage_of_time_range,
-          0
-        );
-        const endPercentage = Math.min(
-          timeslice_end_as_percentage_of_time_range ?? end_percentage_of_time_range,
-          1
-        );
+        const startPercentage =
+          start_percentage_of_time_range ?? timeslice_start_as_percentage_of_time_range;
+
+        const endPercentage =
+          timeslice_end_as_percentage_of_time_range ?? end_percentage_of_time_range;
+
         return {
           ...(typeof is_anchored === 'boolean' && { is_anchored }),
           ...(typeof startPercentage === 'number' && {
-            start_percentage_of_time_range: startPercentage,
+            start_percentage_of_time_range: Math.max(startPercentage, 0),
           }),
-          ...(typeof endPercentage === 'number' && { end_percentage_of_time_range: endPercentage }),
+          ...(typeof endPercentage === 'number' && {
+            end_percentage_of_time_range: Math.min(endPercentage, 1),
+          }),
         };
       },
     }),
