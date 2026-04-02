@@ -183,8 +183,8 @@ describe('WorkflowExecutionList (stateful)', () => {
       refetch: mockRefetch,
     });
     renderComponent();
-    fireEvent.click(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton'));
-    const dialog = await screen.findByTestId('workflowExecutionListFooterCancelModal');
+    fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
+    const dialog = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel all' }));
     await waitFor(() => expect(mockCancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1'));
   });

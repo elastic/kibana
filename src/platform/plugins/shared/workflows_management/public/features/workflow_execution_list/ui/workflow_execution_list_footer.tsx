@@ -94,7 +94,7 @@ export const WorkflowExecutionListFooter = ({
           buttonColor="warning"
           defaultFocusedButton="cancel"
           isLoading={isCancelLoadedNonTerminalInProgress}
-          data-test-subj="workflowExecutionListFooterCancelModal"
+          data-test-subj="cancelAllActiveExecutionsConfirmationModal"
         >
           <p>
             <FormattedMessage
@@ -117,7 +117,7 @@ export const WorkflowExecutionListFooter = ({
             isCancelLoadedNonTerminalInProgress
           }
           onClick={openFooterCancelModal}
-          data-test-subj="workflowExecutionListFooterCancelNonTerminalButton"
+          data-test-subj="cancelAllActiveExecutionsButton"
         >
           <FormattedMessage
             id="workflows.workflowExecutionList.footerCancelNonTerminal.button"

@@ -22,6 +22,7 @@ export {
   getAlertTriggerEventAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
   getScrollTestWorkflowYaml,
+  getLongRunningCancellationWorkflowYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,

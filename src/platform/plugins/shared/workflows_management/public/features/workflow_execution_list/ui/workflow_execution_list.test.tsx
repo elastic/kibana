@@ -211,9 +211,7 @@ describe('WorkflowExecutionList', () => {
   describe('footer cancel non-terminal', () => {
     it('disables footer cancel when all loaded executions are terminal', () => {
       renderComponent();
-      expect(
-        screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton')
-      ).toBeDisabled();
+      expect(screen.getByTestId('cancelAllActiveExecutionsButton')).toBeDisabled();
     });
 
     it('enables footer cancel when a non-terminal execution is loaded', () => {
@@ -238,9 +236,7 @@ describe('WorkflowExecutionList', () => {
         total: 1,
       };
       renderComponent({ executions: withRunning });
-      expect(
-        screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton')
-      ).not.toBeDisabled();
+      expect(screen.getByTestId('cancelAllActiveExecutionsButton')).not.toBeDisabled();
     });
 
     it('opens confirm modal and calls onConfirmCancelLoadedNonTerminal when confirmed', async () => {
@@ -266,8 +262,8 @@ describe('WorkflowExecutionList', () => {
         total: 1,
       };
       renderComponent({ executions: withRunning, onConfirmCancelLoadedNonTerminal });
-      fireEvent.click(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton'));
-      const modal = await screen.findByTestId('workflowExecutionListFooterCancelModal');
+      fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
+      const modal = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
       expect(modal).toBeInTheDocument();
       fireEvent.click(within(modal).getByRole('button', { name: 'Cancel all' }));
       await waitFor(() => expect(onConfirmCancelLoadedNonTerminal).toHaveBeenCalled());
