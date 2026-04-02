@@ -146,6 +146,7 @@
     "@kbn/field-formats-common",
     "@kbn/calculate-auto",
     "@kbn/esql-language",
+    "@kbn/core-http-browser",
   ],
   "exclude": ["target/**/*"]
 }
