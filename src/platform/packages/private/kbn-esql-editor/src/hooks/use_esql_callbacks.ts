@@ -26,6 +26,7 @@ import {
   getViews,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import { clearCacheWhenOld } from '../helpers';
 import { getHistoryItems } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
@@ -53,7 +54,11 @@ type MemoizedFieldsFromESQL = MemoizedFn<
 >;
 
 type MemoizedSources = MemoizedFn<
-  [CoreStart, (() => Promise<ILicense | undefined>) | undefined],
+  [
+    CoreStart,
+    (() => Promise<ILicense | undefined>) | undefined,
+    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+  ],
   ReturnType<typeof getESQLSources>
 >;
 
@@ -107,7 +112,8 @@ export const useEsqlCallbacks = ({
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
     const getLicense = esqlService?.getLicense;
-    const sources = await memoizedSources(core, getLicense).result;
+    const enrichSources = esqlService?.enrichSources;
+    const sources = await memoizedSources(core, getLicense, enrichSources).result;
     return sources;
   }, [dataSourcesCache, minimalQueryRef, memoizedSources, core, esqlService]);
 

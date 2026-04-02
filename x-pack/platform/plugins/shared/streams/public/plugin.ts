@@ -17,6 +17,7 @@ import type { Observable } from 'rxjs';
 import { of, from } from 'rxjs';
 import { map, catchError } from 'rxjs';
 import { once } from 'lodash';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import type { StreamsPublicConfig } from '../common/config';
 import type {
   ClassicStreamsStatus,
@@ -29,6 +30,7 @@ import type {
   WiredStreamsStatus,
 } from './types';
 import type { StreamsRepositoryClient } from './api';
+import { createStreamsSourceEnricher } from './services/esql_source_enricher';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;
@@ -45,6 +47,17 @@ export class Plugin implements StreamsPluginClass {
 
   setup(core: CoreSetup, pluginSetup: StreamsPluginSetupDependencies): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
+
+    if (pluginSetup.esql) {
+      // Register the enricher at setup time; actual service access is deferred to runtime
+      // via core.getStartServices() so the enricher doesn't force eager plugin loading.
+      pluginSetup.esql.registerSourceEnricher(async (sources: ESQLSourceResult[]) => {
+        const [coreStart] = await core.getStartServices();
+        const enricher = createStreamsSourceEnricher(this.repositoryClient, coreStart.application);
+        return enricher(sources);
+      });
+    }
+
     return {};
   }
 

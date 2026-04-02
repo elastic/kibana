@@ -68,6 +68,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
   const kibana = useKibana<ESQLEditorDeps>();
   const { core } = kibana.services;
   const getLicense = kibana.services?.esql?.getLicense;
+  const enrichSources = kibana.services?.esql?.enrichSources;
 
   const sourcesDropdownCss = useMemo(
     () => [
@@ -88,7 +89,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
     let cancelled = false;
 
     const fetchSources = async () => {
-      const sources = await getESQLSources(core, getLicense);
+      const sources = await getESQLSources(core, getLicense, enrichSources);
       if (cancelled || !isMounted()) {
         return;
       }
@@ -111,7 +112,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
     return () => {
       cancelled = true;
     };
-  }, [core, fetchedSources.length, getLicense, isMounted]);
+  }, [core, enrichSources, fetchedSources.length, getLicense, isMounted]);
 
   useEffect(() => {
     if (hasAutoSelectedDefaultSource.current || fetchedSources.length === 0) {
