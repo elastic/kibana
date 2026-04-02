@@ -19,6 +19,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
 import * as i18n from './translations';
 import { isProviderTechPreview } from '../../../../utils/reranker_helper';
@@ -105,7 +106,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
       <EuiFlexItem grow={false}>
         <EuiBadgeGroup gutterSize="xs">
           {taskType != null && (
-            <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
+            <EuiToolTip content={TASK_TYPE_DESCRIPTIONS[taskType] ?? taskType}>
               <EuiBadge
                 tabIndex={0}
                 data-test-subj={`table-column-task-type-${taskType}`}

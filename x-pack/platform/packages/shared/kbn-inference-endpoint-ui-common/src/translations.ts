@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export const getRequiredMessage = (field: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
@@ -148,6 +149,50 @@ export const ENDPOINT_TITLE = i18n.translate(
     defaultMessage: 'Inference Endpoint',
   }
 );
+
+export const ADD_ENDPOINT_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.addEndpointTitle',
+  {
+    defaultMessage: 'Add inference endpoint',
+  }
+);
+
+export const EDIT_ENDPOINT_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.editEndpointTitle',
+  {
+    defaultMessage: 'Edit inference endpoint',
+  }
+);
+
+export const TASK_TYPE_DESCRIPTIONS: Partial<Record<InferenceTaskType, string>> = {
+  text_embedding: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.textEmbeddingDescription',
+    {
+      defaultMessage: 'Converts text into dense vector representations for semantic search',
+    }
+  ),
+  sparse_embedding: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.sparseEmbeddingDescription',
+    {
+      defaultMessage: 'Converts text into sparse vector representations for semantic search',
+    }
+  ),
+  rerank: i18n.translate('xpack.inferenceEndpointUICommon.components.taskType.rerankDescription', {
+    defaultMessage: 'Re-ranks search results by relevance',
+  }),
+  completion: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.completionDescription',
+    {
+      defaultMessage: 'Generates text completions from a given input',
+    }
+  ),
+  chat_completion: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.chatCompletionDescription',
+    {
+      defaultMessage: 'Generates conversational responses from a chat input',
+    }
+  ),
+};
 
 export const CANCEL = i18n.translate('xpack.inferenceEndpointUICommon.components.cancelBtnLabel', {
   defaultMessage: 'Cancel',
