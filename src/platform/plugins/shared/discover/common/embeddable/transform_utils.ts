@@ -137,8 +137,15 @@ export function fromStoredSearchEmbeddableByValue(
   const [tab] = attributes.tabs ?? extractTabs(attributes).tabs;
   const apiTab = fromStoredTab(tab.attributes, references);
   const panelOverrides = toDiscoverSessionPanelOverrides(storedState);
+  const { title, description } = attributes;
+  const { hide_title, hide_border } = storedState;
+
   return {
     ...otherAttrs,
+    title,
+    description,
+    hide_title,
+    hide_border,
     tabs: [{ ...apiTab, ...panelOverrides }],
   };
 }
