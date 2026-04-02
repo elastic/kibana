@@ -9,24 +9,6 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import { ruleSavedObjectAttributesSchemaV1 } from '../schemas/rule_saved_object_attributes';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
-  '2': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          metadata: {
-            properties: {
-              name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
-            },
-          },
-        },
-      },
-    ],
-    schemas: {
-      forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-      create: ruleSavedObjectAttributesSchemaV1,
-    },
-  },
   '1': {
     changes: [],
     schemas: {
