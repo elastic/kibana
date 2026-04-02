@@ -179,7 +179,7 @@ describe('cleanupLegacyRiskEngine', () => {
       kibanaVersion: '9.0.0',
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to stop legacy latest transform')
     );
     expect(mockDeleteTransform).toHaveBeenCalledTimes(1);
@@ -202,7 +202,7 @@ describe('cleanupLegacyRiskEngine', () => {
       kibanaVersion: '9.0.0',
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('remove failed'));
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('remove failed'));
     expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(2);
     expect(mockStopTransform).toHaveBeenCalledTimes(2);
   });
