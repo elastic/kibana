@@ -477,7 +477,6 @@ export const runActionTestSuite = ({
     });
   });
 
-
   describe('openPit', () => {
     it('opens PointInTime for an index', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });

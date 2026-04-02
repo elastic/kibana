@@ -25,7 +25,6 @@ import {
   SavedObjectTypeRegistry,
   type IKibanaMigrator,
   type MigrationResult,
-
   type ISavedObjectTypeRegistryInternal,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';

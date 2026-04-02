@@ -456,4 +456,3 @@ describe('getMigrationType', () => {
     }
   );
 });
-

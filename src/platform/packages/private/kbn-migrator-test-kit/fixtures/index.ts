@@ -8,10 +8,7 @@
  */
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import type {
-  SavedObjectMigration,
-  SavedObjectsType,
-} from '@kbn/core-saved-objects-server';
+import type { SavedObjectMigration, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClientWrapperFactory } from '../src/elasticsearch_client_wrapper';
 import {
   currentVersion,
@@ -251,4 +248,3 @@ export const getCompatibleMigratorTestKit = async ({
     settings,
   });
 };
-

@@ -10,10 +10,7 @@
 import * as Either from 'fp-ts/Either';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
-import {
-  createBulkDeleteOperationBody,
-  createBulkIndexOperationTuple,
-} from './helpers';
+import { createBulkDeleteOperationBody, createBulkIndexOperationTuple } from './helpers';
 import type { TransformErrorObjects } from '../core';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];

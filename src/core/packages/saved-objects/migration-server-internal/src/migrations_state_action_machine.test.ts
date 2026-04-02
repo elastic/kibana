@@ -108,7 +108,12 @@ describe('migrationsStateActionMachine', () => {
     await migrationStateActionMachine({
       initialState,
       logger: mockLogger.get(),
-      model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'DONE']),
+      model: transitionModel([
+        'WAIT_FOR_YELLOW_SOURCE',
+        'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        'DONE',
+      ]),
       next,
       abort,
     });
@@ -146,7 +151,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState,
         logger,
-        model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -172,7 +182,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState,
         logger: mockLogger.get(),
-        model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -184,7 +199,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.some('source-index') } },
         logger: mockLogger.get(),
-        model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -196,7 +216,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.none } },
         logger: mockLogger.get(),
-        model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -208,7 +233,11 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
-        model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'FATAL']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'FATAL',
+        ]),
         next,
         abort,
       })
@@ -222,7 +251,11 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
-        model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'FATAL']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'FATAL',
+        ]),
         next: () => {
           throw new errors.ResponseError(
             elasticsearchClientMock.createApiResponse({
@@ -264,7 +297,11 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
-        model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'FATAL']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'FATAL',
+        ]),
         next: () => {
           throw new Error('this action throws');
         },
@@ -295,7 +332,11 @@ describe('migrationsStateActionMachine', () => {
         migrationStateActionMachine({
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
           logger: mockLogger.get(),
-          model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'FATAL']),
+          model: transitionModel([
+            'WAIT_FOR_YELLOW_SOURCE',
+            'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+            'FATAL',
+          ]),
           next: () => {
             throw new Error('this action throws');
           },
@@ -310,7 +351,11 @@ describe('migrationsStateActionMachine', () => {
         migrationStateActionMachine({
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
           logger: mockLogger.get(),
-          model: transitionModel(['WAIT_FOR_YELLOW_SOURCE', 'UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'FATAL']),
+          model: transitionModel([
+            'WAIT_FOR_YELLOW_SOURCE',
+            'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+            'FATAL',
+          ]),
           next,
           abort,
         })

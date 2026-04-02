@@ -9,6 +9,7 @@
 
 import { join } from 'path';
 import { omit } from 'lodash';
+import { parse } from 'hjson';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -22,7 +23,12 @@ import {
   currentVersion,
 } from '@kbn/migrator-test-kit';
 import { BASELINE_TEST_ARCHIVE_LARGE } from '../kibana_migrator_archive_utils';
-import { getUpToDateMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
+import {
+  getReindexingBaselineTypes,
+  getReindexingMigratorTestKit,
+  getUpToDateMigratorTestKit,
+} from '@kbn/migrator-test-kit/fixtures';
+import { expectDocumentsMigratedToHighestVersion } from '@kbn/migrator-test-kit/expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
 
@@ -99,4 +105,156 @@ describe('v2 migration', () => {
     });
   });
 
+  describe('to a newer stack version', () => {
+    describe('with unknown types', () => {
+      let unknownTypesKit: KibanaMigratorTestKit;
+      let logs: string;
+
+      beforeAll(async () => {
+        await clearLog(logFilePath);
+        unknownTypesKit = await getReindexingMigratorTestKit({
+          logFilePath,
+          // we must exclude 'deprecated' from the list of registered types
+          // so that it is considered unknown
+          types: getReindexingBaselineTypes(['server', 'task', 'deprecated']),
+          // however we don't want to flag 'deprecated' as a removed type
+          // because we want the migrator to consider it unknown
+          removedTypes: ['server', 'task'],
+          settings: {
+            migrations: {
+              discardUnknownObjects: currentVersion, // instead of the actual target, 'nextMinor'
+            },
+          },
+        });
+      });
+
+      it('fails if Kibana is not configured to discard unknown objects', async () => {
+        await expect(unknownTypesKit.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
+          "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated
+          To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
+          Please refer to https://www.elastic.co/docs/troubleshoot/kibana/migration-failures for more information."
+        `);
+        logs = await readLog(logFilePath);
+        expect(logs).toMatch(
+          'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
+        );
+        expect(logs).toMatch(
+          `[${defaultKibanaIndex}] Migration failed because some documents were found which use unknown saved object types: deprecated`
+        );
+        expect(logs).toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.`);
+      });
+    });
+
+    describe('with transform errors', () => {
+      let transformErrorsKit: KibanaMigratorTestKit;
+      let logs: string;
+
+      beforeAll(async () => {
+        await clearLog(logFilePath);
+        transformErrorsKit = await getReindexingMigratorTestKit({
+          logFilePath,
+          // filter out 'task' objects in order to not spawn that migrator for this test
+          removedTypes: ['deprecated', 'server', 'task'],
+          settings: {
+            migrations: {
+              discardCorruptObjects: currentVersion, // instead of the actual target, 'nextMinor'
+            },
+          },
+        });
+      });
+
+      it('collects corrupt saved object documents across batches', async () => {
+        try {
+          await transformErrorsKit.runMigrations();
+        } catch (error) {
+          const lines = error.message
+            .split('\n')
+            .filter((line: string) => line.includes(`'complex'`))
+            .join('\n');
+          expect(lines).toMatchSnapshot();
+        }
+      });
+
+      it('fails if Kibana is not configured to discard transform errors', async () => {
+        logs = await readLog(logFilePath);
+        expect(logs).toMatch(
+          `Cannot convert 'complex' objects with values that are multiple of 100`
+        );
+        expect(logs).toMatch(`[${defaultKibanaIndex}] OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL.`);
+      });
+
+      it('closes reindex PIT upon failure', async () => {
+        const lineWithPit = logs
+          .split('\n')
+          .find((line) =>
+            line.includes(`[${defaultKibanaIndex}] OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT PitId:`)
+          );
+
+        expect(lineWithPit).toBeTruthy();
+
+        const id = parse(lineWithPit!).message.split(':')[1];
+        expect(id).toBeTruthy();
+
+        await expect(
+          transformErrorsKit.client.search({
+            pit: { id },
+          })
+          // throws an exception that cannot search with closed PIT
+        ).rejects.toThrow(/search_phase_execution_exception/);
+      });
+    });
+
+    describe('configured to discard transform errors and unknown types', () => {
+      let kit: KibanaMigratorTestKit;
+      let logs: string;
+
+      beforeAll(async () => {
+        await clearLog(logFilePath);
+        kit = await getReindexingMigratorTestKit({
+          logFilePath,
+        });
+
+        await kit.runMigrations();
+        logs = await readLog(logFilePath);
+      });
+
+      it('migrates documents to the highest version', async () => {
+        await expectDocumentsMigratedToHighestVersion(kit.client, [
+          defaultKibanaIndex,
+          defaultKibanaTaskIndex,
+        ]);
+      });
+
+      describe('a migrator performing a compatible upgrade migration', () => {
+        it('updates mappings meta properties with the correct modelVersions (>=10.0.0)', async () => {
+          const res = await kit.client.indices.getMapping({ index: defaultKibanaTaskIndex });
+          const indexMeta = Object.values(res)[0].mappings._meta!;
+          expect(indexMeta.mappingVersions.task).toEqual('10.2.0');
+        });
+
+        it('updates target mappings when mappings have changed', () => {
+          expect(logs).toMatch(
+            `[${defaultKibanaTaskIndex}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`
+          );
+          expect(logs).toMatch(
+            `[${defaultKibanaTaskIndex}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`
+          );
+          expect(logs).toMatch(
+            `[${defaultKibanaTaskIndex}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`
+          );
+          expect(logs).toMatch(
+            `[${defaultKibanaTaskIndex}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`
+          );
+        });
+
+        it('updates the version aliases during the PREPARE_COMPATIBLE_MIGRATION step', () => {
+          expect(logs).toMatch(`[${defaultKibanaTaskIndex}] PREPARE_COMPATIBLE_MIGRATION`);
+          expect(logs).not.toMatch(`[${defaultKibanaTaskIndex}] MARK_VERSION_INDEX_READY`);
+          expect(logs).toMatch(
+            `[${defaultKibanaTaskIndex}] CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.`
+          );
+        });
+      });
+    });
+  });
 });

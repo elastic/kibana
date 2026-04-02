@@ -671,7 +671,6 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
-
       });
     });
 
@@ -2145,7 +2144,6 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-
     });
 
     describe('MARK_VERSION_INDEX_READY_CONFLICT', () => {

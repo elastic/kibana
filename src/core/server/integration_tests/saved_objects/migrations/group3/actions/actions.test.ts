@@ -8,7 +8,6 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import * as Option from 'fp-ts/Option';
 import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
@@ -421,7 +420,6 @@ describe('migration actions', () => {
       `);
     });
   });
-
 
   describe('openPit', () => {
     it('opens PointInTime for an index', async () => {

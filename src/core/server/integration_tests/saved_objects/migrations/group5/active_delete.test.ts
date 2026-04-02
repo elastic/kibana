@@ -291,7 +291,6 @@ describe('when upgrading to a new stack version', () => {
       });
     });
   });
-
 });
 
 const countResultsByType = (
