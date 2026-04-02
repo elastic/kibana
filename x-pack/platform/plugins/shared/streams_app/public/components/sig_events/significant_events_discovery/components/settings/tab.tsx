@@ -632,7 +632,7 @@ export function SettingsTab() {
                     'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsHelp',
                     {
                       defaultMessage:
-                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*, metrics.internal.*) to skip during continuous extraction.',
+                        'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to skip during continuous extraction.',
                     }
                   )}
                 >
@@ -648,7 +648,7 @@ export function SettingsTab() {
                     disabled={!continuousKiExtraction.enabled}
                     placeholder={i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
-                      { defaultMessage: 'logs.debug.*, metrics.internal.*' }
+                      { defaultMessage: 'logs.debug.*' }
                     )}
                     rows={2}
                   />

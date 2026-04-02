@@ -303,7 +303,6 @@ export class StreamsPlugin
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
-        features: featureService,
         server: this.server,
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
@@ -319,7 +318,6 @@ export class StreamsPlugin
     registerRoutes({
       repository: internalEligibleStreamsRoutes,
       dependencies: {
-        features: featureService,
         server: this.server,
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,

@@ -121,7 +121,7 @@ export function registerFeatureFlags(
               'xpack.streams.continuousKiExtractionExcludedStreamPatternsDescription',
               {
                 defaultMessage:
-                  'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*, metrics.internal.*) to exclude from automatic knowledge indicator extraction.',
+                  'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to exclude from automatic knowledge indicator extraction.',
               }
             ),
             type: 'string',

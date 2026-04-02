@@ -8,6 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 
 import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
@@ -21,6 +22,28 @@ export const createContinuousKiExtractionWorkflowService = (
   managementApi: WorkflowsServerPluginSetup['management']
 ): ContinuousKiExtractionWorkflowService => {
   const log = logger.get('continuous-ki-extraction-workflow');
+
+  const cancelRunningExecution = async () => {
+    const { results } = await managementApi.getWorkflowExecutions(
+      {
+        workflowId: CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        statuses: [...NonTerminalExecutionStatuses],
+        size: 1,
+      },
+      DEFAULT_SPACE_ID
+    );
+
+    if (results.length === 0) {
+      return;
+    }
+
+    const executionId = results[0].id;
+    log.info(
+      `Cancelling running execution ${executionId} for workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
+    );
+
+    await managementApi.cancelWorkflowExecution(executionId, DEFAULT_SPACE_ID);
+  };
 
   return {
     async ensureWorkflow({ enabled, request }) {
@@ -38,6 +61,14 @@ export const createContinuousKiExtractionWorkflowService = (
             `Continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID} is already up to date`
           );
           return;
+        }
+
+        if (!enabled && enabledChanged) {
+          try {
+            await cancelRunningExecution();
+          } catch (error) {
+            log.warn(`Best-effort cancellation failed, proceeding with disable: ${error}`);
+          }
         }
 
         const patch: { yaml?: string; enabled?: boolean } = {};
