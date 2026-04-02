@@ -22,6 +22,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
 } from '@elastic/eui';
@@ -31,6 +32,8 @@ import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 
+const MAX_VISIBLE_LABELS = 1;
+
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -38,6 +41,29 @@ const descriptionTextStyle = css`
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
+`;
+
+const labelsContainerStyle = css`
+  overflow: hidden;
+`;
+
+const labelItemStyle = css`
+  max-width: 60%;
+  flex-shrink: 0;
+`;
+
+const overflowBadgeItemStyle = css`
+  flex-shrink: 0;
+`;
+
+const truncatedBadgeStyle = css`
+  max-width: 100%;
+  vertical-align: middle;
+  .euiBadge__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 `;
 
 interface RuleActionsMenuProps {
@@ -292,7 +318,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
         ),
-        width: '12%',
+        width: '20%',
         render: (_metadata: RuleApiResponse['metadata']) => {
           const labels = _metadata?.labels;
           if (!labels || labels.length === 0) {
@@ -300,13 +326,46 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
             );
           }
+          const visibleLabels = labels.slice(0, MAX_VISIBLE_LABELS);
+          const overflowLabels = labels.slice(MAX_VISIBLE_LABELS);
           return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {labels.map((label) => (
-                <EuiFlexItem key={label} grow={false}>
-                  <EuiBadge color="hollow">{label}</EuiBadge>
+            <EuiFlexGroup
+              gutterSize="xs"
+              wrap={false}
+              responsive={false}
+              alignItems="center"
+              css={labelsContainerStyle}
+              data-test-subj="labelsContainer"
+            >
+              {visibleLabels.map((label) => (
+                <EuiFlexItem key={label} grow={false} css={labelItemStyle}>
+                  <EuiToolTip content={label}>
+                    <EuiBadge tabIndex={0} color="hollow" css={truncatedBadgeStyle}>
+                      {label}
+                    </EuiBadge>
+                  </EuiToolTip>
                 </EuiFlexItem>
               ))}
+              {overflowLabels.length > 0 && (
+                <EuiFlexItem grow={false} css={overflowBadgeItemStyle}>
+                  <EuiToolTip
+                    content={overflowLabels.join(', ')}
+                    data-test-subj="overflowLabelsTooltip"
+                  >
+                    <EuiBadge
+                      tabIndex={0}
+                      color="hollow"
+                      data-test-subj="overflowLabelsBadge"
+                      iconType="tag"
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.labels.overflow', {
+                        defaultMessage: '+{count}',
+                        values: { count: overflowLabels.length },
+                      })}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },
@@ -316,7 +375,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
         ),
-        width: '12%',
+        width: '10%',
         render: (kind: string) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -343,7 +402,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
         ),
-        width: '10%',
+        width: '8%',
         render: (enabled: boolean) =>
           enabled ? (
             <EuiBadge color="success" data-test-subj="ruleStatusEnabled">
