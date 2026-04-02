@@ -22,7 +22,10 @@ export async function sortPackageJson(log) {
 
   const path = Path.resolve(REPO_ROOT, 'package.json');
   const json = await Fsp.readFile(path, 'utf8');
-  const sorted = sortPackageJson(json);
+  let sorted = sortPackageJson(json);
+
+  sorted += '\n';
+
   if (sorted !== json) {
     await Fsp.writeFile(path, sorted, 'utf8');
     log.success('sorted package.json');

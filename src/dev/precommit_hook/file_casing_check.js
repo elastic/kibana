@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getFilesForCommit } from './get_files_for_commit';
-export { runFileCasingCheck } from './run_file_casing_check';
-export { FileCasingCheck } from './file_casing_check';
-export { YamlLintCheck } from './yaml_lint_check';
-export { LinterCheck } from './linter_check';
-export { MoonConfigGenerationCheck } from './moon_config_generation_check';
-export { SemverRangesCheck } from './semver_check';
+import { PrecommitCheck } from './precommit_check';
+import { runFileCasingCheck } from './run_file_casing_check';
+
+export class FileCasingCheck extends PrecommitCheck {
+  constructor() {
+    super('File Casing');
+  }
+
+  shouldExecute() {
+    return !process.env.SKIP_CASING_CHECK?.match(/(1|true)/);
+  }
+
+  async execute(log, allFiles) {
+    const files = allFiles.filter((f) => f.getGitStatus() !== 'deleted');
+    await runFileCasingCheck(log, files);
+  }
+}

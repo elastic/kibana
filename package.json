@@ -53,6 +53,7 @@
     "lint:oxc": "node scripts/lint",
     "lint:style": "node scripts/stylelint",
     "makelogs": "node scripts/makelogs",
+    "moon:regenerate": "node scripts/regenerate_moon_projects.js --update",
     "quick-checks": "node scripts/quick_checks",
     "serverless": "node scripts/kibana --dev --serverless",
     "serverless-es": "node scripts/kibana --dev --serverless=es",

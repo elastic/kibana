@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { File } from '../file';
 
 /**
- * Get the files that are staged for commit (excluding deleted files)
+ * Get the files that are staged for commit
  * as `File` objects that are aware of their commit status.
  *
  * @param  {String|String[]} gitRef
@@ -27,29 +27,31 @@ export async function getFilesForCommit(gitRef, options = {}) {
   const gitRefForDiff = normalizedGitRef ? normalizedGitRef : '--cached';
   const output = await simpleGit.diff(['--name-status', gitRefForDiff]);
 
-  const trackedPaths = output
+  const filesFromDiff = output
     .split('\n')
     // Ignore blank lines
     .filter((line) => line.trim().length > 0)
     // git diff --name-status outputs lines with two OR three parts
     // separated by a tab character
     .map((line) => line.trim().split('\t'))
-    .map(([status, ...paths]) => {
-      // ignore deleted files
-      if (status === 'D') {
-        return undefined;
-      }
+    .map(([statusSymbol, ...paths]) => {
+      const status = {
+        A: 'added',
+        M: 'modified',
+        R: 'renamed',
+        D: 'deleted',
+        '??': 'untracked',
+      }[statusSymbol];
 
       // the status is always in the first column
       // .. If the file is edited the line will only have two columns
       // .. If the file is renamed it will have three columns
       // .. In any case, the last column is the CURRENT path to the file
-      return paths[paths.length - 1];
-    })
-    .filter(Boolean);
+      return new File(paths[paths.length - 1], status);
+    });
 
   if (!includeUntracked) {
-    return trackedPaths.map((path) => new File(path));
+    return filesFromDiff;
   }
 
   const untrackedOutput = await simpleGit.raw(['ls-files', '--others', '--exclude-standard']);
@@ -58,5 +60,10 @@ export async function getFilesForCommit(gitRef, options = {}) {
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
 
-  return [...new Set([...trackedPaths, ...untrackedPaths])].map((path) => new File(path));
+  const trackedRelativePaths = new Set(filesFromDiff.map((f) => f.getRelativePath()));
+  const untrackedFiles = untrackedPaths
+    .filter((path) => !trackedRelativePaths.has(path))
+    .map((path) => new File(path, 'untracked'));
+
+  return [...filesFromDiff, ...untrackedFiles];
 }
