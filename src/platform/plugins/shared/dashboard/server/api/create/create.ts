@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardCreateRequestBody, DashboardCreateRequestParams } from './types';
+import type { DashboardCreateRequestBody } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardCreateResponseBody } from './types';
@@ -21,7 +21,6 @@ export async function create(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardCreateRequestBody,
-  createParams?: DashboardCreateRequestParams,
   isDashboardAppRequest: boolean = false
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
@@ -45,7 +44,6 @@ export async function create(
     soAttributes,
     {
       references: soReferences,
-      ...(createParams?.id && { id: createParams.id }),
       ...(accessControl?.access_mode &&
         supportsAccessControl && {
           accessControl: {

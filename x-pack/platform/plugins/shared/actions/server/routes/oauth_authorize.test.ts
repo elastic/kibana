@@ -113,6 +113,8 @@ describe('oauthAuthorizeRoute', () => {
     );
   });
 
+  const mockActionsConfigUtils = { getEarsUrl: jest.fn().mockReturnValue(undefined) };
+
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
     const licenseState = licenseStateMock.create();
     oauthAuthorizeRoute(
@@ -120,7 +122,8 @@ describe('oauthAuthorizeRoute', () => {
       licenseState,
       mockLogger,
       coreSetup as never,
-      mockRateLimiter as never
+      mockRateLimiter as never,
+      mockActionsConfigUtils as never
     );
     return router.post.mock.calls[0];
   };
@@ -382,7 +385,8 @@ describe('oauthAuthorizeRoute', () => {
       licenseState,
       mockLogger,
       createMockCoreSetup() as never,
-      mockRateLimiter as never
+      mockRateLimiter as never,
+      mockActionsConfigUtils as never
     );
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));

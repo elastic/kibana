@@ -115,7 +115,6 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
   [AIV2TelemetryEventType.IntegrationDownloadZipClicked]: {},
   [AIV2TelemetryEventType.ApproveModalCancelClicked]: {},
   [AIV2TelemetryEventType.ApproveModalApproveClicked]: {},
-  [AIV2TelemetryEventType.IntegrationDeleteConfirmed]: {},
   [AIV2TelemetryEventType.DataStreamDeleteConfirmed]: {
     sessionId: {
       type: 'keyword',

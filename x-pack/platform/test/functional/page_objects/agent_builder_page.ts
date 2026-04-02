@@ -740,6 +740,93 @@ export class AgentBuilderPageObject extends FtrService {
     };
   }
 
+  /*
+   * ==========================
+   * Embeddable sidebar helpers
+   * ==========================
+   */
+
+  /**
+   * Navigate to the Kibana home page — use this as the starting point for sidebar tests
+   * so the sidebar components don't clash with the full-screen agent builder components.
+   */
+  async navigateToHome() {
+    await this.common.navigateToApp('home');
+  }
+
+  /**
+   * Standard starting point for all embeddable sidebar tests.
+   * Navigates to home, opens the sidebar, and waits for it to be ready.
+   * Must be called from any page except the agent builder app, to avoid
+   * data-test-subj clashes with full-screen components.
+   */
+  async prepareEmbeddableSidebar() {
+    await this.navigateToHome();
+    await this.openEmbeddableSidebar();
+    await this.waitForEmbeddableSidebarOpen();
+  }
+
+  /**
+   * Opens the sidebar and resets it to a blank new chat.
+   * Use when the test needs a clean empty conversation ready for input.
+   */
+  async prepareEmbeddableSidebarWithNewChat() {
+    await this.prepareEmbeddableSidebar();
+    await this.openEmbeddableMenu();
+    await this.clickEmbeddableNewChatButton();
+  }
+
+  /**
+   * Open the embeddable conversation sidebar by clicking the nav control button
+   */
+  async openEmbeddableSidebar() {
+    await this.testSubjects.click('AgentBuilderNavControlButton');
+  }
+
+  /**
+   * Wait for the embeddable sidebar to be open (menu button visible)
+   */
+  async waitForEmbeddableSidebarOpen() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('agentBuilderEmbeddableMenuButton');
+    });
+  }
+
+  /**
+   * Open the embeddable menu (hamburger button)
+   */
+  async openEmbeddableMenu() {
+    await this.testSubjects.click('agentBuilderEmbeddableMenuButton');
+  }
+
+  /**
+   * Click "New chat" button inside the embeddable menu popover
+   */
+  async clickEmbeddableNewChatButton() {
+    await this.testSubjects.click('agentBuilderEmbeddableNewChatButton');
+  }
+
+  /**
+   * Select an existing conversation from the embeddable menu popover
+   */
+  async selectEmbeddableConversation(conversationId: string) {
+    await this.testSubjects.click(`agentBuilderEmbeddableConversation-${conversationId}`);
+  }
+
+  /**
+   * Click the agent row in the conversations popover to navigate to agents view
+   */
+  async clickEmbeddableAgentRow() {
+    await this.testSubjects.click('agentBuilderEmbeddableAgentRow');
+  }
+
+  /**
+   * Select an agent from the agents popover view
+   */
+  async selectEmbeddableAgent(agentId: string) {
+    await this.testSubjects.click(`agentBuilderAgentOption-${agentId}`);
+  }
+
   async getAgentFormDisplayName() {
     const displayNameInputValue = await this.testSubjects.getAttribute(
       'agentSettingsDisplayNameInput',

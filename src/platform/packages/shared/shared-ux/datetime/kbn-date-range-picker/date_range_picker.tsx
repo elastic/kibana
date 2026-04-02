@@ -75,7 +75,7 @@ export interface DateRangePickerProps {
   defaultValue?: string;
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-  /** Custom format for displaying (and parsing?) dates */
+  /** Additional format string for parsing absolute dates (does not affect display). */
   dateFormat?: string;
   /** Show invalid state */
   isInvalid?: boolean;
@@ -103,8 +103,9 @@ export interface DateRangePickerProps {
    */
   compressed?: boolean;
   /**
-   * When `true`, the idle-state control hides its text label and only shows
-   * the short-duration badge.
+   * When true, hides the text label and shows only the duration badge.
+   * The badge is hidden for relative-to-now ranges (e.g. "Last 15 minutes")
+   * when not collapsed, since the label already conveys the duration.
    * @default false
    */
   collapsed?: boolean;
@@ -146,6 +147,12 @@ export interface DateRangePickerProps {
   timeZone?: string;
   /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
   onRefresh?: () => void;
+  /**
+   * Prepends the Kibana server `basePath` to an internal URL path.
+   * Typically provided as `core.http.basePath.prepend`.
+   * When omitted, paths are used as-is.
+   */
+  prependBasePath?: (path: string) => string;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
