@@ -53,7 +53,7 @@ export class ManagementSectionsService {
   }
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
 
-  private getAllSections = () => [...this.sections.values()];
+  getAllSections = () => [...this.sections.values()];
 
   private registerSection = (section: RegisterManagementSectionArgs) => {
     if (this.sections.has(section.id)) {

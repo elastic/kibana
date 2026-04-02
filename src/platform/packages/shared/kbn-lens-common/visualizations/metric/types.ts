@@ -66,7 +66,7 @@ export interface MetricVisualizationState {
    * @deprecated
    */
   titleWeight?: MetricStyle['titleWeight'];
-  primaryPosition?: MetricStyle['valuePosition'];
+  primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;

@@ -21,11 +21,12 @@ export interface MatcherContext {
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
   rule: MatcherContextRule;
+  data?: Record<string, unknown>;
 }
 
 export interface MatcherContextFieldDescriptor {
   path: string;
-  type: 'string' | 'boolean' | 'string[]';
+  type: 'string' | 'boolean' | 'string[]' | 'object';
 }
 
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
@@ -40,4 +41,5 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
   { path: 'rule.enabled', type: 'boolean' },
   { path: 'rule.createdAt', type: 'string' },
   { path: 'rule.updatedAt', type: 'string' },
+  { path: 'data', type: 'object' },
 ];

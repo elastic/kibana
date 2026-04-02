@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -13,11 +13,15 @@ import { ENABLE_LEAD_GENERATION_URL } from '../../../../../common/entity_analyti
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { StartPlugins } from '../../../../plugin';
+import { startLeadGenerationTask } from '../tasks';
+import { createLeadIndexService } from '../indices/lead_index_service';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const enableLeadGenerationRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.versioned
     .post({
@@ -35,13 +39,29 @@ export const enableLeadGenerationRoute = (
         validate: {},
       },
 
-      withMinimumLicense(async (_context, _request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, _request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          // TODO: Wire to Task Manager (#15955) — schedule the 24h recurring task
-          logger.info('[LeadGeneration] Enable requested — Task Manager wiring pending (#15955)');
+          const { getSpaceId } = await context.securitySolution;
+          const spaceId = getSpaceId();
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
+          const [, startPlugins] = await getStartServices();
+          const taskManager = startPlugins.taskManager;
+          if (!taskManager) {
+            return siemResponse.error({
+              statusCode: 500,
+              body: 'Task Manager is not available',
+            });
+          }
+
+          const indexService = createLeadIndexService({ esClient, logger, spaceId });
+          await indexService.createIndices();
+
+          await startLeadGenerationTask({ taskManager, logger, namespace: spaceId });
+
+          logger.info(`[LeadGeneration] Enabled scheduled lead generation for space "${spaceId}"`);
           return response.ok({ body: { success: true } });
         } catch (e) {
           logger.error(`[LeadGeneration] Error enabling lead generation: ${e}`);
