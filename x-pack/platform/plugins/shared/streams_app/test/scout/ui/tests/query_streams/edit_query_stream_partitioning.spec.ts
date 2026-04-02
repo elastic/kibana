@@ -43,7 +43,7 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
-      // Cleanup may fail if the delete test already removed the stream — helpers handle this gracefully
+      // Cleanup may fail if the delete test already removed the stream - helpers handle this gracefully
       await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
       await deleteRootStreamViews(esClient);
       await disableQueryStreams(kbnClient);

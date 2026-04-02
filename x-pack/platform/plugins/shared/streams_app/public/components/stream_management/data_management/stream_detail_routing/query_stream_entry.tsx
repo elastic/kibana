@@ -208,10 +208,6 @@ interface EditingQueryStreamEntryProps {
   parentStreamName: string;
 }
 
-/**
- * Inline form for editing an existing query stream within the routing page.
- * Mirrors CreatingQueryStreamEntry but pre-fills data and calls update instead of create.
- */
 export function EditingQueryStreamEntry({
   streamName,
   parentStreamName,
@@ -236,7 +232,6 @@ export function EditingQueryStreamEntry({
 
   const [isDeleteModalOpen, { on: openDeleteModal, off: closeDeleteModal }] = useBoolean(false);
 
-  // Fetch the current stream definition to get the existing ES|QL query
   const streamDetailsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
@@ -251,8 +246,6 @@ export function EditingQueryStreamEntry({
     streamDetailsFetch.value && Streams.QueryStream.GetResponse.is(streamDetailsFetch.value)
       ? streamDetailsFetch.value.stream.query.esql
       : undefined;
-
-  // Debounced query execution for preview
   const { run: debouncedExecuteQuery } = useDebounceFn((query: string) => {
     if (query && query.trim() !== '') {
       executeQuery(query);
@@ -281,7 +274,6 @@ export function EditingQueryStreamEntry({
     );
   }, [streamsRepositoryClient, streamName, navigateToUrl, router, parentStreamName]);
 
-  // Extract suffix for the inline form (remove parent prefix)
   const suffix = streamName.replace(`${parentStreamName}.`, '');
 
   if (streamDetailsFetch.loading) {
