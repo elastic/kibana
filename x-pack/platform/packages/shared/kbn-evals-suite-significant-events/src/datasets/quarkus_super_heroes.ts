@@ -12,9 +12,6 @@ import {
 } from '../constants';
 import type { DatasetConfig } from './types';
 
-// TODO: None of the scenarios have validated criteria and GCS snapshots yet.
-// These are unvalidated placeholders — snapshots and criteria will be added as
-// each scenario is validated.
 export const quarkusSuperHeroesDataset: DatasetConfig = {
   id: QUARKUS_SUPER_HEROES_NAMESPACE,
   description: 'Quarkus Super Heroes sample microservices application',
@@ -185,32 +182,32 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         criteria: [
           {
             id: 'entity-rest-fights',
-            text: 'Must identify rest-fights as a failing entity (evidence: SRMSG18206 unable to write to Kafka, SRMSG18212 message nacked, Unable to write to Kafka errors in rest-fights logs)',
+            text: 'Must identify rest-fights as a failing entity (Kafka producer failures are present in the logs: unable to write to Kafka, message nacked, SRMSG18206, SRMSG18212)',
             score: 2,
           },
           {
             id: 'entity-event-statistics',
-            text: 'Must identify event-statistics as a failing entity (evidence: Kafka consumer timeout errors — org.apache.kafka.common.errors.TimeoutException, Topic fights not present in metadata)',
+            text: 'Must identify event-statistics as a failing entity (Kafka consumer failures are present in the logs: topic not found, connection timeout, org.apache.kafka.common.errors.TimeoutException)',
             score: 2,
           },
           {
             id: 'dep-event-statistics-fights-kafka',
-            text: 'Must identify the dependency event-statistics -> fights-kafka (evidence: Kafka consumer TimeoutException, topic metadata unavailable)',
+            text: 'Must identify the dependency event-statistics -> fights-kafka (Kafka consumer failing: topic unavailable or connection timeout)',
             score: 1,
           },
           {
             id: 'dep-rest-fights-fights-kafka',
-            text: 'Must identify the dependency rest-fights -> fights-kafka (evidence: SRMSG18206 unable to write, SRMSG18212 message nacked)',
+            text: 'Must identify the dependency rest-fights -> fights-kafka (Kafka producer failing: unable to write or publish fight events)',
             score: 3,
           },
           {
             id: 'tech-kafka',
-            text: 'Must identify Kafka as the affected technology (evidence: SmallRye Reactive Messaging error codes SRMSG18206/SRMSG18212 and org.apache.kafka.common.errors.TimeoutException in producer/consumer logs)',
+            text: 'Must identify Kafka as the affected technology (both producer and consumer sides are failing due to broker unreachability)',
             score: 2,
           },
           {
             id: 'error-signatures',
-            text: 'Must reference Kafka error signatures such as SRMSG18206 (unable to write), SRMSG18212 (message nacked), or TimeoutException (topic not present in metadata)',
+            text: 'Must reference Kafka failure signals such as unable to write to Kafka, message nacked, topic not present in metadata, connection timeout, or equivalent producer/consumer error descriptions',
             score: 2,
           },
         ],
