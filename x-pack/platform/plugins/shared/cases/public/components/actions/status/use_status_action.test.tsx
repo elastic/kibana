@@ -8,7 +8,7 @@
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
 import { basicCase } from '../../../containers/mock';
-import type { PatchCaseStats } from '../../../../common/types/api';
+import type { UpdateSummary } from '../../../../common/types/api';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useShouldDisableStatus } from './use_should_disable_status';
@@ -24,17 +24,17 @@ describe('useStatusAction', () => {
   const onActionSuccess = jest.fn();
   const mutate = jest.fn();
 
-  const getUpdateSuccessToastFromLastCall = (patchCaseStats?: PatchCaseStats[]) => {
+  const getUpdateSuccessToastFromLastCall = (updateSummary?: UpdateSummary[]) => {
     const updateCall = mutate.mock.calls.at(-1)?.[0] as
       | {
-          getUpdateSuccessToast?: (args: { patchCaseStats?: PatchCaseStats[] }) => {
+          getUpdateSuccessToast?: (args: { updateSummary?: UpdateSummary[] }) => {
             title: string;
             text?: unknown;
           };
         }
       | undefined;
 
-    return updateCall?.getUpdateSuccessToast?.({ patchCaseStats });
+    return updateCall?.getUpdateSuccessToast?.({ updateSummary });
   };
 
   beforeEach(() => {

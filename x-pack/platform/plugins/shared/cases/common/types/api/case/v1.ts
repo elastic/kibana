@@ -536,16 +536,16 @@ export const CasesPatchRequestRt = rt.strict({
   }),
 });
 
-export const PatchCaseStatsRt = rt.strict({
+export const UpdateSummaryRt = rt.strict({
   syncedAlertCount: rt.number,
 });
 
-export const CaseWithPatchStatsRt = rt.intersection([
+export const CaseWithUpdateSummaryRt = rt.intersection([
   CaseRt,
-  rt.partial({ patchCaseStats: PatchCaseStatsRt }),
+  rt.partial({ updateSummary: UpdateSummaryRt }),
 ]);
 
-export const PatchCasesResponseRt = rt.array(CaseWithPatchStatsRt);
+export const PatchCasesResponseRt = rt.array(CaseWithUpdateSummaryRt);
 
 /**
  * Push case
@@ -636,8 +636,8 @@ export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFi
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
-export type PatchCaseStats = rt.TypeOf<typeof PatchCaseStatsRt>;
-export type CaseWithPatchStats = rt.TypeOf<typeof CaseWithPatchStatsRt>;
+export type UpdateSummary = rt.TypeOf<typeof UpdateSummaryRt>;
+export type CaseWithUpdateSummary = rt.TypeOf<typeof CaseWithUpdateSummaryRt>;
 export type CasesPatchResponse = rt.TypeOf<typeof PatchCasesResponseRt>;
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type GetTagsResponse = rt.TypeOf<typeof GetTagsResponseRt>;

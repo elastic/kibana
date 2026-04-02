@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import type { ToastInputFields } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import type { PatchCaseStats } from '../../../../common/types/api';
+import type { UpdateSummary } from '../../../../common/types/api';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
@@ -30,7 +30,7 @@ import { generateCaseViewPath } from '../../../common/navigation';
 interface GetUpdateSuccessToastParams {
   status: CaseStatuses;
   cases: CasesUI;
-  patchCaseStats?: PatchCaseStats[];
+  updateSummary?: UpdateSummary[];
   // Dependencies for rendering re-direct button within toast
   appId?: string;
   application: ReturnType<typeof useKibana>['services']['application'];
@@ -42,7 +42,7 @@ interface GetUpdateSuccessToastParams {
 const getUpdateSuccessToast = ({
   status,
   cases,
-  patchCaseStats,
+  updateSummary,
   appId,
   application,
   i18nStart,
@@ -62,7 +62,7 @@ const getUpdateSuccessToast = ({
 
   // Special handling for closed cases as it can possibly be closed with a close reason to sync to attached alerts
   const alertStatusSyncCount =
-    patchCaseStats?.reduce((total, stats) => {
+    updateSummary?.reduce((total, stats) => {
       return total + (stats?.syncedAlertCount ?? 0);
     }, 0) ?? 0;
   const totalAlertsCount = cases.reduce(
@@ -139,11 +139,11 @@ export const useStatusAction = ({
       updateCases(
         {
           cases: casesToUpdate,
-          getUpdateSuccessToast: ({ patchCaseStats }: { patchCaseStats?: PatchCaseStats[] }) => {
+          getUpdateSuccessToast: ({ updateSummary }: { updateSummary?: UpdateSummary[] }) => {
             return getUpdateSuccessToast({
               status,
               cases: selectedCases,
-              patchCaseStats,
+              updateSummary,
               appId,
               application,
               i18nStart,

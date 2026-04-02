@@ -29,7 +29,7 @@ import type {
   CasePatchRequest,
   CasesPatchRequest,
   CasesPatchResponse,
-  CaseWithPatchStats,
+  CaseWithUpdateSummary,
 } from '../../../common/types/api';
 import { PatchCasesResponseRt, CasesPatchRequestRt } from '../../../common/types/api';
 import {
@@ -614,14 +614,14 @@ export const bulkUpdate = async (
         };
 
         const syncedAlertCount = syncedAlertCountCountByCaseId.get(updatedCase.id) ?? 0;
-        const updatedCaseWithStats: CaseWithPatchStats = {
+        const updatedCaseWithStats: CaseWithUpdateSummary = {
           ...flattenCaseSavedObject({
             savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
             totalComment,
             totalAlerts,
             totalEvents,
           }),
-          ...(syncedAlertCount > 0 ? { patchCaseStats: { syncedAlertCount } } : {}),
+          ...(syncedAlertCount > 0 ? { updateSummary: { syncedAlertCount } } : {}),
         };
 
         flattenCases.push(updatedCaseWithStats);

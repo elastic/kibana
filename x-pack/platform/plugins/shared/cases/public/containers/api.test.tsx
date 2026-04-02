@@ -764,16 +764,16 @@ describe('Cases API', () => {
   });
 
   describe('updateCases', () => {
-    const casesSnakeWithBulkUpdateStats = casesSnake.map((theCase) => ({
+    const casesSnakeWithUpdateSummary = casesSnake.map((theCase) => ({
       ...theCase,
-      patchCaseStats: {
+      updateSummary: {
         syncedAlertCount: 0,
       },
     }));
 
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesSnakeWithBulkUpdateStats);
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
     });
 
     const data = [
@@ -799,7 +799,7 @@ describe('Cases API', () => {
       expect(resp[0]).toEqual(
         expect.objectContaining({
           id: cases[0].id,
-          patchCaseStats: {
+          updateSummary: {
             syncedAlertCount: 0,
           },
         })
@@ -812,7 +812,7 @@ describe('Cases API', () => {
     });
 
     it('returns cases with per-case alert status update summary', async () => {
-      fetchMock.mockResolvedValue(casesSnakeWithBulkUpdateStats);
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
 
       const resp = await updateCases({
         cases: data,
@@ -829,7 +829,7 @@ describe('Cases API', () => {
       expect(resp[0]).toEqual(
         expect.objectContaining({
           id: cases[0].id,
-          patchCaseStats: {
+          updateSummary: {
             syncedAlertCount: 0,
           },
         })

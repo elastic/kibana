@@ -28,7 +28,7 @@ import type {
   FindCasesContainingAllAlertsResponse,
   BulkAddObservablesRequest,
   FindCasesContainingAllDocumentsRequest,
-  PatchCaseStats,
+  UpdateSummary,
   CasesPatchResponse,
 } from '../../common/types/api';
 import type {
@@ -106,7 +106,7 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
-  decodeCasesWithBulkUpdateStatsResponse,
+  decodeCasesWithUpdateSummaryResponse,
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
@@ -387,7 +387,7 @@ export const updateCases = async ({
 }: {
   cases: CaseUpdateRequest[];
   signal?: AbortSignal;
-}): Promise<Array<CaseUI & { patchCaseStats?: PatchCaseStats }>> => {
+}): Promise<Array<CaseUI & { updateSummary?: UpdateSummary }>> => {
   if (cases.length === 0) {
     return [];
   }
@@ -398,9 +398,9 @@ export const updateCases = async ({
     signal,
   });
 
-  const decodedResponse = decodeCasesWithBulkUpdateStatsResponse(response);
+  const decodedResponse = decodeCasesWithUpdateSummaryResponse(response);
   return convertArrayToCamelCase(decodedResponse) as Array<
-    CaseUI & { patchCaseStats?: PatchCaseStats }
+    CaseUI & { updateSummary?: UpdateSummary }
   >;
 };
 

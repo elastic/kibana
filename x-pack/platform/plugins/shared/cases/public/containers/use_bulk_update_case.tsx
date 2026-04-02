@@ -9,7 +9,7 @@ import { useQueryClient, useMutation } from '@kbn/react-query';
 import type { ToastInputFields } from '@kbn/core/public';
 import * as i18n from './translations';
 import { updateCases } from './api';
-import type { PatchCaseStats } from '../../common/types/api';
+import type { UpdateSummary } from '../../common/types/api';
 import type { CaseUpdateRequest } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
@@ -18,7 +18,7 @@ import { casesQueriesKeys, casesMutationsKeys } from './constants';
 interface MutationArgs {
   cases: CaseUpdateRequest[];
   successToasterTitle?: string;
-  getUpdateSuccessToast?: (args: { patchCaseStats?: PatchCaseStats[] }) => {
+  getUpdateSuccessToast?: (args: { updateSummary?: UpdateSummary[] }) => {
     title: string;
     text?: ToastInputFields['text'];
   };
@@ -36,9 +36,9 @@ export const useUpdateCases = () => {
       queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
       const customToast = getUpdateSuccessToast?.({
-        patchCaseStats: data
-          ?.map((updatedCase) => updatedCase.patchCaseStats)
-          .filter((stats): stats is PatchCaseStats => stats !== undefined),
+        updateSummary: data
+          ?.map((updatedCase) => updatedCase.updateSummary)
+          .filter((stats): stats is UpdateSummary => stats !== undefined),
       });
 
       if (customToast) {

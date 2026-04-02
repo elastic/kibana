@@ -2169,7 +2169,7 @@ describe('update', () => {
         ]);
         expect(result[0]).toEqual(
           expect.objectContaining({
-            patchCaseStats: {
+            updateSummary: {
               syncedAlertCount: 1,
             },
           })
@@ -2288,7 +2288,7 @@ describe('update', () => {
 
         expect(result[0]).toEqual(
           expect.objectContaining({
-            patchCaseStats: {
+            updateSummary: {
               syncedAlertCount: 3,
             },
           })
@@ -2296,7 +2296,7 @@ describe('update', () => {
         expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalled();
       });
 
-      it('omits patchCaseStats when no alerts are synced', async () => {
+      it('omits updateSummary when no alerts are synced', async () => {
         const result = await bulkUpdate(
           {
             cases: [
@@ -2311,7 +2311,7 @@ describe('update', () => {
           casesClientMock
         );
 
-        expect(result[0]).not.toHaveProperty('patchCaseStats');
+        expect(result[0]).not.toHaveProperty('updateSummary');
       });
     });
   });
