@@ -140,6 +140,6 @@ fileGroups:
     - scripts/**/*
     - package.json
     - test/scout/**/*
-    - test/scout_automatic_import_v2/**/*
+    - test/scout_automatic_import/**/*
     - '!target/**/*'
 tasks: {}

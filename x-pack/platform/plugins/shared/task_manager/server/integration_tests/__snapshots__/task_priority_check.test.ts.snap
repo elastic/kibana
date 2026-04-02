@@ -14,5 +14,9 @@ Array [
     "priority": 40,
     "taskType": "alerting:attack-discovery",
   },
+  Object {
+    "priority": 50,
+    "taskType": "autoImport-dataStream-task",
+  },
 ]
 `;
