@@ -43,7 +43,6 @@ import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
-import { compareSelectedTabId } from './utils/compare_selected_tab_id';
 import { isTabDeleted } from './utils/is_tab_deleted';
 
 export const getSearchEmbeddableFactory = ({
@@ -103,6 +102,10 @@ export const getSearchEmbeddableFactory = ({
       const isSelectedTabDeleted = (tabId: string | undefined, availableTabs: typeof tabs = tabs) =>
         isTabDeleted(tabId, availableTabs);
 
+      const defaultState = embeddableTransformsEnabled
+        ? { selected_tab_id: tabs[0]?.id }
+        : { selectedTabId: tabs[0]?.id };
+
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -145,6 +148,7 @@ export const getSearchEmbeddableFactory = ({
       const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
+        defaultState,
         serializeState: () => serialize(savedObjectId$.getValue()),
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
@@ -187,9 +191,7 @@ export const getSearchEmbeddableFactory = ({
                   Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
                 )
               : {}),
-            selectedTabId: shouldSkipTabComparators
-              ? 'skip'
-              : (last, current) => compareSelectedTabId(tabs[0]?.id, last, current),
+            selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
             attributes: 'skip',
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
