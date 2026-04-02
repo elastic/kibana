@@ -143,7 +143,7 @@ Elasticsearch solution::
 * Fixes the query rules UI rejecting case variants as duplicate values ({kibana-pull}259506[#259506]).
 * Fixes only passing filtered rules to the API and deleting rules not matching the filter in the Query Rule Set editor ({kibana-pull}259503[#259503]).
 Machine Learning::
-* Fixes the anomaly swim lane dashboard panel not refreshing ({kibana-pull}259962[#259962]).
+* Fixes the anomaly swim lane dashboard panel not refreshing ({kibana-pull}259962[#259962]). 
 
 [[release-notes-8.19.13]]
 == {kib} 8.19.13
