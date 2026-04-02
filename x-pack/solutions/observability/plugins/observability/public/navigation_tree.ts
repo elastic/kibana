@@ -560,6 +560,21 @@ function createNavTree({
               { link: 'monitoring' },
             ],
           },
+          ...(showAlertingV2
+            ? [
+                {
+                  id: 'v2_alerting_preview',
+                  title: i18n.translate('xpack.observability.obltNav.v2AlertingPreview', {
+                    defaultMessage: 'V2 Alerting Preview',
+                  }),
+                  renderAs: 'panelOpener' as const,
+                  children: [
+                    { link: 'management:rules' as const },
+                    { link: 'management:notification_policies' as const },
+                  ],
+                },
+              ]
+            : []),
           {
             id: 'alerts_and_insights',
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {

@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
-import { RuleDurationFormat } from '../../execution_log_table/rule_duration_format';
+import { humanizeDuration } from '../utils';
 
 interface DurationBreakdownSectionProps {
-  totalSearchDurationMs: number | null | undefined;
-  totalIndexingDurationMs: number | null | undefined;
+  totalSearchDurationMs: number | null;
+  totalIndexingDurationMs: number | null;
 }
 
 export const DurationBreakdownSection: React.FC<DurationBreakdownSectionProps> = ({
@@ -62,11 +62,7 @@ export const DurationBreakdownSection: React.FC<DurationBreakdownSectionProps> =
             <FieldLabel label={i18n.FLYOUT_SEARCH_DURATION} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutSearchDuration">
-              {totalSearchDurationMs != null ? (
-                <RuleDurationFormat duration={totalSearchDurationMs} />
-              ) : (
-                '—'
-              )}
+              {totalSearchDurationMs !== null ? humanizeDuration(totalSearchDurationMs) : '—'}
             </EuiText>
           </EuiFlexItem>
           <SectionSeparator />
@@ -74,11 +70,7 @@ export const DurationBreakdownSection: React.FC<DurationBreakdownSectionProps> =
             <FieldLabel label={i18n.FLYOUT_INDEX_DURATION} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutIndexDuration">
-              {totalIndexingDurationMs != null ? (
-                <RuleDurationFormat duration={totalIndexingDurationMs} />
-              ) : (
-                '—'
-              )}
+              {totalIndexingDurationMs !== null ? humanizeDuration(totalIndexingDurationMs) : '—'}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

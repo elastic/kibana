@@ -125,7 +125,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the redesigned execution results table on the rule details page
    */
-  newExecutionResultsTableEnabled: false,
+  newExecutionResultsTableEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
