@@ -3,7 +3,8 @@
 # Runs on a schedule and orchestrates feature identification across managed streams:
 #   1. Fetches eligible streams from the _eligible API endpoint (respects
 #      interval, exclusions, concurrency).
-#   2. Schedules ALL candidate streams in parallel (fire-and-forget).
+#   2. Schedules ALL candidate streams, confirming each reaches in_progress
+#      before moving to the next.
 #   3. Polls each stream sequentially until it reaches a terminal state
 #      (completed/failed), then captures the result.
 #
@@ -59,7 +60,7 @@ steps:
     type: if
     condition: "steps.get_eligible.output.candidates[0].streamName:*"
     steps:
-      # Phase 1: Schedule all candidate streams up front so they run in parallel.
+      # Phase 1: Schedule all candidate streams, confirming each reaches in_progress.
       - name: schedule_all
         type: foreach
         foreach: "${{ steps.get_eligible.output.candidates }}"
@@ -83,6 +84,26 @@ steps:
                 max-attempts: 3
                 delay: "5s"
                 strategy: exponential
+          - name: await_in_progress
+            type: while
+            condition: "steps.verify_status.output.status:not_started"
+            steps:
+              - name: verify_status
+                type: kibana.request
+                with:
+                  method: GET
+                  path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
+                  use_server_info: true
+                  headers:
+                    x-elastic-internal-origin: "kibana"
+              - name: if_not_started_delay
+                type: if
+                condition: "steps.verify_status.output.status:not_started"
+                steps:
+                  - name: startup_delay
+                    type: wait
+                    with:
+                      duration: "1s"
 
       # Phase 2: Poll each stream until it reaches a terminal state.
       - name: collect_results

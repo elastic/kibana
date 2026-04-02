@@ -322,10 +322,17 @@ export class TaskClient<TaskType extends string> {
 
     this.logger.debug(`Bulk-deleting ${tasks.length} task(s) of type ${type}`);
 
-    await this.storageClient.bulk({
+    const response = await this.storageClient.bulk({
       operations: tasks.map((task) => ({ delete: { _id: task.id } })),
     });
 
-    return tasks.length;
+    const failed = response.items.filter((item) => item.delete?.error);
+    if (failed.length > 0) {
+      this.logger.warn(
+        `${failed.length} of ${tasks.length} task(s) of type ${type} failed to delete`
+      );
+    }
+
+    return tasks.length - failed.length;
   }
 }

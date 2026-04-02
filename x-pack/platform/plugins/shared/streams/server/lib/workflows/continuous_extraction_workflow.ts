@@ -105,13 +105,6 @@ export const createContinuousKiExtractionWorkflowService = (
         request
       );
 
-      await managementApi.updateWorkflow(
-        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-        { enabled: true },
-        DEFAULT_SPACE_ID,
-        request
-      );
-
       log.info(`Created continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`);
     },
   };
