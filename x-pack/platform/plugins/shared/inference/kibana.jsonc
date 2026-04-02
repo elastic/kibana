@@ -14,7 +14,7 @@
     ],
     "requiredBundles": [
     ],
-    "optionalPlugins": ["anonymization"],
+    "optionalPlugins": [],
     "extraPublicDirs": []
   }
 }

@@ -6,7 +6,6 @@
  */
 
 import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
-import type { EffectiveFieldPolicy, EffectivePolicy } from '@kbn/anonymization-common';
 import dedent from 'dedent';
 
 /**
@@ -14,23 +13,13 @@ import dedent from 'dedent';
  * placeholders (e.g. `PER_a1b2c3`) appear in the conversation and what
  * they mean.
  *
- * Covers all three anonymization paths:
- *  - NER rules → PER, LOC, ORG, MISC (filtered by allowedEntityClasses when present)
- *  - Regex rules → their entityClass values
- *  - Field-based policy → entity classes derived from the effective policy
- *
- * Returns the original system string unchanged when no anonymization is active.
+ * Covers NER rules (PER, LOC, ORG, MISC) and regex rules (their entityClass values).
+ * Returns the original system string unchanged when no anonymization rules are enabled.
  */
-export function addAnonymizationInstruction(
-  system: string,
-  rules: AnonymizationRule[],
-  effectivePolicy?: EffectivePolicy
-): string {
+export function addAnonymizationInstruction(system: string, rules: AnonymizationRule[]): string {
   const hasEnabledRules = rules.some((r) => r.enabled);
-  const hasFieldPolicy =
-    effectivePolicy && Object.values(effectivePolicy).some((p) => p.action === 'anonymize');
 
-  if (!hasEnabledRules && !hasFieldPolicy) {
+  if (!hasEnabledRules) {
     return system;
   }
 
@@ -41,20 +30,7 @@ export function addAnonymizationInstruction(
     .filter((r): r is RegexAnonymizationRule => r.type === 'RegExp' && r.enabled)
     .map((r) => r.entityClass);
 
-  const fieldPolicyClasses = effectivePolicy
-    ? [
-        ...new Set(
-          Object.values(effectivePolicy)
-            .filter(
-              (p): p is Extract<EffectiveFieldPolicy, { action: 'anonymize' }> =>
-                p.action === 'anonymize'
-            )
-            .map((p) => p.entityClass)
-        ),
-      ]
-    : [];
-
-  const customClasses = [...new Set([...regexClasses, ...fieldPolicyClasses])];
+  const customClasses = [...new Set([...regexClasses])];
   const allClasses = [...new Set([...nerClasses, ...customClasses])];
   const exampleTokens = allClasses.map((c) => `\`${c}_abc123\``).join(', ');
 

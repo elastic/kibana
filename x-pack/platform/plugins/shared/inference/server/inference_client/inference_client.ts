@@ -24,7 +24,6 @@ import { createPromptApi } from '../prompt';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { createCallbackManager } from './callback_manager';
-import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 export function createInferenceClient({
@@ -35,10 +34,8 @@ export function createInferenceClient({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
-  replacementsEsClient,
   endpointIdCache,
   callbacks,
-  anonymization,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -47,10 +44,8 @@ export function createInferenceClient({
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
-  replacementsEsClient?: ElasticsearchClient;
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
-  anonymization?: InferenceAnonymizationOptions;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -64,13 +59,6 @@ export function createInferenceClient({
     esClient,
     endpointIdCache,
     callbackManager,
-    anonymization: {
-      ...anonymization,
-      replacements: {
-        ...anonymization?.replacements,
-        ...(replacementsEsClient ? { esClient: replacementsEsClient } : {}),
-      },
-    },
   });
 
   const chatComplete = createChatCompleteApi({

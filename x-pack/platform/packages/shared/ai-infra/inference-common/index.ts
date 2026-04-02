@@ -59,8 +59,6 @@ export {
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
-  type ChatCompleteAnonymizationMetadata,
-  type ChatCompleteAnonymizationTarget,
   type AnonymizationRule,
   type RegexAnonymizationRule,
   type NamedEntityRecognitionRule,
@@ -72,7 +70,6 @@ export {
   type DeanonymizedMessage,
   type AnonymizationSettings,
   type AnonymizationEntityClass,
-  type AnonymizationResponseMetadata,
   type DeanonymizedMessageData,
   type CustomToolChoice,
   type ToolCallArgumentsOfToolDefinition,
@@ -85,6 +82,7 @@ export {
   type ToolCallbackResult,
   type InferenceCallbacks,
   type InferenceEventEmitter,
+  NER_MODEL_ID,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';

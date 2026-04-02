@@ -17,12 +17,10 @@ export function resolveOverlapsAndMask({
   detectedMatches,
   state,
   rules,
-  salt,
 }: {
   detectedMatches: DetectedMatch[];
   state: AnonymizationState;
   rules: RegexAnonymizationRule[];
-  salt?: string;
 }): AnonymizationState {
   if (detectedMatches.length === 0) {
     return state;
@@ -82,14 +80,10 @@ export function resolveOverlapsAndMask({
         for (const match of nonOverlappingMatches) {
           result += originalText.substring(lastIndex, match.start);
 
-          const mask = getEntityMask(
-            {
-              value: match.matchValue,
-              class_name: match.class_name,
-              field: match.recordKey,
-            },
-            salt
-          );
+          const mask = getEntityMask({
+            value: match.matchValue,
+            class_name: match.class_name,
+          });
           result += mask;
 
           newAnonymizations.push({

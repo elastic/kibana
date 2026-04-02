@@ -91,7 +91,6 @@ describe('GenAiSettingsApp', () => {
     showAiBreadcrumb: true,
     showAiAssistantsVisibilitySetting: true,
     showChatExperienceSetting: true,
-    showAnonymizationProfilesSection: true,
     ...overrides,
   });
 
@@ -107,8 +106,7 @@ describe('GenAiSettingsApp', () => {
       },
       observabilityAIAssistant: { show: true },
       securitySolutionAssistant: { 'ai-assistant': true },
-      agentBuilder: { show: true },
-      anonymization: { show: true, manage: true },
+      agentBuilder: { show: true, manageAgents: true },
     };
 
     // Mock feature flags to enable AI Agents by default
@@ -197,13 +195,6 @@ describe('GenAiSettingsApp', () => {
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSectionTitle')).not.toBeInTheDocument();
-
-      // Anonymization section
-      expect(screen.getByTestId('anonymizationProfilesSection')).toBeInTheDocument();
-      expect(screen.getByTestId('anonymizationProfilesActiveSpaceId')).toHaveTextContent(
-        'Space: default'
-      );
-      expect(screen.getByText('Manage')).toBeInTheDocument();
     });
 
     it('should conditionally render sections based on settings', () => {
@@ -215,13 +206,6 @@ describe('GenAiSettingsApp', () => {
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
       firstRender.unmount();
-
-      mockUseEnabledFeatures.mockReturnValue(
-        createFeatureFlagsMock({ showAnonymizationProfilesSection: false })
-      );
-      const secondRender = renderComponent();
-      expect(screen.queryByTestId('anonymizationProfilesSection')).not.toBeInTheDocument();
-      secondRender.unmount();
 
       mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
       coreStart.application.capabilities = {
@@ -237,33 +221,6 @@ describe('GenAiSettingsApp', () => {
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
       thirdRender.unmount();
-    });
-  });
-
-  describe('Anonymization Profiles section', () => {
-    it('switches to read-only mode when manage capability is absent', async () => {
-      coreStart.application.capabilities = {
-        ...coreStart.application.capabilities,
-        anonymization: { show: true, manage: false },
-      };
-
-      renderComponent();
-
-      expect(await screen.findByTestId('anonymizationProfilesSection')).toBeInTheDocument();
-      expect(screen.getByText('Read only')).toBeInTheDocument();
-      expect(screen.getByTestId('anonymizationProfilesCreateProfile')).toBeDisabled();
-    });
-
-    it('opens create profile flyout in manage mode', async () => {
-      renderComponent();
-
-      fireEvent.click(await screen.findByTestId('anonymizationProfilesCreateProfile'));
-      expect(await screen.findByTestId('anonymizationProfilesProfileFlyout')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByText('Cancel'));
-      await waitFor(() => {
-        expect(screen.queryByTestId('anonymizationProfilesProfileFlyout')).not.toBeInTheDocument();
-      });
     });
   });
 

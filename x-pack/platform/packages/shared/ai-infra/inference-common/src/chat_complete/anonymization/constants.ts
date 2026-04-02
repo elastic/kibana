@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export type {
-  TargetType,
-  ProfilesListQuery,
-  UpdateProfileInput,
-  ProfilesQueryContext,
-} from '../common/types/profiles';
+/** Default NER model ID used for anonymization rules. */
+export const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';

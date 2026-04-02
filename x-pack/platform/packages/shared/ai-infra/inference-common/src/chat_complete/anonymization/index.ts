@@ -17,6 +17,7 @@ export type {
   NamedEntityRecognitionRule,
   AnonymizationSettings,
   AnonymizationEntityClass,
-  AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './types';
+
+export { NER_MODEL_ID } from './constants';

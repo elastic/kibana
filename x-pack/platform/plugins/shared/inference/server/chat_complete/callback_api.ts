@@ -43,7 +43,6 @@ import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { prepareAnonymization } from './prepare_anonymization';
 
@@ -55,7 +54,6 @@ interface CreateChatCompleteApiOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
-  anonymization?: InferenceAnonymizationOptions;
   endpointIdCache: InferenceEndpointIdCache;
   callbackManager?: InferenceCallbackManager;
 }
@@ -108,7 +106,6 @@ export function createChatCompleteCallbackApi({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
-  anonymization,
   endpointIdCache,
   callbackManager,
 }: CreateChatCompleteApiOptions) {
@@ -136,7 +133,6 @@ export function createChatCompleteCallbackApi({
         abortSignal,
         stream,
         namespace,
-        anonymization,
       })
     ).pipe(
       retryWithExponentialBackoff({
@@ -167,7 +163,6 @@ function createChatCompletePipeline({
   abortSignal,
   stream,
   namespace,
-  anonymization,
 }: {
   resolve: () => Promise<ResolvedPipelineContext>;
   esClient: ElasticsearchClient;
@@ -178,7 +173,6 @@ function createChatCompletePipeline({
   abortSignal?: AbortSignal;
   stream?: boolean;
   namespace: string;
-  anonymization?: InferenceAnonymizationOptions;
 }) {
   return forkJoin({
     context: from(resolve()),
@@ -203,29 +197,16 @@ function createChatCompletePipeline({
 
       return from(
         prepareAnonymization({
-          namespace,
-          logger,
           anonymizationRules,
           regexWorker,
           esClient,
-          replacementsEsClient: anonymization?.replacements?.esClient,
-          replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
-          usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
-          requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
-          saltPromise: anonymization?.saltPromise,
-          resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
-          metadata,
           system,
           messages,
         })
       ).pipe(
-        switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+        switchMap(({ anonymization: preparedAnonymization }) => {
           const systemWithAnonymizationInstructions = preparedAnonymization.system
-            ? addAnonymizationInstruction(
-                preparedAnonymization.system,
-                anonymizationRules,
-                effectivePolicy
-              )
+            ? addAnonymizationInstruction(preparedAnonymization.system, anonymizationRules)
             : system;
 
           const spanModel = getSpanModel(modelName);
@@ -255,7 +236,7 @@ function createChatCompletePipeline({
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+          ).pipe(deanonymizeMessage(preparedAnonymization));
         })
       );
     })
@@ -275,7 +256,6 @@ function resolveAndCreatePipeline({
   abortSignal,
   stream,
   namespace,
-  anonymization,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -289,7 +269,6 @@ function resolveAndCreatePipeline({
   abortSignal?: AbortSignal;
   stream?: boolean;
   namespace: string;
-  anonymization?: InferenceAnonymizationOptions;
 }) {
   return from(endpointIdCache.has(connectorId)).pipe(
     switchMap((isInferenceEndpoint) => {
@@ -396,7 +375,6 @@ function resolveAndCreatePipeline({
         abortSignal,
         stream,
         namespace,
-        anonymization,
       }).pipe(
         catchError((error) => {
           if (error?.meta?.status === 404 || error?.statusCode === 404) {
