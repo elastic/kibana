@@ -52,7 +52,6 @@ export const LENS_METRIC_LAYOUT_BY_POSITION: Record<
   },
   middle: {
     titlesTextAlign: 'left',
-    titleWeight: 'bold',
     primaryAlign: 'center',
     iconAlign: 'right',
     secondaryAlign: 'right',

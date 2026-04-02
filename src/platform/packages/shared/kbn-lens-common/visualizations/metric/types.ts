@@ -65,7 +65,7 @@ export interface MetricVisualizationState {
    * legacy state property
    * @deprecated
    */
-  titleWeight?: MetricStyle['titleWeight'];
+  titleWeight?: Extract<MetricStyle['titleWeight'], string>;
   primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
