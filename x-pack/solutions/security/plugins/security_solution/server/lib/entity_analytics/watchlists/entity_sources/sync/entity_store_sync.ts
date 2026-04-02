@@ -76,8 +76,9 @@ export const removeWatchlistAttributeFromStore = async ({
   watchlistId: string;
 }): Promise<void> => {
   // Only update entities whose current watchlists are known — if we don't have the current value we'd blindly write an empty array to the store.
-  const knownRefs = entityRefs.filter((ref): ref is EntityRef & { currentWatchlists: string[] } =>
-    Boolean(ref.currentWatchlists) && Array.isArray(ref.currentWatchlists)
+  const knownRefs = entityRefs.filter(
+    (ref): ref is EntityRef & { currentWatchlists: string[] } =>
+      Boolean(ref.currentWatchlists) && Array.isArray(ref.currentWatchlists)
   );
   if (knownRefs.length === 0) return;
 
