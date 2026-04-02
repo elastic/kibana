@@ -198,10 +198,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <PromotionCallout
-          streamName={definition.stream.name}
-          onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
-        />
+        <EuiFlexItem grow={false}>
+          <PromotionCallout
+            streamName={definition.stream.name}
+            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
+          />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
