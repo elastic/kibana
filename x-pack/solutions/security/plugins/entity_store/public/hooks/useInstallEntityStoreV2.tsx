@@ -10,7 +10,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { EntityStoreStatus } from '../../common';
-import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common/constants';
+import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
 import type { StatusRequestQuery } from '../../server/routes/apis/status';
 
 export interface Services {
@@ -68,17 +68,14 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           getStatusRequest
         );
         const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
-        // Entity store already installed → init entity maintainers only (any space).
+        // Entity store already installed → init entity maintainers only.
         if (isEntityStoreV2Installed) {
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
-        // Entity store not installed and default space → install entity store, then init entity maintainers.
-        if (space.id === 'default') {
-          await services.http.post(installAllEntitiesRequest);
-          await services.http.post(initEntityMaintainersRequest);
-        }
-        // Entity store not installed and non-default space → do nothing.
+        // Entity store not installed → install entity store, then init entity maintainers.
+        await services.http.post(installAllEntitiesRequest);
+        await services.http.post(initEntityMaintainersRequest);
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);

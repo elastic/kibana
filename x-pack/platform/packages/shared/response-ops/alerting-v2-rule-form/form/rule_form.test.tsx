@@ -21,6 +21,10 @@ jest.mock('./fields/rule_preview_panel', () => ({
 jest.mock('./fields/name_field', () => ({
   NameField: () => <div data-test-subj="mockNameField">Rule Name</div>,
 }));
+
+jest.mock('./error_callout', () => ({
+  ErrorCallOut: () => <div data-test-subj="mockErrorCallOut">Error CallOut</div>,
+}));
 const mockCreateRule = jest.fn();
 const mockUpdateRule = jest.fn();
 jest.mock('./hooks/use_create_rule', () => ({
@@ -94,6 +98,12 @@ describe('RuleForm', () => {
 
       expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
       expect(screen.getByText('GUI Form')).toBeInTheDocument();
+    });
+
+    it('renders ErrorCallOut from RuleFormContent', () => {
+      render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockErrorCallOut')).toBeInTheDocument();
     });
 
     it('passes includeQueryEditor to GuiRuleForm', () => {

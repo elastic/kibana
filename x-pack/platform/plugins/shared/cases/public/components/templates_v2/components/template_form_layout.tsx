@@ -23,7 +23,7 @@ import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
 import { TemplateEditorLayout } from './template_editor_layout';
 import { updateYamlFieldDefault } from '../utils/update_yaml_field_default';
-import { FieldType } from '../field_types/constants';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;

@@ -6,7 +6,10 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
   NotificationGroup,
@@ -67,19 +70,24 @@ export class StoreActionsStep implements DispatcherStep {
             })
           )
         ),
-        ...dispatch
-          .filter((group) => policies?.get(group.policyId)?.throttle?.interval)
-          .map((group) => ({
+        ...dispatch.map((group) => {
+          const groupingMode = policies?.get(group.policyId)?.groupingMode ?? 'per_episode';
+          const action: AlertAction = {
             '@timestamp': now.toISOString(),
             actor: 'system',
             action_type: 'notified',
-            rule_id: group.ruleId,
-            group_hash: 'irrelevant',
+            rule_id: group.episodes[0]?.rule_id ?? 'unknown',
+            group_hash: group.episodes[0]?.group_hash ?? 'unknown',
             last_series_event_timestamp: now.toISOString(),
             notification_group_id: group.id,
             source: 'internal',
-            reason: `notified by policy ${group.policyId} with throttle interval`,
-          })),
+            reason: `notified by policy ${group.policyId}`,
+          };
+          if (groupingMode === 'per_episode') {
+            action.episode_status = group.episodes[0]?.episode_status;
+          }
+          return action;
+        }),
         ...unmatched.map((episode) =>
           toAction({
             episode,

@@ -9,6 +9,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createQueryClientWrapper } from '../../test_utils';
+import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { useUpdateRule } from './use_update_rule';
 import type { FormValues } from '../types';
 
@@ -54,6 +55,8 @@ describe('useUpdateRule', () => {
       },
     },
     grouping: { fields: ['host.name'] },
+    stateTransitionAlertDelayMode: 'immediate',
+    stateTransitionRecoveryDelayMode: 'immediate',
   };
 
   it('calls the correct API endpoint with encoded ruleId', async () => {
@@ -67,7 +70,7 @@ describe('useUpdateRule', () => {
 
     await waitFor(() => {
       expect(http.patch).toHaveBeenCalledWith(
-        `/internal/alerting/v2/rule/${encodeURIComponent(ruleId)}`,
+        `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
         expect.any(Object)
       );
     });
@@ -99,6 +102,8 @@ describe('useUpdateRule', () => {
       timeField: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
       evaluation: { query: { base: 'FROM logs | LIMIT 10' } },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     await act(async () => {
@@ -136,7 +141,7 @@ describe('useUpdateRule', () => {
 
     await waitFor(() => {
       expect(http.patch).toHaveBeenCalledWith(
-        `/internal/alerting/v2/rule/${encodeURIComponent(ruleId)}`,
+        `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
         { body: JSON.stringify(expectedPayload) }
       );
     });
@@ -237,6 +242,8 @@ describe('useUpdateRule', () => {
     const formData: FormValues = {
       ...validFormData,
       kind: 'alert',
+      stateTransitionAlertDelayMode: 'duration',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: { pendingCount: 3, pendingTimeframe: '10m' },
     };
 

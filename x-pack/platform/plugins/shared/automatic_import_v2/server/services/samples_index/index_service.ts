@@ -7,7 +7,11 @@
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type { AutomaticImportSamplesProperties } from './storage';
-import { createIndexAdapter, type AutomaticImportSamplesIndexAdapter } from './storage';
+import {
+  automaticImportSamplesIndexName,
+  createIndexAdapter,
+  type AutomaticImportSamplesIndexAdapter,
+} from './storage';
 import type { OriginalSource } from '../../../common';
 
 export interface AddSamplesToDataStreamParams {
@@ -111,45 +115,28 @@ export class AutomaticImportSamplesIndexService {
    * @returns The number of deleted samples
    */
   public async deleteSamplesForDataStream(integrationId: string, dataStreamId: string) {
-    const samplesIndexAdapter = this.getAdapter();
-
-    let deletedCount = 0;
-    let hasMore = true;
-
-    // Delete in batches since storage adapter delete only works with IDs
-    while (hasMore) {
-      const searchResponse = await samplesIndexAdapter.getClient().search({
-        query: {
-          bool: {
-            must: [
-              { term: { integration_id: integrationId } },
-              { term: { data_stream_id: dataStreamId } },
-            ],
-          },
-        },
-        size: 1000, // Process in batches of 1000
-        track_total_hits: false,
-      });
-
-      const hits = searchResponse.hits.hits;
-      if (hits.length === 0) {
-        hasMore = false;
-        break;
-      }
-
-      // Delete each document by ID
-      for (const hit of hits) {
-        if (hit._id) {
-          await samplesIndexAdapter.getClient().delete({ id: hit._id });
-          deletedCount++;
-        }
-      }
-
-      // If we got fewer than the batch size, we're done
-      if (hits.length < 1000) {
-        hasMore = false;
-      }
+    if (!this.internalEsClient) {
+      throw new Error(
+        'AutomaticImportSamplesIndexService not initialized: internal ES client not set'
+      );
     }
+
+    const result = await this.internalEsClient.deleteByQuery({
+      index: automaticImportSamplesIndexName,
+      query: {
+        bool: {
+          must: [
+            { term: { integration_id: integrationId } },
+            { term: { data_stream_id: dataStreamId } },
+          ],
+        },
+      },
+      refresh: true,
+      ignore_unavailable: true,
+      conflicts: 'proceed',
+    });
+
+    const deletedCount = typeof result.deleted === 'number' ? result.deleted : 0;
 
     this.logger.debug(
       `Deleted ${deletedCount} samples for data stream ${dataStreamId} in integration ${integrationId}`

@@ -88,6 +88,10 @@ Filters the returned results according to the value of the specified field, usin
    * Gap fill statuses
    */
   gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
+  /**
+   * Gap auto fill scheduler ID used to determine gap fill status for rules
+   */
+  gap_auto_fill_scheduler_id: z.string().optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

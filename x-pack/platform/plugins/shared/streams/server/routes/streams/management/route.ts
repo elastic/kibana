@@ -11,6 +11,7 @@ import { routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
+import { forkStreamRequest } from '../../../oas_examples';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
@@ -22,6 +23,17 @@ export const forkStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              forkStream: { value: forkStreamRequest },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -124,7 +136,11 @@ export const getClassicStreamsStatusRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+
+    if (!isSecurityEnabled) {
+      return { can_manage: true };
+    }
 
     const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
 

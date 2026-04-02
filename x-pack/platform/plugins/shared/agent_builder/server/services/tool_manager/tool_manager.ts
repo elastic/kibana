@@ -22,7 +22,7 @@ import { browserToolsToLangchain } from '../tools/browser_tool_adapter';
 
 export const createToolManager = (): ToolManager => {
   return new ToolManager({
-    dynamicToolCapacity: 10,
+    dynamicToolCapacity: 15,
   });
 };
 

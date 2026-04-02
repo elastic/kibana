@@ -48,10 +48,9 @@ export async function search(
 
   return {
     dashboards: soResponse.saved_objects.map((so) => {
-      const { description, tags, time_range, title } = transformDashboardOut(
-        so.attributes,
-        so.references
-      );
+      const {
+        dashboardState: { description, tags, time_range, title },
+      } = transformDashboardOut(so.attributes, so.references);
 
       return {
         id: so.id,
@@ -66,7 +65,7 @@ export async function search(
           }),
           title: title ?? '',
         },
-        meta: getDashboardMeta(so, 'search'),
+        meta: getDashboardMeta(so),
       };
     }),
     page: soResponse.page,

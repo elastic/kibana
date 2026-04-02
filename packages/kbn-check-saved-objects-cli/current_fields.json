@@ -109,8 +109,11 @@
     "destinations.type",
     "enabled",
     "groupBy",
+    "groupingMode",
     "name",
     "snoozedUntil",
+    "throttle",
+    "throttle.strategy",
     "updatedAt",
     "updatedBy",
     "updatedByUsername"

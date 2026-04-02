@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
@@ -30,12 +30,13 @@ export const findCompositeSLORoute = createSloServerRoute({
     const perPage = query.perPage ? Number(query.perPage) : 25;
     const tags = query.tags ? query.tags.split(',').map((tag) => tag.trim()) : [];
 
-    return await repository.search({
+    const result = await repository.search({
       search: query.search,
       pagination: { page, perPage },
       tags,
       sortBy: query.sortBy,
       sortDirection: query.sortDirection,
     });
+    return findCompositeSLOResponseSchema.encode(result);
   },
 });
