@@ -11,7 +11,6 @@ import { getLensAttributesFromSuggestion } from './get_lens_attributes';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { currentSuggestionMock } from '../__mocks__/suggestions_mock';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 describe('getLensAttributesFromSuggestion', () => {
   const dataView = {
@@ -39,7 +38,7 @@ describe('getLensAttributesFromSuggestion', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
-      version: LENS_ITEM_LATEST_VERSION,
+      version: 3,
       references: [],
       title: currentSuggestionMock.title,
       visualizationType: 'lnsHeatmap',
