@@ -18,6 +18,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Streams / Significant Events
   ...Object.values(platformStreamsSigEventsTools),
 
+  // Cases
+  platformCoreTools.casesAnalytics,
+
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,

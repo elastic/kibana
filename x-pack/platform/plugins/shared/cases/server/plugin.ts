@@ -56,6 +56,7 @@ import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import { registerCaseWorkflowSteps } from './workflows';
+import { registerCasesAgentBuilderTools } from './agent_builder';
 
 export class CasePlugin
   implements
@@ -211,6 +212,10 @@ export class CasePlugin
     });
 
     registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+
+    if (plugins.agentBuilder && this.caseConfig.analytics.index?.enabled) {
+      registerCasesAgentBuilderTools(plugins.agentBuilder, core, this.logger);
+    }
 
     return {
       attachmentFramework: {

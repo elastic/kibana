@@ -30,6 +30,7 @@ export const platformCoreTools = {
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
+  casesAnalytics: platformCoreTool('cases_analytics'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
   // SML tools
   smlSearch: platformCoreTool('sml_search'),
