@@ -8,4 +8,5 @@
  */
 
 export { asCodeIdSchema } from './id';
-export { asCodeMetaSchema, getMeta } from './meta';
+export { asCodeMetaSchema, getMeta, type AsCodeMeta } from './meta';
+export { asCodeResolveSchema } from './resolve_schema';
