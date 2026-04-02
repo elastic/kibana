@@ -14,6 +14,7 @@ export interface UsageStats {
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
   'securitySolution:alertTags': string;
+  'securitySolution:excludedGapReasons': string[];
   'securitySolution:detectionsCloseReasons': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
@@ -195,6 +196,7 @@ export interface UsageStats {
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
+  'observability:streamsSigEventsIndexPatterns': string;
   'securitySolution:entityStoreEnableV2': boolean;
   'elasticConsole:enabled': boolean;
 }

@@ -7,6 +7,7 @@
 import { identity, keyBy } from 'lodash';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { BulkManualRuleFillGaps } from '../../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
@@ -20,6 +21,7 @@ interface BuildScheduleRuleGapFillingParams {
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
   fillGapsPayload: BulkManualRuleFillGaps['fill_gaps'];
+  excludedReasons?: GapReasonType[];
 }
 
 interface BulkScheduleBackfillOutcome {
@@ -35,6 +37,7 @@ export const bulkScheduleRuleGapFilling = async ({
   mlAuthz,
   rulesAuthz,
   fillGapsPayload,
+  excludedReasons,
 }: BuildScheduleRuleGapFillingParams): Promise<BulkScheduleBackfillOutcome> => {
   const errors: Array<PromisePoolError<RuleAlertType, Error> | BulkOperationError> = [];
   // In the first step, we validate if it is possible to schedule backfill for the rules
@@ -89,6 +92,7 @@ export const bulkScheduleRuleGapFilling = async ({
     },
     {
       maxGapCountPerRule,
+      excludedReasons,
     }
   );
 
