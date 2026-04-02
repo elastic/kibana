@@ -53,4 +53,14 @@ export type {
 export { getLangSmithOptions } from './lib/lang_smith';
 export type { LangSmithOptions } from './lib/lang_smith';
 
-export { generateId, normalizeTitleName } from './lib/helper_functions';
+export {
+  generateId,
+  normalizeTitleName,
+  isValidNameFormat,
+  isNotPurelyNumeric,
+  startsWithLetter,
+  meetsMinLength,
+  meetsMaxLength,
+  MIN_NAME_LENGTH,
+  MAX_NAME_LENGTH,
+} from './lib/helper_functions';
