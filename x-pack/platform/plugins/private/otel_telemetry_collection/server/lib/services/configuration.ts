@@ -16,6 +16,7 @@ import {
   distinctUntilChanged,
   shareReplay,
 } from 'rxjs';
+import { isEqual } from 'lodash';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { ArtifactService } from './artifact';
@@ -60,7 +61,7 @@ export class ConfigurationService {
       takeUntil(this.stop$),
       startWith(defaultConfiguration),
       filter((cfg) => cfg !== undefined),
-      distinctUntilChanged(),
+      distinctUntilChanged(isEqual),
       shareReplay(1)
     );
   }
