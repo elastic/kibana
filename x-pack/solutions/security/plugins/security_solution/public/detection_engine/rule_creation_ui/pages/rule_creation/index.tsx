@@ -349,10 +349,12 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       toggleStepAccordionRef.current(RuleStep.scheduleRule);
     }
 
-    await defineStepForm.validate();
-    await aboutStepForm.validate();
-    await scheduleStepForm.validate();
-    await actionsStepForm.validate();
+    await Promise.all([
+      defineStepForm.validate(),
+      aboutStepForm.validate(),
+      scheduleStepForm.validate(),
+      actionsStepForm.validate(),
+    ]);
 
     goToStepRef.current(RuleStep.ruleActions);
   };
