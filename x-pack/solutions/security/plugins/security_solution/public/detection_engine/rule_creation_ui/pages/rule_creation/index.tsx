@@ -222,7 +222,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
-  const onAiCreatedRuleAppliedRef = useRef<(() => void) | undefined>(undefined);
+  const onAiCreatedRuleAppliedRef = useRef<(() => void | Promise<void>) | undefined>(undefined);
+  const isAiRuleAppliedRef = useRef(false);
 
   const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
@@ -304,7 +305,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   );
   const goToStep = useCallback(
     (step: RuleStep) => {
-      if (ruleStepsOrder.indexOf(step) > ruleStepsOrder.indexOf(activeStep) && !openSteps[step]) {
+      if (
+        !openSteps[step] &&
+        (isAiRuleAppliedRef.current ||
+          ruleStepsOrder.indexOf(step) > ruleStepsOrder.indexOf(activeStep))
+      ) {
         toggleStepAccordion(step);
       }
       setActiveStep(step);
@@ -331,7 +336,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   const toggleStepAccordionRef = useRef(toggleStepAccordion);
   toggleStepAccordionRef.current = toggleStepAccordion;
 
-  onAiCreatedRuleAppliedRef.current = () => {
+  onAiCreatedRuleAppliedRef.current = async () => {
+    isAiRuleAppliedRef.current = true;
     const o = openStepsRef.current;
     if (o[RuleStep.defineRule]) {
       toggleStepAccordionRef.current(RuleStep.defineRule);
@@ -342,6 +348,12 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     if (o[RuleStep.scheduleRule]) {
       toggleStepAccordionRef.current(RuleStep.scheduleRule);
     }
+
+    await defineStepForm.validate();
+    await aboutStepForm.validate();
+    await scheduleStepForm.validate();
+    await actionsStepForm.validate();
+
     goToStepRef.current(RuleStep.ruleActions);
   };
 
@@ -419,6 +431,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
 
   const editStep = useCallback(
     async (step: RuleStep) => {
+      if (isAiRuleAppliedRef.current) {
+        goToStep(step);
+        return;
+      }
+
       const { valid } = await validateStep(activeStep);
 
       if (valid) {

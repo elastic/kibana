@@ -47,7 +47,7 @@ interface UseAgentBuilderRuleCreationParams {
    * from agent chat (e.g. `() => goToStep(RuleStep.ruleActions)`). Uses a ref so the parent can
    * wire this after `goToStep` is defined.
    */
-  onAiCreatedRuleAppliedRef?: MutableRefObject<(() => void) | undefined>;
+  onAiCreatedRuleAppliedRef?: MutableRefObject<(() => void | Promise<void>) | undefined>;
 }
 
 interface UseAgentBuilderRuleCreationResult {
