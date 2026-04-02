@@ -8,9 +8,9 @@
  */
 
 import {
-  isTerminalStatus,
   type EsWorkflowExecution,
   type EsWorkflowStepExecution,
+  isTerminalStatus,
 } from '@kbn/workflows';
 import type { StepMetadataCache } from './step_metadata_cache';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
@@ -51,7 +51,8 @@ export class WorkflowExecutionState {
     }
 
     const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
-      this.workflowExecution.stepExecutionIds
+      this.workflowExecution.stepExecutionIds,
+      ['id', 'stepId', 'status', 'state']
     );
     foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
     this.buildStepIdExecutionIdIndex();

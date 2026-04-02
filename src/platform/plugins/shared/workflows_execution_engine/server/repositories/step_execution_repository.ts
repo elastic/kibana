@@ -63,11 +63,13 @@ export class StepExecutionRepository {
    * @returns A promise that resolves to an array of step executions.
    */
   public async getStepExecutionsByIds(
-    stepExecutionIds: string[]
+    stepExecutionIds: string[],
+    sourceIncludes?: (keyof EsWorkflowStepExecution)[]
   ): Promise<EsWorkflowStepExecution[]> {
     const response = await this.esClient.mget<EsWorkflowStepExecution>({
       index: this.indexName,
       ids: stepExecutionIds,
+      _source_includes: sourceIncludes,
     });
 
     const stepExecutions: EsWorkflowStepExecution[] = [];
