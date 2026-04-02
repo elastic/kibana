@@ -39,6 +39,47 @@ describe('processStrategy', () => {
       );
     });
 
+    it('renders source ip:port and destination ip:port when both are present', () => {
+      const text = buildAlertTimelineString({
+        event: { category: ['network'] },
+        process: { name: ['curl'] },
+        source: { ip: ['10.0.0.1'], port: [8080] },
+        destination: { ip: ['192.168.1.1'], port: [443] },
+        kibana: { alert: { severity: ['medium'], rule: { name: ['rule-1'] } } },
+      });
+
+      expect(text).toBe(
+        'network event with process curl, source 10.0.0.1:8080, destination 192.168.1.1:443, created medium alert rule-1.'
+      );
+    });
+
+    it('omits port when the corresponding ip is absent', () => {
+      const text = buildAlertTimelineString({
+        event: { category: ['process'] },
+        process: { name: ['bash'] },
+        source: { port: [8080] },
+        destination: { port: [443] },
+        kibana: { alert: { severity: ['high'], rule: { name: ['rule-2'] } } },
+      });
+
+      expect(text).toBe(
+        'process event with process bash, created high alert rule-2.'
+      );
+    });
+
+    it('renders ip without port when port is absent', () => {
+      const text = buildAlertTimelineString({
+        event: { category: ['network'] },
+        source: { ip: ['10.0.0.1'] },
+        destination: { ip: ['192.168.1.1'] },
+        kibana: { alert: { severity: ['low'], rule: { name: ['rule-3'] } } },
+      });
+
+      expect(text).toBe(
+        'network event with source 10.0.0.1, destination 192.168.1.1, created low alert rule-3.'
+      );
+    });
+
     it('does not render "with" when none of the with-fields exist', () => {
       const text = buildAlertTimelineString({
         event: { category: ['process'] },

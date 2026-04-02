@@ -51,11 +51,17 @@ export const buildAlertTimelineString = (source: AlertSource): string => {
   if (processParentName != null) text += ` parent process ${processParentName},`;
   if (fileName != null) text += ` file ${fileName},`;
 
-  if (sourceIp != null) text += ` source ${sourceIp}`;
-  if (sourcePort != null) text += `:${sourcePort},`;
+  if (sourceIp != null) {
+    text += ` source ${sourceIp}`;
+    if (sourcePort != null) text += `:${sourcePort}`;
+    text += ',';
+  }
 
-  if (destinationIp != null) text += ` destination ${destinationIp}`;
-  if (destinationPort != null) text += `:${destinationPort},`;
+  if (destinationIp != null) {
+    text += ` destination ${destinationIp}`;
+    if (destinationPort != null) text += `:${destinationPort}`;
+    text += ',';
+  }
 
   if (userName != null) text += ` by ${userName}`;
   if (hostName != null) text += ` on ${hostName}`;
