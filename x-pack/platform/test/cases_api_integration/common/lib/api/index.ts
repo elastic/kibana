@@ -46,7 +46,7 @@ import type {
   CasesFindResponse,
   CasesPatchRequest,
   CasesSimilarResponse,
-  CaseWithPatchStats,
+  CaseWithUpdateSummary,
   CustomFieldPutRequest,
   DocumentResponse,
   GetRelatedCasesByAlertResponse,
@@ -400,7 +400,7 @@ export const updateCase = async ({
     return cases;
   }
   // Remove stats from the patch case response
-  return cases.map(({ patchCaseStats, ...rest }: CaseWithPatchStats) => rest);
+  return cases.map(({ updateSummary, ...rest }: CaseWithUpdateSummary) => rest);
 };
 
 export const getCase = async ({
