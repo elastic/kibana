@@ -117,6 +117,15 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
 
+export const selectDataSourceProfileId = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.profileId;
+};
+
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
   runtimeStateManager: RuntimeStateManager,
   dataViewId: string

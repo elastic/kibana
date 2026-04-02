@@ -8,9 +8,21 @@
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
+  ActionsClient,
 } from '@kbn/actions-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+/**
+ * Narrow interface for the actions plugin dependency used internally by the
+ * inference plugin. Only the `getActionsClientWithRequest` method is needed,
+ * so consumers don't have to depend on the full {@link ActionsPluginStart}.
+ */
+export interface ActionsClientProvider {
+  getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+}
 import type {
   BoundInferenceClient,
   BoundOptions,
@@ -153,6 +165,38 @@ export interface InferenceServerStart {
    * @throws Error if the connector with the specified ID does not exist
    */
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Creates an {@link InferenceClient} using pre-scoped services instead of a
+   * {@link KibanaRequest}. This is useful for background tasks (e.g. alerting rule
+   * executors) that have scoped clients but no HTTP request context.
+   *
+   * Note: anonymization features are not available on clients created this way.
+   *
+   * @param actionsClient - A pre-scoped actions client
+   * @param esClient - A pre-scoped Elasticsearch client
+   */
+  getClientWithoutRequest: (
+    actionsClient: PublicMethodsOf<ActionsClient>,
+    esClient: ElasticsearchClient
+  ) => InferenceClient;
+
+  /**
+   * Retrieves a specific inference connector by its ID, using pre-scoped services
+   * instead of a {@link KibanaRequest}. This is useful for background tasks (e.g.
+   * alerting rule executors) that have scoped clients but no HTTP request.
+   *
+   * @param id - The unique identifier of the connector to retrieve
+   * @param actionsClient - A pre-scoped actions client
+   * @param esClient - A pre-scoped Elasticsearch client
+   * @returns A promise that resolves to the requested inference connector
+   * @throws Error if the connector with the specified ID does not exist
+   */
+  getConnectorByIdWithoutClientRequest: (
+    id: string,
+    actionsClient: PublicMethodsOf<ActionsClient>,
+    esClient: ElasticsearchClient
+  ) => Promise<InferenceConnector>;
 
   /**
    * Lists available Elasticsearch inference endpoints, optionally filtered by task type.

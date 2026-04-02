@@ -8,34 +8,28 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import {
-  CaseResponseProperties as CaseResponsePropertiesSchema,
-  UpdateCaseRequest as UpdateCaseRequestSchema,
-} from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import { UpdateCaseRequest as UpdateCaseRequestSchema } from '../../bundled-types.gen';
+import { CasesStepBaseConfigSchema, CasesStepSingleCaseOutputSchema } from './shared';
 import * as i18n from '../translations';
 
 export const CreateCaseFromTemplateStepTypeId = 'cases.createCaseFromTemplate';
 
-export const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
+const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
   id: true,
   version: true,
 });
 
-export const InputSchema = z.object({
+const InputSchema = z.object({
   case_template_id: z.string().min(1, 'case_template_id is required'),
   overwrites: OverwritesSchema.optional(),
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponsePropertiesSchema,
-});
+const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export const ConfigSchema = CasesStepBaseConfigSchema;
+const ConfigSchema = CasesStepBaseConfigSchema;
 
-export type CreateCaseFromTemplateStepInputSchema = typeof InputSchema;
-export type CreateCaseFromTemplateStepOutputSchema = typeof OutputSchema;
-export type CreateCaseFromTemplateStepConfigSchema = typeof ConfigSchema;
+type CreateCaseFromTemplateStepInputSchema = typeof InputSchema;
+type CreateCaseFromTemplateStepOutputSchema = typeof OutputSchema;
 
 export type CreateCaseFromTemplateStepInput = z.infer<typeof InputSchema>;
 export type CreateCaseFromTemplateStepOutput = z.infer<typeof OutputSchema>;

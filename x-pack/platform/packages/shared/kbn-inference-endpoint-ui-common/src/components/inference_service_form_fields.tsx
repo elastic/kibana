@@ -435,7 +435,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           value={config?.provider ? providerName : ''}
           fullWidth
           placeholder={LABELS.SELECT_PROVIDER}
-          icon={{ type: 'arrowDown', side: 'right' }}
+          icon={{ type: 'chevronSingleDown', side: 'right' }}
           aria-expanded={isProviderPopoverOpen}
           role="combobox"
           onChange={() => {

@@ -20,9 +20,11 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiIconTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
+import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
@@ -143,20 +145,24 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
           defaultMessage: 'Storage size',
         }),
-        truncateText: true,
         sortable: true,
-        render: (
-          meteringStorageSizeBytes: DataStream['meteringStorageSizeBytes'],
-          dataStream: DataStream
-        ) => dataStream.meteringStorageSize,
+        minWidth: '9em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
+        render: (_: DataStream['meteringStorageSizeBytes'], dataStream: DataStream) =>
+          dataStream.meteringStorageSize,
       });
       columns.push({
         field: 'meteringDocsCount',
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.docsCountColumnTitle', {
           defaultMessage: 'Documents count',
         }),
-        truncateText: true,
         sortable: true,
+        minWidth: '8em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
       });
     }
     if (config.enableDataStreamStats) {
@@ -179,9 +185,12 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
           defaultMessage: 'Storage size',
         }),
-        truncateText: true,
         sortable: true,
-        render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        minWidth: '9em',
+        width: '12em',
+        className: 'eui-textNoWrap',
+        align: RIGHT_ALIGNMENT,
+        render: (_: DataStream['storageSizeBytes'], dataStream: DataStream) =>
           dataStream.storageSize,
       });
     }
@@ -192,8 +201,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indicesColumnTitle', {
       defaultMessage: 'Indices',
     }),
-    truncateText: true,
     sortable: true,
+    align: RIGHT_ALIGNMENT,
+    minWidth: '6em',
+    width: '7em',
     render: (indices: DataStream['indices'], dataStream) => (
       <EuiLink
         data-test-subj="indicesLink"
@@ -209,35 +220,34 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
       defaultMessage: 'Index mode',
     }),
-    truncateText: true,
     sortable: true,
     render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
+    width: '7.5em',
+    minWidth: '7.5em',
   });
 
   columns.push({
     field: 'lifecycle',
-    name: (
-      <span>
-        {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
-          defaultMessage: 'Data retention',
-        })}{' '}
-        <EuiIconTip
-          content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
-            defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
-            values: {
-              // ILM is not applicable on serverless, so when the user isnt able to
-              // disable data retention (which is only for serverless) we want to
-              // tweak the copy of the tooltip to hide any references to it.
-              canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
-            },
-          })}
-          position="top"
-          type="question"
-          size="s"
-          color="subdued"
-        />
-      </span>
-    ),
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+      defaultMessage: 'Data retention',
+    }),
+    nameTooltip: {
+      content: i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
+        defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
+        values: {
+          // ILM is not applicable on serverless, so when the user isn't able to
+          // disable data retention (which is only for serverless) we want to
+          // tweak the copy of the tooltip to hide any references to it.
+          canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
+        },
+      }),
+      icon: 'question',
+      iconProps: {
+        color: 'subdued',
+      },
+    },
+    width: '12em',
+    minWidth: '10em',
     truncateText: true,
     sortable: true,
     render: (lifecycle: DataStream['lifecycle'], dataStream) => (
@@ -277,6 +287,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   });
 
   columns.push({
+    ...columnPresetActions({}),
     name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionColumnTitle', {
       defaultMessage: 'Actions',
     }),
@@ -442,12 +453,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         sorting={sorting}
         selection={selectionConfig}
         pagination={pagination}
-        rowProps={() => ({
-          'data-test-subj': 'row',
-        })}
-        cellProps={() => ({
-          'data-test-subj': 'cell',
-        })}
         data-test-subj="dataStreamTable"
         tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
           defaultMessage: 'Data streams',
@@ -458,7 +463,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             defaultMessage="No data streams found"
           />
         }
-        tableLayout={'auto'}
+        tableLayout="auto"
+        scrollableInline
+        responsiveBreakpoint={false}
         onTableChange={onTableChange}
       />
     </>

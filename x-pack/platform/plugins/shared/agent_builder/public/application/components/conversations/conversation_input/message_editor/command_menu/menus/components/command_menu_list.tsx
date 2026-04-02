@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSelectable,
@@ -34,59 +41,105 @@ const noMatchesLabel = i18n.translate(
 
 export interface CommandMenuListOption {
   readonly key: string;
+  /**
+   * Plain string for accessibility and default label; use `renderLabel` for rich rows.
+   */
   readonly label: string;
+  readonly renderLabel?: React.ReactNode;
 }
+
+/** After EuiSelectableList merges `option.data` into the option, `renderOption` receives this shape. */
+type CommandMenuListSelectableRow = EuiSelectableOption &
+  Partial<Pick<CommandMenuListOption, 'renderLabel'>>;
 
 interface CommandMenuListProps {
   readonly options: readonly CommandMenuListOption[];
   readonly isLoading: boolean;
   readonly onSelect: (option: CommandMenuListOption) => void;
+  readonly width?: number;
   readonly 'data-test-subj'?: string;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
-  ({ options, isLoading, onSelect, 'data-test-subj': dataTestSubj = 'commandMenuList' }, ref) => {
+  (
+    {
+      options,
+      isLoading,
+      onSelect,
+      width: menuWidth = MENU_WIDTH,
+      'data-test-subj': dataTestSubj = 'commandMenuList',
+    },
+    ref
+  ) => {
     const { euiTheme } = useEuiTheme();
     const [activeIndex, setActiveIndex] = useState(0);
+    const activeIndexRef = useRef(activeIndex);
+    activeIndexRef.current = activeIndex;
+
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       setActiveIndex(0);
     }, [options.length]);
+
+    const scrollIndexIntoView = (index: number) => {
+      const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
+      const item = items?.[index];
+      item?.scrollIntoView?.({ block: 'nearest' });
+    };
+    const handleSetActive = (next: (index: number) => number) => {
+      const nextIndex = next(activeIndexRef.current);
+      activeIndexRef.current = nextIndex;
+      setActiveIndex(nextIndex);
+      scrollIndexIntoView(nextIndex);
+    };
+    const handleSelectOption = () => {
+      const option = options[activeIndexRef.current];
+      if (option) {
+        onSelect(option);
+      }
+    };
 
     const selectableOptions: EuiSelectableOption[] = useMemo(
       () =>
         options.map((option) => ({
           label: option.label,
           key: option.key,
+          data: option.renderLabel != null ? { renderLabel: option.renderLabel } : undefined,
         })),
       [options]
     );
 
     useImperativeHandle(ref, () => ({
       isKeyDownEventHandled: (event: React.KeyboardEvent): boolean => {
-        const handledKeys = [keys.ARROW_DOWN, keys.ARROW_UP, keys.ENTER, keys.TAB];
+        const handledKeys = [
+          keys.ARROW_DOWN,
+          keys.ARROW_UP,
+          // Ctrl+n and Ctrl+p
+          ...(event.ctrlKey ? ['n', 'p'] : []),
+          keys.ENTER,
+          keys.TAB,
+        ];
         return handledKeys.includes(event.key);
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
-        if (event.key === keys.ARROW_DOWN) {
-          setActiveIndex((prev) => Math.min(prev + 1, options.length - 1));
-        } else if (event.key === keys.ARROW_UP) {
-          setActiveIndex((prev) => Math.max(prev - 1, 0));
+        if (event.key === keys.ARROW_DOWN || (event.ctrlKey && event.key === 'n')) {
+          handleSetActive((prev) => Math.min(prev + 1, options.length - 1));
+        } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
+          handleSetActive((prev) => Math.max(prev - 1, 0));
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
-          if (options.length > 0) {
-            onSelect(options[activeIndex]);
-          }
+          handleSelectOption();
         }
       },
     }));
 
     const containerStyles = css`
-      width: ${MENU_WIDTH}px;
+      width: ${menuWidth}px;
     `;
 
     const activeHighlightStyles = css`
       .euiSelectableListItem:nth-child(${activeIndex + 1}) {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
+        background-color: ${euiTheme.focus.backgroundColor};
       }
     `;
 
@@ -96,7 +149,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           justifyContent="center"
           alignItems="center"
           css={css`
-            width: ${MENU_WIDTH}px;
+            width: ${menuWidth}px;
             padding: ${euiTheme.size.m};
           `}
           data-test-subj={`${dataTestSubj}-loading`}
@@ -110,6 +163,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     return (
       <div
+        ref={containerRef}
         css={[containerStyles, activeHighlightStyles]}
         data-test-subj={dataTestSubj}
         onMouseDown={(e) => {
@@ -120,6 +174,9 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
+          renderOption={(option: CommandMenuListSelectableRow) =>
+            option.renderLabel ?? option.label
+          }
           listProps={{
             showIcons: false,
             bordered: false,

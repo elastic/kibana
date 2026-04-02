@@ -13,22 +13,40 @@ import type { SmlDocument } from './types';
 
 export const smlIndexName = chatSystemIndex('sml-data');
 
+/**
+ * Single source of truth for SML data index field mappings (storage + Elasticsearch).
+ */
+const smlStorageSchemaProperties = {
+  id: types.keyword({}),
+  type: types.keyword({
+    fields: {
+      autocomplete: types.search_as_you_type({}),
+    },
+  }),
+  title: types.search_as_you_type({}),
+  origin_id: types.keyword({}),
+  content: types.text({}),
+  created_at: types.date({}),
+  updated_at: types.date({}),
+  spaces: types.keyword({}),
+  permissions: types.keyword({}),
+};
+
 const storageSettings = {
   name: smlIndexName,
   schema: {
-    properties: {
-      id: types.keyword({}),
-      type: types.keyword({}),
-      title: types.text({}),
-      origin_id: types.keyword({}),
-      content: types.text({}),
-      created_at: types.date({}),
-      updated_at: types.date({}),
-      spaces: types.keyword({}),
-      permissions: types.keyword({}),
-    },
+    properties: smlStorageSchemaProperties,
   },
 } satisfies IndexStorageSettings;
+
+/**
+ * Elasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).
+ * Field definitions match `smlStorageSchemaProperties` / `storageSettings`.
+ */
+export const smlElasticsearchIndexMappings = {
+  dynamic: 'strict' as const,
+  properties: smlStorageSchemaProperties,
+};
 
 export type SmlStorageSettings = typeof storageSettings;
 

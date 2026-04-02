@@ -7,7 +7,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip, EuiLoadingSpinner, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ContentFrameworkSection } from '@kbn/unified-doc-viewer-plugin/public';
@@ -18,6 +18,7 @@ export interface DiscoverFlyoutStreamFieldProps {
   doc: DataTableRecord;
   streamsRepositoryClient: StreamsRepositoryClient;
   locator: StreamsAppLocator;
+  renderCpsWarning?: boolean;
 }
 
 export function DiscoverFlyoutStreamField(props: DiscoverFlyoutStreamFieldProps) {
@@ -37,6 +38,7 @@ function DiscoverFlyoutStreamFieldContent({
   streamsRepositoryClient,
   doc,
   locator,
+  renderCpsWarning,
 }: DiscoverFlyoutStreamFieldProps) {
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
@@ -48,8 +50,29 @@ function DiscoverFlyoutStreamFieldContent({
   if (!value || error) return <span>-</span>;
 
   return (
-    <EuiLink href={locator.getRedirectUrl({ name: value })}>
-      <EuiText size="xs">{value}</EuiText>
-    </EuiLink>
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiLink href={locator.getRedirectUrl({ name: value })}>
+        <EuiText size="xs">{value}</EuiText>
+      </EuiLink>
+      {renderCpsWarning && <CpsWarningIcon />}
+    </EuiFlexGroup>
   );
 }
+
+const CPS_WARNING_MESSAGE = i18n.translate('xpack.streams.discoverFlyout.cpsWarning', {
+  defaultMessage:
+    'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
+});
+
+const CpsWarningIcon = () => (
+  <EuiIconTip
+    content={CPS_WARNING_MESSAGE}
+    type="warning"
+    size="s"
+    color="warning"
+    data-test-subj="cpsStreamsWarningIcon"
+    anchorProps={{
+      css: { display: 'flex' },
+    }}
+  />
+);

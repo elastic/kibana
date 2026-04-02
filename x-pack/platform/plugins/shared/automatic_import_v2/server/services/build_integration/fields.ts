@@ -130,8 +130,13 @@ export const generateFieldMappings = async (
   });
   const ecsFieldsMap = ecsFieldsDict.toPlain();
 
-  return rawFields.map((f) => ({
-    ...f,
-    is_ecs: f.name in ecsFieldsMap,
-  }));
+  return rawFields.map((f) => {
+    const ecsEntry = ecsFieldsMap[f.name];
+    const isEcs = !!ecsEntry;
+    return {
+      ...f,
+      type: isEcs && ecsEntry.type ? ecsEntry.type : f.type,
+      is_ecs: isEcs,
+    };
+  });
 };

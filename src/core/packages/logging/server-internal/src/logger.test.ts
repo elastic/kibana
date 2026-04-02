@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Appender } from '@kbn/logging';
+import apmAgent from 'elastic-apm-node';
+import { trace } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
+import type { Appender, LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { LoggingConfig } from './logging_config';
 import { BaseLogger } from './logger';
@@ -452,4 +455,99 @@ describe('isLevelEnabled', () => {
       }
     });
   }
+});
+
+describe('trace context in log records', () => {
+  const createMockOtelSpan = (traceId: string, spanId: string): Span =>
+    ({
+      spanContext: () => ({ traceId, spanId, traceFlags: 1 }),
+    } as unknown as Span);
+
+  const getLastLogRecord = (): LogRecord => (appenderMocks[0].append as jest.Mock).mock.calls[0][0];
+
+  // currentTraceIds is a getter defined on Agent.prototype; we override it on the
+  // instance directly so each test can control what APM reports.
+  const mockApmTraceIds = (values: {
+    'trace.id'?: string;
+    'span.id'?: string;
+    'transaction.id'?: string;
+  }) => {
+    Object.defineProperty(apmAgent, 'currentTraceIds', {
+      get: () => values,
+      configurable: true,
+    });
+  };
+
+  afterEach(() => {
+    // Remove the own-property override so the prototype getter is restored.
+    delete (apmAgent as any).currentTraceIds;
+  });
+
+  describe('when APM has an active trace', () => {
+    const apmTraceId = 'apm-trace-id-value';
+    const apmSpanId = 'apm-span-id-value';
+    const apmTransactionId = 'apm-transaction-id-value';
+
+    beforeEach(() => {
+      mockApmTraceIds({
+        'trace.id': apmTraceId,
+        'span.id': apmSpanId,
+        'transaction.id': apmTransactionId,
+      });
+    });
+
+    it('populates traceId, spanId and transactionId from APM', () => {
+      logger.info('test message');
+
+      expect(getLastLogRecord()).toEqual(
+        expect.objectContaining({
+          traceId: apmTraceId,
+          spanId: apmSpanId,
+          transactionId: apmTransactionId,
+        })
+      );
+    });
+  });
+
+  describe('when APM has no active trace', () => {
+    const otelTraceId = 'otel-trace-id-value';
+    const otelSpanId = 'otel-span-id-value';
+
+    beforeEach(() => {
+      mockApmTraceIds({});
+    });
+
+    it('falls back to OTel span context for traceId and spanId', () => {
+      jest
+        .spyOn(trace, 'getActiveSpan')
+        .mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
+
+      logger.info('test message');
+
+      expect(getLastLogRecord()).toEqual(
+        expect.objectContaining({ traceId: otelTraceId, spanId: otelSpanId })
+      );
+    });
+
+    it('does not populate transactionId (no OTel equivalent)', () => {
+      jest
+        .spyOn(trace, 'getActiveSpan')
+        .mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
+
+      logger.info('test message');
+
+      expect(getLastLogRecord().transactionId).toBeUndefined();
+    });
+
+    it('produces no trace IDs when OTel also has no active span', () => {
+      jest.spyOn(trace, 'getActiveSpan').mockReturnValue(undefined);
+
+      logger.info('test message');
+
+      const { traceId, spanId, transactionId } = getLastLogRecord();
+      expect(traceId).toBeUndefined();
+      expect(spanId).toBeUndefined();
+      expect(transactionId).toBeUndefined();
+    });
+  });
 });

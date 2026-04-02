@@ -18,6 +18,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { ControlLabel } from './shared_form_components';
@@ -150,6 +151,7 @@ export function IdentifierControlForm({
     // removes the double question mark from the variable name
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
+      ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
       available_options: availableOptions,
       selected_options: [availableOptions[0]],
       title: label || variableNameWithoutQuestionmark,

@@ -122,6 +122,7 @@ export const useInitDataViewManager = () => {
     ].map((scope) =>
       createDataViewSelectedListener({
         scope,
+        spaces: services.spaces,
         dataViews: services.dataViews,
         notifications: services.notifications,
         storage: services.storage,

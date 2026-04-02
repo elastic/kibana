@@ -15,7 +15,6 @@ import {
   categorizationFieldValidationSchema,
   basicChartSchema,
   populationChartSchema,
-  datafeedIdsSchema,
   forceStartDatafeedSchema,
   jobIdsSchema,
   optionalJobIdsSchema,
@@ -27,6 +26,7 @@ import {
   datafeedPreviewSchema,
   bulkCreateSchema,
   deleteJobsSchema,
+  stopDatafeedsSchema,
 } from './schemas/job_service_schema';
 
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -91,15 +91,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: datafeedIdsSchema,
+            body: stopDatafeedsSchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { stopDatafeeds } = jobServiceProvider(client, mlClient);
-          const { datafeedIds } = request.body;
-          const resp = await stopDatafeeds(datafeedIds);
+          const { datafeedIds, closeJobs } = request.body;
+          const resp = await stopDatafeeds(datafeedIds, closeJobs);
 
           return response.ok({
             body: resp,

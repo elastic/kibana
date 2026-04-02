@@ -43,6 +43,7 @@ describe('bedrockClaudeAdapter', () => {
       config: {},
       capabilities: {},
       isInferenceEndpoint: false,
+      isPreconfigured: false,
     });
   });
 

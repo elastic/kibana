@@ -61,6 +61,7 @@ export const WorkflowsExtensionsExampleApp = ({ http }: AppDeps) => {
           message: 'Emitted from Workflows Extensions Example UI',
           source: 'workflows_extensions_example_app',
           ...(category && { category }),
+          labels: ['example', 'demo'],
         }),
       });
       setResult(

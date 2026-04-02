@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCaseStepDefinition } from './get_case';
+import { getCaseStepDefinition } from './simple_steps';
 // import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 describe('getCaseStepDefinition', () => {

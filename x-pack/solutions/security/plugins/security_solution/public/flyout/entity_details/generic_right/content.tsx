@@ -22,7 +22,7 @@ import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
@@ -50,19 +50,18 @@ const defaultPinnedFields = [
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
-  insightsField: CloudPostureEntityIdentifier;
-  insightsValue: string;
+  identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
 }
 
 export const GenericEntityFlyoutContent = ({
   source,
   openGenericEntityDetailsPanelByPath,
-  insightsField,
-  insightsValue,
+  identityFields,
   onAssetCriticalityChange,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
+  const entityDisplayValue = Object.values(identityFields)[0] ?? '';
 
   const fieldsSectionExpandedState = useExpandSection({
     title: 'fields',
@@ -93,7 +92,10 @@ export const GenericEntityFlyoutContent = ({
   return (
     <FlyoutBody>
       <AssetCriticalityAccordion
-        entity={{ name: insightsValue, type: EntityType.generic }}
+        entity={{
+          name: entityDisplayValue as string,
+          type: EntityType.generic,
+        }}
         onChange={() => {
           uiMetricService.trackUiMetric(
             METRIC_TYPE.CLICK,
@@ -104,10 +106,10 @@ export const GenericEntityFlyoutContent = ({
         }}
       />
       <EntityInsight
-        field={insightsField}
-        value={insightsValue}
+        identityFields={identityFields}
         isPreviewMode={false}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
+        entityType={EntityType.generic}
       />
       <ExpandableSection
         title={
@@ -122,7 +124,7 @@ export const GenericEntityFlyoutContent = ({
       >
         <ExpandablePanel
           header={{
-            iconType: 'arrowStart',
+            iconType: 'chevronLimitLeft',
             title: (
               <EuiTitle
                 css={css`

@@ -254,27 +254,27 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'Transaction Detail - Waterfall size warning "view in Discover" link opens traces experience',
-      async ({ page, pageObjects, scoutSpace }) => {
+      'Transaction Detail - Unified waterfall size warning "view in Discover" link opens traces experience',
+      async ({ page, pageObjects }) => {
         const transactionDetailParams = {
           ...APM_TIME_RANGE,
           transactionName: RICH_TRACE.TRANSACTION_NAME,
           transactionType: 'request',
         };
 
-        await spaceTest.step('disable unified waterfall to use legacy waterfall', async () => {
-          await scoutSpace.uiSettings.set({
-            'observability:apmUseUnifiedTraceWaterfall': false,
-          });
-        });
-
-        await spaceTest.step('intercept trace API to force exceedsMax condition', async () => {
-          await page.route('**/internal/apm/traces/**', async (route) => {
-            const url = new URL(route.request().url());
-            url.searchParams.set('maxTraceItems', '2');
-            await route.continue({ url: url.toString() });
-          });
-        });
+        await spaceTest.step(
+          'intercept unified trace API to force exceedsMax condition',
+          async () => {
+            await page.route('**/internal/apm/unified_traces/**', async (route) => {
+              const response = await route.fetch();
+              const body = await response.json();
+              await route.fulfill({
+                response,
+                json: { ...body, traceDocsTotal: body.maxTraceItems + 1 },
+              });
+            });
+          }
+        );
 
         await spaceTest.step('navigate to APM transaction detail', async () => {
           await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
@@ -282,17 +282,16 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('waterfall size warning is visible', async () => {
-          await expect(page.testSubj.locator('apmWaterfallSizeWarning')).toBeVisible();
+        await spaceTest.step('unified waterfall size warning is visible', async () => {
+          await expect(page.testSubj.locator('waterfallSizeWarning')).toBeVisible();
         });
 
         await spaceTest.step(
           'warning "view in Discover" link opens traces experience',
           async () => {
-            await page.testSubj.locator('apmWaterfallSizeWarningDiscoverLink').click();
+            await page.testSubj.locator('waterfallSizeWarningDiscoverLink').click();
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
-            await scoutSpace.uiSettings.unset('observability:apmUseUnifiedTraceWaterfall');
           }
         );
       }

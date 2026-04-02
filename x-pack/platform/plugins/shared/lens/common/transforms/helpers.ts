@@ -19,7 +19,7 @@ import { stripUndefined } from '@kbn/lens-embeddable-utils/config_builder/transf
  * it is currently used as a runtime state object but it shouldn't be.
  */
 type IncludedPanelStateKeys =
-  | 'savedObjectId'
+  | 'ref_id'
   | 'attributes'
   | 'references'
   | 'time_range'
@@ -35,7 +35,7 @@ export type StrippedLensState = Pick<LensSerializedState, IncludedPanelStateKeys
  */
 export function stripInheritedContext(state: LensSerializedState): StrippedLensState {
   const {
-    savedObjectId,
+    ref_id,
     attributes,
     // LensWithReferences
     references,
@@ -51,7 +51,7 @@ export function stripInheritedContext(state: LensSerializedState): StrippedLensS
   } = state;
 
   return stripUndefined({
-    savedObjectId,
+    ref_id,
     attributes,
     references,
     time_range,

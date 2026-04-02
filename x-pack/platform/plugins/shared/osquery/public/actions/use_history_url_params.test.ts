@@ -20,12 +20,13 @@ describe('parseHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     });
   });
 
   it('parses all parameters', () => {
     const result = parseHistoryUrlParams(
-      '?q=test&sources=live,rule&runBy=user1,user2&tags=tag1,tag2&start=now-7d&end=now-1d&pageSize=50'
+      '?q=test&sources=live,rule&runBy=user1,user2&tags=tag1,tag2&start=now-7d&end=now-1d&pageSize=50&sortDirection=asc'
     );
 
     expect(result).toEqual({
@@ -36,6 +37,7 @@ describe('parseHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: 50,
+      sortDirection: 'asc',
     });
   });
 
@@ -50,6 +52,7 @@ describe('parseHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     });
   });
 
@@ -94,6 +97,16 @@ describe('parseHistoryUrlParams', () => {
     expect(result.sources).toEqual([]);
     expect(result.runBy).toEqual([]);
   });
+
+  it('parses valid sortDirection values', () => {
+    expect(parseHistoryUrlParams('?sortDirection=asc').sortDirection).toBe('asc');
+    expect(parseHistoryUrlParams('?sortDirection=desc').sortDirection).toBe('desc');
+  });
+
+  it('defaults sortDirection for invalid values', () => {
+    expect(parseHistoryUrlParams('?sortDirection=invalid').sortDirection).toBe('desc');
+    expect(parseHistoryUrlParams('?sortDirection=').sortDirection).toBe('desc');
+  });
 });
 
 describe('serializeHistoryUrlParams', () => {
@@ -106,6 +119,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     };
 
     const result = serializeHistoryUrlParams(filters);
@@ -118,6 +132,7 @@ describe('serializeHistoryUrlParams', () => {
       start: undefined,
       end: undefined,
       pageSize: undefined,
+      sortDirection: undefined,
     });
   });
 
@@ -130,6 +145,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: 50,
+      sortDirection: 'asc',
     };
 
     const result = serializeHistoryUrlParams(filters);
@@ -142,6 +158,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: '50',
+      sortDirection: 'asc',
     });
   });
 
@@ -154,6 +171,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-24h',
       end: 'now',
       pageSize: undefined,
+      sortDirection: 'desc',
     };
 
     const result = serializeHistoryUrlParams(filters);
@@ -162,9 +180,39 @@ describe('serializeHistoryUrlParams', () => {
     expect(result.sources).toBe('live');
   });
 
+  it('omits sortDirection at default value (desc)', () => {
+    const filters: HistoryUrlFilters = {
+      q: '',
+      sources: [],
+      runBy: [],
+      tags: [],
+      start: 'now-24h',
+      end: 'now',
+      pageSize: undefined,
+      sortDirection: 'desc',
+    };
+
+    expect(serializeHistoryUrlParams(filters).sortDirection).toBeUndefined();
+  });
+
+  it('serializes non-default sortDirection', () => {
+    const filters: HistoryUrlFilters = {
+      q: '',
+      sources: [],
+      runBy: [],
+      tags: [],
+      start: 'now-24h',
+      end: 'now',
+      pageSize: undefined,
+      sortDirection: 'asc',
+    };
+
+    expect(serializeHistoryUrlParams(filters).sortDirection).toBe('asc');
+  });
+
   it('roundtrips through parse and serialize', () => {
     const search =
-      '?q=test&sources=live,scheduled&runBy=user1&tags=important&start=now-7d&end=now-1d&pageSize=25';
+      '?q=test&sources=live,scheduled&runBy=user1&tags=important&start=now-7d&end=now-1d&pageSize=25&sortDirection=asc';
     const parsed = parseHistoryUrlParams(search);
     const serialized = serializeHistoryUrlParams(parsed);
 
@@ -176,6 +224,7 @@ describe('serializeHistoryUrlParams', () => {
       start: 'now-7d',
       end: 'now-1d',
       pageSize: '25',
+      sortDirection: 'asc',
     });
   });
 });

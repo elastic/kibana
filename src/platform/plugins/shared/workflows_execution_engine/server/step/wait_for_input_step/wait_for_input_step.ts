@@ -24,6 +24,18 @@ export class WaitForInputStepImpl implements NodeImplementation {
 
   async run(): Promise<void> {
     if (this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT)) {
+      // Store step config as input so the record is self contained
+      // consistent with every other step type & readable without a definition lookup
+      const withConfig = this.node.configuration?.with;
+      if (withConfig) {
+        const ctx = this.stepExecutionRuntime.contextManager;
+        this.stepExecutionRuntime.setInput({
+          ...(withConfig.message !== undefined && {
+            message: ctx.renderValueAccordingToContext(withConfig.message),
+          }),
+          ...(withConfig.schema !== undefined && { schema: withConfig.schema }),
+        });
+      }
       this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
         event: { action: 'hitl:waiting' },
       });

@@ -343,12 +343,15 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       />
     ) : null;
 
-  if (isSidebarCollapsed && sidebarToggleButton) {
-    return (
-      <EuiHideFor sizes={['xs', 's']}>
-        <div {...pageSidebarProps}>{sidebarToggleButton}</div>
-      </EuiHideFor>
-    );
+  if (isSidebarCollapsed) {
+    if (sidebarToggleButton) {
+      return (
+        <EuiHideFor sizes={['xs', 's']}>
+          <div {...pageSidebarProps}>{sidebarToggleButton}</div>
+        </EuiHideFor>
+      );
+    }
+    return null;
   }
 
   const hasButtonAddFieldToolbarStyle = buttonAddFieldVariant === 'toolbar';

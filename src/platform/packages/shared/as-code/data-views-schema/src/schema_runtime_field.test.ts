@@ -217,27 +217,24 @@ describe('schema_runtime_fields', () => {
 
         // When/Then
         expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
-          /definition for this key is missing/
+          /Additional properties are not allowed \('[^']+' was unexpected\)/
         );
       });
     });
 
-    describe.each(['custom_label', 'custom_description', 'popularity'])(
-      'when it has a top-level %s',
-      (field) => {
-        it('should throw an error', () => {
-          // Given
-          const runtimeField = buildCompositeRuntimeField({
-            [field]: field === 'popularity' ? 1 : 'my_runtime_field',
-          });
-
-          // When/Then
-          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
-            /definition for this key is missing/
-          );
+    describe.each(['custom_label', 'custom_description'])('when it has a top-level %s', (field) => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = buildCompositeRuntimeField({
+          [field]: 'my_runtime_field',
         });
-      }
-    );
+
+        // When/Then
+        expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
+          /Additional properties are not allowed \('[^']+' was unexpected\)/
+        );
+      });
+    });
   });
 
   describe.each([
@@ -421,53 +418,6 @@ describe('schema_runtime_fields', () => {
           it('should be valid', () => {
             // Given
             const runtimeField = buildWithFields({ [field]: 'my_runtime_field' });
-
-            // When/Then
-            expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
-          });
-        });
-      });
-    });
-
-    describe('when it has a popularity', () => {
-      describe('when it is not a number', () => {
-        it('should throw an error', () => {
-          // Given
-          // @ts-expect-error - we want to test an invalid type
-          const runtimeField = buildWithFields({ popularity: 'a' });
-
-          // When/Then
-          expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(/popularity/);
-        });
-      });
-
-      describe('when it is a number', () => {
-        describe('when it is less than 0', () => {
-          it('should throw an error', () => {
-            // Given
-            const runtimeField = buildWithFields({ popularity: -1 });
-
-            // When/Then
-            expect(() => runtimeFieldSchema.validate(runtimeField)).toThrow(
-              /equal to or greater than/
-            );
-          });
-        });
-
-        describe('when it is 0', () => {
-          it('should be valid', () => {
-            // Given
-            const runtimeField = buildWithFields({ popularity: 0 });
-
-            // When/Then
-            expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
-          });
-        });
-
-        describe('when it is greater than 0', () => {
-          it('should be valid', () => {
-            // Given
-            const runtimeField = buildWithFields({ popularity: 1 });
 
             // When/Then
             expect(runtimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);

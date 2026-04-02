@@ -8,7 +8,6 @@
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 import { getErrorsByDocId, getUnifiedTraceItems } from './get_unified_trace_items';
-import type { APMConfig } from '../..';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
 jest.mock('./get_unified_trace_errors');
@@ -107,19 +106,13 @@ describe('getUnifiedTraceItems', () => {
 
   const mockLogsClient = {} as LogsClient;
 
-  const mockConfig = {
-    ui: {
-      maxTraceItems: 1000,
-    },
-  } as APMConfig;
-
   const defaultParams = {
     apmEventClient: mockApmEventClient,
     logsClient: mockLogsClient,
     traceId: 'test-trace-id',
     start: 0,
     end: 1000,
-    config: mockConfig,
+    maxTraceItems: 1000,
   };
 
   const mockUnifiedTraceErrors = {
@@ -157,6 +150,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -178,7 +172,12 @@ describe('getUnifiedTraceItems', () => {
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
             serviceName: 'test-service',
+            serviceEnvironment: undefined,
             type: undefined,
+            sync: undefined,
+            agentName: undefined,
+            coldstart: undefined,
+            composite: undefined,
             spanLinksCount: {
               incoming: 0,
               outgoing: 0,
@@ -188,6 +187,7 @@ describe('getUnifiedTraceItems', () => {
         ],
         agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
+        traceDocsTotal: 1,
       });
     });
     it('should return trace items and unified trace with agent marks', async () => {
@@ -215,6 +215,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -236,7 +237,12 @@ describe('getUnifiedTraceItems', () => {
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
             serviceName: 'test-service',
+            serviceEnvironment: undefined,
             type: undefined,
+            sync: undefined,
+            agentName: undefined,
+            coldstart: undefined,
+            composite: undefined,
             spanLinksCount: {
               incoming: 0,
               outgoing: 0,
@@ -250,6 +256,7 @@ describe('getUnifiedTraceItems', () => {
           domComplete: 118,
         },
         unifiedTraceErrors: mockUnifiedTraceErrors,
+        traceDocsTotal: 1,
       });
     });
     it('should return trace items and unified trace errors', async () => {
@@ -265,6 +272,7 @@ describe('getUnifiedTraceItems', () => {
               },
             },
           ],
+          total: { value: 1, relation: 'eq' },
         },
       };
 
@@ -275,6 +283,7 @@ describe('getUnifiedTraceItems', () => {
       expect(result).toEqual({
         traceItems: [
           {
+            icon: undefined,
             id: 'span-1',
             name: 'Test Span',
             timestampUs: 1672531200000000,
@@ -285,7 +294,12 @@ describe('getUnifiedTraceItems', () => {
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
             serviceName: 'test-service',
+            serviceEnvironment: undefined,
             type: undefined,
+            sync: undefined,
+            agentName: undefined,
+            coldstart: undefined,
+            composite: undefined,
             spanLinksCount: {
               incoming: 0,
               outgoing: 0,
@@ -295,6 +309,7 @@ describe('getUnifiedTraceItems', () => {
         ],
         agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
+        traceDocsTotal: 1,
       });
     });
 
@@ -335,7 +350,7 @@ describe('getUnifiedTraceItems', () => {
       );
     });
 
-    it('should use maxTraceItemsFromUrlParam when provided', async () => {
+    it('should use maxTraceItems when provided', async () => {
       const mockSearchResponse = {
         hits: { hits: [] },
       };
@@ -344,7 +359,7 @@ describe('getUnifiedTraceItems', () => {
 
       await getUnifiedTraceItems({
         ...defaultParams,
-        maxTraceItemsFromUrlParam: 500,
+        maxTraceItems: 500,
       });
 
       expect(mockApmEventClient.search).toHaveBeenCalledWith(
@@ -1238,6 +1253,60 @@ describe('getUnifiedTraceItems', () => {
         incoming: 5,
         outgoing: 2,
       });
+    });
+  });
+
+  describe('traceDocsTotal and maxTraceItems', () => {
+    it('returns traceDocsTotal as raw ES total', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+          total: { value: 5000, relation: 'eq' },
+        },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceDocsTotal).toBe(5000);
+    });
+
+    it('returns traceDocsTotal as 0 when hits.total is undefined', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceDocsTotal).toBe(0);
+    });
+
+    it('does not include maxTraceItems in the return value', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).not.toHaveProperty('maxTraceItems');
+    });
+
+    it('does not include exceedMax in the return value', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 2000, relation: 'eq' } },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).not.toHaveProperty('exceedMax');
     });
   });
 

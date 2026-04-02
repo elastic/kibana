@@ -50,6 +50,13 @@ export function registerReadRoute(
         response: {
           200: {
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
+            description: 'success',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          404: {
+            description: 'not found',
           },
         },
       }),
@@ -75,10 +82,10 @@ export function registerReadRoute(
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest(e.message);
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );

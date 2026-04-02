@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { loadAll as yamlLoadAll, JSON_SCHEMA } from 'js-yaml';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 
 const ACCEPTED_MIME_TYPES = new Set([
   'application/x-yaml',

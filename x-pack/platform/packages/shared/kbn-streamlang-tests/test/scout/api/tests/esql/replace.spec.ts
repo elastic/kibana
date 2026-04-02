@@ -31,7 +31,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
         await testBed.ingest(indexName, docs);
@@ -59,7 +59,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
         await testBed.ingest(indexName, docs);
@@ -85,7 +85,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Error code 404 found' }];
       await testBed.ingest(indexName, docs);
@@ -109,7 +109,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Android.log' }];
       await testBed.ingest(indexName, docs);
@@ -133,7 +133,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'User alice has 3 new messages' }];
       await testBed.ingest(indexName, docs);
@@ -159,7 +159,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { message: 'An error occurred', status: 'doc1' };
         const docWithoutField = { status: 'doc2' }; // Should be filtered out
@@ -189,7 +189,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithField = { message: 'An error occurred', status: 'doc1' };
       const docWithoutField = { status: 'doc2' }; // Should pass through
@@ -223,7 +223,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { message: 'An error occurred', event: { kind: 'test' }, status: 'doc1' },
@@ -266,7 +266,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -312,7 +312,7 @@ apiTest.describe(
           } as ReplaceProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

@@ -47,6 +47,7 @@ describe('UiamAPIKeys', () => {
       grantApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
       convertApiKeys: jest.fn(),
+      exchangeOAuthToken: jest.fn(),
     };
 
     uiamApiKeys = new UiamAPIKeys({

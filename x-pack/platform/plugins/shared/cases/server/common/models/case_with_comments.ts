@@ -127,7 +127,7 @@ export class CaseCommentModel {
         queryRestAttributes.comment
       ) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
-          attachmentId: id,
+          savedObjectId: id,
           mode,
         })) as SavedObject<UserCommentAttachmentPayload>;
 
@@ -146,7 +146,7 @@ export class CaseCommentModel {
 
       const [comment, commentableCase] = await Promise.all([
         this.params.services.attachmentService.update({
-          attachmentId: id,
+          savedObjectId: id,
           updatedAttributes: {
             ...queryRestAttributes,
             updated_at: updatedAt,
@@ -253,7 +253,7 @@ export class CaseCommentModel {
         type: UserActionTypes.comment,
         action: UserActionActions.update,
         caseId: this.caseInfo.id,
-        attachmentId: comment.id,
+        savedObjectId: comment.id,
         payload: { attachment: queryRestAttributes },
         user: this.params.user,
         owner,
@@ -518,7 +518,7 @@ export class CaseCommentModel {
         type: UserActionTypes.comment,
         action: UserActionActions.create,
         caseId: this.caseInfo.id,
-        attachmentId: comment.id,
+        savedObjectId: comment.id,
         payload: {
           attachment: req,
         },

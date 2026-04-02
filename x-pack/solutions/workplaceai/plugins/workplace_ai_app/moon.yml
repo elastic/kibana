@@ -42,7 +42,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/triggers-actions-ui-plugin'
-  - '@kbn/elastic-assistant'
+  - '@kbn/inference-connectors'
   - '@kbn/ai-assistant-connector-selector-action'
   - '@kbn/core-application-browser'
   - '@kbn/workflows-extensions'
@@ -63,26 +63,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

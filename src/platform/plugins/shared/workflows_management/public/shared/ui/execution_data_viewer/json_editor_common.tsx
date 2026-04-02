@@ -93,7 +93,7 @@ export const JsonCodeEditorCommon = ({
       <EuiFlexItem grow={false} css={styles.copyButtonContainer}>
         <EuiCopy textToCopy={jsonValue}>
           {(copy) => (
-            <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+            <EuiButtonEmpty size="xs" flush="right" iconType="copy" onClick={copy}>
               {copyToClipboardLabel}
             </EuiButtonEmpty>
           )}

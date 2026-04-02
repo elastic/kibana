@@ -47,8 +47,6 @@ import { throwAuthzError } from '../../../../machine_learning/validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
-
 import type { ConfigType } from '../../../../../config';
 import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
@@ -155,8 +153,7 @@ export const previewRulesRoute = (
           const spaceId = siemClient.getSpaceId();
           const previewId = uuidv4();
           const username = security?.authc.getCurrentUser(request)?.username;
-          const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
-          const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
+          const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
           const runState: Record<string, unknown> = {
             isLoggedRequestsEnabled: request.query.enable_logged_requests,
           };
@@ -319,25 +316,23 @@ export const previewRulesRoute = (
                 ruleExecutionTimeout: `${PREVIEW_TIMEOUT_SECONDS}s`,
               })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
-              const errors = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
-                .map((item) => item.message ?? 'Unknown Error');
-
-              const warnings = loggedStatusChanges
-                .filter((item) => item.newStatus === RuleExecutionStatusEnum['partial failure'])
-                .map((item) => item.message ?? 'Unknown Warning');
+              const executionResult = previewRuleExecutionLogger.getExecutionResult();
 
               logs.push({
-                errors,
-                warnings,
+                errors:
+                  executionResult?.status === RuleExecutionStatusEnum.failed
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getErrors()]
+                    : previewRuleExecutionLogger.getErrors(),
+                warnings:
+                  executionResult?.status === RuleExecutionStatusEnum['partial failure']
+                    ? [executionResult?.message, ...previewRuleExecutionLogger.getWarnings()]
+                    : previewRuleExecutionLogger.getWarnings(),
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
                 ...(loggedRequests ? { requests: loggedRequests } : {}),
               });
 
-              loggedStatusChanges.length = 0;
-
-              if (errors.length) {
+              if (executionResult?.status === RuleExecutionStatusEnum.failed) {
                 break;
               }
 

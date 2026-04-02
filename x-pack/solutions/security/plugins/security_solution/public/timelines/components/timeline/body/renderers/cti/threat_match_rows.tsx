@@ -137,7 +137,7 @@ const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildr
     <div>
       <EuiButtonEmpty
         data-test-subj="threat-match-row-show-all"
-        iconType="popout"
+        iconType="external"
         color="primary"
         onClick={showModal}
       >

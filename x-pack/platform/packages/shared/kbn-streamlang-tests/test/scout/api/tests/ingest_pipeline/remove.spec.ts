@@ -28,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ temp_field: 'to-be-removed', message: 'keep-this' }];
       await testBed.ingest(indexName, docs, processors);
@@ -53,7 +53,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       await testBed.ingest(indexName, docs, processors);
@@ -77,7 +77,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -101,7 +101,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { temp_data: { value: 'remove-me' }, event: { kind: 'test' }, message: 'doc1' },
@@ -135,7 +135,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       // Field missing, should fail (ignore_missing defaults to false)
       const docs = [{ message: 'some_value' }];
@@ -164,7 +164,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpile(streamlangDSL)).toThrow(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });

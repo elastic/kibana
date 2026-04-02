@@ -1102,7 +1102,7 @@
           "10"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 1098,
+        "lineNumber": 1115,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

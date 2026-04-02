@@ -67,6 +67,9 @@ export const ProjectPickerSettings = ({ onResetToDefaults }: ProjectPickerSettin
       anchorPosition="rightCenter"
       ownFocus
       panelPaddingSize="none"
+      aria-label={i18n.translate('cpsUtils.projectPicker.settingsPopoverAriaLabel', {
+        defaultMessage: 'Cross-project search settings',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

@@ -134,6 +134,13 @@ export const monitoringSchema = schema.object({
             })
           )
         ),
+        gap_reason: schema.maybe(
+          schema.nullable(
+            schema.object({
+              type: schema.string(),
+            })
+          )
+        ),
       }),
     }),
   }),

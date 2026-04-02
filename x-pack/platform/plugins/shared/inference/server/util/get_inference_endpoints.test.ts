@@ -41,12 +41,14 @@ describe('getInferenceEndpoints', () => {
         taskType: 'chat_completion',
         service: 'openai',
         serviceSettings: { model_id: 'gpt-4o' },
+        metadata: {},
       },
       {
         inferenceId: 'ep-2',
         taskType: 'text_embedding',
         service: 'elasticsearch',
         serviceSettings: undefined,
+        metadata: {},
       },
     ]);
   });

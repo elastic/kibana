@@ -267,6 +267,7 @@ export class ElasticAssistantPlugin
     // Register the Attack Discovery Schedule type
     plugins.alerting.registerType(
       getAttackDiscoveryScheduleType({
+        core,
         logger: this.logger,
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         telemetry: core.analytics,

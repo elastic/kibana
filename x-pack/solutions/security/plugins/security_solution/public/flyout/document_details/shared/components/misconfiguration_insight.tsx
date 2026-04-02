@@ -17,16 +17,21 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {
   type CloudSecurityUiCounters,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import { useUiSetting } from '../../../../common/lib/kibana';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
@@ -34,13 +39,9 @@ import {
 
 interface MisconfigurationsInsightProps {
   /**
-   *  Entity name to retrieve misconfigurations for
+   * Entity identifiers used to filter the misconfigurations by.
    */
-  name: string;
-  /**
-   * Indicator whether the entity is host or user
-   */
-  fieldName: 'host.name' | 'user.name';
+  identityFields: Record<string, string>;
   /**
    * The direction of the flex group
    */
@@ -63,8 +64,7 @@ interface MisconfigurationsInsightProps {
  * Displays a distribution bar with the count of total misconfigurations for a given entity
  */
 export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> = ({
-  name,
-  fieldName,
+  identityFields,
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
@@ -72,12 +72,18 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
 }) => {
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
-  const { data } = useMisconfigurationPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(fieldName, name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
+  const euidApi = useEntityStoreEuidApi();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityType = inferEntityTypeFromIdentityFields(identityFields);
+  const cspPreviewOptions = useMemo(
+    () =>
+      buildEuidCspPreviewOptions(entityType, identityFields, euidApi, {
+        entityStoreV2Enabled,
+        legacyIdentityFields: identityFields,
+      }),
+    [euidApi, entityStoreV2Enabled, entityType, identityFields]
+  );
+  const { data } = useMisconfigurationPreview(cspPreviewOptions);
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;

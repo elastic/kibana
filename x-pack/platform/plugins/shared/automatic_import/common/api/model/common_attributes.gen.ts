@@ -15,6 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { ESProcessorItem } from './processor_attributes.gen';
 import { CelInput } from './cel_input_attributes.gen';
@@ -23,37 +24,37 @@ import { CelInput } from './cel_input_attributes.gen';
  * Package name for the integration to be built.
  */
 export type PackageName = z.infer<typeof PackageName>;
-export const PackageName = z.string().min(1);
+export const PackageName = z.string().min(1).max(256).superRefine(isNonEmptyString);
 
 /**
  * DataStream name for the integration to be built.
  */
 export type DataStreamName = z.infer<typeof DataStreamName>;
-export const DataStreamName = z.string().min(1);
+export const DataStreamName = z.string().min(1).max(256).superRefine(isNonEmptyString);
 
 /**
  * Package title for the integration to be built.
  */
 export type PackageTitle = z.infer<typeof PackageTitle>;
-export const PackageTitle = z.string().min(1);
+export const PackageTitle = z.string().min(1).max(256).superRefine(isNonEmptyString);
 
 /**
  * DataStream title for the integration to be built.
  */
 export type DataStreamTitle = z.infer<typeof DataStreamTitle>;
-export const DataStreamTitle = z.string().min(1);
+export const DataStreamTitle = z.string().min(1).max(256).superRefine(isNonEmptyString);
 
 /**
  * String form of the input logsamples.
  */
 export type LogSamples = z.infer<typeof LogSamples>;
-export const LogSamples = z.array(z.string());
+export const LogSamples = z.array(z.string()).max(100);
 
 /**
  * String array containing the json raw samples that are used for ecs mapping.
  */
 export type RawSamples = z.infer<typeof RawSamples>;
-export const RawSamples = z.array(z.string());
+export const RawSamples = z.array(z.string()).max(100);
 
 /**
  * mapping object to ECS Mapping Request.
@@ -65,13 +66,13 @@ export const Mapping = z.object({}).catchall(z.unknown());
  * LLM Connector to be used in each API request.
  */
 export type Connector = z.infer<typeof Connector>;
-export const Connector = z.string();
+export const Connector = z.string().min(1).max(256).superRefine(isNonEmptyString);
 
 /**
  * An array of processed documents.
  */
 export type Docs = z.infer<typeof Docs>;
-export const Docs = z.array(z.object({}).catchall(z.unknown()));
+export const Docs = z.array(z.object({}).catchall(z.unknown())).max(500);
 
 /**
  * The name of the log samples format.
@@ -108,11 +109,11 @@ export const SamplesFormat = z.object({
   /**
    * For CSV format, specifies the column names proposed by the LLM.
    */
-  columns: z.array(z.string()).optional(),
+  columns: z.array(z.string()).max(500).optional(),
   /**
    * For a JSON format, describes how to get to the sample array from the root of the JSON.
    */
-  json_path: z.array(z.string()).optional(),
+  json_path: z.array(z.string()).max(50).optional(),
 });
 
 /**
@@ -123,11 +124,11 @@ export const Pipeline = z.object({
   /**
    * The name of the pipeline.
    */
-  name: z.string().optional(),
+  name: z.string().max(256).optional(),
   /**
    * The description of the pipeline.
    */
-  description: z.string().optional(),
+  description: z.string().max(4096).optional(),
   /**
    * The version of the pipeline.
    */
@@ -135,11 +136,11 @@ export const Pipeline = z.object({
   /**
    * The processors to execute.
    */
-  processors: z.array(ESProcessorItem),
+  processors: z.array(ESProcessorItem).max(500),
   /**
    * The processors to execute if the pipeline fails.
    */
-  on_failure: z.array(ESProcessorItem).optional(),
+  on_failure: z.array(ESProcessorItem).max(50).optional(),
 });
 
 /**
@@ -173,19 +174,19 @@ export const DataStream = z.object({
   /**
    * The name of the dataStream.
    */
-  name: z.string(),
+  name: z.string().min(1).max(256).superRefine(isNonEmptyString),
   /**
    * The title of the dataStream.
    */
-  title: z.string(),
+  title: z.string().min(1).max(256).superRefine(isNonEmptyString),
   /**
    * The description of the dataStream.
    */
-  description: z.string(),
+  description: z.string().min(1).max(4096).superRefine(isNonEmptyString),
   /**
    * The input types of the dataStream.
    */
-  inputTypes: z.array(InputType),
+  inputTypes: z.array(InputType).max(20),
   /**
    * The raw samples of the dataStream.
    */
@@ -216,23 +217,23 @@ export const Integration = z.object({
   /**
    * The name of the integration.
    */
-  name: z.string(),
+  name: z.string().min(1).max(256).superRefine(isNonEmptyString),
   /**
    * The title of the integration.
    */
-  title: z.string(),
+  title: z.string().min(1).max(256).superRefine(isNonEmptyString),
   /**
    * The description of the integration.
    */
-  description: z.string(),
+  description: z.string().min(1).max(4096).superRefine(isNonEmptyString),
   /**
    * The dataStreams of the integration.
    */
-  dataStreams: z.array(DataStream),
+  dataStreams: z.array(DataStream).max(50),
   /**
    * The logo of the integration.
    */
-  logo: z.string().optional(),
+  logo: z.string().max(1400000).optional(),
 });
 
 /**
@@ -243,9 +244,9 @@ export const LangSmithOptions = z.object({
   /**
    * The project name.
    */
-  projectName: z.string(),
+  projectName: z.string().min(1).max(256).superRefine(isNonEmptyString),
   /**
    * The apiKey to use for tracing.
    */
-  apiKey: z.string(),
+  apiKey: z.string().min(1).max(512).superRefine(isNonEmptyString),
 });

@@ -7,7 +7,6 @@
 
 import {
   AT_TIMESTAMP,
-  ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
@@ -18,7 +17,6 @@ import {
   HTTP_RESPONSE_STATUS_CODE,
   PARENT_ID,
   SERVICE_ENVIRONMENT,
-  SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
   SPAN_ACTION,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -31,23 +29,18 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
-  TRANSACTION_PAGE_URL,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
-  URL_FULL,
 } from '@kbn/apm-types';
 
 export const DEFAULT_TRACE_FIELDS = [
   // Timeline + identity
-  '_index',
-  '_id',
   AT_TIMESTAMP,
   TRACE_ID,
   'message',
   'log.level',
 
   // Error fields
-  ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
@@ -56,7 +49,6 @@ export const DEFAULT_TRACE_FIELDS = [
 
   // Service fields
   SERVICE_ENVIRONMENT,
-  SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
 
   // Transaction summary
@@ -82,12 +74,12 @@ export const DEFAULT_TRACE_FIELDS = [
   // HTTP fields
   HTTP_REQUEST_METHOD,
   HTTP_RESPONSE_STATUS_CODE,
-  TRANSACTION_PAGE_URL,
-  URL_FULL,
 ];
 
-export const DEFAULT_MAX_TRACES = 10;
-export const DEFAULT_MAX_DOCS_PER_TRACE = 100;
+export const DEFAULT_MAX_TRACES = 5;
+export const DEFAULT_MAX_DOCS_PER_TRACE = 50;
+
+export const DEFAULT_MAX_OUTPUT_CHARS = 30000;
 
 export const DEFAULT_TIME_RANGE = {
   start: 'now-1h',

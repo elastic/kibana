@@ -48,6 +48,9 @@ export function mockTask(overrides = {}, definitionOverrides = {}) {
     isSameTask() {
       return false;
     },
+    get cost(): number {
+      return this.definition.cost ?? TaskCost.Normal;
+    },
     ...overrides,
   };
 }

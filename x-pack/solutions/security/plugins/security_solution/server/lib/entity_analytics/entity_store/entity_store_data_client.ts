@@ -18,7 +18,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
@@ -28,6 +28,7 @@ import type { EntityStoreCapability, EntityDefinition } from '@kbn/entities-sche
 import type { estypes } from '@elastic/elasticsearch';
 import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
@@ -944,6 +945,48 @@ export class EntityStoreDataClient {
     };
 
     return { records, total, inspect };
+  }
+
+  /**
+   * Fetch all entities from the V2 unified latest index with search_after pagination.
+   * Suitable for batch processing pipelines that need the full entity population.
+   */
+  public async fetchAllUnifiedLatestEntities(params?: {
+    sourceFields?: string[];
+    pageSize?: number;
+  }): Promise<Entity[]> {
+    const { namespace, logger } = this.options;
+    const index = getLatestEntitiesIndexName(namespace);
+    const size = params?.pageSize ?? 1000;
+    const results: Entity[] = [];
+    let searchAfter: FieldValue[] | undefined;
+
+    while (true) {
+      try {
+        const resp = await this.esClient.search<Entity>({
+          index,
+          size,
+          ignore_unavailable: true,
+          ...(params?.sourceFields ? { _source: params.sourceFields } : {}),
+          sort: [{ '@timestamp': { order: 'desc' as const } }],
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+          query: { match_all: {} },
+        });
+
+        const { hits } = resp.hits;
+        for (const hit of hits) {
+          if (hit._source) results.push(hit._source);
+        }
+
+        if (hits.length < size) break;
+        searchAfter = hits[hits.length - 1].sort as FieldValue[];
+      } catch (error) {
+        logger.warn(`[EntityStoreDataClient] Failed to fetch entities from "${index}": ${error}`);
+        break;
+      }
+    }
+
+    return results;
   }
 
   public async applyDataViewIndices(): Promise<{

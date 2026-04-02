@@ -39,8 +39,8 @@ import {
   installScriptsLibraryIndexTemplates,
   SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
 } from './lib/scripts_library';
-import type { ReferenceDataClientInterface } from './lib/reference_data';
-import { ReferenceDataClient } from './lib/reference_data';
+import type { OptInStatusMetadata, ReferenceDataClientInterface } from './lib/reference_data';
+import { REF_DATA_KEYS, ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
@@ -260,8 +260,6 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
 
-    // TODO:PT check what this returns when running locally with kibana in serverless emulation
-
     return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
   }
 
@@ -306,6 +304,7 @@ export class EndpointAppContextService {
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
+      this.isServerless(),
       this.startDependencies.productFeaturesService
     );
   }
@@ -498,8 +497,31 @@ export class EndpointAppContextService {
 
     return new ReferenceDataClient(
       this.savedObjects.createInternalScopedSoClient({ readonly: false }),
+      this.experimentalFeatures,
       this.createLogger('ReferenceDataClient')
     );
+  }
+
+  /**
+   * Returns true if Endpoint Exceptions move FF is enabled AND the user has opted in
+   * to per-policy Endpoint Exceptions.
+   */
+  public async isEndpointExceptionsPerPolicyEnabled(): Promise<boolean> {
+    if (!this.startDependencies) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!this.startDependencies.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      return false;
+    }
+
+    const referenceDataClient = this.getReferenceDataClient();
+
+    const optInStatusMetadata = await referenceDataClient.get<OptInStatusMetadata>(
+      REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
+    );
+
+    return optInStatusMetadata.metadata.status;
   }
 
   public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(

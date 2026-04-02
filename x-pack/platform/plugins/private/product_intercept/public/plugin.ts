@@ -44,7 +44,9 @@ export class ProductInterceptPublicPlugin implements Plugin {
       analytics: core.analytics,
     });
 
-    const productOffering = `Elastic ${capitalize(cloud.serverless.projectType || '')}`.trim();
+    const projectType = cloud.serverless.projectType || '';
+    const productOffering =
+      projectType === 'search' ? 'Elasticsearch' : `Elastic ${capitalize(projectType)}`.trim();
 
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();

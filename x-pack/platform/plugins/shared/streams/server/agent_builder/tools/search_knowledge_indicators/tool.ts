@@ -31,7 +31,9 @@ const searchKnowledgeIndicatorsSchema = z.object({
   search_text: z
     .string()
     .optional()
-    .describe('Optional. Free-text search (best-effort across stored fields).'),
+    .describe(
+      'Optional. Natural-language search with semantic ranking (hybrid keyword + vector). Descriptive phrases work better than single keywords.'
+    ),
   kind: z
     .array(z.enum(['feature', 'query']))
     .optional()
@@ -80,10 +82,13 @@ export function createSearchKnowledgeIndicatorsTool({
     tags: ['streams', 'significant_events'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, uiSettings }): Promise<ToolAvailabilityResult> => {
+      handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
         try {
-          const { licensing } = await getScopedClients({ request });
-          await assertSignificantEventsAccess({ server, licensing, uiSettingsClient: uiSettings });
+          await assertSignificantEventsAccess({
+            server,
+            licensing: server.licensing,
+            uiSettingsClient: uiSettings,
+          });
           return { status: 'available' };
         } catch (error) {
           if (error instanceof Error) {
@@ -128,7 +133,7 @@ export function createSearchKnowledgeIndicatorsTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running search_knowledge_indicators: ${message}`);
+        logger.error(`Error running search_kis: ${message}`);
         if (error instanceof Error) {
           logger.debug(error.stack ?? error.message);
         } else {

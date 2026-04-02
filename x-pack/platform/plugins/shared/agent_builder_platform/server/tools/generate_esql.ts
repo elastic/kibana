@@ -19,7 +19,7 @@ const nlToEsqlToolSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Index to search against. If not provided, will use the index explorer to find the best index to use.'
+      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
     ),
   context: z
     .string()

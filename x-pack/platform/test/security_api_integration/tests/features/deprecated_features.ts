@@ -64,6 +64,20 @@ function getUserCredentials(username: string) {
   return `Basic ${Buffer.from(`${username}:changeme`).toString('base64')}`;
 }
 
+const deprecatedApiActions: Record<string, Set<string>> = {
+  'api:alerts-signal-update-deprecated-privilege': new Set([
+    'siem',
+    'siemV2',
+    'siemV3',
+    'siemV4',
+    'securitySolutionRulesV1',
+    'securitySolutionRulesV2',
+  ]),
+};
+
+const isDeprecatedApiAction = ({ featureId, action }: { featureId: string; action: string }) =>
+  deprecatedApiActions[action]?.has(featureId) ?? false;
+
 export default function ({ getService }: FtrProviderContext) {
   describe('deprecated features', function () {
     const supertest = getService('supertest');
@@ -190,6 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
           "securitySolutionCases",
           "securitySolutionCasesV2",
           "securitySolutionRulesV1",
+          "securitySolutionRulesV2",
           "siem",
           "siemV2",
           "siemV3",
@@ -224,6 +239,8 @@ export default function ({ getService }: FtrProviderContext) {
         'siemV2',
         'siemV3',
         'siemV4',
+        'securitySolutionRulesV1',
+        'securitySolutionRulesV2',
       ]);
       for (const feature of features) {
         if (
@@ -321,6 +338,7 @@ export default function ({ getService }: FtrProviderContext) {
           for (const deprecatedAction of deprecatedActions) {
             if (
               isReplaceableAction(deprecatedAction) &&
+              !isDeprecatedApiAction({ featureId: feature.id, action: deprecatedAction }) &&
               !replacementActions.delete(deprecatedAction)
             ) {
               throw new Error(

@@ -39,6 +39,7 @@ const connector: ActionConnector = createMockActionConnector({
   actionTypeId: '.test',
   config: { testTextField: 'My text field' },
   secrets: { secretTextField: 'super secret' },
+  authMode: 'shared',
 });
 
 describe('EditConnectorFlyout', () => {

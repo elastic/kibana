@@ -63,7 +63,7 @@ export const getErrorBudgetEmbeddableFactory = ({
       });
       const reload$ = new Subject<boolean>();
 
-      function serializeState() {
+      function serializeState(): ErrorBudgetEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
@@ -71,7 +71,7 @@ export const getErrorBudgetEmbeddableFactory = ({
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<ErrorBudgetEmbeddableState>({
         uuid,
         parentApi,
         serializeState,

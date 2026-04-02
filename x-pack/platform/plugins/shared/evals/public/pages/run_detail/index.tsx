@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, type MouseEvent } from 'react';
+import React, { useCallback, useMemo, type MouseEvent } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
   EuiLink,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
@@ -25,11 +26,12 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
 import { TraceWaterfall } from '../../components/trace_waterfall';
+import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
 interface DatasetStatsGroup {
@@ -44,8 +46,12 @@ interface DatasetStatsAccordionProps {
   totalRepetitions: number;
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
   runLoading: boolean;
-  onTraceClick: (traceId: string) => void;
+  isOpen: boolean;
+  selectedExampleId?: string | null;
+  onTraceClick: (traceId: string, exampleId: string) => void;
   onDatasetClick: (datasetId: string) => void;
+  onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
+  onExampleClick: (exampleId: string) => void;
 }
 
 const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
@@ -54,10 +60,13 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   totalRepetitions,
   statsColumns,
   runLoading,
+  isOpen,
+  selectedExampleId,
   onTraceClick,
   onDatasetClick,
+  onDatasetToggle,
+  onExampleClick,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
@@ -97,7 +106,8 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
             )}
           </EuiFlexGroup>
         }
-        onToggle={(nextIsOpen) => setIsOpen(nextIsOpen)}
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={(nextIsOpen) => onDatasetToggle(group.datasetId, nextIsOpen)}
       >
         <EuiSpacer size="m" />
         <EuiText size="s">
@@ -111,7 +121,9 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
         ) : (
           <ExampleScoresTable
             examples={datasetExamples?.examples ?? []}
-            onTraceClick={(traceId) => onTraceClick(traceId)}
+            selectedExampleId={selectedExampleId}
+            onExampleClick={onExampleClick}
+            onTraceClick={onTraceClick}
           />
         )}
         <EuiSpacer size="m" />
@@ -133,11 +145,75 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
 export const RunDetailPage: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
   const history = useHistory();
+  const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const { data: runDetail, isLoading: runLoading, error: runError } = useEvaluationRun(runId);
-  const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
-  const runIdShort = runId.slice(0, 12);
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const openDatasetId = searchParams.get('dataset_id');
+  const selectedExampleId = searchParams.get('example_id');
+  const selectedTraceId = searchParams.get('trace_id');
+  const prUrl = useMemo(() => {
+    const pr = runDetail?.ci?.pull_request;
+    return pr ? resolvePrUrl(pr) : null;
+  }, [runDetail?.ci?.pull_request]);
+
+  const updateSearchParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const next = new URLSearchParams(location.search);
+      updater(next);
+      const search = next.toString();
+      history.push({
+        pathname: location.pathname,
+        search: search ? `?${search}` : '',
+      });
+    },
+    [history, location.pathname, location.search]
+  );
+
+  const setOpenDatasetId = useCallback(
+    (datasetId: string | null) => {
+      updateSearchParams((params) => {
+        if (datasetId) {
+          params.set('dataset_id', datasetId);
+        } else {
+          params.delete('dataset_id');
+          params.delete('example_id');
+          params.delete('trace_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const setSelectedExample = useCallback(
+    (exampleId: string | null) => {
+      updateSearchParams((params) => {
+        if (exampleId) {
+          params.set('example_id', exampleId);
+        } else {
+          params.delete('example_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const setSelectedTrace = useCallback(
+    (traceId: string | null, exampleId?: string) => {
+      updateSearchParams((params) => {
+        if (traceId) {
+          params.set('trace_id', traceId);
+          if (exampleId) {
+            params.set('example_id', exampleId);
+          }
+        } else {
+          params.delete('trace_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
 
   const datasetStatsGroups = useMemo(() => {
     const groupedStats = new Map<
@@ -208,11 +284,12 @@ export const RunDetailPage: React.FC = () => {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h2>{i18n.getPageTitle(runIdShort)}</h2>
-      </EuiTitle>
-
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiTitle size="l">
+          <h2>{i18n.getPageTitle(runId)}</h2>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+
         {runError ? (
           <>
             <EuiText color="danger" size="s">
@@ -224,7 +301,7 @@ export const RunDetailPage: React.FC = () => {
 
         {runDetail && (
           <>
-            <EuiFlexGroup>
+            <EuiFlexGroup wrap>
               <EuiFlexItem>
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
@@ -252,6 +329,55 @@ export const RunDetailPage: React.FC = () => {
                   />
                 </EuiPanel>
               </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiStat
+                    title={
+                      runDetail.git_branch ? (
+                        <EuiBadge color="hollow">{runDetail.git_branch}</EuiBadge>
+                      ) : (
+                        '-'
+                      )
+                    }
+                    description={i18n.STAT_BRANCH}
+                    titleSize="xs"
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiStat
+                    title={
+                      runDetail.ci?.build_url ? (
+                        <EuiLink href={runDetail.ci.build_url} target="_blank" external>
+                          {i18n.CI_BUILD_LINK}
+                        </EuiLink>
+                      ) : (
+                        '-'
+                      )
+                    }
+                    description={i18n.STAT_CI}
+                    titleSize="xs"
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiStat
+                    title={
+                      prUrl ? (
+                        <EuiLink href={prUrl} target="_blank" external>
+                          {i18n.PR_LINK}
+                        </EuiLink>
+                      ) : (
+                        '-'
+                      )
+                    }
+                    description={i18n.STAT_PULL_REQUEST}
+                    titleSize="xs"
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
           </>
@@ -269,8 +395,14 @@ export const RunDetailPage: React.FC = () => {
             totalRepetitions={runDetail?.total_repetitions ?? 1}
             statsColumns={statsColumns}
             runLoading={runLoading}
-            onTraceClick={setSelectedTraceId}
+            isOpen={openDatasetId === datasetId}
+            selectedExampleId={openDatasetId === datasetId ? selectedExampleId : null}
+            onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
             onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
+            onDatasetToggle={(targetDatasetId, nextIsOpen) =>
+              setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
+            }
+            onExampleClick={(exampleId) => setSelectedExample(exampleId)}
           />
         ))}
       </EuiPageSection>
@@ -278,7 +410,7 @@ export const RunDetailPage: React.FC = () => {
       {selectedTraceId && (
         <EuiFlyoutResizable
           ownFocus
-          onClose={() => setSelectedTraceId(null)}
+          onClose={() => setSelectedTrace(null)}
           size="l"
           minWidth={480}
           maxWidth={1600}

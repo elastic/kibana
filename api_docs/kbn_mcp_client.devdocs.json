@@ -177,7 +177,7 @@
               "\nConnect to the MCP client and return the connected status and capabilities."
             ],
             "signature": [
-              "() => Promise<{ connected: boolean; capabilities?: any; }>"
+              "() => Promise<{ connected: boolean; capabilities?: { experimental?: { [x: string]: object; } | undefined; logging?: object | undefined; completions?: object | undefined; prompts?: { listChanged?: boolean | undefined; } | undefined; resources?: { subscribe?: boolean | undefined; listChanged?: boolean | undefined; } | undefined; tools?: { listChanged?: boolean | undefined; } | undefined; tasks?: { [x: string]: unknown; list?: object | undefined; cancel?: object | undefined; requests?: { [x: string]: unknown; tools?: { [x: string]: unknown; call?: object | undefined; } | undefined; } | undefined; } | undefined; } | undefined; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
             "lineNumber": 98,
@@ -518,7 +518,14 @@
             "label": "content",
             "description": [],
             "signature": [
-              "any[]"
+              {
+                "pluginId": "@kbn/mcp-client",
+                "scope": "common",
+                "docId": "kibKbnMcpClientPluginApi",
+                "section": "def-common.ContentPart",
+                "text": "ContentPart"
+              },
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
             "lineNumber": 115,
@@ -1018,7 +1025,22 @@
         "label": "ContentPart",
         "description": [],
         "signature": [
-          "any"
+          "{ type: \"text\"; text: string; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; name: string; type: \"resource_link\"; description?: string | undefined; mimeType?: string | undefined; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; icons?: { src: string; mimeType?: string | undefined; sizes?: string[] | undefined; theme?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ light: \"light\"; dark: \"dark\"; }> | undefined; }[] | undefined; title?: string | undefined; } | { type: \"resource\"; resource: { uri: string; text: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; blob: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; }; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; } | ",
+          {
+            "pluginId": "@kbn/mcp-client",
+            "scope": "common",
+            "docId": "kibKbnMcpClientPluginApi",
+            "section": "def-common.NonTextPart",
+            "text": "NonTextPart"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
         "lineNumber": 76,
@@ -1037,7 +1059,9 @@
           "\nEmbedded resource returned as part of a tool call response.\nServers may embed resource contents (text or base64 blob) inline."
         ],
         "signature": [
-          "any"
+          "{ type: \"resource\"; resource: { uri: string; text: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; } | { uri: string; blob: string; mimeType?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; }; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
         "lineNumber": 57,
@@ -1110,7 +1134,9 @@
           "\nA resource link returned as part of a tool call response.\nLinks are references to resources that can be fetched via resources/read."
         ],
         "signature": [
-          "any"
+          "{ audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
         "lineNumber": 50,
@@ -1127,7 +1153,11 @@
         "label": "ResourceLinkPart",
         "description": [],
         "signature": [
-          "any"
+          "{ uri: string; name: string; type: \"resource_link\"; description?: string | undefined; mimeType?: string | undefined; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; icons?: { src: string; mimeType?: string | undefined; sizes?: string[] | undefined; theme?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ light: \"light\"; dark: \"dark\"; }> | undefined; }[] | undefined; title?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
         "lineNumber": 55,
@@ -1146,7 +1176,9 @@
           "\nA text content as part of a tool call response."
         ],
         "signature": [
-          "any"
+          "{ type: \"text\"; text: string; annotations?: { audience?: ",
+          "node_modules/zod/v4/core/schemas",
+          "$InferEnumOutput<{ user: \"user\"; assistant: \"assistant\"; }>[] | undefined; priority?: number | undefined; lastModified?: string | undefined; } | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
         "lineNumber": 71,

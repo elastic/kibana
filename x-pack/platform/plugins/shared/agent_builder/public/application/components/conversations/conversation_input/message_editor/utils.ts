@@ -42,7 +42,16 @@ export const insertSpaceAfter = (node: Node, container: HTMLElement): Text => {
  */
 export const placeCursorAfter = (node: Node, sel: Selection): void => {
   const range = document.createRange();
-  range.setStartAfter(node);
+  if (node instanceof Text) {
+    /**
+     * (Firefox bug) For text nodes, collapse inside the node at the end of its data. That avoids
+     * a parent-boundary range when a sibling empty text node follows (common after
+     * Range mutations), which can paint the caret at the wrong horizontal position.
+     * */
+    range.setStart(node, node.length);
+  } else {
+    range.setStartAfter(node);
+  }
   range.collapse(true);
   sel.removeAllRanges();
   sel.addRange(range);

@@ -12,7 +12,7 @@ import { TestProviders } from '../../../common/mock';
 import { NodeDetailView } from './node_detail';
 import { useCubeAssets } from '../use_cube_assets';
 import { useLinkProps } from '../use_link_props';
-import type { ResolverCellActionRendererProps } from '../../types';
+import type { CellActionRendererProps } from '../../../flyout_v2/shared/components/cell_actions';
 
 const mockUseCubeAssets = useCubeAssets as jest.Mock;
 jest.mock('../use_cube_assets');
@@ -32,7 +32,7 @@ const processEvent = {
 };
 
 describe('<NodeDetailView />', () => {
-  const renderCellActions = jest.fn(({ children }: ResolverCellActionRendererProps) => children);
+  const renderCellActions = jest.fn(({ children }: CellActionRendererProps) => children);
 
   beforeEach(() => {
     jest.clearAllMocks();

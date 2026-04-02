@@ -41,6 +41,7 @@ export class WorkflowExecuteAsyncStrategy {
           spaceId,
           inputs,
           triggeredBy: 'workflow-step',
+          parentWorkflowInvocation: 'async',
           parentWorkflowId: workflowExecution.workflowId,
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,

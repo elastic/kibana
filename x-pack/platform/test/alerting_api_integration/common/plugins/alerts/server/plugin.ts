@@ -59,6 +59,7 @@ export interface FixtureStartDeps {
 const testRuleTypes = [
   'test.always-firing',
   'test.cumulative-firing',
+  'test.consumer-metrics',
   'test.never-firing',
   'test.failing',
   'test.authorization',

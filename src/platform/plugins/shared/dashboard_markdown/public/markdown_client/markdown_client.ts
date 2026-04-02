@@ -10,7 +10,7 @@
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 
-import type { MarkdownSearchRequestBody, MarkdownSearchResponseBody } from '../../server/api';
+import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from '../../server/api';
 import {
   MARKDOWN_API_PATH,
   MARKDOWN_API_VERSION,
@@ -32,13 +32,13 @@ export const markdownClient = {
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
-    return coreServices.http.delete(`${MARKDOWN_API_PATH}/${id}`, {
+    return coreServices.http.delete(`${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`, {
       version: MARKDOWN_API_VERSION,
     });
   },
   get: async (id: string): Promise<MarkdownReadResponseBody> => {
     const result = await coreServices.http
-      .get<MarkdownReadResponseBody>(`${MARKDOWN_API_PATH}/${id}`, {
+      .get<MarkdownReadResponseBody>(`${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`, {
         version: MARKDOWN_API_VERSION,
       })
       .catch((e) => {
@@ -50,18 +50,19 @@ export const markdownClient = {
       });
     return result;
   },
-  search: async (searchBody: MarkdownSearchRequestBody) => {
-    return await coreServices.http.post<MarkdownSearchResponseBody>(`${MARKDOWN_API_PATH}/search`, {
+  search: async (searchQuery: MarkdownSearchRequestQuery) => {
+    const { query, ...params } = searchQuery;
+    return await coreServices.http.post<MarkdownSearchResponseBody>(`${MARKDOWN_API_PATH}`, {
       version: MARKDOWN_API_VERSION,
-      body: JSON.stringify({
-        ...searchBody,
-        search: searchBody.search ? `${searchBody.search}*` : undefined,
-      }),
+      query: {
+        ...params,
+        ...(query ? { query: `${query}*` } : {}),
+      },
     });
   },
   update: async (id: string, markdownState: MarkdownAttributes) => {
     const updateResponse = await coreServices.http.put<MarkdownUpdateResponseBody>(
-      `${MARKDOWN_API_PATH}/${id}`,
+      `${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`,
       {
         version: MARKDOWN_API_VERSION,
         body: JSON.stringify(markdownState),

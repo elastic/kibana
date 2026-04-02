@@ -51,6 +51,15 @@ export function initRoutes(
       {
         path: `/authentication/app/${isAuthFlow ? 'auth_flow' : 'not_auth_flow'}`,
         security: {
+          ...(!isAuthFlow
+            ? {
+                authc: {
+                  enabled: false as const,
+                  reason:
+                    'This route is part of a security functional test plugin and does not require authentication.',
+                },
+              }
+            : {}),
           authz: {
             enabled: false,
             reason: 'This route is opted out from authorization',
@@ -62,7 +71,7 @@ export function initRoutes(
             message: schema.maybe(schema.string()),
           }),
         },
-        options: { tags: isAuthFlow ? [ROUTE_TAG_AUTH_FLOW] : [], authRequired: !isAuthFlow },
+        ...(isAuthFlow ? { options: { tags: [ROUTE_TAG_AUTH_FLOW] } } : {}),
       },
       (context, request, response) => {
         if (request.query.statusCode) {
@@ -81,13 +90,18 @@ export function initRoutes(
     {
       path: '/authentication/app/setup',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route is part of a security functional test plugin and does not require authentication.',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
       },
       validate: { body: schema.object({ simulateUnauthorized: schema.boolean() }) },
-      options: { authRequired: false, xsrfRequired: false },
+      options: { xsrfRequired: false },
     },
     (context, request, response) => {
       authenticationAppOptions.simulateUnauthorized = request.body.simulateUnauthorized;
@@ -366,13 +380,18 @@ export function initRoutes(
     {
       path: '/simulate_point_in_time_failure',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route is part of a security functional test plugin and does not require authentication.',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
       },
       validate: { body: schema.object({ simulateOpenPointInTimeFailure: schema.boolean() }) },
-      options: { authRequired: false, xsrfRequired: false },
+      options: { xsrfRequired: false },
     },
     async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client.asInternalUser;
@@ -412,13 +431,17 @@ export function initRoutes(
     {
       path: '/cleanup_task_status',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route is part of a security functional test plugin and does not require authentication.',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
       },
       validate: false,
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       const [, { taskManager }] = await core.getStartServices();

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { isChildOf, Streams, type IngestStreamSettings } from '@kbn/streams-schema';
+import {
+  isChildOf,
+  isInheritFailureStore,
+  isInheritLifecycle,
+  Streams,
+  type IngestStreamSettings,
+} from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import type { State } from '../state';
 import type { ValidationResult } from '../stream_active_record/stream_active_record';
@@ -31,6 +37,18 @@ export function computeChange({
   hasChanged,
 }: ComputeChangeOptions): boolean {
   return isExistingStream ? hasChanged() : hasMeaningfulValue;
+}
+
+export function classicIngestHasEsLevelChanges(
+  ingest: Streams.ClassicStream.UpsertRequest['stream']['ingest']
+) {
+  return (
+    (ingest.processing?.steps?.length ?? 0) > 0 ||
+    !isInheritLifecycle(ingest.lifecycle) ||
+    Object.keys(ingest.settings ?? {}).length > 0 ||
+    !isInheritFailureStore(ingest.failure_store) ||
+    (ingest.classic?.field_overrides && Object.keys(ingest.classic.field_overrides).length > 0)
+  );
 }
 
 export function formatSettings(settings: IngestStreamSettings, isServerless: boolean) {

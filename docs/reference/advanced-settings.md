@@ -541,7 +541,7 @@ $$$securitysolution-enablenewsfeed$$$`securitySolution:enableNewsFeed` {applies_
 $$$security-solution-exclude-cold-frozen-tiers-analyzer$$$`securitySolution:excludeColdAndFrozenTiersInAnalyzer` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Skips cold and frozen tiers in Analyzer's queries when activated. `false` by default.
 
-$$$security-solution-enable-graph-visualization$$$`securitySolution:enableGraphVisualization` {applies_to}`stack: preview` {applies_to}`security: preview`
+$$$security-solution-enable-graph-visualization$$$`securitySolution:enableGraphVisualization` {applies_to}`stack: removed 9.4, preview 9.1-9.3` {applies_to}`serverless: removed`
 :   Enables the Graph Visualization feature within the Security solution. `false` by default.
 
 $$$security-solution-enable-asset-inventory$$$`securitySolution:enableAssetInventory` {applies_to}`stack: preview` {applies_to}`security: preview`

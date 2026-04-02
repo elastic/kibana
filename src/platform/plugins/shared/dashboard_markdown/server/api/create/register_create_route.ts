@@ -9,6 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 import { create } from './create';
@@ -17,7 +18,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
     path: MARKDOWN_API_PATH,
-    summary: 'Create a markdown panel',
+    summary: 'Create a markdown library item',
     ...commonRouteConfig,
   });
 
@@ -29,8 +30,15 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
           body: createRequestBodySchema,
         },
         response: {
-          200: {
+          201: {
             body: () => createResponseBodySchema,
+            description: 'created',
+          },
+          400: {
+            description: 'invalid request',
+          },
+          403: {
+            description: 'forbidden',
           },
         },
       },
@@ -38,13 +46,13 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       try {
         const result = await create(ctx, req.body);
-        return res.ok({ body: result });
+        return res.created({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest({ body: e.message });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );

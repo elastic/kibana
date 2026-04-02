@@ -11,6 +11,7 @@ export const getGapsSummaryByRuleIdsBodySchema = schema.object(
     end: schema.string(),
     start: schema.string(),
     rule_ids: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    gap_auto_fill_scheduler_id: schema.maybe(schema.string()),
   },
   {
     validate({ start, end }) {

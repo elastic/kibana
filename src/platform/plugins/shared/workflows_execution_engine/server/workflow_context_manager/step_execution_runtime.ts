@@ -105,13 +105,11 @@ export class StepExecutionRuntime {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public getCurrentStepState(): Record<string, any> | undefined {
+  public getCurrentStepState(): Record<string, unknown> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setCurrentStepState(state: Record<string, any> | undefined): void {
+  public setCurrentStepState(state: Record<string, unknown> | undefined): void {
     const stepId = this.node.stepId;
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -135,8 +133,7 @@ export class StepExecutionRuntime {
     } as Partial<EsWorkflowStepExecution>;
 
     this.workflowExecutionState.upsertStep(stepExecution);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.logStepStart(stepId, stepExecution.id!);
+    this.logStepStart(stepId, this.stepExecutionId);
   }
 
   public setInput(input: Record<string, unknown>): void {
@@ -146,7 +143,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  public finishStep(stepOutput?: Record<string, unknown>): void {
+  public finishStep(stepOutput?: unknown): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,

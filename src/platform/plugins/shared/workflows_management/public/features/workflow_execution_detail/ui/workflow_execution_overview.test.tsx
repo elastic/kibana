@@ -116,7 +116,7 @@ describe('WorkflowExecutionOverview', () => {
         <WorkflowExecutionOverview stepExecution={stepExecution} />
       );
 
-      const beakerIcon = container.querySelector('[data-euiicon-type="beaker"]');
+      const beakerIcon = container.querySelector('[data-euiicon-type="flask"]');
       expect(beakerIcon).toBeInTheDocument();
     });
 
@@ -135,7 +135,7 @@ describe('WorkflowExecutionOverview', () => {
         <WorkflowExecutionOverview stepExecution={stepExecution} />
       );
 
-      const beakerIcon = container.querySelector('[data-euiicon-type="beaker"]');
+      const beakerIcon = container.querySelector('[data-euiicon-type="flask"]');
       expect(beakerIcon).not.toBeInTheDocument();
     });
 
@@ -147,7 +147,7 @@ describe('WorkflowExecutionOverview', () => {
         <WorkflowExecutionOverview stepExecution={stepExecution} />
       );
 
-      const beakerIcon = container.querySelector('[data-euiicon-type="beaker"]');
+      const beakerIcon = container.querySelector('[data-euiicon-type="flask"]');
       expect(beakerIcon).not.toBeInTheDocument();
     });
   });

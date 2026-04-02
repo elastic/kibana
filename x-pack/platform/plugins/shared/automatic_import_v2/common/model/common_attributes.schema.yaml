@@ -22,6 +22,7 @@ components:
             dataStreams:
               type: array
               description: The data streams of the integration
+              maxItems: 50
               items:
                 $ref: "#/components/schemas/DataStream"
             logo:
@@ -56,6 +57,7 @@ components:
             inputTypes:
               type: array
               description: The input types of the data stream
+              maxItems: 100
               items:
                 $ref: "#/components/schemas/InputType"
     OriginalSourceType:
@@ -136,6 +138,7 @@ components:
             inputTypes:
               type: array
               description: The input types of the data stream
+              maxItems: 100
               items:
                 $ref: "#/components/schemas/InputType"
             status:

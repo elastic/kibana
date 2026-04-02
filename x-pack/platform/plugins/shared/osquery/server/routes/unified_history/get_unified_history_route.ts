@@ -75,6 +75,9 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               startDate: schema.maybe(schema.string()),
               endDate: schema.maybe(schema.string()),
               tags: schema.maybe(schema.string()),
+              sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                defaultValue: 'desc',
+              }),
             }),
           },
         },
@@ -97,6 +100,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             startDate,
             endDate,
             tags: tagsRaw,
+            sortDirection,
           } = request.query;
 
           const decoded = decodeCursor(nextPage);
@@ -152,6 +156,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
+                activeFilters,
               })
             : undefined;
 
@@ -167,6 +173,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
               })
             : undefined;
 
@@ -211,7 +218,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             spaceId,
-            activeFilters,
             logger,
           });
 
@@ -229,7 +235,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             filteredLiveRows,
             allScheduledRows,
             pageSize,
-            scheduledOffset
+            scheduledOffset,
+            sortDirection
           );
 
           const { nextActionSearchAfter, nextScheduledCursor, nextScheduledOffset } =

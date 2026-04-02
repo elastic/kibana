@@ -19,6 +19,7 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { buildEntityNameFilter, EntityType } from '../../../../common/search_strategy';
+import type { ESQuery } from '../../../../common/typed_json';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
@@ -33,12 +34,51 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
+const buildFilterQueryFromIdentityFields = (
+  identityFields?: Record<string, string>
+): ESQuery | undefined => {
+  if (identityFields == null) {
+    return undefined;
+  }
+  const clauses: ESQuery[] = Object.entries(identityFields)
+    .filter(([, fieldValue]) => typeof fieldValue === 'string' && fieldValue.trim() !== '')
+    .map(
+      ([fieldKey, fieldValue]) =>
+        ({
+          match: {
+            [fieldKey]: {
+              query: fieldValue,
+              type: 'phrase',
+            },
+          },
+        } as ESQuery)
+    );
+  if (clauses.length === 0) {
+    return undefined;
+  }
+  if (clauses.length === 1) {
+    return clauses[0];
+  }
+  return { bool: { filter: clauses } } as ESQuery;
+};
+
 const RiskDetailsTabBodyComponent: React.FC<
   Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
     riskEntity: EntityType;
+    identityScopedFilterQuery?: string;
+    identityFields?: Record<string, string>;
   }
-> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
+> = ({
+  entityName,
+  startDate,
+  endDate,
+  setQuery,
+  deleteQuery,
+  riskEntity,
+  identityScopedFilterQuery,
+  identityFields,
+}) => {
   const queryId = useMemo(
     () =>
       riskEntity === EntityType.host
@@ -64,10 +104,16 @@ const RiskDetailsTabBodyComponent: React.FC<
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${queryId} contributors`);
 
-  const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
-    [entityName, riskEntity]
-  );
+  const filterQuery = useMemo(() => {
+    if (identityScopedFilterQuery) {
+      return identityScopedFilterQuery;
+    }
+    const identityFieldsQuery = buildFilterQueryFromIdentityFields(identityFields);
+    if (identityFieldsQuery !== undefined) {
+      return identityFieldsQuery;
+    }
+    return entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {};
+  }, [entityName, identityFields, identityScopedFilterQuery, riskEntity]);
 
   const { data, loading, refetch, inspect, hasEngineBeenInstalled } = useRiskScore({
     filterQuery,

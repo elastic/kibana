@@ -23,6 +23,7 @@ import { EngineDescriptorType, EntityStoreGlobalStateType } from './domain/saved
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud';
+import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
 
@@ -113,6 +114,8 @@ export class EntityStorePlugin
     const logger = this.logger;
     return {
       createCRUDClient: (esClient, namespace) => new CRUDClient({ logger, esClient, namespace }),
+      createResolutionClient: (esClient, namespace) =>
+        new ResolutionClient({ logger, esClient, namespace }),
     };
   }
 

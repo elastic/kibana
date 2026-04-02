@@ -70,7 +70,7 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
-        "lineNumber": 112,
+        "lineNumber": 113,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11051,7 +11051,7 @@
           "<...>"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
-        "lineNumber": 134,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22679,7 +22679,7 @@
           "<...> : never : never : never; }[P][]) | undefined; }[P] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
-        "lineNumber": 121,
+        "lineNumber": 122,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22800,7 +22800,7 @@
           " | MappingPropertyObjectType"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -22819,7 +22819,7 @@
           ", \"properties\"> & { properties: Record<string, S>; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
-        "lineNumber": 114,
+        "lineNumber": 115,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -23010,7 +23010,7 @@
           "<O[\"properties\"][K]> : never : never : never; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
-        "lineNumber": 68,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

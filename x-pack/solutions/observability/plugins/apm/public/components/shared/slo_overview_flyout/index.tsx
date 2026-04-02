@@ -389,7 +389,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 fontWeight: euiTheme.font.weight.regular,
               }}
             >
-              <EuiIcon type="expand" color="subdued" aria-hidden={true} />
+              <EuiIcon type="maximize" color="subdued" aria-hidden={true} />
               {name}
             </EuiLink>
           </EuiToolTip>

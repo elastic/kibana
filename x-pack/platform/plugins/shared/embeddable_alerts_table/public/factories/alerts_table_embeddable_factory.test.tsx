@@ -8,7 +8,7 @@
 // Write a test that verifies that the `AlertsTableEmbeddable` component renders the `AlertsTable` component with the correct props.
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
@@ -67,6 +67,10 @@ describe('getEmbeddableAlertsTableFactory', () => {
     parentApi: {} as any,
   };
 
+  beforeEach(() => {
+    mockEmbeddableAlertsTable.mockClear();
+  });
+
   it('should render AlertsTable with the correct props', async () => {
     const { Component, api } = await factory.buildEmbeddable(embeddableParams);
 
@@ -91,5 +95,49 @@ describe('getEmbeddableAlertsTableFactory', () => {
     const { api } = await factory.buildEmbeddable(embeddableParams);
 
     expect(api.isEditingEnabled()).toBeFalsy();
+  });
+
+  it('should restore the saved query after a user edits the panel config and resets changes', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+    const updatedQuery = {
+      type: 'alertsFilters' as const,
+      filters: [{ filter: { field: 'kibana.alert.rule.name', value: 'updated' } }],
+    };
+
+    render(<Component />);
+
+    // simulate the user applying a new query to the panel
+    await act(async () => {
+      await api.applySerializedState({
+        ...embeddableParams.initialState,
+        tableConfig: {
+          solution: 'observability',
+          query: updatedQuery,
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: updatedQuery,
+        }),
+        {}
+      );
+    });
+
+    // simulate the user resetting the changes
+    await act(async () => {
+      await api.applySerializedState(embeddableParams.initialState);
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: embeddableParams.initialState.tableConfig.query,
+        }),
+        {}
+      );
+    });
   });
 });

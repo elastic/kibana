@@ -65,20 +65,6 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME entity.sub_type = _source_sub_type
 | RENAME host.ip = _source_host_ip`;
 
-  // The ecsParentField hint is needed to later query actions done TO this entity
-  // (e.g., to find events where this entity is the target).
-  //
-  // Currently we only query the generic entities index which uses entity.id,
-  // so ecsParentField is always 'entity'.
-  //
-  // When entity-specific indices are added (user, host, service), we would use
-  // generateFieldHintCases similar to actorEntityFieldHint/targetEntityFieldHint to detect:
-  // - user.entity.id -> ecsParentField: 'user'
-  // - host.entity.id -> ecsParentField: 'host'
-  // - service.entity.id -> ecsParentField: 'service'
-  // - entity.id -> ecsParentField: 'entity'
-  const ecsParentFieldValue = 'entity';
-
   return `FROM ${indexName}
 ${coalesceStatements}
 | FORK
@@ -88,7 +74,6 @@ ${enrichmentSection}
 // Build enriched actors doc data with entity metadata (from the queried entity)
 | EVAL actorDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
     "\\"availableInEntityStore\\":true",
-    ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
     ${formatJsonProperty('name', 'entity.name')},
     ${formatJsonProperty('type', 'entity.type')},
     ${formatJsonProperty('sub_type', 'entity.sub_type')},
@@ -97,11 +82,11 @@ ${enrichmentSection}
       CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(host.ip), "\\"", "}"),
       ""
     ),
+    ",\\"sourceFields\\":{\\"entity.id\\":\\"", entity.id, "\\"}",
   "}}")
 // Build enriched targets doc data with entity metadata
 | EVAL targetDocData = CONCAT("{\\"id\\":\\"", _target_id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
     "\\"availableInEntityStore\\":", CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false"),
-    ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
     ${formatJsonProperty('name', '_target_name')},
     ${formatJsonProperty('type', '_target_type')},
     ${formatJsonProperty('sub_type', '_target_sub_type')},
@@ -110,6 +95,7 @@ ${enrichmentSection}
       CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"", "}"),
       ""
     ),
+    ",\\"sourceFields\\":{\\"entity.id\\":\\"", _target_id, "\\"}",
   "}}")
 // Group by actor entity, relationship, and target type/subtype (for target grouping)
 // This ensures targets with the same type are grouped together

@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, timePicker } = getPageObjects(['common', 'timePicker']);
+  const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display request stats with no results', async () => {
-      await inspector.open();
+      await discover.openInspectorFromTabMenu();
       let foundZero = false;
       for (const subj of ['Documents', 'Data']) {
         await testSubjects.click('inspectorRequestChooser');
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display request stats with results', async () => {
       await timePicker.setDefaultAbsoluteRange();
-      await inspector.open();
+      await discover.openInspectorFromTabMenu();
       await testSubjects.click('inspectorRequestChooser');
       await testSubjects.click(`inspectorRequestChooserDocuments`);
       await testSubjects.click(`inspectorRequestDetailStatistics`);

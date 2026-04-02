@@ -90,7 +90,6 @@ export const apmRuleTypeAlertFieldMap = {
   },
 };
 
-// Defines which alerts-as-data index alerts will use
 export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityApmAlert> = {
   context: APM_RULE_TYPE_ALERT_CONTEXT,
   mappings: {

@@ -64,6 +64,14 @@ export function getInitialAppState({
     mergedState.hideChart = undefined;
   }
 
+  if (typeof mergedState.hideTable !== 'boolean') {
+    mergedState.hideTable = undefined;
+  }
+
+  if (mergedState.hideChart && mergedState.hideTable) {
+    mergedState.hideTable = false;
+  }
+
   // Don't allow URL state to overwrite the data source if there's an ES|QL query
   if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
     mergedState.dataSource = createEsqlDataSource();
@@ -195,6 +203,9 @@ function getDefaultAppState({
   }
   if (persistedTab?.hideChart !== undefined) {
     defaultState.hideChart = persistedTab.hideChart;
+  }
+  if (persistedTab?.hideTable !== undefined) {
+    defaultState.hideTable = persistedTab.hideTable;
   }
   if (persistedTab?.rowHeight !== undefined) {
     defaultState.rowHeight = persistedTab.rowHeight;

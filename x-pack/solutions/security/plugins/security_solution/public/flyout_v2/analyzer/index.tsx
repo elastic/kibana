@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { PREFIX } from '../../flyout/shared/test_ids';
 import { PageScope } from '../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
@@ -14,7 +15,6 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useTimelineDataFilters } from '../../timelines/containers/use_timeline_data_filters';
 import { Resolver } from '../../resolver/view';
-import type { ResolverCellActionRenderer } from '../../resolver/types';
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
 
@@ -26,7 +26,7 @@ export interface AnalyzerGraphProps {
   /**
    * A function that renders cell actions for the analyzer graph.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 const RESOLVER_COMPONENT_INSTANCE_ID = 'flyout_v2_analyzer_graph';

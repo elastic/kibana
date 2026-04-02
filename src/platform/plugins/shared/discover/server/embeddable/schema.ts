@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { ObjectType, Props, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DataGridDensity } from '@kbn/discover-utils';
-import { aggregateQuerySchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import { aggregateQuerySchema, querySchema } from '@kbn/es-query-server';
+import {
+  BY_REF_SCHEMA_META,
+  BY_VALUE_SCHEMA_META,
+  serializedTitlesSchema,
+  serializedTimeRangeSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { runtimeFieldSchema } from '@kbn/as-code-data-views-schema';
+import { dataViewSchema } from '@kbn/as-code-data-views-schema';
+import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-const columnSchema = schema.object({
-  name: schema.string({
-    meta: {
-      description: 'The name of the field to display in the data table.',
-    },
-  }),
+const columnSettingsEntrySchema = schema.object({
   width: schema.maybe(
     schema.number({
       min: 0,
@@ -46,83 +48,33 @@ const sortSchema = schema.object({
   }),
 });
 
-/**
- * TODO: These are duplicated from the Lens embeddable schema. We should move these to a shared location.
- * @see datasetTypeSchema
- */
-export const dataViewReferenceSchema = schema.object(
+export const viewModeSchema = schema.oneOf(
+  [
+    schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+    schema.literal(VIEW_MODE.PATTERN_LEVEL),
+    schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+  ],
   {
-    type: schema.literal('dataView'),
-    /**
-     * The name of the Kibana data view to use as the data source.
-     * Example: 'my-data-view'
-     */
-    id: schema.string({
-      meta: {
-        description:
-          'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
-      },
-    }),
-  },
-  { meta: { id: 'dataViewDatasetTypeSchema' } }
+    defaultValue: VIEW_MODE.DOCUMENT_LEVEL,
+    meta: {
+      description:
+        'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
+    },
+  }
 );
-
-export const dataViewSpecSchema = schema.object(
-  {
-    type: schema.literal('index'),
-    /**
-     * The name of the Elasticsearch index to use as the data source.
-     * Example: 'my-index-*'
-     */
-    index: schema.string({
-      meta: {
-        description:
-          'The name of the Elasticsearch index to use as the data source. Example: "my-index-*".',
-      },
-    }),
-    /**
-     * The name of the time field in the index. Used for time-based filtering.
-     * Example: '@timestamp'
-     */
-    time_field: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
-        },
-      })
-    ),
-    /**
-     * Optional array of runtime fields to define on the index. Each runtime field describes a computed field available at query time.
-     * If not provided, no runtime fields are used.
-     */
-    runtime_fields: schema.maybe(schema.arrayOf(runtimeFieldSchema, { maxSize: 100 })),
-  },
-  { meta: { id: 'indexDatasetTypeSchema' } }
-);
-
-export const dataViewSchema = schema.oneOf([dataViewReferenceSchema, dataViewSpecSchema]);
 
 const dataTableLimitsSchema = schema.object(
   {
     rows_per_page: schema.maybe(
-      schema.oneOf(
-        [
-          schema.literal(10),
-          schema.literal(25),
-          schema.literal(50),
-          schema.literal(100),
-          schema.literal(250),
-          schema.literal(500),
-        ],
-        {
-          defaultValue: 100,
-          meta: {
-            description:
-              'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".',
-          },
-        }
-      )
+      schema.number({
+        min: 1,
+        max: 10000,
+        defaultValue: 100,
+        meta: {
+          description:
+            'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".',
+        },
+      })
     ),
     sample_size: schema.maybe(
       schema.number({
@@ -141,13 +93,28 @@ const dataTableLimitsSchema = schema.object(
 
 const dataTableSchema = schema.object(
   {
-    columns: schema.maybe(
-      schema.arrayOf(columnSchema, {
-        maxSize: 100,
-        defaultValue: [],
+    column_order: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          meta: {
+            description: 'Field name of a column in display order.',
+          },
+        }),
+        {
+          maxSize: 100,
+          defaultValue: [],
+          meta: {
+            description:
+              'Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.',
+          },
+        }
+      )
+    ),
+    column_settings: schema.maybe(
+      schema.recordOf(schema.string(), columnSettingsEntrySchema, {
         meta: {
           description:
-            'List of columns to display in the data table. If omitted, defaults to the advanced setting "defaultColumns".',
+            'Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.',
         },
       })
     ),
@@ -158,47 +125,39 @@ const dataTableSchema = schema.object(
         description: 'Sort configuration for the data table (field and direction).',
       },
     }),
-    view_mode: schema.oneOf(
-      [
-        schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
-        schema.literal(VIEW_MODE.PATTERN_LEVEL),
-        schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
-      ],
-      {
-        defaultValue: VIEW_MODE.DOCUMENT_LEVEL,
-        meta: {
-          description:
-            'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
-        },
-      }
+    density: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(DataGridDensity.COMPACT),
+          schema.literal(DataGridDensity.EXPANDED),
+          schema.literal(DataGridDensity.NORMAL),
+        ],
+        {
+          defaultValue: DataGridDensity.COMPACT,
+          meta: {
+            description:
+              'Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
+          },
+        }
+      )
     ),
-    density: schema.oneOf(
-      [
-        schema.literal(DataGridDensity.COMPACT),
-        schema.literal(DataGridDensity.EXPANDED),
-        schema.literal(DataGridDensity.NORMAL),
-      ],
-      {
-        defaultValue: DataGridDensity.COMPACT,
-        meta: {
-          description:
-            'Data grid density. Choose "compact", "expanded", or "normal" for row spacing.',
-        },
-      }
-    ),
-    header_row_height: schema.oneOf(
-      [
-        schema.number({
-          min: 1,
-          max: 5,
-        }),
-        schema.literal('auto'),
-      ],
-      {
-        meta: {
-          description: 'Header row height. Use a number (1–5) or "auto" to size based on content.',
-        },
-      }
+    header_row_height: schema.maybe(
+      schema.oneOf(
+        [
+          schema.number({
+            min: 1,
+            max: 5,
+          }),
+          schema.literal('auto'),
+        ],
+        {
+          defaultValue: 3,
+          meta: {
+            description:
+              'Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).',
+          },
+        }
+      )
     ),
     row_height: schema.maybe(
       schema.oneOf(
@@ -222,6 +181,121 @@ const dataTableSchema = schema.object(
   { meta: { id: 'discoverSessionEmbeddableDataTableSchema' } }
 );
 
+const panelOverridesSchema = schema.object(
+  {
+    column_order: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          meta: {
+            description: 'Field name of a column in display order.',
+          },
+        }),
+        {
+          maxSize: 100,
+          defaultValue: [],
+          meta: {
+            description:
+              'When set, overrides column order for the data table relative to the referenced saved object (`discover_session_id`) or the inline tab in `tabs`. If omitted, the source configuration is used.',
+          },
+        }
+      )
+    ),
+    column_settings: schema.maybe(
+      schema.recordOf(schema.string(), columnSettingsEntrySchema, {
+        meta: {
+          description:
+            'Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.',
+        },
+      })
+    ),
+    sort: schema.maybe(
+      schema.arrayOf(sortSchema, {
+        maxSize: 100,
+        defaultValue: [],
+        meta: {
+          description:
+            'Sort configuration (field and direction) for the data table. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+        },
+      })
+    ),
+    density: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(DataGridDensity.COMPACT),
+          schema.literal(DataGridDensity.EXPANDED),
+          schema.literal(DataGridDensity.NORMAL),
+        ],
+        {
+          defaultValue: DataGridDensity.COMPACT,
+          meta: {
+            description:
+              'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          },
+        }
+      )
+    ),
+    header_row_height: schema.maybe(
+      schema.oneOf(
+        [
+          schema.number({
+            min: 1,
+            max: 5,
+          }),
+          schema.literal('auto'),
+        ],
+        {
+          defaultValue: 3,
+          meta: {
+            description:
+              'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          },
+        }
+      )
+    ),
+    row_height: schema.maybe(
+      schema.oneOf(
+        [
+          schema.number({
+            min: 1,
+            max: 20,
+          }),
+          schema.literal('auto'),
+        ],
+        {
+          defaultValue: 3,
+          meta: {
+            description:
+              'Data row height: number (1–20) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
+          },
+        }
+      )
+    ),
+    rows_per_page: schema.maybe(
+      schema.number({
+        min: 1,
+        max: 10000,
+        defaultValue: 100,
+        meta: {
+          description:
+            'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".',
+        },
+      })
+    ),
+    sample_size: schema.maybe(
+      schema.number({
+        min: 10,
+        max: 10000,
+        defaultValue: 500,
+        meta: {
+          description:
+            'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
+        },
+      })
+    ),
+  },
+  { defaultValue: {} }
+);
+
 const classicTabSchema = schema.allOf([
   dataTableSchema,
   dataTableLimitsSchema,
@@ -234,7 +308,8 @@ const classicTabSchema = schema.allOf([
         description: 'List of filters to apply to the data in the tab.',
       },
     }),
-    dataset: dataViewSchema,
+    data_source: dataViewSchema,
+    view_mode: viewModeSchema,
   }),
 ]);
 
@@ -252,43 +327,77 @@ const esqlTabSchema = schema.allOf([
 
 const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
 
-const discoverSessionBaseEmbeddableSchema = serializedTitlesSchema.extends({
-  timeRange: schema.maybe(timeRangeSchema), // Waiting on https://github.com/elastic/kibana/pull/253789
-});
+const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
-const discoverSessionByValueEmbeddableSchema = discoverSessionBaseEmbeddableSchema.extends({
-  tabs: schema.arrayOf(tabSchema, {
-    minSize: 1,
-    maxSize: 1,
-    meta: {
-      description: 'Array of tabs for the Discover session embeddable. Currently supports one tab.',
-    },
-  }),
-});
+/**
+ * Intersects embeddable-only props with panel-level schemas normally merged by the host
+ * (e.g. dashboard): serialized titles, time range, and drilldowns.
+ */
+function withPanelSchemas<P extends Props>(
+  embeddableSchema: ObjectType<P>,
+  allOfOptions?: { meta: typeof BY_VALUE_SCHEMA_META | typeof BY_REF_SCHEMA_META }
+) {
+  return (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+    schema.allOf(
+      [
+        serializedTitlesSchema,
+        serializedTimeRangeSchema,
+        getDrilldownsSchema(DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS),
+        embeddableSchema,
+      ],
+      allOfOptions ?? {}
+    );
+}
 
-const discoverSessionByReferenceEmbeddableSchema = discoverSessionBaseEmbeddableSchema.extends({
-  discover_session_id: schema.string(),
-  selected_tab_id: schema.maybe(
-    schema.string({
+const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
+  schema.object({
+    tabs: schema.arrayOf(tabSchema, {
+      minSize: 1,
+      maxSize: 1,
       meta: {
         description:
-          'The selected tab in the Discover session. If omitted, defaults to the first tab.',
+          'Inline tab configuration. Used when no `discover_session_id` is set. Currently supports one tab.',
       },
-    })
-  ),
-});
+    }),
+  }),
+  { meta: BY_VALUE_SCHEMA_META }
+);
 
-export const discoverSessionEmbeddableSchema = schema.oneOf([
-  discoverSessionByValueEmbeddableSchema,
-  discoverSessionByReferenceEmbeddableSchema,
-]);
+const getDiscoverSessionByReferenceEmbeddableSchema = withPanelSchemas(
+  schema.object({
+    discover_session_id: schema.string(),
+    selected_tab_id: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
+        },
+      })
+    ),
+    overrides: panelOverridesSchema,
+  }),
+  { meta: BY_REF_SCHEMA_META }
+);
+
+export const getDiscoverSessionEmbeddableSchema = (
+  getDrilldownsSchema: GetDrilldownsSchemaFnType
+) =>
+  schema.oneOf([
+    getDiscoverSessionByValueEmbeddableSchema(getDrilldownsSchema),
+    getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
+  ]);
+
+export type DiscoverSessionPanelOverrides = TypeOf<typeof panelOverridesSchema>;
+export type DiscoverSessionClassicTab = TypeOf<typeof classicTabSchema>;
+export type DiscoverSessionEsqlTab = TypeOf<typeof esqlTabSchema>;
+export type DiscoverSessionTab = TypeOf<typeof tabSchema>;
 
 export type DiscoverSessionEmbeddableByValueState = TypeOf<
-  typeof discoverSessionByValueEmbeddableSchema
+  ReturnType<typeof getDiscoverSessionByValueEmbeddableSchema>
 >;
 export type DiscoverSessionEmbeddableByReferenceState = TypeOf<
-  typeof discoverSessionByReferenceEmbeddableSchema
+  ReturnType<typeof getDiscoverSessionByReferenceEmbeddableSchema>
 >;
-export type DiscoverSessionEmbeddableState =
-  | DiscoverSessionEmbeddableByValueState
-  | DiscoverSessionEmbeddableByReferenceState;
+export type DiscoverSessionEmbeddableState = TypeOf<
+  ReturnType<typeof getDiscoverSessionEmbeddableSchema>
+>;

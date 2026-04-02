@@ -15,7 +15,7 @@ export function NewChatButton(
   return !props.collapsed ? (
     <EuiButton
       data-test-subj="observabilityAiAssistantNewChatButton"
-      iconType="newChat"
+      iconType="plusCircle"
       {...nextProps}
     >
       {i18n.translate('xpack.aiAssistant.newChatButton', {
@@ -25,7 +25,7 @@ export function NewChatButton(
   ) : (
     <EuiButtonIcon
       data-test-subj="observabilityAiAssistantNewChatButton"
-      iconType="newChat"
+      iconType="plusCircle"
       size="xs"
       {...nextProps}
     />

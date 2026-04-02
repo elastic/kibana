@@ -9,6 +9,8 @@ import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import { useSecuritySolutionNavigation } from './use_security_solution_navigation';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 
 const mockUseBreadcrumbsNav = jest.fn();
 jest.mock('../breadcrumbs', () => ({
@@ -21,10 +23,15 @@ jest.mock('../security_side_nav', () => ({
 }));
 
 const mockGetChromeStyle$ = jest.fn().mockReturnValue(of('classic'));
+
+const mockServices: Record<string, unknown> = {
+  chrome: { getChromeStyle$: () => mockGetChromeStyle$() },
+};
+
 jest.mock('../../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
-      services: { chrome: { getChromeStyle$: () => mockGetChromeStyle$() } },
+      services: mockServices,
     }),
   };
 });
@@ -82,6 +89,51 @@ describe('Security Solution Navigation', () => {
     it('should initialize breadcrumbs', () => {
       renderHook(useSecuritySolutionNavigation);
       expect(mockUseBreadcrumbsNav).toHaveBeenCalled();
+    });
+
+    describe('solution view switch callout', () => {
+      const mockNotifications = notificationServiceMock.createStartContract();
+      const mockApplication = applicationServiceMock.createStartContract();
+      const mockSpaces = spacesPluginMock.createStartContract();
+
+      beforeEach(() => {
+        mockNotifications.tours.isEnabled.mockReturnValue(true);
+        mockApplication.capabilities = {
+          ...mockApplication.capabilities,
+          spaces: { manage: true },
+        };
+        Object.assign(mockServices, {
+          chrome: { getChromeStyle$: () => mockGetChromeStyle$() },
+          notifications: mockNotifications,
+          application: mockApplication,
+          spaces: mockSpaces,
+        });
+      });
+
+      it('includes footer with SolutionViewSwitchCallout when all conditions are met', () => {
+        const { result } = renderHook(useSecuritySolutionNavigation);
+        expect(result.current?.footer).toBeDefined();
+        expect(result.current?.hasPinnedBottomNavItems).toBe(true);
+      });
+
+      it('does not include footer when announcements are disabled', () => {
+        mockNotifications.tours.isEnabled.mockReturnValue(false);
+
+        const { result } = renderHook(useSecuritySolutionNavigation);
+        expect(result.current?.footer).toBeUndefined();
+        expect(result.current?.hasPinnedBottomNavItems).toBeUndefined();
+      });
+
+      it('does not include footer when canManageSpaces is false', () => {
+        mockApplication.capabilities = {
+          ...mockApplication.capabilities,
+          spaces: { manage: false },
+        };
+
+        const { result } = renderHook(useSecuritySolutionNavigation);
+        expect(result.current?.footer).toBeUndefined();
+        expect(result.current?.hasPinnedBottomNavItems).toBeUndefined();
+      });
     });
   });
 

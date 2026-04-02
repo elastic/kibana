@@ -34,10 +34,11 @@ import {
   buildGeoPointExistsQuery,
   normalizeGeoPointsInObject,
   rebuildGeoPointsFromFlattened,
-  collectFieldsWithGeoPoints,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
-
-const UNMAPPED_SAMPLE_SIZE = 500;
+import {
+  getUnmappedFields,
+  UNMAPPED_SAMPLE_SIZE,
+} from '../../../../lib/streams/helpers/unmapped_fields';
 const FIELD_SIMULATION_TIMEOUT = '1s';
 
 const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
@@ -90,71 +91,17 @@ export const unmappedFieldsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<{ unmappedFields: string[] }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const searchBody = {
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc' as const,
-          },
-        },
-      ],
-      size: UNMAPPED_SAMPLE_SIZE,
-    };
-
-    const [streamDefinition, ancestors, results] = await Promise.all([
+    const [definition, ancestors, sampleDocs] = await Promise.all([
       streamsClient.getStream(params.path.name),
       streamsClient.getAncestors(params.path.name),
       scopedClusterClient.asCurrentUser.search({
         index: params.path.name,
-        ...searchBody,
+        sort: [{ '@timestamp': { order: 'desc' as const } }],
+        size: UNMAPPED_SAMPLE_SIZE,
       }),
     ]);
 
-    const sourceFields = new Set<string>();
-
-    results.hits.hits.forEach((hit) => {
-      Object.keys(getFlattenedObject(hit._source as Record<string, unknown>)).forEach((field) => {
-        sourceFields.add(field);
-      });
-    });
-
-    // Mapped fields from the stream's definition and inherited from ancestors
-    const mappedFields = new Set<string>();
-    const geoPointFields = new Set<string>();
-
-    if (Streams.ClassicStream.Definition.is(streamDefinition)) {
-      collectFieldsWithGeoPoints(
-        streamDefinition.ingest.classic.field_overrides || {},
-        mappedFields,
-        geoPointFields
-      );
-    }
-
-    if (Streams.WiredStream.Definition.is(streamDefinition)) {
-      collectFieldsWithGeoPoints(
-        streamDefinition.ingest.wired.fields,
-        mappedFields,
-        geoPointFields
-      );
-    }
-
-    for (const ancestor of ancestors) {
-      collectFieldsWithGeoPoints(ancestor.ingest.wired.fields, mappedFields, geoPointFields);
-    }
-
-    const unmappedFields = Array.from(sourceFields)
-      .filter((field) => {
-        if (mappedFields.has(field)) return false;
-
-        const latMatch = field.match(/^(.+)\.lat$/);
-        const lonMatch = field.match(/^(.+)\.lon$/);
-
-        if (latMatch && geoPointFields.has(latMatch[1])) return false;
-        if (lonMatch && geoPointFields.has(lonMatch[1])) return false;
-
-        return true;
-      })
-      .sort();
+    const unmappedFields = getUnmappedFields({ definition, ancestors, sampleDocs });
 
     return { unmappedFields };
   },
@@ -187,11 +134,14 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     simulationError: string | null;
     documentsWithRuntimeFieldsApplied: DocumentWithIgnoredFields[] | null;
   }> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
 
     if (!read) {
@@ -352,11 +302,14 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
 
     if (!read) {

@@ -6,104 +6,43 @@
  */
 
 import { Route, Routes } from '@kbn/shared-ux-router';
-import React from 'react';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { AgentBuilderAgentsCreate } from './pages/agent_create';
-import { AgentBuilderAgentsEdit } from './pages/agent_edit';
-import { AgentBuilderAgentsPage } from './pages/agents';
-import { AgentBuilderConversationsPage } from './pages/conversations';
-import { AgentBuilderToolCreatePage } from './pages/tool_create';
-import { AgentBuilderToolDetailsPage } from './pages/tool_details';
-import { AgentBuilderToolsPage } from './pages/tools';
-import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
-import { AgentBuilderSkillsPage } from './pages/skills';
-import { AgentBuilderSkillCreatePage } from './pages/skill_create';
-import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
-import { AgentBuilderPluginsPage } from './pages/plugins';
-import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
-import { useExperimentalFeatures } from './hooks/use_experimental_features';
-import { useKibana } from './hooks/use_kibana';
-import { AgentBuilderConnectorsPage } from './pages/connectors';
+import React, { useMemo } from 'react';
+
+import { AppLayout } from './components/layout/app_layout';
+import { RootRedirect } from './components/redirects/root_redirect';
+import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
+import { getEnabledRoutes } from './route_config';
+import { useFeatureFlags } from './hooks/use_feature_flags';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const isConnectorsEnabled = uiSettings.get<boolean>(
-    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
-    false
-  );
+  const featureFlags = useFeatureFlags();
+
+  const enabledRoutes = useMemo(() => getEnabledRoutes(featureFlags), [featureFlags]);
 
   return (
-    <Routes>
-      <Route path="/conversations/:conversationId">
-        <AgentBuilderConversationsPage />
-      </Route>
+    <AppLayout>
+      <Routes>
+        {enabledRoutes.map((route) => (
+          <Route key={route.path} path={route.path} exact>
+            {route.element}
+          </Route>
+        ))}
 
-      <Route path="/agents/new">
-        <AgentBuilderAgentsCreate />
-      </Route>
-
-      <Route path="/agents/:agentId">
-        <AgentBuilderAgentsEdit />
-      </Route>
-
-      <Route path="/agents">
-        <AgentBuilderAgentsPage />
-      </Route>
-
-      <Route path="/tools/new">
-        <AgentBuilderToolCreatePage />
-      </Route>
-
-      <Route path="/tools/bulk_import_mcp">
-        <AgentBuilderBulkImportMcpToolsPage />
-      </Route>
-
-      <Route path="/tools/:toolId">
-        <AgentBuilderToolDetailsPage />
-      </Route>
-
-      <Route path="/tools">
-        <AgentBuilderToolsPage />
-      </Route>
-
-      {isConnectorsEnabled ? (
-        <Route path="/connectors">
-          <AgentBuilderConnectorsPage />
+        {/* Legacy routes - redirect to new structure */}
+        <Route path="/conversations/:conversationId">
+          <LegacyConversationRedirect />
         </Route>
-      ) : null}
 
-      {isExperimentalFeaturesEnabled
-        ? [
-            <Route key="skill-create" path="/skills/new">
-              <AgentBuilderSkillCreatePage />
-            </Route>,
-            <Route key="skill-details" path="/skills/:skillId">
-              <AgentBuilderSkillDetailsPage />
-            </Route>,
-            <Route key="skills-list" path="/skills">
-              <AgentBuilderSkillsPage />
-            </Route>,
-          ]
-        : null}
+        {/* Redirect /agents to /agents/:lastAgentId */}
+        <Route path="/agents" exact>
+          <RootRedirect />
+        </Route>
 
-      {isExperimentalFeaturesEnabled
-        ? [
-            <Route key="plugin-details" path="/plugins/:pluginId">
-              <AgentBuilderPluginDetailsPage />
-            </Route>,
-            <Route key="plugins-list" path="/plugins">
-              <AgentBuilderPluginsPage />
-            </Route>,
-          ]
-        : null}
-
-      {/* Default to conversations page */}
-      <Route path="/">
-        <AgentBuilderConversationsPage />
-      </Route>
-    </Routes>
+        {/* Root route - redirect to last used agent */}
+        <Route path="/" exact>
+          <RootRedirect />
+        </Route>
+      </Routes>
+    </AppLayout>
   );
 };

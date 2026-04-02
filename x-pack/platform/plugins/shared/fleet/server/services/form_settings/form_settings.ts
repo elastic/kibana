@@ -10,7 +10,7 @@ import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
 import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
-import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../common/settings';
+import { getAgentPolicyAdvancedSettings } from '../../../common/settings';
 import type { AgentPolicy } from '../../types';
 
 export function getSettingsAPISchema(settingSection: SettingsSection) {
@@ -91,7 +91,7 @@ function convertValue(val: any, type?: string) {
 
 export function getSettings(settingSection: SettingsSection) {
   if (settingSection === 'AGENT_POLICY_ADVANCED_SETTINGS') {
-    return AGENT_POLICY_ADVANCED_SETTINGS;
+    return getAgentPolicyAdvancedSettings();
   }
 
   throw new Error(`Invalid settings section ${settingSection}`);

@@ -26,6 +26,10 @@ export interface DocViewerRestorableState {
    * Each tab can store its own state as needed.
    */
   docViewerTabsState?: DocViewerTabsState;
+  /**
+   * Used to dedupe initial `unified_doc_viewer_viewed` event when restoring state.
+   */
+  initialDocViewerViewedEventKey?: string;
 }
 
 export interface FieldMapping {

@@ -17,6 +17,7 @@ import {
 import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 
 apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_TAGS }, () => {
@@ -86,6 +87,7 @@ apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_
       ),
     ]);
     additionalIndicesToCleanup = [];
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(

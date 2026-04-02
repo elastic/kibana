@@ -93,7 +93,7 @@ export const RoleSwitcher = () => {
         <EuiButton
           color="text"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           minWidth={false}
           onClick={() => setIsOpen((toggle) => !toggle)}

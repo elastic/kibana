@@ -180,6 +180,13 @@ EOF
       export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
     fi
 
+    # Optional: Remote Kibana for managed dataset operations (golden cluster)
+    EVALUATIONS_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$EVALUATIONS_KBN_URL" ]]; then
+      export EVALUATIONS_KBN_URL
+      export EVALUATIONS_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    fi
+
     # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
     export GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
   fi

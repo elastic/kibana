@@ -57,7 +57,7 @@ export const GetDataStreamResultsResponse = z
     /**
      * Results array as JSON objects.
      */
-    results: z.array(z.object({}).catchall(z.unknown())),
+    results: z.array(z.object({}).catchall(z.unknown())).max(10000),
   })
   .strict();
 
@@ -136,9 +136,21 @@ export type UpdateDataStreamPipelineRequestParamsInput = z.input<
 export type UpdateDataStreamPipelineRequestBody = z.infer<
   typeof UpdateDataStreamPipelineRequestBody
 >;
-export const UpdateDataStreamPipelineRequestBody = z.object({
-  ingest_pipeline: z.union([z.string(), z.object({}).catchall(z.unknown())]),
-});
+export const UpdateDataStreamPipelineRequestBody = z
+  .object({
+    /**
+     * JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.
+     */
+    ingest_pipeline: z.union([
+      z.string().max(10485760),
+      z
+        .object({
+          processors: z.array(z.object({}).catchall(z.unknown())).max(10000).optional(),
+        })
+        .catchall(z.unknown()),
+    ]),
+  })
+  .strict();
 export type UpdateDataStreamPipelineRequestBodyInput = z.input<
   typeof UpdateDataStreamPipelineRequestBody
 >;
@@ -147,7 +159,7 @@ export type UpdateDataStreamPipelineResponse = z.infer<typeof UpdateDataStreamPi
 export const UpdateDataStreamPipelineResponse = z
   .object({
     ingest_pipeline: z.object({}).catchall(z.unknown()),
-    results: z.array(z.object({}).catchall(z.unknown())),
+    results: z.array(z.object({}).catchall(z.unknown())).max(10000),
   })
   .strict();
 
@@ -171,24 +183,26 @@ export type UploadSamplesToDataStreamRequestParamsInput = z.input<
 export type UploadSamplesToDataStreamRequestBody = z.infer<
   typeof UploadSamplesToDataStreamRequestBody
 >;
-export const UploadSamplesToDataStreamRequestBody = z.object({
-  /**
-   * The samples to upload (when source is file)
-   */
-  samples: z.array(z.string()).optional(),
-  /**
-   * Index name to pick samples from.
-   */
-  sourceIndex: z.string().min(1).optional(),
-  /**
-   * The original source of the samples (file name or index name)
-   */
-  originalSource: OriginalSource,
-  /**
-   * The LangSmith tracing options
-   */
-  langSmithOptions: LangSmithOptions.optional(),
-});
+export const UploadSamplesToDataStreamRequestBody = z
+  .object({
+    /**
+     * Log lines to upload when the source is a file (omit when using sourceIndex).
+     */
+    samples: z.array(z.string()).max(1000).optional(),
+    /**
+     * Index name to pick samples from.
+     */
+    sourceIndex: z.string().min(1).optional(),
+    /**
+     * The original source of the samples (file name or index name)
+     */
+    originalSource: OriginalSource,
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
+  })
+  .strict();
 export type UploadSamplesToDataStreamRequestBodyInput = z.input<
   typeof UploadSamplesToDataStreamRequestBody
 >;

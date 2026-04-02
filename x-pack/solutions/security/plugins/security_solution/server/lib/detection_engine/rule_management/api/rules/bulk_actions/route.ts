@@ -236,6 +236,7 @@ export const performBulkActionRoute = (
                 : MAX_RULES_TO_PROCESS_TOTAL,
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
+            schedulerId: body.gap_auto_fill_scheduler_id,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);

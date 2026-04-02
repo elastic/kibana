@@ -66,6 +66,7 @@ export class ElasticsearchService
   private readonly config$: Observable<ElasticsearchConfig>;
   private readonly isServerless: boolean;
   private onRequestHandlerFactory: OnRequestHandlerFactory;
+  private esTimingEnabled: boolean = false;
   private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
@@ -117,7 +118,8 @@ export class ElasticsearchService
           ).catch(() => ({ cpsEnabled: false }))
         ).cpsEnabled ?? false
       : false;
-    this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled);
+    this.esTimingEnabled = deps.http.config.serverTimingElasticsearch;
+    this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled, this.esTimingEnabled);
 
     const agentManager = this.getAgentManager(config);
 

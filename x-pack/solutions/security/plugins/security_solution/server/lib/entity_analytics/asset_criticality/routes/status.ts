@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GetAssetCriticalityStatusResponse } from '../../../../../common/api/entity_analytics';
@@ -18,10 +18,12 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 
-export const assetCriticalityInternalStatusRoute = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
-) => {
+export const assetCriticalityInternalStatusRoute = ({
+  router,
+  logger,
+  config,
+  docLinks,
+}: EntityAnalyticsRoutesDeps) => {
   router.versioned
     .get({
       access: 'internal',
@@ -33,12 +35,22 @@ export const assetCriticalityInternalStatusRoute = (
       },
     })
     .addVersion(
-      { version: API_VERSIONS.internal.v1, validate: {} },
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<GetAssetCriticalityStatusResponse>> => {
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
+      },
+      async (context, _, response): Promise<IKibanaResponse<GetAssetCriticalityStatusResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
           await checkAndInitAssetCriticalityResources(context, logger);

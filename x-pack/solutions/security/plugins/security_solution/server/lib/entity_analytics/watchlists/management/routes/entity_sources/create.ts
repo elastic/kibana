@@ -18,6 +18,14 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
+import {
+  WatchlistEntitySourceClient,
+  getStreamPatternFor,
+  INTEGRATION_TYPES,
+  integrationsSourceIndex,
+  oktaLastFullSyncMarkersIndex,
+} from '../../../entity_sources/infra';
+import type { IntegrationType } from '../../../entity_sources/infra';
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -52,24 +60,19 @@ export const createEntitySourceRoute = (
           const siemResponse = buildSiemResponse(response);
           const monitoringSource = request.body;
           try {
-            if (monitoringSource.type !== 'index') {
-              // currently we own the integration sources so we don't allow creation of other types
-              // we might allow this in the future if we have a way to manage the integration sources
-              return siemResponse.error({
-                statusCode: 400,
-                body: 'Cannot currently create entity source of type other than index',
-              });
-            }
-
             const secSol = await context.securitySolution;
             const core = await context.core;
-            const client = secSol.getMonitoringEntitySourceDataClient();
+            const namespace = secSol.getSpaceId();
+            const client = new WatchlistEntitySourceClient({
+              soClient: getRequestSavedObjectClient(core),
+              namespace,
+            });
 
-            const body = await client.create(monitoringSource);
+            const body = await createSourceForType(client, monitoringSource, namespace);
 
             const watchlistClient = new WatchlistConfigClient({
               logger,
-              namespace: secSol.getSpaceId(),
+              namespace,
               soClient: getRequestSavedObjectClient(core),
               esClient: core.elasticsearch.client.asCurrentUser,
             });
@@ -78,7 +81,7 @@ export const createEntitySourceRoute = (
             return response.ok({ body });
           } catch (e) {
             const error = transformError(e);
-            logger.error(`Error creating monitoring entity source sync config: ${error.message}`);
+            logger.error(`Error creating watchlist entity source sync config: ${error.message}`);
             return siemResponse.error({
               statusCode: error.statusCode,
               body: error.message,
@@ -88,4 +91,68 @@ export const createEntitySourceRoute = (
         'platinum'
       )
     );
+};
+
+const createSourceForType = async (
+  client: WatchlistEntitySourceClient,
+  source: WatchlistDataSources.CreateWatchlistEntitySourceRequestBody,
+  namespace: string
+): Promise<WatchlistDataSources.CreateWatchlistEntitySourceResponse> => {
+  if (source.type === 'entity_analytics_integration') {
+    if (!validateIntegrationName(source.integrationName)) {
+      throw new Error(
+        `integrationName is required and must be one of: ${INTEGRATION_TYPES.join(', ')}`
+      );
+    }
+    return createIntegrationSource(client, source.integrationName, namespace);
+  }
+
+  if (source.type === 'store' && !source.queryRule) {
+    throw new Error('queryRule is required for store-type sources');
+  }
+
+  return client.create(source);
+};
+
+const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType): string => {
+  if (integration === 'entityanalytics_ad') {
+    return getStreamPatternFor(integration, namespace);
+  }
+  return oktaLastFullSyncMarkersIndex(namespace);
+};
+
+const buildIntegrationSourceAttributes = (
+  namespace: string,
+  integrationName: IntegrationType
+): WatchlistDataSources.CreateWatchlistEntitySourceRequestBody => ({
+  type: 'entity_analytics_integration',
+  name: integrationsSourceIndex(namespace, integrationName),
+  indexPattern: getStreamPatternFor(integrationName, namespace),
+  integrationName,
+  enabled: true,
+});
+
+const validateIntegrationName = (
+  integrationName: string | undefined
+): integrationName is IntegrationType => {
+  return !!integrationName && INTEGRATION_TYPES.includes(integrationName as IntegrationType);
+};
+
+const createIntegrationSource = async (
+  client: WatchlistEntitySourceClient,
+  integrationName: IntegrationType,
+  namespace: string
+): Promise<WatchlistDataSources.CreateWatchlistEntitySourceResponse> => {
+  const sourceAttrs = buildIntegrationSourceAttributes(namespace, integrationName);
+  const { sources } = await client.list({ name: sourceAttrs.name, per_page: 1 });
+
+  return (
+    sources[0] ??
+    client.create({
+      ...sourceAttrs,
+      integrations: {
+        syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, integrationName),
+      },
+    })
+  );
 };

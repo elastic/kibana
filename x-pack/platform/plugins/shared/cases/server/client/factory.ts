@@ -34,6 +34,8 @@ import type {
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
@@ -150,6 +152,7 @@ export class CasesClientFactory {
       request,
       auditLogger,
       alertsClient,
+      auth,
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -191,6 +194,7 @@ export class CasesClientFactory {
     request,
     auditLogger,
     alertsClient,
+    auth,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
@@ -198,6 +202,7 @@ export class CasesClientFactory {
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
+    auth: PublicMethodsOf<Authorization>;
   }): CasesServices {
     this.validateInitialization();
 
@@ -208,10 +213,15 @@ export class CasesClientFactory {
       config: this.options.config,
     });
 
+    const spaceId =
+      this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const namespace = spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
+
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient,
+      namespace,
     });
 
     const caseService = new CasesService({

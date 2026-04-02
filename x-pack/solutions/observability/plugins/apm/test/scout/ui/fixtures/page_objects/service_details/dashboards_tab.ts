@@ -23,7 +23,9 @@ export class DashboardsTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad(): Promise<void> {
-    await this.addServiceDashboardButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   public async linkDashboardByTitle(dashboardTitle: string) {
@@ -31,5 +33,11 @@ export class DashboardsTab extends ServiceDetailsTab {
     await this.page.getByTestId('apmSelectServiceDashboard').getByTestId('comboBoxInput').click();
     await this.page.getByText(dashboardTitle).click();
     await this.page.getByTestId('apmSelectDashboardButton').click();
+  }
+
+  public async unlinkDashboard() {
+    await this.page.getByTestId('apmContextMenuButton').click();
+    await this.page.getByTestId('apmUnLinkServiceDashboardMenu').click();
+    await this.page.getByTestId('confirmModalConfirmButton').click();
   }
 }

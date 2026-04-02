@@ -21,8 +21,10 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { CompactionSummary } from '@kbn/agent-builder-common';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
+import { serializeCompactionSummary } from './conversation_compactor';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -36,6 +38,12 @@ export interface ConversationToLangchainOptions {
    * When true, tool call steps will be ignored.
    */
   ignoreSteps?: boolean;
+  /**
+   * Optional compaction summary to inject before the remaining rounds.
+   * When provided, the summary is serialized and prepended as a
+   * user/assistant message pair representing the compacted history.
+   */
+  compactionSummary?: CompactionSummary;
 }
 
 /**
@@ -48,6 +56,7 @@ export const convertPreviousRounds = async ({
   conversation,
   resultTransformer,
   ignoreSteps = false,
+  compactionSummary,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
@@ -60,6 +69,13 @@ export const convertPreviousRounds = async ({
   if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
     rounds = rounds.slice(0, rounds.length - 1);
     input = lastRound.input;
+  }
+
+  // Inject compaction summary as a user/assistant exchange before remaining rounds
+  if (compactionSummary) {
+    const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
+    messages.push(createUserMessage('[Previous conversation context was compacted]'));
+    messages.push(createAIMessage(summaryText));
   }
 
   for (const round of rounds) {

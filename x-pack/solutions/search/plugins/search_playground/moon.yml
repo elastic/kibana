@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/alerts-ui-shared'
   - '@kbn/ui-actions-plugin'
   - '@kbn/file-upload-common'
-  - '@kbn/deeplinks-search'
   - '@kbn/logging-mocks'
   - '@kbn/inference-plugin'
   - '@kbn/code-editor'

@@ -9,6 +9,7 @@ import type { DataStreamResponse } from '../../../common';
 
 export interface DataStreamResultsFlyoutProps {
   integrationId: string;
+  integrationName: string;
   dataStream: DataStreamResponse;
   onClose: () => void;
 }

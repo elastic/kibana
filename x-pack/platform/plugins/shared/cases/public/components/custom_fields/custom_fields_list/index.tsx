@@ -96,7 +96,7 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                         <EuiButtonIcon
                           data-test-subj={`${customField.key}-custom-field-delete`}
                           aria-label={`${customField.key}-custom-field-delete`}
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           color="danger"
                           onClick={() => setSelectedItem(customField)}
                         />

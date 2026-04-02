@@ -117,9 +117,7 @@ export const TableSection = React.memo(
 
     const { loading: listsConfigLoading } = useListsConfig();
 
-    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
-      TableId.alertsOnAttacksPage
-    );
+    const { showOnlyThreatIndicatorAlerts } = useDataTableFilters(TableId.alertsOnAttacksPage);
 
     // for showing / hiding anonymized data:
     const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
@@ -196,7 +194,7 @@ export const TableSection = React.memo(
     // AlertsTable manages global filters itself, so not including `filters`
     const defaultFilters = useMemo(() => {
       return [
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+        ...buildShowBuildingBlockFilter(true),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
@@ -204,7 +202,6 @@ export const TableSection = React.memo(
         ...(showAttacksOnly ? buildAttacksOnlyFilter() : []),
       ];
     }, [
-      showBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
       pageFilters,
       assignees,

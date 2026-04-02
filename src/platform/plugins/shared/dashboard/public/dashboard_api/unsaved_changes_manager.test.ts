@@ -22,8 +22,6 @@ import type { initializeProjectRoutingManager } from './project_routing_manager'
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
 
-jest.mock('../services/dashboard_backup_service', () => ({}));
-
 const setStateMock = () => {};
 
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
@@ -81,7 +79,7 @@ describe('unsavedChangesManager', () => {
     layoutUnsavedChanges$.next({});
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/dashboard_backup_service').getDashboardBackupService = () => ({
+    require('../services/dashboard_api_services').getDashboardBackupService = () => ({
       setState: setBackupStateMock,
     });
   });

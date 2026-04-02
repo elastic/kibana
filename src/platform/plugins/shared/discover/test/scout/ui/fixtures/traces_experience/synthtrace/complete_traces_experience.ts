@@ -37,7 +37,7 @@ import type {
   SynthtraceGenerator,
 } from '@kbn/synthtrace-client';
 import { apm, log, timerange } from '@kbn/synthtrace-client';
-import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from '../constants';
+import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from '../constants';
 
 const FRONTEND_SERVICE = RICH_TRACE.SERVICE_NAME;
 const BACKEND_SERVICE = PRODUCER_TRACE.SERVICE_NAME;
@@ -343,4 +343,61 @@ export function traceCorrelatedLogs({
         .defaults({ 'trace.id': traceId, 'span.id': processOrderSpanId })
         .timestamp(timestamp + 900),
     ]);
+}
+
+/**
+ * Generates a trace with enough spans to push the scroll target below the
+ * visible fold in the full-screen waterfall flyout, so the scroll-to-highlighted
+ * behaviour can be validated end-to-end.
+ *
+ * Structure: root transaction + 19 filler spans + 1 named scroll target (all siblings).
+ */
+export function deepTrace({
+  from,
+  to,
+}: {
+  from: number;
+  to: number;
+}): SynthtraceGenerator<ApmFields> {
+  const frontend = apm
+    .service({ name: FRONTEND_SERVICE, environment: 'production', agentName: 'nodejs' })
+    .instance('frontend-1');
+
+  const events = Array.from(
+    timerange(from, to)
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) => {
+        const fillerSpans = Array.from({ length: 19 }, (_, i) =>
+          frontend
+            .span({ spanName: `step-${i + 1}`, spanType: 'app', spanSubtype: 'internal' })
+            .timestamp(timestamp + 10 + i * 20)
+            .duration(10)
+            .success()
+        );
+
+        const scrollTarget = frontend
+          .span({
+            spanName: DEEP_TRACE.SCROLL_TARGET_SPAN_NAME,
+            spanType: 'app',
+            spanSubtype: 'internal',
+          })
+          .timestamp(timestamp + 400)
+          .duration(10)
+          .success();
+
+        return frontend
+          .transaction({ transactionName: DEEP_TRACE.TRANSACTION_NAME })
+          .timestamp(timestamp)
+          .duration(500)
+          .success()
+          .children(...fillerSpans, scrollTarget);
+      })
+  );
+
+  function* generator(): SynthtraceGenerator<ApmFields> {
+    yield* events;
+  }
+
+  return generator();
 }

@@ -8,8 +8,9 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
 import type { LeftPanelPaths } from '../constants/left_panel_paths';
-import { INSIGHTS_TAB_TEST_ID, NOTES_TAB_TEST_ID } from '../constants/test_ids';
+import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
 import { InsightsTab } from './tabs/insights_tab';
 import { NotesTab } from './tabs/notes_tab';
 
@@ -34,7 +35,7 @@ export const insightsTab: LeftPanelTabType = {
 
 export const notesTab: LeftPanelTabType = {
   id: 'notes',
-  'data-test-subj': NOTES_TAB_TEST_ID,
+  'data-test-subj': NOTES_DETAILS_TEST_ID,
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.left.notes.tabLabel"

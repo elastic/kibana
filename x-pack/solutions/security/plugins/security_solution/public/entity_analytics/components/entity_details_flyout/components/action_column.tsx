@@ -28,7 +28,7 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ input }) => {
       button={
         <EuiButtonIcon
           onClick={togglePopover}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.translate(
             'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel',
             {

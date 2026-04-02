@@ -196,6 +196,15 @@ function mergeWithSubFeatures(
         mergedConfig.cases?.assign ?? [],
         subFeaturePrivilege.cases?.assign ?? []
       ),
+      ...(mergedConfig.cases?.manageTemplates !== undefined ||
+      subFeaturePrivilege.cases?.manageTemplates !== undefined
+        ? {
+            manageTemplates: mergeArrays(
+              mergedConfig.cases?.manageTemplates ?? [],
+              subFeaturePrivilege.cases?.manageTemplates ?? []
+            ),
+          }
+        : {}),
     };
   }
   return mergedConfig;

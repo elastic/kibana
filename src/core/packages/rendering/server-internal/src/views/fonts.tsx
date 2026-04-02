@@ -16,16 +16,52 @@ interface Props {
   url: RenderingMetadata['uiPublicUrl'];
 }
 
+type FontFaceWeightValue = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+type FontFaceWeight = FontFaceWeightValue | `${FontFaceWeightValue} ${FontFaceWeightValue}`;
+type FontFaceDisplay = 'swap' | 'auto' | 'block' | 'fallback' | 'optional';
+
 interface FontFace {
   family: string;
   variants: Array<{
     style: 'normal' | 'italic';
-    weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+    weight: FontFaceWeight;
     sources: string[];
     unicodeRange?: string;
     format?: string;
+    display?: FontFaceDisplay;
   }>;
 }
+
+/**
+ * `Elastic UI Numeric` is a derivative of Inter with OpenType numeric features
+ * (tnum, zero, ss01, ss07) baked into the default glyphs. This allows canvas-based
+ * rendering to display tabular numbers and slashed zeros without requiring CSS
+ * font-feature-settings, which is not supported by Firefox's canvas implementation.
+ *
+ * The font only contains numeric characters and common punctuation, using unicode-range
+ * to apply only to those characters. When used alongside Inter, numeric characters
+ * will render with the enhanced features while letters use standard Inter.
+ *
+ * Future numeric/typographic enhancements for charts can be added to this font family while
+ * keeping the public API stable (hence the generic name).
+ *
+ * @see https://github.com/elastic/kibana/issues/249382
+ */
+const getElasticUINumeric = (url: string): FontFace => {
+  return {
+    family: 'Elastic UI Numeric',
+    variants: [
+      {
+        style: 'normal',
+        weight: '100 900',
+        sources: [`${url}/fonts/elastic_ui_numeric/ElasticUINumeric-Variable.woff2`],
+        format: 'woff2',
+        display: 'swap',
+        unicodeRange: 'U+20, U+24-25, U+28-29, U+2B-2F, U+30-3A, U+A0, U+202F, U+2212',
+      },
+    ],
+  };
+};
 
 /**
  * `Inter` is the latest version of `Inter UI`
@@ -37,128 +73,92 @@ const getInter = (url: string): FontFace => {
       {
         style: 'normal',
         weight: 100,
-        sources: [`${url}/fonts/inter/Inter-Thin.woff2`, `${url}/fonts/inter/Inter-Thin.woff`],
+        sources: [`${url}/fonts/inter/Inter-Thin.woff2`],
       },
       {
         style: 'italic',
         weight: 100,
-        sources: [
-          `${url}/fonts/inter/Inter-ThinItalic.woff2`,
-          `${url}/fonts/inter/Inter-ThinItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-ThinItalic.woff2`],
       },
       {
         style: 'normal',
         weight: 200,
-        sources: [
-          `${url}/fonts/inter/Inter-ExtraLight.woff2`,
-          `${url}/fonts/inter/Inter-ExtraLight.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-ExtraLight.woff2`],
       },
       {
         style: 'italic',
         weight: 200,
-        sources: [
-          `${url}/fonts/inter/Inter-ExtraLightItalic.woff2`,
-          `${url}/fonts/inter/Inter-ExtraLightItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-ExtraLightItalic.woff2`],
       },
       {
         style: 'normal',
         weight: 300,
-        sources: [`${url}/fonts/inter/Inter-Light.woff2`, `${url}/fonts/inter/Inter-Light.woff`],
+        sources: [`${url}/fonts/inter/Inter-Light.woff2`],
       },
       {
         style: 'italic',
         weight: 300,
-        sources: [
-          `${url}/fonts/inter/Inter-LightItalic.woff2`,
-          `${url}/fonts/inter/Inter-LightItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-LightItalic.woff2`],
       },
       {
         style: 'normal',
         weight: 400,
-        sources: [
-          `${url}/fonts/inter/Inter-Regular.woff2`,
-          `${url}/fonts/inter/Inter-Regular.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-Regular.woff2`],
       },
       {
         style: 'italic',
         weight: 400,
-        sources: [`${url}/fonts/inter/Inter-Italic.woff2`, `${url}/fonts/inter/Inter-Italic.woff`],
+        sources: [`${url}/fonts/inter/Inter-Italic.woff2`],
       },
       {
         style: 'normal',
         weight: 500,
-        sources: [`${url}/fonts/inter/Inter-Medium.woff2`, `${url}/fonts/inter/Inter-Medium.woff`],
+        sources: [`${url}/fonts/inter/Inter-Medium.woff2`],
       },
       {
         style: 'italic',
         weight: 500,
-        sources: [
-          `${url}/fonts/inter/Inter-MediumItalic.woff2`,
-          `${url}/fonts/inter/Inter-MediumItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-MediumItalic.woff2`],
       },
       {
         style: 'normal',
         weight: 600,
-        sources: [
-          `${url}/fonts/inter/Inter-SemiBold.woff2`,
-          `${url}/fonts/inter/Inter-SemiBold.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-SemiBold.woff2`],
       },
       {
         style: 'italic',
         weight: 600,
-        sources: [
-          `${url}/fonts/inter/Inter-SemiBoldItalic.woff2`,
-          `${url}/fonts/inter/Inter-SemiBoldItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-SemiBoldItalic.woff2`],
       },
       {
         style: 'normal',
         weight: 700,
-        sources: [`${url}/fonts/inter/Inter-Bold.woff2`, `${url}/fonts/inter/Inter-Bold.woff`],
+        sources: [`${url}/fonts/inter/Inter-Bold.woff2`],
       },
       {
         style: 'italic',
         weight: 700,
-        sources: [
-          `${url}/fonts/inter/Inter-BoldItalic.woff2`,
-          `${url}/fonts/inter/Inter-BoldItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-BoldItalic.woff2`],
       },
       {
         style: 'normal',
         weight: 800,
-        sources: [
-          `${url}/fonts/inter/Inter-ExtraBold.woff2`,
-          `${url}/fonts/inter/Inter-ExtraBold.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-ExtraBold.woff2`],
       },
       {
         style: 'italic',
         weight: 800,
-        sources: [
-          `${url}/fonts/inter/Inter-ExtraBoldItalic.woff2`,
-          `${url}/fonts/inter/Inter-ExtraBoldItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-ExtraBoldItalic.woff2`],
       },
       {
         style: 'normal',
         weight: 900,
-        sources: [`${url}/fonts/inter/Inter-Black.woff2`, `${url}/fonts/inter/Inter-Black.woff`],
+        sources: [`${url}/fonts/inter/Inter-Black.woff2`],
       },
       {
         style: 'italic',
         weight: 900,
-        sources: [
-          `${url}/fonts/inter/Inter-BlackItalic.woff2`,
-          `${url}/fonts/inter/Inter-BlackItalic.woff`,
-        ],
+        sources: [`${url}/fonts/inter/Inter-BlackItalic.woff2`],
       },
     ],
   };
@@ -220,6 +220,7 @@ const getRoboto = (url: string): FontFace => {
 };
 
 export const Fonts: FunctionComponent<Props> = ({ url }) => {
+  const elasticUINumericFont = getElasticUINumeric(url);
   const sansFont = getInter(url);
   const codeFont = getRoboto(url);
 
@@ -228,9 +229,9 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
     <style
       dangerouslySetInnerHTML={{
         __html: `
-        ${[sansFont, codeFont]
+        ${[elasticUINumericFont, sansFont, codeFont]
           .flatMap(({ family, variants }) =>
-            variants.map(({ style, weight, format, sources, unicodeRange }) => {
+            variants.map(({ style, weight, format, sources, unicodeRange, display }) => {
               const src = sources
                 .map((source) =>
                   source.startsWith(url)
@@ -239,17 +240,18 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
                 )
                 .join(', ');
 
+              const fontFaceRules = [
+                `font-family: '${family}';`,
+                `font-style: ${style};`,
+                `font-weight: ${weight};`,
+                ...(display ? [`font-display: ${display};`] : []),
+                `src: ${src};`,
+                ...(unicodeRange ? [`unicode-range: ${unicodeRange};`] : []),
+              ];
+
               return `
         @font-face {
-          font-family: '${family}';
-          font-style: ${style};
-          font-weight: ${weight};
-          src: ${src};${
-                unicodeRange
-                  ? `
-          unicode-range: ${unicodeRange};`
-                  : ''
-              }
+          ${fontFaceRules.join('\n          ')}
         }`;
             })
           )

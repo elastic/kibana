@@ -9,6 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../flyout/shared/test_ids';
@@ -45,7 +46,7 @@ export interface AboutSectionProps {
  */
 export const AboutSection = memo(({ hit }: AboutSectionProps) => {
   const isAlert = useMemo(
-    () => (getFieldValue(hit, 'event.kind') as string) === EventKind.signal,
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
     [hit]
   );
 

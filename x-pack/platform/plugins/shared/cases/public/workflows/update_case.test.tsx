@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { updateCaseStepDefinition } from './update_case';
+import { updateCaseStepDefinition } from './simple_steps';
 // import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 describe('createUpdateCaseStepDefinition', () => {

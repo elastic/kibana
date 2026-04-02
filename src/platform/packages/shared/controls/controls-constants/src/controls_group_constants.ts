@@ -10,14 +10,18 @@
 /** Controls group state */
 export const CONTROLS_GROUP_TYPE = 'control_group';
 
-export const DEFAULT_USE_GLOBAL_FILTERS = true;
 export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
-export const DEFAULT_IGNORE_VALIDATIONS = false;
 
 /** This state is only relevant for sticky controls */
 export const CONTROL_WIDTH_SMALL = 'small';
 export const CONTROL_WIDTH_MEDIUM = 'medium';
 export const CONTROL_WIDTH_LARGE = 'large';
+type ControlWidth =
+  | typeof CONTROL_WIDTH_SMALL
+  | typeof CONTROL_WIDTH_MEDIUM
+  | typeof CONTROL_WIDTH_LARGE;
 
-export const DEFAULT_CONTROL_WIDTH = CONTROL_WIDTH_MEDIUM;
-export const DEFAULT_CONTROL_GROW = false;
+export const DEFAULT_PINNED_CONTROL_STATE = {
+  width: CONTROL_WIDTH_MEDIUM as ControlWidth,
+  grow: false,
+};

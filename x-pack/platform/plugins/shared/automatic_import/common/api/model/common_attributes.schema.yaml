@@ -9,31 +9,41 @@ components:
     PackageName:
       type: string
       minLength: 1
+      maxLength: 256
+      format: nonempty
       description: Package name for the integration to be built.
 
     DataStreamName:
       type: string
       minLength: 1
+      maxLength: 256
+      format: nonempty
       description: DataStream name for the integration to be built.
 
     PackageTitle:
       type: string
       minLength: 1
+      maxLength: 256
+      format: nonempty
       description: Package title for the integration to be built.
 
     DataStreamTitle:
       type: string
       minLength: 1
+      maxLength: 256
+      format: nonempty
       description: DataStream title for the integration to be built.
 
     LogSamples:
       type: array
+      maxItems: 100
       items:
         type: string
-      description:  String form of the input logsamples.
+      description: String form of the input logsamples.
 
     RawSamples:
       type: array
+      maxItems: 100
       items:
         type: string
       description: String array containing the json raw samples that are used for ecs mapping.
@@ -45,10 +55,14 @@ components:
 
     Connector:
       type: string
+      minLength: 1
+      maxLength: 256
+      format: nonempty
       description: LLM Connector to be used in each API request.
 
     Docs:
       type: array
+      maxItems: 500
       description: An array of processed documents.
       items:
         type: object
@@ -84,11 +98,13 @@ components:
           description: For CSV format, specifies whether the samples have a header row. For other formats, specifies the presence of header in each row.
         columns:
           type: array
+          maxItems: 500
           description: For CSV format, specifies the column names proposed by the LLM.
           items:
             type: string
         json_path:
           type: array
+          maxItems: 50
           description: For a JSON format, describes how to get to the sample array from the root of the JSON.
           items:
             type: string
@@ -101,20 +117,24 @@ components:
       properties:
         name:
           type: string
+          maxLength: 256
           description: The name of the pipeline.
         description:
           type: string
+          maxLength: 4096
           description: The description of the pipeline.
         version:
           type: integer
           description: The version of the pipeline.
         processors:
           type: array
+          maxItems: 500
           items:
             $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
           description: The processors to execute.
         on_failure:
           type: array
+          maxItems: 50
           items:
             $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
           description: The processors to execute if the pipeline fails.
@@ -153,15 +173,25 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 256
+          format: nonempty
           description: The name of the dataStream.
         title:
           type: string
+          minLength: 1
+          maxLength: 256
+          format: nonempty
           description: The title of the dataStream.
         description:
           type: string
+          minLength: 1
+          maxLength: 4096
+          format: nonempty
           description: The description of the dataStream.
         inputTypes:
           type: array
+          maxItems: 20
           items:
             $ref: "#/components/schemas/InputType"
           description: The input types of the dataStream.
@@ -192,20 +222,31 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 256
+          format: nonempty
           description: The name of the integration.
         title:
           type: string
+          minLength: 1
+          maxLength: 256
+          format: nonempty
           description: The title of the integration.
         description:
           type: string
+          minLength: 1
+          maxLength: 4096
+          format: nonempty
           description: The description of the integration.
         dataStreams:
           type: array
+          maxItems: 50
           items:
             $ref: "#/components/schemas/DataStream"
           description: The dataStreams of the integration.
         logo:
           type: string
+          maxLength: 1400000
           description: The logo of the integration.
 
     LangSmithOptions:
@@ -217,7 +258,13 @@ components:
       properties:
         projectName:
           type: string
+          minLength: 1
+          maxLength: 256
+          format: nonempty
           description: The project name.
         apiKey:
           type: string
+          minLength: 1
+          maxLength: 512
+          format: nonempty
           description: The apiKey to use for tracing.

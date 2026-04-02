@@ -11,8 +11,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 export function registerListWorkflowsTool(
   agentBuilder: AgentBuilderPluginSetupContract,

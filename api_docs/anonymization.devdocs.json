@@ -114,7 +114,7 @@
               "\nRetrieves a single profile by ID."
             ],
             "signature": [
-              "(namespace: string, profileId: string) => Promise<any>"
+              "(namespace: string, profileId: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 62,
@@ -169,7 +169,7 @@
               "\nRetrieves the global profile for a namespace."
             ],
             "signature": [
-              "(namespace: string) => Promise<any>"
+              "(namespace: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 67,
@@ -548,7 +548,7 @@
             "label": "findProfileByTarget",
             "description": [],
             "signature": [
-              "(targetType: \"index\" | \"data_view\" | \"index_pattern\", targetId: string) => Promise<any>"
+              "(targetType: \"index\" | \"data_view\" | \"index_pattern\", targetId: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 33,
@@ -609,7 +609,7 @@
                 "section": "def-server.CreateAnonymizationProfileParams",
                 "text": "CreateAnonymizationProfileParams"
               },
-              ") => Promise<z.infer<any>>"
+              ") => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; }>"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 37,
@@ -821,12 +821,12 @@
           {
             "parentPluginId": "anonymization",
             "id": "def-server.CreateAnonymizationProfileParams.rules",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "rules",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "{ fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
             "lineNumber": 24,

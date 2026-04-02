@@ -30,7 +30,7 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApm
       data-test-subj="apmGotoDashboardGoToDashboardButton"
       color="text"
       size="s"
-      iconType="visGauge"
+      iconType="chartGauge"
       href={url}
     >
       {i18n.translate('xpack.apm.serviceDashboards.contextMenu.goToDashboard', {

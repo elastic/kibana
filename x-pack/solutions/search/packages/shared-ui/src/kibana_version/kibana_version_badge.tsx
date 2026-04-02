@@ -8,11 +8,11 @@
 import { EuiFlexItem, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
 
-interface SearchHomepageVersionBadgeProps {
+interface KibanaVersionBadgeProps {
   kibanaVersion: string;
   docLink: string;
 }
-export const SearchHomepageVersionBadge: React.FC<SearchHomepageVersionBadgeProps> = ({
+export const KibanaVersionBadge: React.FC<KibanaVersionBadgeProps> = ({
   kibanaVersion,
   docLink,
 }) => {

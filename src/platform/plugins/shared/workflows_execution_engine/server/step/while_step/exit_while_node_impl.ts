@@ -8,6 +8,7 @@
  */
 
 import type { ExitWhileNode } from '@kbn/workflows/graph';
+import type { WhileStepState } from './types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -23,7 +24,9 @@ export class ExitWhileNodeImpl implements NodeImplementation {
   ) {}
 
   public run(): void {
-    const whileState = this.stepExecutionRuntime.getCurrentStepState();
+    const whileState = this.stepExecutionRuntime.getCurrentStepState() as
+      | WhileStepState
+      | undefined;
 
     if (!whileState) {
       throw new Error(`While state for step ${this.node.stepId} not found`);

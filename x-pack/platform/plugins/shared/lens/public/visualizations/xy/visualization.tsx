@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 
 import { Position } from '@elastic/charts';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,7 @@ import type {
   AnnotationGroups,
   FormBasedPersistedState,
   VisualizationInfo,
+  XYPersistedState,
 } from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
@@ -67,7 +69,7 @@ import type {
   XYDataLayerConfig,
   SeriesType,
   XYByValueAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from './types';
 import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -128,7 +130,6 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import type { XYPersistedState } from './persistence';
 import { convertPersistedState, convertToPersistable } from './persistence';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings';
 import {
@@ -172,8 +173,9 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<XYState, XYPersistedState, ExtraAppendLayerArg> => ({
+}): Visualization<XYVisualizationState, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
+  suggestionPriority: 1,
   getVisualizationTypeId(state, layerId) {
     const type = getVisualizationType(state, layerId);
     return type === 'mixed' ? type : type.id;
@@ -272,7 +274,7 @@ export const getXyVisualization = ({
 
   getDescription,
 
-  switchVisualizationType(seriesType: string, state: XYState, layerId?: string) {
+  switchVisualizationType(seriesType: string, state: XYVisualizationState, layerId?: string) {
     const dataLayer = layerId
       ? state.layers.find((l) => l.layerId === layerId)
       : state.layers.at(0);
@@ -321,7 +323,7 @@ export const getXyVisualization = ({
 
     return {
       title: 'Empty XY chart',
-      legend: { isVisible: true, position: Position.Right },
+      legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
       valueLabels: 'hide',
       preferredSeriesType: defaultSeriesType,
       layers: [
@@ -1170,8 +1172,10 @@ export const getXyVisualization = ({
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
-    const suggestion: Suggestion<XYState, FormBasedPersistedState> = {
+    const allSuggestions = suggestions as Array<
+      Suggestion<XYVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<XYVisualizationState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
@@ -1185,7 +1189,7 @@ export const getXyVisualization = ({
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...(context.configuration as XYState),
+        ...(context.configuration as XYVisualizationState),
       },
     };
     return suggestion;
@@ -1236,7 +1240,7 @@ const getMappedAccessors = ({
   frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYDataLayerConfig;
 }) => {
   let mappedAccessors: AccessorConfig[] = accessors.map((accessor) => ({
@@ -1309,7 +1313,7 @@ function resolveDefaultPaletteForSeriesType(
 }
 
 function getVisualizationInfo(
-  state: XYState,
+  state: XYVisualizationState,
   frame: Partial<FramePublicAPI> | undefined,
   paletteService: PaletteRegistry,
   fieldFormats: FieldFormatsStart
@@ -1445,7 +1449,7 @@ function getVisualizationInfo(
 }
 
 function getNotifiableFeatures(
-  state: XYState,
+  state: XYVisualizationState,
   frame: Pick<FramePublicAPI, 'dataViews'> & Partial<FramePublicAPI>,
   paletteService: PaletteRegistry,
   fieldFormats: FieldFormatsStart

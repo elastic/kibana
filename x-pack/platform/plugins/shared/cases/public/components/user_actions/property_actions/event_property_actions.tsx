@@ -37,7 +37,7 @@ const EventPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalEvents
               type: AttachmentActionType.BUTTON as const,
               color: 'danger' as const,
               disabled: false,
-              iconType: 'minusInCircle',
+              iconType: 'minusCircle',
               label: i18n.REMOVE_EVENTS(totalEvents),
               onClick: onModalOpen,
             },

@@ -60,7 +60,7 @@ export function createOpenInExplorerAction(
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     order: 40,
     getIconType(): string {
-      return 'visTable';
+      return 'table';
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.openInAnomalyExplorerTitle', {

@@ -86,22 +86,90 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.createCase',
-    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.deleteCases',
+    handlerHash: '461013a1fb15a84b4edf75620cf377080998a35dedd39c672ddadfde4796fdda',
   },
   {
     id: 'cases.updateCase',
-    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.updateCases',
+    handlerHash: 'b858a33a3f4fa058b6b89ab5366c96f39a6a79d737d9cf7ff3c43221d640cf10',
   },
   {
     id: 'cases.getCase',
-    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
   {
     id: 'cases.addComment',
-    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addAlerts',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setCategory',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addEvents',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addObservables',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.addTags',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.assignCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.closeCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
   {
     id: 'cases.createCaseFromTemplate',
     handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.findCases',
+    handlerHash: '61ec2695a6ddba397c05b3845e9dbd3c66f9b299ed8568b8f4e7f3c187ff1c73',
+  },
+  {
+    id: 'cases.findSimilarCases',
+    handlerHash: '647032606a8724390063eb7f093e84360b65ff6e44eecaa74222d7c557dfde02',
+  },
+  {
+    id: 'cases.setCustomField',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.unassignCase',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setDescription',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setSeverity',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setStatus',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+  },
+  {
+    id: 'cases.setTitle',
+    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
 ];

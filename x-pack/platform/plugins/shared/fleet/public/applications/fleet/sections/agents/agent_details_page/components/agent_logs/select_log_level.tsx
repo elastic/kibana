@@ -39,7 +39,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
     );
 
     const [agentLogLevel, setAgentLogLevel] = useState(
-      agent.local_metadata?.elastic?.agent?.log_level ?? DEFAULT_LOG_LEVEL
+      agent.local_metadata?.elastic?.agent?.log_level ?? agentPolicyLogLevel
     );
     const [selectedLogLevel, setSelectedLogLevel] = useState(agentLogLevel);
 

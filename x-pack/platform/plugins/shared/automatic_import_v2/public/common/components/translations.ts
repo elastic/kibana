@@ -12,6 +12,14 @@ export const ADD_CONNECTOR_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Add connector',
   }
 );
+
+export const ADD_CONNECTOR_NO_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.automaticImportV2.components.connectorSelector.addConnectorNoPermissionTooltip',
+  {
+    defaultMessage:
+      'You do not have permission to create connectors. Ask your administrator to grant Management > Connectors access.',
+  }
+);
 export const SELECT_CONNECTOR_PLACEHOLDER = i18n.translate(
   'xpack.automaticImportV2.components.connectorSelector.selectConnectorPlaceholder',
   {

@@ -892,3 +892,31 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "nonidp1_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:23Z",
+      "user": { "name": "alice.local" },
+      "host": { "id": "host-nonidp-001" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "illegal1_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:24Z",
+      "user": { "email": "invalid-idp-illegal@test.com" },
+      "event": { "module": "azure" }
+    }
+  }
+}

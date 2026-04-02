@@ -26,7 +26,6 @@ import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_availa
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
-import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -73,8 +72,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/create_use_rules_link', () => ({
-  createUseRulesLink: jest.fn((unifiedRulesPage: boolean) => () => ({
-    href: unifiedRulesPage ? '/app/rules' : '/app/observability/alerts/rules',
+  createUseRulesLink: jest.fn(() => () => ({
+    href: '/app/rules',
     onClick: jest.fn(),
   })),
 }));
@@ -228,9 +227,7 @@ describe('AlertsPage with all capabilities', () => {
   });
 
   describe('Manage rules link', () => {
-    it('should direct to unified rules page when the experimental feature is enabled', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
+    it('should direct to unified rules page', async () => {
       let wrapper;
       await act(async () => {
         wrapper = await setup();
@@ -240,21 +237,6 @@ describe('AlertsPage with all capabilities', () => {
         const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
         expect(manageRulesLink).toBeInTheDocument();
         expect(manageRulesLink.getAttribute('href')).toBe('/app/rules');
-      });
-    });
-
-    it('should direct to oblt rules page when the experimental feature is disabled', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-
-      let wrapper;
-      await act(async () => {
-        wrapper = await setup();
-      });
-
-      await waitFor(() => {
-        const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
-        expect(manageRulesLink).toBeInTheDocument();
-        expect(manageRulesLink.getAttribute('href')).toBe('/app/observability/alerts/rules');
       });
     });
   });

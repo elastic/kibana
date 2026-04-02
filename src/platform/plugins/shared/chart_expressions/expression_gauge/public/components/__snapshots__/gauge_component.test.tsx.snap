@@ -178,6 +178,12 @@ exports[`GaugeComponent renders the chart 1`] = `
             "padding": 0,
           },
           "rect": Object {
+            "dimmed": Object {
+              "fill": "#ECF1F9",
+              "texture": Object {
+                "opacity": 0.25,
+              },
+            },
             "opacity": 1,
           },
           "rectBorder": Object {
@@ -422,6 +428,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "horizontalHeight": 64,
           "labelOptions": Object {
             "maxLines": 1,
+            "widthLimit": 250,
           },
           "margin": 0,
           "spacingBuffer": 10,
@@ -498,7 +505,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "textLightColor": "#E3E8F2",
           "textSubtitleDarkColor": "#1D2A3E",
           "textSubtitleLightColor": "#CAD3E2",
-          "titleWeight": "bold",
+          "titleWeight": 500,
           "titlesTextAlign": "left",
           "valueFontSize": "default",
           "valuePosition": "bottom",
@@ -506,6 +513,9 @@ exports[`GaugeComponent renders the chart 1`] = `
         },
         "partition": Object {
           "circlePadding": 4,
+          "dimmed": Object {
+            "fill": "#ECF1F9",
+          },
           "emptySizeRatio": 0,
           "fillLabel": Object {
             "clipText": false,

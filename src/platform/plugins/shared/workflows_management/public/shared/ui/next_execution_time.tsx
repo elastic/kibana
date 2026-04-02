@@ -8,6 +8,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
@@ -36,6 +37,11 @@ export function NextExecutionTime({ triggers, history, children }: NextExecution
           },
         })
       }
+      anchorProps={{
+        css: css`
+          max-width: 100%;
+        `,
+      }}
     >
       {children}
     </EuiToolTip>

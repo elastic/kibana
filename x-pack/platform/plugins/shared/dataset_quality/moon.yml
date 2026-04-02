@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/streams-schema'
   - '@kbn/streams-plugin'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod
@@ -92,26 +93,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

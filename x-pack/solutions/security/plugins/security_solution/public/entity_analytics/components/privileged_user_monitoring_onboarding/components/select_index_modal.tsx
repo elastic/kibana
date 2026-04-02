@@ -187,7 +187,7 @@ export const IndexSelectorModal = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={showCreateIndexModal}
               data-test-subj="create-index-button"
               aria-label={i18n.translate(

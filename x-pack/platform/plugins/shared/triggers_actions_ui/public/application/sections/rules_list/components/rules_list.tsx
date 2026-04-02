@@ -35,6 +35,7 @@ import {
   getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
   BulkEditActions,
   Pagination,
@@ -166,14 +167,18 @@ export const RulesList = ({
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities, navigateToApp },
+    application,
     http,
+    cps,
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
     ...startServices
   } = kibanaServices;
 
+  const { capabilities, navigateToApp } = application;
+
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.DISABLED, { application, cps });
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
@@ -946,7 +951,9 @@ export const RulesList = ({
                   <EuiButtonIcon
                     onClick={() => toggleErrorMessage(_executionStatus, rule)}
                     aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
+                    iconType={
+                      itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                    }
                   />
                 ) : null;
               }}
@@ -1028,6 +1035,7 @@ export const RulesList = ({
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
+            cps={cps}
           />
         )}
       </EuiPageTemplate.Section>

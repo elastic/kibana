@@ -37,7 +37,7 @@ const mockRoutingContext = {
 };
 
 jest.mock(
-  '../data_management/stream_detail_routing/state_management/stream_routing_state_machine',
+  '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine',
   () => ({
     // Note: `<T,>` syntax avoids TSX parsing this as JSX
     useStreamsRoutingSelector: <TSelected,>(

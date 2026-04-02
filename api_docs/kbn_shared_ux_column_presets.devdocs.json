@@ -1,0 +1,146 @@
+{
+  "id": "@kbn/shared-ux-column-presets",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-column-presets",
+        "id": "def-common.columnPresetActions",
+        "type": "Function",
+        "tags": [],
+        "label": "columnPresetActions",
+        "description": [],
+        "signature": [
+          "<TDataShape extends object = object>({ actions }: { actions?: ",
+          "Action",
+          "<any>[] | undefined; }) => { width: string; minWidth: string; align: \"right\"; }"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/column-presets/src/actions.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-column-presets",
+            "id": "def-common.columnPresetActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ actions }",
+            "description": [],
+            "signature": [
+              "{ actions?: ",
+              "Action",
+              "<any>[] | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/column-presets/src/actions.ts",
+            "lineNumber": 15,
+            "columnNumber": 7,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-column-presets",
+        "id": "def-common.EmptyCellString",
+        "type": "Function",
+        "tags": [],
+        "label": "EmptyCellString",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/column-presets/src/empty_values.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-column-presets",
+        "id": "def-common.EmptyCellValue",
+        "type": "Function",
+        "tags": [],
+        "label": "EmptyCellValue",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/column-presets/src/empty_values.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-column-presets",
+        "id": "def-common.ColumnPreset",
+        "type": "Type",
+        "tags": [],
+        "label": "ColumnPreset",
+        "description": [],
+        "signature": [
+          "<TDataShape extends object = TDataShapeSrc>(...args: keyof TArgs extends never ? [] : [args: TArgs]) => Partial<",
+          "EuiBasicTableColumn",
+          "<TDataShape>>"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/column-presets/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-column-presets",
+            "id": "def-common.ColumnPreset.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "keyof TArgs extends never ? [] : [args: TArgs]"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/column-presets/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

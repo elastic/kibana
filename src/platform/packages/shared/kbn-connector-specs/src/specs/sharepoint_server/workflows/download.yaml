@@ -1,0 +1,69 @@
+version: '1'
+name: 'sources.sharepoint-server.download'
+description: 'Download SharePoint Server content. REQUIRED: always provide download_action — calling without it will fail. download_action options: "downloadFile" (requires path, server-relative URL) for text/plain files — binary files (PDF, .docx) go through Elasticsearch attachment ingest pipeline (extracted text in docs[0].doc._source.attachment.content); "getSitePageContents" (requires page_id integer) for site page content.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: download_action
+    type: choice
+    options:
+      - "downloadFile"
+      - "getSitePageContents"
+    required: true
+    description: "Required. Which action to perform: 'downloadFile' to fetch file content by server-relative path; 'getSitePageContents' to fetch a site page by integer ID."
+  - name: path
+    type: string
+    required: false
+    description: "Server-relative URL of the file (for downloadFile)"
+  - name: page_id
+    type: number
+    required: false
+    description: "Integer item ID of the site page (for getSitePageContents)"
+steps:
+  - name: download-file-flow
+    type: if
+    condition: "${{ inputs.download_action == 'downloadFile' }}"
+    steps:
+      - name: download-file
+        type: sharepoint-server.downloadFile
+        connector-id: <%= sharepoint-server-stack-connector-id %>
+        with:
+          path: "${{ inputs.path }}"
+      - name: extract-content
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /_ingest/pipeline/_simulate
+          body:
+            pipeline:
+              processors:
+                - attachment:
+                    field: data
+                    indexed_chars: -1
+                    remove_binary: true
+            docs:
+              - _id: "${{ inputs.path }}"
+                _source:
+                  filename: "${{ inputs.path }}"
+                  data: "${{ steps.download-file.output.text }}"
+  - name: get-site-page-contents
+    type: sharepoint-server.getSitePageContents
+    if: "${{ inputs.download_action == 'getSitePageContents' }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with:
+      pageId: ${{ inputs.page_id }}
+  - name: set-download-result
+    type: if
+    condition: "${{ inputs.download_action == 'downloadFile' }}"
+    steps:
+      - name: set-download-file-output
+        type: data.set
+        with:
+          result: "${{ steps.extract-content.output }}"
+    else:
+      - name: set-site-page-contents-output
+        type: data.set
+        with:
+          result: "${{ steps.get-site-page-contents.output }}"

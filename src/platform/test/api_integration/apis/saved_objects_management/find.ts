@@ -92,7 +92,8 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '[request query.searchFields]: definition for this key is missing',
+                message:
+                  "[request query.searchFields]: Additional properties are not allowed ('searchFields' was unexpected)",
               });
             }));
       });

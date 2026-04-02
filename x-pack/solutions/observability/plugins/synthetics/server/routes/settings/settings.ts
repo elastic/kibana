@@ -4,22 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { IndexSizeEntry } from '../../../common/constants';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getIndexSizesRoute: SyntheticsRestApiRouteFactory<{
-  data: CatIndicesResponse;
+  data: IndexSizeEntry[];
 }> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.INDEX_SIZE,
   validate: {},
   handler: async ({ syntheticsEsClient, server }) => {
-    const data = await syntheticsEsClient.baseESClient.cat.indices({
+    const stats = await syntheticsEsClient.baseESClient.indices.stats({
       index: 'synthetics-*',
-      format: 'json',
-      bytes: 'b',
+      metric: 'store',
     });
+
+    const data: IndexSizeEntry[] = Object.entries(stats.indices ?? {}).map(
+      ([indexName, indexStats]) => ({
+        index: indexName,
+        sizeInBytes: indexStats.total?.store?.size_in_bytes ?? 0,
+      })
+    );
 
     return { data };
   },

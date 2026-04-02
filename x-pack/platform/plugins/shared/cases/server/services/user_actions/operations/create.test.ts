@@ -44,6 +44,9 @@ import {
   patchExtractObservablesCasesRequest,
   patchBothSettingsCasesRequest,
   getBothSettingsUserActions,
+  patchExtendedFieldsCasesRequest,
+  patchUpdateExtendedFieldsCasesRequest,
+  getExtendedFieldsUserActions,
 } from '../mocks';
 import { AttachmentType } from '../../../../common/types/domain';
 
@@ -313,6 +316,43 @@ describe('UserActionPersister', () => {
           user: testUser,
         })
       ).toEqual(getBothSettingsUserActions({ isMock: false }));
+    });
+
+    describe('extendedFields', () => {
+      it('creates a user action when extended_fields are set for the first time', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchExtendedFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+      });
+
+      it('creates a user action only for the fields that changed', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchUpdateExtendedFieldsCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+      });
+
+      it('creates no user action when extended_fields have not changed', () => {
+        const noDiffRequest = {
+          cases: [
+            {
+              ...patchUpdateExtendedFieldsCasesRequest.cases[0],
+              updatedAttributes: { extended_fields: { risk_score: 'low', severity: 'medium' } },
+            },
+          ],
+        };
+        expect(
+          persister.buildUserActions({
+            updatedCases: noDiffRequest,
+            user: testUser,
+          })
+        ).toEqual({ '1': [] });
+      });
     });
 
     describe('customFields', () => {

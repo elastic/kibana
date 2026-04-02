@@ -18,8 +18,8 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  GRAPH_TARGET_EUID_SOURCE_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import { Graph, isEntityNode } from '../../..';
 import { Callout } from '../callout/callout';
@@ -339,11 +339,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
     const pinnedIds = useMemo(() => {
-      return getFilterValues(searchFilters, [
-        ...GRAPH_ACTOR_ENTITY_FIELDS,
-        ...GRAPH_TARGET_ENTITY_FIELDS,
+      const filterValues = getFilterValues(searchFilters, [
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS,
         RELATED_ENTITY,
       ]).map(String);
+      return filterValues;
     }, [searchFilters]);
 
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({

@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { AgentVisibility } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -59,17 +58,6 @@ const PLUGINS_SCHEMA = schema.arrayOf(
     meta: { description: 'Array of plugin IDs to assign to the agent.' },
   }
 );
-
-const VISIBILITY_DISABLED_MESSAGE =
-  'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.';
-
-const isVisibilityBlockedByExperimentalGate = ({
-  experimentalFeaturesEnabled,
-  visibility,
-}: {
-  experimentalFeaturesEnabled: boolean;
-  visibility: AgentVisibility | undefined;
-}): boolean => !experimentalFeaturesEnabled && visibility !== undefined;
 
 export function registerAgentRoutes({
   router,
@@ -266,23 +254,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.create(request.body);
@@ -427,23 +398,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.update(request.params.id, request.body);

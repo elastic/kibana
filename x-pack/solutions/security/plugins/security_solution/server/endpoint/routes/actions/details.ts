@@ -37,7 +37,6 @@ export const registerActionDetailsRoutes = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

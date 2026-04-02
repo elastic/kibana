@@ -11,6 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/tracing-utils",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
     "@kbn/config",

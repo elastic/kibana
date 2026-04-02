@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/alerting-v2-schemas",
+    "@kbn/code-editor",
+    "@kbn/esql-language",
+    "@kbn/esql-types",
+    "@kbn/monaco",
+    "@kbn/zod"
+  ]
+}

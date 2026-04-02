@@ -305,7 +305,7 @@ describe('ProposalManager', () => {
     } as unknown as KeyboardEvent);
 
     expect(manager.hasPendingProposals()).toBe(false);
-    expect(onAccept).toHaveBeenCalledWith('all');
+    expect(onAccept).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
 
     addDocSpy.mockRestore();
   });
@@ -340,7 +340,7 @@ describe('ProposalManager', () => {
 
     expect(editor.getModel().getValue()).toBe(original);
     expect(manager.hasPendingProposals()).toBe(false);
-    expect(onReject).toHaveBeenCalledWith('all');
+    expect(onReject).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
 
     addDocSpy.mockRestore();
   });
@@ -478,7 +478,7 @@ describe('ProposalManager', () => {
       manager.applyAfterYaml('line1\nchanged\n');
       manager.acceptHunk(0);
 
-      expect(onAccept).toHaveBeenCalledWith('all');
+      expect(onAccept).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: false });
     });
   });
 
@@ -502,7 +502,7 @@ describe('ProposalManager', () => {
       manager.applyAfterYaml('line1\nchanged\n');
       manager.rejectHunk(0);
 
-      expect(onReject).toHaveBeenCalledWith('all');
+      expect(onReject).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: false });
     });
   });
 
@@ -518,7 +518,7 @@ describe('ProposalManager', () => {
       manager.acceptAll();
 
       expect(manager.hasPendingProposals()).toBe(false);
-      expect(onAccept).toHaveBeenCalledWith('all');
+      expect(onAccept).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
     });
 
     it('preserves editor model content after acceptAll', () => {
@@ -544,7 +544,7 @@ describe('ProposalManager', () => {
 
       expect(editor.getModel().getValue()).toBe(original);
       expect(manager.hasPendingProposals()).toBe(false);
-      expect(onReject).toHaveBeenCalledWith('all');
+      expect(onReject).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
     });
 
     it('restores original content after insert', () => {

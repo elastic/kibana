@@ -22,6 +22,12 @@ jest.mock('../../sourcerer/containers', () => ({
   })),
 }));
 
+jest.mock('../components/home/dynamic_risk_level_panel', () => ({
+  DynamicRiskLevelPanel: () => (
+    <div data-test-subj="dynamic-risk-level-panel">{'Dynamic Risk Level Panel'}</div>
+  ),
+}));
+
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn((flag: string) => {
     if (flag === 'newDataViewPickerEnabled') return false;
@@ -42,7 +48,7 @@ jest.mock('../components/home/combined_risk_donut_chart', () => ({
   ),
 }));
 
-jest.mock('../components/home/anomalies_placeholder_panel', () => ({
+jest.mock('../components/home/anomalies_panel', () => ({
   EntityAnalyticsRecentAnomalies: () => (
     <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
   ),
@@ -144,7 +150,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
-  it('renders the combined donut chart', () => {
+  it('renders the dynamic risk level panel', () => {
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -152,7 +158,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByTestId('combined-risk-donut-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
   });
 
   it('renders the anomalies placeholder panel', () => {

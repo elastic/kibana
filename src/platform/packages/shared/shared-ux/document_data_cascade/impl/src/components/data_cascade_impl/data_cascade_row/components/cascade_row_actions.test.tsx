@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -35,33 +36,48 @@ const headerRowActions = [
   },
 ];
 
-const renderComponent = () => {
+const renderComponent = (
+  props: Pick<ComponentProps<typeof CascadeRowActions>, 'isMobile'> = { isMobile: false }
+) => {
   render(
     <EuiThemeProvider>
-      <CascadeRowActions headerRowActions={headerRowActions} />
+      <CascadeRowActions headerRowActions={headerRowActions} {...props} />
     </EuiThemeProvider>
   );
 };
 
 describe('CascadeRowActions', () => {
-  it('will only render the first two actions by default', () => {
-    renderComponent();
-
-    // Check that the first two actions are visible
-    expect(screen.getByText('Action 1')).toBeInTheDocument();
-    expect(screen.getByText('Action 2')).toBeInTheDocument();
-    expect(screen.getByText('Action 3')).toBeInTheDocument();
-    expect(screen.queryByText('Action 4')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Select more options')).toBeInTheDocument();
+  describe('when isMobile is true', () => {
+    it('will only render the select more options button', () => {
+      renderComponent({ isMobile: true });
+      expect(screen.queryByText('Action 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('Action 2')).not.toBeInTheDocument();
+      expect(screen.queryByText('Action 3')).not.toBeInTheDocument();
+      expect(screen.queryByText('Action 4')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Select more options')).toBeInTheDocument();
+    });
   });
 
-  it('clicking the select more options button reveals additional actions', () => {
-    renderComponent();
+  describe('when isMobile is false', () => {
+    it('will only render the first two actions by default', () => {
+      renderComponent();
 
-    // Click the "Select more options" button
-    fireEvent.click(screen.getByLabelText('Select more options'));
+      // Check that the first two actions are visible
+      expect(screen.getByText('Action 1')).toBeInTheDocument();
+      expect(screen.getByText('Action 2')).toBeInTheDocument();
+      expect(screen.getByText('Action 3')).toBeInTheDocument();
+      expect(screen.queryByText('Action 4')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Select more options')).toBeInTheDocument();
+    });
 
-    // Check that the third action is now visible
-    expect(screen.getByText('Action 4')).toBeInTheDocument();
+    it('clicking the select more options button reveals additional actions', () => {
+      renderComponent();
+
+      // Click the "Select more options" button
+      fireEvent.click(screen.getByLabelText('Select more options'));
+
+      // Check that the third action is now visible
+      expect(screen.getByText('Action 4')).toBeInTheDocument();
+    });
   });
 });

@@ -27,7 +27,7 @@ import type {
   Suggestion,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
@@ -39,7 +39,7 @@ import {
   computeInterval,
 } from '@kbn/visualization-utils';
 import type { LegendSize } from '@kbn/chart-expressions-common';
-import type { XYState as XYConfiguration } from '@kbn/lens-common';
+import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -505,7 +505,9 @@ export class LensVisService {
     let preferredVisAttributes = originalPreferredVisAttributes;
 
     if (preferredVisAttributes && breakdownColumn) {
-      const visualization = preferredVisAttributes?.state?.visualization as XYState | undefined;
+      const visualization = preferredVisAttributes?.state?.visualization as
+        | XYVisualizationState
+        | undefined;
       const layers = Array.isArray(visualization?.layers) ? visualization.layers : [];
       if (
         !layers.some(

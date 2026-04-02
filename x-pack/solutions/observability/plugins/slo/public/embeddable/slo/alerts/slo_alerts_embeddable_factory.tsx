@@ -25,9 +25,12 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
+import {
+  SLO_ALERTS_EMBEDDABLE_ID,
+  SLO_ALERTS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/alerts/constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
-import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState } from './types';
+import type { AlertsCustomState, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
 const queryClient = new QueryClient();
 
@@ -49,8 +52,15 @@ export function getAlertsEmbeddableFactory({
 }) {
   const factory: EmbeddableFactory<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+    }) => {
       const deps = { ...coreStart, ...pluginsStart };
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       async function onEdit() {
         try {
           const result = await openSloConfiguration(
@@ -66,31 +76,37 @@ export function getAlertsEmbeddableFactory({
       }
 
       const titleManager = initializeTitleManager(initialState);
-      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(initialState, {
-        slos: [],
-        showAllGroupByInstances: false,
-      });
+      const sloAlertsStateManager = initializeStateManager<AlertsCustomState>(
+        { slos: initialState?.slos ?? [] },
+        { slos: [] }
+      );
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
-      function serializeState() {
+      function serializeState(): SloAlertsEmbeddableState {
         return {
           ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
           ...sloAlertsStateManager.getLatestState(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<SloAlertsEmbeddableState>({
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, sloAlertsStateManager.anyStateChange$),
+        anyStateChange$: merge(
+          drilldownsManager.anyStateChange$,
+          titleManager.anyStateChange$,
+          sloAlertsStateManager.anyStateChange$
+        ),
         getComparators: () => ({
           ...titleComparators,
+          ...drilldownsManager.comparators,
           slos: 'referenceEquality',
-          showAllGroupByInstances: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
+          drilldownsManager.reinitializeState(lastSaved ?? {});
           titleManager.reinitializeState(lastSaved);
           sloAlertsStateManager.reinitializeState(lastSaved);
         },
@@ -99,7 +115,9 @@ export function getAlertsEmbeddableFactory({
       const api = finalizeApi({
         ...titleManager.api,
         ...unsavedChangesApi,
+        ...drilldownsManager.api,
         defaultTitle$,
+        supportedTriggers: () => SLO_ALERTS_SUPPORTED_TRIGGERS,
         getTypeDisplayName: () =>
           i18n.translate('xpack.slo.editSloAlertswEmbeddable.typeDisplayName', {
             defaultMessage: 'configuration',
@@ -109,15 +127,11 @@ export function getAlertsEmbeddableFactory({
           onEdit();
         },
         serializeState,
-        getSloAlertsConfig: () => {
-          return {
-            slos: sloAlertsStateManager.api.slos$.getValue(),
-            showAllGroupByInstances: sloAlertsStateManager.api.showAllGroupByInstances$.getValue(),
-          };
-        },
+        getSloAlertsConfig: () => ({
+          slos: sloAlertsStateManager.api.slos$.getValue(),
+        }),
         updateSloAlertsConfig: (update) => {
           sloAlertsStateManager.api.setSlos(update.slos);
-          sloAlertsStateManager.api.setShowAllGroupByInstances(update.showAllGroupByInstances);
         },
       });
 
@@ -130,15 +144,13 @@ export function getAlertsEmbeddableFactory({
       return {
         api,
         Component: () => {
-          const [slos, showAllGroupByInstances] = useBatchedPublishingSubjects(
-            sloAlertsStateManager.api.slos$,
-            sloAlertsStateManager.api.showAllGroupByInstances$
-          );
+          const [slos] = useBatchedPublishingSubjects(sloAlertsStateManager.api.slos$);
           const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
             };
           }, []);
@@ -168,7 +180,6 @@ export function getAlertsEmbeddableFactory({
                       slos={slos}
                       timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
                       reloadSubject={reload$}
-                      showAllGroupByInstances={showAllGroupByInstances}
                     />
                   </QueryClientProvider>
                 </PluginContext.Provider>

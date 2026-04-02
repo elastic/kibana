@@ -44,11 +44,12 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   );
 
   const handleCreate = useCallback(
-    async (data: YamlEditorFormValues) => {
+    async (data: YamlEditorFormValues, isEnabled: boolean) => {
       await mutateAsync({
         template: {
           owner: defaultOwnerValue,
           definition: data.definition,
+          isEnabled,
         },
       });
       setYamlEditorState(exampleTemplateDefinition);

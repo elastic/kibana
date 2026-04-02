@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@kbn/react-query';
@@ -16,15 +16,28 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { QUERY_KEY_GROUPING_DATA, QUERY_KEY_ENTITY_ANALYTICS } from '../constants';
 import { DataViewContext } from '..';
 
+export type EntitiesGroupingQuery = GroupingQuery | SearchRequest;
+
 export interface EntitiesGroupingAggregation {
   entityType?: {
     buckets?: GenericBuckets[];
+  };
+  resolutionRiskScore?: {
+    value: number | null;
+  };
+  resolutionEntityName?: {
+    doc_count: number;
+    name: { buckets: Array<{ key: string; doc_count: number }> };
+  };
+  resolutionEntityType?: {
+    doc_count: number;
+    type: { buckets: Array<{ key: string; doc_count: number }> };
   };
 }
 
 export type EntitiesRootGroupingAggregation = RootAggregation<EntitiesGroupingAggregation>;
 
-export const getGroupedEntitiesQuery = (query: GroupingQuery, indexPattern: string) => {
+export const getGroupedEntitiesQuery = (query: EntitiesGroupingQuery, indexPattern: string) => {
   return {
     ...query,
     index: indexPattern,
@@ -37,7 +50,7 @@ export const useFetchGroupedData = ({
   query,
   enabled = true,
 }: {
-  query: GroupingQuery;
+  query: EntitiesGroupingQuery;
   enabled: boolean;
 }) => {
   const {

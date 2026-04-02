@@ -6,7 +6,12 @@
  */
 
 import { get } from 'lodash';
-import type { FieldEvaluation, FieldEvaluationSource } from '../definitions/entity_schema';
+import type {
+  EntityDefinitionWithoutId,
+  FieldEvaluation,
+  FieldEvaluationSource,
+} from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 
 /** Result of resolving document + field evaluation into a filter-friendly spec (no EVAL). */
 export type SourceMatchSpec = { type: 'unknown' } | { type: 'values'; values: string[] };
@@ -81,17 +86,18 @@ export function getSourceMatchSpec(doc: any, evaluation: FieldEvaluation): Sourc
 export function applyFieldEvaluations(
   doc: any,
   fieldEvaluations: FieldEvaluation[]
-): Record<string, string> {
-  const result: Record<string, string> = {};
+): Record<string, string | null> {
+  const result: Record<string, string | null> = {};
   for (const evaluation of fieldEvaluations) {
+    const currentDoc = { ...doc, ...result };
     let sourceValue: string | undefined;
     for (const source of evaluation.sources) {
-      sourceValue = resolveSourceValue(doc, source);
+      sourceValue = resolveSourceValue(currentDoc, source);
       if (sourceValue !== undefined) {
         break;
       }
     }
-    let value: string;
+    let value: string | null;
     if (sourceValue === undefined) {
       value = evaluation.fallbackValue;
     } else {
@@ -106,6 +112,17 @@ export function applyFieldEvaluations(
     result[evaluation.destination] = value;
   }
   return result;
+}
+
+export function getFieldEvaluationsFromDefinition(
+  entityDefinition: Pick<EntityDefinitionWithoutId, 'fieldEvaluations' | 'identityField'>
+): FieldEvaluation[] {
+  const sharedEvaluations = entityDefinition.fieldEvaluations ?? [];
+  if (isSingleFieldIdentity(entityDefinition.identityField)) {
+    return sharedEvaluations;
+  }
+
+  return [...sharedEvaluations, ...(entityDefinition.identityField.fieldEvaluations ?? [])];
 }
 
 function isNotEmpty(value: string): boolean {

@@ -11,15 +11,19 @@ import {
   deleteWatchlistRoute,
   getWatchlistRoute,
   listWatchlistsRoute,
+  searchWatchlistIndicesRoute,
   updateWatchlistRoute,
 } from './management/routes';
 import { registerEntitySourceRoutes } from './management/routes/entity_sources';
+import { syncWatchlistRoute } from './management/routes/sync';
 
 export const registerWatchlistRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
   createWatchlistRoute(router, logger);
   deleteWatchlistRoute(router, logger);
   getWatchlistRoute(router, logger);
   listWatchlistsRoute(router, logger);
+  searchWatchlistIndicesRoute(router, logger);
   updateWatchlistRoute(router, logger);
   registerEntitySourceRoutes(router, logger);
+  syncWatchlistRoute(router, logger);
 };

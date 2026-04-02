@@ -17,5 +17,6 @@
     "@kbn/core-http-browser",
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-browser",
+    "@kbn/zod",
   ]
 }

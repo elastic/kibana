@@ -79,9 +79,9 @@ export const legendConfigFunction: LegendConfigFn = {
         defaultMessage: 'Specifies the number of lines per legend item.',
       }),
     },
-    listLayoutMaxWidth: {
+    maxPixels: {
       types: ['number'],
-      help: i18n.translate('expressionXY.legendConfig.widthLimit.help', {
+      help: i18n.translate('expressionXY.legendConfig.maxPixels.help', {
         defaultMessage: 'Specifies the max label width in pixels for list layout truncation.',
       }),
     },

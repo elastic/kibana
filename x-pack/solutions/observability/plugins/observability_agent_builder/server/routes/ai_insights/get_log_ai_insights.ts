@@ -28,14 +28,15 @@ import { createAiInsightResult, type AiInsightResult } from './types';
 export interface GetLogAiInsightsParams {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
-  index: string;
-  id: string;
   inferenceClient: InferenceClient;
   connectorId: string;
   connector: InferenceConnector;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
   logger: Logger;
+  index?: string;
+  id?: string;
+  fields?: Record<string, unknown>;
 }
 
 export async function getLogAiInsights({
@@ -43,6 +44,7 @@ export async function getLogAiInsights({
   plugins,
   index,
   id,
+  fields,
   esClient,
   inferenceClient,
   connectorId,
@@ -50,14 +52,23 @@ export async function getLogAiInsights({
   request,
   logger,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
-  const logEntry = await getLogDocumentById({
-    esClient: esClient.asCurrentUser,
-    index,
-    id,
-  });
+  let logEntry: LogDocument;
 
-  if (!logEntry) {
-    throw new Error('Log entry not found');
+  if (typeof index === 'string' && typeof id === 'string') {
+    const fetchedById = await getLogDocumentById({
+      esClient: esClient.asCurrentUser,
+      index,
+      id,
+    });
+    if (!fetchedById) {
+      throw new Error('Log entry not found');
+    }
+    logEntry = fetchedById;
+    // esql mode, filter out null entries from passed in fields
+  } else {
+    logEntry = Object.fromEntries(
+      Object.entries(fields ?? {}).filter(([, v]) => v != null)
+    ) as LogDocument;
   }
 
   const context = await fetchLogContext({
@@ -95,55 +106,82 @@ async function fetchLogContext({
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
   esClient: IScopedClusterClient;
-  index: string;
-  id: string;
+  index?: string;
+  id?: string;
   logEntry: LogDocument;
 }): Promise<string> {
   const logTimestamp = logEntry['@timestamp'];
+  if (!logTimestamp) {
+    return dedent(`
+      <LogEntryFields>
+      \`\`\`json
+      ${JSON.stringify(logEntry, null, 2)}
+      \`\`\`
+      </LogEntryFields>
+    `);
+  }
+
   const logTime = moment(logTimestamp);
   const windowStart = logTime.clone().subtract(60, 'minutes').toISOString();
   const windowEnd = logTime.clone().add(60, 'minutes').toISOString();
 
-  let context = dedent(`
-    <LogEntryIndex>
-    ${index}
-    </LogEntryIndex>
-    <LogEntryId>
-    ${id}
-    </LogEntryId>
+  let context = '';
+
+  if (index) {
+    context += dedent(`
+      <LogEntryIndex>
+      ${index}
+      </LogEntryIndex>
+    `);
+  }
+  if (id) {
+    context += dedent(`
+      <LogEntryId>
+      ${id}
+      </LogEntryId>
+    `);
+  }
+
+  context += dedent(`
     <LogEntryFields>
     \`\`\`json
     ${JSON.stringify(logEntry, null, 2)}
     \`\`\`
     </LogEntryFields>
   `);
+  // in esql (fields) mode, trace.id may be available
+  const traceId = logEntry['trace.id'] as string | undefined;
+  const traceFilter = id ? `_id: ${id}` : traceId ? `trace.id: ${traceId}` : undefined;
+  const traceIndex = index ?? 'traces-*';
 
-  try {
-    const { traces } = await getTraces({
-      core,
-      plugins,
-      logger,
-      esClient,
-      index,
-      start: windowStart,
-      end: windowEnd,
-      kqlFilter: `_id: ${id}`,
-      maxTraces: 10,
-      maxDocsPerTrace: 100,
-    });
-    const trace = traces[0];
-    if (trace) {
-      context += dedent(`
-      <TraceDocuments>
-      Time window: ${windowStart} to ${windowEnd}
-      \`\`\`json
-      ${JSON.stringify(trace, null, 2)}
-      \`\`\`
-      </TraceDocuments>
-    `);
+  if (traceFilter) {
+    try {
+      const { traces } = await getTraces({
+        core,
+        plugins,
+        logger,
+        esClient,
+        index: traceIndex,
+        start: windowStart,
+        end: windowEnd,
+        kqlFilter: traceFilter,
+        maxTraces: 10,
+        maxDocsPerTrace: 100,
+      });
+      const trace = traces[0];
+      if (trace) {
+        context += dedent(`
+        <TraceDocuments>
+        Time window: ${windowStart} to ${windowEnd}
+        \`\`\`json
+        ${JSON.stringify(trace, null, 2)}
+        \`\`\`
+        </TraceDocuments>
+      `);
+      }
+    } catch (error) {
+      logger.debug(`Failed to fetch traces: ${error.message}`);
     }
-  } catch (error) {
-    logger.debug(`Failed to fetch traces: ${error.message}`);
   }
 
   return context;

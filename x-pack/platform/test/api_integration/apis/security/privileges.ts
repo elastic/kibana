@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_settings',
         'create_comment',
         'case_reopen',
+        'cases_manage_templates',
       ],
       generalCasesV3: [
         'all',
@@ -53,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         'create_comment',
         'case_reopen',
         'cases_assign',
+        'cases_manage_templates',
       ],
       observabilityCases: [
         'all',
@@ -71,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_settings',
         'create_comment',
         'case_reopen',
+        'cases_manage_templates',
       ],
       observabilityCasesV3: [
         'all',
@@ -82,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         'create_comment',
         'case_reopen',
         'cases_assign',
+        'cases_manage_templates',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
       agentBuilder: [
@@ -328,6 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_settings',
         'create_comment',
         'case_reopen',
+        'cases_manage_templates',
       ],
       securitySolutionCasesV3: [
         'all',
@@ -339,6 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
         'create_comment',
         'case_reopen',
         'cases_assign',
+        'cases_manage_templates',
       ],
       securitySolutionTimeline: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -351,6 +357,14 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'security_solution_exceptions_all',
       ],
+      securitySolutionRulesV3: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'security_solution_exceptions_all',
+      ],
+      securitySolutionAlertsV1: ['all', 'read', 'minimal_all', 'minimal_read'],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
       dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules', 'manage_alerts'],

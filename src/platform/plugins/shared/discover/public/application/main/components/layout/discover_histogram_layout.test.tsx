@@ -17,7 +17,6 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { act } from 'react-dom/test-utils';
-import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
@@ -33,8 +32,10 @@ const mockSearchSessionId = '123';
 
 const setup = async ({
   noSearchSessionId,
+  hideTable = false,
 }: {
   noSearchSessionId?: boolean;
+  hideTable?: boolean;
 } = {}) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
@@ -53,6 +54,7 @@ const setup = async ({
       tabId: toolkit.getCurrentTab().id,
       appState: {
         dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        hideTable,
         query: { query: '', language: 'kuery' },
       },
     })
@@ -99,18 +101,10 @@ const setup = async ({
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
-    panelsToggle: (
-      <PanelsToggle
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        isChartAvailable={undefined}
-        renderedFor="root"
-      />
-    ),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: true,
+      toggle: () => {},
+    }),
   };
 
   render(
@@ -143,6 +137,13 @@ describe('Discover histogram layout component', () => {
       await user.click(screen.getByTestId('dscHideHistogramButton'));
       expect(screen.queryByTestId('dscPanelsToggleInHistogram')).not.toBeInTheDocument();
       expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
+    });
+
+    it('should hide the main panel when the table is collapsed and chart is available', async () => {
+      await setup({ hideTable: true });
+      expect(screen.queryByTestId('unifiedHistogramRendered')).toBeInTheDocument();
+      expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscShowTableButton')).toBeInTheDocument();
     });
   });
 });

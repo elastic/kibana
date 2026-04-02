@@ -12,3 +12,8 @@ export function esqlIsNotNullOrEmpty(field: string) {
 export function esqlIsNullOrEmpty(field: string) {
   return `(${field} IS NULL OR ${field} == "")`;
 }
+
+/** Escape a string for use inside double-quoted ESQL string literals (backslash and double-quote). */
+export function escapeEsqlStringLiteral(s: string): string {
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}

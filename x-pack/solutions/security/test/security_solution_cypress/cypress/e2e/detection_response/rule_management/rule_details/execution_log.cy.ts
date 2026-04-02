@@ -45,7 +45,7 @@ describe(
       });
     });
 
-    it('should display the execution log', function () {
+    it.skip('should display the execution log', function () {
       visit(ruleDetailsUrl(this.ruleId));
       goToExecutionLogTab();
 

@@ -25,6 +25,7 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -65,6 +66,10 @@ export interface DiscoverAppState {
    * Hide chart
    */
   hideChart?: boolean;
+  /**
+   * Hide table
+   */
+  hideTable?: boolean;
   /**
    * The current data source
    */
@@ -133,6 +138,39 @@ export enum TabInitializationStatus {
   Error = 'Error',
 }
 
+export const DEFAULT_PROFILE_STATE_FIELDS = [
+  'columns',
+  'rowHeight',
+  'breakdownField',
+  'hideChart',
+  'hideTable',
+] as const;
+
+export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
+
+type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
+
+export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+
+export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+
+export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
+
+export interface DefaultProfileState {
+  resetId: string;
+  fieldsToReset: DefaultProfileStateFields;
+  snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
+}
+
+// This is used to identify heavy state values (e.g. long lists of nested objects)
+// that should be excluded from the Redux serializable/immutable checks to avoid
+// rendering delays when using Discover in dev builds
+export const HEAVY_STATE_KEYS = [
+  'cascadedDocumentsState',
+  'fieldListExistingFieldsInfo',
+  'renderDocumentViewMeta',
+];
+
 export interface TabState extends TabItem {
   initializationState:
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
@@ -161,13 +199,7 @@ export interface TabState extends TabItem {
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
-  resetDefaultProfileState: {
-    resetId: string;
-    columns: boolean;
-    rowHeight: boolean;
-    breakdownField: boolean;
-    hideChart: boolean;
-  };
+  defaultProfileState: DefaultProfileState;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
@@ -179,6 +211,8 @@ export interface TabState extends TabItem {
     docViewer?: Partial<DocViewerRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner: string | undefined;
+  renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }
 

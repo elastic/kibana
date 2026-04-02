@@ -22,6 +22,7 @@ export interface UseUnifiedHistoryConfig {
   tags?: string[];
   startDate?: string;
   endDate?: string;
+  sortDirection?: 'asc' | 'desc';
   enabled?: boolean;
 }
 
@@ -40,6 +41,7 @@ export const useUnifiedHistory = ({
   tags,
   startDate,
   endDate,
+  sortDirection = 'desc',
   enabled = true,
 }: UseUnifiedHistoryConfig) => {
   const { http } = useKibana().services;
@@ -56,7 +58,17 @@ export const useUnifiedHistory = ({
   return useQuery(
     [
       UNIFIED_HISTORY_QUERY_KEY,
-      { pageSize, nextPage, kuery, sourceFilters, userIds, tags, startDate, endDate },
+      {
+        pageSize,
+        nextPage,
+        kuery,
+        sourceFilters,
+        userIds,
+        tags,
+        startDate,
+        endDate,
+        sortDirection,
+      },
     ],
     () =>
       http.get<UnifiedHistoryResponse>('/api/osquery/history', {
@@ -65,7 +77,7 @@ export const useUnifiedHistory = ({
           pageSize,
           ...(nextPage ? { nextPage } : {}),
           ...(kuery ? { kuery } : {}),
-          ...(sourceFilters && sourceFilters.length > 0 && sourceFilters.length < 3
+          ...(sourceFilters && sourceFilters.length > 0
             ? { sourceFilters: sourceFilters.join(',') }
             : {}),
           ...(userIds && userIds.length > 0 ? { userIds: userIds.join(',') } : {}),
@@ -73,6 +85,7 @@ export const useUnifiedHistory = ({
           ...(tags && tags.length > 0 ? { tags: JSON.stringify(tags) } : {}),
           ...(startDate ? { startDate } : {}),
           ...(endDate ? { endDate } : {}),
+          ...(sortDirection !== 'desc' ? { sortDirection } : {}),
         },
       }),
     {

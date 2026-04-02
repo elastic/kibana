@@ -11,9 +11,11 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
+import { extractEventChainDepthFromExecution } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -66,6 +68,15 @@ export async function setupDependencies(
     throw new Error(
       `Workflow execution id ${workflowRunId} cannot execute a workflow without Kibana Request`
     );
+  }
+
+  const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution);
+
+  if (eventChainDepth !== undefined) {
+    setWorkflowEventChainContext(fakeRequest, {
+      depth: eventChainDepth,
+      sourceWorkflowId: workflowExecution.workflowId,
+    });
   }
 
   let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
@@ -158,5 +169,6 @@ export async function setupDependencies(
     nodesFactory,
     workflowExecutionRepository,
     esClient,
+    telemetryClient,
   };
 }

@@ -202,7 +202,7 @@ describe('CustomTimeRangePanel', () => {
         target: { value: '15' },
       });
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m - now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m to now');
     });
 
     it('emits the literal "now" in the input for the Now type', () => {
@@ -212,7 +212,7 @@ describe('CustomTimeRangePanel', () => {
 
       fireEvent.click(within(getStartFieldset()).getByText('Now'));
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now - now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now to now');
     });
 
     it('updates the panel UI when the input text changes to a valid range', () => {
@@ -230,12 +230,12 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('does not reset the panel when the input becomes partial or unparseable', () => {
-      // '2025-01-01 to now' → start=ABSOLUTE "Jan 1 2025, 00:00", end=NOW.
+      // '2025-01-01 to now' → start=ABSOLUTE "Jan 1, 2025, 00:00:00", end=NOW.
       renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to now' });
       openCustomPanel();
 
       const startAbsInput = within(getStartFieldset()).getByLabelText('Start date absolute date');
-      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+      expect(startAbsInput).toHaveValue('Jan 1, 2025, 00:00:00');
 
       // Simulate the user clearing/partially typing in the main input.
       fireEvent.change(screen.getByLabelText('Set picker text'), {
@@ -243,7 +243,7 @@ describe('CustomTimeRangePanel', () => {
       });
 
       // Panel state must not have been clobbered by a fallback timestamp.
-      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+      expect(startAbsInput).toHaveValue('Jan 1, 2025, 00:00:00');
       expect(
         within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();
@@ -270,7 +270,7 @@ describe('CustomTimeRangePanel', () => {
       expect(onPresetSave).toHaveBeenCalledWith({
         start: 'now-15m',
         end: 'now',
-        label: '-15m - now',
+        label: '-15m to now',
       });
     });
   });

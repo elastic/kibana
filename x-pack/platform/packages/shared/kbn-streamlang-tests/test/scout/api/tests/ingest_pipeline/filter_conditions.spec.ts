@@ -33,7 +33,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { attributes: { status_codes: [200, 201, 204] } },
@@ -71,7 +71,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { path: 'C:\\Program Files\\App' },
@@ -102,7 +102,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { message: 'He said "hello"' },
@@ -135,7 +135,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { data: 'path: "C:\\Users\\test"' },
@@ -169,7 +169,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { path: 'C:\\Program Files\\App\\bin' },
@@ -203,7 +203,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { path: 'C:\\Windows\\System32' },
@@ -237,7 +237,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { path: 'C:\\Program Files\\bin\\app.exe' },

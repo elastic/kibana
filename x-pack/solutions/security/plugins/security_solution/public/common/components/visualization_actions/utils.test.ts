@@ -6,12 +6,44 @@
  */
 
 import {
+  buildAnyFieldExistsFilter,
   getDetailsPageFilter,
   getNetworkDetailsPageFilter,
   getRequestsAndResponses,
+  hostNameExistsFilter,
   parseVisualizationData,
+  userNameExistsFilter,
 } from './utils';
 import { mockRequests } from './__mocks__/utils';
+
+describe('buildAnyFieldExistsFilter', () => {
+  test('meta.value serializes the same bool query as query', () => {
+    const [filter] = buildAnyFieldExistsFilter(['host.name', 'host.id']);
+    expect(filter.meta.value).toBe(JSON.stringify({ query: filter.query }));
+  });
+
+  test('hostNameExistsFilter includes EUID-related host fields and entity.id', () => {
+    const [filter] = hostNameExistsFilter;
+    const should = (filter.query as { bool: { filter: Array<{ bool: { should: unknown[] } }> } })
+      .bool.filter[0].bool.should;
+    const fields = should.map((clause) => (clause as { exists: { field: string } }).exists.field);
+    expect(fields).toEqual([
+      'host.entity.id',
+      'host.id',
+      'host.name',
+      'host.hostname',
+      'entity.id',
+    ]);
+  });
+
+  test('userNameExistsFilter includes EUID-related user fields and entity.id', () => {
+    const [filter] = userNameExistsFilter;
+    const should = (filter.query as { bool: { filter: Array<{ bool: { should: unknown[] } }> } })
+      .bool.filter[0].bool.should;
+    const fields = should.map((clause) => (clause as { exists: { field: string } }).exists.field);
+    expect(fields).toEqual(['user.entity.id', 'user.name', 'user.id', 'user.email', 'entity.id']);
+  });
+});
 
 describe('getDetailsPageFilter', () => {
   test('should render host details filter', () => {

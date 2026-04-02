@@ -26,8 +26,8 @@ const packageMatcher = makeMatcher([
 /**
  * Any code that is outside of a package must match this in order to trigger a restart
  */
-const nonPackageMatcher = makeMatcher(['config/**/*.yml', 'plugins/**/server/**/*']);
-const staticFileMatcher = makeMatcher(['plugins/**/kibana.json']);
+const nonPackageMatcher = makeMatcher(['plugins/**/server/**/*']);
+const staticFileMatcher = makeMatcher(['plugins/**/kibana.json', 'config/**/*.yml']);
 const OPTIMIZER_RESTART_DEBOUNCE_MS = 1000;
 
 export interface Options {

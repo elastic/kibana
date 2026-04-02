@@ -274,7 +274,7 @@ const CurrentPageOfTotal = ({
     <EuiButtonEmpty
       onClick={onPopoverClick}
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.BULK_ACTION_BUTTON}
     >

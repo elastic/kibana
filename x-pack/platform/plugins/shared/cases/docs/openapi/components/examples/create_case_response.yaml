@@ -2,6 +2,7 @@ summary: The create case API returns a JSON object that contains details about t
 value: 
   comments: []
   totalAlerts: 0
+  totalEvents: 0
   id: 66b9aa00-94fa-11ea-9f74-e7e108796192
   version: WzUzMiwxXQ==
   totalComment: 0

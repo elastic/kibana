@@ -26,7 +26,7 @@ import {
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & {
-  data_stream: { type: string; dataset: string };
+  data_stream: { type?: string; dataset: string };
 };
 
 export const getStreamsForInputType = (

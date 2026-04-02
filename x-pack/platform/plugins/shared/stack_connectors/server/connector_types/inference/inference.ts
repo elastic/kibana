@@ -201,11 +201,15 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         method: 'POST',
         path: `_inference/chat_completion/${this.inferenceId}/_stream`,
+        querystring: {
+          timeout: '180s',
+        },
         body,
       },
       {
         asStream: true,
         meta: true,
+        requestTimeout: 180_000,
         signal: params.signal,
         ...(params.telemetryMetadata?.pluginId
           ? {

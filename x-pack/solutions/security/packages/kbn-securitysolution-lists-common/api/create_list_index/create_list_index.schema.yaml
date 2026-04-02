@@ -5,6 +5,7 @@ info:
 paths:
   /api/lists/index:
     post:
+      deprecated: true
       x-labels: [serverless, ess]
       operationId: CreateListIndex
       x-codegen-enabled: true

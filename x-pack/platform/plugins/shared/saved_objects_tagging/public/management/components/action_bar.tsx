@@ -107,6 +107,7 @@ export const ActionBar: FC<ActionBarProps> = ({
                         className="tagMgt__actionBarIcon"
                         type="chevronSingleDown"
                         size="s"
+                        aria-hidden={true}
                       />
                     </EuiLink>
                   </EuiText>

@@ -22,7 +22,7 @@
           "({ url }: Props) => React.JSX.Element"
         ],
         "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
-        "lineNumber": 222,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +38,7 @@
               "Props"
             ],
             "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
-            "lineNumber": 222,
+            "lineNumber": 186,
             "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,

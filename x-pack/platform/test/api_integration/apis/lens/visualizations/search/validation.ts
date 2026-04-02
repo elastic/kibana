@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { LENS_INTERNAL_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -16,14 +16,14 @@ export default function ({ getService }: FtrProviderContext) {
   describe('validation', () => {
     it('should return error if using unknown params', async () => {
       const response = await supertest
-        .get(LENS_INTERNAL_VIS_API_PATH)
+        .get(LENS_VIS_API_PATH)
         .query({ xyz: 'unknown param' })
         .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send({});
 
       expect(response.status).to.be(400);
       expect(response.body.message).to.be(
-        '[request query.xyz]: definition for this key is missing'
+        "[request query.xyz]: Additional properties are not allowed ('xyz' was unexpected)"
       );
     });
   });

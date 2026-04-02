@@ -7,7 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup, EuiComboBox, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
   DEFAULT_COLOR_MAPPING_CONFIG,
@@ -34,6 +35,41 @@ import { getDatatableColumn } from '../../../../common/expressions/impl/datatabl
 const idPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
+
+const dynamicColorModeOptions: Array<EuiComboBoxOptionOption<ColumnType['colorMode']>> = [
+  {
+    id: `${idPrefix}none`,
+    value: 'none',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
+      defaultMessage: 'None',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
+  },
+  {
+    id: `${idPrefix}cell`,
+    value: 'cell',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
+      defaultMessage: 'Cell',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
+  },
+  {
+    id: `${idPrefix}badge`,
+    value: 'badge',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.badge', {
+      defaultMessage: 'Badge',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_badge',
+  },
+  {
+    id: `${idPrefix}text`,
+    value: 'text',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
+      defaultMessage: 'Text',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
+  },
+];
 
 function updateColumn(
   state: DatatableVisualizationState,
@@ -97,6 +133,10 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
+
+  const selectedDynamicColorModeOption =
+    dynamicColorModeOptions.find((option) => option.value === currentColorMode) ??
+    dynamicColorModeOptions[0];
 
   const currentMinMax =
     getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
@@ -176,39 +216,22 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
               defaultMessage: 'Color by value',
             })}
           >
-            <EuiButtonGroup
-              isFullWidth
-              legend={i18n.translate('xpack.lens.table.dynamicColoring.label', {
+            <EuiComboBox
+              fullWidth
+              compressed
+              isClearable={false}
+              aria-label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
                 defaultMessage: 'Color by value',
               })}
               data-test-subj="lnsDatatable_dynamicColoring_groups"
-              buttonSize="compressed"
-              options={[
-                {
-                  id: `${idPrefix}none`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
-                    defaultMessage: 'None',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
-                },
-                {
-                  id: `${idPrefix}cell`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
-                    defaultMessage: 'Cell',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
-                },
-                {
-                  id: `${idPrefix}text`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
-                    defaultMessage: 'Text',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
-                },
-              ]}
-              idSelected={`${idPrefix}${currentColorMode}`}
-              onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as ColumnType['colorMode'];
+              singleSelection={{ asPlainText: true }}
+              options={dynamicColorModeOptions}
+              selectedOptions={[selectedDynamicColorModeOption]}
+              onChange={(choices) => {
+                const newMode = choices[0]?.value;
+                if (!newMode) {
+                  return;
+                }
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };

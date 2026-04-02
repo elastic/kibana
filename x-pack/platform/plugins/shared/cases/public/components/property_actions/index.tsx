@@ -86,7 +86,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
           <EuiButtonIcon
             data-test-subj={`${dataTestSubjPrepend}-ellipses`}
             aria-label={i18n.ACTIONS_ARIA}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             onClick={onButtonClick}
             buttonRef={buttonRef}
           />

@@ -123,7 +123,7 @@ export const AlertsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasNonClosedAlerts ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasNonClosedAlerts ? 'chevronLimitLeft' : '',
         title: (
           <EuiText
             size="xs"

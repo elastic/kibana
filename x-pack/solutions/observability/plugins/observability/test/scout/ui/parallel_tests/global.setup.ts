@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { globalSetupHook, tags } from '@kbn/scout-oblt';
+import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 import {
   createDataView,
   generateLogsData,

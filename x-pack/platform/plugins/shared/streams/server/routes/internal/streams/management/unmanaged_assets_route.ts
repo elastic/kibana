@@ -31,11 +31,14 @@ export const unmanagedAssetsRoute = createServerRoute({
     path: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({
       name: params.path.name,
       esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
     });
 
     if (!read) {

@@ -41,11 +41,13 @@ export function SvlSearchNavigationServiceProvider({
     },
     async navigateToIndexDetailPage(indexName: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
+        await PageObjects.common.navigateToApp('indexManagement', {
+          path: 'indices/index_details',
+          search: `indexName=${indexName}`,
           shouldLoginIfPrompted: false,
         });
       });
-      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
+      await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage() {
       await PageObjects.common.navigateToApp('searchInferenceEndpoints', {

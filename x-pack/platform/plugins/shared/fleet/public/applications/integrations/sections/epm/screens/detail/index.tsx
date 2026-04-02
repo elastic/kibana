@@ -51,7 +51,7 @@ import {
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
@@ -289,9 +289,13 @@ export function Detail() {
     packageInfo &&
     hasDocumentation({ packageInfo, integration });
 
-  const showAlertingTab = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
+  const { enableIntegrationInactivityAlerting } = ExperimentalFeaturesService.get();
+  const hasArchiveAlertingAssets = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
     (ALERTING_ASSET_TYPES as string[]).includes(type)
   );
+  const showAlertingTab =
+    hasArchiveAlertingAssets ||
+    (isInstalled && packageInfo?.type === 'integration' && enableIntegrationInactivityAlerting);
 
   // Track install status state
   useEffect(() => {

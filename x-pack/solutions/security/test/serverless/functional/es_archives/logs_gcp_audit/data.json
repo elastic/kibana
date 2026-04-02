@@ -12,9 +12,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin@example.com"
-        }
+        "id": "admin@example.com"
       },
       "client": {
         "user": {
@@ -152,9 +150,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin2@example.com"
-        }
+        "id": "admin2@example.com"
       },
       "client": {
         "user": {
@@ -292,9 +288,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin3@example.com"
-        }
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -432,9 +426,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin3@example.com"
-        }
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -572,9 +564,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin4@example.com"
-        }
+        "id": "admin4@example.com"
       },
       "client": {
         "user": {
@@ -721,9 +711,7 @@
         }
       },
       "user": {
-        "entity": {
-          "id": "admin6@example.com"
-        }
+        "id": "admin6@example.com"
       },
       "client": {
         "user": {
@@ -873,12 +861,10 @@
         }
       },
       "user": {
-        "entity": {
-          "id": [
-            "admin-user1@example.com",
-            "admin-user2@example.com"
-          ]
-        }
+        "id": [
+          "admin-user1@example.com",
+          "admin-user2@example.com"
+        ]
       },
       "client": {
         "user": {

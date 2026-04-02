@@ -37,9 +37,16 @@ Here is the Elastic integrations context for you to reference for your task, rea
 - If there are multiple integrations in the list that match, prioritize the most specific of them, as long as it is compatible with the rule:
   - For example, if the rule is related to "Linux Sysmon" then the "Sysmon for Linux" integration is more specific than any other "Linux" integration.
   - Operating System needs to be compatible, so if the rule is related to "Windows Sysmon", then the "Linux Sysmon" integration is not compatible, so we should assign the "Windows" integration.
-- If not completely sure about the best match, and there is an integration with "Elastic" in the name, you can safely respond with that one, they are general purpose security integrations created by Elastic.
+- If not completely sure about the best match, and there is an integration with "Elastic" in the name, you can safely respond with that one, they are general purpose security integrations created by Elastic. These are mostly most suited for the rules that do many things at a time.
+  - Elastic Defend is one such example which is a cross platform integration that can be used for a wide range of SIEM and detection use cases such as prevention, detection, and response capabilities with deep visibility for EPP, EDR, SIEM, and Security Analytics use cases across Windows, macOS, and Linux operating systems running on both traditional endpoints and public cloud environments. Use Elastic Defend to:
+    - Prevent complex attacks - Prevent malware (Windows, macOS, Linux) and ransomware (Windows) from executing, and stop advanced threats with malicious behavior (Windows, macOS, Linux), memory threat (Windows, macOS, Linux), and credential hardening (Windows) protections. All powered by Elastic Labs(external, opens in a new tab or window) and our global community.
+    - Alert in high fidelity - Bolster team efficacy by detecting threats centrally and minimizing false positives via extensive corroboration.
+    - Detect threats in high fidelity - Elastic Defend facilitates deep visibility by instrumenting the process, file, and network data in your environments with minimal data collection overhead.
+    - Triage and respond rapidly - Quickly analyze detailed data from across your hosts. Examine host-based activity with interactive visualizations. Invoke remote response actions across distributed endpoints. Extend investigation capabilities even further with the Osquery integration, fully integrated into Elastic Security workflows.
+    - Secure your cloud workloads - Stop threats targeting cloud workloads and cloud-native applications. Gain real-time visibility and control with a lightweight user-space agent, powered by eBPF. Automate the identification of cloud threats with detection rules and machine learning (ML). Achieve rapid time-to-value with MITRE ATT&CK-aligned detections honed by Elastic Security Labs.
+    - View terminal sessions - Give your security team a unique and powerful investigative tool for digital forensics and incident response (DFIR), reducing the mean time to respond (MTTR). Session view provides a time-ordered series of process executions in your Linux workloads in the form of a terminal shell, as well as the ability to replay the terminal session.
 - If no related integration is found, reply with an empty string.
-- Provide a concise reasoning summary for your decision, explaining why the selected integration is the best fit or why no suitable match was found.
+- Provide a readable and clear reasoning for your decision, explaining why the selected integration is the best fit or why no suitable match was found.
 </guidelines>
 
 <expected_output>

@@ -33,9 +33,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
     onFeatureFetchError: (streamName, error) => {
       const errorMessage =
         error instanceof Error ? error.stack ?? error.message : String(error ?? 'Unknown error');
-      logger.debug(
-        `search_knowledge_indicators: failed to fetch features for ${streamName}: ${errorMessage}`
-      );
+      logger.debug(`search_kis: failed to fetch features for ${streamName}: ${errorMessage}`);
     },
     getStreamNames: async () => {
       const streams = await streamsClient.listStreams();
@@ -49,7 +47,8 @@ export async function searchKnowledgeIndicatorsToolHandler({
       return result.hits;
     },
     getQueries: async (streamNames, search_text) => {
-      // TODO: add support for semantic search
+      // findQueries uses the default search mode (hybrid when ELSER is available,
+      // keyword otherwise), giving the agent the best-available ranking.
       const links = search_text
         ? await queryClient.findQueries(streamNames, search_text)
         : await queryClient.getQueryLinks(streamNames);

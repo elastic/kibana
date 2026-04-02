@@ -13,6 +13,7 @@ module.exports = {
   roots: [
     '<rootDir>/src/platform/plugins/shared/workflows_management/common',
     '<rootDir>/src/platform/plugins/shared/workflows_management/public',
+    '<rootDir>/src/platform/plugins/shared/workflows_management/test/connector_workflows',
   ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/workflows_management',

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ON_CLICK_IMAGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_CLICK_IMAGE, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export const IMAGE_EMBEDDABLE_TYPE = 'image';
 export const ADD_IMAGE_EMBEDDABLE_ACTION_ID = 'create_image_embeddable';
-export const IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_CLICK_IMAGE];
+export const IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_CLICK_IMAGE, ON_OPEN_PANEL_MENU];
 export const DEFAULT_OBJECT_FIT = 'contain'; // CSS spec defaults to fill but embeddable has historically defaulted to contain

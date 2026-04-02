@@ -29,16 +29,23 @@ interface IntegrationsResponse {
  * @param core The core start contract to make HTTP requests.
  * @param areRemoteIndicesAvailable A boolean indicating if remote indices should be included.
  * @param signal Optional AbortSignal to cancel the request.
+ * @param projectRouting Optional CPS project routing value forwarded to the server so that index
+ *   resolution reflects the project picker selection or an explicit `SET project_routing`
+ *   pre-statement. `SET project_routing` takes precedence over the picker value.
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
 export const getIndicesList = async (
   core: Pick<CoreStart, 'http'>,
   areRemoteIndicesAvailable: boolean,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  projectRouting?: string
 ): Promise<ESQLSourceResult[]> => {
   const scope = areRemoteIndicesAvailable ? 'all' : 'local';
   const response = await core.http
-    .get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`, { signal })
+    .get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`, {
+      signal,
+      query: projectRouting ? { projectRouting } : undefined,
+    })
     .catch((error) => {
       if (signal?.aborted) return [];
       // eslint-disable-next-line no-console
@@ -96,18 +103,22 @@ const getIntegrations = async (
  * @param core The core start contract to make HTTP requests and access application capabilities.
  * @param getLicense An optional function to retrieve the current license information.
  * @param signal Optional AbortSignal to cancel the request.
+ * @param projectRouting Optional CPS project routing value forwarded to the server so that index
+ *   resolution reflects the project picker selection or an explicit `SET project_routing`
+ *   pre-statement. `SET project_routing` takes precedence over the picker value.
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
 export const getESQLSources = async (
   core: Pick<CoreStart, 'application' | 'http'>,
   getLicense: (() => Promise<ILicense | undefined>) | undefined,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  projectRouting?: string
 ): Promise<ESQLSourceResult[]> => {
   const ls = await getLicense?.();
   const ccrFeature = ls?.getFeature('ccr');
   const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
   const [allIndices, integrations] = await Promise.all([
-    getIndicesList(core, areRemoteIndicesAvailable, signal),
+    getIndicesList(core, areRemoteIndicesAvailable, signal, projectRouting),
     getIntegrations(core, signal),
   ]);
   return [...allIndices, ...integrations];

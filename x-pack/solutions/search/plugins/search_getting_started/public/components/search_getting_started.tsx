@@ -13,6 +13,7 @@ import { AnalyticsEvents } from '../../common';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { SearchGettingStartedConnectCode } from './connect_code';
+import { AgentInstallSection } from './agent_install/agent_install';
 import { GettingStartedFooter } from './footer';
 import { SearchGettingStartedHeader } from './header';
 
@@ -27,6 +28,9 @@ export const SearchGettingStartedPage: React.FC = () => {
     <SearchGettingStartedPageTemplate>
       <EuiPageTemplate.Section data-test-subj="gettingStartedHeader" paddingSize="xl" grow={false}>
         <SearchGettingStartedHeader />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section data-test-subj="gettingStartedAgentInstall">
+        <AgentInstallSection />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section data-test-subj="gettingStartedConsoleTutorials" paddingSize="xl">
         <ConsoleTutorialsGroup />

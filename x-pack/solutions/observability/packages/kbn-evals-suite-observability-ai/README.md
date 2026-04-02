@@ -18,7 +18,10 @@ This package is separate from [`@kbn/evals-suite-obs-ai-assistant`](../kbn-evals
 
 ### Snapshot Data
 
-AI Insights evaluations replay observability data from a GCS snapshot repository (`obs-ai-datasets/otel-demo/payment-service-failures`).
+AI Insights evaluations replay observability data from GCS snapshot repositories:
+
+- `obs-ai-datasets/otel-demo/payment-service-failures` — payment service invalid token errors
+- `obs-ai-datasets/otel-demo/payment-unreachable` — payment service unreachable from checkout (via the `paymentUnreachable` feature flag in the OTel demo)
 
 Set `GCS_CREDENTIALS` before starting Scout. This must contain the full JSON service account credential string (not a file path):
 

@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { FleetError, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../../services';
@@ -84,12 +85,16 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
   const spaceIds = request.body?.space_ids ?? [spaceId];
 
   for (const spaceToInstallId of spaceIds) {
+    const spaceScopedClient = appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId);
+    const installAsAdditionalSpace =
+      (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceToInstallId;
+
     await installKibanaAssetsAndReferences({
-      savedObjectsClient: appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId),
+      savedObjectsClient: spaceScopedClient,
       logger,
       pkgName,
       pkgTitle: packageInfo.title,
-      installAsAdditionalSpace: true,
+      installAsAdditionalSpace,
       spaceId: spaceToInstallId,
       assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
       installedPkg: installation,
@@ -99,9 +104,12 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
         archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
       },
     });
-  }
 
-  await createInactivityMonitoringTemplate({ logger, savedObjectsClient }, { packageInfo });
+    await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient: spaceScopedClient },
+      { packageInfo, spaceId: spaceToInstallId, installAsAdditionalSpace }
+    );
+  }
 
   return response.ok({ body: { success: true } });
 };
@@ -168,9 +176,14 @@ export const installRuleAssetsHandler: FleetRequestHandler<
 
   const { packageInfo } = installedPkgWithAssets;
 
+  const installAsAdditionalSpace =
+    (installation.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId;
+
   await stepCreateAlertingAssets({
     logger,
-    savedObjectsClient,
+    savedObjectsClient: installAsAdditionalSpace
+      ? appContextService.getInternalUserSOClientForSpaceId(spaceId)
+      : savedObjectsClient,
     packageInstallContext: {
       packageInfo,
       paths: installedPkgWithAssets.paths,
@@ -178,6 +191,7 @@ export const installRuleAssetsHandler: FleetRequestHandler<
     },
     spaceId,
     request,
+    installAsAdditionalSpace,
   });
 
   return response.ok({ body: { success: true } });

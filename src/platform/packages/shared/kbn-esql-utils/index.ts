@@ -21,6 +21,7 @@ export {
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
+  buildMetricsInfoQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -72,4 +73,4 @@ export {
   type ESQLStatsQueryMeta,
 } from './src';
 
-export { ENABLE_ESQL } from './constants';
+export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

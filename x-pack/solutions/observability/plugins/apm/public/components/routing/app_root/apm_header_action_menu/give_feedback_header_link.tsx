@@ -37,7 +37,7 @@ export function GiveFeedbackHeaderLink() {
       data-test-subj="apmGiveFeedbackLink"
       href={getStorageExplorerFeedbackHref()}
       target="_blank"
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       color="primary"
       aria-label={i18n.translate('xpack.apm.views.storageExplorer.giveFeedbackAriaLabel', {

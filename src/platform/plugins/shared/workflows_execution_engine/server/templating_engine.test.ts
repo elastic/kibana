@@ -155,6 +155,79 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+  describe('custom entries filter', () => {
+    it('should convert an object to an array of {key, value} pairs', () => {
+      const template = '${{ data | entries }}';
+      const context = { data: { a: 1, b: 2, c: 3 } };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([
+        { key: 'a', value: 1 },
+        { key: 'b', value: 2 },
+        { key: 'c', value: 3 },
+      ]);
+    });
+
+    it('should handle nested object values', () => {
+      const template = '${{ data | entries }}';
+      const context = {
+        data: {
+          'index-001': { settings: { lifecycle: { name: 'old-policy' } } },
+          'index-002': { settings: { lifecycle: { name: 'new-policy' } } },
+        },
+      };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([
+        { key: 'index-001', value: { settings: { lifecycle: { name: 'old-policy' } } } },
+        { key: 'index-002', value: { settings: { lifecycle: { name: 'new-policy' } } } },
+      ]);
+    });
+
+    it('should return arrays as-is', () => {
+      const template = '${{ data | entries }}';
+      const context = { data: [1, 2, 3] };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([1, 2, 3]);
+    });
+
+    it('should return null as-is', () => {
+      const template = '{{ data | entries }}';
+      const context = { data: null };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('');
+    });
+
+    it('should return non-object primitives as-is', () => {
+      const template = '{{ data | entries }}';
+      const context = { data: 'hello' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('hello');
+    });
+
+    it('should handle empty objects', () => {
+      const template = '${{ data | entries }}';
+      const context = { data: {} };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([]);
+    });
+
+    it('should work with evaluateExpression for foreach usage', () => {
+      const template = '{{ data | entries }}';
+      const context = { data: { x: 10, y: 20 } };
+      const result = templatingEngine.evaluateExpression(template, context);
+      expect(result).toEqual([
+        { key: 'x', value: 10 },
+        { key: 'y', value: 20 },
+      ]);
+    });
+
+    it('should chain with other filters', () => {
+      const template = '${{ data | entries | first }}';
+      const context = { data: { a: 1, b: 2 } };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ key: 'a', value: 1 });
+    });
+  });
+
   describe('filter chaining', () => {
     it('should chain json and json_parse filters', () => {
       const template = '{{ data | json | json_parse | json }}';

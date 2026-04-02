@@ -42,6 +42,8 @@ const SCHEMA_URI = `inmemory://schemas/test-step-json-historical-editor-schema`;
 export interface StepExecuteHistoricalFormProps {
   value: string;
   setValue: (value: string) => void;
+  /** Callback to set the execution context when an execution is selected */
+  setExecutionContext: (executionContext: Record<string, unknown> | undefined) => void;
   warnings: string | null;
   errors: string | null;
   setErrors: (errors: string | null) => void;
@@ -61,6 +63,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
   ({
     value,
     setValue,
+    setExecutionContext,
     errors,
     setErrors,
     warnings,
@@ -104,6 +107,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         includeOutput: true,
       }
     );
+    useEffect(() => {
+      setExecutionContext(workflowExecution?.context);
+    }, [setExecutionContext, workflowExecution?.context]);
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
       const results = stepExecutionsList?.results ?? [];
@@ -171,12 +177,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     }, [stepExecutionsList?.results, getFormattedDateTime, euiTheme]);
 
     useEffect(() => {
-      if (initialStepExecutionId != null) {
-        setSelectedStepExecutionId(initialStepExecutionId);
-      }
-    }, [initialStepExecutionId]);
-
-    useEffect(() => {
       if (!selectedStepExecutionId || isLoadingStepExecution || isLoadingWorkflowExecution) {
         setErrors(NOT_READY_SENTINEL);
       }
@@ -198,19 +198,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       const id = selected.length > 0 && selected[0].value ? String(selected[0].value) : null;
       setSelectedStepExecutionId(id);
     }, []);
-
-    const handleChange = useCallback(
-      (newValue: string) => {
-        setValue(newValue);
-        try {
-          JSON.parse(newValue);
-          setErrors(null);
-        } catch {
-          setErrors(translations.invalidJson);
-        }
-      },
-      [setValue, setErrors]
-    );
 
     // Hook Monaco on mount to register the schema for validation + suggestions
     const handleMount = useCallback(
@@ -279,7 +266,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                       maxLines: 15,
                     }}
                     width="100%"
-                    onChange={handleChange}
+                    onChange={setValue}
                     editorDidMount={handleMount}
                     dataTestSubj="workflow-test-step-historical-json-editor"
                     overflowWidgetsContainerZIndexOverride={6001}
@@ -339,9 +326,6 @@ const translations = {
     }),
   testRun: i18n.translate('workflows.testStepModal.testRun', {
     defaultMessage: 'Test Run',
-  }),
-  invalidJson: i18n.translate('workflows.testStepModal.invalidJson', {
-    defaultMessage: 'Invalid JSON',
   }),
   selectStepExecutionLabel: i18n.translate('workflows.testStepModal.selectStepExecutionLabel', {
     defaultMessage: 'Select step execution',

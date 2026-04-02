@@ -82,7 +82,7 @@ describe('validateTriggerConditionsForWorkflow', () => {
       name: 'test',
       enabled: true,
       steps: MINIMAL_STEPS,
-      triggers: [{ type: 'alert', with: { rule_id: 'r1' } }],
+      triggers: [{ type: 'alert' }],
     };
 
     const result = validateTriggerConditionsForWorkflow(workflow, getTriggerDefinition);

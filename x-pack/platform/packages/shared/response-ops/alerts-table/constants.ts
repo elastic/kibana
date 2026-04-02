@@ -90,7 +90,7 @@ export const alertProducersData: Record<AlertsTableSupportedConsumers, AlertProd
   },
   [AlertConsumers.EXAMPLE]: {
     displayName: 'Example',
-    icon: 'beaker',
+    icon: 'flask',
   },
   [AlertConsumers.DISCOVER]: {
     displayName: STACK_DISPLAY_NAME,

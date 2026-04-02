@@ -1,0 +1,128 @@
+version: '1'
+name: 'sources.github.get'
+description: 'Get a specific GitHub resource by ID. Actions and inputs: resource_type (required choice), owner (required), repo (required), plus resource-specific inputs: sha (for getCommit), pullNumber (for pullRequestRead), issueNumber (for getIssue/getIssueComments), path/ref (for getFileContents). getLatestRelease requires only owner and repo.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: resource_type
+    type: choice
+    required: true
+    description: |
+      The type of GitHub resource to retrieve. Each requires owner and repo, plus resource-specific inputs:
+        getCommit - Get details of a specific commit (requires sha)
+        getLatestRelease - Get the latest release for a repository (no extra inputs)
+        pullRequestRead - Read pull request details, diff, or review comments (requires pull_number; optional pull_request_method)
+        getFileContents - Get the contents of a file or directory (requires path; ref is optional)
+        getIssue - Get details of a specific issue (requires issue_number)
+        getIssueComments - Get comments for a specific issue (requires issue_number)
+    options:
+      - getCommit
+      - getLatestRelease
+      - pullRequestRead
+      - getFileContents
+      - getIssue
+      - getIssueComments
+  - name: owner
+    type: string
+    required: true
+    description: "Repository owner (username or organization)"
+  - name: repo
+    type: string
+    required: true
+    description: "Repository name"
+  - name: path
+    type: string
+    required: false
+    description: "File or directory path within the repository. Required for getFileContents."
+  - name: ref
+    type: string
+    required: false
+    description: "Git ref (branch name, tag, or SHA). Optional for getFileContents."
+  - name: sha
+    type: string
+    required: false
+    description: "Commit SHA. Required for getCommit."
+  - name: pull_number
+    type: number
+    required: false
+    description: "Pull request number. Required for pullRequestRead."
+  - name: pull_request_method
+    type: choice
+    required: false
+    default: get
+    description: |
+      What to retrieve for pullRequestRead:
+        get - Full pull request details (default)
+        get_diff - Unified diff for the pull request
+        get_review_comments - Review comments for the pull request
+      Used by pullRequestRead only.
+    options:
+      - get
+      - get_diff
+      - get_review_comments
+  - name: issue_number
+    type: number
+    required: false
+    description: "Issue number. Required for getIssue and getIssueComments."
+steps:
+  - name: route-get
+    type: switch
+    expression: "{{ inputs.resource_type }}"
+    cases:
+      - match: getCommit
+        steps:
+          - name: get-commit
+            type: github.getCommit
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              sha: "${{inputs.sha}}"
+      - match: getLatestRelease
+        steps:
+          - name: get-latest-release
+            type: github.getLatestRelease
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+      - match: pullRequestRead
+        steps:
+          - name: pull-request-read
+            type: github.pullRequestRead
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              pullNumber: ${{inputs.pull_number}}
+              method: "${{inputs.pull_request_method}}"
+      - match: getFileContents
+        steps:
+          - name: get-file-contents
+            type: github.getFileContents
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              path: "${{inputs.path}}"
+              ref: "${{inputs.ref}}"
+      - match: getIssue
+        steps:
+          - name: get-issue
+            type: github.getIssue
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              issueNumber: ${{inputs.issue_number}}
+      - match: getIssueComments
+        steps:
+          - name: get-issue-comments
+            type: github.getIssueComments
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              issueNumber: ${{inputs.issue_number}}

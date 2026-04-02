@@ -399,6 +399,9 @@ export function Table<T extends UserContentCommonSchema>({
           data-test-subj="itemsInMemTable"
           rowHeader="attributes.title"
           tableCaption={tableCaption}
+          scrollableInline
+          tableLayout="auto"
+          responsiveBreakpoint={false}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
         />
       </TagFilterContextProvider>

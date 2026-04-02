@@ -11,8 +11,6 @@ export {
   cleanupEntityStore,
   waitForEntityDataIndexed,
   enableAssetInventory,
-  waitForEnrichPolicyCreated,
-  executeEnrichPolicy,
   installCloudAssetInventoryPackage,
   initEntityEnginesWithRetry,
 } from './entity_store';

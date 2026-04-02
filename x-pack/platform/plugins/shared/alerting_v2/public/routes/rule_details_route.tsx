@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { lazy, Suspense } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { useExistingRule } from '../hooks/use_existing_rule';
+import { Skeleton } from '../components/rule_details/skeleton';
+
+const LazyRuleDetailPage = lazy(async () => {
+  const module = await import('../components/rule_details/rule_detail_page');
+  return { default: module.RuleDetailPage };
+});
+
+export const RuleDetailsRoute: React.FunctionComponent = () => {
+  const { ruleId } = useParams<{ ruleId: string }>();
+  const { rule, isLoading, error } = useExistingRule(ruleId);
+  const history = useHistory();
+
+  if (isLoading) {
+    return <Skeleton />;
+  }
+
+  if (error || !rule) {
+    return (
+      <EuiEmptyPrompt
+        iconType="warning"
+        color="danger"
+        title={
+          <h2>
+            {i18n.translate('xpack.alertingV2.ruleDetails.errorTitle', {
+              defaultMessage: 'Unable to load rule',
+            })}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate('xpack.alertingV2.ruleDetails.errorBody', {
+              defaultMessage: 'The rule could not be found or an error occurred while loading it.',
+            })}
+          </p>
+        }
+        actions={[
+          <EuiButton
+            color="primary"
+            fill
+            onClick={() => history.push('/')}
+            data-test-subj="ruleDetailsErrorBackButton"
+          >
+            {i18n.translate('xpack.alertingV2.ruleDetails.backToRules', {
+              defaultMessage: 'Back to rules',
+            })}
+          </EuiButton>,
+        ]}
+        data-test-subj="ruleDetailsErrorPrompt"
+      />
+    );
+  }
+
+  return (
+    <Suspense fallback={<Skeleton />}>
+      <LazyRuleDetailPage rule={rule} />
+    </Suspense>
+  );
+};

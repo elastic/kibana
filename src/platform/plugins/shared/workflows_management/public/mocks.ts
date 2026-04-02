@@ -11,7 +11,9 @@ import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
@@ -19,6 +21,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
+import type { WorkflowsServices } from './types';
 
 export const createStartServicesMock = () => ({
   ...coreLifecycleMock.createCoreStart(),
@@ -26,6 +29,7 @@ export const createStartServicesMock = () => ({
   serverless: serverlessMock.createStart(),
   storage: new Storage(localStorage),
   dataViews: dataViewPluginMocks.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
@@ -39,3 +43,25 @@ export const createStartServicesMock = () => ({
     },
   },
 });
+
+export type StartServicesMock = ReturnType<typeof createStartServicesMock>;
+
+/**
+ * Creates a properly typed return value for mocking `useKibana()`.
+ * Returns the full `KibanaReactContextValue<WorkflowsServices>` shape
+ * so `mockUseKibana.mockReturnValue(...)` does not require `as any`.
+ *
+ * The single `as unknown as` cast here is intentional and centralized:
+ * upstream plugin mocks (e.g. `coreMock.createCoreStart()`) return jest-enhanced
+ * types that are structurally compatible but not identical to `WorkflowsServices`.
+ */
+export const createUseKibanaMockValue = (services?: StartServicesMock) => {
+  const svc = services ?? createStartServicesMock();
+  return {
+    services: svc,
+    overlays: {
+      openFlyout: jest.fn(),
+      openModal: jest.fn(),
+    },
+  } as unknown as KibanaReactContextValue<WorkflowsServices>;
+};

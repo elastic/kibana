@@ -262,7 +262,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           <EuiButton
             data-test-subj="createEnrollmentTokenButton"
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={() => setModalOpen(true)}
           >
             <FormattedMessage

@@ -28,11 +28,13 @@ describe('getGapFilteredRuleIds', () => {
     totalUnfilledDurationMs: 0,
     totalInProgressDurationMs: 0,
     totalFilledDurationMs: 0,
+    totalErrorDurationMs: 0,
     totalDurationMs: 0,
     rulesByGapFillStatus: {
       unfilled: 0,
       inProgress: 0,
       filled: 0,
+      error: 0,
     },
   };
 

@@ -1,0 +1,416 @@
+{
+  "id": "@kbn/yaml-rule-editor",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/yaml-rule-editor",
+        "id": "def-public.YamlRuleEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "YamlRuleEditor",
+        "description": [
+          "\nYAML Rule Editor component with ES|QL support\n\nThis component provides a Monaco-based code editor for editing rule definitions\nin YAML format with embedded ES|QL query support, including:\n- Syntax highlighting for both YAML and ES|QL\n- Auto-completion for YAML keys based on the rule schema\n- ES|QL auto-completion within the query field\n- Real-time validation against the rule schema"
+        ],
+        "signature": [
+          "({ value, onChange, esqlCallbacks, esqlPropertyNames, isReadOnly, height, dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/yaml-rule-editor",
+            "scope": "public",
+            "docId": "kibKbnYamlRuleEditorPluginApi",
+            "section": "def-public.YamlRuleEditorProps",
+            "text": "YamlRuleEditorProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/yaml_rule_editor.tsx",
+        "lineNumber": 73,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value,\n  onChange,\n  esqlCallbacks,\n  esqlPropertyNames = DEFAULT_ESQL_PROPERTY_NAMES,\n  isReadOnly = false,\n  height = 320,\n  dataTestSubj = 'alertingV2YamlRuleEditor',\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/yaml-rule-editor",
+                "scope": "public",
+                "docId": "kibKbnYamlRuleEditorPluginApi",
+                "section": "def-public.YamlRuleEditorProps",
+                "text": "YamlRuleEditorProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/yaml_rule_editor.tsx",
+            "lineNumber": 73,
+            "columnNumber": 63,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/yaml-rule-editor",
+        "id": "def-public.QueryContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryContext",
+        "description": [
+          "\nContext information for ES|QL query within YAML"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.QueryContext.propertyName",
+            "type": "string",
+            "tags": [],
+            "label": "propertyName",
+            "description": [
+              "The matched property name (e.g., 'query')"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.QueryContext.queryText",
+            "type": "string",
+            "tags": [],
+            "label": "queryText",
+            "description": [
+              "The ES|QL query text"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.QueryContext.queryOffset",
+            "type": "number",
+            "tags": [],
+            "label": "queryOffset",
+            "description": [
+              "The cursor offset within the query text"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/yaml-rule-editor",
+        "id": "def-public.SchemaPropertyInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaPropertyInfo",
+        "description": [
+          "\nSchema property information extracted from JSON schema"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.SchemaPropertyInfo.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.SchemaPropertyInfo.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.SchemaPropertyInfo.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Formatted type string for display (e.g., \"string\", \"number\", \"string[]\", '\"a\" | \"b\"')"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.SchemaPropertyInfo.isEnum",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEnum",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.SchemaPropertyInfo.enumValues",
+            "type": "Array",
+            "tags": [],
+            "label": "enumValues",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/yaml-rule-editor",
+        "id": "def-public.YamlRuleEditorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "YamlRuleEditorProps",
+        "description": [
+          "\nProps for the YamlRuleEditor component"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(value: string) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-rule-editor",
+                "id": "def-public.YamlRuleEditorProps.onChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+                "lineNumber": 74,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.esqlCallbacks",
+            "type": "Object",
+            "tags": [],
+            "label": "esqlCallbacks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLCallbacks",
+                "text": "ESQLCallbacks"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.esqlPropertyNames",
+            "type": "Array",
+            "tags": [
+              "default"
+            ],
+            "label": "esqlPropertyNames",
+            "description": [
+              "\nProperty names in YAML that should be treated as ES|QL queries.\nValues of these properties will get ES|QL syntax highlighting and auto-completion."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.isReadOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReadOnly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.height",
+            "type": "number",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-rule-editor",
+            "id": "def-public.YamlRuleEditorProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/yaml-rule-editor",
+        "id": "def-public.DEFAULT_ESQL_PROPERTY_NAMES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_ESQL_PROPERTY_NAMES",
+        "description": [
+          "\nYAML property names whose values contain ES|QL queries.\nThe editor enables ES|QL syntax highlighting and auto-completion for these fields.\n\nTODO: with zod4 upgrade we can add a metadata tag to the schema to mark these fields as ES|QL queries."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/yaml-rule-editor/src/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

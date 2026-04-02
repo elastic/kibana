@@ -11,7 +11,6 @@ import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -53,9 +52,9 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
       };
     },
     getAgentDescription: () => {
-      return `${AttachmentType.esql} can be executed using the ${sanitizeToolId(
-        platformCoreTools.executeEsql
-      )} tool`;
+      return `Represents an ES|QL query, which can be executed using the ${platformCoreTools.executeEsql} tool
+
+      When rendered inline, displays the query to the user in a code block.`;
     },
     getTools: () => [platformCoreTools.executeEsql],
   };

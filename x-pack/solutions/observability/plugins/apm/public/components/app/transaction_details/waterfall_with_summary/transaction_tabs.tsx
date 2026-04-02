@@ -12,6 +12,8 @@ import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useDiscoverHref } from '../../../shared/links/discover_links/use_discover_href';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
 import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
@@ -167,6 +169,22 @@ function TimelineTabContent({
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
   entryTransactionId?: string;
 }) {
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
+  );
+  const traceId = unifiedWaterfallFetchResult.traceItems[0]?.traceId;
+  const discoverHref = useDiscoverHref({
+    indexType: 'traces',
+    rangeFrom,
+    rangeTo,
+    queryParams: { traceId, sortDirection: 'ASC' },
+  });
+
   if (useUnified) {
     return (
       <UnifiedWaterfallContainer
@@ -178,6 +196,9 @@ function TimelineTabContent({
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
         entryTransactionId={entryTransactionId}
+        traceDocsTotal={unifiedWaterfallFetchResult.traceDocsTotal}
+        maxTraceItems={unifiedWaterfallFetchResult.maxTraceItems}
+        discoverHref={discoverHref}
       />
     );
   }

@@ -34,7 +34,7 @@ export const HeaderMenuButton = forwardRef(
         aria-controls={props['aria-controls']}
         ref={props.forwardRef}
       >
-        <EuiIcon type="menu" size="m" />
+        <EuiIcon type="menu" size="m" aria-hidden={true} />
       </EuiHeaderSectionItemButton>
     );
   }

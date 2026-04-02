@@ -223,32 +223,35 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         width: '20%',
       },
       {
-        field: 'name',
-        name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.action', {
-          defaultMessage: 'Action',
+        field: 'name' as const,
+        name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.actions', {
+          defaultMessage: 'Actions',
         }),
-        render: (pipelineName: string, item: PipelineInfoWithStatus) => (
-          <EuiButtonEmpty
-            size="s"
-            href={getIngestPipelineUrl(basePath, pipelineName)}
-            target="_blank"
-          >
-            {isCriticalFailureRateFromString(item.failureRate)
-              ? i18n.translate(
-                  'xpack.securitySolution.siemReadiness.continuity.action.viewFailure',
-                  {
-                    defaultMessage: 'View Failure',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.securitySolution.siemReadiness.continuity.action.viewPipeline',
-                  {
-                    defaultMessage: 'View Pipeline',
-                  }
-                )}
-          </EuiButtonEmpty>
-        ),
-        width: '20%',
+        actions: [
+          {
+            render: (item: PipelineInfoWithStatus) => (
+              <EuiButtonEmpty
+                size="s"
+                href={getIngestPipelineUrl(basePath, item.name)}
+                target="_blank"
+              >
+                {isCriticalFailureRateFromString(item.failureRate)
+                  ? i18n.translate(
+                      'xpack.securitySolution.siemReadiness.continuity.action.viewFailure',
+                      {
+                        defaultMessage: 'View Failure',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.securitySolution.siemReadiness.continuity.action.viewPipeline',
+                      {
+                        defaultMessage: 'View Pipeline',
+                      }
+                    )}
+              </EuiButtonEmpty>
+            ),
+          },
+        ],
       },
     ],
     [basePath]
@@ -380,7 +383,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleCreateCase}
                 data-test-subj="createNewCaseButton"
               >

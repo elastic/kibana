@@ -83,7 +83,7 @@ export const AnomalyDetectionEmptyState: FC<{
                 target="_blank"
                 href={docLinks.links.ml.anomalyDetection}
                 data-test-subj="mlAnalyticsReadDocumentationButton"
-                iconType="popout"
+                iconType="external"
                 iconSide="left"
               >
                 <FormattedMessage

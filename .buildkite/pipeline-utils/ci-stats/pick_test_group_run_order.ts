@@ -94,6 +94,10 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
 
+  const JEST_UNIT_TOO_LONG_MINUTES = 27;
+  const JEST_INTEGRATION_TOO_LONG_MINUTES = 27;
+  const FUNCTIONAL_TOO_LONG_MINUTES = 27;
+
   /**
    * This env variable corresponds to the env stanza within
    * https://github.com/elastic/kibana/blob/bc2cb5dc613c3d455a5fed9c54450fd7e46ffd92/.buildkite/pipelines/code_coverage/daily.yml#L17
@@ -285,6 +289,7 @@ export async function pickTestGroupRunOrder() {
         type: UNIT_TYPE,
         defaultMin: 4,
         maxMin: JEST_UNIT_MAX_MINUTES,
+        tooLongMin: JEST_UNIT_TOO_LONG_MINUTES,
         overheadMin: 0.2,
         warmupMin: 4,
         concurrency: 3,
@@ -294,6 +299,7 @@ export async function pickTestGroupRunOrder() {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
+        tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
         overheadMin: 0.2,
         warmupMin: 2,
         concurrency: 1,
@@ -304,6 +310,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
+        tooLongMin: FUNCTIONAL_TOO_LONG_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
         warmupMin: 3,
@@ -485,6 +492,18 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
     throw new Error(`missing test group run order for group [${typeName}]`);
   }
 
+  const uniqueTooLongMin = [
+    ...new Set(
+      types.map((t) => t.tooLongMin).filter((value): value is number => typeof value === 'number')
+    ),
+  ];
+  const tooLongThresholdLabel =
+    uniqueTooLongMin.length > 0
+      ? `configured warning threshold${
+          uniqueTooLongMin.length === 1 ? ` of ${uniqueTooLongMin[0]} minutes` : ''
+        }`
+      : 'maximum amount of time desired for a single CI job';
+
   const misses = types.flatMap((t) => t.namesWithoutDurations);
   if (misses.length > 0) {
     bk.setAnnotation(
@@ -514,10 +533,10 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
       'warning',
       [
         tooLongs.length === 1
-          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. ` +
+          ? `The following "${typeName}" config has a duration that exceeds the ${tooLongThresholdLabel}. ` +
             `This is not an error, and if you don't own this config then you can ignore this warning. ` +
             `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
-          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. ` +
+          : `The following "${typeName}" configs have durations that exceed the ${tooLongThresholdLabel}. ` +
             `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
             `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
         '',

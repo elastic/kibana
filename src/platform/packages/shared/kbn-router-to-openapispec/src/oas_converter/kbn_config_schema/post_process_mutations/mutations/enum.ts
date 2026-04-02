@@ -21,6 +21,22 @@ const isNullableOutput = (schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaOb
   );
 };
 
+const replaceNullableOutputWithNullEnum = (schema: OpenAPIV3.SchemaObject) => {
+  let replaced = false;
+  schema.anyOf = schema.anyOf!.map((item) => {
+    if (!isNullableOutput(item)) {
+      return item;
+    }
+
+    replaced = true;
+    return {
+      enum: [null],
+    };
+  });
+
+  return replaced;
+};
+
 /**
  * Handle special case output of schema.nullable()
  *
@@ -35,9 +51,15 @@ const processNullableOutput = (schema: OpenAPIV3.SchemaObject) => {
   const idx = schema.anyOf!.findIndex((item) => isNullableOutput(item));
   if (idx === -1) return false;
   const anyOf = schema.anyOf!;
+  const nullableTarget = anyOf[1 - idx];
+
+  if (isReferenceObject(nullableTarget)) {
+    return false;
+  }
+
   delete schema.anyOf;
   schema.nullable = true;
-  Object.assign(schema, anyOf[1 - idx]);
+  Object.assign(schema, nullableTarget);
   return true;
 };
 
@@ -59,5 +81,6 @@ const prettifyEnum = (schema: OpenAPIV3.SchemaObject) => {
 export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
   if (!schema.anyOf) return;
   if (processNullableOutput(schema)) return;
+  replaceNullableOutputWithNullEnum(schema);
   prettifyEnum(schema);
 };

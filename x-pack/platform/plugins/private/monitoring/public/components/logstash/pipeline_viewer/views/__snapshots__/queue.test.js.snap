@@ -3,7 +3,7 @@
 exports[`Queue component renders default elements 1`] = `
 <div>
   <StatementListHeading
-    iconType="logstashQueue"
+    iconType="queue"
     title="Queue"
   />
   <EuiSpacer

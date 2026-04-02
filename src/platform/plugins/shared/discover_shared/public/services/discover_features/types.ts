@@ -40,6 +40,7 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
+  renderCpsWarning?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
@@ -119,9 +120,15 @@ export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
   render: (hit: DataTableRecord) => JSX.Element;
 }
 
+export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
+  id: 'security-solution-alert-flyout-header-title';
+  renderHeader: (hit: DataTableRecord) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
-  | SecuritySolutionAlertFlyoutOverviewTabFeature;
+  | SecuritySolutionAlertFlyoutOverviewTabFeature
+  | SecuritySolutionAlertFlyoutHeaderTitleFeature;
 
 /** ****************************************************************************************/
 

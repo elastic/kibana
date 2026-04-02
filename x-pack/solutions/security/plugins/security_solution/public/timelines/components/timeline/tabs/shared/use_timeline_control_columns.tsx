@@ -24,7 +24,7 @@ interface UseTimelineControlColumnArgs {
   events: TimelineItem[];
   rawEvents: EsHitRecord[];
   eventIdToNoteIds: Record<string, string[]>;
-  onToggleShowNotes: (eventId?: string) => void;
+  onToggleShowNotes: (eventId?: string, eventData?: DataTableRecord & TimelineItem) => void;
 }
 
 export const useTimelineControlColumn = ({
@@ -74,6 +74,10 @@ export const useTimelineControlColumn = ({
         // We are creating this object here so we can pass it to the cell action, which will then pass it to the flyout.
         // This way we can use the same flyout content code between Security Solution and Discover.
         const esHitRecord: DataTableRecord = buildDataTableRecord(rawEvents[props.rowIndex]);
+        const eventData: DataTableRecord & TimelineItem = {
+          ...esHitRecord,
+          ...events[props.rowIndex],
+        };
 
         return (
           <TimelineControlColumnCellRender
@@ -81,6 +85,7 @@ export const useTimelineControlColumn = ({
             columnValues=""
             disablePinAction={!canWriteTimelines}
             ecsData={events[props.rowIndex].ecs}
+            eventData={eventData}
             eventId={events[props.rowIndex]?._id}
             eventIdToNoteIds={eventIdToNoteIds}
             hit={esHitRecord}

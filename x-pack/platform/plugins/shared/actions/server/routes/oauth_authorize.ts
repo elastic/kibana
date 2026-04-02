@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import { getEarsEndpointsForProvider, resolveEarsUrl } from '../lib/ears';
 import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
@@ -16,6 +17,7 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 
 const paramsSchema = schema.object({
   connectorId: schema.string(),
@@ -34,7 +36,8 @@ export const oauthAuthorizeRoute = (
   licenseState: ILicenseState,
   logger: Logger,
   coreSetup: CoreSetup<ActionsPluginsStart>,
-  oauthRateLimiter: OAuthRateLimiter
+  oauthRateLimiter: OAuthRateLimiter,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.post(
     {
@@ -153,14 +156,29 @@ export const oauthAuthorizeRoute = (
             createdBy: profile_uid,
           });
 
-          const authorizationUrl = oauthService.buildAuthorizationUrl({
-            baseAuthorizationUrl: oauthConfig.authorizationUrl,
-            clientId: oauthConfig.clientId,
-            scope: oauthConfig.scope,
-            redirectUri,
-            state: state.state,
-            codeChallenge,
-          });
+          let authorizationUrl: string;
+          if (oauthConfig.authTypeId === 'ears') {
+            const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
+            authorizationUrl = oauthService.buildEarsAuthorizationUrl({
+              baseAuthorizationUrl: resolveEarsUrl(
+                authorizeEndpoint,
+                actionsConfigUtils.getEarsUrl()
+              ),
+              scope: oauthConfig.scope,
+              callbackUri: redirectUri,
+              state: state.state,
+              pkceChallenge: codeChallenge,
+            });
+          } else {
+            authorizationUrl = oauthService.buildAuthorizationUrl({
+              baseAuthorizationUrl: oauthConfig.authorizationUrl,
+              clientId: oauthConfig.clientId,
+              scope: oauthConfig.scope,
+              redirectUri,
+              state: state.state,
+              codeChallenge,
+            });
+          }
 
           return res.ok({
             body: {
@@ -174,6 +192,8 @@ export const oauthAuthorizeRoute = (
             err instanceof Error && 'statusCode' in err
               ? (err as Error & { statusCode: number }).statusCode
               : 500;
+
+          logger.error('Failed to initiate OAuth authorization', { error: err });
 
           return res.customError({
             statusCode,

@@ -95,7 +95,7 @@ function getDefaultLensApiMock() {
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
     updateAttributes: jest.fn(),
-    updateSavedObjectId: jest.fn(),
+    updateRefId: jest.fn(),
     updateOverrides: jest.fn(),
     getSerializedStateByReference: jest.fn(),
     getSerializedStateByValue: jest.fn(),
@@ -109,7 +109,7 @@ function getDefaultLensApiMock() {
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-    resetUnsavedChanges: jest.fn(),
+    applySerializedState: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
   };
   return LensApiMock;
@@ -138,7 +138,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
-    savedObjectId: faker.string.uuid(),
+    ref_id: faker.string.uuid(),
     ...getDefaultLensSerializedStateMock(),
     ...overrides,
   };

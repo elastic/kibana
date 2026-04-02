@@ -17,6 +17,7 @@ import type {
   InterruptValue,
   TraceData,
 } from '@kbn/elastic-assistant-common';
+import { addSpanLabels } from '@kbn/apm-utils';
 import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -222,7 +223,7 @@ export const invokeGraph = async ({
         transactionId: span.transaction.ids['transaction.id'],
         traceId: span.ids['trace.id'],
       };
-      span.addLabels({ evaluationId: traceOptions?.evaluationId });
+      addSpanLabels({ evaluationId: traceOptions?.evaluationId });
     }
     const result = await assistantGraph.invoke(inputs, {
       callbacks: [

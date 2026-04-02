@@ -5,129 +5,142 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  useConversationTitle,
-  useHasActiveConversation,
-  useHasPersistedConversation,
-} from '../../../hooks/use_conversation';
-import { RenameConversationInput } from './rename_conversation_input';
+import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
+import { DeleteConversationModal } from '../delete_conversation_modal';
+import { RenameConversationModal } from '../rename_conversation_modal';
 
 const labels = {
-  ariaLabel: i18n.translate('xpack.agentBuilder.conversationTitle.ariaLabel', {
-    defaultMessage: 'Conversation title',
-  }),
   rename: i18n.translate('xpack.agentBuilder.conversationTitle.rename', {
-    defaultMessage: 'Rename conversation',
+    defaultMessage: 'Rename',
+  }),
+  delete: i18n.translate('xpack.agentBuilder.conversationTitle.delete', {
+    defaultMessage: 'Delete',
   }),
   newConversation: i18n.translate('xpack.agentBuilder.conversationTitle.newConversation', {
     defaultMessage: 'New conversation',
+  }),
+  openTitleMenu: i18n.translate('xpack.agentBuilder.conversationTitle.openTitleMenu', {
+    defaultMessage: 'Open conversation menu',
   }),
 };
 
 interface ConversationTitleProps {
   ariaLabelledBy?: string;
-  isEditing: boolean;
-  setIsEditing: (isEditing: boolean) => void;
 }
 
-export const ConversationTitle: React.FC<ConversationTitleProps> = ({
-  ariaLabelledBy,
-  isEditing,
-  setIsEditing,
-}) => {
-  const { title, isLoading } = useConversationTitle();
-  const hasActiveConversation = useHasActiveConversation();
+export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
+  const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
-  const [isHovering, setIsHovering] = useState(false);
-  const [previousTitle, setPreviousTitle] = useState('');
-  const [currentText, setCurrentText] = useState('');
 
-  useEffect(() => {
-    if (isLoading || !hasActiveConversation) return;
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const fullText = title || labels.newConversation;
+  const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
 
-    // Typewriter: ONLY when transitioning from "New conversation" to actual title
-    if (previousTitle === labels.newConversation && title) {
-      if (currentText.length < fullText.length) {
-        const timeout = setTimeout(() => {
-          setCurrentText(fullText.substring(0, currentText.length + 1));
-        }, 50);
-        return () => clearTimeout(timeout);
-      }
-    } else if (title && title !== previousTitle) {
-      // Normal title change: immediate
-      setCurrentText(fullText);
-    } else if (!title) {
-      // Reset when switching to new conversation (no title)
-      setCurrentText('');
-    }
-
-    // Always track the previous title
-    setPreviousTitle(fullText);
-  }, [title, currentText, isLoading, previousTitle, hasActiveConversation]);
-
-  const displayedTitle = currentText || previousTitle;
-
-  const handlePencilClick = () => {
-    setIsEditing(true);
-    setIsHovering(false);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
-
-  const shouldShowTitle = hasActiveConversation;
-  if (!shouldShowTitle) {
-    return null;
+  // No popover for unsaved conversations — just show the title
+  if (!hasPersistedConversation) {
+    return (
+      <h4
+        id={ariaLabelledBy}
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+        data-test-subj="agentBuilderConversationTitle"
+      >
+        {displayedTitle}
+      </h4>
+    );
   }
 
-  if (isEditing) {
-    return <RenameConversationInput onCancel={handleCancel} />;
-  }
+  const menuItems = [
+    <EuiContextMenuItem
+      key="rename"
+      icon="pencil"
+      onClick={() => {
+        setIsPopoverOpen(false);
+        setIsRenameModalOpen(true);
+      }}
+      data-test-subj="agentBuilderConversationRenameButton"
+    >
+      {labels.rename}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="delete"
+      icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+      onClick={() => {
+        setIsPopoverOpen(false);
+        setIsDeleteModalOpen(true);
+      }}
+      css={css`
+        color: ${euiTheme.colors.danger};
+      `}
+      data-test-subj="agentBuilderConversationDeleteButton"
+    >
+      {labels.delete}
+    </EuiContextMenuItem>,
+  ];
 
-  const titleStyles = css`
+  const titleButtonStyles = css`
+    max-width: 100%;
+    block-size: auto;
     font-weight: ${euiTheme.font.weight.semiBold};
+    .euiButtonEmpty__text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   `;
 
-  // Only show rename icon when there is a conversation ID !== 'new'
-  const canRename = hasPersistedConversation;
+  const titleButton = (
+    <EuiButtonEmpty
+      color="text"
+      iconType="arrowDown"
+      iconSide="right"
+      flush="left"
+      onClick={() => setIsPopoverOpen((open) => !open)}
+      aria-expanded={isPopoverOpen}
+      css={titleButtonStyles}
+      data-test-subj="agentBuilderConversationTitleButton"
+    >
+      <span id={ariaLabelledBy}>{displayedTitle}</span>
+    </EuiButtonEmpty>
+  );
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      responsive={false}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      data-test-subj="agentBuilderConversationTitle"
-    >
-      <EuiFlexItem grow={false}>
-        <h4 id={ariaLabelledBy} css={titleStyles}>
-          {displayedTitle}
-        </h4>
-      </EuiFlexItem>
-      {canRename && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="pencil"
-            aria-label={labels.rename}
-            onClick={handlePencilClick}
-            color="text"
-            data-test-subj="agentBuilderConversationRenameButton"
-            css={css`
-              opacity: ${isHovering ? 1 : 0};
-              transition: opacity 0.2s ease;
-            `}
-          />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <>
+      <EuiPopover
+        button={titleButton}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downCenter"
+        aria-label={labels.openTitleMenu}
+      >
+        <EuiContextMenuPanel items={menuItems} />
+      </EuiPopover>
+
+      <RenameConversationModal
+        isOpen={isRenameModalOpen}
+        onClose={() => setIsRenameModalOpen(false)}
+      />
+
+      <DeleteConversationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
+    </>
   );
 };

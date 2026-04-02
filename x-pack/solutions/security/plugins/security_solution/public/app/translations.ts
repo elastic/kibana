@@ -22,17 +22,6 @@ export const AI_VALUE_DASHBOARD = i18n.translate('xpack.securitySolution.navigat
   defaultMessage: 'Value report',
 });
 
-export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.navigation.entityRiskScore',
-  {
-    defaultMessage: 'Entity risk score',
-  }
-);
-
-export const ENTITY_STORE = i18n.translate('xpack.securitySolution.navigation.entityStore', {
-  defaultMessage: 'Entity store',
-});
-
 export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
   defaultMessage: 'Notes',
 });
@@ -62,13 +51,6 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   'xpack.securitySolution.navigation.privilegedUserMonitoring',
   {
     defaultMessage: 'Privileged user monitoring',
-  }
-);
-
-export const ENTITY_ANALYTICS_WATCHLISTS = i18n.translate(
-  'xpack.securitySolution.navigation.watchlists',
-  {
-    defaultMessage: 'Watchlists Management',
   }
 );
 

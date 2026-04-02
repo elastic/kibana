@@ -52,7 +52,7 @@ export interface AttachmentViewObject<Props = {}> {
 }
 
 export interface CommonAttachmentViewProps {
-  attachmentId: string;
+  savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
 }
 

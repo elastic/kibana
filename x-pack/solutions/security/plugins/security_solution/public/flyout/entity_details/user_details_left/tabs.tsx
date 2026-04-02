@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   getInsightsInputTab,
+  getResolutionGroupTab,
   getRiskInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
@@ -21,9 +22,10 @@ import type {
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { DocumentDetailsProvider } from '../../document_details/shared/context';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -31,7 +33,10 @@ export const useTabs = (
   isRiskScoreExist: boolean,
   scopeId: string,
   hasMisconfigurationFindings?: boolean,
-  hasNonClosedAlerts?: boolean
+  hasNonClosedAlerts?: boolean,
+  identityFields?: IdentityFields,
+  entityId?: string,
+  entityStoreEntityId?: string
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -56,18 +61,33 @@ export const useTabs = (
       tabs.push(getEntraTab(entraManagedUser));
     }
 
-    if (hasMisconfigurationFindings || hasNonClosedAlerts) {
-      tabs.push(getInsightsInputTab({ name, fieldName: EntityIdentifierFields.userName, scopeId }));
+    if ((hasMisconfigurationFindings || hasNonClosedAlerts) && name) {
+      tabs.push(
+        getInsightsInputTab({
+          field: 'user.name',
+          value: name,
+          entityId: entityId ?? identityFields?.['user.entity.id'] ?? '',
+          scopeId,
+          entityType: EntityType.user,
+        })
+      );
+    }
+
+    if (entityStoreEntityId) {
+      tabs.push(getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'user' }));
     }
 
     return tabs;
   }, [
+    entityId,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
+    identityFields,
     isRiskScoreExist,
     managedUser,
     name,
     scopeId,
+    entityStoreEntityId,
   ]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({

@@ -11,7 +11,6 @@ import type {
   RunAgentReturn,
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { withAgentSpan } from '../../tracing';
 import { createAgentHandler } from '../agents/modes/create_handler';
@@ -38,7 +37,6 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     spaces,
     elasticsearch,
     savedObjects,
-    uiSettings,
     modelProvider,
     toolsService,
     attachmentsService,
@@ -57,15 +55,9 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
 
-  // fetch experimental features setting to build experimental feature list
-  const soClient = savedObjects.getScopedClient(request);
-  const uiSettingsClient = uiSettings.asScopedToClient(soClient);
-  const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
   const experimentalFeatures: ExperimentalFeatures = {
-    filestore: experimentalFeaturesEnabled,
-    skills: experimentalFeaturesEnabled,
+    filestore: true,
+    skills: true,
   };
 
   return {

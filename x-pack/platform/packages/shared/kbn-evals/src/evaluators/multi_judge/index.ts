@@ -25,6 +25,18 @@ function computeMajority(scores: number[]): number {
   return ones > rounded.length / 2 ? 1 : 0;
 }
 
+/**
+ * Meta-evaluator that aggregates scores from multiple judge evaluators using a
+ * configurable strategy (mean, median, or majority vote).
+ *
+ * Individual judge failures are handled gracefully — failed judges are logged via
+ * the optional logger and excluded from aggregation. The evaluator's `kind` is
+ * derived from the judges: 'LLM' if any judge is LLM-based, 'CODE' otherwise.
+ *
+ * @param config.judges - Array of evaluators to aggregate
+ * @param config.strategy - Aggregation method: 'mean' | 'median' | 'majority' (default: 'mean')
+ * @param config.logger - Optional logger for warning on judge failures
+ */
 export function createMultiJudgeEvaluator(config: {
   judges: Evaluator[];
   strategy?: AggregationStrategy;
@@ -48,7 +60,7 @@ export function createMultiJudgeEvaluator(config: {
       results.forEach((result, i) => {
         if (result.status === 'fulfilled') {
           judgeResults.push({ name: judges[i].name, result: result.value });
-          if (result.value.score != null) {
+          if (result.value.score != null && Number.isFinite(result.value.score)) {
             scores.push(result.value.score);
           }
         } else {

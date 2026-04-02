@@ -10,10 +10,11 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
-import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiBreadcrumb, EuiSearchBarProps } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
 import { Breadcrumbs } from './breadcrumbs';
@@ -29,7 +30,6 @@ import { useFormattedDate } from './use_formatted_date';
 import * as nodeDataModel from '../../models/node_data';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
-import type { ResolverCellActionRenderer } from '../../types';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -48,7 +48,7 @@ export const EventDetail = memo(function EventDetail({
   nodeID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }) {
   const isEventLoading = useSelector((state: State) =>
     selectors.isCurrentRelatedEventLoading(state.analyzer[id])
@@ -105,7 +105,7 @@ const EventDetailContents = memo(function ({
    */
   eventType: string;
   processEvent: SafeResolverEvent | undefined;
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
   const formattedDate =
@@ -169,7 +169,7 @@ function EventDetailFields({
 }: {
   event: SafeResolverEvent;
   id: string;
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }) {
   const descriptions = useMemo(() => {
     const returnValue: EventDetailsTableView[] = [];

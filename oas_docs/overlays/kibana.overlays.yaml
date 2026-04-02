@@ -97,6 +97,21 @@ actions:
         # description: 
         # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
       x-displayName: 'Agent Builder'
+  - target: '$.tags[?(@.name=="workflows")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Workflows enable you to automate multi-step processes directly in Kibana.
+        Define sequences of steps in YAML to transform data insights into automated actions and outcomes,
+        without needing external automation tools.
+
+
+        Use the workflows APIs to create, manage, and run workflows programmatically.
+        You can also search, export, import, and monitor workflow executions.
+      externalDocs:
+        description: Workflows documentation
+        url: https://www.elastic.co/docs/explore-analyze/workflows
+      x-displayName: 'Workflows'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

@@ -49,6 +49,7 @@ import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
+import { SchemaService } from './lib/schema_service';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
 
@@ -61,12 +62,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private coreStart: CoreStart | null = null;
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
+  private readonly schemaService: SchemaService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
     this.logger = initializerContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
+    this.schemaService = new SchemaService(this.logger);
   }
 
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
@@ -103,7 +106,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         );
 
         plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
-        defineRoutes(router, osqueryContext);
+        defineRoutes(router, osqueryContext, this.schemaService);
       })
       .catch(() => {
         // it shouldn't reject, but just in case

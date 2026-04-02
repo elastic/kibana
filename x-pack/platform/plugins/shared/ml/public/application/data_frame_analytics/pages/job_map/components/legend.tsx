@@ -231,7 +231,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
                     <EuiButtonIcon
                       iconSize="s"
                       onClick={() => setShowJobTypes(!showJobTypes)}
-                      iconType={showJobTypes ? 'arrowUp' : 'arrowDown'}
+                      iconType={showJobTypes ? 'chevronSingleUp' : 'chevronSingleDown'}
                       aria-label={i18n.translate(
                         'xpack.ml.dataframe.analyticsMap.legend.showJobTypesAriaLabel',
                         {

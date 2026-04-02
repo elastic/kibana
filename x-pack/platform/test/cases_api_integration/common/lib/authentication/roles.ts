@@ -354,6 +354,40 @@ export const onlyActions: Role = {
   },
 };
 
+export const securitySolutionOnlyManageTemplates: Role = {
+  name: 'sec_only_manage_templates',
+  privileges: {
+    ...defaultElasticsearchPrivileges,
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['cases_manage_templates'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyNoManageTemplates: Role = {
+  name: 'sec_only_no_manage_templates',
+  privileges: {
+    ...defaultElasticsearchPrivileges,
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const roles = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
@@ -368,6 +402,8 @@ export const roles = [
   securitySolutionOnlyCreateComment,
   securitySolutionOnlyReadCreateComment,
   securitySolutionOnlyNoCreateComment,
+  securitySolutionOnlyManageTemplates,
+  securitySolutionOnlyNoManageTemplates,
   observabilityOnlyAll,
   observabilityOnlyRead,
   observabilityOnlyReadAlerts,

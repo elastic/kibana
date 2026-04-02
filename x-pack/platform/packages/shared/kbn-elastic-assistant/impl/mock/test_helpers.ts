@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import type { QueryObserverSuccessResult } from '@kbn/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { AIConnector } from '../connectorland/connector_selector';
+import type { UseLoadConnectorsResult } from '@kbn/inference-connectors';
 
 /**
  * Helper function to create a properly typed mock return value for useLoadConnectors
- * Returns a QueryObserverSuccessResult which is compatible with UseQueryResult
  */
 export const createMockUseLoadConnectorsResult = (
-  overrides: Partial<QueryObserverSuccessResult<AIConnector[], IHttpFetchError>>
-): QueryObserverSuccessResult<AIConnector[], IHttpFetchError> => {
+  overrides: Partial<UseLoadConnectorsResult>
+): UseLoadConnectorsResult => {
   return {
-    data: [] as AIConnector[],
+    data: [],
     error: null,
     isError: false,
     isLoading: false,
@@ -42,6 +39,7 @@ export const createMockUseLoadConnectorsResult = (
     isPlaceholderData: false,
     refetch: jest.fn(),
     remove: jest.fn(),
+    soEntryFound: false,
     ...overrides,
-  };
+  } as UseLoadConnectorsResult;
 };

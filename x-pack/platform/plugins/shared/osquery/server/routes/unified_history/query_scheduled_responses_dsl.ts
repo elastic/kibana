@@ -16,6 +16,7 @@ interface ScheduledResponsesQueryOptions {
   spaceId: string;
   startDate?: string;
   endDate?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export const buildScheduledResponsesQuery = ({
@@ -27,6 +28,7 @@ export const buildScheduledResponsesQuery = ({
   spaceId,
   startDate,
   endDate,
+  sortDirection = 'desc',
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
 } => {
@@ -67,7 +69,9 @@ export const buildScheduledResponsesQuery = ({
 
   if (cursor) {
     filters.push({
-      range: { planned_schedule_time: { lte: cursor } },
+      range: {
+        planned_schedule_time: sortDirection === 'desc' ? { lte: cursor } : { gte: cursor },
+      },
     });
   }
 
@@ -94,7 +98,7 @@ export const buildScheduledResponsesQuery = ({
           multi_terms: {
             terms: [{ field: 'schedule_id' }, { field: 'schedule_execution_count' }],
             size: aggSize,
-            order: { planned_time: 'desc' as const },
+            order: { planned_time: sortDirection },
           },
           aggs: {
             planned_time: { max: { field: 'planned_schedule_time' } },

@@ -12,8 +12,10 @@ export const transformRequest = ({
   rule_ids,
   start,
   end,
+  gap_auto_fill_scheduler_id,
 }: GetGapsSummaryByRuleIdsBodyV1): GetGapsSummaryByRuleIdsParams => ({
   ruleIds: rule_ids,
   start,
   end,
+  schedulerId: gap_auto_fill_scheduler_id,
 });

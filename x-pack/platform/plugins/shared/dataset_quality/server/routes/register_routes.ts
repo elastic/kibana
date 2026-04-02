@@ -24,6 +24,7 @@ interface RegisterRoutes {
   logger: Logger;
   plugins: DatasetQualityRouteHandlerResources['plugins'];
   getEsCapabilities: DatasetQualityRouteHandlerResources['getEsCapabilities'];
+  getIsSecurityEnabled: DatasetQualityRouteHandlerResources['getIsSecurityEnabled'];
 }
 
 export function registerRoutes({
@@ -32,6 +33,7 @@ export function registerRoutes({
   logger,
   plugins,
   getEsCapabilities,
+  getIsSecurityEnabled,
 }: RegisterRoutes) {
   const routes = Object.values(repository);
 
@@ -69,6 +71,7 @@ export function registerRoutes({
             params: decodedParams,
             plugins,
             getEsCapabilities,
+            getIsSecurityEnabled,
           });
 
           if (data === undefined) {

@@ -53,14 +53,22 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const isByReference = libraryId !== undefined;
     const initialLibraryState = isByReference
       ? await loadFromLibrary(libraryId)
-      : ({} as MarkdownAttributes);
+      : ({
+          title: '',
+          description: '',
+          content: '',
+        } as MarkdownAttributes);
 
     const titleManager = initializeTitleManager(initialState);
     const content$ = new BehaviorSubject<string>(
       isByReference ? initialLibraryState.content : (initialState as MarkdownByValueState).content
     );
-    const defaultTitle$ = new BehaviorSubject(initialLibraryState.title);
-    const defaultDescription$ = new BehaviorSubject(initialLibraryState.description);
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(
+      isByReference ? initialLibraryState.title : undefined
+    );
+    const defaultDescription$ = new BehaviorSubject<string | undefined>(
+      isByReference ? initialLibraryState.description : undefined
+    );
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
@@ -218,8 +226,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 if (libraryId) {
                   await markdownClient.update(libraryId, {
                     content: value,
-                    title: titleManager.api.title$.getValue(),
-                    description: titleManager.api.description$.getValue(),
+                    title: titleManager.api.title$.getValue() ?? initialLibraryState.title,
+                    description:
+                      titleManager.api.description$.getValue() ?? initialLibraryState.description,
                   });
                 }
                 if (isNewPanel$.getValue()) {

@@ -7,10 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import {
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL,
-  ENTITY_ANALYTICS_HOME_PAGE_URL,
-} from '../../../urls/navigation';
+import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
   PAGE_TITLE,
   COMBINED_RISK_DONUT_CHART,
@@ -18,7 +15,6 @@ import {
   ENTITIES_TABLE_GRID,
   TIMELINE_ACTION,
 } from '../../../screens/entity_analytics/entity_analytics_home';
-import { WATCHLIST_FILTER_COMBO_BOX } from '../../../screens/entity_analytics/watchlist_filter';
 
 describe(
   'Entity Analytics page',
@@ -41,6 +37,15 @@ describe(
 
     beforeEach(() => {
       login();
+      // Set grouping to "none" so the flat EntitiesDataTable renders.
+      // Default "Resolution" grouping renders GroupWrapper, which doesn't
+      // contain the ENTITIES_TABLE_GRID or TIMELINE_ACTION test subjects.
+      cy.window().then((win) =>
+        win.localStorage.setItem(
+          'groups',
+          JSON.stringify({ 'entityAnalytics:grouping': { activeGroups: ['none'] } })
+        )
+      );
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.url().should('include', ENTITY_ANALYTICS_HOME_PAGE_URL);
     });
@@ -73,18 +78,6 @@ describe(
     it('renders entities table', () => {
       cy.get(PAGE_TITLE).should('exist');
       cy.get(ENTITIES_TABLE_GRID).should('exist');
-    });
-
-    it('navigate to privileged user monitoring page on selecting privileged users watchlist', () => {
-      cy.get(PAGE_TITLE).should('exist');
-
-      cy.get(WATCHLIST_FILTER_COMBO_BOX).should('exist');
-      const comboBoxInput = `${WATCHLIST_FILTER_COMBO_BOX} input`;
-      cy.get(comboBoxInput).first().click();
-      cy.get(comboBoxInput).first().type('Privileged users{downArrow}{enter}');
-
-      cy.url().should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
-      cy.url().should('include', '/entity_analytics_privileged_user_monitoring');
     });
 
     it('displays timeline action icons in the data grid', () => {

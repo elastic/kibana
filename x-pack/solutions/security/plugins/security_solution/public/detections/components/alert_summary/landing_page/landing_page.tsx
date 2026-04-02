@@ -146,7 +146,7 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj={LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={navigateToIntegrationsPage}
             >
               {VIEW_ALL_INTEGRATIONS}

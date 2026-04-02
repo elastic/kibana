@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { take } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { EsResourceType } from '@kbn/agent-builder-common';
@@ -20,7 +19,6 @@ import type {
 import { listSearchSources } from './steps/list_search_sources';
 import { flattenMapping, getDataStreamMappings } from './utils/mappings';
 import { getIndexFields, partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
-import { generateXmlTree } from './utils/formatting/xml';
 
 export interface RelevantResource {
   type: EsResourceType;
@@ -38,6 +36,13 @@ export interface ResourceDescriptor {
   description?: string;
   fields?: string[];
 }
+
+const truncateList = (fields: string[], max: number): string[] => {
+  if (fields.length <= max) {
+    return fields;
+  }
+  return [...fields.slice(0, max), `[and ${fields.length - max} more]`];
+};
 
 /**
  * Builds resource descriptors for a list of indices by delegating
@@ -76,7 +81,7 @@ const createAliasSummaries = async ({
     return {
       type: EsResourceType.alias,
       name: aliasName,
-      description: `Point to the following indices: ${indices.join(', ')}`,
+      description: `Point to the following indices: ${truncateList(indices, 20).join(', ')}`,
     };
   });
 };
@@ -216,27 +221,11 @@ export interface SelectedResource {
   reason: string;
 }
 
-// Helper function to format each resource in an XML-like block
 export const formatResource = (res: ResourceDescriptor): string => {
-  const topFields = take(res.fields ?? [], 10);
-
-  return generateXmlTree({
-    tagName: 'resource',
-    attributes: {
-      type: res.type,
-      name: res.name,
-      description: res.description ?? 'No description provided.',
-    },
-    children: [
-      {
-        tagName: 'sample_fields',
-        children:
-          topFields.length > 0
-            ? topFields.map((field) => ({ tagName: 'field', children: [field] }))
-            : ['(No fields available)'],
-      },
-    ],
-  });
+  const topFields = truncateList(res.fields ?? [], 10);
+  const description = res.description ? `: ${res.description}` : '';
+  const fields = topFields.length > 0 ? `\n  fields: ${topFields.join(', ')}` : '';
+  return `- ${res.name} (${res.type})${description}${fields}`;
 };
 
 export const createIndexSelectorPrompt = ({
@@ -287,7 +276,9 @@ The 'select_resources' tool expects this exact structure:
 
 ## Available Resources
 
+<available_resources>
 ${resources.map(formatResource).join('\n')}
+</available_resources>
 
 Call the 'select_resources' tool now with your selection. Maximum ${limit} target(s). Use an empty targets array if none match.`,
     ],

@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -29,7 +30,7 @@ export const getAttackDiscoveryGenerationsRoute = (
       path: ATTACK_DISCOVERY_GENERATIONS,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })

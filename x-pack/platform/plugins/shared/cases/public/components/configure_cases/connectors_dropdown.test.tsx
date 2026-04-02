@@ -55,7 +55,7 @@ describe('ConnectorsDropdown', () => {
               <EuiIcon
                 css="unknown styles"
                 size="m"
-                type="minusInCircle"
+                type="minusCircle"
               />
             </EuiFlexItem>
             <EuiFlexItem>

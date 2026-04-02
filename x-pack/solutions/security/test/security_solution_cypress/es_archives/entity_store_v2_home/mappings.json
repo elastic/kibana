@@ -62,6 +62,13 @@
                   "properties": {
                     "resolved_to": {
                       "type": "keyword"
+                    },
+                    "risk": {
+                      "properties": {
+                        "calculated_score_norm": {
+                          "type": "float"
+                        }
+                      }
                     }
                   }
                 }

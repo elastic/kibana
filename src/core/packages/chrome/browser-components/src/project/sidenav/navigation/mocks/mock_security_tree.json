@@ -1159,16 +1159,7 @@
               "id": "entity_analytics-management",
               "href": "/jom/app/security/entity_analytics_management",
               "path": "stack_management.node-1.entity_analytics-management",
-              "title": "Entity risk score",
-              "deepLink": {},
-              "isExternalLink": false,
-              "sideNavStatus": "visible"
-            },
-            {
-              "id": "entity_analytics-entity_store_management",
-              "href": "/jom/app/security/entity_analytics_entity_store",
-              "path": "stack_management.node-1.entity_analytics-entity_store_management",
-              "title": "Entity store",
+              "title": "Entity analytics",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"

@@ -21,12 +21,8 @@ import {
   skip,
 } from 'rxjs';
 
-import {
-  DEFAULT_SEARCH_TECHNIQUE,
-  OPTIONS_LIST_CONTROL,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from '@kbn/controls-constants';
-import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
+import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import type { OptionsListSelection, OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
@@ -54,7 +50,7 @@ import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { buildFilter } from './utils/filter_utils';
 import {
   clearSelections,
@@ -77,7 +73,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         throw new Error('ES|QL control state handling not yet implemented');
       }
       const editorStateManager = initializeEditorStateManager(state);
-      const temporaryStateManager = initializeTemporayStateManager();
+      const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
 
       const dataControlManager: DataControlStateManager =
@@ -137,10 +133,10 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         )
         .subscribe(() => {
           temporaryStateManager.api.setSearchString('');
-          selectionsManager.api.setSelectedOptions(undefined);
+          selectionsManager.api.setSelectedOptions(DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options);
           selectionsManager.api.setExistsSelected(false);
           selectionsManager.api.setExclude(false);
-          selectionsManager.api.setSort(OPTIONS_LIST_DEFAULT_SORT);
+          selectionsManager.api.setSort(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
           temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
         });
 
@@ -239,7 +235,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListDSLControlState {
+      function serializeState(): OptionsListControlState {
         return {
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
@@ -250,7 +246,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
         uuid,
         parentApi,
         serializeState,
@@ -269,8 +265,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           };
         },
         defaultState: {
-          search_technique: DEFAULT_SEARCH_TECHNIQUE,
-          sort: OPTIONS_LIST_DEFAULT_SORT,
+          search_technique: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
+          sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
           exclude: false,
           exists_selected: false,
         },
@@ -308,7 +304,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
 
-      const componentApi: OptionsListComponentApi = {
+      const componentApi: DSLOptionsListComponentApi = {
         ...api,
         ...dataControlManager.api,
         ...editorStateManager.api,

@@ -31,6 +31,7 @@ describe('getFileType', () => {
 
   describe('getFileAttachmentViewObject', () => {
     const attachmentViewProps: ExternalReferenceAttachmentViewProps = {
+      savedObjectId: 'test-so-id',
       externalReferenceId: basicFileMock.id,
       // @ts-expect-error: files is a proper JSON
       externalReferenceMetadata: { files: [basicFileMock] },

@@ -127,7 +127,7 @@ export function WorkflowsPage() {
                 <>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      iconType="importAction"
+                      iconType="download"
                       size="m"
                       onClick={() => setShowImportFlyout(true)}
                       data-test-subj="importWorkflowsButton"
@@ -141,7 +141,7 @@ export function WorkflowsPage() {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       color="primary"
                       size="m"
                       fill

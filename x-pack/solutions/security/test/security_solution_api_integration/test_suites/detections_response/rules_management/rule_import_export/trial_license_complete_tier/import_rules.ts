@@ -119,8 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(importResponse.errors[0]).toEqual({
             error: {
-              message:
-                'Invalid input: expected string, received array, Too big: expected array to have <=5 items',
+              message: 'threshold.field: Too big: expected array to have <=5 items',
               status_code: 400,
             },
           });

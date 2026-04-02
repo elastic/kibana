@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getSidebarViewForRoute, getAgentIdFromPath } from './route_config';
+
+describe('route_config', () => {
+  describe('getSidebarViewForRoute', () => {
+    describe('agent routes', () => {
+      it('returns "conversation" for agent root', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent')).toBe('conversation');
+        expect(getSidebarViewForRoute('/agents/my-custom-agent')).toBe('conversation');
+      });
+
+      it('returns "conversation" for conversation routes', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/conversations/123')).toBe(
+          'conversation'
+        );
+        expect(getSidebarViewForRoute('/agents/my-agent/conversations/abc-def')).toBe(
+          'conversation'
+        );
+      });
+
+      it('returns "conversation" for overview route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/overview')).toBe('conversation');
+      });
+
+      it('returns "conversation" for skills route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/skills')).toBe('conversation');
+      });
+
+      it('returns "conversation" for tools route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/tools')).toBe('conversation');
+      });
+
+      it('returns "conversation" for plugins route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/plugins')).toBe('conversation');
+      });
+
+      it('returns "conversation" for connectors route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/connectors')).toBe('conversation');
+      });
+    });
+
+    describe('manage routes', () => {
+      it('returns "manage" for manage agents routes', () => {
+        expect(getSidebarViewForRoute('/manage/agents')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/agents/new')).toBe('manage');
+      });
+
+      it('returns "manage" for manage tools routes', () => {
+        expect(getSidebarViewForRoute('/manage/tools')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/tools/new')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/tools/tool-123')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/tools/bulk_import_mcp')).toBe('manage');
+      });
+
+      it('returns "manage" for manage skills routes', () => {
+        expect(getSidebarViewForRoute('/manage/skills')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/skills/new')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/skills/skill-123')).toBe('manage');
+      });
+
+      it('returns "manage" for manage plugins routes', () => {
+        expect(getSidebarViewForRoute('/manage/plugins')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/plugins/plugin-123')).toBe('manage');
+      });
+
+      it('returns "manage" for manage connectors route', () => {
+        expect(getSidebarViewForRoute('/manage/connectors')).toBe('manage');
+      });
+    });
+
+    describe('fallback behavior', () => {
+      it('returns "conversation" for unknown routes', () => {
+        expect(getSidebarViewForRoute('/unknown')).toBe('conversation');
+        expect(getSidebarViewForRoute('/')).toBe('conversation');
+        expect(getSidebarViewForRoute('/some/random/path')).toBe('conversation');
+      });
+    });
+  });
+
+  describe('getAgentIdFromPath', () => {
+    it('extracts agent ID from agent routes', () => {
+      expect(getAgentIdFromPath('/agents/elastic-ai-agent')).toBe('elastic-ai-agent');
+      expect(getAgentIdFromPath('/agents/my-custom-agent')).toBe('my-custom-agent');
+      expect(getAgentIdFromPath('/agents/elastic-ai-agent/skills')).toBe('elastic-ai-agent');
+      expect(getAgentIdFromPath('/agents/elastic-ai-agent/conversations/123')).toBe(
+        'elastic-ai-agent'
+      );
+    });
+
+    it('returns undefined for non-agent routes', () => {
+      expect(getAgentIdFromPath('/manage/agents')).toBeUndefined();
+      expect(getAgentIdFromPath('/manage/tools')).toBeUndefined();
+      expect(getAgentIdFromPath('/')).toBeUndefined();
+      expect(getAgentIdFromPath('/unknown')).toBeUndefined();
+    });
+  });
+});

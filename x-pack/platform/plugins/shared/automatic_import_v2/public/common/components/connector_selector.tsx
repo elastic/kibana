@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiInputPopover,
   EuiLoadingSpinner,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
@@ -27,7 +28,9 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLoadConnectors, useKibana } from '..';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useAuthorization } from '../hooks/use_authorization';
+import { useKibana } from '..';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
 
@@ -81,6 +84,7 @@ interface ConnectorData {
   defaultConnectorId: string | undefined;
   settingsDefaultConnectorId: string | undefined;
   isLoading: boolean;
+  canCreateConnectors: boolean;
 }
 
 interface UIState {
@@ -120,6 +124,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
     defaultConnectorId,
     settingsDefaultConnectorId,
     isLoading,
+    canCreateConnectors,
   } = connectorData;
   const { isPopoverOpen, setIsPopoverOpen } = uiState;
   const { onAddConnectorClick, onManageConnectorsClick } = handlers;
@@ -178,7 +183,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
             customConnectors={customConnectors}
             value={selectedOrDefaultConnector?.id}
             onValueChange={handleChangeConnector}
-            onAddConnectorClick={onAddConnectorClick}
+            onAddConnectorClick={canCreateConnectors ? onAddConnectorClick : undefined}
             onManageConnectorsClick={onManageConnectorsClick}
             defaultConnectorId={settingsDefaultConnectorId}
             renderOption={renderOption}
@@ -195,6 +200,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
       onManageConnectorsClick,
       settingsDefaultConnectorId,
       renderOption,
+      canCreateConnectors,
     ]
   );
 
@@ -219,7 +225,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
 
   const input = (
     <EuiButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       size="s"
       color="text"
@@ -239,18 +245,32 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
   );
 
   if (!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0) {
+    const addConnectorButton = (
+      <EuiButtonEmpty
+        data-test-subj={
+          canCreateConnectors ? 'addNewConnectorButton' : 'addNewConnectorButtonDisabled'
+        }
+        iconType="plusCircle"
+        isDisabled={isDisabled || !canCreateConnectors}
+        size="xs"
+        onClick={onAddConnectorClick}
+      >
+        {i18n.ADD_CONNECTOR_BUTTON_LABEL}
+      </EuiButtonEmpty>
+    );
+
     return (
       <EuiFlexGroup direction="column" alignItems="flexEnd">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            data-test-subj="addNewConnectorButton"
-            iconType="plusInCircle"
-            isDisabled={isDisabled}
-            size="xs"
-            onClick={onAddConnectorClick}
-          >
-            {i18n.ADD_CONNECTOR_BUTTON_LABEL}
-          </EuiButtonEmpty>
+          {!canCreateConnectors ? (
+            <EuiToolTip content={i18n.ADD_CONNECTOR_NO_PERMISSION_TOOLTIP}>
+              <span style={{ display: 'inline-block' }} tabIndex={0}>
+                {addConnectorButton}
+              </span>
+            </EuiToolTip>
+          ) : (
+            addConnectorButton
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -282,12 +302,21 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   isDisabled = false,
   displayFancy,
 }) => {
-  const { settings, application } = useKibana().services;
+  const { http, settings, application } = useKibana().services;
+  const { canCreateConnectors } = useAuthorization();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState(false);
 
-  const { connectors, isLoading, refetch } = useLoadConnectors();
+  const {
+    data: connectors,
+    isLoading,
+    refetch,
+  } = useLoadConnectors({
+    http,
+    featureId: 'automatic_import_v2',
+    settings,
+  });
 
   const settingsDefaultConnectorId = settings?.client.get<string>(
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR
@@ -357,6 +386,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
       defaultConnectorId,
       settingsDefaultConnectorId,
       isLoading,
+      canCreateConnectors,
     }),
     [
       connectors,
@@ -365,6 +395,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
       defaultConnectorId,
       settingsDefaultConnectorId,
       isLoading,
+      canCreateConnectors,
     ]
   );
 

@@ -56,7 +56,7 @@ export async function update(
     );
 
     const myComment = await attachmentService.getter.get({
-      attachmentId: queryCommentId,
+      savedObjectId: queryCommentId,
       mode,
     });
 

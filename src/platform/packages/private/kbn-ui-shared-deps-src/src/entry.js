@@ -35,6 +35,8 @@ export const IoTs = require('io-ts');
 export const IoTsReporter = require('io-ts/Reporter');
 export const IoTsPathReporter = require('io-ts/PathReporter');
 export const IoTsThrowReporter = require('io-ts/ThrowReporter');
+// eslint-disable-next-line @kbn/eslint/module_migration
+export const Zod = require('zod/v4');
 
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;

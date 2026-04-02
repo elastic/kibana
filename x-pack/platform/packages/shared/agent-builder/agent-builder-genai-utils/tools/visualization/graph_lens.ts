@@ -28,7 +28,7 @@ import {
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
-import { createGenerateConfigPrompt } from './prompts';
+import { createGenerateConfigPrompt, esqlAdditionalInstructions } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
@@ -72,15 +72,6 @@ function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   return queries;
 }
 
-/**
- * Helper to get a single existing ESQL query (for backward compatibility).
- * Returns the first query if multiple exist.
- */
-function getExistingEsqlQuery(config: VisualizationConfig | null): string | null {
-  const queries = getExistingEsqlQueries(config);
-  return queries.length > 0 ? queries[0] : null;
-}
-
 const VisualizationStateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
@@ -108,7 +99,9 @@ export const createVisualizationGraph = (
   model: ScopedModel,
   logger: Logger,
   events: ToolEventEmitter,
-  esClient: IScopedClusterClient
+  esClient: IScopedClusterClient,
+  includeTimeRange = true,
+  additionalChartConfigInstructions?: string
 ) => {
   // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {
@@ -135,8 +128,7 @@ export const createVisualizationGraph = (
         events,
         logger,
         esClient: esClient.asCurrentUser,
-        additionalInstructions:
-          'Use human-readable column aliases in STATS/EVAL (e.g. `Unique Visitors` not `unique_visitors`). Wrap multi-word aliases in backticks.',
+        additionalInstructions: esqlAdditionalInstructions,
       });
 
       if (!generateEsqlResponse.query) {
@@ -201,22 +193,17 @@ export const createVisualizationGraph = (
       .filter(Boolean)
       .join('\n');
 
-    const additionalInstructions = `IMPORTANT RULES:
-1. The 'dataset' field must contain: { type: "esql", query: "${esqlQuery}" }
-2. Always use { operation: 'value', column: '<esql column name>', ...other options } for operations
-3. All field names must match those available in the ES|QL query result
-4. Follow the schema definition strictly`;
-
     const additionalContext = previousActionContext
       ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
       : undefined;
 
     const prompt = createGenerateConfigPrompt({
       nlQuery: state.nlQuery,
+      esqlQuery,
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
-      additionalInstructions,
+      additionalChartConfigInstructions,
       additionalContext,
     });
 
@@ -418,7 +405,7 @@ What is the most appropriate time range for this visualization?`,
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
-      esqlQuery: lastGenerateEsqlAction?.query,
+      esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
   };
@@ -427,10 +414,15 @@ What is the most appropriate time range for this visualization?`,
   const shouldRetryRouter = (state: VisualizationState): string => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
 
-    // Success case - generate time range before finalizing
+    // Success case - optionally generate a time range before finalizing
     if (lastValidateAction?.success) {
-      logger.debug('Configuration validated successfully, generating time range');
-      return GENERATE_TIME_RANGE_NODE;
+      if (includeTimeRange) {
+        logger.debug('Configuration validated successfully, generating time range');
+        return GENERATE_TIME_RANGE_NODE;
+      }
+
+      logger.debug('Configuration validated successfully, skipping time range generation');
+      return 'finalize';
     }
 
     // Failure case - max attempts reached
@@ -446,16 +438,16 @@ What is the most appropriate time range for this visualization?`,
     return GENERATE_CONFIG_NODE;
   };
 
-  // Router: Decide whether to generate ESQL or use existing
+  // Router: Use an explicit ES|QL query when provided, otherwise generate one.
+  // Existing config is still valuable because generateESQLNode includes the
+  // prior query as context when regenerating edits.
   const shouldGenerateESQLRouter = (state: VisualizationState): string => {
-    // If we have existing config with a query, skip ES|QL generation
-    const existingQuery = getExistingEsqlQuery(state.parsedExistingConfig);
-    if (existingQuery) {
-      logger.debug('Using existing ES|QL query from parsed config');
+    if (state.esqlQuery) {
+      logger.debug('Using provided ES|QL query');
       return GENERATE_CONFIG_NODE;
     }
 
-    logger.debug('No existing query found, generating new ES|QL query');
+    logger.debug('No ES|QL query provided, generating ES|QL query');
     return GENERATE_ESQL_NODE;
   };
 

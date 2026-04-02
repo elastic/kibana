@@ -14,10 +14,12 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
+import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import moment from 'moment';
 import React, { useMemo } from 'react';
@@ -48,9 +50,7 @@ import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../common/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
-import { PopoverTooltip } from './popover_tooltip';
 import { useRulesTableContext } from './rules_table/rules_table_context';
-import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
@@ -62,6 +62,7 @@ import {
   GAP_STATUS_IN_PROGRESS_LABEL,
   GAP_STATUS_UNFILLED_LABEL,
   GAP_STATUS_FILLED_LABEL,
+  GAP_STATUS_ERROR_LABEL,
   gapStatusTooltipInProgress,
   gapStatusTooltipUnfilled,
   gapStatusTooltipFilled,
@@ -127,7 +128,9 @@ export const useEnabledColumn = ({
           />
         </EuiToolTip>
       ),
-      width: '95px',
+      minWidth: '6em',
+      width: '6em',
+      maxWidth: '6em',
       sortable: true,
     }),
     [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobs]
@@ -167,17 +170,19 @@ export const RULE_NAME_COLUMN: TableColumn = {
   render: (value: Rule['name'], item: Rule) => <RuleLink id={item.id} name={value} />,
   sortable: true,
   truncateText: true,
-  width: '38%',
+  minWidth: '12em',
+  width: '18em',
+  // Keep max width at 20em unless the table container width is large enough that we have
+  // enough space for other columns
+  maxWidth: 'max(20em, 25cqi)',
 };
 
 export const useRuleExecutionStatusColumn = ({
   sortable,
-  width,
   isLoadingJobs,
   mlJobs,
 }: {
   sortable: boolean;
-  width: string;
   isLoadingJobs: boolean;
   mlJobs: SecurityJob[];
 }): TableColumn => {
@@ -201,10 +206,11 @@ export const useRuleExecutionStatusColumn = ({
         );
       },
       sortable,
-      truncateText: true,
-      width,
+      minWidth: '9em',
+      width: '13em',
+      maxWidth: '13em',
     }),
-    [isLoadingJobs, mlJobs, sortable, width]
+    [isLoadingJobs, mlJobs, sortable]
   );
 };
 
@@ -233,8 +239,9 @@ const TAGS_COLUMN: TableColumn = {
       />
     );
   },
-  width: '65px',
-  truncateText: true,
+  width: '4.5em',
+  minWidth: '4.5em',
+  maxWidth: '5em',
 };
 
 const INTEGRATIONS_COLUMN: TableColumn = {
@@ -248,8 +255,9 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
     return <IntegrationsPopover relatedIntegrations={integrations} />;
   },
-  width: '70px',
-  truncateText: true,
+  width: '5.5em',
+  minWidth: '5.5em',
+  maxWidth: '5.5em',
 };
 
 const MODIFIED_COLUMN: TableColumn = {
@@ -278,7 +286,9 @@ const MODIFIED_COLUMN: TableColumn = {
       </EuiToolTip>
     );
   },
-  width: '90px',
+  // Hide column visually when there are no modified rules
+  minWidth: '0px',
+  maxWidth: '7em',
   truncateText: true,
 };
 
@@ -295,15 +305,15 @@ export const LAST_EXECUTION_COLUMN = {
             tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
             relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
             value={value}
-            tooltipAnchorClassName="eui-textTruncate"
           />
         )}
       </EuiFlexGroup>
     );
   },
   sortable: true,
-  truncateText: true,
-  width: '16%',
+  minWidth: '6em',
+  width: '9.5em',
+  maxWidth: '11em',
 };
 
 const useActionsColumn = ({
@@ -317,7 +327,7 @@ const useActionsColumn = ({
     confirmDeletion,
   });
 
-  return useMemo(() => ({ actions, width: '40px' }), [actions]);
+  return useMemo(() => ({ ...columnPresetActions({}), actions, sticky: true }), [actions]);
 };
 
 export interface UseColumnsProps extends ColumnsProps, ActionColumnsProps {}
@@ -346,7 +356,6 @@ export const useRulesColumns = ({
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: true,
-    width: '16%',
     isLoadingJobs,
     mlJobs,
   });
@@ -368,7 +377,9 @@ export const useRulesColumns = ({
         ),
         sortable: true,
         truncateText: true,
-        width: '85px',
+        align: RIGHT_ALIGNMENT,
+        width: '7em',
+        maxWidth: '8em',
       },
       {
         field: 'severity',
@@ -376,7 +387,9 @@ export const useRulesColumns = ({
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
         sortable: true,
         truncateText: true,
-        width: '12%',
+        minWidth: '6.5em',
+        width: '6.5em',
+        maxWidth: '8em',
       },
       LAST_EXECUTION_COLUMN,
       executionStatusColumn,
@@ -391,13 +404,13 @@ export const useRulesColumns = ({
               tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
               relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
               value={value}
-              tooltipAnchorClassName="eui-textTruncate"
             />
           );
         },
         sortable: true,
-        width: '18%',
-        truncateText: true,
+        minWidth: '9.5em',
+        width: '9.5em',
+        maxWidth: '11em',
       },
       snoozeColumn,
       enabledColumn,
@@ -416,12 +429,11 @@ export const useRulesColumns = ({
 
 export const INDEXING_DURATION_COLUMN = {
   field: 'execution_summary.last_execution.metrics.total_indexing_duration_ms',
-  name: (
-    <TableHeaderTooltipCell
-      title={i18n.COLUMN_INDEXING_TIMES}
-      tooltipContent={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
-    />
-  ),
+  name: i18n.COLUMN_INDEXING_TIMES,
+  nameTooltip: {
+    content: i18n.COLUMN_INDEXING_TIMES_TOOLTIP,
+    icon: 'question',
+  },
   render: (value: number | undefined) => (
     <EuiText data-test-subj="total_indexing_duration_ms" size="s">
       {value != null ? value.toFixed() : getEmptyTagValue()}
@@ -429,17 +441,18 @@ export const INDEXING_DURATION_COLUMN = {
   ),
   sortable: true,
   truncateText: true,
-  width: '16%',
+  minWidth: '12em',
+  width: '12em',
+  maxWidth: '14em',
 };
 
 export const SEARCH_DURATION_COLUMN = {
   field: 'execution_summary.last_execution.metrics.total_search_duration_ms',
-  name: (
-    <TableHeaderTooltipCell
-      title={i18n.COLUMN_QUERY_TIMES}
-      tooltipContent={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
-    />
-  ),
+  name: i18n.COLUMN_QUERY_TIMES,
+  nameTooltip: {
+    content: i18n.COLUMN_QUERY_TIMES_TOOLTIP,
+    icon: 'question',
+  },
   render: (value: number | undefined) => (
     <EuiText data-test-subj="total_search_duration_ms" size="s">
       {value != null ? value.toFixed() : getEmptyTagValue()}
@@ -447,7 +460,9 @@ export const SEARCH_DURATION_COLUMN = {
   ),
   sortable: true,
   truncateText: true,
-  width: '14%',
+  width: '11em',
+  minWidth: '11em',
+  maxWidth: '11em',
 };
 
 export const useGapDurationColumn = () => {
@@ -455,30 +470,23 @@ export const useGapDurationColumn = () => {
 
   return {
     field: 'execution_summary.last_execution.metrics.execution_gap_duration_s',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_GAP}
-        customTooltip={
-          <div css={{ maxWidth: '20px' }}>
-            <PopoverTooltip columnName={i18n.COLUMN_GAP} anchorColor="subdued">
-              <EuiText css={{ width: 300 }}>
-                <FormattedMessage
-                  defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
-                  id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
-                  values={{
-                    seeDocs: (
-                      <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
-                        {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </PopoverTooltip>
-          </div>
-        }
-      />
-    ),
+    name: i18n.COLUMN_GAP,
+    nameTooltip: {
+      content: (
+        <FormattedMessage
+          defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+          id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
+          values={{
+            seeDocs: (
+              <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
+              </EuiLink>
+            ),
+          }}
+        />
+      ),
+      icon: 'question',
+    },
     render: (value: number | undefined) => (
       <EuiText data-test-subj="gap" size="s">
         {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
@@ -486,7 +494,9 @@ export const useGapDurationColumn = () => {
     ),
     sortable: true,
     truncateText: true,
-    width: '14%',
+    minWidth: '11em',
+    width: '11em',
+    maxWidth: '12em',
   };
 };
 
@@ -533,17 +543,21 @@ export const useGapStatusColumn = (): TableColumn => {
         const totalFilledDurationMs = gapInfo.total_filled_duration_ms;
 
         const byStatus: Record<GapFillStatus, { color: string; label: string }> = {
+          [gapFillStatus.FILLED]: {
+            color: euiTheme.colors.vis.euiColorVis0,
+            label: GAP_STATUS_FILLED_LABEL,
+          },
           [gapFillStatus.IN_PROGRESS]: {
-            color: euiTheme.colors.backgroundBaseWarning,
+            color: euiTheme.colors.vis.euiColorVis2,
             label: GAP_STATUS_IN_PROGRESS_LABEL,
           },
           [gapFillStatus.UNFILLED]: {
-            color: euiTheme.colors.backgroundBaseDanger,
+            color: euiTheme.colors.vis.euiColorVis6,
             label: GAP_STATUS_UNFILLED_LABEL,
           },
-          [gapFillStatus.FILLED]: {
-            color: euiTheme.colors.backgroundBaseSuccess,
-            label: GAP_STATUS_FILLED_LABEL,
+          [gapFillStatus.ERROR]: {
+            color: euiTheme.colors.vis.euiColorVis8,
+            label: GAP_STATUS_ERROR_LABEL,
           },
         };
 
@@ -569,24 +583,26 @@ export const useGapStatusColumn = (): TableColumn => {
       },
       sortable: false,
       truncateText: true,
-      width: '120px',
+      minWidth: '7em',
+      width: '7em',
+      maxWidth: '9em',
     }),
     [
-      euiTheme.colors.backgroundBaseWarning,
-      euiTheme.colors.backgroundBaseDanger,
-      euiTheme.colors.backgroundBaseSuccess,
+      euiTheme.colors.vis.euiColorVis0,
+      euiTheme.colors.vis.euiColorVis2,
+      euiTheme.colors.vis.euiColorVis6,
+      euiTheme.colors.vis.euiColorVis8,
     ]
   );
 };
 
 export const TOTAL_UNFILLED_DURATION_COLUMN = {
   field: 'gap_info.total_unfilled_duration_ms',
-  name: (
-    <TableHeaderTooltipCell
-      title={i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION}
-      tooltipContent={i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP}
-    />
-  ),
+  name: i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION,
+  nameTooltip: {
+    content: i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP,
+    icon: 'question',
+  },
   render: (value: number | undefined) => (
     <EuiText data-test-subj="gap_info" size="s">
       {value != null && value > 0 ? moment.duration(value, 'ms').humanize() : getEmptyTagValue()}
@@ -594,7 +610,9 @@ export const TOTAL_UNFILLED_DURATION_COLUMN = {
   ),
   sortable: false,
   truncateText: true,
-  width: '14%',
+  minWidth: '12em',
+  width: '12em',
+  maxWidth: '13em',
 };
 
 export const useMonitoringColumns = ({
@@ -621,7 +639,6 @@ export const useMonitoringColumns = ({
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: true,
-    width: '12%',
     isLoadingJobs,
     mlJobs,
   });
@@ -630,10 +647,7 @@ export const useMonitoringColumns = ({
 
   return useMemo(
     () => [
-      {
-        ...RULE_NAME_COLUMN,
-        width: '28%',
-      },
+      RULE_NAME_COLUMN,
       MODIFIED_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,

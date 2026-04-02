@@ -12,7 +12,7 @@ import type {
   DatasourcePublicAPI,
   VisualizationToolbarProps,
 } from '@kbn/lens-common';
-import type { XYState, XYDataLayerConfig } from '../types';
+import type { XYVisualizationState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -25,7 +25,7 @@ import { XyAxisSettings } from './axis_settings';
 describe('xy style settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): XYState {
+  function testState(): XYVisualizationState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -50,7 +50,9 @@ describe('xy style settings', () => {
     };
   });
 
-  const renderComponent = (overrideProps?: Partial<VisualizationToolbarProps<XYState>>) => {
+  const renderComponent = (
+    overrideProps?: Partial<VisualizationToolbarProps<XYVisualizationState>>
+  ) => {
     const state = testState();
     const rtlRender = render(
       <XyStyleSettings frame={frame} setState={jest.fn()} state={state} {...overrideProps} />

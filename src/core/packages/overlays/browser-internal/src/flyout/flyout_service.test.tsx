@@ -34,21 +34,23 @@ const mountText = (text: string) => (container: HTMLElement) => {
   return () => {};
 };
 
-const getServiceStart = () => {
+const getService = () => {
   const service = new FlyoutService();
-  return service.start({
+  const flyouts = service.start({
     analytics: analyticsMock,
     i18n: i18nMock,
     theme: themeMock,
     userProfile: userProfileMock,
     targetDomElement: document.createElement('div'),
   });
+  return { service, flyouts };
 };
 
 describe('FlyoutService', () => {
   let flyouts: OverlayFlyoutStart;
+  let service: FlyoutService;
   beforeEach(() => {
-    flyouts = getServiceStart();
+    ({ service, flyouts } = getService());
   });
 
   describe('openFlyout()', () => {
@@ -82,6 +84,24 @@ describe('FlyoutService', () => {
       });
     });
   });
+  describe('closeAllFlyouts()', () => {
+    it('closes the active flyout and resolves onClose', async () => {
+      const ref = flyouts.open(mountText('Flyout content'));
+      const onCloseComplete = jest.fn();
+      ref.onClose.then(onCloseComplete);
+
+      service.closeAllFlyouts();
+
+      await ref.onClose;
+      expect(onCloseComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('is a no-op when no flyout is open', () => {
+      expect(() => service.closeAllFlyouts()).not.toThrow();
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+  });
+
   describe('FlyoutRef#close()', () => {
     it('resolves the onClose Promise', async () => {
       const ref = flyouts.open(mountText('Flyout content'));

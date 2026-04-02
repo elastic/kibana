@@ -36,12 +36,12 @@ import type { LensPartitionVisualizationState } from '@kbn/lens-common';
 describe('Partition', () => {
   describe('validateConverter', () => {
     const datasets = [
-      { name: 'pie/donut basic', config: pieLegacyBasicState, schema: pieStateSchema },
+      { name: 'pie basic', config: pieLegacyBasicState, schema: pieStateSchema },
       { name: 'treemap basic', config: treemapLegacyBasicState, schema: treemapStateSchema },
       { name: 'mosaic basic', config: mosaicLegacyBasicState, schema: mosaicStateSchema },
       { name: 'waffle basic', config: waffleLegacyBasicState, schema: waffleStateSchema },
       {
-        name: 'pie/donut advanced with collapsed groups',
+        name: 'pie advanced with collapsed groups',
         config: pieLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
         schema: pieStateSchema,
       },
@@ -92,7 +92,10 @@ describe('Partition', () => {
   describe('validateAPIConverter', () => {
     for (const config of esqlCharts) {
       it(`should convert an API ${config.title} chart`, () => {
-        validateAPIConverter(config as LensApiState, partitionStateSchema);
+        validateAPIConverter(config as LensApiState, partitionStateSchema, [
+          'sampling',
+          'ignore_global_filters',
+        ]);
       });
     }
   });

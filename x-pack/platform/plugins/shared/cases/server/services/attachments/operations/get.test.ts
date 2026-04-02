@@ -169,7 +169,7 @@ describe('AttachmentService getter', () => {
         )
         .mockResolvedValueOnce(createUserAttachment());
 
-      const res = await attachmentGetterWithFlagOn.get({ attachmentId: '1', mode });
+      const res = await attachmentGetterWithFlagOn.get({ savedObjectId: '1', mode });
 
       expect(res).toStrictEqual(createUserAttachment());
       expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(2);
@@ -190,7 +190,7 @@ describe('AttachmentService getter', () => {
       unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('ES timeout'));
 
       await expect(
-        attachmentGetterWithFlagOn.get({ attachmentId: '1', mode })
+        attachmentGetterWithFlagOn.get({ savedObjectId: '1', mode })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES timeout"`);
 
       expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -204,7 +204,7 @@ describe('AttachmentService getter', () => {
       it('does not throw when the response has the required fields', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createUserAttachment());
 
-        await expect(attachmentGetter.get({ attachmentId: '1', mode })).resolves.not.toThrow();
+        await expect(attachmentGetter.get({ savedObjectId: '1', mode })).resolves.not.toThrow();
       });
 
       it('strips excess fields', async () => {
@@ -212,7 +212,7 @@ describe('AttachmentService getter', () => {
           ...createUserAttachment({ foo: 'bar' }),
         });
 
-        const res = await attachmentGetter.get({ attachmentId: '1', mode });
+        const res = await attachmentGetter.get({ savedObjectId: '1', mode });
         expect(res).toStrictEqual(createUserAttachment());
       });
 
@@ -223,7 +223,7 @@ describe('AttachmentService getter', () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(invalidAttachment);
 
         await expect(
-          attachmentGetter.get({ attachmentId: '1', mode })
+          attachmentGetter.get({ savedObjectId: '1', mode })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
         );

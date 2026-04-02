@@ -46,13 +46,9 @@ const defaultRootProfileState: RootProfileState = {
 };
 let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
-jest.mock('../../context_awareness', () => {
-  const originalModule = jest.requireActual('../../context_awareness');
-  return {
-    ...originalModule,
-    useRootProfile: () => mockRootProfileState,
-  };
-});
+jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
+  useRootProfile: () => mockRootProfileState,
+}));
 
 function getServicesMock(
   hasESData = true,

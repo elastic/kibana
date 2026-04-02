@@ -16,8 +16,8 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
   workflowTools,
 } from '../../../common/agent_builder/constants';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 const clientDiagnosticSchema = z.object({
   severity: z.enum(['error', 'warning']),
@@ -164,12 +164,16 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `\`condition\` is a config param specific to the \`if\` step type (alongside \`steps\`/\`else\`).\n\n` +
     `## Common Fixes\n\n` +
     `- Liquid expressions must be quoted in YAML: \`"{{ steps.name.output.field }}"\`\n` +
+    `- Step outputs are accessed via \`steps.<name>.output\` — NEVER \`steps.<name>.with.*\` or \`steps.<name>.<input_param>\`. A step's input parameters (\`with\` block) are NOT accessible as variables; only \`output\` is. Use \`${workflowTools.getStepDefinitions}\` with \`includeOutputSummary\` to learn what a step's output contains.\n` +
+    `- NEVER reference \`triggers.event\`, \`trigger.event\`, or \`triggers.event.*\` — use \`event\` directly (e.g. \`{{ event.alerts }}\`, \`{{ event.rule.name }}\`). The \`triggers\` block configures trigger types, not runtime data.\n` +
+    `- For alert triggers: \`event.alerts\` is an array, \`event.rule\` has \`id\`/\`name\`/\`tags\`, \`event.spaceId\` is the space\n` +
     `- ES|QL params must be an array of positional values (\`?\` placeholder), not a named map\n` +
     `- All workflows need \`version: '1'\` at the root\n` +
     `- Each step needs a unique \`name\` and valid \`type\`\n` +
     `- Step input parameters go in the \`with\` block\n` +
     `- Config params are step-level fields outside \`with\` (e.g. \`condition\`/\`steps\`/\`else\` for the \`if\` step type, \`foreach\`/\`steps\` for \`foreach\`)\n` +
-    `- Connector-based steps require a \`connector-id\` field`,
+    `- Connector-based steps require a \`connector-id\` field\n` +
+    `- When fixing an error, scan the entire YAML for other occurrences of the same mistake and fix them all`,
 });
 
 export function registerWorkflowYamlAttachment(

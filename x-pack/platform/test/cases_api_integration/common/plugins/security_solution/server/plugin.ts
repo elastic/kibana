@@ -182,6 +182,29 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             },
           ],
         },
+        {
+          name: 'Manage templates',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_manage_templates',
+                  name: 'Manage case templates',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    manageTemplates: ['securitySolutionFixture'],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 

@@ -10,10 +10,8 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import type { IFileStore, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import {
-  createResultTransformer,
-  FILE_REFERENCE_TOKEN_THRESHOLD,
-} from './create_result_transformer';
+import { createResultTransformer, FS_TOOL_CALL_TOKEN_THRESHOLD } from './create_result_transformer';
+import type { ProcessedConversation } from './prepare_conversation';
 
 describe('createResultTransformer', () => {
   const makeToolCallWithResult = (
@@ -62,6 +60,15 @@ describe('createResultTransformer', () => {
       list: jest.fn(async () => []),
     } as unknown as ToolRegistry);
 
+  const createMockProcessedConversation = (): ProcessedConversation =>
+    ({
+      previousRounds: [],
+      nextInput: {},
+      attachmentTypes: [],
+      attachments: [],
+      attachmentStateManager: {} as any,
+    } as unknown as ProcessedConversation);
+
   const createMockToolManager = (
     summarizers: Map<
       string,
@@ -88,6 +95,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -117,6 +125,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -142,6 +151,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -163,6 +173,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -203,6 +214,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager,
         filestore,
@@ -237,6 +249,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager,
         filestore,
@@ -265,17 +278,19 @@ describe('createResultTransformer', () => {
         '/tool_calls/search/call-1/result-1.json',
         createFileEntry(
           '/tool_calls/search/call-1/result-1.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 100,
+          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
           { large: 'data' }
         )
       );
       const filestore = createMockFileStore(entries);
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
+        conversationTokenThreshold: 0,
       });
 
       const toolCall = makeToolCallWithResult('call-1', 'search', [
@@ -303,10 +318,12 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(entries);
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
+        conversationTokenThreshold: 0,
       });
 
       const toolCall = makeToolCallWithResult('call-1', 'search', [
@@ -325,10 +342,12 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
+        conversationTokenThreshold: 0,
       });
 
       const toolCall = makeToolCallWithResult('call-1', 'search', [
@@ -349,13 +368,14 @@ describe('createResultTransformer', () => {
         '/tool_calls/search/call-1/result-1.json',
         createFileEntry(
           '/tool_calls/search/call-1/result-1.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 100,
+          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
           { large: 'data' }
         )
       );
       const filestore = createMockFileStore(entries);
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -394,17 +414,19 @@ describe('createResultTransformer', () => {
         '/tool_calls/search/call-1/summarized.json',
         createFileEntry(
           '/tool_calls/search/call-1/summarized.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 1000,
+          FS_TOOL_CALL_TOKEN_THRESHOLD + 1000,
           { summary: 'Summarized data' }
         )
       );
       const filestore = createMockFileStore(entries);
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
+        conversationTokenThreshold: 0,
       });
 
       const toolCall = makeToolCallWithResult('call-1', 'search', [
@@ -430,6 +452,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -467,6 +490,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -492,6 +516,7 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(new Map());
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
@@ -505,7 +530,7 @@ describe('createResultTransformer', () => {
       expect(result).toHaveLength(0);
     });
 
-    it('respects custom threshold parameter', async () => {
+    it('respects custom toolCallTokenThreshold parameter', async () => {
       const toolRegistry = createMockToolRegistry(new Map([['search', {} as any]]));
 
       const entries = new Map<string, FileEntry>();
@@ -517,11 +542,13 @@ describe('createResultTransformer', () => {
       const filestore = createMockFileStore(entries);
 
       const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
         toolRegistry,
         toolManager: createMockToolManager(),
         filestore,
         filestoreEnabled: true,
-        tokenThreshold: 100,
+        conversationTokenThreshold: 0,
+        toolCallTokenThreshold: 100,
       });
 
       const toolCall = makeToolCallWithResult('call-1', 'search', [
@@ -531,6 +558,41 @@ describe('createResultTransformer', () => {
       const result = await transformer(toolCall);
 
       expect(result[0].type).toBe(ToolResultType.fileReference);
+    });
+
+    it('skips filestore substitution when conversation token count is below conversationTokenThreshold', async () => {
+      const toolRegistry = createMockToolRegistry(new Map([['search', {} as any]]));
+
+      const entries = new Map<string, FileEntry>();
+      entries.set(
+        '/tool_calls/search/call-1/result-1.json',
+        createFileEntry(
+          '/tool_calls/search/call-1/result-1.json',
+          FS_TOOL_CALL_TOKEN_THRESHOLD + 100,
+          { large: 'data' }
+        )
+      );
+      const filestore = createMockFileStore(entries);
+
+      // conversationTokenThreshold is very high — empty conversation won't exceed it
+      const transformer = createResultTransformer({
+        processedConversation: createMockProcessedConversation(),
+        toolRegistry,
+        toolManager: createMockToolManager(),
+        filestore,
+        filestoreEnabled: true,
+        conversationTokenThreshold: 1_000_000,
+      });
+
+      const toolCall = makeToolCallWithResult('call-1', 'search', [
+        { tool_result_id: 'result-1', type: ToolResultType.other, data: { large: 'data' } },
+      ]);
+
+      const result = await transformer(toolCall);
+
+      // Filestore substitution should NOT happen because conversation token count is too low
+      expect(result[0].type).toBe(ToolResultType.other);
+      expect(result[0].data).toEqual({ large: 'data' });
     });
   });
 });

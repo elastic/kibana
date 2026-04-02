@@ -187,3 +187,7 @@ export const addChangelogToZip = (
   const yamlContent = dump(changelog, { lineWidth: -1, quotingType: '"', forceQuotes: true });
   zip.addFile(path.join(rootDir, 'changelog.yml'), Buffer.from(yamlContent));
 };
+
+export const addReadmeToZip = (zip: AdmZip, rootDir: string, readmeContent: string): void => {
+  zip.addFile(path.join(rootDir, 'docs', 'README.md'), Buffer.from(readmeContent));
+};

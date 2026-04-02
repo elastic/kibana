@@ -55,7 +55,7 @@ export const EndpointScriptDetailsActions = memo<EndpointScriptDetailsActionsPro
         <EuiButton
           iconSide="right"
           fill
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           data-test-subj={getTestId('takeActionButton')}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);

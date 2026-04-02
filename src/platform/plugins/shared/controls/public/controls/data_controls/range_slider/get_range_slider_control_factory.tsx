@@ -18,7 +18,7 @@ import {
   initializeUnsavedChanges,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
@@ -130,7 +130,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       ])
         .pipe(skip(1))
         .subscribe(() => {
-          editorStateManager.api.setStep(1);
+          editorStateManager.api.setStep(DEFAULT_RANGE_SLIDER_STATE.step);
           selections.setValue(undefined);
         });
 
@@ -261,7 +261,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               max={max}
               min={min}
               onChange={selections.setValue}
-              step={step ?? 1}
+              step={step}
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}

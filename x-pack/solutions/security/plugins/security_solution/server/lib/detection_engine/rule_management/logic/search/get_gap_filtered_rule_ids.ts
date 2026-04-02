@@ -81,6 +81,7 @@ export interface GapFilteredRuleIdsOptions {
   filter?: string;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
+  schedulerId?: string;
 }
 
 export interface GapFilteredRuleIdsResult {
@@ -102,12 +103,14 @@ export const getGapFilteredRuleIds = async ({
   filter,
   sortField,
   sortOrder,
+  schedulerId,
 }: GapFilteredRuleIdsOptions): Promise<GapFilteredRuleIdsResult> => {
   // Step 1: get ALL rule IDs with gaps for the selected range and gap fill statuses
   const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
     highestPriorityGapFillStatuses: gapFillStatuses,
     start: gapRange.start,
     end: gapRange.end,
+    schedulerId,
   });
 
   const initialRuleIds = ruleIdsWithGaps.ruleIds.slice(0, maxRuleIds);

@@ -14,7 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -79,6 +79,7 @@ async function getCreationOptions(
           {
             type: OPTIONS_LIST_CONTROL,
             config: {
+              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
               data_view_id: dataView.id ?? '',
               title: 'Node name',
               field_name: 'service.node.name',

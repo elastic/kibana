@@ -69,7 +69,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
         >
           <EuiFilterButton
             data-test-subj={FILTER_BY_ASSIGNEES_BUTTON}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             badgeColor="subdued"
             disabled={!isPlatinumPlus}
             onClick={togglePopover}

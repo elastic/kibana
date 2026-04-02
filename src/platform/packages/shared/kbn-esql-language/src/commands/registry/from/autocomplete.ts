@@ -22,7 +22,6 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
-import { esqlCommandRegistry } from '../../../..';
 import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
@@ -207,10 +206,5 @@ async function suggestAdditionalSources(
 }
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
-  if (context?.isCursorInSubquery) {
-    return false;
-  }
-
-  const fromCommand = esqlCommandRegistry.getCommandByName('from');
-  return fromCommand?.metadata?.subquerySupport ?? true;
+  return !context?.isCursorInSubquery;
 }

@@ -38,7 +38,7 @@ export function TipsAndResources() {
 
   const cards = [
     {
-      icon: 'beaker',
+      icon: 'flask',
       title: i18n.translate('xpack.apm.storageExplorer.resources.errorMessages.title', {
         defaultMessage: 'Reduce transactions',
       }),
@@ -49,7 +49,7 @@ export function TipsAndResources() {
       href: docLinks.links.apm.transactionSampling,
     },
     {
-      icon: 'visLine',
+      icon: 'chartLine',
       title: i18n.translate('xpack.apm.storageExplorer.resources.compressedSpans.title', {
         defaultMessage: 'Reduce spans',
       }),
@@ -97,7 +97,7 @@ export function TipsAndResources() {
           serviceGroup: '',
         },
       }),
-      iconType: 'tableDensityExpanded',
+      iconType: 'tableDensityLow',
     },
     {
       label: i18n.translate('xpack.apm.storageExplorer.resources.documentation', {
@@ -115,7 +115,7 @@ export function TipsAndResources() {
             }),
             href: getStorageExplorerFeedbackHref(),
             target: '_blank',
-            iconType: 'editorComment',
+            iconType: 'comment',
           },
         ]
       : []),

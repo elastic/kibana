@@ -301,15 +301,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const getRequestTimestamp = async () => {
           // check inspector panel request stats for timestamp
-          await inspector.open();
+          await PageObjects.discover.openInspectorFromTabMenu();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
           );
+          await inspector.close();
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
-          await inspector.close();
           return requestStatsRow[0][1];
         };
 

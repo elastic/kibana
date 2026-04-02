@@ -176,7 +176,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
               onFocus={() => setIsPinFocused(true)}
               onBlur={() => setIsPinFocused(false)}
               color="text"
-              iconType={showPinIcon ? 'pinFilled' : 'empty'}
+              iconType={showPinIcon ? 'pinFill' : 'empty'}
               data-test-subj="pinFieldButton"
               aria-label={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',

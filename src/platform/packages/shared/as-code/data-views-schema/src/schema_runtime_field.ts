@@ -95,15 +95,6 @@ const commonFieldSchema = {
       },
     })
   ),
-  popularity: schema.maybe(
-    schema.number({
-      min: 0,
-      meta: {
-        description:
-          'Adjust the popularity to make the field appear higher or lower in the fields list. By default, Discover orders fields from most selected to least selected.',
-      },
-    })
-  ),
 };
 
 export const primitiveRuntimeFieldSchema = schema.object({

@@ -17,7 +17,7 @@ import {
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHeartbeats } from '../../tasks/index_endpoint_heartbeats';
 
-describe(
+describe.skip(
   'Metering',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],

@@ -44,8 +44,16 @@ export const COLUMN_CI = i18n.translate('xpack.evals.runsList.columns.ci', {
   defaultMessage: 'CI',
 });
 
+export const COLUMN_PULL_REQUEST = i18n.translate('xpack.evals.runsList.columns.pullRequest', {
+  defaultMessage: 'PR',
+});
+
 export const CI_BUILD_LINK = i18n.translate('xpack.evals.runsList.ciBuildLink', {
   defaultMessage: 'Build',
+});
+
+export const PR_LINK = i18n.translate('xpack.evals.runsList.prLink', {
+  defaultMessage: 'PR',
 });
 
 export const SUITE_FILTER_ARIA_LABEL = i18n.translate('xpack.evals.runsList.suiteFilterAriaLabel', {

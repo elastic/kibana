@@ -133,11 +133,11 @@ describe('ApiKeyForm', () => {
       expect(toggleButton.querySelector('[data-euiicon-type="eye"]')).toBeInTheDocument();
     });
 
-    it('should show "eyeClosed" icon when API key is visible', () => {
+    it('should show "eyeSlash" icon when API key is visible', () => {
       renderWithStatus(Status.showPreviewKey);
 
       const toggleButton = screen.getByTestId('searchHomepageShowAPIKeyButton');
-      expect(toggleButton.querySelector('[data-euiicon-type="eyeClosed"]')).toBeInTheDocument();
+      expect(toggleButton.querySelector('[data-euiicon-type="eyeSlash"]')).toBeInTheDocument();
     });
   });
 });

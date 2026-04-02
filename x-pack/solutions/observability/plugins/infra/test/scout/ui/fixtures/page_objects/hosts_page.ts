@@ -60,6 +60,7 @@ export class HostsPage {
   public async openFilterControl(fieldName: string) {
     const controlTestId = `optionsList-control-${fieldName}`;
     const control = this.page.getByTestId(controlTestId);
+    await control.locator('.euiLoadingSpinner').waitFor({ state: 'hidden' });
     await control.waitFor();
     await control.click();
     await this.excludeButton.waitFor();

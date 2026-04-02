@@ -12,6 +12,11 @@ import { useAgentBuilderIntegration } from './use_agent_builder_integration';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
 import { useKibana } from '../../../../hooks/use_kibana';
 
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => mockDispatch,
+}));
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid-1234' }));
 jest.mock('../../../../features/ai_integration', () => ({
@@ -32,6 +37,7 @@ jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
     updateStatus: jest.fn(),
     cascadeDecline: jest.fn().mockReturnValue([]),
     clearAll: jest.fn(),
+    getAllRecords: jest.fn().mockReturnValue([]),
   })),
 }));
 

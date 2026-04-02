@@ -180,7 +180,7 @@ evaluate.describe(
                 criteria: [
                   'Return that the required anomaly detection jobs are not enabled in this environment.',
                   'Prompt the user to enable anomaly detection jobs',
-                  `Mention at least 1 job id from the list: auth_rare_hour_for_a_user`,
+                  `Mention at least 1 job id from the list: auth_rare_hour_for_a_user_ea`,
                 ],
               },
               metadata: { query_intent: 'Factual' },

@@ -49,7 +49,7 @@ export const TryInConsoleButton = ({
   content = RUN_IN_CONSOLE,
   color,
   showIcon = true,
-  iconType = 'console',
+  iconType = 'commandLine',
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,

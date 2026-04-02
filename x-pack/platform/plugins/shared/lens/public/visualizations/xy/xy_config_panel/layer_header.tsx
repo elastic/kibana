@@ -14,7 +14,7 @@ import type {
   VisualizationLayerWidgetProps,
 } from '@kbn/lens-common';
 import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
-import type { XYState, XYAnnotationLayerConfig } from '../types';
+import type { XYVisualizationState, XYAnnotationLayerConfig } from '../types';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import {
   getAnnotationLayerTitle,
@@ -22,7 +22,7 @@ import {
   isReferenceLayer,
 } from '../visualization_helpers';
 
-export function LayerHeader(props: VisualizationLayerWidgetProps<XYState>) {
+export function LayerHeader(props: VisualizationLayerWidgetProps<XYVisualizationState>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
   if (!layer) {
     return null;
@@ -36,7 +36,9 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<XYState>) {
   return null;
 }
 
-export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<XYState>) {
+export function LayerHeaderContent(
+  props: VisualizationLayerHeaderContentProps<XYVisualizationState>
+) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
   if (layer && isAnnotationsLayer(layer)) {
     return <AnnotationLayerHeaderContent {...props} />;
@@ -74,7 +76,7 @@ function AnnotationLayerHeaderContent({
   state,
   layerId,
   onChangeIndexPattern,
-}: VisualizationLayerHeaderContentProps<XYState>) {
+}: VisualizationLayerHeaderContentProps<XYVisualizationState>) {
   const { euiTheme } = useEuiTheme();
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',

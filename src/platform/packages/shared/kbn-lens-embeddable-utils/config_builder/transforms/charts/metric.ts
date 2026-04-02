@@ -138,10 +138,10 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     subtitle: primaryMetric.sub_label ?? '',
     showBar: false,
     valueFontMode: primaryMetric.fit ? 'fit' : 'default',
-    ...(primaryMetric.alignments
+    ...(primaryMetric.labels?.alignment || primaryMetric.value?.alignment
       ? {
-          primaryAlign: primaryMetric.alignments.value,
-          titlesTextAlign: primaryMetric.alignments.labels,
+          primaryAlign: primaryMetric.value?.alignment,
+          titlesTextAlign: primaryMetric.labels?.alignment,
         }
       : {}),
     ...(primaryMetric.position ? { primaryPosition: primaryMetric.position } : {}),
@@ -149,7 +149,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     ...(primaryMetric.icon
       ? {
           icon: primaryMetric.icon.name,
-          iconAlign: primaryMetric.icon.align,
+          iconAlign: primaryMetric.icon.alignment,
         }
       : {}),
     ...(secondaryMetric
@@ -158,12 +158,12 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           ...('prefix' in secondaryMetric && secondaryMetric.prefix
             ? { secondaryLabel: secondaryMetric.prefix }
             : {}),
-          ...('label_position' in secondaryMetric && secondaryMetric.label_position
-            ? { secondaryLabelPosition: secondaryMetric.label_position }
+          ...('placement' in secondaryMetric && secondaryMetric.placement
+            ? { secondaryLabelPosition: secondaryMetric.placement }
             : {}),
           secondaryAlign:
-            ('alignments' in secondaryMetric && secondaryMetric.alignments?.value) ||
-            ('alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined),
+            ('value' in secondaryMetric && secondaryMetric.value?.alignment) ||
+            ('value' in primaryMetric ? primaryMetric.value?.alignment : undefined),
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
@@ -183,8 +183,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? {
           maxAccessor: getAccessorName('max'),
           showBar: true,
-          ...(primaryMetric.background_chart.direction != null
-            ? { progressDirection: primaryMetric.background_chart.direction }
+          ...(primaryMetric.background_chart.orientation != null
+            ? { progressDirection: primaryMetric.background_chart.orientation }
             : {}),
         }
       : {}),
@@ -304,7 +304,7 @@ function buildFromFormBasedLayer(
             type: 'bar',
             max_value: maxValue,
             ...(visualization.progressDirection
-              ? { direction: visualization.progressDirection }
+              ? { orientation: visualization.progressDirection }
               : {}),
           },
         }
@@ -393,7 +393,7 @@ function enrichConfigurationWithVisualizationProperties(
     if (visualization.icon) {
       primaryMetric.icon = {
         name: visualization.icon,
-        align: visualization.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign,
+        alignment: visualization.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign,
       };
     }
 
@@ -402,13 +402,19 @@ function enrichConfigurationWithVisualizationProperties(
       visualization.valuesTextAlign ||
       visualization.titlesTextAlign
     ) {
-      primaryMetric.alignments = {
-        value:
-          visualization.primaryAlign ??
-          visualization.valuesTextAlign ??
-          LENS_METRIC_STATE_DEFAULTS.primaryAlign,
-        labels: visualization.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-      };
+      if (visualization.primaryAlign || visualization.valuesTextAlign) {
+        primaryMetric.value = {
+          alignment:
+            visualization.primaryAlign ??
+            visualization.valuesTextAlign ??
+            LENS_METRIC_STATE_DEFAULTS.primaryAlign,
+        };
+      }
+      if (visualization.titlesTextAlign) {
+        primaryMetric.labels = {
+          alignment: visualization.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
+        };
+      }
     }
 
     primaryMetric.fit = visualization.valueFontMode === 'fit';
@@ -432,7 +438,7 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.secondaryLabelPosition) {
-      secondaryMetric.label_position = visualization.secondaryLabelPosition;
+      secondaryMetric.placement = visualization.secondaryLabelPosition;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
@@ -443,8 +449,8 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.secondaryAlign) {
-      secondaryMetric.alignments = {
-        value: visualization.secondaryAlign,
+      secondaryMetric.value = {
+        alignment: visualization.secondaryAlign,
       };
     }
   }

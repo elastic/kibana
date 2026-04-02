@@ -21,6 +21,7 @@ import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import type { Query } from '../../../../common/queries';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import { getWiredIngestResponse, upsertWiredIngestRequest } from '../../../oas_examples';
 
 async function getAssets({
   name,
@@ -148,8 +149,22 @@ const readIngestRoute = createServerRoute({
     summary: 'Get ingest stream settings',
     description: 'Fetches the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          content: {
+            'application/json': {
+              examples: {
+                getWiredIngest: { value: getWiredIngestResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -187,8 +202,20 @@ const upsertIngestRoute = createServerRoute({
     summary: 'Update ingest stream settings',
     description: 'Upserts the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertWiredIngest: { value: upsertWiredIngestRequest },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -215,6 +242,15 @@ const upsertIngestRoute = createServerRoute({
 
     if (!Streams.ingest.all.Definition.is(definition)) {
       throw badData(`_ingest is only supported on Wired and Classic streams`);
+    }
+
+    // Replicated data streams are managed by the source cluster via CCR.
+    // Ingest settings (routing, processing, field mappings) cannot be modified locally.
+    const dataStream = await streamsClient.getDataStream(name).catch(() => null);
+    if (dataStream?.replicated) {
+      throw badData(
+        'Cannot modify ingest settings of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+      );
     }
 
     if (WiredIngestUpsertRequest.is(ingest)) {

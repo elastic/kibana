@@ -14,6 +14,7 @@ import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
+import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
 import {
   extractEsqlQueries,
@@ -21,7 +22,6 @@ import {
   validateEsqlQuery,
   buildTimeRangeParams,
 } from '../utils/esql';
-import { resolveResourceWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type {
@@ -79,7 +79,7 @@ export const createNlToEsqlGraph = ({
 }) => {
   // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
-    const resolvedResource = await resolveResourceWithSamplingStats({
+    const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
       samplingSize: 100,
       esClient,

@@ -99,16 +99,11 @@ export const changeDataView: InternalStateThunkActionCreator<
     }
 
     if (nextDataView && currentDataView) {
-      // Reset the default profile state if we are switching to a different data view
+      // Mark all profile state fields to reset if we are switching to a different data view
       dispatch(
-        internalStateActions.setResetDefaultProfileState({
+        internalStateActions.setProfileStateFieldsToReset({
           tabId,
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: true,
-            breakdownField: true,
-            hideChart: true,
-          },
+          fieldsToReset: 'all',
         })
       );
 
@@ -125,7 +120,13 @@ export const changeDataView: InternalStateThunkActionCreator<
         currentAppState.query
       );
 
-      dispatch(internalStateActions.updateAppState({ tabId, appState: nextAppState }));
+      dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: nextAppState,
+          isSystemTriggered: true,
+        })
+      );
 
       const currentTab = selectTab(currentState, tabId);
       if (currentTab.expandedDoc) {

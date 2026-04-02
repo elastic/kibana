@@ -19,6 +19,7 @@ import {
   EuiTimelineItem,
 } from '@elastic/eui';
 import { useActions, type State } from '../../../../state';
+import { MAX_TITLE_LENGTH } from '../../../../../../../../common/constants';
 import { ApiDefinitionInput } from './api_definition_input';
 import * as i18n from './translations';
 import * as il8n_ds from '../../../../steps/data_stream_step/translations';
@@ -179,6 +180,7 @@ export const UploadSpecStep = React.memo<UploadSpecStepProps>(
                   isInvalid={showValidation && fieldValidationErrors.title}
                   value={dataStreamTitle}
                   onChange={onChangeDataStreamTitle}
+                  maxLength={MAX_TITLE_LENGTH}
                 />
               </EuiFormRow>
             </EuiTimelineItem>

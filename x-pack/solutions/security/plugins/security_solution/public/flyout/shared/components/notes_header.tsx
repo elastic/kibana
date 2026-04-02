@@ -31,7 +31,7 @@ import {
   selectNotesByDocumentId,
 } from '../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { AlertHeaderBlock } from './alert_header_block';
+import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel',

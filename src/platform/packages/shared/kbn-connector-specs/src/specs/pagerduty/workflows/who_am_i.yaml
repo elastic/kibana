@@ -1,0 +1,13 @@
+version: '1'
+name: sources.pagerduty.who_am_i
+description: 'Return the current PagerDuty user (the authenticated user). Includes name, id, email, summary, role, and teams. No inputs required.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs: []
+steps:
+  - name: get-user-data
+    type: pagerduty_mcp.getUserData
+    connector-id: <%= pagerduty_mcp-stack-connector-id %>
+    with: {}

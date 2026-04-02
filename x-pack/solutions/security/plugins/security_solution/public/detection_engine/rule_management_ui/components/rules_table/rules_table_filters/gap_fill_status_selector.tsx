@@ -17,6 +17,7 @@ import {
   GAP_FILL_STATUS_FILLED,
   GAP_FILL_STATUS_IN_PROGRESS,
   GAP_FILL_STATUS_UNFILLED,
+  GAP_FILL_STATUS_ERROR,
 } from '../../../../common/translations';
 
 interface GapFillStatusSelectorProps {
@@ -33,6 +34,11 @@ export const GapFillStatusSelector = ({
   const options: EuiSelectableOption[] = useMemo(
     () => [
       {
+        label: GAP_FILL_STATUS_FILLED,
+        data: { status: gapFillStatus.FILLED as GapFillStatus },
+        checked: selectedStatuses.includes(gapFillStatus.FILLED) ? 'on' : undefined,
+      },
+      {
         label: GAP_FILL_STATUS_IN_PROGRESS,
         data: { status: gapFillStatus.IN_PROGRESS as GapFillStatus },
         checked: selectedStatuses.includes(gapFillStatus.IN_PROGRESS) ? 'on' : undefined,
@@ -43,9 +49,9 @@ export const GapFillStatusSelector = ({
         checked: selectedStatuses.includes(gapFillStatus.UNFILLED) ? 'on' : undefined,
       },
       {
-        label: GAP_FILL_STATUS_FILLED,
-        data: { status: gapFillStatus.FILLED as GapFillStatus },
-        checked: selectedStatuses.includes(gapFillStatus.FILLED) ? 'on' : undefined,
+        label: GAP_FILL_STATUS_ERROR,
+        data: { status: gapFillStatus.ERROR as GapFillStatus },
+        checked: selectedStatuses.includes(gapFillStatus.ERROR) ? 'on' : undefined,
       },
     ],
     [selectedStatuses]
@@ -62,7 +68,7 @@ export const GapFillStatusSelector = ({
   const trigger = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={toggle}
       numFilters={options.length}
       isSelected={isOpen}

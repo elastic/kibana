@@ -18,13 +18,14 @@ import type {
 } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { DashboardCanvasContent } from './dashboard_canvas_content';
-import { handlePreviewInDashboard } from './handle_preview_in_dashboard';
-import { onAttachmentMount } from './create_attachment_mount_handler';
+import { DashboardCanvasContent } from './canvas_integration/dashboard_canvas_content';
+import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment_in_dashboard';
+import { onAttachmentMount } from './on_attachment_mount';
 
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder: {
     attachments,
+    addAttachment,
     events: { chat$ },
   },
   dashboardLocator,
@@ -59,7 +60,7 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
     getIcon: () => 'productDashboard',
     onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
-      onAttachmentMount({ ...params, dashboardPlugin, chat$ }),
+      onAttachmentMount({ ...params, dashboardPlugin, chat$, addAttachment }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
@@ -81,17 +82,16 @@ export const registerDashboardAttachmentUiDefinition = ({
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
           handler: () => {
-            if (!dashboardApi) {
-              openCanvas?.();
-              return;
+            if (dashboardApi) {
+              return previewAttachmentInDashboard({
+                attachment,
+                dashboardApi,
+                checkSavedDashboardExist,
+                updateOrigin,
+              });
             }
 
-            handlePreviewInDashboard({
-              attachment,
-              dashboardApi,
-              checkSavedDashboardExist,
-              updateOrigin,
-            });
+            openCanvas?.();
           },
         },
       ];

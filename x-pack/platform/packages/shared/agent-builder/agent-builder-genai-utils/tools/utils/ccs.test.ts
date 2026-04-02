@@ -6,7 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isCcsTarget, partitionByCcs, getFieldsFromFieldCaps, getIndexFields } from './ccs';
+import {
+  isCcsTarget,
+  partitionByCcs,
+  getFieldsFromFieldCaps,
+  getBatchedFieldsFromFieldCaps,
+  getIndexFields,
+} from './ccs';
 import { getIndexMappings } from './mappings';
 
 describe('isCcsTarget', () => {
@@ -245,5 +251,47 @@ describe('getIndexFields', () => {
     expect(result).toEqual({});
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
+  });
+});
+
+describe('getBatchedFieldsFromFieldCaps', () => {
+  it('batches requests when resource names would exceed URL length', async () => {
+    const resources = Array.from(
+      { length: 100 },
+      (_, i) => `remote_cluster:logs-elastic_agent.input-${String(i).padStart(7, '0')}`
+    );
+
+    const esClient = {
+      fieldCaps: jest.fn().mockImplementation((params: any) => {
+        const indexNames = (params.index as string).split(',');
+        const fields: Record<string, Record<string, any>> = {};
+        for (const name of indexNames) {
+          fields[`field_${name}`] = {
+            keyword: {
+              type: 'keyword',
+              searchable: true,
+              aggregatable: true,
+              indices: [name],
+            },
+          };
+        }
+        return Promise.resolve({ indices: indexNames, fields });
+      }),
+    } as unknown as ElasticsearchClient;
+
+    const result = await getBatchedFieldsFromFieldCaps({ resources, esClient });
+
+    expect((esClient.fieldCaps as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+
+    for (const call of (esClient.fieldCaps as jest.Mock).mock.calls) {
+      expect((call[0].index as string).length).toBeLessThanOrEqual(3000);
+    }
+
+    expect(Object.keys(result).length).toBe(100);
+    for (const name of resources) {
+      expect(result[name]).toBeDefined();
+      expect(result[name].length).toBe(1);
+      expect(result[name][0].path).toBe(`field_${name}`);
+    }
   });
 });

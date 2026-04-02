@@ -37,7 +37,11 @@ import {
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
 import { Parser } from '@elastic/esql';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
-import { getDateHistogramCompletionItem, PLACEHOLDER_CONFIG } from '../complete_items';
+import {
+  getDateHistogramCompletionItem,
+  getTimeseriesDateHistogramCompletionItem,
+  PLACEHOLDER_CONFIG,
+} from '../complete_items';
 import { attachReplacementRanges } from '../../../language/autocomplete/utils/prefix_range';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
@@ -858,6 +862,17 @@ describe('STATS Autocomplete', () => {
           const suggestions = await suggest('FROM a | STATS BY ');
 
           expect(suggestions).toContainEqual(expect.objectContaining(expectedCompletionItem));
+        });
+
+        test('suggests TBUCKET for TS source command', async () => {
+          const expectedCompletionItem = getTimeseriesDateHistogramCompletionItem(50);
+
+          const suggestions = await suggest('TS a | STATS BY ');
+
+          expect(suggestions).toContainEqual(expect.objectContaining(expectedCompletionItem));
+          expect(suggestions).not.toContainEqual(
+            expect.objectContaining(getDateHistogramCompletionItem(50))
+          );
         });
 
         test('BUCKET constant arguments should not trigger function suggestions', async () => {

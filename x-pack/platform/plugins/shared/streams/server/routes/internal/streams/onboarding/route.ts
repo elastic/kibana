@@ -10,10 +10,10 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { OnboardingTaskParams } from '../../../../lib/tasks/task_definitions/onboarding';
 import {
   getOnboardingTaskId,
   STREAMS_ONBOARDING_TASK_TYPE,
+  type OnboardingTaskParams,
 } from '../../../../lib/tasks/task_definitions/onboarding';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';

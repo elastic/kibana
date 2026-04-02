@@ -60,7 +60,7 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
   ) : (
     <EuiButtonIcon
       isDisabled={props.isManaged}
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={handleToggleMenu}
       aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
         defaultMessage: 'Open',

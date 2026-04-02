@@ -110,6 +110,7 @@ dependsOn:
   - '@kbn/lens-embeddable-utils'
   - '@kbn/resizable-layout'
   - '@kbn/css-utils'
+  - '@kbn/shared-ux-column-presets'
 tags:
   - plugin
   - prod
@@ -123,26 +124,6 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

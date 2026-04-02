@@ -5,44 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiFieldText,
-  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiRange,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import { QueryBar } from '../../../common/components/query_bar';
-import { useKibana } from '../../../common/lib/kibana';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
-import { SUPPORTED_FILE_TYPES } from './constants';
 import {
   WATCHLIST_DESCRIPTION_LABEL,
-  WATCHLIST_ENTITY_FIELD_ARIA_LABEL,
-  WATCHLIST_ENTITY_FIELD_PLACEHOLDER,
-  WATCHLIST_FILE_PICKER_ARIA_LABEL,
-  WATCHLIST_FILE_UPLOAD_LABEL,
-  WATCHLIST_FILTER_QUERY_HELP_TEXT,
-  WATCHLIST_FILTER_QUERY_LABEL,
-  WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL,
   WATCHLIST_NAME_LABEL,
   WATCHLIST_RISK_SCORE_WEIGHTING_LABEL,
 } from './translations';
+import { RuleBasedSourceInput } from './rule_based_source_input';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
+  isEditMode: boolean;
   isNameInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -50,50 +36,12 @@ export interface WatchlistFormProps {
   ) => void;
 }
 
-export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: WatchlistFormProps) => {
-  const {
-    services: { data },
-  } = useKibana();
-  const [dataView, setDataView] = useState<DataView>();
-  const [filterQuery, setFilterQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
-  const [filters, setFilters] = useState<Filter[]>([]);
-  const [entityField, setEntityField] = useState<string>('');
-  const filterManager = data.query.filterManager;
-
-  useEffect(() => {
-    setFilters(filterManager.getFilters());
-    const subscription = filterManager.getUpdates$().subscribe(() => {
-      setFilters(filterManager.getFilters());
-    });
-
-    return () => subscription.unsubscribe();
-  }, [filterManager]);
-
-  useEffect(() => {
-    let isSubscribed = true;
-    const loadDefaultDataView = async () => {
-      const defaultDataView = await data.dataViews.getDefaultDataView();
-      if (isSubscribed && defaultDataView) {
-        setDataView(defaultDataView);
-      }
-    };
-
-    loadDefaultDataView();
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [data.dataViews]);
-
-  const onSubmitQuery = useCallback((query: Query) => {
-    setFilterQuery(query);
-  }, []);
-
-  const onSavedQuery = useCallback((newSavedQuery: SavedQuery | undefined) => {
-    setSavedQuery(newSavedQuery);
-  }, []);
-
+export const WatchlistForm = ({
+  watchlist,
+  isEditMode,
+  isNameInvalid,
+  onFieldChange,
+}: WatchlistFormProps) => {
   return (
     <EuiForm component="form" fullWidth>
       <EuiFormRow
@@ -148,94 +96,36 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
           onChange={(e) => onFieldChange('riskModifier', Number(e.currentTarget.value))}
         />
       </EuiFormRow>
-      <EuiFormRow label={WATCHLIST_FILE_UPLOAD_LABEL}>
-        <EuiFilePicker
-          data-test-subj="upload-watchlist-file"
-          accept={SUPPORTED_FILE_TYPES.join(',')}
-          fullWidth
-          onChange={() => {}} // TODO use fileUploader from privmon
-          isInvalid={false}
-          isLoading={false}
-          aria-label={WATCHLIST_FILE_PICKER_ARIA_LABEL}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" size="full" css={{ height: 2 }} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.watchlists.flyout.orSeparator"
-              defaultMessage="OR"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" css={{ height: 2 }} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.watchlists.flyout.createByQueryTitle"
-              defaultMessage="Create watchlist by query"
-            />
+            <strong>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.ruleBasedDataSourcesTitle"
+                defaultMessage="Rule Based Data Sources"
+              />
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.ruleBasedDataSourcesDescription"
+                defaultMessage="Create Watchlist by filtering on existing entities in the store or filtering on entities from an indexPattern"
+              />
+            </p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFormRow label={WATCHLIST_FILTER_QUERY_LABEL} helpText={WATCHLIST_FILTER_QUERY_HELP_TEXT}>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            {dataView ? (
-              // TODO: plug into endpoint when available: https://github.com/elastic/security-team/issues/15538
-              <QueryBar
-                indexPattern={dataView}
-                isRefreshPaused={true}
-                filterQuery={filterQuery}
-                filterManager={filterManager}
-                filters={filters}
-                onSubmitQuery={onSubmitQuery}
-                savedQuery={savedQuery}
-                onSavedQuery={onSavedQuery}
-                hideSavedQuery={false}
-                displayStyle="inPage"
-                dataTestSubj="watchlistFilterQuery"
-              />
-            ) : (
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryLoading"
-                  defaultMessage="Loading data view..."
-                />
-              </EuiText>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <EuiFormRow label={WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiSuperSelect
-              valueOfSelected={entityField}
-              placeholder={WATCHLIST_ENTITY_FIELD_PLACEHOLDER}
-              // TODO: remove this when backend route available: https://github.com/elastic/security-team/issues/15538
-              options={[
-                { value: 'user.name', inputDisplay: 'user.name' },
-                { value: 'host.name', inputDisplay: 'host.name' },
-                { value: 'source.ip', inputDisplay: 'source.ip' },
-              ]}
-              onChange={(value) => setEntityField(value)}
-              aria-label={WATCHLIST_ENTITY_FIELD_ARIA_LABEL}
-              style={{ width: 240 }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+      <RuleBasedSourceInput
+        watchlistName={watchlist.name}
+        isEditMode={isEditMode}
+        onFieldChange={onFieldChange}
+        initialEntitySource={watchlist.entitySources?.[0]}
+      />
     </EuiForm>
   );
 };

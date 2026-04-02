@@ -82,5 +82,6 @@
     "@kbn/charts-theme",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
+    "@kbn/react-kibana-context-render",
   ]
 }

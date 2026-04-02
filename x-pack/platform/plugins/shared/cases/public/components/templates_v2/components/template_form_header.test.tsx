@@ -20,6 +20,8 @@ describe('TemplateFormHeader', () => {
     hasChanges: false,
     isEdit: false,
     submitError: null,
+    isEnabled: true,
+    onIsEnabledChange: jest.fn(),
     onBack: jest.fn(),
     onReset: jest.fn(),
     onSave: jest.fn(),
@@ -32,7 +34,7 @@ describe('TemplateFormHeader', () => {
   it('renders the title', () => {
     renderWithTestingProviders(<TemplateFormHeader {...defaultProps} />);
 
-    expect(screen.getByRole('heading', { name: 'Test Template' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Test Template', level: 1 })).toBeInTheDocument();
   });
 
   it('renders back button with correct label', () => {
@@ -170,5 +172,25 @@ describe('TemplateFormHeader', () => {
     renderWithTestingProviders(<TemplateFormHeader {...defaultProps} isLoading={true} />);
 
     expect(screen.getByRole('progressbar', { name: 'Loading Test Template' })).toBeInTheDocument();
+  });
+
+  it('shows enabled tooltip on switch when isEnabled is true', async () => {
+    renderWithTestingProviders(<TemplateFormHeader {...defaultProps} isEnabled={true} />);
+
+    await user.hover(screen.getByTestId('templateEnabledSwitch'));
+
+    expect(
+      await screen.findByText('This template is enabled and can be used to create new cases.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows disabled tooltip on switch when isEnabled is false', async () => {
+    renderWithTestingProviders(<TemplateFormHeader {...defaultProps} isEnabled={false} />);
+
+    await user.hover(screen.getByTestId('templateEnabledSwitch'));
+
+    expect(
+      await screen.findByText('If the template is disabled, it cannot be used to create new cases.')
+    ).toBeInTheDocument();
   });
 });

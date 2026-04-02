@@ -38,5 +38,15 @@ export const templatesUrlStateDeserializer = (
     parsed.search = decodeURIComponent(search);
   }
 
+  const rawIsEnabled = (result as Record<string, unknown>).isEnabled;
+  if (rawIsEnabled !== undefined) {
+    parsed.isEnabled =
+      rawIsEnabled === true || rawIsEnabled === 'true'
+        ? true
+        : rawIsEnabled === false || rawIsEnabled === 'false'
+        ? false
+        : undefined;
+  }
+
   return sanitizeState(parsed);
 };

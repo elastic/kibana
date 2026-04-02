@@ -80,26 +80,27 @@ const effectiveWithLifecycleFailureStoreSchema: z.Schema<EffectiveFailureStoreEn
     }),
   });
 
-const effectiveEnabledFailureStoreSchema: z.Schema<EffectiveFailureStoreEnabled> = z.union([
-  effectiveWithLifecycleFailureStoreSchema,
-  enabledWithoutLifecycleFailureStoreSchema,
-]);
-
-export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z.union([
-  effectiveEnabledFailureStoreSchema,
-  disabledFailureStoreSchema,
-]);
+export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z
+  .union([
+    effectiveWithLifecycleFailureStoreSchema,
+    enabledWithoutLifecycleFailureStoreSchema,
+    disabledFailureStoreSchema,
+  ])
+  .meta({ id: 'EffectiveFailureStore' });
 
 export const enabledFailureStoreSchema: z.Schema<FailureStoreEnabled> = z.union([
   enabledWithLifecycleFailureStoreSchema,
   enabledWithoutLifecycleFailureStoreSchema,
 ]);
 
-export const failureStoreSchema: z.Schema<FailureStore> = z.union([
-  inheritFailureStoreSchema,
-  disabledFailureStoreSchema,
-  enabledFailureStoreSchema,
-]);
+export const failureStoreSchema: z.Schema<FailureStore> = z
+  .union([
+    inheritFailureStoreSchema,
+    disabledFailureStoreSchema,
+    enabledWithLifecycleFailureStoreSchema,
+    enabledWithoutLifecycleFailureStoreSchema,
+  ])
+  .meta({ id: 'FailureStore' });
 
 export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.object({
   size: z.number().min(0).optional(),
@@ -134,7 +135,8 @@ export const isEnabledFailureStore = (
 ): input is FailureStoreEnabled | EffectiveFailureStoreEnabled => {
   return (
     isSchema(enabledFailureStoreSchema, input) ||
-    isSchema(effectiveEnabledFailureStoreSchema, input)
+    isSchema(effectiveWithLifecycleFailureStoreSchema, input) ||
+    isSchema(enabledWithoutLifecycleFailureStoreSchema, input)
   );
 };
 

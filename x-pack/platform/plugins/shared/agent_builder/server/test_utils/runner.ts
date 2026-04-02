@@ -171,7 +171,7 @@ export const createSkillServiceStartMock = (): SkillServiceStartMock => {
 
 export const createPluginsServiceStartMock = (): PluginsServiceStartMock => {
   return {
-    getScopedClient: jest.fn(),
+    getRegistry: jest.fn(),
     installPlugin: jest.fn(),
     deletePlugin: jest.fn(),
   };
@@ -212,6 +212,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getAccessedRefs: jest.fn(),
     clearAccessTracking: jest.fn(),
     resolveRefs: jest.fn(),
+    evaluateStalenessForActiveAttachments: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
     hasChanges: jest.fn(),
     markClean: jest.fn(),

@@ -35,8 +35,23 @@ describe('GoogleCalendar', () => {
     expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should use bearer auth', () => {
+  it('should support bearer auth', () => {
     expect(GoogleCalendar.auth?.types).toContain('bearer');
+  });
+
+  it('should support oauth_authorization_code with correct Google defaults', () => {
+    const oauthType = GoogleCalendar.auth?.types.find(
+      (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+    );
+    expect(oauthType).toBeDefined();
+    expect(oauthType).toMatchObject({
+      type: 'oauth_authorization_code',
+      defaults: {
+        authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+        tokenUrl: 'https://oauth2.googleapis.com/token',
+        scope: 'https://www.googleapis.com/auth/calendar.readonly',
+      },
+    });
   });
 
   it('should define all five actions as tools', () => {

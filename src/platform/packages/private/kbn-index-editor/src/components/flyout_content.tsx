@@ -139,7 +139,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                   <EuiBetaBadge
                     tabIndex={0}
                     label=""
-                    iconType="beaker"
+                    iconType="flask"
                     size="s"
                     css={css`
                       vertical-align: middle;

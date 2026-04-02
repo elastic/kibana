@@ -33,5 +33,6 @@ export const getInferenceEndpointById = async ({
     taskType: endpoint.task_type,
     service: endpoint.service,
     serviceSettings: endpoint.service_settings as Record<string, unknown> | undefined,
+    metadata: 'metadata' in endpoint ? (endpoint.metadata as Record<string, unknown>) : {},
   };
 };

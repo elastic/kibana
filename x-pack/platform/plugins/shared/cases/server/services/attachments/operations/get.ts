@@ -59,18 +59,18 @@ export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
 
   public async bulkGet(
-    attachmentIds: string[],
+    savedObjectIds: string[],
     mode: AttachmentMode
   ): Promise<BulkOptionalAttributes<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(
-        `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
+        `Attempting to retrieve attachments with ids: ${savedObjectIds.join()}`
       );
 
       const isCaseAttachmentsEnabled = this.context.config.attachments?.enabled;
       const response =
         await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentAttributesV2>(
-          attachmentIds.flatMap((id) =>
+          savedObjectIds.flatMap((id) =>
             isCaseAttachmentsEnabled
               ? [
                   { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
@@ -88,7 +88,7 @@ export class AttachmentGetter {
       return this.transformAndDecodeBulkGetResponseUnified(merged);
     } catch (error) {
       this.context.log.error(
-        `Error retrieving attachments with ids ${attachmentIds.join()}: ${error}`
+        `Error retrieving attachments with ids ${savedObjectIds.join()}: ${error}`
       );
       throw error;
     }
@@ -372,11 +372,11 @@ export class AttachmentGetter {
   }
 
   public async get({
-    attachmentId,
+    savedObjectId,
     mode,
   }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformedV2> {
     try {
-      this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
+      this.context.log.debug(`Attempting to GET attachment ${savedObjectId}`);
       const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled;
 
       let res:
@@ -388,24 +388,24 @@ export class AttachmentGetter {
         try {
           res = await this.context.unsecuredSavedObjectsClient.get<UnifiedAttachmentAttributes>(
             CASE_ATTACHMENT_SAVED_OBJECT,
-            attachmentId
+            savedObjectId
           );
         } catch (error) {
           if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
             throw error;
           }
           this.context.log.debug(
-            `Attachment ${attachmentId} not found in ${CASE_ATTACHMENT_SAVED_OBJECT}, falling back to ${CASE_COMMENT_SAVED_OBJECT}`
+            `Attachment ${savedObjectId} not found in ${CASE_ATTACHMENT_SAVED_OBJECT}, falling back to ${CASE_COMMENT_SAVED_OBJECT}`
           );
           res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
             CASE_COMMENT_SAVED_OBJECT,
-            attachmentId
+            savedObjectId
           );
         }
       } else {
         res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
-          attachmentId
+          savedObjectId
         );
       }
 
@@ -428,7 +428,7 @@ export class AttachmentGetter {
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
-      this.context.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
+      this.context.log.error(`Error on GET attachment ${savedObjectId}: ${error}`);
       throw error;
     }
   }

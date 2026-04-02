@@ -86,13 +86,13 @@ export const useUIFieldActions = ({
     () => [
       {
         id: 'addFilterInAction',
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
         label: filterForValueLabel,
         onClick: () => actions.addFilterIn({ field, value, mapping }),
       },
       {
         id: 'addFilterOutremoveFromFilterAction',
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
         label: filterOutValueLabel,
         onClick: () => actions.addFilterOut({ field, value, mapping }),
       },
@@ -104,13 +104,13 @@ export const useUIFieldActions = ({
       },
       {
         id: 'toggleFieldColumnAction',
-        iconType: actions.isColumnAdded({ field }) ? 'cross' : 'plusInCircle',
+        iconType: actions.isColumnAdded({ field }) ? 'cross' : 'plusCircle',
         label: toggleColumnLabel,
         onClick: () => actions.toggleFieldColumn({ field }),
       },
       {
         id: 'copyToClipboardAction',
-        iconType: 'copyClipboard',
+        iconType: 'copy',
         label: copyToClipboardLabel,
         onClick: () => actions.copyToClipboard(formattedValue ?? (value as string)),
       },

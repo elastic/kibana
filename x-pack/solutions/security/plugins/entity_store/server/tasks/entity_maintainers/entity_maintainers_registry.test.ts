@@ -22,27 +22,30 @@ describe('EntityMaintainersRegistry', () => {
 
   describe('register', () => {
     it('should add an entry and getAll returns it', () => {
-      registry.register({ id: 'maintainer-a', interval: '5m' });
+      registry.register({ id: 'maintainer-a', interval: '5m', minLicense: 'basic' });
       expect(registry.getAll()).toEqual([
         {
           id: 'maintainer-a',
           interval: '5m',
+          minLicense: 'basic',
         },
       ]);
       expect(registry.getAll()[0].description).toBeUndefined();
     });
 
     it('should add multiple entries and getAll returns all in map order', () => {
-      registry.register({ id: 'maintainer-a', interval: '1m' });
-      registry.register({ id: 'maintainer-b', interval: '5m' });
+      registry.register({ id: 'maintainer-a', interval: '1m', minLicense: 'basic' });
+      registry.register({ id: 'maintainer-b', interval: '5m', minLicense: 'basic' });
       expect(registry.getAll()).toEqual([
         {
           id: 'maintainer-a',
           interval: '1m',
+          minLicense: 'basic',
         },
         {
           id: 'maintainer-b',
           interval: '5m',
+          minLicense: 'basic',
         },
       ]);
       expect(registry.getAll()[0].description).toBeUndefined();
@@ -50,12 +53,13 @@ describe('EntityMaintainersRegistry', () => {
     });
 
     it('should overwrite entry when register is called with same id', () => {
-      registry.register({ id: 'maintainer-a', interval: '1m' });
-      registry.register({ id: 'maintainer-a', interval: '10m' });
+      registry.register({ id: 'maintainer-a', interval: '1m', minLicense: 'basic' });
+      registry.register({ id: 'maintainer-a', interval: '10m', minLicense: 'gold' });
       expect(registry.getAll()).toEqual([
         {
           id: 'maintainer-a',
           interval: '10m',
+          minLicense: 'gold',
         },
       ]);
     });
@@ -65,11 +69,13 @@ describe('EntityMaintainersRegistry', () => {
         id: 'maintainer-a',
         interval: '5m',
         description: 'Maintains entity index',
+        minLicense: 'platinum',
       });
       expect(registry.get('maintainer-a')).toEqual({
         id: 'maintainer-a',
         interval: '5m',
         description: 'Maintains entity index',
+        minLicense: 'platinum',
       });
     });
   });
@@ -80,10 +86,11 @@ describe('EntityMaintainersRegistry', () => {
     });
 
     it('should return the entry when id was registered', () => {
-      registry.register({ id: 'maintainer-a', interval: '5m' });
+      registry.register({ id: 'maintainer-a', interval: '5m', minLicense: 'basic' });
       expect(registry.get('maintainer-a')).toEqual({
         id: 'maintainer-a',
         interval: '5m',
+        minLicense: 'basic',
       });
       expect(registry.get('maintainer-a')!.description).toBeUndefined();
     });
@@ -95,12 +102,12 @@ describe('EntityMaintainersRegistry', () => {
     });
 
     it('should return true when id was registered', () => {
-      registry.register({ id: 'maintainer-a', interval: '5m' });
+      registry.register({ id: 'maintainer-a', interval: '5m', minLicense: 'basic' });
       expect(registry.hasId('maintainer-a')).toBe(true);
     });
 
     it('should return false for different id', () => {
-      registry.register({ id: 'maintainer-a', interval: '5m' });
+      registry.register({ id: 'maintainer-a', interval: '5m', minLicense: 'basic' });
       expect(registry.hasId('maintainer-b')).toBe(false);
     });
   });

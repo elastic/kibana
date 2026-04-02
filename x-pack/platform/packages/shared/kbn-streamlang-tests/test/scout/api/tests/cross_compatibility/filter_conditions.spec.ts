@@ -31,8 +31,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       // ES|QL needs a mapping doc for the new field
       const mappingDoc = { attributes: { status: 'null', is_active: 'null' } };
@@ -83,8 +83,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { status: 'null', not_deleted: 'null' } };
       const docs = [
@@ -136,8 +136,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { priority: 0, high_priority: 'null' } };
       const docs = [
@@ -193,8 +193,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { age: 0, adult: 'null' } };
         const docs = [
@@ -244,8 +244,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { quantity: 100, low_stock: 'null' } };
       const docs = [
@@ -301,8 +301,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { size: 1000, small_file: 'null' } };
         const docs = [
@@ -352,8 +352,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = {
         attributes: { user_email: 'null', user_name: 'null', has_email: 'null' },
@@ -413,8 +413,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { temperature: 0, in_range: 'null' } };
       const docs = [
@@ -473,8 +473,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { service_name: 'null', matched: 'null' } };
       const docs = [
@@ -579,8 +579,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { message: 'null', is_error: 'null' } };
       const docs = [
@@ -646,8 +646,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { filename: 'null', is_log_file: 'null' } };
       const docs = [
@@ -716,8 +716,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = {
         attributes: { service_name: 'null', message: 'null', log_path: 'null', priority: 'null' },
@@ -795,8 +795,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { log_level: 'null', not_debug: 'null' } };
       const docs = [
@@ -862,8 +862,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { message: 'null', important: 'null' } };
       const docs = [
@@ -933,8 +933,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { tags: [''], has_error_tag: 'null' } };
         const docs = [
@@ -993,8 +993,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { roles: [''], no_admin: 'null' } };
       const docs = [
@@ -1045,8 +1045,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { url_path: 'null', is_api_path: 'null' } };
       const docs = [
@@ -1114,8 +1114,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { tag: 'null', matched: 'null' } };
         const docs = [

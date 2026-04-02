@@ -9,6 +9,7 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type {
+  ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
 } from './types';
@@ -18,6 +19,7 @@ import type { WorkflowEditorType } from '../types';
 export const workflowUIEventNames = {
   [WorkflowUIEventTypes.WorkflowListViewed]: 'Workflow list viewed',
   [WorkflowUIEventTypes.WorkflowDetailViewed]: 'Workflow detail viewed',
+  [WorkflowUIEventTypes.WorkflowCreateOpened]: 'Workflow create opened',
 };
 
 const eventNameSchema: RootSchema<{ eventName: string }> = {
@@ -87,7 +89,13 @@ const workflowDetailViewedSchema: RootSchema<ReportWorkflowDetailViewedActionPar
   },
 };
 
+const workflowCreateOpenedSchema: RootSchema<ReportWorkflowCreateOpenedActionParams> = {
+  ...eventNameSchema,
+  ...editorTypeSchema,
+};
+
 export const workflowUIEventSchemas = {
   [WorkflowUIEventTypes.WorkflowListViewed]: workflowListViewedSchema,
   [WorkflowUIEventTypes.WorkflowDetailViewed]: workflowDetailViewedSchema,
+  [WorkflowUIEventTypes.WorkflowCreateOpened]: workflowCreateOpenedSchema,
 };

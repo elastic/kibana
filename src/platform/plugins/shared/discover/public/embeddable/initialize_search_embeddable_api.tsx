@@ -35,6 +35,7 @@ import {
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { getEsqlDataView } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
@@ -43,7 +44,6 @@ import type {
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
-import { getEsqlDataView } from '../application/main/state_management/utils/get_esql_data_view';
 
 const initializeSearchSource = async (
   discoverServices: DiscoverServices,

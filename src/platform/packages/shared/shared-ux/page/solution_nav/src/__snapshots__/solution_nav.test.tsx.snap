@@ -4,7 +4,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
@@ -103,7 +103,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
     </EuiPanel>
   </EuiCollapsibleNavGroup>
   <div
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
       css="unknown styles"
@@ -203,7 +203,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
@@ -301,7 +301,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
     </EuiPanel>
   </EuiCollapsibleNavGroup>
   <div
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
       css="unknown styles"
@@ -400,7 +400,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    css="unknown styles"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={false}
     paddingSize="none"
@@ -498,7 +498,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
     </EuiPanel>
   </EuiCollapsibleNavGroup>
   <div
-    css="unknown styles"
+    className="kbnSolutionNav"
   >
     <EuiTitle
       css="unknown styles"
@@ -594,7 +594,7 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
@@ -628,7 +628,7 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
     />
   </EuiCollapsibleNavGroup>
   <div
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
       css="unknown styles"
@@ -664,7 +664,7 @@ exports[`SolutionNav renders 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
@@ -762,7 +762,7 @@ exports[`SolutionNav renders 1`] = `
     </EuiPanel>
   </EuiCollapsibleNavGroup>
   <div
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
       css="unknown styles"
@@ -861,7 +861,7 @@ exports[`SolutionNav renders with icon 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
@@ -964,7 +964,7 @@ exports[`SolutionNav renders with icon 1`] = `
     </EuiPanel>
   </EuiCollapsibleNavGroup>
   <div
-    css="unknown styles"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
   >
     <EuiTitle
       css="unknown styles"

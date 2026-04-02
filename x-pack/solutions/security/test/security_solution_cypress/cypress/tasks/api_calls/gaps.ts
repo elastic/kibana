@@ -243,7 +243,11 @@ export const getGapAutoFillSchedulerApi = () =>
     })
   );
 
-export const interceptGapAutoFillSchedulerLogsWithErrors = () => {
+export const interceptGapAutoFillSchedulerLogsWithErrors = ({
+  timestamp = new Date().toISOString(),
+}: {
+  timestamp?: string;
+} = {}) => {
   cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/*/logs`, (req) => {
     req.reply({
       statusCode: 200,
@@ -254,7 +258,7 @@ export const interceptGapAutoFillSchedulerLogsWithErrors = () => {
         data: [
           {
             id: 'error-log-1',
-            timestamp: new Date().toISOString(),
+            timestamp,
             status: 'error',
             message: 'Failed to schedule gap fill',
             results: [],

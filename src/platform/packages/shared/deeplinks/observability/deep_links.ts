@@ -23,6 +23,7 @@ import type {
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
+  INGEST_HUB_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -40,6 +41,7 @@ type ObltUxApp = typeof OBLT_UX_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
+type IngestHubApp = typeof INGEST_HUB_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -56,7 +58,8 @@ export type AppId =
   | ObltUxApp
   | ObltProfilingApp
   | InventoryApp
-  | StreamsApp;
+  | StreamsApp
+  | IngestHubApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -64,6 +67,7 @@ export type InventoryLinkId = 'datastreams';
 
 export type ObservabilityOverviewLinkId =
   | 'alerts'
+  | 'alerts_v2'
   | 'cases'
   | 'cases_configure'
   | 'cases_create'

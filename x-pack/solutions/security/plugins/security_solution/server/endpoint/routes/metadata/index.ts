@@ -58,7 +58,6 @@ export function registerEndpointRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -78,7 +77,6 @@ export function registerEndpointRoutes(
     .get({
       access: 'public',
       path: HOST_METADATA_GET_ROUTE,
-      options: { authRequired: true },
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -108,7 +106,6 @@ export function registerEndpointRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

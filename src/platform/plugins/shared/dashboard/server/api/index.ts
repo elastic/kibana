@@ -11,7 +11,7 @@ export { registerRoutes } from './register_routes';
 
 export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './create';
 export type { DashboardReadResponseBody } from './read';
-export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
+export type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './search';
 export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './update';
 export type {
   DashboardState,

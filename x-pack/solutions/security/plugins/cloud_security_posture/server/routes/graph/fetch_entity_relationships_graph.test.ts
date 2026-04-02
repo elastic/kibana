@@ -314,10 +314,12 @@ describe('fetchEntityRelationships', () => {
       expect(query).toContain('actorsDocData');
       expect(query).toContain('targetsDocData');
       expect(query).toContain('availableInEntityStore');
-      expect(query).toContain('ecsParentField');
       expect(query).toContain('relationshipNodeId');
       expect(query).toContain('actorHostIps = VALUES(host.ip)');
       expect(query).toContain('targetHostIps = VALUES(_target_host_ip)');
+
+      // Verify sourceFields are included in both actor and target doc data
+      expect(query).toContain('sourceFields');
     });
   });
 });

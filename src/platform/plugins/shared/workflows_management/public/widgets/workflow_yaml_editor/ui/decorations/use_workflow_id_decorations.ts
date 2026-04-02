@@ -50,7 +50,6 @@ function findWorkflowIdPair(stepNode: YAMLMap): Pair<Scalar, Scalar> | null {
 function createWorkflowIdDecoration(
   model: monaco.editor.ITextModel,
   workflowIdPair: Pair<Scalar, Scalar>,
-  workflowId: string,
   workflowName: string
 ): monaco.editor.IModelDeltaDecoration | null {
   if (!workflowIdPair.value || !isScalar(workflowIdPair.value)) {
@@ -61,20 +60,19 @@ function createWorkflowIdDecoration(
     return null;
   }
 
-  const lineNumber = valueRange.startLineNumber;
-  const endColumn = valueRange.startColumn + workflowId.length;
-  const actualEndLine = valueRange.endLineNumber;
-  const actualEndColumn = actualEndLine === lineNumber ? valueRange.endColumn : endColumn;
-
   return {
-    range: new monaco.Range(lineNumber, valueRange.startColumn, lineNumber, actualEndColumn),
+    range: new monaco.Range(
+      valueRange.startLineNumber,
+      valueRange.startColumn,
+      valueRange.startLineNumber,
+      valueRange.startColumn + 1
+    ),
     options: {
-      inlineClassName: 'template-variable-valid', // Match connector styling
       stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-      after: {
-        content: ` (${workflowName})`,
+      before: {
+        content: `✓ ${workflowName}`,
         cursorStops: monaco.editor.InjectedTextCursorStops.None,
-        inlineClassName: 'after-text',
+        inlineClassName: 'workflow-name-badge',
       },
     },
   };
@@ -130,12 +128,7 @@ export const useWorkflowIdDecorations = ({
               // Look up workflow name from Redux store (like connectors do)
               const workflow = workflows.workflows[workflowId];
               if (workflow) {
-                const decoration = createWorkflowIdDecoration(
-                  model,
-                  workflowIdPair,
-                  workflowId,
-                  workflow.name
-                );
+                const decoration = createWorkflowIdDecoration(model, workflowIdPair, workflow.name);
                 if (decoration) {
                   decorations.push(decoration);
                 }

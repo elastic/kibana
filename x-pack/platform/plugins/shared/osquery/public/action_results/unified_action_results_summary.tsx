@@ -80,7 +80,9 @@ const statusTableContainerCss = {
 
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
-  minHeight: 200,
+  '.euiDataGrid__controls': {
+    paddingLeft: '8px',
+  },
 };
 
 const gridStyleOverride = {
@@ -261,6 +263,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               onSetColumns={noop}
               controlColumnIds={EMPTY_CONTROL_COLUMN_IDS}
               gridStyleOverride={gridStyleOverride}
+              rowHeightState={0}
               dataGridDensityState={DataGridDensity.EXPANDED}
             />
           </CellActionsProvider>

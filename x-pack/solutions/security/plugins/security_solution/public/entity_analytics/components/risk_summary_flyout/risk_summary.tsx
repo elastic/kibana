@@ -54,11 +54,13 @@ export interface RiskSummaryProps<T extends EntityType> {
   queryId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
+  entityId?: string;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
   riskScoreData,
   entityType,
+  entityId,
   recalculatingScore,
   queryId,
   openDetailsPanel,
@@ -73,14 +75,18 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = EntityTypeToIdentifierField[entityType];
+    const query = entityId
+      ? `entity.id: "${entityId}" AND entity.EngineMetadata.Type: "${entityType}"`
+      : `${fieldName}: "${entityName}"`;
 
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
-      query: `${fieldName}: "${entityName}"`,
+      query,
       spaceId,
       riskEntity: entityType,
+      entityId,
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId, entityId]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const isPrivmonModifierEnabled = useIsExperimentalFeatureEnabled(
@@ -202,7 +208,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
             />
           ),
           link: riskScoreData.loading ? undefined : link,
-          iconType: !isPreviewMode ? 'arrowStart' : undefined,
+          iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
         }}
         expand={{
           expandable: false,

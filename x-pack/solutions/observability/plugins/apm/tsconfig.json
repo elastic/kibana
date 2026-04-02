@@ -127,6 +127,7 @@
     "@kbn/saved-search-component",
     "@kbn/saved-search-plugin",
     "@kbn/charts-theme",
+    "@kbn/apm-utils",
     "@kbn/response-ops-rule-params",
     "@kbn/core-http-server-utils",
     "@kbn/key-value-metadata-table",
@@ -141,9 +142,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
-    "@kbn/esql-composer",
     "@kbn/discover-shared-plugin",
-    "@kbn/core-chrome-browser",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/controls-constants",
@@ -152,6 +151,7 @@
     "@kbn/kql",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
+    "@kbn/shared-ux-column-presets",
   ],
   "exclude": ["target/**/*"]
 }

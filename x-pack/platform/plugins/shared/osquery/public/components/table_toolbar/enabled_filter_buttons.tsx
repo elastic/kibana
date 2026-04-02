@@ -41,6 +41,9 @@ const EnabledFilterButtonsComponent: React.FC<EnabledFilterButtonsProps> = ({
   return (
     <EuiFilterGroup>
       <EuiFilterButton
+        withNext
+        isToggle
+        isSelected={value === 'true'}
         hasActiveFilters={value === 'true'}
         onClick={handleEnabledClick}
         data-test-subj={`${dataTestSubj}-enabled`}
@@ -48,6 +51,8 @@ const EnabledFilterButtonsComponent: React.FC<EnabledFilterButtonsProps> = ({
         {ENABLED_LABEL}
       </EuiFilterButton>
       <EuiFilterButton
+        isToggle
+        isSelected={value === 'false'}
         hasActiveFilters={value === 'false'}
         onClick={handleDisabledClick}
         data-test-subj={`${dataTestSubj}-disabled`}

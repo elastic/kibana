@@ -85,12 +85,12 @@ describe('EditTemplatePage', () => {
     expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
   });
 
-  it('shows loading state when template is not yet available', () => {
+  it('renders nothing when template is loading and not yet available', () => {
     mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: true });
 
-    render(<EditTemplatePage />);
+    const { container } = render(<EditTemplatePage />);
 
-    expect(screen.getByTestId('layout-loading')).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });

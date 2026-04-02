@@ -74,7 +74,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
             aria-label={FILTER_OUT_VALUE}
             buttonRef={defaultFocusedButtonRef}
             data-test-subj="filter-out-value"
-            iconType="minusInCircle"
+            iconType="minusCircle"
             onClick={filterOutValueFn}
             size={size}
             title={FILTER_OUT_VALUE}
@@ -88,7 +88,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
             className="timelines__hoverActionButton"
             data-test-subj="filter-out-value"
             iconSize="s"
-            iconType="minusInCircle"
+            iconType="minusCircle"
             onClick={filterOutValueFn}
             size={size}
           />

@@ -22,12 +22,14 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
+import { addSpanLabels } from '@kbn/apm-utils';
 
 import type {
   KibanaAssetReference,
   PackageDataStreamTypes,
   PackageDependencies,
   PackageInstallContext,
+  RegistryDataStream,
 } from '../../../../common/types';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -703,7 +705,7 @@ export async function installPackageWithStateMachine(options: {
   }
 
   try {
-    span?.addLabels({
+    addSpanLabels({
       packageName: pkgName,
       packageVersion: pkgVersion,
       installType,
@@ -1293,9 +1295,10 @@ export async function createInstallation(options: {
     installedAsDependencyOf,
   } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(
-    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
+  const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
+    (ds): ds is RegistryDataStream => !!ds.type
   );
+  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1387,13 +1390,22 @@ export const saveKibanaAssetsRefs = async (
           : undefined;
 
       if (saveAsAdditionnalSpace) {
+        let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
+        if (append && installation) {
+          const existingSpaceRefs =
+            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? [];
+          spaceAssetRefs = uniqBy(
+            [...spaceAssetRefs, ...existingSpaceRefs],
+            (asset) => asset.id + asset.type
+          );
+        }
         return savedObjectsClient.update<Installation>(
           PACKAGES_SAVED_OBJECT_TYPE,
           pkgName,
           {
             additional_spaces_installed_kibana: {
               ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
-              ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
+              ...(assetRefs !== null ? { [spaceId]: spaceAssetRefs } : {}),
             },
           },
           { refresh: false }

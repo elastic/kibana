@@ -38,6 +38,21 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await pageObjects.syntheticsApp.navigateToSettings();
     });
 
+    await test.step('Verify that spaces options are available only after selecting an agent policy', async () => {
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
+
+      await page.click('button:has-text("Create location")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).toBeHidden();
+      await page.click('[aria-label="Select agent policy"]');
+      await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).toBeVisible();
+      await page.click('button:has-text("Cancel")');
+    });
+
     await test.step('create private location', async () => {
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await pageObjects.syntheticsApp.createPrivateLocation({
@@ -88,7 +103,8 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await page.testSubj.click('settings-page-link');
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
-      await expect(page.locator(`[data-test-subj="deleteLocation-${locationId}"]`)).toBeDisabled();
+      const deleteLocationButton = page.locator(`[data-test-subj="deleteLocation-${locationId}"]`);
+      await expect(deleteLocationButton).toBeDisabled();
     });
 
     await test.step('delete location after removing monitor', async () => {
@@ -105,6 +121,10 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       const createBtn = page.getByRole('button', { name: 'Create location' });
       await expect(createBtn).toBeDisabled();
+      await createBtn.hover({ force: true });
+      await expect(
+        page.getByText('You do not have sufficient permissions to perform this action.')
+      ).toBeVisible();
     });
   });
 });

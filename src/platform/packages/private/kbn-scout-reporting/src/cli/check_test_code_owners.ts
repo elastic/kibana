@@ -13,7 +13,7 @@ import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
 import ignore from 'ignore';
 
-const IGNORED_FILENAMES = ['moon.yml'];
+const IGNORED_FILENAMES = ['moon.yml', 'version_dependencies.txt'];
 
 const isIgnoredFile = (repoRel: string): boolean =>
   IGNORED_FILENAMES.some((fileName) => repoRel.endsWith(`/${fileName}`));

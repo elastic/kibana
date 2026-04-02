@@ -140,7 +140,7 @@ function parseSortingToAPI(
 export function convertAppearanceToAPIFormat(
   visualization: DatatableVisualizationState,
   columnIdMapping: ColumnIdMapping
-): Pick<DatatableState, 'density' | 'paging' | 'sort_by' | 'show_row_numbers'> {
+): Pick<DatatableState, 'density' | 'paging' | 'sort_by' | 'row_numbers'> {
   const { paging, sorting } = visualization;
 
   const densityAPI = parseDensityToAPI(visualization);
@@ -157,7 +157,7 @@ export function convertAppearanceToAPIFormat(
       : {}),
     ...(sortByAPI ? { sort_by: sortByAPI } : {}),
     ...(visualization.showRowNumbers != null
-      ? { show_row_numbers: visualization.showRowNumbers }
+      ? { row_numbers: { visible: visualization.showRowNumbers } }
       : {}),
   };
 }

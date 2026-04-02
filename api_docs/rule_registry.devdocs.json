@@ -2225,7 +2225,23 @@
           },
           "<TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; validate: { params: ",
           "RuleTypeParamsValidator",
-          "<TParams>; }; name: string; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
+          "<TParams>; }; name: string; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; priority?: ",
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.TaskPriority",
+            "text": "TaskPriority"
+          },
+          ".NormalLongRunning | ",
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.TaskPriority",
+            "text": "TaskPriority"
+          },
+          ".Normal | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -2249,7 +2265,25 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<\"default\">[]; schemas?: { params?: { type: \"zod\"; schema: any; } | { type: \"config-schema\"; schema: ",
+          "<\"default\">[]; schemas?: { params?: { type: \"zod\"; schema: ",
+          "ZodObject",
+          "<Readonly<{ [k: string]: ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodType<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>; }>, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip> | ",
+          "ZodIntersection",
+          "<",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>, ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>>; } | { type: \"config-schema\"; schema: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -2301,23 +2335,7 @@
           "SavedObjectReference",
           "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
-          "<TParams> | undefined; priority?: ",
-          {
-            "pluginId": "taskManager",
-            "scope": "server",
-            "docId": "kibTaskManagerPluginApi",
-            "section": "def-server.TaskPriority",
-            "text": "TaskPriority"
-          },
-          ".NormalLongRunning | ",
-          {
-            "pluginId": "taskManager",
-            "scope": "server",
-            "docId": "kibTaskManagerPluginApi",
-            "section": "def-server.TaskPriority",
-            "text": "TaskPriority"
-          },
-          ".Normal | undefined; internallyManaged?: boolean | undefined; }"
+          "<TParams> | undefined; internallyManaged?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "lineNumber": 253,

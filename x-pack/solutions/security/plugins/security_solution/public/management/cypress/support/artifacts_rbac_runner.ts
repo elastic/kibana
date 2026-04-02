@@ -12,6 +12,7 @@ import { type ArtifactsFixtureType } from '../fixtures/artifacts_page';
 import {
   createArtifactList,
   createPerPolicyArtifact,
+  enableEndpointExceptionPerPolicyOptIn,
   removeAllArtifacts,
 } from '../tasks/artifacts';
 import { performUserActions } from '../tasks/perform_user_actions';
@@ -52,6 +53,8 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
     indexEndpointHosts().then((indexEndpoints) => {
       endpointData = indexEndpoints;
     });
+
+    enableEndpointExceptionPerPolicyOptIn();
   });
 
   beforeEach(() => {

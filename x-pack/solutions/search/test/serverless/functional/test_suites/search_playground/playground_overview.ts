@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchPlayground',
     'embeddedConsole',
     'solutionNavigation',
-    'svlSearchCreateIndexPage',
+    'indexManagement',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonApi = getService('svlCommonApi');
@@ -190,11 +190,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should be able to create index from UI', async () => {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
-            await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.setIndexNameValue(indexName);
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndexButton();
-            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnIndexDetailsPage();
+            await pageObjects.indexManagement.expectToBeOnIndexManagement();
+            await pageObjects.indexManagement.clickCreateIndexButton();
+            await pageObjects.indexManagement.setCreateIndexName(indexName);
+            await pageObjects.indexManagement.clickCreateIndexSaveButton();
 
             // add mapping
             await es.indices.putMapping({

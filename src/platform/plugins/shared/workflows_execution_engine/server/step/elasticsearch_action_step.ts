@@ -13,6 +13,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { buildElasticsearchRequest } from '@kbn/workflows';
+import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { formatBytes, ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
@@ -20,34 +21,32 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
-// Extend BaseStep for elasticsearch-specific properties
-export interface ElasticsearchActionStep extends BaseStep {
-  type: string; // e.g., 'elasticsearch.search.query'
-  with?: Record<string, any>;
-}
-
-export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<ElasticsearchActionStep> {
+export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
-    step: ElasticsearchActionStep,
+    private node: ElasticsearchGraphNode,
     contextManager: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
+    const step = {
+      name: node.stepId,
+      type: node.stepType,
+      stepId: node.stepId,
+      'max-step-size': node.configuration['max-step-size'],
+    };
     super(step, contextManager, undefined, workflowRuntime);
   }
 
   public getInput() {
-    // Render inputs from 'with' - support both direct step.with and step.configuration.with
-    const stepWith = this.step.with || (this.step as any).configuration?.with || {};
+    const stepWith = this.node.configuration.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
     try {
-      // Support both direct step types (elasticsearch.search.query) and atomic+configuration pattern
-      const stepType = this.step.type || (this.step as any).configuration?.type;
-      // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
-      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
+      const stepType = this.node.configuration.type;
+      // Use rendered inputs if provided, otherwise fall back to raw configuration.with
+      const stepWith = withInputs || this.node.configuration.with;
 
       this.workflowLogger.logInfo(`Executing Elasticsearch action: ${stepType}`, {
         event: { action: 'elasticsearch-action', outcome: 'unknown' },
@@ -77,8 +76,8 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
 
       return { input: stepWith, output: result, error: undefined };
     } catch (error) {
-      const stepType = (this.step as any).configuration?.type || this.step.type;
-      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
+      const stepType = this.node.configuration.type;
+      const stepWith = withInputs || this.node.configuration.with;
 
       // Map ES transport maxResponseSize exceeded to our ResponseSizeLimitError
       if (isMaximumResponseSizeExceededError(error)) {

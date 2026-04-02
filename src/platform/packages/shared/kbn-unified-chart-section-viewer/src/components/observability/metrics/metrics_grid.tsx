@@ -13,10 +13,11 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
-import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
+import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
@@ -79,6 +80,7 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
       setExpandedMetric({ index, metricItem, esqlQuery });
     },
     []

@@ -123,6 +123,17 @@ function assertOptionalNonEmptyString(obj, path) {
   }
 }
 
+function validateEvaluationsKbn(config) {
+  const evaluationsKbn = config.evaluationsKbn;
+  if (evaluationsKbn === undefined || evaluationsKbn === null) return;
+
+  if (typeof evaluationsKbn !== 'object' || Array.isArray(evaluationsKbn)) {
+    die('Invalid kbn-evals CI config: "evaluationsKbn" must be an object when provided');
+  }
+  assertNonEmptyString(config, 'evaluationsKbn.url');
+  assertNonEmptyString(config, 'evaluationsKbn.apiKey');
+}
+
 function validateGcsCredentials(config) {
   const gcsCreds = config.gcsDatasetAccessCredentials;
   if (gcsCreds === undefined || gcsCreds === null) return;
@@ -206,6 +217,7 @@ function validateConfigShape(config) {
   assertOptionalNonEmptyString(config, 'litellm.teamId');
   assertOptionalNonEmptyString(config, 'litellm.teamName');
 
+  validateEvaluationsKbn(config);
   validateGcsCredentials(config);
   validateTracingEs(config);
   validateTracingExporters(config);

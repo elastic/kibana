@@ -46,12 +46,12 @@ describe('createSmlSearchTool', () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
     await tool.handler(
-      { keywords: ['cpu', 'usage'], size: 20 },
+      { query: 'cpu usage', size: 20 },
       mockContext as unknown as ToolHandlerContext
     );
     expect(getSmlService).toHaveBeenCalled();
     expect(mockSearch).toHaveBeenCalledWith({
-      keywords: ['cpu', 'usage'],
+      query: 'cpu usage',
       size: 20,
       spaceId: 'default',
       esClient: mockContext.esClient.asCurrentUser,
@@ -77,7 +77,7 @@ describe('createSmlSearchTool', () => {
     mockSearch.mockResolvedValue({ results: hits, total: 1 });
     const tool = createSmlSearchTool({ getSmlService });
     const result = (await tool.handler(
-      { keywords: ['cpu'] },
+      { query: 'cpu' },
       mockContext as unknown as ToolHandlerContext
     )) as {
       results: unknown[];
@@ -102,7 +102,7 @@ describe('createSmlSearchTool', () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
     const result = (await tool.handler(
-      { keywords: ['nonexistent'] },
+      { query: 'nonexistent' },
       mockContext as unknown as ToolHandlerContext
     )) as {
       results: unknown[];
@@ -111,13 +111,13 @@ describe('createSmlSearchTool', () => {
     const data = (
       result.results[0] as OtherResult<{
         message: string;
-        keywords: string[];
+        query: string;
         total: number;
         items: unknown[];
       }>
     ).data;
     expect(data.message).toBe('No results found in the Semantic Metadata Layer.');
-    expect(data.keywords).toEqual(['nonexistent']);
+    expect(data.query).toBe('nonexistent');
     expect(data.total).toBe(0);
     expect(data.items).toEqual([]);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
@@ -126,10 +126,10 @@ describe('createSmlSearchTool', () => {
   it('uses default size when not provided', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
-    await tool.handler({ keywords: ['test'] }, mockContext as unknown as ToolHandlerContext);
+    await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
-        keywords: ['test'],
+        query: 'test',
         size: undefined,
       })
     );

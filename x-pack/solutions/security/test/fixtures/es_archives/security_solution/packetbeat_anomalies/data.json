@@ -2,9 +2,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-packetbeat",
-    "id": "packetbeat_rare_server_domain_record_1761555600000_3600_0_1",
+    "id": "packetbeat_rare_server_domain_ea_record_1761555600000_3600_0_1",
     "source": {
-      "job_id": "packetbeat_rare_server_domain",
+      "job_id": "packetbeat_rare_server_domain_ea",
       "result_type": "record",
       "probability": 0.001,
       "record_score": 87.2,
@@ -54,9 +54,9 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-packetbeat",
-    "id": "packetbeat_rare_server_domain_record_1761555600000_3600_0_2",
+    "id": "packetbeat_rare_server_domain_ea_record_1761555600000_3600_0_2",
     "source": {
-      "job_id": "packetbeat_rare_server_domain",
+      "job_id": "packetbeat_rare_server_domain_ea",
       "result_type": "record",
       "probability": 0.002,
       "record_score": 85.9,

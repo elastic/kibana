@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/elastic-console-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: '@elastic/obs-elastic-brain-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/elastic-console-plugin'
   description: Moon project for @kbn/elastic-console-plugin
   channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  owner: '@elastic/obs-elastic-brain-team'
   sourceRoot: x-pack/platform/plugins/shared/elastic_console
 dependsOn:
   - '@kbn/core'

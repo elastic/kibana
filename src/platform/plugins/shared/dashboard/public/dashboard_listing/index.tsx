@@ -18,10 +18,11 @@ const ListingTableLoadingIndicator = () => {
 };
 
 const LazyDashboardListing = React.lazy(async () => {
-  const [{ DashboardListingTable }] = await Promise.all([
+  const [{ DashboardListingTable, initializeDashboardApiServices }] = await Promise.all([
     import('../dashboard_renderer/dashboard_module'),
     untilPluginStartServicesReady(),
   ]);
+  await initializeDashboardApiServices();
   return { default: DashboardListingTable };
 });
 

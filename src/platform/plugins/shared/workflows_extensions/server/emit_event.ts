@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getEventChainContext } from './event_chain_context';
 import type { TriggerRegistry } from './trigger_registry/trigger_registry';
 import type { EmitEventParams, TriggerEventHandler } from './types';
 
@@ -47,7 +48,15 @@ export async function emitEvent(params: EmitEventParams, deps: EmitEventDeps): P
   }
 
   if (triggerEventHandler) {
-    await triggerEventHandler({ timestamp, triggerId, spaceId, payload, request });
+    const eventChainContext = getEventChainContext(params.request);
+    await triggerEventHandler({
+      timestamp,
+      triggerId,
+      spaceId,
+      payload,
+      request,
+      eventChainContext,
+    });
   } else {
     throw new Error(
       `No trigger event handler registered; event for trigger "${triggerId}" (space: ${spaceId}) will not run any workflows.`

@@ -56,7 +56,7 @@
         "label": "Query",
         "description": [],
         "signature": [
-          "{ query: string | Record<string, any>; language: string; }"
+          "{ language: string; query: string | Record<string, any>; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
         "lineNumber": 23,

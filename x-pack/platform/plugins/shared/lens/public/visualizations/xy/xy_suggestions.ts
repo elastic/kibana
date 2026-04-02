@@ -10,6 +10,7 @@ import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Parser } from '@elastic/esql';
 
@@ -21,9 +22,10 @@ import type {
   TableChangeType,
 } from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
-import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
+import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
 const COLUMN_SORT_ORDER = {
@@ -79,7 +81,7 @@ export function getSuggestions({
   allowMixed,
   datasourceId,
   query,
-}: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
+}: SuggestionRequest<XYVisualizationState>): Array<VisualizationSuggestion<XYVisualizationState>> {
   const incompleteTable =
     !table.isMultiRow ||
     table.columns.length <= 1 ||
@@ -119,13 +121,16 @@ export function getSuggestions({
 function getSuggestionForColumns(
   table: TableSuggestion,
   keptLayerIds: string[],
-  currentState?: XYState,
+  currentState?: XYVisualizationState,
   seriesType?: SeriesType,
   mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean,
   datasourceId?: string,
   query?: SuggestionRequest['query']
-): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> | undefined {
+):
+  | VisualizationSuggestion<XYVisualizationState>
+  | Array<VisualizationSuggestion<XYVisualizationState>>
+  | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
   const sharedArgs = {
     layerId: table.layerId,
@@ -168,7 +173,11 @@ function getSuggestionForColumns(
   }
 }
 
-function getBucketMappings(table: TableSuggestion, isEsql: boolean, currentState?: XYState) {
+function getBucketMappings(
+  table: TableSuggestion,
+  isEsql: boolean,
+  currentState?: XYVisualizationState
+) {
   const currentLayer =
     currentState &&
     getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
@@ -245,7 +254,7 @@ function getSuggestionsForLayer({
   xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
   splitByColumns?: TableSuggestionColumn[];
-  currentState?: XYState;
+  currentState?: XYVisualizationState;
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
@@ -253,7 +262,9 @@ function getSuggestionsForLayer({
   allowMixed?: boolean;
   datasourceId?: string;
   query?: SuggestionRequest['query'];
-}): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
+}):
+  | VisualizationSuggestion<XYVisualizationState>
+  | Array<VisualizationSuggestion<XYVisualizationState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
     requestedSeriesType ||
@@ -310,7 +321,7 @@ function getSuggestionsForLayer({
   }
 
   // Suggestions are either changing the data, or changing the way the data is used
-  const sameStateSuggestions: Array<VisualizationSuggestion<XYState>> = [];
+  const sameStateSuggestions: Array<VisualizationSuggestion<XYVisualizationState>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
   if (seriesType.includes('bar') && (!xValue || xValue.operation.scale === 'ordinal')) {
@@ -482,7 +493,7 @@ function altSeriesType(oldSeriesType: SeriesType) {
 }
 
 function getSeriesType(
-  currentState: XYState | undefined,
+  currentState: XYVisualizationState | undefined,
   layerId: string,
   xValue?: TableSuggestionColumn
 ): SeriesType {
@@ -552,7 +563,7 @@ function buildSuggestion({
   mainPalette,
   allowMixed,
 }: {
-  currentState: XYState | undefined;
+  currentState: XYVisualizationState | undefined;
   seriesType: SeriesType;
   title: string;
   yValues: TableSuggestionColumn[];
@@ -592,7 +603,7 @@ function buildSuggestion({
         : undefined,
     layerType: LayerTypes.DATA,
     colorMapping: !mainPalette
-      ? getColorMappingDefaults()
+      ? getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(seriesType) })
       : mainPalette?.type === 'colorMapping'
       ? mainPalette.value
       : undefined,
@@ -622,8 +633,10 @@ function buildSuggestion({
         )
     : [];
 
-  const state: XYState = {
-    legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+  const state: XYVisualizationState = {
+    legend: currentState
+      ? currentState.legend
+      : { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
@@ -701,6 +714,6 @@ function getScore(
   return (((yValues.length > 1 ? 3 : 2) + (splitBy ? 1 : 0)) / 4) * changeFactor;
 }
 
-function getExistingLayer(currentState: XYState | undefined, layerId: string) {
+function getExistingLayer(currentState: XYVisualizationState | undefined, layerId: string) {
   return currentState && currentState.layers.find((layer) => layer.layerId === layerId);
 }

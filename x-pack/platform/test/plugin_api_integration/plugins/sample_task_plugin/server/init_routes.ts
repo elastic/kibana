@@ -66,6 +66,9 @@ const taskSchema = schema.object({
     state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     id: schema.maybe(schema.string()),
     timeoutOverride: schema.maybe(schema.string()),
+    cost: schema.maybe(
+      schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
+    ),
   }),
 });
 

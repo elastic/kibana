@@ -89,7 +89,7 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
         button={
           <EuiFilterButton
             data-test-subj="group-by-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             css={GroupByFilterButton}
             onClick={() => setIsPopoverOpen((prevValue) => !prevValue)}
             isSelected={isPopoverOpen}

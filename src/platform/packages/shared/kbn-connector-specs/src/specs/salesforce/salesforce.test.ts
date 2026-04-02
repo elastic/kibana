@@ -28,6 +28,32 @@ describe('SalesforceConnector', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports oauth_client_credentials auth', () => {
+      const types = (SalesforceConnector.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('oauth_client_credentials');
+    });
+
+    it('supports oauth_authorization_code with correct Salesforce defaults', () => {
+      const oauthType = (
+        SalesforceConnector.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://login.salesforce.com/services/oauth2/authorize',
+          tokenUrl: 'https://login.salesforce.com/services/oauth2/token',
+          scope: 'api refresh_token',
+        },
+      });
+    });
+  });
+
   describe('query action', () => {
     it('should run SOQL query', async () => {
       const mockResponse = {

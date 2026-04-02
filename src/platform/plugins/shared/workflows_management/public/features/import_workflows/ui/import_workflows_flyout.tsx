@@ -31,13 +31,14 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowPreview } from '../../../../common/lib/export';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import type {
   ImportWorkflowsResult,
   PreflightImportResult,
 } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 
 const ACCEPTED_FILE_TYPES = '.yml,.yaml,.zip';
@@ -125,6 +126,7 @@ function ImportWorkflowsCallouts({
 
 export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ onClose }) => {
   const { notifications } = useKibana().services;
+  const telemetry = useTelemetry();
   const { preflightImportWorkflows, importWorkflows } = useWorkflowActions();
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
@@ -218,19 +220,47 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
       {
         onSuccess: (result) => {
           setImportResult(result);
+          const workflows = preflightResult.workflows;
+          telemetry.reportWorkflowImported({
+            workflowCount: preflightResult.totalWorkflows,
+            format: preflightResult.format,
+            conflictResolution,
+            hasConflicts,
+            successCount: result.created.length,
+            failedCount: result.failed.length,
+            minStepCount: Math.min(...workflows.map((w) => w.stepCount)),
+            maxStepCount: Math.max(...workflows.map((w) => w.stepCount)),
+            minTriggerCount: Math.min(...workflows.map((w) => w.triggers.length)),
+            maxTriggerCount: Math.max(...workflows.map((w) => w.triggers.length)),
+          });
         },
-        onError: (error) => {
-          const toastError = error instanceof Error ? error : new Error(String(error));
+        onError: (importError) => {
+          const toastError =
+            importError instanceof Error ? importError : new Error(String(importError));
           notifications?.toasts.addError(toastError, {
             title: i18n.translate('workflows.importFlyout.error', {
               defaultMessage: 'Failed to import workflows',
             }),
             toastLifeTimeMs: 5000,
           });
+          const workflows = preflightResult.workflows;
+          telemetry.reportWorkflowImported({
+            workflowCount: preflightResult.totalWorkflows,
+            format: preflightResult.format,
+            conflictResolution,
+            hasConflicts,
+            successCount: 0,
+            failedCount: preflightResult.totalWorkflows,
+            minStepCount: Math.min(...workflows.map((w) => w.stepCount)),
+            maxStepCount: Math.max(...workflows.map((w) => w.stepCount)),
+            minTriggerCount: Math.min(...workflows.map((w) => w.triggers.length)),
+            maxTriggerCount: Math.max(...workflows.map((w) => w.triggers.length)),
+            error: toastError,
+          });
         },
       }
     );
-  }, [preflightResult, conflictResolution, importMutate, notifications]);
+  }, [preflightResult, conflictResolution, importMutate, notifications, telemetry]);
 
   const hasConflicts = (preflightResult?.conflicts.length ?? 0) > 0;
   const canImport = selectedFiles !== null && !isImporting && !isCheckingConflicts;

@@ -114,7 +114,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
               isFetchingCurrentView ? 'loading' : 'loaded'
             }`}
             buttonRef={openPopoverButtonRef}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             color="text"
             isLoading={isFetchingCurrentView}

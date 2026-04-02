@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/logging'
   - '@kbn/actions-plugin'
+  - '@kbn/inference-common'
   - '@kbn/logging-mocks'
   - '@kbn/utility-types'
   - '@kbn/tooling-log'
@@ -34,26 +35,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

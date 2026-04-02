@@ -9,11 +9,12 @@ import { getEntries } from '../get_entries';
 
 export const getHostNameFromInfluencers = (
   influencers: Array<Record<string, string>> = [],
-  hostName?: string
+  hostName?: string,
+  influencerFieldName: string = 'host.name'
 ): string | null => {
   const recordFound = influencers.find((influencer) => {
     const [influencerName, influencerValue] = getEntries(influencer);
-    if (influencerName === 'host.name') {
+    if (influencerName === influencerFieldName) {
       if (hostName == null) {
         return true;
       } else {

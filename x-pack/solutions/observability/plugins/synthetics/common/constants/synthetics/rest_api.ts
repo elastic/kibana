@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export interface IndexSizeEntry {
+  index: string;
+  sizeInBytes: number;
+}
+
 export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',

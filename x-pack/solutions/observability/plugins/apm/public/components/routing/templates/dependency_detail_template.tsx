@@ -84,6 +84,13 @@ export function DependencyDetailTemplate({ children }: Props) {
   return (
     <ApmIndexSettingsContextProvider>
       <ApmMainTemplate
+        searchBar={
+          <SearchBar
+            showTimeComparison
+            showEnvironmentFilter
+            searchBarPlaceholder={unifiedSearchBarPlaceholder}
+          />
+        }
         pageHeader={{
           tabs,
           pageTitle: (
@@ -104,7 +111,6 @@ export function DependencyDetailTemplate({ children }: Props) {
           ),
         }}
       >
-        <SearchBar showTimeComparison searchBarPlaceholder={unifiedSearchBarPlaceholder} />
         {children}
       </ApmMainTemplate>
     </ApmIndexSettingsContextProvider>

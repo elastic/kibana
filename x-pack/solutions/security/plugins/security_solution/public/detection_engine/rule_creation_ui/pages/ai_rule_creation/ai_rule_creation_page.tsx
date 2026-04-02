@@ -141,7 +141,7 @@ const AiRuleCreationPageComponent: React.FC = () => {
             setPromptValue(submittedPromptValue);
             lastSubmittedPrompt.current = submittedPromptValue;
           }}
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
         >
           {i18n.AI_RULE_CREATION_BACK_TO_PROMPT}
         </LinkIcon>

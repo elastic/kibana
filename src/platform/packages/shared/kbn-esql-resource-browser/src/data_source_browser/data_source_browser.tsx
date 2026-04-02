@@ -21,20 +21,34 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ILicense } from '@kbn/licensing-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
 import { DataSourceSelectionChange } from '../types';
+import { useAllSources } from './use_all_sources';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
 const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter panel lists
 
+interface DataSourceBrowserKibanaServices {
+  core: Pick<CoreStart, 'application' | 'http'>;
+  esql?: { getLicense?: () => Promise<ILicense | undefined> };
+}
+
 interface DataSourceBrowserProps {
   isOpen: boolean;
-  isLoading: boolean;
-  allSources: ESQLSourceResult[];
+  isTimeseries: boolean;
+  /**
+   * Sources passed from autocomplete to render immediately without fetching.
+   * If empty/undefined, the browser will fetch sources using Kibana services.
+   */
+  preloadedSources?: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
   onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
@@ -43,13 +57,33 @@ interface DataSourceBrowserProps {
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
-  isLoading,
-  allSources,
+  isTimeseries,
+  preloadedSources,
   selectedSources = [],
   onClose,
   onSelect,
   position,
 }) => {
+  const kibana = useKibana<DataSourceBrowserKibanaServices>();
+  const { core } = kibana.services;
+  const { http, application } = core;
+  const getLicense = kibana.services?.esql?.getLicense;
+
+  const getTimeseriesIndicesCallback = useCallback(async () => {
+    return await getTimeseriesIndices(http);
+  }, [http]);
+
+  const getSourcesCallback = useCallback(async () => {
+    return await getESQLSources({ http, application }, getLicense);
+  }, [application, getLicense, http]);
+
+  const { allSources, isLoading } = useAllSources({
+    isOpen,
+    preloadedSources,
+    getSources: getSourcesCallback,
+    getTimeseriesIndices: getTimeseriesIndicesCallback,
+    isTimeseries,
+  });
   const { euiTheme } = useEuiTheme();
 
   const [searchValue, setSearchValue] = useState('');

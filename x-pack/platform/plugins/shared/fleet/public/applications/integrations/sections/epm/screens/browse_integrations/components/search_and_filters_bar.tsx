@@ -128,7 +128,7 @@ const SortFilter: React.FC = () => {
         button={
           <EuiFilterButton
             data-test-subj="browseIntegrations.searchBar.sortBtn"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={togglePopover}
             isSelected={isOpen}
           >

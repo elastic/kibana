@@ -173,10 +173,10 @@ export async function find(
 }
 
 /**
- * Retrieves a single attachment by its ID.
+ * Retrieves a single attachment by its saved object id.
  */
 export async function get(
-  { attachmentID, caseID, mode = 'legacy' }: GetArgs,
+  { savedObjectId, caseID, mode = 'legacy' }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<AttachmentV2> {
   const {
@@ -187,7 +187,7 @@ export async function get(
 
   try {
     const comment = await attachmentService.getter.get({
-      attachmentId: attachmentID,
+      savedObjectId,
       mode,
     });
 
@@ -201,7 +201,7 @@ export async function get(
     return decodeOrThrow(AttachmentRtV2)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
+      message: `Failed to get comment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
       error,
       logger,
     });

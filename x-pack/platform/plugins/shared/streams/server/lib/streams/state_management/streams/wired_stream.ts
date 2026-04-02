@@ -747,7 +747,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       },
       {
         type: 'upsert_ingest_pipeline',
@@ -915,7 +919,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();

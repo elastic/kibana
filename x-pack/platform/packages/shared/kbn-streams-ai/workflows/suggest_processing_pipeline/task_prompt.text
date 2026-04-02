@@ -4,11 +4,11 @@ Analyze this data stream and determine if an ingest pipeline is needed. Use an *
 
 1. **Analyze** the dataset analysis below to understand the data structure
 2. **Decide** if processing is actually needed:
-   - If data already has proper `@timestamp`, `severity_text`, `body.text`, etc. → **commit an empty pipeline** `{ "steps": [] }`
+   - If data already has proper `@timestamp`, `{{{severity_field}}}`, `{{{content_field}}}`, etc. → **commit an empty pipeline** `{ "steps": [] }`
    - If there's no `event.original` or raw text to parse → **commit an empty pipeline**
-   - If `body.text` is a simple message (not a structured log line) → **do NOT parse it**
+   - If `{{{content_field}}}` is a simple message (not a structured log line) → **do NOT parse it**
    - Only design processors if the data actually needs transformation
-   - **Never create no-op grok/dissect patterns** that extract a field's entire content unchanged (e.g., `%{body.text}` from `body.text`)
+   - **Never create no-op grok/dissect patterns** that extract a field's entire content unchanged (e.g., `%{{{content_field}}}` from `{{{content_field}}}`)
    - Note: `date` processors to reformat timestamps or `convert` processors to change types ARE valid transformations
 3. **Design** a pipeline with appropriate processors (only if processing is needed)
 4. **Call `simulate_pipeline`** to test it against sample data

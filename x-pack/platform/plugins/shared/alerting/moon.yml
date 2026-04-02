@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/scout'
   - '@kbn/encrypted-saved-objects-shared'
+  - '@kbn/core-analytics-server-mocks'
 tags:
   - plugin
   - prod
@@ -100,26 +101,6 @@ fileGroups:
     - common/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -63,10 +63,14 @@ export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
   userRoles: MaybeImmutable<string[]> = [],
+  isServerless: boolean,
   productFeaturesService?: ProductFeaturesService // only exists on the server side
 ): EndpointAuthz => {
   const hasAuth = hasAuthFactory(fleetAuthz, productFeaturesService);
   const hasSuperuserRole = userRoles.includes('superuser');
+  const hasAdminRole = userRoles.includes('admin');
+
+  const hasSuperuserPrivileges = isServerless ? hasAdminRole : hasSuperuserRole;
 
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
@@ -111,9 +115,9 @@ export const calculateEndpointAuthz = (
   const canReadScriptsLibrary = hasAuth('readScriptsManagement');
   const canWriteScriptsLibrary = hasAuth('writeScriptsManagement');
 
-  // These are currently tied to the superuser role
-  const canReadAdminData = hasSuperuserRole;
-  const canWriteAdminData = hasSuperuserRole;
+  // These are currently tied to the superuser role on ESS and the admin role on Serverless
+  const canReadAdminData = hasSuperuserPrivileges;
+  const canWriteAdminData = hasSuperuserPrivileges;
 
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,

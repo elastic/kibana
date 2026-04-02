@@ -93,7 +93,7 @@ export function ContentFrameworkSection({
                     label={description}
                     alignment="middle"
                     color="hollow"
-                    iconType="beaker"
+                    iconType="flask"
                     title={title}
                     data-test-subj="ContentFrameworkSectionEuiBetaBadge"
                   />

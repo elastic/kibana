@@ -117,7 +117,7 @@ export const getLabelExpandItems = (
 
     items.push({
       type: 'item',
-      iconType: 'expand',
+      iconType: 'maximize',
       testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
       label: eventDetailsLabel,
       onClick: () => {

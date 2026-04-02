@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { executeEsql, buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+import {
+  executeEsql,
+  buildTimeRangeParams,
+  interpolateEsqlQuery,
+} from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -15,6 +20,10 @@ import { resolveTimeRange } from './screen_context_utils';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
+  params: z
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+    .optional()
+    .describe('(Optional) The parameter values to use for the query'),
   time_range: z
     .object({
       from: z
@@ -45,23 +54,38 @@ Under no circumstances should you invent, guess, or modify a query yourself for 
 If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
     schema: executeEsqlToolSchema,
     handler: async (
-      { query: esqlQuery, time_range: explicitTimeRange },
+      { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange },
       { esClient, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
+      const params: Array<Record<string, FieldValue>> = [
+        ...Object.entries(esqlParams).map(([key, value]) => {
+          return { [key]: value };
+        }),
+        ...(buildTimeRangeParams(timeRange) ?? []),
+      ];
+
       const result = await executeEsql({
         query: esqlQuery,
-        params: buildTimeRangeParams(timeRange),
+        params,
         esClient: esClient.asCurrentUser,
       });
+
+      // need the interpolated query to return in the results / to display in the UI
+      const interpolatedQuery = params.length
+        ? interpolateEsqlQuery(
+            esqlQuery,
+            params.reduce((acc, curr) => ({ ...acc, ...curr }), {})
+          )
+        : esqlQuery;
 
       return {
         results: [
           {
             type: ToolResultType.query,
             data: {
-              esql: esqlQuery,
+              esql: interpolatedQuery,
             },
           },
           {
@@ -69,7 +93,7 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
             type: ToolResultType.esqlResults,
             data: {
               source: 'esql',
-              query: esqlQuery,
+              query: interpolatedQuery,
               columns: result.columns,
               values: result.values,
               time_range: timeRange,

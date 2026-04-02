@@ -55,7 +55,12 @@ const NewLiveQueryPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...backNavigationProps} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="chevronSingleLeft"
+            {...backNavigationProps}
+            flush="left"
+            size="xs"
+          >
             {isHistoryEnabled ? (
               <FormattedMessage
                 id="xpack.osquery.newLiveQuery.viewHistoryTitle"

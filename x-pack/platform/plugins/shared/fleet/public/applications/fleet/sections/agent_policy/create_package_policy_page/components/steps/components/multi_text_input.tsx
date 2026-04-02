@@ -183,7 +183,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
         disabled={isDisabled}
         size="xs"
         flush="left"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addRowHandler}
       >
         <FormattedMessage id="xpack.fleet.multiTextInput.addRow" defaultMessage="Add row" />

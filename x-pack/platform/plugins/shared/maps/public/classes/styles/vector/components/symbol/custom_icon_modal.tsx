@@ -336,6 +336,7 @@ export class CustomIconModal extends Component<Props, State> {
         maxWidth={700}
         onClose={onCancel}
         initialFocus=".mapsCustomIconForm__image"
+        aria-label={title}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle component="h3">{title}</EuiModalHeaderTitle>

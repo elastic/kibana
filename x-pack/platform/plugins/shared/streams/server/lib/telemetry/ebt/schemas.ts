@@ -235,46 +235,83 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
   };
 
 const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
-  inferred_total_count: {
-    type: 'long',
+  run_id: {
+    type: 'keyword',
     _meta: {
-      description: 'The total number of inferred features',
+      description: 'UUID identifying the full identification run (shared across iterations)',
     },
   },
-  inferred_dedup_count: {
+  iteration: {
     type: 'long',
     _meta: {
-      description: 'The number of inferred features after deduplication',
+      description: 'Iteration number (1-based); 0 for terminal failure/cancel events',
+    },
+  },
+  docs_count: {
+    type: 'long',
+    _meta: {
+      description: 'Number of documents used in this iteration',
+    },
+  },
+  features_new: {
+    type: 'long',
+    _meta: {
+      description: 'New features identified in this iteration',
+    },
+  },
+  features_updated: {
+    type: 'long',
+    _meta: {
+      description: 'Existing features updated in this iteration',
     },
   },
   input_tokens_used: {
     type: 'long',
     _meta: {
-      description: 'The number of input tokens used for the identification request',
+      description: 'Input tokens used in this iteration',
     },
   },
   output_tokens_used: {
     type: 'long',
     _meta: {
-      description: 'The number of output tokens used for the identification request',
+      description: 'Output tokens used in this iteration',
     },
   },
   total_tokens_used: {
     type: 'long',
     _meta: {
-      description: 'The total number of tokens used for the identification request',
+      description: 'Total tokens used in this iteration',
     },
   },
-  total_duration_ms: {
+  excluded_features_count: {
     type: 'long',
     _meta: {
-      description: 'The total duration of the features identification task in milliseconds',
+      description: 'The number of excluded features present at the time of identification',
     },
   },
-  identification_duration_ms: {
+  llm_ignored_count: {
     type: 'long',
     _meta: {
-      description: 'The duration of the LLM features identification in milliseconds',
+      description: 'The number of features the LLM reported as matching excluded features',
+    },
+  },
+  code_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inferred features dropped server-side because they matched excluded features',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Cached tokens used in this iteration',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description: 'Duration of this iteration in milliseconds',
     },
   },
   stream_type: {
@@ -293,6 +330,24 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
     type: 'keyword',
     _meta: {
       description: 'The state of the features identification task (success, failure, or canceled)',
+    },
+  },
+  filters_capped: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the filters were capped',
+    },
+  },
+  total_filters: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of filters available in features',
+    },
+  },
+  has_filtered_documents: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the sample query found documents after filters were applied',
     },
   },
 };

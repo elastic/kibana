@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-// Import specific step types as needed from schema
-// import { evaluate } from '@marcbachmann/cel-js'
 import apm from 'elastic-apm-node';
+import type { ByteSizeValue } from '@kbn/config-schema';
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
@@ -26,21 +22,18 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
-  input: any;
-  output: any;
+  input: unknown;
+  output: unknown;
   error: SerializedError | undefined;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
 // Base step interface
 export interface BaseStep {
+  stepId: string;
   name: string;
   type: string;
-  if?: string;
-  foreach?: string;
-  timeout?: number;
   'max-step-size'?: string;
-  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
@@ -125,9 +118,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     // graph node directly (e.g. for ES/Kibana steps), bridge the gap so that
     // error messages and APM spans always have a human-readable step name.
     if (!this.step.name) {
-      const graphStepId = (step as any).stepId;
+      const graphStepId = step.stepId;
       if (graphStepId) {
-        (this.step as any).name = graphStepId;
+        this.step.name = graphStepId;
       }
     }
 
@@ -135,9 +128,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     // This ensures every step respects the YAML limit regardless of how
     // the subclass constructs its step object.
     if (!this.step['max-step-size']) {
-      const nodeConfig = (stepExecutionRuntime.node as any)?.configuration;
-      if (nodeConfig?.['max-step-size']) {
-        this.step['max-step-size'] = nodeConfig['max-step-size'];
+      if (
+        'configuration' in stepExecutionRuntime.node &&
+        stepExecutionRuntime.node.configuration?.['max-step-size']
+      ) {
+        this.step['max-step-size'] = stepExecutionRuntime.node.configuration?.['max-step-size'];
       }
     }
   }
@@ -146,7 +141,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public getInput(): any {
+  public getInput(): Record<string, unknown> {
     return {};
   }
 
@@ -157,7 +152,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       return;
     }
 
-    let input: any;
+    let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
     // flush event logs after start step
     await this.stepExecutionRuntime.flushEventLogs();
@@ -227,7 +222,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   // Subclasses implement this to execute the step logic
-  protected abstract _run(input?: any): Promise<RunStepResult>;
+  protected abstract _run(input: Record<string, unknown>): Promise<RunStepResult>;
 
   /**
    * Resolves the maximum step size in bytes.
@@ -257,7 +252,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         const configValue = pluginConfig.maxResponseSize;
         return typeof configValue === 'number'
           ? configValue
-          : (configValue as any).getValueInBytes();
+          : (configValue as ByteSizeValue).getValueInBytes();
       }
 
       // 4. Hardcoded fallback
@@ -268,7 +263,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   // Helper for handling on-failure, retries, etc.
-  protected handleFailure(input: any, error: any): RunStepResult {
+  protected handleFailure(input: Record<string, unknown>, error: Error): RunStepResult {
     return {
       input,
       output: undefined,

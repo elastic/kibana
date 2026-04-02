@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DatasetTypeESQL } from '../dataset';
+import type { XYState, XYStateESQL } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
 
 describe('XY', () => {
+  const minimalLayer = {
+    dataset: { type: 'dataView', id: 'myDataView' as const },
+    type: 'bar' as const,
+    y: [{ operation: 'count' as const }],
+  };
   const universalTypes = [
     'bar',
     'line',
@@ -18,10 +25,14 @@ describe('XY', () => {
     'area_stacked',
     'bar_horizontal',
     'bar_horizontal_stacked',
-  ];
+  ] as const;
 
-  const typesWithBreakdown = ['bar_percentage', 'area_percentage', 'bar_horizontal_percentage'];
-  const anyType = universalTypes.concat(typesWithBreakdown);
+  const typesWithBreakdown = [
+    'bar_percentage',
+    'area_percentage',
+    'bar_horizontal_percentage',
+  ] as const;
+  const anyType = [...universalTypes, ...typesWithBreakdown] as const;
   describe('minimal xy charts', () => {
     it.each([
       'bar',
@@ -37,9 +48,15 @@ describe('XY', () => {
           type: 'xy',
           title: `${type} Chart`,
           layers: [
-            { dataset: { type: 'dataView', id: 'myDataView' }, type, y: [{ operation: 'count' }] },
+            {
+              dataset: { type: 'dataView', id: 'myDataView' },
+              type,
+              ignore_global_filters: false,
+              sampling: 1,
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
           ],
-        })
+        } satisfies XYState)
       ).not.toThrow();
     });
 
@@ -52,11 +69,13 @@ describe('XY', () => {
             {
               dataset: { type: 'dataView', id: 'myDataView' },
               type,
-              y: [{ operation: 'count' }],
-              breakdown_by: { operation: 'terms', fields: ['product'] },
+              ignore_global_filters: false,
+              sampling: 1,
+              y: [{ operation: 'count', empty_as_null: false }],
+              breakdown_by: { operation: 'terms', fields: ['product'], limit: 5 },
             },
           ],
-        })
+        } satisfies XYState)
       ).not.toThrow();
     });
 
@@ -71,12 +90,20 @@ describe('XY', () => {
               {
                 dataset: { type: 'dataView', id: 'myDataView' },
                 type,
-                x: { operation: 'date_histogram', field: 'order_date' },
-                y: [{ operation: 'count' }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+                ignore_global_filters: false,
+                sampling: 1,
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  include_empty_rows: false,
+                },
+                y: [{ operation: 'count', empty_as_null: false }],
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
-          })
+          } satisfies XYState)
         ).not.toThrow();
       }
     );
@@ -94,12 +121,14 @@ describe('XY', () => {
                   'FROM kibana_simple_logs_data | STATS count = count() BY buckets = BUCKET(3 hours, order_date), product',
               },
               type,
+              ignore_global_filters: false,
+              sampling: 1,
               x: { operation: 'value', column: 'order_date' },
               y: [{ operation: 'value', column: 'count' }],
               breakdown_by: { operation: 'value', column: 'product' },
             },
           ],
-        })
+        } satisfies XYState)
       ).not.toThrow();
     });
 
@@ -112,25 +141,39 @@ describe('XY', () => {
             {
               dataset: { type: 'dataView', id: 'myDataView' },
               type,
-              x: { operation: 'date_histogram', field: 'order_date' },
-              y: [{ operation: 'count' }],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                include_empty_rows: false,
+              },
+              y: [{ operation: 'count', empty_as_null: false }],
+              breakdown_by: {
+                operation: 'terms',
+                fields: ['product', 'category'],
+                limit: 5,
+              },
             },
             {
               dataset: { type: 'dataView', id: 'myDataView' },
               type: 'referenceLines',
+              ignore_global_filters: false,
+              sampling: 1,
               thresholds: [
                 {
                   operation: 'median',
                   field: 'price',
                   label: 'Median line',
                   color: { type: 'static', color: 'red' },
-                  text: 'label',
+                  text: { visible: true },
                 },
               ],
             },
           ],
-        })
+        } satisfies XYState)
       ).not.toThrow();
     });
 
@@ -143,12 +186,21 @@ describe('XY', () => {
             {
               dataset: { type: 'dataView', id: 'myDataView' },
               type,
-              x: { operation: 'date_histogram', field: 'order_date' },
-              y: [{ operation: 'count' }],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                include_empty_rows: false,
+              },
+              y: [{ operation: 'count', empty_as_null: false }],
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
             {
               type: 'annotations',
+              ignore_global_filters: false,
               dataset: {
                 type: 'dataView',
                 id: 'metrics-*',
@@ -158,7 +210,7 @@ describe('XY', () => {
                   type: 'point',
                   label: 'New Year',
                   timestamp: '2023-01-01T00:00:00Z',
-                  text: 'label',
+                  text: { visible: true },
                   color: {
                     type: 'static',
                     color: '#ff0000',
@@ -167,7 +219,7 @@ describe('XY', () => {
               ],
             },
           ],
-        })
+        } satisfies XYState)
       ).not.toThrow();
     });
   });
@@ -187,19 +239,41 @@ describe('XY', () => {
               {
                 dataset: { type: 'dataView', id: 'companyAIndex' },
                 type: type1,
-                x: { operation: 'date_histogram', field: 'order_date' },
-                y: [{ operation: 'count' }, { operation: 'average', field: 'price' }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+                ignore_global_filters: false,
+                sampling: 1,
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  include_empty_rows: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
                 type: type2,
-                x: { operation: 'date_histogram', field: 'order_date' },
-                y: [{ operation: 'count' }, { operation: 'average', field: 'price' }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+                ignore_global_filters: false,
+                sampling: 1,
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  include_empty_rows: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
-          })
+          } satisfies XYState)
         ).not.toThrow();
       }
     );
@@ -215,39 +289,64 @@ describe('XY', () => {
               {
                 dataset: { type: 'dataView', id: 'companyAIndex' },
                 type: type1,
-                x: { operation: 'date_histogram', field: 'order_date' },
-                y: [{ operation: 'count' }, { operation: 'average', field: 'price' }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+                ignore_global_filters: false,
+                sampling: 1,
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  include_empty_rows: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
                 type: type2,
-                x: { operation: 'date_histogram', field: 'order_date' },
-                y: [{ operation: 'count' }, { operation: 'average', field: 'price' }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+                ignore_global_filters: false,
+                sampling: 1,
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  include_empty_rows: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'myDataView' },
                 type: 'referenceLines',
+                ignore_global_filters: false,
+                sampling: 1,
                 thresholds: [
                   {
                     operation: 'median',
                     field: 'price',
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
-                    text: 'label',
+                    text: { visible: true },
                   },
                   {
                     operation: 'average',
                     field: 'price',
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
-                    text: 'label',
+                    text: { visible: true },
                   },
                 ],
               },
               {
                 type: 'annotations',
+                ignore_global_filters: false,
                 dataset: {
                   type: 'dataView',
                   id: 'metrics-*',
@@ -257,7 +356,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'New Year',
                     timestamp: '2023-01-01T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -267,7 +366,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'Christmas',
                     timestamp: '2023-12-25T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -291,7 +390,7 @@ describe('XY', () => {
                     label: 'Bingo!',
                     query: { language: 'kuery', query: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#0000ff',
@@ -300,7 +399,7 @@ describe('XY', () => {
                 ],
               },
             ],
-          })
+          } satisfies XYState)
         ).not.toThrow();
       }
     );
@@ -333,7 +432,7 @@ describe('XY', () => {
                 breakdown_by: {
                   operation: 'terms',
                   fields: ['product', 'category'],
-                  size: 5,
+                  limit: 5,
                   rank_by: {
                     direction: 'desc',
                     metric: 0,
@@ -364,7 +463,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
-                    text: 'label',
+                    text: { visible: true },
                     axis: 'left',
                   },
                   {
@@ -372,7 +471,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
-                    text: 'none',
+                    text: { visible: false },
                     axis: 'left',
                   },
                 ],
@@ -389,7 +488,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'New Year',
                     timestamp: '2023-01-01T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -399,7 +498,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'Christmas',
                     timestamp: '2023-12-25T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -423,7 +522,10 @@ describe('XY', () => {
                     label: 'Bingo!',
                     query: { language: 'kuery', query: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: { type: 'field', field: 'order_id' },
+                    text: {
+                      visible: true,
+                      field: 'order_id',
+                    },
                     color: {
                       type: 'static',
                       color: '#0000ff',
@@ -432,7 +534,7 @@ describe('XY', () => {
                 ],
               },
             ],
-          })
+          } satisfies XYState)
         ).not.toThrow();
       }
     );
@@ -445,7 +547,7 @@ describe('XY', () => {
           type: 'xy',
           title: `Faulty Chart`,
           layers: [],
-        })
+        } satisfies XYState)
       ).toThrow();
     });
 
@@ -455,15 +557,27 @@ describe('XY', () => {
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
+            // @ts-expect-error - mixing not allowed
             {
               dataset: { type: 'esql', query: 'FROM company_index' },
               type: 'bar',
-              x: { operation: 'date_histogram', field: 'order_date' },
-              y: [{ operation: 'count' }, { operation: 'average', field: 'price' }],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                include_empty_rows: false,
+              },
+              y: [
+                { operation: 'count', empty_as_null: false },
+                { operation: 'average', field: 'price' },
+              ],
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
           ],
-        })
+        } satisfies XYState)
       ).toThrow();
     });
 
@@ -476,22 +590,32 @@ describe('XY', () => {
             {
               dataset: { type: 'dataView', id: 'myDataView' },
               type: 'bar',
-              x: { operation: 'date_histogram', field: 'order_date' },
-              y: [{ operation: 'count' }],
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                include_empty_rows: false,
+              },
+              y: [{ operation: 'count', empty_as_null: false }],
             },
             {
               type: 'annotations',
+              ignore_global_filters: false,
+              // @ts-expect-error - mixing not allowed
               dataset: {
                 type: 'esql',
                 query:
                   'FROM kibana_simple_logs_data | EVAL timestamp = order_date | FILTER product == "xyz" ',
-              },
+              } satisfies DatasetTypeESQL,
               events: [
                 {
                   type: 'point',
-                  name: 'Event',
+                  label: 'Event',
                   timestamp: '2023-01-01T00:00:00Z',
-                  text: { type: 'label', text: 'New Year' },
+                  text: { visible: true },
                   color: {
                     type: 'static',
                     color: '#ff0000',
@@ -500,8 +624,85 @@ describe('XY', () => {
               ],
             },
           ],
-        })
+        } satisfies XYState | XYStateESQL)
       ).toThrow();
+    });
+
+    it('should reject list legend layout for left positions', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: 'Invalid list legend position',
+          legend: {
+            visibility: 'visible',
+            position: 'left',
+            layout: {
+              type: 'list',
+              truncate: {
+                max_pixels: 300,
+              },
+            },
+          },
+          layers: [minimalLayer],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[legend]: types that failed validation:
+        - [legend.0.position]: types that failed validation:
+         - [legend.position.0]: expected value to equal [top]
+         - [legend.position.1]: expected value to equal [bottom]
+        - [legend.1.layout.type]: expected value to equal [grid]
+        - [legend.2.placement]: expected value to equal [inside]"
+      `);
+    });
+
+    it('should not allow both truncation values at the same time', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: 'Valid list legend truncation',
+          legend: {
+            visibility: 'visible',
+            position: 'bottom',
+            layout: {
+              type: 'list',
+              truncate: {
+                max_lines: 2,
+                max_pixels: 320,
+              },
+            },
+          },
+          layers: [minimalLayer],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[legend]: types that failed validation:
+        - [legend.0.layout]: types that failed validation:
+         - [legend.layout.0.type]: expected value to equal [grid]
+         - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
+        - [legend.1.layout.type]: expected value to equal [grid]
+        - [legend.2.placement]: expected value to equal [inside]"
+      `);
+    });
+  });
+
+  describe('legend layout schema', () => {
+    it('should allow list legend layout for top/bottom with truncate.max_pixels', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: 'Valid list legend',
+          legend: {
+            visibility: 'visible',
+            position: 'bottom',
+            layout: {
+              type: 'list',
+              truncate: {
+                max_pixels: 320,
+              },
+            },
+          },
+          layers: [minimalLayer],
+        })
+      ).not.toThrow();
     });
   });
 

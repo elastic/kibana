@@ -85,7 +85,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         data-test-subj="launchCloudFormationAgentlessButton"
         target="_blank"
         iconSide="left"
-        iconType="launch"
+        iconType="rocket"
         href={cloudConnectorRemoteRoleTemplate}
       >
         <FormattedMessage

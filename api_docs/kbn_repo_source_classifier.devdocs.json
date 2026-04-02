@@ -91,7 +91,7 @@
               }
             ],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
-            "lineNumber": 269,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -107,7 +107,7 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
-                "lineNumber": 269,
+                "lineNumber": 276,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,

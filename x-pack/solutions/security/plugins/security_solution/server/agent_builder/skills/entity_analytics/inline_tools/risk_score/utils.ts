@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/entity-store/common';
+import type { EntityType } from '@kbn/entity-store/public';
 
 export const intervalToEsql = (interval: string) => {
   const match = interval.match(/^(\d+)([smhdwM])$/);

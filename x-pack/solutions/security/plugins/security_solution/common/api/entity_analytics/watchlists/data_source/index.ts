@@ -10,3 +10,4 @@ export * from './delete.gen';
 export * from './get.gen';
 export * from './list.gen';
 export * from './update.gen';
+export * from './common.gen';

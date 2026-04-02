@@ -12,6 +12,7 @@ import { getSpaceHealthRoute } from './detection_engine_health/get_space_health/
 import { setupHealthRoute } from './detection_engine_health/setup/setup_health_route';
 import { getRuleExecutionEventsRoute } from './rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route';
 import { getRuleExecutionResultsRoute } from './rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route';
+import { readRuleExecutionResultsRoute } from './rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route';
 
 export const registerRuleMonitoringRoutes = (router: SecuritySolutionPluginRouter) => {
   // Detection Engine health API
@@ -23,4 +24,5 @@ export const registerRuleMonitoringRoutes = (router: SecuritySolutionPluginRoute
   // Rule execution logs API
   getRuleExecutionEventsRoute(router);
   getRuleExecutionResultsRoute(router);
+  readRuleExecutionResultsRoute(router);
 };

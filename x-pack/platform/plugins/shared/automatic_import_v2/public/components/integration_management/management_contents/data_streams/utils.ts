@@ -54,6 +54,34 @@ export const getFieldType = (value: unknown): string => {
   return 'string';
 };
 
+// Diff function based on longest common subsequence used in Git diff algorithm
+export const diffPipelineLines = (
+  original: string,
+  updated: string
+): { linesAdded: number; linesRemoved: number; netLineChange: number } => {
+  const originalLines = original.split('\n');
+  const newLines = updated.split('\n');
+  const m = originalLines.length;
+  const n = newLines.length;
+
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] =
+        originalLines[i - 1] === newLines[j - 1]
+          ? dp[i - 1][j - 1] + 1
+          : Math.max(dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+
+  const lcsLength = dp[m][n];
+  return {
+    linesAdded: n - lcsLength,
+    linesRemoved: m - lcsLength,
+    netLineChange: n - m,
+  };
+};
+
 export const flattenPipelineObject = (
   obj: Record<string, unknown>,
   parentKey = ''

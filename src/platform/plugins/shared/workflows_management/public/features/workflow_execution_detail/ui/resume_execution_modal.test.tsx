@@ -8,8 +8,13 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { StepContext } from '@kbn/workflows';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { z } from '@kbn/zod/v4';
 import type { ResumeExecutionModalProps } from './resume_execution_modal';
 import { ResumeExecutionModal } from './resume_execution_modal';
 
@@ -35,6 +40,13 @@ jest.mock('@kbn/code-editor', () => ({
         type="button"
       >
         {'invalid change'}
+      </button>
+      <button
+        data-test-subj="editorChangeSyntaxOkSchemaFail"
+        onClick={() => onChange('{"wrongKey": true}')}
+        type="button"
+      >
+        {'valid json invalid schema'}
       </button>
     </div>
   ),
@@ -90,6 +102,33 @@ describe('ResumeExecutionModal', () => {
       renderWithProviders(defaultProps);
       expect(screen.getByTestId('editorValue')).toHaveTextContent('{}');
     });
+
+    it('should initialize with serialised stepContext when provided', () => {
+      const schema = z.object({ approved: z.boolean() });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          stepContext: { approved: true } as Partial<StepContext>,
+        },
+      });
+      // toHaveTextContent normalises whitespace, so check for the key content
+      expect(screen.getByTestId('editorValue')).toHaveTextContent('"approved": true');
+    });
+
+    it('should fall back to empty object when initialcontextOverride has undefined stepContext', () => {
+      const schema = z.object({ approved: z.boolean() });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          stepContext: undefined as unknown as Partial<StepContext>,
+        },
+      });
+      // undefined stepContext must not produce "null" or cause the editor to be empty —
+      // it must fall back to '{}'.
+      expect(screen.getByTestId('editorValue')).toHaveTextContent('{}');
+    });
   });
 
   describe('submit behavior', () => {
@@ -115,6 +154,40 @@ describe('ResumeExecutionModal', () => {
 
       fireEvent.click(screen.getByTestId('editorChangeValid'));
       expect(screen.getByTestId('workflowSubmitResume')).not.toBeDisabled();
+    });
+
+    it('should disable Resume when JSON parses but fails the resume Zod schema', () => {
+      const schema = z.object({ approved: z.boolean() });
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          stepContext: { approved: true } as Partial<StepContext>,
+        },
+      });
+      fireEvent.click(screen.getByTestId('editorChangeSyntaxOkSchemaFail'));
+      expect(screen.getByTestId('workflowSubmitResume')).toBeDisabled();
+    });
+
+    it('should disable Resume when a JSON Schema required key is missing even if Zod applies defaults', () => {
+      const rawJsonSchema = {
+        type: 'object',
+        properties: {
+          approved: { type: 'boolean', default: false },
+          optionalMessage: { type: 'string', default: 'whats up' },
+        },
+        required: ['approved'],
+      } satisfies JSONSchema7;
+      const schema = convertJsonSchemaToZod(rawJsonSchema);
+      renderWithProviders({
+        ...defaultProps,
+        initialcontextOverride: {
+          schema,
+          rawJsonSchema: rawJsonSchema as JsonModelSchemaType,
+          stepContext: {} as Partial<StepContext>,
+        },
+      });
+      expect(screen.getByTestId('workflowSubmitResume')).toBeDisabled();
     });
   });
 

@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   const siemModule = 'security_linux_v3';
-  const mlJobId = 'v3_linux_anomalous_network_activity';
+  const mlJobId = 'v3_linux_anomalous_network_activity_ea';
 
   describe('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
@@ -262,14 +262,14 @@ export default function ({ getService }: FtrProviderContext) {
         },
         anomalies: [
           {
-            id: 'v3_linux_anomalous_network_activity',
+            id: 'v3_linux_anomalous_network_activity_ea',
             'job.description':
               'Security: Linux - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.',
             'job.name': 'Unusual Linux Network Activity',
             score: 4.834237150691662,
           },
           {
-            id: 'v3_linux_anomalous_network_activity',
+            id: 'v3_linux_anomalous_network_activity_ea',
             'job.description':
               'Security: Linux - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.',
             'job.name': 'Unusual Linux Network Activity',

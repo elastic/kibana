@@ -36,6 +36,7 @@ const defaultProps: ActionsComponentProps = {
   disablePinAction: false,
   disableTimelineAction: false,
   ecsData: mockTimelineData[0].ecs,
+  eventData: undefined,
   eventId: 'abc',
   eventIdToNoteIds: {},
   hit: { id: 'id', raw: {}, flattened: {} },

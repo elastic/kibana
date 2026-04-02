@@ -1452,7 +1452,7 @@
           "\nThis is a narrowing type, which finds the correct primitive type based on a\ngiven {@link SettingType}."
         ],
         "signature": [
-          "T extends \"string\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\" ? string : T extends \"boolean\" ? boolean : T extends \"number\" | \"bigint\" ? number : T extends \"array\" ? (string | number)[] : T extends \"undefined\" ? undefined : never"
+          "T extends \"string\" | \"color\" | \"select\" | \"image\" | \"markdown\" | \"json\" ? string : T extends \"boolean\" ? boolean : T extends \"number\" | \"bigint\" ? number : T extends \"array\" ? (string | number)[] : T extends \"undefined\" ? undefined : never"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
         "lineNumber": 62,
@@ -1842,7 +1842,7 @@
           "\nThis is a local type equivalent to {@link UiSettingsType} for flexibility."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\" | \"array\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"select\" | \"image\" | \"markdown\" | \"json\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
         "lineNumber": 12,
@@ -1887,7 +1887,7 @@
           "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `string` primitive type value."
         ],
         "signature": [
-          "\"string\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\""
+          "\"string\" | \"color\" | \"select\" | \"image\" | \"markdown\" | \"json\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
         "lineNumber": 39,

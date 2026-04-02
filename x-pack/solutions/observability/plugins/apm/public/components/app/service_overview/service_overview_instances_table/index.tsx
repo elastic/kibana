@@ -181,6 +181,9 @@ export function ServiceOverviewInstancesTable({
                   })
                 : ''
             }
+            tableLayout="auto"
+            scrollableInline
+            responsiveBreakpoint={false}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

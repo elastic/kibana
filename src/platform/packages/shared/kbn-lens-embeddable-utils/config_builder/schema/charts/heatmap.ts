@@ -21,21 +21,24 @@ import {
   axisTitleSchemaProps,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendSizeSchema, mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
-import { positionSchema } from '../alignments';
+import {
+  baseLegendVisibilitySchema,
+  legendSizeSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+  xScaleSchema,
+} from './shared';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
+  visibility: baseLegendVisibilitySchema,
   size: legendSizeSchema,
-  position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
 
 const labelsSchemaProps = {
   visible: schema.maybe(
-    schema.boolean({ defaultValue: true, meta: { description: 'Whether to show axis labels' } })
+    schema.boolean({ defaultValue: true, meta: { description: 'Show axis labels' } })
   ),
   orientation: schema.maybe(
     builderEnums.orientation({
@@ -64,7 +67,7 @@ const heatmapSharedStateSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axis: schema.maybe(
+  axes: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
@@ -73,6 +76,7 @@ const heatmapSharedStateSchema = {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(schema.object(labelsSchemaProps)),
               sort: schema.maybe(heatmapSortPredicateSchema),
+              scale: xScaleSchema,
             },
             {
               meta: {
@@ -117,7 +121,7 @@ const heatmapSharedStateSchema = {
             visible: schema.maybe(
               schema.boolean({
                 defaultValue: false,
-                meta: { description: 'Whether to show cell labels' },
+                meta: { description: 'Show cell labels' },
               })
             ),
           })

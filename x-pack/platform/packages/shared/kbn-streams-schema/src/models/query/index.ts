@@ -56,6 +56,7 @@ export namespace QueryStream {
   export interface Definition extends BaseStream.Definition {
     type: 'query';
     query: QueryWithEsql;
+    field_descriptions?: Record<string, string>;
   }
 
   export type Source = BaseStream.Source<QueryStream.Definition>;
@@ -76,20 +77,26 @@ const queryStreamDefinitionSchema = baseStreamDefinitionSchema
   .extend({
     type: z.literal('query'),
     query: QueryWithEsql.right,
+    field_descriptions: z.record(z.string(), z.string()).optional(),
   })
   .meta({ id: 'QueryStreamDefinition' });
 
-const queryStreamGetResponseSchema = baseStreamGetResponseSchema.extend({
-  stream: queryStreamDefinitionSchema,
-  inherited_fields: inheritedFieldDefinitionSchema,
-});
+const queryStreamGetResponseSchema = baseStreamGetResponseSchema
+  .extend({
+    stream: queryStreamDefinitionSchema,
+    inherited_fields: inheritedFieldDefinitionSchema,
+  })
+  .meta({ id: 'QueryStreamGetResponse' });
 
-const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema.extend({
-  stream: baseStreamUpsertDefinitionSchema.extend({
-    type: z.literal('query'),
-    query: QueryWithEsql.right,
-  }),
-});
+const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema
+  .extend({
+    stream: baseStreamUpsertDefinitionSchema.extend({
+      type: z.literal('query'),
+      query: QueryWithEsql.right,
+      field_descriptions: z.record(z.string(), z.string()).optional(),
+    }),
+  })
+  .meta({ id: 'QueryStreamUpsertRequest' });
 
 export const QueryStream: {
   Definition: Validation<BaseStream.Model['Definition'], QueryStream.Definition>;

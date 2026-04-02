@@ -54,7 +54,7 @@ describe('CaseView actions', () => {
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
   });
 
-  it('clicking copyClipboard icon copies case id', () => {
+  it('clicking copy icon copies case id', () => {
     const originalClipboard = global.window.navigator.clipboard;
 
     Object.defineProperty(navigator, 'clipboard', {
@@ -74,7 +74,7 @@ describe('CaseView actions', () => {
       .find('button[data-test-subj="property-actions-case-ellipses"]')
       .first()
       .simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-case-copyClipboard"]').simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-copy"]').simulate('click');
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
 
@@ -96,9 +96,7 @@ describe('CaseView actions', () => {
       .first()
       .simulate('click');
     expect(wrapper.find('[data-test-subj="property-actions-case-trash"]').exists()).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="property-actions-case-copyClipboard"]').exists()
-    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="property-actions-case-copy"]').exists()).toBeTruthy();
   });
 
   it('toggle delete modal and confirm', async () => {
@@ -145,7 +143,7 @@ describe('CaseView actions', () => {
       .first()
       .simulate('click');
     expect(
-      wrapper.find('[data-test-subj="property-actions-case-popout"]').first().prop('aria-label')
+      wrapper.find('[data-test-subj="property-actions-case-external"]').first().prop('aria-label')
     ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
   });
 });

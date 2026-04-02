@@ -1232,7 +1232,7 @@ groups:
       - setting: xpack.alerting.rules.maxScheduledPerMinute
         description: |
           Specifies the maximum number of rules to run per minute.
-        note: "In Serverless, the maximum number of rules to run per minute is set to `400` and can't be configured."
+        note: "In Serverless, the maximum number of rules to run per minute is set to `800` for Elastic Security projects and `400` for other projects. This setting can't be configured."
         datatype: int
         default: 32000
         applies_to:

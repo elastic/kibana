@@ -81,7 +81,7 @@ const RuleTagFilterPopoverButton = memo(
     return (
       <EuiFilterButton
         data-test-subj={buttonDataTestSubj}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isSelected}
         hasActiveFilters={selectedTags.length > 0}
         numActiveFilters={selectedTags.length}

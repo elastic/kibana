@@ -14,7 +14,9 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 import { getEuidEsqlFilterBasedOnDocument } from '../../../../common/domain/euid/esql';
+import { USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES } from '../fixtures/user_ts_extraction_cases';
 
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -43,13 +45,14 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     );
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(
@@ -119,11 +122,24 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   );
 
   apiTest(
+    'user: synthetic invalid docs should not return per-document ESQL filter (documentsFilter or postAgg gate)',
+    async ({ esClient }) => {
+      await esClient.esql.query({
+        query: `FROM ${UPDATES_INDEX} | LIMIT 1`,
+        drop_null_columns: true,
+      });
+      for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
+        expect(getEuidEsqlFilterBasedOnDocument('user', example.doc)).toBeUndefined();
+      }
+    }
+  );
+
+  apiTest(
     'user: ESQL from doc with user.name + event.module returns exactly that document (filter without EVAL)',
     async ({ esClient }) => {
       const docSource = {
         user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
-        event: { module: 'entityanalytics_ad' },
+        event: { kind: 'asset', module: 'entityanalytics_ad' },
       };
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
@@ -150,7 +166,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = {
         user: { name: 'john.doe' },
-        event: { module: 'okta' },
+        event: { kind: 'asset', module: 'okta' },
       };
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
@@ -174,6 +190,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       const docSource = {
         user: { name: 'cloudtrail.user' },
+        event: { kind: 'asset' },
         data_stream: { dataset: 'aws.cloudtrail' },
       };
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
@@ -196,7 +213,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'user: ESQL from doc with no event.module or data_stream.dataset (unknown fallback) returns expected document',
     async ({ esClient }) => {
-      const docSource = { user: { name: 'no.module.user' } };
+      const docSource = { user: { name: 'no.module.user' }, event: { kind: 'asset' } };
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 

@@ -68,7 +68,7 @@ export function InstallButton(props: InstallationButtonProps) {
   return canInstallPackages ? (
     <Fragment>
       <EuiButton
-        iconType={'importAction'}
+        iconType={'download'}
         isLoading={isInstalling}
         onClick={toggleInstallModal}
         data-test-subj="installAssetsButton"

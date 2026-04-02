@@ -1,5 +1,5 @@
 {
-  "sha1": "e5ed48fd3ce64189c2522300baee0831e0cb9274",
+  "sha1": "0096d80e0560b7aef0b23ffccff5bd6ee5591a25",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -540,7 +540,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 58,
+        "line": 56,
         "column": 9
       }
     },
@@ -556,7 +556,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 69,
+        "line": 67,
         "column": 9
       }
     },
@@ -572,7 +572,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 77,
+        "line": 75,
         "column": 9
       }
     },
@@ -588,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 98,
+        "line": 96,
         "column": 9
       }
     },
@@ -604,7 +604,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 120,
+        "line": 118,
         "column": 9
       }
     },
@@ -620,7 +620,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 139,
+        "line": 137,
         "column": 9
       }
     },
@@ -636,7 +636,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 162,
+        "line": 160,
         "column": 9
       }
     },
@@ -652,7 +652,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 178,
+        "line": 176,
         "column": 9
       }
     },
@@ -668,7 +668,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 198,
+        "line": 196,
         "column": 9
       }
     },
@@ -684,7 +684,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 213,
+        "line": 211,
         "column": 9
       }
     },
@@ -3371,21 +3371,21 @@
     {
       "id": "7ce2670a3e19b7c-cd54fa739417889",
       "title": "Query streams - Create query stream should properly handle errors for invalid query streams",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 7
       }
     },
     {
       "id": "7ce2670a3e19b7c-aed3b1699c34c31",
       "title": "Query streams - Create query stream should properly create a root query stream",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -3399,14 +3399,14 @@
     {
       "id": "7ce2670a3e19b7c-0f0cfefb9e93b08",
       "title": "Query streams - Create query stream should create a query stream as a child of an ingest stream",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 7
       }
     },
@@ -3427,14 +3427,14 @@
     {
       "id": "5ccc6d0f072c147-7490fc470cd2b93",
       "title": "Query streams - Edit query stream should support editing an existing query stream's ES|QL query from the partitioning tab",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream.spec.ts",
-        "line": 48,
+        "line": 47,
         "column": 7
       }
     },

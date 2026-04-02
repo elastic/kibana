@@ -37,7 +37,7 @@
           "default"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -53,7 +53,7 @@
               "ElasticsearchClientConfig"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -67,7 +67,7 @@
             "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentFactoryProvider,\n    kibanaVersion,\n    onRequest,\n  }",
             "description": [],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -89,7 +89,7 @@
                   }
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-                "lineNumber": 36,
+                "lineNumber": 37,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -102,7 +102,7 @@
                 "label": "type",
                 "description": [],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-                "lineNumber": 37,
+                "lineNumber": 38,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -118,7 +118,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-                "lineNumber": 38,
+                "lineNumber": 39,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -134,7 +134,7 @@
                   "(() => string | undefined) | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-                "lineNumber": 39,
+                "lineNumber": 40,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -152,7 +152,7 @@
                   "AgentFactoryProvider"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-                "lineNumber": 40,
+                "lineNumber": 41,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -165,7 +165,7 @@
                 "label": "kibanaVersion",
                 "description": [],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-                "lineNumber": 41,
+                "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -195,7 +195,7 @@
                   ") => void"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
-                "lineNumber": 42,
+                "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -212,7 +212,7 @@
                       "OnRequestContext"
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 32,
+                    "lineNumber": 51,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -228,7 +228,7 @@
                       "TransportRequestParams"
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 33,
+                    "lineNumber": 52,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -244,7 +244,7 @@
                       "TransportRequestOptions"
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 34,
+                    "lineNumber": 53,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -266,7 +266,7 @@
                       }
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 36,
+                    "lineNumber": 55,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -303,7 +303,7 @@
           "default"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-        "lineNumber": 41,
+        "lineNumber": 60,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -316,7 +316,7 @@
             "label": "{\n  scoped = false,\n  getExecutionContext = noop,\n  getUnauthorizedErrorHandler,\n  onRequest,\n  logger,\n}",
             "description": [],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-            "lineNumber": 47,
+            "lineNumber": 66,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -332,7 +332,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                "lineNumber": 48,
+                "lineNumber": 67,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -348,7 +348,7 @@
                   "(() => string | undefined) | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                "lineNumber": 49,
+                "lineNumber": 68,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -367,7 +367,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                "lineNumber": 50,
+                "lineNumber": 69,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -397,7 +397,7 @@
                   ") => void"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                "lineNumber": 51,
+                "lineNumber": 70,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -414,7 +414,7 @@
                       "OnRequestContext"
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 32,
+                    "lineNumber": 51,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -430,7 +430,7 @@
                       "TransportRequestParams"
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 33,
+                    "lineNumber": 52,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -446,7 +446,7 @@
                       "TransportRequestOptions"
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 34,
+                    "lineNumber": 53,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -468,7 +468,7 @@
                       }
                     ],
                     "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                    "lineNumber": 36,
+                    "lineNumber": 55,
                     "columnNumber": 3,
                     "deprecated": false,
                     "trackAdoption": false
@@ -492,7 +492,7 @@
                   }
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-                "lineNumber": 52,
+                "lineNumber": 71,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -656,7 +656,7 @@
         "label": "OnRequestContext",
         "description": [],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-        "lineNumber": 27,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -669,7 +669,7 @@
             "label": "scoped",
             "description": [],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-            "lineNumber": 28,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +805,7 @@
           ") => void"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-        "lineNumber": 31,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -822,7 +822,7 @@
               "OnRequestContext"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-            "lineNumber": 32,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -838,7 +838,7 @@
               "TransportRequestParams"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-            "lineNumber": 33,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -854,7 +854,7 @@
               "TransportRequestOptions"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-            "lineNumber": 34,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -876,7 +876,7 @@
               }
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/create_transport.ts",
-            "lineNumber": 36,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

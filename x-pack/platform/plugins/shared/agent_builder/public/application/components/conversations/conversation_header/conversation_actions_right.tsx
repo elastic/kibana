@@ -6,47 +6,45 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiTourStep } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { MoreActionsButton } from './more_actions_button';
-import { CloseDockedViewButton } from './close_docked_view_button';
-import { TourStep, useAgentBuilderTour } from '../../../context/agent_builder_tour_context';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
     defaultMessage: 'Conversation actions',
   }),
+  close: i18n.translate('xpack.agentBuilder.conversationActions.close', {
+    defaultMessage: 'Close',
+  }),
 };
 
 export interface ConversationRightActionsProps {
   onClose?: () => void;
-  onRenameConversation: () => void;
 }
 
-export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({
-  onClose,
-  onRenameConversation,
-}) => {
+export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
   const { isEmbeddedContext } = useConversationContext();
-
-  const { getStepProps } = useAgentBuilderTour();
 
   return (
     <EuiFlexGroup
-      gutterSize="s"
+      gutterSize="xs"
       justifyContent="flexEnd"
       alignItems="center"
       aria-label={labels.container}
       responsive={false}
     >
-      <EuiTourStep {...getStepProps(TourStep.ConversationActions)}>
-        <MoreActionsButton
-          onRenameConversation={onRenameConversation}
-          onCloseSidebar={isEmbeddedContext ? onClose : undefined}
+      <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
+      {isEmbeddedContext && (
+        <EuiButtonIcon
+          color="text"
+          iconType="cross"
+          size="m"
+          onClick={onClose}
+          aria-label={labels.close}
         />
-      </EuiTourStep>
-      {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
+      )}
     </EuiFlexGroup>
   );
 };

@@ -14,6 +14,7 @@ import type { useGetIntegrationById } from './common/hooks/use_get_integration_b
 import type { CreateIntegrationComponent } from './components/create_integration/types';
 import type { CreateIntegrationSideCardButtonComponent } from './components/create_integration_card_button/types';
 import type { DataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout/types';
+import type { AIV2TelemetryService } from './services/telemetry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AutomaticImportV2PluginSetup {}
@@ -37,6 +38,11 @@ export interface AutomaticImportV2PluginStart {
      */
     DataStreamResultsFlyout: DataStreamResultsFlyoutComponent;
   };
+  /**
+   * Telemetry service for reporting AIV2 analytics events.
+   * Events are sent to Elastic's telemetry cluster.
+   */
+  telemetry: AIV2TelemetryService;
 }
 
 export interface AutomaticImportPluginSetupDependencies {

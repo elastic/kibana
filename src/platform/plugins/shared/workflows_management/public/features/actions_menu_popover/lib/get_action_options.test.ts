@@ -15,6 +15,7 @@ import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
 
@@ -67,15 +68,14 @@ describe('getActionOptions', () => {
   it('should return all base action groups', () => {
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
 
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(7);
     expect(result[0].id).toBe('triggers');
     expect(result[1].id).toBe('elasticsearch');
     expect(result[2].id).toBe('kibana');
     expect(result[3].id).toBe('ai');
     expect(result[4].id).toBe('data');
     expect(result[5].id).toBe('external');
-    expect(result[6].id).toBe('http');
-    expect(result[7].id).toBe('flowControl');
+    expect(result[6].id).toBe('flowControl');
   });
 
   it('should include trigger options', () => {
@@ -86,6 +86,30 @@ describe('getActionOptions', () => {
     if (triggersGroup && 'options' in triggersGroup) {
       expect(triggersGroup.options).toHaveLength(3);
       expect(triggersGroup.options.map((opt) => opt.id)).toEqual(['manual', 'alert', 'scheduled']);
+    }
+  });
+
+  it('should set stability tech_preview for registered event-driven trigger options', () => {
+    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'cases.updated',
+        title: 'Case updated',
+        description: 'When a case is created or updated.',
+      },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const triggersGroup = result.find((group) => group.id === 'triggers');
+
+    expect(triggersGroup).toBeDefined();
+    if (triggersGroup && isActionGroup(triggersGroup)) {
+      const builtInCount = 3;
+      expect(triggersGroup.options).toHaveLength(builtInCount + 1);
+      const casesOption = triggersGroup.options.find((opt) => opt.id === 'cases.updated');
+      expect(casesOption).toBeDefined();
+      if (casesOption && isActionOption(casesOption)) {
+        expect(casesOption.stability).toBe('tech_preview');
+      }
     }
   });
 

@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useLicense } from '../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
-import { useSessionViewConfig } from '../hooks/use_session_view_config';
+import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { SessionViewNotEnabled } from './session_view_not_enabled';

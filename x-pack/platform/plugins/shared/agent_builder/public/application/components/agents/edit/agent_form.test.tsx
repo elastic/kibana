@@ -73,12 +73,12 @@ jest.mock('../../../hooks/use_ui_privileges', () => ({
   useUiPrivileges: () => ({ manageAgents: true, isAdmin: false }),
 }));
 
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => false,
-}));
-
 jest.mock('../../../hooks/tools/use_tools', () => ({
   useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
+}));
+
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: () => false,
 }));
 
 jest.mock('@kbn/unsaved-changes-prompt', () => ({

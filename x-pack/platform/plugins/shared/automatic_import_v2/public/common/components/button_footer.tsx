@@ -23,6 +23,7 @@ interface ButtonsFooterProps {
   onAction?: () => void;
   onCancel?: () => void;
   hideCancel?: boolean;
+  hideActionButton?: boolean;
   isActionDisabled?: boolean;
   isActionLoading?: boolean;
 }
@@ -33,6 +34,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
     onAction,
     onCancel,
     hideCancel = false,
+    hideActionButton = false,
     isActionDisabled = false,
     isActionLoading = false,
   }) => {
@@ -69,23 +71,25 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                       </EuiButtonEmpty>
                     )}
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      color="primary"
-                      onClick={onAction}
-                      isDisabled={isActionDisabled}
-                      isLoading={isActionLoading}
-                      data-test-subj="buttonsFooter-actionButton"
-                    >
-                      {actionButtonText || (
-                        <FormattedMessage
-                          id="xpack.automaticImportV2.footer.action"
-                          defaultMessage="Done"
-                        />
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
+                  {!hideActionButton && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        color="primary"
+                        onClick={onAction}
+                        isDisabled={isActionDisabled}
+                        isLoading={isActionLoading}
+                        data-test-subj="buttonsFooter-actionButton"
+                      >
+                        {actionButtonText || (
+                          <FormattedMessage
+                            id="xpack.automaticImportV2.footer.action"
+                            defaultMessage="Done"
+                          />
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

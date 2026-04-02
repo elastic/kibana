@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
+import {
+  DATA_STREAM_TYPE_VAR_NAME,
+  GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
+  OTEL_COLLECTOR_INPUT_TYPE,
+} from '../../../common/constants/epm';
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
-import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
+import {
+  storedPackagePoliciesToAgentInputs,
+  storedPackagePolicyToAgentInputs,
+} from './package_policies_to_agent_inputs';
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -1225,5 +1232,122 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
       },
     ]);
+  });
+});
+
+describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () => {
+  const baseMockPolicy: PackagePolicy = {
+    id: 'some-uuid',
+    name: 'mock-policy',
+    description: '',
+    created_at: '',
+    created_by: '',
+    updated_at: '',
+    updated_by: '',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    namespace: 'default',
+    inputs: [],
+    revision: 1,
+    package: { name: 'sql_server_input_otel', version: '1.0.0', title: 'SQL Server OTel' },
+  };
+
+  const dynamicPackageInfo: any = {
+    name: 'sql_server_input_otel',
+    version: '1.0.0',
+    type: 'input',
+    policy_templates: [
+      {
+        name: 'otel',
+        input: OTEL_COLLECTOR_INPUT_TYPE,
+        dynamic_signal_types: true,
+        title: 'SQL OTel',
+        description: 'OTel input',
+        template_path: 'some/path.hbs',
+      },
+    ],
+  };
+
+  it('strips undefined type for dynamic_signal_types package stream when data_stream.type variable is not set', () => {
+    const policy: PackagePolicy = {
+      ...baseMockPolicy,
+      inputs: [
+        {
+          type: OTEL_COLLECTOR_INPUT_TYPE,
+          enabled: true,
+          streams: [
+            {
+              id: 'stream-dynamic',
+              enabled: true,
+              data_stream: { dataset: 'otel.dataset' },
+            } as any,
+          ],
+        },
+      ],
+    };
+
+    const result = storedPackagePolicyToAgentInputs(policy, dynamicPackageInfo);
+    expect(result).toHaveLength(1);
+    const stream = result[0].streams?.[0];
+    expect(stream).toBeDefined();
+    expect(stream?.data_stream.type).toBeUndefined();
+    // Ensure the key is stripped (not present as undefined)
+    expect('type' in (stream?.data_stream ?? {})).toBe(false);
+  });
+
+  it('uses data_stream.type variable value when set for dynamic_signal_types package', () => {
+    const policy: PackagePolicy = {
+      ...baseMockPolicy,
+      inputs: [
+        {
+          type: OTEL_COLLECTOR_INPUT_TYPE,
+          enabled: true,
+          streams: [
+            {
+              id: 'stream-dynamic',
+              enabled: true,
+              data_stream: { dataset: 'otel.dataset' },
+              vars: { [DATA_STREAM_TYPE_VAR_NAME]: { value: 'metrics' } },
+            } as any,
+          ],
+        },
+      ],
+    };
+
+    const result = storedPackagePolicyToAgentInputs(policy, dynamicPackageInfo);
+    expect(result).toHaveLength(1);
+    const stream = result[0].streams?.[0];
+    expect(stream?.data_stream.type).toEqual('metrics');
+  });
+
+  it('throws for non-dynamic package with undefined data_stream.type', () => {
+    const nonDynamicPackageInfo: any = {
+      name: 'regular-package',
+      version: '1.0.0',
+      type: 'integration',
+      policy_templates: [],
+    };
+    const policy: PackagePolicy = {
+      ...baseMockPolicy,
+      package: { name: 'regular-package', version: '1.0.0', title: 'Regular' },
+      inputs: [
+        {
+          type: 'logfile',
+          enabled: true,
+          streams: [
+            {
+              id: 'stream-no-type',
+              enabled: true,
+              data_stream: { dataset: 'regular.dataset' },
+            } as any,
+          ],
+        },
+      ],
+    };
+
+    expect(() => storedPackagePolicyToAgentInputs(policy, nonDynamicPackageInfo)).toThrowError(
+      '[data_stream.type]: unexpected undefined stream type for non-dynamic package'
+    );
   });
 });

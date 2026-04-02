@@ -66,7 +66,7 @@ const columns: Array<EuiBasicTableColumn<Note>> = [
             <OpenFlyoutButtonIcon
               eventId={note.eventId}
               timelineId={note.timelineId}
-              iconType="expand"
+              iconType="maximize"
             />
           ) : null}
         </EuiFlexItem>

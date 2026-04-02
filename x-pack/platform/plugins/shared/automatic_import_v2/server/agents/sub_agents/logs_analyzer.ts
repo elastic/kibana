@@ -6,23 +6,24 @@
  */
 
 import type { SubAgent, SubAgentParams } from '../types';
-import { LOG_ANALYZER_PROMPT } from '../prompts';
+import { LOG_AND_ECS_ANALYZER_PROMPT } from '../prompts';
 
 /**
- * Creates a logs analyzer agent.
- * This agent analyzes the log format and provides a structured analysis for ingest pipeline generation.
+ * Creates a log and ECS analyzer agent.
+ * This agent analyzes the log format, provides a structured analysis for ingest pipeline
+ * generation, and produces best-effort ECS field mappings.
  *
- * @returns Logs analyzer agent configured with the provided parameters
+ * @returns Log and ECS analyzer agent configured with the provided parameters
  */
-export const createLogsAnalyzerAgent = (
+export const createLogAndEcsAnalyzerAgent = (
   params: Omit<SubAgentParams, 'name' | 'description' | 'sampleCount'>
 ): SubAgent => {
   const userPrompt = params.prompt;
   return {
-    name: 'logs_analyzer',
+    name: 'log_and_ecs_analyzer',
     description:
-      'Analyzes the log format and provides a structured analysis for ingest pipeline generation.',
-    prompt: LOG_ANALYZER_PROMPT + (userPrompt ? `\n\n${userPrompt}` : ''),
+      'Analyzes the log format, provides structured analysis for ingest pipeline generation, and produces best-effort ECS field mappings.',
+    prompt: LOG_AND_ECS_ANALYZER_PROMPT + (userPrompt ? `\n\n${userPrompt}` : ''),
     tools: params.tools,
   };
 };

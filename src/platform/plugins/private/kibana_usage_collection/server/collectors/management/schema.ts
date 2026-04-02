@@ -41,7 +41,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'securitySolution:alertCloseReasons': {
+  'securitySolution:detectionsCloseReasons': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
@@ -158,14 +158,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description:
         'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
     },
-  },
-  'securitySolution:enableVisualizationsInFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableGraphVisualization': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
@@ -757,6 +749,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
+    },
+  },
+  'observability:streamsEnableOverviewPage': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable the Streams management Overview tab',
     },
   },
   'observability:enableDiagnosticMode': {

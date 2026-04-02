@@ -66,6 +66,7 @@ export interface FetchRulesProps {
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
   signal?: AbortSignal;
+  schedulerId?: string;
 }
 
 // Rule snooze settings map keyed by rule SO's id (not ruleId) and valued by rule snooze settings

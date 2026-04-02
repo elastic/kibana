@@ -148,6 +148,16 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       }
       break;
 
+    case 'json_extract':
+      processor.extractions.forEach((extraction) => {
+        fields.push(extraction.target_field);
+      });
+      break;
+
+    case 'enrich':
+      fields.push(processor.to);
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -275,6 +285,25 @@ export function getProcessorOutputType(
     case 'network_direction':
       return 'string';
 
+    case 'json_extract': {
+      const extraction = processor.extractions.find(
+        ({ target_field }) => target_field === fieldName
+      );
+      switch (extraction?.type ?? 'keyword') {
+        case 'keyword':
+          return 'string';
+        case 'integer':
+        case 'long':
+        case 'double':
+          return 'number';
+        case 'boolean':
+          return 'boolean';
+        default:
+          return 'unknown';
+      }
+    }
+
+    case 'enrich':
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -369,7 +398,13 @@ export function getExpectedInputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'network_direction':
+    case 'enrich':
     case 'manual_ingest_pipeline':
+      return null;
+    case 'json_extract':
+      if (processor.field === fieldName) {
+        return ['string'];
+      }
       return null;
     default: {
       const _exhaustiveCheck: never = processor;
@@ -439,6 +474,12 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         if ('internal_networks_field' in step && step.internal_networks_field) {
           fieldsUsed.push(step.internal_networks_field);
         }
+        break;
+      case 'json_extract':
+        fieldsUsed.push(step.field);
+        break;
+      case 'enrich':
+        fieldsUsed.push(step.to);
         break;
       case 'append':
       case 'drop_document':

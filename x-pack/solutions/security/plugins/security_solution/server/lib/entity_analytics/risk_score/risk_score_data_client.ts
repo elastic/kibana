@@ -90,6 +90,70 @@ export class RiskScoreDataClient {
     });
   };
 
+  /**
+   * Daily average normalized risk scores per entity (oldest → newest calendar buckets)
+   * from the risk score time-series index. Suitable for trend / escalation analysis.
+   */
+  public async getDailyAverageRiskScoreNormSeries(params: {
+    entityType: string;
+    entityNames: readonly string[];
+    lookbackRange?: { readonly gte: string; readonly lte: string };
+  }): Promise<Map<string, number[]>> {
+    const { entityType, entityNames } = params;
+    const range = params.lookbackRange ?? { gte: 'now-90d', lte: 'now' };
+    const result = new Map<string, number[]>();
+
+    if (entityNames.length === 0) {
+      return result;
+    }
+
+    const { esClient, namespace } = this.options;
+    const index = getRiskScoreTimeSeriesIndex(namespace);
+
+    const response = await esClient.search({
+      index,
+      size: 0,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: {
+        bool: {
+          filter: [
+            { terms: { [`${entityType}.name`]: [...entityNames] } },
+            { range: { '@timestamp': range } },
+          ],
+        },
+      },
+      aggs: {
+        by_entity: {
+          terms: { field: `${entityType}.name`, size: entityNames.length },
+          aggs: {
+            scores_over_time: {
+              date_histogram: { field: '@timestamp', calendar_interval: 'day' },
+              aggs: {
+                avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+      []) as Array<{
+      key: string;
+      scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
+    }>;
+
+    for (const bucket of buckets) {
+      const scores = bucket.scores_over_time.buckets
+        .map((b) => b.avg_score.value)
+        .filter((v): v is number => v != null);
+      result.set(`${entityType}:${bucket.key}`, scores);
+    }
+
+    return result;
+  }
+
   public getRiskInputsIndex = ({ dataViewId }: { dataViewId: string }) =>
     getRiskInputsIndex({
       dataViewId,
@@ -189,8 +253,36 @@ export class RiskScoreDataClient {
         indexPatterns,
       });
 
+      this.options.auditLogger?.log({
+        message: 'System installed risk engine Elasticsearch components',
+        event: {
+          action: RiskScoreAuditActions.RISK_ENGINE_INSTALL,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.CHANGE,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+    } catch (error) {
+      this.options.logger.error(
+        `Error initializing risk engine resources: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * @deprecated This is for the legacy risk engine and will be removed when 9.4 mode is default.
+   */
+  public async initLegacyTransforms() {
+    const namespace = this.options.namespace;
+    const esClient = this.options.esClient;
+
+    try {
       await this.createOrUpdateRiskScoreLatestIndex();
 
+      const indexPatterns = getIndexPatternDataStream(namespace);
       const transformId = getLatestTransformId(namespace);
       await createTransform({
         esClient,
@@ -204,18 +296,12 @@ export class RiskScoreDataClient {
           }),
         },
       });
-
-      this.options.auditLogger?.log({
-        message: 'System installed risk engine Elasticsearch components',
-        event: {
-          action: RiskScoreAuditActions.RISK_ENGINE_INSTALL,
-          category: AUDIT_CATEGORY.DATABASE,
-          type: AUDIT_TYPE.CHANGE,
-          outcome: AUDIT_OUTCOME.SUCCESS,
-        },
-      });
     } catch (error) {
-      this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
+      this.options.logger.error(
+        `Error initializing legacy risk engine transforms: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       throw error;
     }
   }

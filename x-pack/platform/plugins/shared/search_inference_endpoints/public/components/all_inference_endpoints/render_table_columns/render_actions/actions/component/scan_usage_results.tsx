@@ -13,13 +13,10 @@ import {
   EuiPanel,
   EuiText,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
-
-import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
 import type { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { RenderMessageWithIcon } from './render_message_with_icon';
@@ -38,18 +35,14 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
   onIgnoreWarningCheckboxChange,
 }) => {
   const {
-    services: { application, serverless },
+    services: { share },
   } = useKibana();
-  const handleNavigateToIndexManagement = () => {
-    if (serverless) {
-      application?.navigateToApp(SEARCH_INDICES, {
-        openInNewTab: true,
-      });
-    } else {
-      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
-        path: `search_indices`,
-        openInNewTab: true,
-      });
+  const { euiTheme } = useEuiTheme();
+  const handleNavigateToIndexManagement = async () => {
+    const indexManagementLocator = share?.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
+    if (indexManagementLocator) {
+      const url = await indexManagementLocator.getUrl({ page: 'index_list' });
+      if (url) window.open(url, '_blank');
     }
   };
 
@@ -72,7 +65,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                   <EuiText
                     size="xs"
                     css={css`
-                      font-weight: ${euiThemeVars.euiCodeFontWeightBold};
+                      font-weight: ${euiTheme.font.weight.bold};
                     `}
                   >
                     <p>{i18n.COUNT_USAGE_LABEL(list.length)}</p>
@@ -81,7 +74,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={handleNavigateToIndexManagement}
-                    iconType="popout"
+                    iconType="external"
                     iconSide="right"
                     iconSize="s"
                     flush="both"

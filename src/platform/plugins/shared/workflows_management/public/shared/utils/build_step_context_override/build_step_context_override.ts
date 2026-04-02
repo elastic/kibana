@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { merge } from 'lodash';
 import type {
   EsWorkflowStepExecution,
   LegacyWorkflowInput,
@@ -34,6 +35,8 @@ import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
   schema: z.ZodType;
+  /** Original JSON Schema (avoids lossy Zod → JSON Schema round-trip for Monaco validation) */
+  rawJsonSchema?: JsonModelSchemaType;
 }
 
 export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflow'> {
@@ -179,19 +182,7 @@ function mergeContextOverride(
   if (!contextOverride || typeof contextOverride !== 'object') {
     return base;
   }
-  const result = { ...base };
-  for (const key of Object.keys(contextOverride)) {
-    const overrideVal = contextOverride[key];
-    if (overrideVal !== undefined) {
-      const baseVal = result[key];
-      if (isPlainObject(overrideVal)) {
-        result[key] = { ...asPlainObject(baseVal), ...overrideVal };
-      } else {
-        result[key] = overrideVal;
-      }
-    }
-  }
-  return result;
+  return merge({}, base, contextOverride);
 }
 
 /** Extract items array from a foreach step execution's input */

@@ -18,11 +18,14 @@ import type {
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { CodeEditor } from '@kbn/code-editor';
-import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useWorkflowsApi, type WorkflowApi } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../../common';
+import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
+import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
 import { queryClient } from '../../../shared/lib/query_client';
-import { createWorkflow, updateWorkflow } from '../../../shared/lib/workflows_api';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
@@ -46,29 +49,42 @@ const extractErrorMessage = (error: unknown): string =>
   'Unknown error';
 
 interface SaveWorkflowParams {
-  http: HttpSetup;
-  notifications: NotificationsStart;
+  workflowApi: WorkflowApi;
+  notifications: CoreStart['notifications'];
   yaml: string;
   workflowId?: string;
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
+  telemetry: WorkflowsBaseTelemetry;
 }
 
 const saveWorkflow = async ({
-  http,
+  workflowApi,
   notifications,
   yaml,
   workflowId,
   updateOrigin,
+  telemetry,
 }: SaveWorkflowParams): Promise<string | undefined> => {
   try {
     let savedId = workflowId;
     if (workflowId) {
-      await updateWorkflow(http, workflowId, yaml);
+      const result = await workflowApi.updateWorkflow(workflowId, { yaml });
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowId] });
+      telemetry.reportWorkflowUpdated({
+        workflowId,
+        workflowUpdate: { yaml },
+        hasValidationErrors: result.validationErrors.length > 0,
+        validationErrorCount: result.validationErrors.length,
+        aiAssisted: true,
+      });
     } else {
-      const result = await createWorkflow(http, yaml);
+      const result = await workflowApi.createWorkflow({ yaml });
       savedId = result.id;
       await updateOrigin(result.id);
+      telemetry.reportWorkflowCreated({
+        workflowId: result.id,
+        aiAssisted: true,
+      });
     }
     queryClient.invalidateQueries({ queryKey: ['workflows'] });
     notifications.toasts.addSuccess(
@@ -113,21 +129,22 @@ const WorkflowYamlCanvasContent: React.FC<{
   isSidebar: boolean;
   registerActionButtons: CanvasRenderCallbacks['registerActionButtons'];
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
-  http: HttpSetup;
-  notifications: NotificationsStart;
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
+  telemetry: WorkflowsBaseTelemetry;
 }> = ({
   attachment,
   isSidebar,
   registerActionButtons,
   updateOrigin,
-  http,
-  notifications,
   application,
   isOnWorkflowPage,
+  telemetry,
 }) => {
   useWorkflowsMonacoTheme();
+
+  const workflowApi = useWorkflowsApi();
+  const { notifications } = useKibana<{ notifications: CoreStart['notifications'] }>().services;
 
   // Defer button registration past the initial mount cycle so the parent
   // flyout's clearing effect (which also fires on mount) doesn't overwrite
@@ -145,21 +162,26 @@ const WorkflowYamlCanvasContent: React.FC<{
 
   const handleSave = useCallback(async () => {
     const id = await saveWorkflow({
-      http,
+      workflowApi,
       notifications,
       yaml: attachment.data.yaml,
       workflowId,
       updateOrigin,
+      telemetry,
     });
     if (id && !workflowId) {
       setSavedWorkflowId(id);
     }
-  }, [http, notifications, attachment.data.yaml, workflowId, updateOrigin]);
+  }, [workflowApi, notifications, attachment.data.yaml, workflowId, updateOrigin, telemetry]);
 
   const handleSaveAsNew = useCallback(async () => {
     try {
-      const result = await createWorkflow(http, attachment.data.yaml);
+      const result = await workflowApi.createWorkflow({ yaml: attachment.data.yaml });
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      telemetry.reportWorkflowCreated({
+        workflowId: result.id,
+        aiAssisted: true,
+      });
       notifications.toasts.addSuccess(
         i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewSuccess', {
           defaultMessage: 'Workflow saved as new',
@@ -176,7 +198,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         text: extractErrorMessage(error),
       });
     }
-  }, [http, notifications, application, attachment.data.yaml]);
+  }, [workflowApi, notifications, application, attachment.data.yaml, telemetry]);
 
   useEffect(() => {
     if (!ready) {
@@ -256,14 +278,14 @@ const WorkflowYamlCanvasContent: React.FC<{
 };
 
 export const createWorkflowYamlAttachmentUiDefinition = ({
-  http,
-  notifications,
-  application,
+  core,
+  telemetry: telemetryClient,
 }: {
-  http: HttpSetup;
-  notifications: NotificationsStart;
-  application: ApplicationStart;
+  core: CoreStart;
+  telemetry: TelemetryServiceClient;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
+  const { application } = core;
+  const telemetry = new WorkflowsBaseTelemetry(telemetryClient);
   let currentAppId: string | undefined;
   let currentLocation = '';
   let appContextSub: Subscription | undefined;
@@ -323,16 +345,17 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
     },
 
     renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
-      <WorkflowYamlCanvasContent
-        attachment={attachment}
-        isSidebar={isSidebar}
-        registerActionButtons={registerActionButtons}
-        updateOrigin={updateOrigin}
-        http={http}
-        notifications={notifications}
-        application={application}
-        isOnWorkflowPage={isOnWorkflowPage}
-      />
+      <KibanaContextProvider services={core}>
+        <WorkflowYamlCanvasContent
+          attachment={attachment}
+          isSidebar={isSidebar}
+          registerActionButtons={registerActionButtons}
+          updateOrigin={updateOrigin}
+          application={application}
+          isOnWorkflowPage={isOnWorkflowPage}
+          telemetry={telemetry}
+        />
+      </KibanaContextProvider>
     ),
   };
 };

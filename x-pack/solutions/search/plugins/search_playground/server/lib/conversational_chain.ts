@@ -79,7 +79,7 @@ export const getMessages = (chatHistory: ChatMessage[]) => {
       }
       return null;
     })
-    .filter((message): message is BaseMessage => message !== null);
+    .filter((message): message is HumanMessage | AIMessage => message !== null);
 };
 
 const buildContext = (docs: Document[]) => {

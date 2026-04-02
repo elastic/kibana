@@ -117,13 +117,8 @@ export const createCreateIndexActions = () => {
   };
 
   const clickCreateIndexSaveButton = async () => {
-    // `CreateIndexModal` renders the submit button in the modal footer and wires it via `form=...`
-    // (instead of nesting it inside the <form>). In JSDOM, clicking a submit button triggers
-    // `requestSubmit`, which throws "Not implemented". We only need the React `onClick` handler,
-    // so switch the DOM button type to avoid the native submit behavior.
-    const saveButton = screen.getByTestId('createIndexSaveButton') as HTMLButtonElement;
-    saveButton.type = 'button';
-    fireEvent.click(saveButton);
+    const form = screen.getByTestId('createIndexModalForm');
+    fireEvent.submit(form);
   };
 
   const setIndexName = (name: string) => {

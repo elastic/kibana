@@ -535,7 +535,7 @@ describe('FeatureRegistry', () => {
         .toThrowErrorMatchingInlineSnapshot(`
         "[privileges]: types that failed validation:
         - [privileges.0]: expected value to equal [null]
-        - [privileges.1.foo]: definition for this key is missing"
+        - [privileges.1.foo]: Additional properties are not allowed ('foo' was unexpected)"
       `);
     });
 

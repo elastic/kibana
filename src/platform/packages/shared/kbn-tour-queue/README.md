@@ -27,6 +27,6 @@ When you register a tour, you get a tour object with these methods:
 
 | Order | Tour ID | Description |
 |----------|---------|-------------|
-| 1 | `siemMigrationSetupTour` | Security SIEM migration setup (Security plugin) |
+| 1 | `spacesSolutionViewSwitchTour` | Tour for solution view spaces that have switched from Classic (Spaces plugin) |
 
 **Note:** Lower order = shown first. If a tour is skipped, all remaining tours are skipped for the current page load only.

@@ -1,5 +1,5 @@
 {
-  "sha1": "700d2adc9e04eae84635b1c3e7f95eb3493ef0ea",
+  "sha1": "90348e45cef240aae36362de78ab6b77bc477f1f",
   "tests": [
     {
       "id": "1927b5fbbdf0acf-ad7c5ee24e88621",
@@ -166,6 +166,76 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
         "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "37e997b21783acc-69d13b6081ecc3b",
+      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should exchange OAuth token and authenticate successfully on MCP endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "37e997b21783acc-ad644497d28964d",
+      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject OAuth token on a non-MCP endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "37e997b21783acc-45cdf235fdeb05e",
+      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject an invalid OAuth token on MCP endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
+        "line": 77,
+        "column": 12
+      }
+    },
+    {
+      "id": "37e997b21783acc-d4652af3f04a55c",
+      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject OAuth token with wrong audience on MCP endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "37e997b21783acc-765e699b78a50b5",
+      "title": "[NON-MKI] UIAM OAuth token exchange on MCP endpoint should reject a non-essu_ Bearer token on MCP endpoint (falls through to ES)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
+        "line": 137,
         "column": 12
       }
     },

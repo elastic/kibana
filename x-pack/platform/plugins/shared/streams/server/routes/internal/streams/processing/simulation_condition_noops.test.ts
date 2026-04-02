@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Condition, StreamlangDSL } from '@kbn/streamlang';
+import type { Condition, EnrichProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { conditionToPainless } from '@kbn/streamlang';
+import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 import { buildSimulationProcessorsWithConditionNoops } from './simulation_condition_noops';
 
 describe('buildSimulationProcessorsWithConditionNoops', () => {
-  it('injects a no-op processor for a condition even if it has no descendants', () => {
+  it('injects a no-op processor for a condition even if it has no descendants', async () => {
     const dsl: StreamlangDSL = {
       steps: [
         {
@@ -24,7 +25,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
       ],
     };
 
-    const processors = buildSimulationProcessorsWithConditionNoops(dsl);
+    const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
 
     expect(processors).toHaveLength(2);
     expect(processors[0]).toHaveProperty('set');
@@ -36,7 +37,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     expect(processors[1]!.remove?.field).toBe('_streams_condition_noop');
   });
 
-  it('injects condition no-op before its descendants and keeps descendant processor tags', () => {
+  it('injects condition no-op before its descendants and keeps descendant processor tags', async () => {
     const dsl: StreamlangDSL = {
       steps: [
         {
@@ -57,7 +58,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
       ],
     };
 
-    const processors = buildSimulationProcessorsWithConditionNoops(dsl);
+    const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
 
     expect(processors).toHaveLength(3);
     expect(processors[0]!.set?.tag).toBe('cond-1');
@@ -67,7 +68,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     expect(typeof processors[2]!.set?.if).toBe('string');
   });
 
-  it('composes nested condition no-ops with parent conditions', () => {
+  it('composes nested condition no-ops with parent conditions', async () => {
     const parentCondition: Condition = { field: 'a', eq: 1 };
     const childCondition: Condition = { field: 'b', eq: 2 };
     const dsl: StreamlangDSL = {
@@ -97,7 +98,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
       ],
     };
 
-    const processors = buildSimulationProcessorsWithConditionNoops(dsl);
+    const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
 
     expect(processors).toHaveLength(5);
     expect(processors[0]!.set?.tag).toBe('cond-parent');
@@ -110,5 +111,36 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     const childSetIf = processors[2]!.set?.if;
     expect(childSetIf).toBe(conditionToPainless({ and: [parentCondition, childCondition] }));
+  });
+
+  it('transpiles enrich steps when an enrich policy resolver is provided', async () => {
+    const enrichResolverOptions: StreamlangResolverOptions = {
+      enrich: async () =>
+        Promise.resolve({
+          matchField: 'source.ip',
+          enrichFields: ['city'],
+        }),
+    };
+
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          action: 'enrich',
+          policy_name: 'test-policy',
+          to: 'geo',
+        } as EnrichProcessor,
+      ],
+    };
+
+    const processors = await buildSimulationProcessorsWithConditionNoops(
+      dsl,
+      enrichResolverOptions
+    );
+
+    expect(processors).toHaveLength(1);
+    expect(processors[0]).toHaveProperty('enrich');
+    expect(processors[0]!.enrich?.policy_name).toBe('test-policy');
+    expect(processors[0]!.enrich?.field).toBe('source.ip');
+    expect(processors[0]!.enrich?.target_field).toBe('geo');
   });
 });

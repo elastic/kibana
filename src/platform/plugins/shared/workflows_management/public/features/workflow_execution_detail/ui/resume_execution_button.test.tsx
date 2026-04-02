@@ -10,9 +10,10 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ResumeExecutionButton } from './resume_execution_button';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -23,20 +24,36 @@ jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsCapabilities: jest.fn(),
 }));
 
-// Capture the onSubmit callback exposed by ResumeExecutionModal so tests can trigger it.
+jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
+  convertJsonSchemaToZod: jest.fn(),
+}));
+
+jest.mock('../../../../common/lib/generate_sample_from_json_schema', () => ({
+  generateSampleFromJsonSchema: jest.fn(),
+}));
+
+const { convertJsonSchemaToZod } = jest.requireMock(
+  '@kbn/workflows/spec/lib/build_fields_zod_validator'
+);
+
+// Capture callbacks and props exposed by ResumeExecutionModal so tests can inspect them.
 let capturedOnSubmit: ((params: { stepInputs: Record<string, unknown> }) => void) | undefined;
+let capturedContextOverride: ContextOverrideData | undefined;
 
 jest.mock('./resume_execution_modal', () => ({
   ResumeExecutionModal: ({
     onSubmit,
     onClose,
     resumeMessage,
+    initialcontextOverride,
   }: {
     onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
     onClose: () => void;
     resumeMessage?: string;
+    initialcontextOverride?: ContextOverrideData;
   }) => {
     capturedOnSubmit = onSubmit;
+    capturedContextOverride = initialcontextOverride;
     return (
       <div data-test-subj="resume-execution-modal">
         <span data-test-subj="modal-resume-message">{resumeMessage ?? ''}</span>
@@ -62,6 +79,9 @@ describe('ResumeExecutionButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnSubmit = undefined;
+    capturedContextOverride = undefined;
+    // Default: schema conversion succeeds and returns a minimal Zod-like object.
+    convertJsonSchemaToZod.mockReturnValue({ safeParse: jest.fn(() => ({ success: true })) });
     mockHttpPost.mockResolvedValue({});
     useKibana.mockReturnValue({
       services: {
@@ -71,9 +91,7 @@ describe('ResumeExecutionButton', () => {
         },
       },
     });
-    jest
-      .mocked(useWorkflowsCapabilities)
-      .mockReturnValue({ ...mockWorkflowsManagementCapabilities });
+    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
   const renderComponent = (props = {}) =>
@@ -96,7 +114,7 @@ describe('ResumeExecutionButton', () => {
 
     it('disables the button when user lacks executeWorkflow capability', () => {
       jest.mocked(useWorkflowsCapabilities).mockReturnValue({
-        ...mockWorkflowsManagementCapabilities,
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
       renderComponent();
@@ -141,10 +159,24 @@ describe('ResumeExecutionButton', () => {
         'Please approve this action'
       );
     });
+
+    it('renders without crashing and passes no contextOverride when schema conversion throws', () => {
+      convertJsonSchemaToZod.mockImplementationOnce(() => {
+        throw new Error('Unsupported $ref in JSON Schema');
+      });
+      // The component must not throw even when the schema is malformed.
+      expect(() =>
+        renderComponent({ resumeSchema: { $ref: '#/definitions/Unsupported' } })
+      ).not.toThrow();
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      expect(screen.getByTestId('resume-execution-modal')).toBeInTheDocument();
+      // Modal receives no context override — falls back to free-form JSON editor.
+      expect(capturedContextOverride).toBeUndefined();
+    });
   });
 
   describe('submit', () => {
-    it('calls POST /api/workflowExecutions/{id}/resume with the submitted input', async () => {
+    it('calls POST /api/workflows/executions/{id}/resume with the submitted input', async () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
@@ -152,8 +184,9 @@ describe('ResumeExecutionButton', () => {
         capturedOnSubmit!({ stepInputs: { approved: true } });
       });
       await waitFor(() => {
-        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflowExecutions/exec-123/resume', {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
           body: JSON.stringify({ input: { approved: true } }),
+          version: '2023-10-31',
         });
       });
     });

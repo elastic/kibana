@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { DataControlState, OptionsListControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -44,7 +44,12 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       return Boolean(field && isFieldCompatible(field));
     },
     execute: async ({ embeddable, state, controlId, isPinned }) => {
-      createDataControlOfType(OPTIONS_LIST_CONTROL, { embeddable, state, controlId, isPinned });
+      createDataControlOfType(OPTIONS_LIST_CONTROL, {
+        embeddable,
+        state: { ...DEFAULT_DSL_OPTIONS_LIST_STATE, ...state },
+        controlId,
+        isPinned,
+      });
     },
     extension: {
       CustomOptionsComponent: OptionsListEditorOptions,

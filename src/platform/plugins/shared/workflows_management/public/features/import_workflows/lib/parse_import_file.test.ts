@@ -141,5 +141,153 @@ describe('parseImportFile', () => {
       expect(result.parseErrors).toHaveLength(1);
       expect(result.parseErrors[0]).toContain('not a .yml');
     });
+
+    it('should report parse error for nested directory entries', async () => {
+      const zip = new JSZip();
+      zip.file('subdir/nested.yml', 'name: Nested');
+      zip.file('w-1.yml', 'name: Root');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'nested.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows).toHaveLength(1);
+      expect(result.parseErrors.some((e) => e.includes('Unexpected nested entry'))).toBe(true);
+    });
+
+    it('should report manifest count mismatch as a parse error', async () => {
+      const zip = new JSZip();
+      zip.file('w-1.yml', 'name: One');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 5,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'mismatch.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows).toHaveLength(1);
+      expect(
+        result.parseErrors.some(
+          (e) => e.includes('Manifest declares 5') && e.includes('1 were parsed')
+        )
+      ).toBe(true);
+    });
+
+    it('should correctly derive ID from .yaml extension', async () => {
+      const zip = new JSZip();
+      zip.file('my-workflow.yaml', 'name: YAML Extension');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'yaml-ext.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.workflowIds).toEqual(['my-workflow']);
+      expect(result.workflows[0].id).toBe('my-workflow');
+    });
+
+    it('should reject constructor and prototype as unsafe IDs', async () => {
+      const zip = new JSZip();
+      zip.file('constructor.yml', 'name: Ctor');
+      zip.file('prototype.yml', 'name: Proto');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 0,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'unsafe.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows).toHaveLength(0);
+      expect(result.parseErrors.filter((e) => e.includes('invalid workflow ID'))).toHaveLength(2);
+    });
+
+    it('should throw for manifest with unsupported version', async () => {
+      const zip = new JSZip();
+      zip.file('w-1.yml', 'name: Test');
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '99',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'bad-version.zip');
+
+      await expect(parseImportFile(file)).rejects.toThrow('Invalid or missing manifest');
+    });
+
+    it('should handle ZIP with only manifest and no workflow entries', async () => {
+      const zip = new JSZip();
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 0,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'empty.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.format).toBe('zip');
+      expect(result.totalWorkflows).toBe(0);
+      expect(result.workflows).toHaveLength(0);
+      expect(result.parseErrors).toHaveLength(0);
+    });
+
+    it('should reject entries exceeding per-entry YAML length limit', async () => {
+      const longYaml = `name: ${'x'.repeat(1_048_576)}`;
+      const zip = new JSZip();
+      zip.file('w-1.yml', longYaml);
+      zip.file(
+        'manifest.yml',
+        YAML.stringify({
+          exportedCount: 1,
+          exportedAt: '2026-01-01T00:00:00Z',
+          version: '1',
+        })
+      );
+      const buffer = await zip.generateAsync({ type: 'arraybuffer' });
+      const file = createFile(buffer, 'large-entry.zip');
+      const result = await parseImportFile(file);
+
+      expect(result.workflows).toHaveLength(0);
+      expect(result.parseErrors.some((e) => e.includes('maximum YAML length'))).toBe(true);
+    });
+  });
+
+  describe('YAML files - limits', () => {
+    it('should throw for standalone YAML file exceeding MAX_WORKFLOW_YAML_LENGTH', async () => {
+      const longYaml = `name: ${'x'.repeat(1_048_576)}`;
+      const file = createFile(longYaml, 'huge.yml');
+
+      await expect(parseImportFile(file)).rejects.toThrow('maximum YAML length');
+    });
   });
 });

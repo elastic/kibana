@@ -25,5 +25,5 @@ export async function create(
     createBody
   );
 
-  return getMarkdownCRUResponseBody(savedObject, 'create');
+  return getMarkdownCRUResponseBody(savedObject);
 }

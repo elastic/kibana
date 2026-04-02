@@ -9,10 +9,17 @@
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { distinctUntilChanged, map, pairwise } from 'rxjs';
+import { distinctUntilChanged, filter, map, pairwise } from 'rxjs';
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
+import { type UseEuiTheme, transparentize } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  euiCanAnimate,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -33,6 +40,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
+  const hasBeenDragged = useRef<boolean>(false);
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
@@ -50,6 +58,42 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       delete gridLayoutStateManager.headerRefs.current[sectionId];
     };
   }, [sectionId, gridLayoutStateManager]);
+
+  /**
+   * Callback for collapsing and/or expanding the section when the title button is clicked
+   */
+  const toggleIsCollapsed = useCallback(() => {
+    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+    const section = newLayout[sectionId];
+    if (section.isMainSection) return;
+
+    section.isCollapsed = !section.isCollapsed;
+    gridLayoutStateManager.gridLayout$.next(newLayout);
+
+    const buttonRef = collapseButtonRef.current;
+    if (!buttonRef) return;
+    buttonRef.setAttribute('aria-expanded', `${!section.isCollapsed}`);
+  }, [gridLayoutStateManager, sectionId]);
+
+  const collapseSectionOnDrag = useCallback(() => {
+    const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
+    if (!section || section.isMainSection) return; // main sections cannot be collapsed
+    if (section.isCollapsed || panelCount === 0) return; // prevent collapsing if already collapsed or empty
+    toggleIsCollapsed();
+  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed, panelCount]);
+
+  const shouldIgnoreHeaderClick = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return false;
+    return Boolean(target.closest('[data-no-drag]'));
+  };
+
+  const handleSectionDragStart = useCallback(
+    (e: UserInteractionEvent) => {
+      if (shouldIgnoreHeaderClick(e.target)) return;
+      startDrag(e);
+    },
+    [startDrag]
+  );
 
   useEffect(() => {
     /**
@@ -75,44 +119,79 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       });
 
     /**
-     * This subscription is responsible for handling the drag + drop styles for
-     * re-ordering grid rows
+     * Extracted drag state stream that maps the before and after of the activeSectionEvent$ stream to a more explicit "drag state"
      */
-    const dragRowStyleSubscription = gridLayoutStateManager.activeSectionEvent$
-      .pipe(
-        pairwise(),
-        map(([before, after]) => {
-          if (!before && after) {
-            return { type: 'init', activeSectionEvent: after };
-          } else if (before && after) {
-            return { type: 'update', activeSectionEvent: after };
-          } else {
-            return { type: 'finish', activeSectionEvent: before };
-          }
-        })
-      )
-      .subscribe(({ type, activeSectionEvent }) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
-        if (!headerRef || activeSectionEvent?.id !== sectionId) return;
+    const dragState$ = gridLayoutStateManager.activeSectionEvent$.pipe(
+      pairwise(),
+      map(([before, after]) => {
+        if (!before && after) return { type: 'init', event: after };
+        if (before && after) return { type: 'update', event: after };
+        return { type: 'finish', event: before };
+      }),
+      filter(({ event }) => event?.id === sectionId)
+    );
 
-        if (type === 'init') {
-          setIsActive(true);
-          const width = headerRef.getBoundingClientRect().width;
-          headerRef.style.position = 'fixed';
-          headerRef.style.width = `${width}px`;
-          headerRef.style.top = `${activeSectionEvent.startingPosition.top}px`;
-          headerRef.style.left = `${activeSectionEvent.startingPosition.left}px`;
-        } else if (type === 'update') {
-          headerRef.style.transform = `translate(${activeSectionEvent.translate.left}px, ${activeSectionEvent.translate.top}px)`;
-        } else {
+    /**
+     * This subscription is responsible for handling the drag + drop styles for
+     * re-ordering grid rows and also collapsing the section when the drag starts
+     *  (if it isn't already collapsed) or toggling the collapsed state when
+     * the drag finishes without any movement (i.e. a click)
+     */
+
+    const sectionInteractionSubscription = dragState$.subscribe(({ type, event }) => {
+      const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
+      if (!headerRef) return;
+
+      const handleFirstDrag = () => {
+        hasBeenDragged.current = true;
+        setIsActive(true);
+        collapseSectionOnDrag();
+
+        const width = headerRef.getBoundingClientRect().width;
+        headerRef.style.width = `${width}px`;
+        headerRef.style.position = 'fixed';
+        headerRef.style.top = `${event!.startingPosition.top}px`;
+        headerRef.style.left = `${event!.startingPosition.left}px`;
+      };
+
+      const resetHeaderStyles = () => {
+        headerRef.style.position = '';
+        headerRef.style.width = '';
+        headerRef.style.top = '';
+        headerRef.style.left = '';
+        headerRef.style.transform = '';
+      };
+
+      switch (type) {
+        case 'init':
+          hasBeenDragged.current = false;
+          /**
+           * we want active drag styles to be applied on keyboard drag from the start, whereas for mouse/touch
+           * we only want to apply drag styles if there is actual movement(i.e., distinguish between click and drag)
+           */
+          if (event?.sensorType === 'keyboard') {
+            handleFirstDrag();
+          }
+          break;
+        case 'update':
+          if (!hasBeenDragged.current) {
+            handleFirstDrag();
+          }
+          headerRef.style.transform = `translate(${event!.translate.left}px, ${
+            event!.translate.top
+          }px)`;
+          break;
+        case 'finish':
           setIsActive(false);
-          headerRef.style.position = ``;
-          headerRef.style.width = ``;
-          headerRef.style.top = ``;
-          headerRef.style.left = ``;
-          headerRef.style.transform = ``;
-        }
-      });
+          if (!hasBeenDragged.current) {
+            // if no drag occurred, then this is a click event
+            toggleIsCollapsed();
+          }
+          hasBeenDragged.current = false;
+          resetHeaderStyles();
+          break;
+      }
+    });
 
     /**
      * This subscription is responsible for setting the collapsed state class name
@@ -138,10 +217,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     return () => {
       accessModeSubscription.unsubscribe();
       panelCountSubscription.unsubscribe();
-      dragRowStyleSubscription.unsubscribe();
+      sectionInteractionSubscription.unsubscribe();
       collapsedStateSubscription.unsubscribe();
     };
-  }, [gridLayoutStateManager, sectionId]);
+  }, [gridLayoutStateManager, sectionId, toggleIsCollapsed, collapseSectionOnDrag]);
 
   const confirmDeleteSection = useCallback(() => {
     /**
@@ -159,41 +238,14 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     }
   }, [gridLayoutStateManager, sectionId]);
 
-  /**
-   * Callback for collapsing and/or expanding the section when the title button is clicked
-   */
-  const toggleIsCollapsed = useCallback(() => {
-    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    const section = newLayout[sectionId];
-    if (section.isMainSection) return;
-
-    section.isCollapsed = !section.isCollapsed;
-    gridLayoutStateManager.gridLayout$.next(newLayout);
-
-    const buttonRef = collapseButtonRef.current;
-    if (!buttonRef) return;
-    buttonRef.setAttribute('aria-expanded', `${!section.isCollapsed}`);
-  }, [gridLayoutStateManager, sectionId]);
-
-  const handleSectionDragStart = useCallback(
-    (e: UserInteractionEvent) => {
-      const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId];
-
-      if (section && !section.isMainSection && !section.isCollapsed) {
-        toggleIsCollapsed();
-      }
-      startDrag(e);
-    },
-    [gridLayoutStateManager, sectionId, toggleIsCollapsed, startDrag]
-  );
-
   return (
     <>
       <EuiFlexGroup
         gutterSize="xs"
         responsive={false}
         alignItems="center"
-        css={(theme) => styles.headerStyles(theme, sectionId)}
+        id={`kbnGridSectionHeader-${sectionId}`}
+        css={(theme) => styles.headerStyles(theme, sectionId, readOnly)}
         className={classNames('kbnGridSectionHeader', {
           'kbnGridSectionHeader--active': isActive,
           // sets the collapsed state on mount
@@ -207,14 +259,23 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         ref={(element: HTMLDivElement | null) => {
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
+        onMouseDown={readOnly ? toggleIsCollapsed : handleSectionDragStart}
+        onTouchStart={readOnly ? toggleIsCollapsed : handleSectionDragStart}
+        onTouchEnd={(e) => {
+          // prevents both `onMouseDown` and `onTouchStart` from firing during touch events
+          if (!shouldIgnoreHeaderClick(e.target)) {
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
       >
         <GridSectionTitle
           sectionId={sectionId}
           readOnly={readOnly || isActive}
-          toggleIsCollapsed={toggleIsCollapsed}
           editTitleOpen={editTitleOpen}
           setEditTitleOpen={setEditTitleOpen}
           collapseButtonRef={collapseButtonRef}
+          toggleIsCollapsed={toggleIsCollapsed}
         />
         {
           /**
@@ -223,7 +284,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
            */
           !editTitleOpen && (
             <>
-              <EuiFlexItem grow={false} css={styles.visibleOnlyWhenCollapsed}>
+              <EuiFlexItem
+                grow={false}
+                css={readOnly ? styles.visibleOnlyWhenCollapsed : undefined}
+              >
                 <EuiText
                   color="subdued"
                   size="s"
@@ -242,8 +306,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
               {!readOnly && (
                 <>
                   {!isActive && (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem grow={false} css={[styles.floatToRight]}>
                       <EuiButtonIcon
+                        data-no-drag
                         iconType="trash"
                         color="danger"
                         className="kbnGridLayout--deleteSectionIcon"
@@ -254,19 +319,19 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem grow={false} css={[styles.floatToRight]}>
-                    <EuiButtonIcon
-                      iconType="move"
-                      color="text"
-                      className="kbnGridSection--dragHandle"
-                      aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
-                        defaultMessage: 'Move section',
-                      })}
-                      onMouseDown={handleSectionDragStart}
-                      onTouchStart={handleSectionDragStart}
-                      onKeyDown={handleSectionDragStart}
-                      data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
-                    />
+                  <EuiFlexItem
+                    grow={false}
+                    css={isActive && [styles.floatToRight]}
+                    className="kbnGridSection--dragHandle"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={handleSectionDragStart}
+                    aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
+                      defaultMessage: 'Move section',
+                    })}
+                    data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
+                  >
+                    <EuiIcon type="move" color="text" aria-hidden={true} />
                   </EuiFlexItem>
                 </>
               )}
@@ -294,13 +359,25 @@ const styles = {
   floatToRight: css({
     marginLeft: 'auto',
   }),
-  headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string) =>
+  headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string, readOnly: boolean) =>
     css({
       gridColumnStart: 1,
       gridColumnEnd: -1,
       gridRowStart: `span 1`,
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
+      touchAction: 'none', // prevents default scroll on drag behaviour on mobile
+      ...(readOnly
+        ? {
+            cursor: 'pointer',
+          }
+        : {
+            cursor: 'move',
+            userSelect: 'none',
+            '&:hover:not(.kbnGridSectionHeader--active)': {
+              backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
+            },
+          }),
       '.kbnGridLayout--deleteSectionIcon': {
         marginLeft: euiTheme.size.xs,
       },
@@ -308,12 +385,8 @@ const styles = {
         textWrapMode: 'nowrap', // prevent panel count from wrapping
       },
       '.kbnGridSection--dragHandle': {
+        padding: euiTheme.size.xs,
         cursor: 'move',
-        touchAction: 'none',
-        '&:active, &:hover, &:focus': {
-          transform: 'none !important', // prevent "bump up" that EUI adds on hover
-          backgroundColor: 'transparent',
-        },
       },
 
       // these styles hide the delete + move actions by default and only show them on hover
@@ -334,10 +407,10 @@ const styles = {
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
+        pointerEvents: 'auto', // allow pointer events through so that cursor can change
+        cursor: 'move',
         '.kbnGridSection--dragHandle': {
-          cursor: 'move',
           opacity: 1,
-          pointerEvents: 'auto',
         },
       },
     }),

@@ -27,6 +27,7 @@
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/elastic-assistant",
+    "@kbn/inference-connectors",
     "@kbn/kibana-react-plugin",
     "@kbn/code-editor",
     "@kbn/monaco",

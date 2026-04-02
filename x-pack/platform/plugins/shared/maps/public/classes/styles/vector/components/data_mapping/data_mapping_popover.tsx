@@ -10,6 +10,7 @@
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 type Props = {
@@ -62,6 +63,12 @@ export class DataMappingPopover extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         ownFocus
+        aria-label={i18n.translate(
+          'xpack.maps.styles.fieldMetaOptions.dataMappingPopoverAriaLabel',
+          {
+            defaultMessage: 'Data mapping',
+          }
+        )}
       >
         {this.props.children}
       </EuiPopover>

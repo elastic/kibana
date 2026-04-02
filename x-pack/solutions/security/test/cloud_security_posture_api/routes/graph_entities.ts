@@ -223,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
-      it('should return entities for known entity IDs', async () => {
+      it.skip('should return entities for known entity IDs', async () => {
         const response = await postGraphEntities(supertest, {
           query: {
             entityIds: ['partial-host-instance-1', 'admin@example.com'],

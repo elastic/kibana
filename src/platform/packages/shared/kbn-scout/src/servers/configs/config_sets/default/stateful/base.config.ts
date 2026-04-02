@@ -21,7 +21,10 @@ import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
+import {
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+} from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 

@@ -1170,6 +1170,35 @@ describe('The custom threshold alert type', () => {
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
         });
       });
+
+      test('when source tags is a string, it is treated as a single tag', async () => {
+        setEvaluationResults([
+          {
+            'host-01': {
+              ...customThresholdNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              isNoData: false,
+              bucketKey: { groupBy0: 'host-01' },
+              flattenGrouping: { 'host.name': 'host-01' },
+              context: {
+                tags: 'host-01_tag1',
+              },
+            },
+          },
+        ]);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
+
+        const reportedAlert = getLastReportedAlert(instanceIdA);
+        expect(reportedAlert?.context?.tags).toStrictEqual([
+          'host-01_tag1',
+          'ruleTag1',
+          'ruleTag2',
+        ]);
+      });
     });
 
     describe('querying without a groupBy parameter and rule tags', () => {
@@ -4013,6 +4042,35 @@ describe('The custom threshold alert type', () => {
             'Last value of test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
         });
+      });
+
+      test('when source tags is a string, it is treated as a single tag', async () => {
+        setEvaluationResults([
+          {
+            'host-01': {
+              ...customThresholdLastValueCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              isNoData: false,
+              bucketKey: { groupBy0: 'host-01' },
+              flattenGrouping: { 'host.name': 'host-01' },
+              context: {
+                tags: 'host-01_tag1',
+              },
+            },
+          },
+        ]);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
+
+        const reportedAlert = getLastReportedAlert(instanceIdA);
+        expect(reportedAlert?.context?.tags).toStrictEqual([
+          'host-01_tag1',
+          'ruleTag1',
+          'ruleTag2',
+        ]);
       });
     });
 

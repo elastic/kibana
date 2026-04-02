@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { WorkflowInsightType } from '../../../../../../common/endpoint/types/workflow_insights';
 
-export function getPrompts(insightType: DefendInsightType) {
+export function getPrompts(insightType: WorkflowInsightType) {
   switch (insightType) {
-    case DefendInsightType.enum.policy_response_failure:
+    case WorkflowInsightType.enum.policy_response_failure:
       return PROMPTS.POLICY_RESPONSE_FAILURE;
-    case DefendInsightType.enum.incompatible_antivirus:
+    case WorkflowInsightType.enum.incompatible_antivirus:
       return PROMPTS.INCOMPATIBLE_ANTIVIRUS;
-    case DefendInsightType.enum.custom:
+    case WorkflowInsightType.enum.custom:
       return PROMPTS.CUSTOM;
     default:
       throw new Error(`Unsupported insight type: ${insightType}`);

@@ -33,7 +33,7 @@ export const Model: React.FC<ModelProps> = ({ endpointInfo }) => {
       {isEligibleForMITBadge && (
         <EuiBadge
           color="hollow"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           href={modelDefinition.licenseUrl ?? ''}
           target="_blank"

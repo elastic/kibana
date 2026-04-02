@@ -305,7 +305,7 @@ describe('Update rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action_type_id: Invalid input: expected ".osquery", command: Invalid input: expected "isolate", command: Invalid option: expected one of "kill-process"|"suspend-process", config: Invalid input: expected object, received undefined, command: Invalid input: expected "runscript"'
+        'command: Invalid input: expected "isolate", command: Invalid option: expected one of "kill-process"|"suspend-process", config: Invalid input: expected object, received undefined, command: Invalid input: expected "runscript"'
       );
     });
     test('fails when provided with payload missing data', async () => {
@@ -321,7 +321,7 @@ describe('Update rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action_type_id: Invalid input: expected ".osquery", command: Invalid input: expected "isolate", config.field: Invalid input: expected string, received undefined, command: Invalid input: expected "runscript"'
+        'command: Invalid input: expected "isolate", config.field: Invalid input: expected string, received undefined, command: Invalid input: expected "runscript"'
       );
     });
   });

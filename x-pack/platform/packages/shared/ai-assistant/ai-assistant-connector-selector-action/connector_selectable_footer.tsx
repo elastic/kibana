@@ -40,7 +40,7 @@ export const ConnectorSelectableFooter: React.FC<ConnectorSelectableFooterProps>
               aria-label={i8n.addConnectorAriaLabel}
               data-test-subj="aiAssistantAddConnectorButton"
             >
-              <EuiIcon type="plus" />
+              <EuiIcon type="plus" aria-hidden={true} />
               {i8n.addConnectorLabel}
             </EuiButton>
           </EuiFlexItem>

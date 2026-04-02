@@ -13,15 +13,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
-import type { Observable } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 
 import { SpacesMenu } from './components/spaces_menu';
+import { useSolutionViewSwitchAnnouncements } from './hooks/use_solution_view_switch_announcements';
 import { SPACES_QUERY_KEY, useSpaces } from './hooks/use_spaces';
-import { SolutionViewTour } from './solution_view_tour';
+import { NavControlPopoverNotification } from './nav_control_popover_notification';
+import { SolutionViewSwitchTour } from './solution_view_switch_tour';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -41,10 +42,7 @@ export interface Props {
   serverBasePath: string;
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
-  showTour$: Observable<boolean>;
-  onFinishTour: () => void;
-  manageSpacesDocsLink: string;
-  manageSpacesLink: string;
+  areAnnouncementsEnabled: boolean;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
@@ -58,16 +56,12 @@ const NavControlPopoverUI = ({
   serverBasePath,
   allowSolutionVisibility,
   eventTracker,
-  showTour$,
-  onFinishTour,
-  manageSpacesDocsLink,
-  manageSpacesLink,
+  areAnnouncementsEnabled,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
   const [showSpaceSelector, setShowSpaceSelector] = useState(false);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
-  const [showTour, setShowTour] = useState(false);
   const { data, isLoading } = useSpaces(spacesManager);
 
   useEffect(() => {
@@ -77,15 +71,30 @@ const NavControlPopoverUI = ({
       },
     });
 
-    const showTour$Sub = showTour$.subscribe((tour: boolean) => {
-      setShowTour(tour);
-    });
-
     return () => {
       activeSpace$.unsubscribe();
-      showTour$Sub.unsubscribe();
     };
-  }, [spacesManager, showTour$]);
+  }, [spacesManager]);
+
+  const toggleSpaceSelector = useCallback(() => {
+    setShowSpaceSelector(!showSpaceSelector);
+    // Invalidate spaces cache when opening the popover to ensure fresh data
+    if (!showSpaceSelector) {
+      queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
+    }
+  }, [showSpaceSelector, queryClient]);
+
+  const closeSpaceSelector = useCallback(() => {
+    setShowSpaceSelector(false);
+  }, []);
+
+  const { showNotification, tourProps } = useSolutionViewSwitchAnnouncements({
+    activeSpace,
+    capabilities,
+    areAnnouncementsEnabled,
+    closeSpaceSelector,
+    navigateToApp,
+  });
 
   const getAlignedLoadingSpinner = useCallback(() => {
     return (
@@ -97,14 +106,6 @@ const NavControlPopoverUI = ({
       />
     );
   }, []);
-
-  const toggleSpaceSelector = useCallback(() => {
-    setShowSpaceSelector(!showSpaceSelector);
-    // Invalidate spaces cache when opening the popover to ensure fresh data
-    if (!showSpaceSelector) {
-      queryClient.invalidateQueries({ queryKey: SPACES_QUERY_KEY });
-    }
-  }, [showSpaceSelector, queryClient]);
 
   const getButton = useCallback(
     (linkIcon: JSX.Element, linkTitle: string) => {
@@ -145,63 +146,47 @@ const NavControlPopoverUI = ({
     return getButton(
       <Suspense fallback={getAlignedLoadingSpinner()}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
+        {showNotification && <NavControlPopoverNotification />}
       </Suspense>,
       (activeSpace as Space).name
     );
-  }, [activeSpace, getButton, getAlignedLoadingSpinner]);
-
-  const closeSpaceSelector = useCallback(() => {
-    setShowSpaceSelector(false);
-  }, []);
-
-  const handleManageSpaceBtnClick = useCallback(() => {
-    // No need to show the tour anymore, the user is taking action
-    onFinishTour();
-    toggleSpaceSelector();
-  }, [onFinishTour, toggleSpaceSelector]);
+  }, [activeSpace, getButton, getAlignedLoadingSpinner, showNotification]);
 
   const button = getActiveSpaceButton();
-  const isTourOpen = Boolean(activeSpace) && showTour && !showSpaceSelector;
+
+  const shouldRenderTour = Boolean(showSpaceSelector && !isLoading);
 
   return (
-    <SolutionViewTour
-      solution={activeSpace?.solution}
-      isTourOpen={isTourOpen}
-      onFinishTour={onFinishTour}
-      manageSpacesLink={manageSpacesLink}
-      manageSpacesDocsLink={manageSpacesDocsLink}
-      navigateToUrl={navigateToUrl}
+    <EuiPopover
+      id="spcMenuPopover"
+      button={button}
+      isOpen={showSpaceSelector}
+      closePopover={closeSpaceSelector}
+      anchorPosition={anchorPosition}
+      panelPaddingSize="none"
+      repositionOnScroll
+      ownFocus
+      zIndex={Number(euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
+      panelProps={{
+        'data-test-subj': 'spaceMenuPopoverPanel',
+      }}
     >
-      <EuiPopover
-        id="spcMenuPopover"
-        button={button}
-        isOpen={showSpaceSelector}
-        closePopover={closeSpaceSelector}
-        anchorPosition={anchorPosition}
-        panelPaddingSize="none"
-        repositionOnScroll
-        ownFocus
-        zIndex={Number(euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
-        panelProps={{
-          'data-test-subj': 'spaceMenuPopoverPanel',
-        }}
-      >
-        <SpacesMenu
-          id={popoutContentId}
-          spaces={data || []}
-          serverBasePath={serverBasePath}
-          toggleSpaceSelector={toggleSpaceSelector}
-          capabilities={capabilities}
-          navigateToApp={navigateToApp}
-          navigateToUrl={navigateToUrl}
-          activeSpace={activeSpace}
-          allowSolutionVisibility={allowSolutionVisibility}
-          eventTracker={eventTracker}
-          onClickManageSpaceBtn={handleManageSpaceBtnClick}
-          isLoading={isLoading}
-        />
-      </EuiPopover>
-    </SolutionViewTour>
+      {shouldRenderTour && tourProps && <SolutionViewSwitchTour {...tourProps} />}
+      <SpacesMenu
+        id={popoutContentId}
+        spaces={data || []}
+        serverBasePath={serverBasePath}
+        toggleSpaceSelector={toggleSpaceSelector}
+        capabilities={capabilities}
+        navigateToApp={navigateToApp}
+        navigateToUrl={navigateToUrl}
+        activeSpace={activeSpace}
+        allowSolutionVisibility={allowSolutionVisibility}
+        eventTracker={eventTracker}
+        onClickManageSpaceBtn={toggleSpaceSelector}
+        isLoading={isLoading}
+      />
+    </EuiPopover>
   );
 };
 

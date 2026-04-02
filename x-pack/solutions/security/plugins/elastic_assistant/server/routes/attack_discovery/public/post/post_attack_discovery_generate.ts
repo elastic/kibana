@@ -14,6 +14,7 @@ import {
   getAttackDiscoveryLoadingMessage,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -43,7 +44,7 @@ export const postAttackDiscoveryGenerateRoute = (
       path: ATTACK_DISCOVERY_GENERATE,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
       options: {
@@ -100,6 +101,8 @@ export const postAttackDiscoveryGenerateRoute = (
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
+          const inference = (await context.elasticAssistant).inference;
+          const inferenceClient = inference.getClient({ request });
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
           const authenticatedUser = await assistantContext.getCurrentUser();
 
@@ -119,7 +122,19 @@ export const postAttackDiscoveryGenerateRoute = (
 
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
-          const { apiConfig, size } = request.body;
+          const { size } = request.body;
+
+          // Resolve the connector server-side to get the authoritative actionTypeId,
+          // rather than relying on what the client sent. This handles inference endpoint
+          // IDs (e.g. EIS connectors) that may not match a stack connector type.
+          const resolvedConnector = await inference.getConnectorById(
+            request.body.apiConfig.connectorId,
+            request
+          );
+          const apiConfig = {
+            ...request.body.apiConfig,
+            actionTypeId: resolvedConnector.type,
+          };
 
           if (
             !requestIsValid({
@@ -178,9 +193,10 @@ export const postAttackDiscoveryGenerateRoute = (
             enableFieldRendering: true, // the _generate API always pass true for this value. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
             executionUuid,
             authenticatedUser,
-            config: request.body,
+            config: { ...request.body, apiConfig },
             dataClient,
             esClient,
+            inferenceClient,
             logger,
             savedObjectsClient,
             telemetry,

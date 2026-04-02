@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   const siemModule = 'security_linux_v3';
-  const mlJobId = 'v3_linux_anomalous_network_activity';
+  const mlJobId = 'v3_linux_anomalous_network_activity_ea';
   const rule: MachineLearningRuleCreateProps = {
     name: 'Test ML rule',
     description: 'Test ML rule description',
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
           influencers: expect.any(Array),
           initial_record_score: expect.any(Number),
           is_interim: false,
-          job_id: 'v3_linux_anomalous_network_activity',
+          job_id: 'v3_linux_anomalous_network_activity_ea',
           multi_bucket_impact: expect.any(Number),
           probability: expect.any(Number),
           record_score: expect.any(Number),
@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
             false_positives: [],
             from: '1900-01-01T00:00:00.000Z',
             immutable: false,
-            machine_learning_job_id: ['v3_linux_anomalous_network_activity'],
+            machine_learning_job_id: ['v3_linux_anomalous_network_activity_ea'],
             max_signals: 100,
             references: [],
             related_integrations: [],
@@ -183,7 +183,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
           [ALERT_ORIGINAL_TIME]: expect.any(String),
           all_field_values: expect.arrayContaining([
-            'v3_linux_anomalous_network_activity',
+            'v3_linux_anomalous_network_activity_ea',
             'root',
             'store',
             'mothra',

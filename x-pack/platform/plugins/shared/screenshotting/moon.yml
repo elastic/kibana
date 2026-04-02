@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/screenshotting
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/screenshot-mode-plugin'
   - '@kbn/cloud-plugin'
@@ -47,26 +48,6 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!chromium/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

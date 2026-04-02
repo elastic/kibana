@@ -341,6 +341,7 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   skipUnassignFromAgentPolicies?: boolean;
   force?: boolean;
   asyncDeploy?: boolean;
+  ignoreMissing?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {

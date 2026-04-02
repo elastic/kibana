@@ -7,8 +7,8 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { KbnClient } from '@kbn/test';
-import { KbnClient as TestKbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/kbn-client';
+import { KbnClient as TestKbnClient } from '@kbn/kbn-client';
 import { EVALS_DATASETS_URL } from '@kbn/evals-common';
 import { wrapKbnClientWithRetries } from './kbn_client_with_retries';
 

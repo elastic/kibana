@@ -23,10 +23,12 @@ export const getAnswerAgentPrompt = async (
 ): Promise<BaseMessageLike[]> => {
   const { actions, answerActions, processedConversation, resultTransformer } = params;
 
-  // Generate messages from the conversation's rounds
+  // Generate messages from the conversation's rounds, with optional compaction summary
+  // sourced from processedConversation.compactionSummary (set during compaction phase).
   const previousRoundsAsMessages = await convertPreviousRounds({
     conversation: processedConversation,
     resultTransformer,
+    compactionSummary: processedConversation.compactionSummary,
   });
 
   return [
@@ -112,10 +114,12 @@ export const getStructuredAnswerPrompt = async (
   const { attachmentTypes, versionedAttachmentPresentation } = processedConversation;
   const visEnabled = capabilities.visualizations;
 
-  // Generate messages from the conversation's rounds
+  // Generate messages from the conversation's rounds, with optional compaction summary
+  // sourced from processedConversation.compactionSummary (set during compaction phase).
   const previousRoundsAsMessages = await convertPreviousRounds({
     conversation: processedConversation,
     resultTransformer,
+    compactionSummary: processedConversation.compactionSummary,
   });
 
   return [

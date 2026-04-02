@@ -236,9 +236,118 @@ describe('prepareConversation', () => {
       expect(all[0].id).toBe('a-1');
       expect(all[0].current_version).toBe(2);
     });
+
+    it('refreshes origin_snapshot_at only for existing by-reference attachments in nextInput', async () => {
+      const existing: VersionedAttachment = {
+        id: 'a-1',
+        type: 'text',
+        active: true,
+        current_version: 1,
+        origin: 'so-1',
+        origin_snapshot_at: '2024-01-01T00:00:00.000Z',
+        versions: [
+          {
+            version: 1,
+            data: { content: 'v1' },
+            created_at: '2024-01-01T00:00:00.000Z',
+            content_hash: 'hash-v1',
+            estimated_tokens: 1,
+          },
+        ],
+      };
+
+      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          validateOrigin: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+      mockAttachmentsService.getTypeDefinition.mockReturnValue({
+        id: 'text',
+        validate: jest.fn(),
+        format: jest.fn(),
+        getAgentDescription: () => 'desc',
+      });
+
+      const nextInput: ConverseInput = {
+        message: 'Hello',
+        attachments: [{ id: 'a-1', type: 'text', data: { content: 'v2' } }],
+      };
+
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput,
+        context: mockContext,
+      });
+
+      const updated = result.attachmentStateManager.getAttachmentRecord('a-1');
+      expect(updated).toBeDefined();
+      expect(updated?.current_version).toBe(2);
+      expect(updated?.origin).toEqual(existing.origin);
+      expect(updated?.origin_snapshot_at).toBeDefined();
+      expect(updated?.origin_snapshot_at).not.toBe(existing.origin_snapshot_at);
+    });
   });
 
   describe('previousRounds with attachments', () => {
+    it('does not refresh origin_snapshot_at when existing by-reference attachment is only promoted from previous rounds', async () => {
+      const existing: VersionedAttachment = {
+        id: 'a-1',
+        type: 'text',
+        active: true,
+        current_version: 1,
+        origin: 'so-1',
+        origin_snapshot_at: '2024-01-01T00:00:00.000Z',
+        versions: [
+          {
+            version: 1,
+            data: { content: 'v1' },
+            created_at: '2024-01-01T00:00:00.000Z',
+            content_hash: 'hash-v1',
+            estimated_tokens: 1,
+          },
+        ],
+      };
+
+      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          validateOrigin: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+      mockAttachmentsService.getTypeDefinition.mockReturnValue({
+        id: 'text',
+        validate: jest.fn(),
+        format: jest.fn(),
+        getAgentDescription: () => 'desc',
+      });
+
+      const previousRounds: ConversationRound[] = [
+        createRound({
+          id: 'round-1',
+          input: {
+            message: 'Previous message',
+            attachments: [{ id: 'a-1', type: 'text', data: { content: 'v2' } }],
+          },
+        }),
+      ];
+
+      const result = await prepareConversation({
+        previousRounds,
+        nextInput: { message: 'New message' },
+        context: mockContext,
+      });
+
+      const updated = result.attachmentStateManager.getAttachmentRecord('a-1');
+      expect(updated).toBeDefined();
+      expect(updated?.current_version).toBe(2);
+      expect(updated?.origin_snapshot_at).toBe(existing.origin_snapshot_at);
+    });
+
     it('should process previous rounds without attachments', async () => {
       const previousRound = createRound({
         id: 'round-1',

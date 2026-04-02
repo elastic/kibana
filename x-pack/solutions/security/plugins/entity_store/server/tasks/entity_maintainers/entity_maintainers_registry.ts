@@ -22,10 +22,11 @@ export class EntityMaintainersRegistry {
     return { id, ...config };
   }
 
-  register({ id, interval, description }: EntityMaintainerTaskEntry): void {
+  register({ id, interval, description, minLicense }: EntityMaintainerTaskEntry): void {
     this.tasks.set(id, {
       interval,
       description,
+      minLicense,
     });
   }
 

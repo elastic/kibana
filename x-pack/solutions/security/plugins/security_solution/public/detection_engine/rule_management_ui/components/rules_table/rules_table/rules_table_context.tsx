@@ -17,6 +17,7 @@ import React, {
 } from 'react';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
+import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -195,6 +196,8 @@ interface RulesTableContextProviderProps {
 }
 
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
+  const { scheduler } = useGapAutoFillSchedulerContext();
+  const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
@@ -306,6 +309,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       filterOptions,
       sortingOptions,
       pagination,
+      schedulerId: activeSchedulerId,
     },
     {
       // We don't need refreshes on windows focus and reconnects if auto-refresh if off
@@ -332,6 +336,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     {
       ruleIds: rules.map((x) => x.id),
       gapRange: defaultRangeValue,
+      schedulerId: activeSchedulerId,
     },
     {
       enabled: rules.length > 0,

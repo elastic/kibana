@@ -61,6 +61,7 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
       isTextBasedQuery: true,
       grid: {},
       hideChart: false,
+      hideTable: false,
       serializedSearchSource: {},
     };
 

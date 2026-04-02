@@ -159,7 +159,7 @@ const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
         badgeColor="subdued"
         data-test-subj="connectorFilterButton"
         disabled={isLoading}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isPopoverOpen}
         onClick={onFilterButtonClick}
         hasActiveFilters={!!connectorFilterItems.find((item) => item.checked === 'on')}

@@ -194,7 +194,7 @@ export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKe
       name={providerKey}
       data-test-subj={`icon-service-provider-${providerKey}`}
       iconType={iconType}
-      color="#fff"
+      color="plain"
       size="s"
       type="space"
     />

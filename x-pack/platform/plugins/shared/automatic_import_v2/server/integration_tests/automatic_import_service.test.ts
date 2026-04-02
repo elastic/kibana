@@ -49,11 +49,17 @@ describe('AutomaticImportService Integration Tests', () => {
     await kbnRoot.preboot();
     const coreSetup = await kbnRoot.setup();
 
+    const mockAnalytics = {
+      reportEvent: jest.fn(),
+      registerEventType: jest.fn(),
+    } as any;
+
     automaticImportService = new AutomaticImportService(
       kbnRoot.logger,
       coreSetup.savedObjects,
       taskManagerSetupStub,
-      coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>
+      coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>,
+      mockAnalytics
     );
 
     // Start Kibana after registering SO types in service constructor

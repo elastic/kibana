@@ -36,6 +36,10 @@ const exportContentRoute = createServerRoute({
     access: 'public',
     summary: 'Export stream content',
     description: 'Exports the content associated to a stream.',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
   },
   params: z.object({
     path: z.object({
@@ -141,6 +145,10 @@ const importContentRoute = createServerRoute({
     access: 'public',
     summary: 'Import content into a stream',
     description: 'Links content objects to a stream.',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
     body: {
       accepts: 'multipart/form-data',
       maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,

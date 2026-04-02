@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
@@ -24,6 +23,7 @@ import {
   EuiInMemoryTable,
   EuiText,
   useEuiTheme,
+  EuiCallOut,
 } from '@elastic/eui';
 import type {
   EuiBasicTableColumn,
@@ -36,7 +36,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
-import type { DataStreamResponse, TaskStatus } from '@kbn/automatic-import-v2-plugin/common';
 
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
@@ -45,6 +44,16 @@ import { useStartServices } from '../../../../../hooks';
 import { ManageIntegrationActions } from './manage_integration_actions';
 import type { ReviewIntegrationDetails } from './manage_integration_actions';
 import { CreateNewIntegrationButton } from './create_new_integration';
+
+export type DataStreamResultsFlyoutComponent = NonNullable<
+  ReturnType<typeof useStartServices>['automaticImportVTwo']
+>['components']['DataStreamResultsFlyout'];
+export type DataStreamResponse =
+  React.ComponentProps<DataStreamResultsFlyoutComponent>['dataStream'];
+export type TaskStatus = DataStreamResponse['status'];
+export interface AIV2Telemetry {
+  reportEvent(event: string, data: Record<string, unknown>): void;
+}
 
 export interface CreatedIntegrationRow {
   integrationId: string;
@@ -104,6 +113,17 @@ export const ManageIntegrationsTable: React.FC<{
     notifications,
     userProfile: userProfileService,
   } = useStartServices();
+
+  const hasReportedView = useRef(false);
+  useEffect(() => {
+    if (!isLoading && !hasReportedView.current) {
+      (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+        'aiv2_manage_integrations_table_viewed',
+        {}
+      );
+      hasReportedView.current = true;
+    }
+  }, [isLoading, automaticImportVTwo]);
 
   const integrationsWithActions = useMemo(() => {
     return integrations.map((item) => {
@@ -267,6 +287,10 @@ export const ManageIntegrationsTable: React.FC<{
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
+        (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+          'aiv2_integration_download_zip_clicked',
+          {}
+        );
       } catch (error) {
         notifications.toasts.addError(error as Error, {
           title: i18n.translate(
@@ -276,7 +300,7 @@ export const ManageIntegrationsTable: React.FC<{
         });
       }
     },
-    [http, notifications]
+    [http, notifications, automaticImportVTwo]
   );
 
   const approveAndDeployIntegration = useCallback(
@@ -672,6 +696,7 @@ export const ManageIntegrationsTable: React.FC<{
             button={
               <EuiFilterButton
                 iconType="arrowDown"
+                data-test-subj="manageIntegrationsActionsFilterBtn"
                 onClick={() => setIsActionsFilterOpen(!isActionsFilterOpen)}
                 isSelected={isActionsFilterOpen}
                 hasActiveFilters={selectedActions.length > 0}
@@ -702,6 +727,7 @@ export const ManageIntegrationsTable: React.FC<{
             button={
               <EuiFilterButton
                 iconType="arrowDown"
+                data-test-subj="manageIntegrationsStatusFilterBtn"
                 onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
                 isSelected={isStatusFilterOpen}
                 hasActiveFilters={selectedStatuses.length > 0}
@@ -733,7 +759,9 @@ export const ManageIntegrationsTable: React.FC<{
       incremental: true,
       placeholder: 'Search integrations',
     },
-    toolsRight: [filterButtons],
+    toolsRight: [
+      <React.Fragment key="manageIntegrationsSearchTools">{filterButtons}</React.Fragment>,
+    ],
   };
 
   const countText = (
@@ -756,6 +784,7 @@ export const ManageIntegrationsTable: React.FC<{
               iconType="trash"
               isLoading={isBulkDeleting}
               onClick={handleBulkDelete}
+              data-test-subj="manageIntegrationsBulkDeleteBtn"
             >
               <FormattedMessage
                 id="xpack.fleet.epmList.manageIntegrations.bulkDelete"
@@ -770,6 +799,7 @@ export const ManageIntegrationsTable: React.FC<{
                 iconType="exportAction"
                 isLoading={isBulkInstalling}
                 onClick={handleBulkInstall}
+                data-test-subj="manageIntegrationsBulkInstallBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
@@ -808,6 +838,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Unable to load integrations"
           />
         }
+        data-test-subj="manageIntegrationsTableError"
       />
     );
   }

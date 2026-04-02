@@ -130,6 +130,7 @@ export const getRuleIdsWithGaps = async ({
   hasUnfilledIntervals,
   hasInProgressIntervals,
   hasFilledIntervals,
+  schedulerId,
 }: {
   start: string;
   end: string;
@@ -138,6 +139,7 @@ export const getRuleIdsWithGaps = async ({
   hasInProgressIntervals?: boolean;
   hasFilledIntervals?: boolean;
   signal?: AbortSignal;
+  schedulerId?: string;
 }): Promise<GetRuleIdsWithGapResponseBody> =>
   KibanaServices.get().http.fetch<GetRuleIdsWithGapResponseBody>(
     INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH,
@@ -156,6 +158,7 @@ export const getRuleIdsWithGaps = async ({
         ...(hasFilledIntervals !== undefined && {
           has_filled_intervals: hasFilledIntervals,
         }),
+        ...(schedulerId && { gap_auto_fill_scheduler_id: schedulerId }),
       }),
       signal,
     }
@@ -172,11 +175,13 @@ export const getGapsSummaryByRuleIds = async ({
   start,
   end,
   ruleIds,
+  schedulerId,
 }: {
   start: string;
   end: string;
   ruleIds: string[];
   signal?: AbortSignal;
+  schedulerId?: string;
 }): Promise<GetGapsSummaryByRuleIdsResponseBody> =>
   KibanaServices.get().http.fetch<GetGapsSummaryByRuleIdsResponseBody>(
     INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
@@ -187,6 +192,7 @@ export const getGapsSummaryByRuleIds = async ({
         start,
         end,
         rule_ids: ruleIds,
+        ...(schedulerId && { gap_auto_fill_scheduler_id: schedulerId }),
       }),
     }
   );

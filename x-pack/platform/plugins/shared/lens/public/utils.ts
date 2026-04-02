@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, type ColorMapping } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -469,11 +469,16 @@ export function shouldRemoveSource(
   );
 }
 
-export const getColorMappingDefaults = () => {
+export const getColorMappingDefaults = (
+  options: {
+    defaultPaletteId?: ColorMapping.Config['paletteId'];
+  } = {}
+) => {
   if (COLOR_MAPPING_OFF_BY_DEFAULT) {
     return undefined;
   }
-  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
+  const defaultPaletteId = options.defaultPaletteId ?? DEFAULT_COLOR_MAPPING_CONFIG.paletteId;
+  return { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: defaultPaletteId };
 };
 
 export const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';

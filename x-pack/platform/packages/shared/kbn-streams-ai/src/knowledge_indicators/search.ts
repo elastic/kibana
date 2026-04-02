@@ -135,6 +135,11 @@ export async function searchKnowledgeIndicators({
 
   // Step 2: Resolve streams (requested ∩ accessible).
   const streamNames = await resolveStreamNames(params, getStreamNames);
+  const hasRequestedStreams = Array.isArray(params.stream_names) && params.stream_names.length > 0;
+  // Handle the case where no streams are accessible and streams were requested.
+  if (hasRequestedStreams && streamNames.length === 0) {
+    return { knowledge_indicators: [] };
+  }
 
   // Step 3: Fetch features (best-effort per stream).
   const features = normalized.includeFeatures

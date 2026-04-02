@@ -17,13 +17,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart, ScopedHistory } from '@kbn/core/public';
 import type { ExtensionsService } from '../../../../../../services/extensions_service';
 
 import { ConvertToLookupIndexModalContainer } from '../../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container';
-import { navigateToIndexDetailsPage } from '../../../../../services/routing';
 import { notificationService } from '../../../../../services/notification';
+import { getIndexDetailsLink } from '../../../../../services/routing';
 import { IndexDetailsSection } from '../../../../../../../common/constants';
 import type { Index } from '../../../../../../../common';
 
@@ -88,8 +87,7 @@ export interface ModalHostProps {
   reloadIndices: () => void;
   extensionsService: ExtensionsService; // concrete type from services
   getUrlForApp: ApplicationStart['getUrlForApp'];
-  application: ApplicationStart;
-  http: HttpSetup;
+  history: ScopedHistory;
 }
 
 export const ModalHost = memo(
@@ -104,8 +102,7 @@ export const ModalHost = memo(
       reloadIndices,
       extensionsService,
       getUrlForApp,
-      application,
-      http,
+      history,
     },
     ref
   ) {
@@ -316,13 +313,12 @@ export const ModalHost = memo(
         <ConvertToLookupIndexModalContainer
           onCloseModal={() => closeConfirmModal()}
           onSuccess={(lookupIndexName) => {
-            navigateToIndexDetailsPage(
-              lookupIndexName,
-              indicesListURLParams,
-              extensionsService,
-              application,
-              http,
-              IndexDetailsSection.Overview
+            history.push(
+              getIndexDetailsLink(
+                lookupIndexName,
+                indicesListURLParams,
+                IndexDetailsSection.Overview
+              )
             );
 
             notificationService.showSuccessToast(

@@ -43,6 +43,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     // default to the xpack functional config
     ...xpackFunctionalConfig.getAll(),
+    apps: {
+      ...xpackFunctionalConfig.get('apps'),
+      rules: {
+        pathname: '/app/rules',
+      },
+    },
     servers,
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),

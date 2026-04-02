@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createStartServicesMock } from '../../mocks';
+import { createUseKibanaMockValue } from '../../mocks';
 
-export const useKibana = jest.fn(() => ({ services: createStartServicesMock() }));
+export const useKibana = jest.fn(() => createUseKibanaMockValue());

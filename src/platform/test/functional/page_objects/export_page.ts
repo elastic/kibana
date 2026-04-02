@@ -81,7 +81,8 @@ export class ExportPageObject extends FtrService {
         return true; // It was already closed
       }
 
-      await this.testSubjects.click(closeButtonSubj);
+      // Use clickWhenNotDisabledWithoutRetry to avoid the internal retry mechanism
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(closeButtonSubj);
       await this.testSubjects.waitForDeleted(closeButtonSubj);
       return true;
     });

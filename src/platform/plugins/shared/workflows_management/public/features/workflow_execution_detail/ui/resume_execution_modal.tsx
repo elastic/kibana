@@ -25,7 +25,9 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
@@ -34,14 +36,39 @@ import {
 const DEFAULT_SCHEMA = z.object({}).catchall(z.unknown());
 const SCHEMA_URI = 'inmemory://schemas/resume-execution-json-editor-schema';
 
+/**
+ * JSON Schema `required` means each listed property must exist on the instance.
+ * Monaco's JSON dialect enforces that even when a property also declares `default`.
+ * Zod's `.default(...)` fills missing keys during `safeParse`, so we check `required`
+ * explicitly to keep the Resume button aligned with editor diagnostics.
+ */
+const parsedObjectHasRequiredJsonSchemaKeys = (
+  parsed: unknown,
+  rawJsonSchema: JsonModelSchemaType | undefined
+): boolean => {
+  const required = rawJsonSchema?.required;
+  if (!Array.isArray(required) || required.length === 0) {
+    return true;
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return false;
+  }
+  const record = parsed as Record<string, unknown>;
+  return required.every(
+    (key) => typeof key === 'string' && Object.prototype.hasOwnProperty.call(record, key)
+  );
+};
+
 export interface ResumeExecutionModalProps {
   resumeMessage?: string;
+  initialcontextOverride?: ContextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
   onClose: () => void;
 }
 
 export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   resumeMessage,
+  initialcontextOverride,
   onSubmit,
   onClose,
 }) => {
@@ -49,18 +76,34 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   useWorkflowsMonacoTheme();
   const modalTitleId = useGeneratedHtmlId();
 
-  const [inputsJson, setInputsJson] = useState<string>('{}');
-
-  const isJsonValid = useMemo(() => {
+  const [inputsJson, setInputsJson] = useState<string>(
+    initialcontextOverride?.stepContext != null
+      ? JSON.stringify(initialcontextOverride.stepContext, null, 2)
+      : '{}'
+  );
+  const isResumePayloadValid = useMemo(() => {
     try {
-      JSON.parse(inputsJson);
+      const parsed: unknown = JSON.parse(inputsJson);
+      if (!parsedObjectHasRequiredJsonSchemaKeys(parsed, initialcontextOverride?.rawJsonSchema)) {
+        return false;
+      }
+      const schema = initialcontextOverride?.schema;
+      if (schema) {
+        return schema.safeParse(parsed).success;
+      }
       return true;
     } catch {
       return false;
     }
-  }, [inputsJson]);
+  }, [inputsJson, initialcontextOverride?.schema, initialcontextOverride?.rawJsonSchema]);
 
-  const jsonSchema = useMemo(() => z.toJSONSchema(DEFAULT_SCHEMA, { target: 'draft-7' }), []);
+  const jsonSchema = useMemo(() => {
+    if (initialcontextOverride?.rawJsonSchema) {
+      return initialcontextOverride.rawJsonSchema;
+    }
+    const schema = initialcontextOverride?.schema ?? DEFAULT_SCHEMA;
+    return z.toJSONSchema(schema, { target: 'draft-7' });
+  }, [initialcontextOverride?.rawJsonSchema, initialcontextOverride?.schema]);
 
   const mountedOnce = useRef(false);
   const handleMount = useCallback(
@@ -162,7 +205,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
       <EuiModalFooter>
         <EuiButton
           onClick={handleSubmit}
-          disabled={!isJsonValid}
+          disabled={!isResumePayloadValid}
           color="warning"
           iconType="check"
           size="s"

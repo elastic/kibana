@@ -15,6 +15,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
         class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="test-file-stub"
         />
       </div>
@@ -133,6 +134,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
         class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="test-file-stub"
         />
       </div>
@@ -242,6 +244,7 @@ exports[`SampleDataCard not installed renders 1`] = `
         class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="test-file-stub"
         />
       </div>

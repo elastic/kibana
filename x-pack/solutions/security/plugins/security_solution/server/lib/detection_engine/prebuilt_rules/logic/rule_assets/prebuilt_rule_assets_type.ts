@@ -37,6 +37,22 @@ const securityRuleV2 = securityRuleV1.extends(
   { unknowns: 'allow' }
 );
 
+const securityRuleV3 = schema.object(
+  {
+    rule_id: schema.string(),
+    version: schema.number(),
+    name: schema.string(),
+    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
+    // Relaxed to optional for V3: deprecated rule stubs from the Fleet package
+    // lack severity and risk_score since they only carry identification fields.
+    severity: schema.maybe(schema.string()),
+    risk_score: schema.maybe(schema.number()),
+    // New field for deprecated detection-rule objects
+    deprecated: schema.maybe(schema.boolean()),
+  },
+  { unknowns: 'allow' }
+);
+
 const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
@@ -63,6 +79,9 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     },
     risk_score: {
       type: 'float',
+    },
+    deprecated: {
+      type: 'boolean',
     },
   },
 };
@@ -114,6 +133,22 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: securityRuleV2,
         create: securityRuleV2,
+      },
+    },
+    '3': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            deprecated: {
+              type: 'boolean',
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: securityRuleV3,
+        create: securityRuleV3,
       },
     },
   },

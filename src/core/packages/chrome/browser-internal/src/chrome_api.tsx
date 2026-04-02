@@ -154,6 +154,9 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       getIsCollapsed$: () => state.sideNav.collapsed.$,
       getIsCollapsed: () => state.sideNav.collapsed.get(),
       setIsCollapsed: state.sideNav.collapsed.set,
+      getWidth$: () => state.sideNav.width.$,
+      getWidth: () => state.sideNav.width.get(),
+      setWidth: state.sideNav.width.set,
     },
 
     // Project Navigation

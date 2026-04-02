@@ -42,7 +42,7 @@ describe('DashboardService', () => {
     // assert
     const searchDashboard = (await dashboard.findDashboardsService()).search;
     expect(searchDashboard).toHaveBeenCalledWith({
-      search: 'test',
+      query: 'test',
       per_page: 1000,
     });
     expect(resp).toEqual([]);

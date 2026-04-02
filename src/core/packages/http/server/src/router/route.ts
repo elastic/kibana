@@ -310,19 +310,6 @@ export enum ReservedPrivilegesSet {
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
-   * Defines authentication mode for a route:
-   * - true. A user has to have valid credentials to access a resource
-   * - false. A user can access a resource without any credentials.
-   * - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.
-   *               Can be useful when we grant access to a resource but want to identify a user if possible.
-   *
-   * Defaults to `true` if an auth mechanism is registered.
-   *
-   * @deprecated Use `security.authc.enabled` instead
-   */
-  authRequired?: boolean | 'optional';
-
-  /**
    * Defines xsrf protection requirements for a route:
    * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
    * - false. Disables xsrf protection.

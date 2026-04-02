@@ -22,12 +22,16 @@ export interface ApproveIntegrationParams {
   integrationId: string;
   authenticatedUser: AuthenticatedUser;
   version: string;
-  categories?: string[];
+  categories: string[];
 }
 
 export interface CreateDataStreamParams {
   dataStreamParams: DataStreamParams;
   authenticatedUser: AuthenticatedUser;
+  /**
+   * Integration name that this data stream belongs to.
+   */
+  integrationName: string;
   /**
    * Scoped ES client for any synchronous work done when the route is called.
    * This client is NOT stored in the task params (Task Manager serializes params).

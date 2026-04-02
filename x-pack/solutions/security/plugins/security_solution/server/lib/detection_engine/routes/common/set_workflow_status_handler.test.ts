@@ -6,14 +6,14 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core/server';
-import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
+import { DEFAULT_DETECTIONS_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 
 import {
-  typicalSetStatusSignalByIdsPayload,
   getSuccessfulSignalUpdateResponse,
+  typicalSetStatusSignalByIdsPayload,
 } from '../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock, responseMock, requestMock } from '../__mocks__';
+import { requestContextMock, requestMock, responseMock } from '../__mocks__';
 import { setWorkflowStatusHandler } from './set_workflow_status_handler';
 import { responseAdapter } from '../__mocks__/test_adapters';
 
@@ -111,7 +111,7 @@ describe('set workflow status handler', () => {
 
       expect(response.status).toEqual(200);
       expect(context.core.uiSettings.client.get).toHaveBeenCalledWith(
-        DEFAULT_ALERT_CLOSE_REASONS_KEY
+        DEFAULT_DETECTIONS_CLOSE_REASONS_KEY
       );
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(

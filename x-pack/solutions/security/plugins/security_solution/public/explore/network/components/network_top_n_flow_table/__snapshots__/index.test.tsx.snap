@@ -137,7 +137,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -653,7 +653,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>
@@ -953,7 +953,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -1521,7 +1521,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               </span>
               <span
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </button>

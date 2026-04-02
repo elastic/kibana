@@ -28,8 +28,11 @@ import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -54,6 +57,7 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/serv
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { EndpointExceptionsMovedCallout } from '../../components/endpoint_exceptions_moved_callout';
 
 export type Func = () => Promise<void>;
 
@@ -92,16 +96,19 @@ export const SharedLists = React.memo(() => {
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = listsConfigLoading;
 
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+
   const {
-    services: {
-      http,
-      notifications,
-      timelines,
-      application: { navigateToApp },
-    },
+    services: { http, application, cps, notifications, timelines },
   } = useKibana();
+  const { navigateToApp } = application;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -117,11 +124,12 @@ export const SharedLists = React.memo(() => {
     if (canReadExceptions) {
       lists.push(ExceptionListTypeEnum.DETECTION);
     }
-    if (canAccessEndpointExceptions) {
+    if (!isEndpointExceptionsMovedFFEnabled && canAccessEndpointExceptions) {
       lists.push(ExceptionListTypeEnum.ENDPOINT);
     }
     return lists;
-  }, [canAccessEndpointExceptions, canReadExceptions]);
+  }, [canAccessEndpointExceptions, canReadExceptions, isEndpointExceptionsMovedFFEnabled]);
+
   const [
     loadingExceptions,
     exceptions,
@@ -139,9 +147,11 @@ export const SharedLists = React.memo(() => {
     http,
     namespaceTypes: ['single', 'agnostic'],
     notifications,
-    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-      (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-    ),
+    hideLists: isEndpointExceptionsMovedFFEnabled
+      ? []
+      : ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+          (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+        ),
   });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
@@ -398,7 +408,7 @@ export const SharedLists = React.memo(() => {
     <EuiButtonEmpty
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onRowSizeButtonClick}
     >
@@ -482,7 +492,7 @@ export const SharedLists = React.memo(() => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButtonIcon
-                    iconType="popout"
+                    iconType="external"
                     aria-label="go-to-rules"
                     color="primary"
                     onClick={() =>
@@ -509,7 +519,7 @@ export const SharedLists = React.memo(() => {
                   buttonRef={(node: HTMLButtonElement | null) => {
                     createButtonRef.current = node;
                   }}
-                  iconType={'arrowDown'}
+                  iconType="chevronSingleDown"
                   onClick={onCreateButtonClick}
                 >
                   {i18n.CREATE_BUTTON}
@@ -547,7 +557,7 @@ export const SharedLists = React.memo(() => {
           (canEditExceptions || canWriteEndpointExceptions) && (
             <EuiButton
               data-test-subj="importSharedExceptionList"
-              iconType={'importAction'}
+              iconType={'download'}
               onClick={() => setDisplayImportListFlyout(true)}
             >
               {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
@@ -596,6 +606,12 @@ export const SharedLists = React.memo(() => {
 
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
+        {isEndpointExceptionsMovedFFEnabled &&
+          (endpointPerPolicyOptIn?.status === false ||
+            endpointPerPolicyOptIn?.reason === 'userOptedIn') && (
+            <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
+          )}
+
         {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
         {viewerStatus != null ? (

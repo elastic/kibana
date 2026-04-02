@@ -34,7 +34,7 @@ describe('get_step_definitions dynamic connector types', () => {
 
     const api = {
       getAvailableConnectors: jest.fn().mockResolvedValue({
-        connectorsByType: {
+        connectorTypes: {
           '.http': {
             actionTypeId: '.http',
             displayName: 'HTTP',

@@ -18,7 +18,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { useInstallEntityStoreV2 } from '@kbn/entity-store/public';
+import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
 import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -32,6 +32,7 @@ import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
+import { InitializationProvider } from '../common/components/initialization';
 import { AssistantProvider } from '../assistant/provider';
 import { TrialCompanion } from '../trial_companion/trial_companion';
 
@@ -56,30 +57,34 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     <KibanaRenderContextProvider {...services}>
       <ManageGlobalToaster>
         <ReduxStoreProvider store={store}>
-          <EuiThemeProvider darkMode={darkMode}>
-            <MlCapabilitiesProvider>
-              <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                <ManageUserInfo>
-                  <NavigationProvider core={services}>
-                    <ReactQueryClientProvider>
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                      >
-                        <UpsellingProvider upsellingService={upselling}>
-                          <DiscoverInTimelineContextProvider>
-                            <PageRouter history={history}>
-                              <AssistantProvider>{children}</AssistantProvider>
-                              <TrialCompanion />
-                            </PageRouter>
-                          </DiscoverInTimelineContextProvider>
-                        </UpsellingProvider>
-                      </CellActionsProvider>
-                    </ReactQueryClientProvider>
-                  </NavigationProvider>
-                </ManageUserInfo>
-              </UserPrivilegesProvider>
-            </MlCapabilitiesProvider>
-          </EuiThemeProvider>
+          <EntityStoreEuidApiProvider>
+            <EuiThemeProvider darkMode={darkMode}>
+              <MlCapabilitiesProvider>
+                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                  <ManageUserInfo>
+                    <NavigationProvider core={services}>
+                      <ReactQueryClientProvider>
+                        <InitializationProvider>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                          >
+                            <UpsellingProvider upsellingService={upselling}>
+                              <DiscoverInTimelineContextProvider>
+                                <PageRouter history={history}>
+                                  <AssistantProvider>{children}</AssistantProvider>
+                                  <TrialCompanion />
+                                </PageRouter>
+                              </DiscoverInTimelineContextProvider>
+                            </UpsellingProvider>
+                          </CellActionsProvider>
+                        </InitializationProvider>
+                      </ReactQueryClientProvider>
+                    </NavigationProvider>
+                  </ManageUserInfo>
+                </UserPrivilegesProvider>
+              </MlCapabilitiesProvider>
+            </EuiThemeProvider>
+          </EntityStoreEuidApiProvider>
           <ErrorToastDispatcher />
           <GlobalToaster />
         </ReduxStoreProvider>

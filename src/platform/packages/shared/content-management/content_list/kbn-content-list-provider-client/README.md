@@ -36,7 +36,7 @@ import { ContentListClientProvider } from '@kbn/content-list-provider-client';
 const findItems = useCallback(
   async (searchTerm) => {
     return dashboardClient.search({
-      search: searchTerm,
+      query: searchTerm,
     }).then(({ total, dashboards }) => ({
       total,
       hits: dashboards.map(transformToDashboardUserContent),
@@ -84,22 +84,22 @@ const findItems = createFindItemsFn(myExistingFindItems);
   dataSource={{ findItems }}
 >
   <MyListComponent />
-</ContentListProvider>
+</ContentListProvider>;
 ```
 
 ## Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `id` | `string` | Yes* | Unique identifier. `queryKeyScope` derived as `${id}-listing` if not provided. |
-| `queryKeyScope` | `string` | Yes* | Explicit React Query cache key scope. |
-| `labels` | `ContentListLabels` | Yes | User-facing entity labels (should be i18n-translated). |
-| `findItems` | `TableListViewFindItemsFn` | Yes | Your existing `TableListView` findItems function. |
-| `features` | `ContentListFeatures` | No | Feature configuration. |
-| `item` | `ContentListItemConfig` | No | Per-item configuration for links. |
-| `isReadOnly` | `boolean` | No | Disable mutation actions. |
+| Prop            | Type                       | Required | Description                                                                    |
+| --------------- | -------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `id`            | `string`                   | Yes\*    | Unique identifier. `queryKeyScope` derived as `${id}-listing` if not provided. |
+| `queryKeyScope` | `string`                   | Yes\*    | Explicit React Query cache key scope.                                          |
+| `labels`        | `ContentListLabels`        | Yes      | User-facing entity labels (should be i18n-translated).                         |
+| `findItems`     | `TableListViewFindItemsFn` | Yes      | Your existing `TableListView` findItems function.                              |
+| `features`      | `ContentListFeatures`      | No       | Feature configuration.                                                         |
+| `item`          | `ContentListItemConfig`    | No       | Per-item configuration for links.                                              |
+| `isReadOnly`    | `boolean`                  | No       | Disable mutation actions.                                                      |
 
-*At least one of `id` or `queryKeyScope` is required.
+\*At least one of `id` or `queryKeyScope` is required.
 
 ## findItems Function Signature
 

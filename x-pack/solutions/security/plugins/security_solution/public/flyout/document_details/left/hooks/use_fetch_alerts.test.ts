@@ -7,12 +7,16 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { createFindAlerts } from '../services/find_alerts';
 import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';
 import { createReactQueryWrapper } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../services/find_alerts');
+
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
 describe('useFetchAlerts', () => {
   beforeEach(() => {
@@ -24,6 +28,9 @@ describe('useFetchAlerts', () => {
           },
         },
       },
+    });
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
     });
   });
 

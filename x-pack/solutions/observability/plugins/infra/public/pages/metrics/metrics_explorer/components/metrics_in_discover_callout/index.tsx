@@ -73,7 +73,7 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
         size="m"
         announceOnMount
         title={calloutTitle}
-        iconType="cheer"
+        iconType="popper"
         onDismiss={dismissCallout}
       >
         <EuiText size="s">{calloutContent}</EuiText>

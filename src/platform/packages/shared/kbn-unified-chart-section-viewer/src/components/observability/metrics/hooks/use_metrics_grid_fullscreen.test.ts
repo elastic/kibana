@@ -112,4 +112,19 @@ describe('useMetricsGridFullScreen', () => {
       /logicalCSS\s*\(\s*['"]right['"]\s*,\s*['"]var\(--euiPushFlyoutOffsetInlineEnd,\s*0px\)['"]\s*\)/
     );
   });
+
+  it('fullscreen styles reset embPanel z-index to prevent stacking above overlay', () => {
+    // Embeddable panels (.embPanel) set high z-index values that can stack above
+    // the fullscreen overlay and interfere with flyouts (e.g. chart tooltips or
+    // action menus rendering behind panels). Resetting z-index to auto ensures
+    // panels participate in normal stacking context while in fullscreen mode.
+    // See https://github.com/elastic/kibana/issues/260087
+
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    expect(sourceCode).toMatch(/\.embPanel\s*\{\s*z-index:\s*auto\s*!important;/);
+  });
 });

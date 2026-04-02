@@ -39,7 +39,7 @@ export const Header = ({
     rightSideItems={[
       <EuiButtonEmpty
         size="s"
-        iconType="exportAction"
+        iconType="upload"
         data-test-subj="exportAllObjects"
         onClick={onExportAll}
       >
@@ -53,7 +53,7 @@ export const Header = ({
       </EuiButtonEmpty>,
       <EuiButtonEmpty
         size="s"
-        iconType="importAction"
+        iconType="download"
         data-test-subj="importObjects"
         onClick={onImport}
       >

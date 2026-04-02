@@ -19,13 +19,10 @@ import {
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import {
-  legendVisibleSchema,
-  validateMultipleMetricsCriteria,
-  valueDisplaySchema,
-} from './partition_shared';
+import { validateMultipleMetricsCriteria, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -49,7 +46,7 @@ export const waffleStateSharedSchema = {
           )
         ),
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
@@ -61,7 +58,7 @@ export const waffleStateSharedSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 };
 
 /**

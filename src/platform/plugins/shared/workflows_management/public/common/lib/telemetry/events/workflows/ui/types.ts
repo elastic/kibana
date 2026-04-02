@@ -20,6 +20,10 @@ export enum WorkflowUIEventTypes {
    * This tracks detail page views and tab usage.
    */
   WorkflowDetailViewed = 'workflows_workflow_detail_viewed',
+  /**
+   * When the create workflow page is opened (user navigates to /create).
+   */
+  WorkflowCreateOpened = 'workflows_workflow_create_opened',
 }
 
 export type WorkflowDetailTab = 'workflow' | 'executions';
@@ -43,6 +47,14 @@ export interface ReportWorkflowListViewedActionParams {
    * Includes 'query' when a search query is used.
    */
   filterTypes?: string[];
+}
+
+/**
+ * Parameters for workflow create opened telemetry.
+ */
+export interface ReportWorkflowCreateOpenedActionParams {
+  eventName: string;
+  editorType?: WorkflowEditorType;
 }
 
 /**

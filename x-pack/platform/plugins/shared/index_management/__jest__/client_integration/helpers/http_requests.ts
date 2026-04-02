@@ -267,6 +267,9 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
+  const setLoadIndexDocCountResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_count`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesStatsResponse,
@@ -301,6 +304,7 @@ const registerHttpRequestMockHelpers = (
     setGetMatchingDataStreams,
     setUserStartPrivilegesResponse,
     setLoadIndexDocumentsSampleResponse,
+    setLoadIndexDocCountResponse,
   };
 };
 

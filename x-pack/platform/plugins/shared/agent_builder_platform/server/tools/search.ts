@@ -17,7 +17,7 @@ const searchSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
+      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
     ),
   time_range: z
     .object({
@@ -57,7 +57,7 @@ Note:
     `,
     schema: searchSchema,
     handler: async (
-      { query: nlQuery, index = '*', time_range: explicitTimeRange },
+      { query: nlQuery, index, time_range: explicitTimeRange },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
@@ -65,6 +65,7 @@ Note:
       const results = await runSearchTool({
         nlQuery,
         index,
+        allowPatternTarget: true,
         timeRange,
         esClient: esClient.asCurrentUser,
         model: await modelProvider.getDefaultModel(),

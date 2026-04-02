@@ -61,7 +61,7 @@ export const expanderColumn = ({
         <EuiButtonIcon
           onClick={() => toggleRowExpanded(item)}
           aria-label={isRowExpanded(item) ? i18n.COLLAPSE : i18n.EXPAND}
-          iconType={isRowExpanded(item) ? 'arrowUp' : 'arrowDown'}
+          iconType={isRowExpanded(item) ? 'chevronSingleUp' : 'chevronSingleDown'}
         />
       ),
   };

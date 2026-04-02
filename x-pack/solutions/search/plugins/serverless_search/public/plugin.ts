@@ -136,7 +136,11 @@ export class ServerlessSearchPlugin
     const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
       map(([application, chatExperience]) => {
         const showAiAssistant = chatExperience !== AIChatExperience.Agent;
-        return createNavigationTree({ ...application, showAiAssistant });
+        return createNavigationTree({
+          ...application,
+          showAiAssistant,
+          showAlertingV2: Boolean(application.capabilities.alertingVTwo),
+        });
       })
     );
     serverless.initNavigation('es', navigationTree$);

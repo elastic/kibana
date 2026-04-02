@@ -8,7 +8,7 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { bulkDeleteTemplates } from '../api/api';
 import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/constants';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { BulkDeleteTemplatesResponse } from '../types';

@@ -153,7 +153,7 @@ export const QueryFieldsPanel = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiText size="s" color="subdued" data-test-subj={`${index}-skippedFields`}>
-                  <EuiIcon type="eyeClosed" />
+                  <EuiIcon type="eyeSlash" />
                   {` `}
                   <FormattedMessage
                     id="xpack.searchPlayground.viewQuery.flyout.hiddenFields"

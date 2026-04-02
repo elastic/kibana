@@ -129,6 +129,8 @@ describe('chat_message_text', () => {
         setPendingPrompt: jest.fn(),
         clearPendingPrompt: jest.fn(),
         clearLastRoundResponse: jest.fn(),
+        addCompactionStep: jest.fn(),
+        setCompactionStepComplete: jest.fn(),
       },
     });
   });

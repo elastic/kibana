@@ -208,7 +208,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
-        expect(error.message).toEqual("Cannot read properties of null (reading 'startedAt')");
+        expect(error.message).toEqual('Step execution for step timeoutStep not found');
       }
     });
 

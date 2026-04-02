@@ -243,10 +243,15 @@ interface CheckAccessParams extends BaseParams {
 export async function checkAccess({
   name,
   esClient,
-}: CheckAccessParams): Promise<{ read: boolean; write: boolean }> {
+  isSecurityEnabled,
+}: CheckAccessParams & { isSecurityEnabled: boolean }): Promise<{
+  read: boolean;
+  write: boolean;
+}> {
   return checkAccessBulk({
     names: [name],
     esClient,
+    isSecurityEnabled,
   }).then((privileges) => privileges[name]);
 }
 
@@ -257,10 +262,18 @@ interface CheckAccessBulkParams extends BaseParams {
 export async function checkAccessBulk({
   names,
   esClient,
-}: CheckAccessBulkParams): Promise<Record<string, { read: boolean; write: boolean }>> {
+  isSecurityEnabled,
+}: CheckAccessBulkParams & {
+  isSecurityEnabled: boolean;
+}): Promise<Record<string, { read: boolean; write: boolean }>> {
   if (!names.length) {
     return {};
   }
+
+  if (!isSecurityEnabled) {
+    return Object.fromEntries(names.map((name) => [name, { read: true, write: true }]));
+  }
+
   const hasPrivilegesResponse = await esClient.security.hasPrivileges({
     index: [{ names, privileges: ['read', 'write'] }],
   });
@@ -373,12 +386,13 @@ export async function getFailureStoreStats({
 }: {
   name: string;
   esClient: ElasticsearchClient;
-  esClientAsSecondaryAuthUser: ElasticsearchClient;
+  esClientAsSecondaryAuthUser?: ElasticsearchClient;
   isServerless: boolean;
 }): Promise<FailureStoreStatsResponse> {
-  const failureStoreDocs = isServerless
-    ? await getFailureStoreMeteringSize({ name, esClientAsSecondaryAuthUser })
-    : await getFailureStoreSize({ name, esClient });
+  const failureStoreDocs =
+    isServerless && esClientAsSecondaryAuthUser
+      ? await getFailureStoreMeteringSize({ name, esClientAsSecondaryAuthUser })
+      : await getFailureStoreSize({ name, esClient });
   const creationDate = await getFailureStoreCreationDate({ name, esClient });
 
   return {

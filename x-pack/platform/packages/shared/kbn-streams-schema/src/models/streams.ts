@@ -41,16 +41,20 @@ export namespace Streams {
     nClassicStream.Source.right,
     nQueryStream.Source.right,
   ]);
-  const allGetResponseSchema = z.union([
-    nWiredStream.GetResponse.right,
-    nClassicStream.GetResponse.right,
-    nQueryStream.GetResponse.right,
-  ]);
-  const allUpsertRequestSchema = z.union([
-    nWiredStream.UpsertRequest.right,
-    nClassicStream.UpsertRequest.right,
-    nQueryStream.UpsertRequest.right,
-  ]);
+  const allGetResponseSchema = z
+    .union([
+      nWiredStream.GetResponse.right,
+      nClassicStream.GetResponse.right,
+      nQueryStream.GetResponse.right,
+    ])
+    .meta({ id: 'StreamGetResponse' });
+  const allUpsertRequestSchema = z
+    .union([
+      nWiredStream.UpsertRequest.right,
+      nClassicStream.UpsertRequest.right,
+      nQueryStream.UpsertRequest.right,
+    ])
+    .meta({ id: 'StreamUpsertRequest' });
 
   export const all: {
     Definition: Validation<BaseStream.Model['Definition'], all.Definition>;
@@ -83,9 +87,9 @@ Streams.ClassicStream = nClassicStream;
 Streams.QueryStream = nQueryStream;
 
 /**
- * Flat Zod union of all three stream definition schemas, discriminated by the
- * `type` literal field. Registered as a named OAS component (`StreamDefinition`)
- * with a `discriminator` extension so code generators can produce properly typed
+ * Union of all three stream definition schemas, discriminated by the `type`
+ * literal field. Registered as a named OAS component (`StreamDefinition`) with
+ * a `discriminator` extension so code generators can produce properly typed
  * sealed-class / tagged-union structs.
  */
 export const streamDefinitionSchema = z

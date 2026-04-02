@@ -122,11 +122,9 @@ export const useResultsFiltering = (
       const value = Array.isArray(values) ? values[0] : values;
       const stringValue = typeof value === 'string' ? value : String(value);
 
-      const fieldExistsInDataView = dataView?.fields.getByName(field.name) !== undefined;
-
       const newFilter: Filter = {
         meta: {
-          ...(fieldExistsInDataView && dataView?.id ? { index: dataView.id } : {}),
+          ...(dataView?.id ? { index: dataView.id } : {}),
           key: field.name,
           value: stringValue,
           params: { query: value },

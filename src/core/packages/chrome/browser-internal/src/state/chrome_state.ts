@@ -35,6 +35,7 @@ import { createVisibilityState, type VisibilityState } from './visibility_state'
 import { createChromeStyleState, type ChromeStyleState } from './chrome_style_state';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
+const INITIAL_SIDENAV_WIDTH = 0;
 
 export interface ChromeState {
   /** Visibility management */
@@ -46,6 +47,7 @@ export interface ChromeState {
   /** Side navigation state */
   sideNav: {
     collapsed: State<boolean>;
+    width: State<number>;
   };
 
   /** Breadcrumbs state (includes legacy badge from setBadge()) */
@@ -89,6 +91,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
+  const sideNavWidth = createState<number>(INITIAL_SIDENAV_WIDTH);
 
   // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
@@ -116,6 +119,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     style,
     sideNav: {
       collapsed: sideNavCollapsed,
+      width: sideNavWidth,
     },
     breadcrumbs: {
       classic: breadcrumbs,

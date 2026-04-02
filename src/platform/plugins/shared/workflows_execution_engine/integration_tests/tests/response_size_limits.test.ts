@@ -9,7 +9,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('response size limits', () => {

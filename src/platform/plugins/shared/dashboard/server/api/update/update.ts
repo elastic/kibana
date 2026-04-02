@@ -41,6 +41,7 @@ export async function update(
     soAttributes,
     {
       references: soReferences,
+      upsert: soAttributes,
       /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
       mergeAttributes: false,
     }
