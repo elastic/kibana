@@ -17,7 +17,7 @@ const dashboardAttachmentData: DashboardAttachmentData = {
   panels: [
     {
       type: 'lens',
-      uid: 'panel-1',
+      id: 'panel-1',
       grid: { x: 0, y: 0, w: 24, h: 15 },
       config: {
         attributes: {
@@ -34,14 +34,14 @@ const dashboardAttachmentData: DashboardAttachmentData = {
       },
     },
     {
-      uid: 'section-1',
+      id: 'section-1',
       title: 'Operations',
       collapsed: false,
       grid: { y: 20 },
       panels: [
         {
           type: 'markdown',
-          uid: 'panel-2',
+          id: 'panel-2',
           grid: { x: 24, y: 0, w: 24, h: 10 },
           config: {
             title: 'Summary',
