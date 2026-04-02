@@ -70,15 +70,17 @@ export const createContinuousKiExtractionWorkflowService = (
 
     await pollUntil(
       () => Promise.all(canceledIds.map((id) => taskClient.get(id))),
-      (tasks) => tasks.every(
-        ({ status }) => status !== TaskStatus.InProgress && status !== TaskStatus.BeingCanceled
-      )
+      (tasks) =>
+        tasks.every(
+          ({ status }) => status !== TaskStatus.InProgress && status !== TaskStatus.BeingCanceled
+        )
     );
   };
 
   const hardDelete = async (request: KibanaRequest) => {
-    await cancelAndAwaitTermination()
-      .catch(err => log.warn(`Failed to cancel running workflow executions: ${err}`));
+    await cancelAndAwaitTermination().catch((err) =>
+      log.warn(`Failed to cancel running workflow executions: ${err}`)
+    );
 
     const { deleted, failures } = await managementApi.deleteWorkflows(
       [CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
@@ -111,8 +113,9 @@ export const createContinuousKiExtractionWorkflowService = (
       }
 
       if (existing) {
-        await cancelRunningTasks(taskClient)
-          .catch(err => log.warn(`Failed to cancel running tasks: ${err}`));
+        await cancelRunningTasks(taskClient).catch((err) =>
+          log.warn(`Failed to cancel running tasks: ${err}`)
+        );
         await hardDelete(request);
       }
 

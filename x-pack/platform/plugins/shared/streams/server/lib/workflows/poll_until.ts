@@ -30,10 +30,7 @@ const DEFAULT_MAX_ATTEMPTS = 30;
 export const pollUntil = async <T>(
   fn: () => Promise<T>,
   predicate: (value: T) => boolean,
-  {
-    intervalMs = DEFAULT_INTERVAL_MS,
-    maxAttempts = DEFAULT_MAX_ATTEMPTS,
-  }: PollUntilOptions = {}
+  { intervalMs = DEFAULT_INTERVAL_MS, maxAttempts = DEFAULT_MAX_ATTEMPTS }: PollUntilOptions = {}
 ): Promise<T> => {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const value = await fn();
