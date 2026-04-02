@@ -18,15 +18,10 @@ describe('AlertEpisodeGroupingFields', () => {
     expect(service).toHaveAttribute('class', expect.stringContaining('euiBadge'));
   });
 
-  it('renders default empty display when there are no fields', () => {
-    render(<AlertEpisodeGroupingFields fields={[]} />);
-    expect(screen.getByText('—')).toBeInTheDocument();
-  });
-
-  it('renders custom empty display when there are no fields', () => {
-    render(<AlertEpisodeGroupingFields fields={[]} emptyDisplay="None" />);
-    expect(screen.getByText('None')).toBeInTheDocument();
-    expect(screen.queryByText('—')).not.toBeInTheDocument();
+  it('renders no badges when there are no fields', () => {
+    const { container } = render(<AlertEpisodeGroupingFields fields={[]} />);
+    expect(container.querySelector('.euiFlexGroup')).toBeInTheDocument();
+    expect(container.querySelector('.euiBadge')).not.toBeInTheDocument();
   });
 
   it('forwards data-test-subj to the badges row', () => {
