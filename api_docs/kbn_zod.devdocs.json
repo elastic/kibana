@@ -17470,8 +17470,8 @@
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/common_attributes.gen.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/primitive.gen.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/common/model/primitive.gen.ts"
               },
               {
                 "plugin": "@kbn/openapi-common",

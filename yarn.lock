@@ -4875,10 +4875,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/automatic-import-v2-plugin@link:x-pack/platform/plugins/shared/automatic_import_v2":
-  version "0.0.0"
-  uid ""
-
 "@kbn/autoops-promotion-callout@link:src/platform/packages/shared/kbn-management/autoops_promotion_callout":
   version "0.0.0"
   uid ""

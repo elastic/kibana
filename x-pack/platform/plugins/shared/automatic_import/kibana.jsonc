@@ -20,9 +20,14 @@
       "actions",
       "stackConnectors",
       "inference",
+      "security",
+      "features",
+      "taskManager",
+      "kibanaUtils",
+      "fieldsMetadata"
     ],
     "requiredBundles": [
-      "kibanaUtils"
+      "esUiShared"
     ]
   }
 }
