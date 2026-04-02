@@ -151,6 +151,11 @@ export interface QueryStringInputProps {
    * Add additional filters used for suggestions
    */
   filtersForSuggestions?: Filter[];
+
+  /**
+   * Debounce delay in ms for fetching suggestions. Defaults to 100.
+   */
+  suggestionsDebounceMs?: number;
 }
 
 interface State {
@@ -333,7 +338,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     if (!this.componentIsUnmounting) {
       this.setState({ suggestions });
     }
-  }, 100);
+  }, this.props.suggestionsDebounceMs ?? 100);
 
   private onSubmit = (query: Query) => {
     if (this.props.onSubmit) {

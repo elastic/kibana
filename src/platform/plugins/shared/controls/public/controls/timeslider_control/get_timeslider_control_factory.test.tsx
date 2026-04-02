@@ -269,7 +269,7 @@ describe('TimeSliderControlApi', () => {
     expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
       '2024-06-09T18:00:00.000Z'
     );
-    await api.resetUnsavedChanges();
+    await api.applySerializedState(controlState);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(

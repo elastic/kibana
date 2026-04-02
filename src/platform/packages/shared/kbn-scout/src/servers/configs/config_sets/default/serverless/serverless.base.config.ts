@@ -19,6 +19,7 @@ import {
 import { getDockerFileMountPath } from '@kbn/es';
 import {
   MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_CLOUD_ID,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
   MOCK_IDP_UIAM_SERVICE_URL,
@@ -156,14 +157,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.cloud.base_url=https://fake-cloud.elastic.co',
       '--xpack.cloud.billing_url=/billing/overview/',
       '--xpack.cloud.deployments_url=/deployments',
-      // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
-      // CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)
-      // Local: decodes to https://host.docker.internal:9220 (ES is on the host, reached via Docker bridge)
-      `--xpack.cloud.id=${
-        isRunOnCI
-          ? 'ci:ZXMwMTo5MjIwJDo5MjIwJGtpYmFuYTo5MjIw'
-          : 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw'
-      }`,
+      `--xpack.cloud.id=${MOCK_IDP_UIAM_CLOUD_ID}`,
       `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
       '--xpack.cloud.organization_url=/account/',
       '--xpack.cloud.profile_url=/user/settings/',
