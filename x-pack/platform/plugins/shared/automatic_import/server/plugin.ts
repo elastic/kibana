@@ -103,9 +103,7 @@ export class AutomaticImportPlugin
     return {
       actions: plugins.actions,
       setIsAvailable: (isAvailable: boolean) => {
-        if (!isAvailable) {
-          this.productTierAllowsAutomaticImport = false;
-        }
+        this.productTierAllowsAutomaticImport = isAvailable;
       },
     };
   }
