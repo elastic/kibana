@@ -450,11 +450,32 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
    * - The grok pattern overwrites the source field AND a preceding processor touched the field
    *   (in this case, we can't show correct highlighting - the original value doesn't reflect
    *   preceding transformations, and the current value has been overwritten by grok)
+   *
+   * Grok highlighting is debounced (1s) because each visible cell triggers expensive
+   * Oniguruma-to-JS regex compilation in GrokSampleWithContext. Without debouncing,
+   * 50 visible rows × 3 getRegex() calls = 150 regex compilations per keystroke.
    */
-  const grokMode =
+  const immediateGrokMode =
     isGrokProcessorActive &&
     validGrokSourceField !== undefined &&
     !(grokOverwritesSourceField && precedingProcessorTouchedGrokField);
+
+  const [grokMode, setGrokMode] = useState(immediateGrokMode);
+  const grokModeDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    // Disable grok mode immediately when conditions are no longer met
+    if (!immediateGrokMode) {
+      clearTimeout(grokModeDebounceRef.current);
+      setGrokMode(false);
+      return;
+    }
+    // Enable grok mode after 1s debounce (avoids expensive per-cell regex work while typing)
+    clearTimeout(grokModeDebounceRef.current);
+    grokModeDebounceRef.current = setTimeout(() => {
+      setGrokMode(true);
+    }, 1000);
+    return () => clearTimeout(grokModeDebounceRef.current);
+  }, [immediateGrokMode]);
 
   const validGrokField = grokMode ? validGrokSourceField : undefined;
 
@@ -464,8 +485,10 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   const validCurrentProcessorSourceField = currentProcessorSourceField;
 
   // Calculate if view mode should be forced to 'columns'
+  // Use grokColumns (not validGrokField) so columns mode is forced even while
+  // grok highlighting is debounced — the user sees columns immediately.
   const isViewModeForced = Boolean(
-    validGrokField ||
+    grokColumns ||
       validCurrentProcessorSourceField ||
       currentProcessorTargetField ||
       currentProcessorAdditionalSourceFields.length > 0
@@ -512,10 +535,14 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
    * In Grok mode, show the source field plus all fields extracted by the grok patterns.
    * As the user types patterns (e.g. %{DATA:attributes.ad.category}), the extracted field
    * names are parsed from the expressions and auto-activated as preview columns.
-   * Debounced to avoid excessive re-renders on every keystroke (500ms).
+   *
+   * Note: column extraction (getFields) is cheap. The expensive part is grok highlighting
+   * (GrokSampleWithContext), which is debounced via grokMode above. Columns always use
+   * the grok source field even when highlighting is debounced, so the source field stays
+   * visible while typing.
    */
-  const immediateGrokColumns = useMemo(() => {
-    if (!validGrokField) return undefined;
+  const grokColumns = useMemo(() => {
+    if (!isGrokProcessorActive || !validGrokSourceField) return undefined;
     const extractedFields: string[] = [];
     grokExpressions.forEach((expr) => {
       const fieldsMap = expr.getFields();
@@ -525,18 +552,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         }
       });
     });
-    return [validGrokField, ...extractedFields];
-  }, [validGrokField, grokExpressions]);
-
-  const [grokColumns, setGrokColumns] = useState(immediateGrokColumns);
-  const grokDebounceRef = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => {
-    clearTimeout(grokDebounceRef.current);
-    grokDebounceRef.current = setTimeout(() => {
-      setGrokColumns(immediateGrokColumns);
-    }, 1000);
-    return () => clearTimeout(grokDebounceRef.current);
-  }, [immediateGrokColumns]);
+    return [validGrokSourceField, ...extractedFields];
+  }, [isGrokProcessorActive, validGrokSourceField, grokExpressions]);
 
   /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
