@@ -8,8 +8,19 @@
  */
 
 import type { ESQLAstAllCommands, ESQLAstUserAgentCommand } from '@elastic/esql/types';
-import { pipeCompleteItem, withCompleteItem } from '../complete_items';
+import {
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+} from '../../definitions/utils/autocomplete/helpers';
+import { ESQL_STRING_TYPES } from '../../definitions/types';
+import {
+  assignCompletionItem,
+  getNewUserDefinedColumnSuggestion,
+  pipeCompleteItem,
+  withCompleteItem,
+} from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
+import { Location } from '../types';
 import { getPosition, UserAgentPosition } from './utils';
 
 export async function autocomplete(
@@ -19,18 +30,37 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    return [];
+  }
+
   const userAgentCommand = command as ESQLAstUserAgentCommand;
   const position = getPosition(userAgentCommand, cursorPosition);
 
   switch (position) {
     case UserAgentPosition.AFTER_USER_AGENT_KEYWORD:
-      return [];
+      return [
+        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() ?? ''),
+      ];
 
     case UserAgentPosition.AFTER_TARGET_FIELD:
-      return [];
+      return [assignCompletionItem];
 
-    case UserAgentPosition.AFTER_ASSIGN:
-      return [];
+    case UserAgentPosition.AFTER_ASSIGN: {
+      const fieldSuggestions = await getFieldsSuggestions(
+        [...ESQL_STRING_TYPES],
+        callbacks.getByType,
+        { addSpaceAfterField: true }
+      );
+      const functionSuggestions = getFunctionsSuggestions({
+        location: Location.EVAL,
+        types: [...ESQL_STRING_TYPES],
+        options: {},
+        context,
+        callbacks,
+      });
+      return [...fieldSuggestions, ...functionSuggestions];
+    }
 
     case UserAgentPosition.AFTER_EXPRESSION:
       return [withCompleteItem, pipeCompleteItem];
