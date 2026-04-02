@@ -50,8 +50,8 @@ describe('buildWatchlistsManagementTableColumns', () => {
     expect(column.name).toBeTruthy();
   });
 
-  it('renders number of users column', () => {
-    const column = getColumnByField('users.length');
+  it('renders number of entities column', () => {
+    const column = getColumnByField('entityCount');
     expect(column).toBeTruthy();
     expect(column.name).toBeTruthy();
   });
