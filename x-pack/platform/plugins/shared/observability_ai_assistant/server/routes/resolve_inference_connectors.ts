@@ -26,7 +26,7 @@ type ResolveArgs = Pick<
 /**
  * Returns the connector list for Observability AI Assistant.
  *
- * When Model Settings is enabled and SIEP returns endpoints, returns only those.
+ * When Model Settings is enabled and inference endpoints are returned, returns only those.
  * Otherwise falls back to the full inference connector list.
  */
 export async function resolveConnectorList({
