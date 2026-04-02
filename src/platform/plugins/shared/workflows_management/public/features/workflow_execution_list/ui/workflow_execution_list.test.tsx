@@ -209,9 +209,9 @@ describe('WorkflowExecutionList', () => {
   });
 
   describe('footer cancel non-terminal', () => {
-    it('disables footer cancel when all loaded executions are terminal', () => {
+    it('hides footer cancel when all loaded executions are terminal', () => {
       renderComponent();
-      expect(screen.getByTestId('cancelAllActiveExecutionsButton')).toBeDisabled();
+      expect(screen.queryByTestId('workflowExecutionListFooter')).not.toBeInTheDocument();
     });
 
     it('enables footer cancel when a non-terminal execution is loaded', () => {
@@ -236,6 +236,7 @@ describe('WorkflowExecutionList', () => {
         total: 1,
       };
       renderComponent({ executions: withRunning });
+      expect(screen.getByTestId('workflowExecutionListFooter')).toBeInTheDocument();
       expect(screen.getByTestId('cancelAllActiveExecutionsButton')).not.toBeDisabled();
     });
 

@@ -65,6 +65,10 @@ export const WorkflowExecutionListFooter = ({
     }
   }, [onConfirmCancelLoadedNonTerminal]);
 
+  if (!hasActiveNonTerminalLoaded) {
+    return null;
+  }
+
   return (
     <>
       {isFooterCancelModalVisible ? (
@@ -106,18 +110,18 @@ export const WorkflowExecutionListFooter = ({
           </p>
         </EuiConfirmModal>
       ) : null}
-      <EuiFlexItem grow={false} css={styles.footerSection}>
+      <EuiFlexItem
+        grow={false}
+        css={styles.footerSection}
+        data-test-subj="workflowExecutionListFooter"
+      >
         <EuiHorizontalRule margin="s" />
         <EuiButton
           color="warning"
           iconType="cross"
           size="s"
           fullWidth
-          disabled={
-            !hasActiveNonTerminalLoaded ||
-            !canCancelLoadedNonTerminal ||
-            isCancelLoadedNonTerminalInProgress
-          }
+          disabled={!canCancelLoadedNonTerminal || isCancelLoadedNonTerminalInProgress}
           onClick={openFooterCancelModal}
           data-test-subj="cancelAllActiveExecutionsButton"
         >

@@ -69,9 +69,10 @@ describe('WorkflowExecutionListFooter', () => {
     jest.clearAllMocks();
   });
 
-  it('disables the button when all loaded executions are terminal', () => {
+  it('hides the bulk-cancel footer when all loaded executions are terminal', () => {
     renderFooter({ loadedExecutions: [terminalExecution] });
-    expect(screen.getByTestId('cancelAllActiveExecutionsButton')).toBeDisabled();
+    expect(screen.queryByTestId('workflowExecutionListFooter')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cancelAllActiveExecutionsButton')).not.toBeInTheDocument();
   });
 
   it('disables the button when the user cannot cancel despite a non-terminal execution', () => {
