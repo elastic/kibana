@@ -109,7 +109,7 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
             <p>
               <FormattedMessage
                 id="xpack.streams.significantEvents.promotionCallout.message"
-                defaultMessage={CALLOUT_MESSAGE}
+                defaultMessage="We detected {queryCount} that you can promote in {ruleCount}, based on the last run."
                 values={{
                   queryCount: <strong>{QUERY_COUNT_LABEL(queries.length)}</strong>,
                   ruleCount: RULE_COUNT_LABEL(queries.length),
@@ -175,9 +175,6 @@ const ACKNOWLEDGE_ERROR_TOAST_TITLE = i18n.translate(
     defaultMessage: 'Failed to acknowledge generation results',
   }
 );
-
-const CALLOUT_MESSAGE =
-  'We detected {queryCount} that you can promote in {ruleCount}, based on the last run.';
 
 const QUERY_COUNT_LABEL = (count: number) =>
   i18n.translate('xpack.streams.significantEvents.promotionCallout.queryCount', {
