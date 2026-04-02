@@ -37,6 +37,7 @@ const subLinks: LinkItem[] = [
     capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
+    hideWhenExperimentalKey: 'siemMigrationsDisabled',
   },
   {
     id: SecurityPageName.siemMigrationsRules,
@@ -83,7 +84,7 @@ const subLinks: LinkItem[] = [
 export const links: LinkItem = {
   id: SecurityPageName.siemMigrationsLanding,
   title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
-    defaultMessage: 'Migrations',
+    defaultMessage: 'Automatic migrations',
   }),
   path: SIEM_MIGRATIONS_LANDING_PATH,
   capabilities: [
@@ -93,6 +94,9 @@ export const links: LinkItem = {
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
       defaultMessage: 'Migrations',
+    }),
+    i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
+      defaultMessage: 'Automatic migrations',
     }),
   ],
   links: subLinks,

@@ -34,14 +34,12 @@ export const IntegrationCardTopCallout = React.memo<{
   const showEndpointCallout =
     activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
 
-  if (!showAgentlessCallout && !showEndpointCallout && !showActiveCallout) {
-    return null;
-  }
+  const showAnyLegacyCallout = showAgentlessCallout || showEndpointCallout || showActiveCallout;
 
   return (
     <>
       <MigrationsCallout />
-      <EuiSpacer size="s" />
+      {showAnyLegacyCallout && <EuiSpacer size="s" />}
       {showEndpointCallout && <EndpointCallout />}
       {showAgentlessCallout && <AgentlessAvailableCallout />}
       {showActiveCallout && (

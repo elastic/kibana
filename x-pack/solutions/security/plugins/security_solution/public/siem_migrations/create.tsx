@@ -6,14 +6,15 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiPageBody } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
-import { Title } from '../common/components/header_page/title';
+import { PageTitle } from './common/components/page_title';
 import { useSpaceId } from '../common/hooks/use_space_id';
 import { OnboardingBody } from '../onboarding/components/onboarding_body/onboarding_body';
 import { OnboardingTopicId } from '../onboarding/constants';
 import { CenteredLoadingSpinner } from '../common/components/centered_loading_spinner';
 import { OnboardingContextProvider } from '../onboarding/components/onboarding_context';
+import { HeaderPage } from '../common/components/header_page';
 
 const SIEM_MIGRATIONS_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.create.pageTitle',
@@ -32,9 +33,11 @@ export const SiemMigrationsCreatePage = () => {
   return (
     <OnboardingContextProvider spaceId={spaceId}>
       <SecuritySolutionPageWrapper>
-        <Title title={SIEM_MIGRATIONS_PAGE_TITLE} />
+        <HeaderPage title={<PageTitle title={SIEM_MIGRATIONS_PAGE_TITLE} />} border />
         <EuiSpacer size="xl" />
-        <OnboardingBody topicId={OnboardingTopicId.siemMigrations} />
+        <EuiPageBody restrictWidth>
+          <OnboardingBody topicId={OnboardingTopicId.siemMigrations} />
+        </EuiPageBody>
       </SecuritySolutionPageWrapper>
     </OnboardingContextProvider>
   );

@@ -42,7 +42,7 @@ export const OnboardingRouter = React.memo(() => {
         }}
       />
       <Route path={`${ONBOARDING_PATH}${topicPathParam}`} exact component={OnboardingRoute} />
-      {/* <Route path={`${ONBOARDING_PATH}/*`} render={() => <Redirect to={ONBOARDING_PATH} />} /> */}
+      <Route path={`${ONBOARDING_PATH}/*`} render={() => <Redirect to={ONBOARDING_PATH} />} />
     </Routes>
   );
 });

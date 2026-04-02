@@ -11,7 +11,6 @@ import { mockOnboardingContext, onboardingContext } from '../../__mocks__/mocks'
 import { OnboardingTopicId } from '../../../constants';
 
 const defaultBodyConfig = [{ title: 'Default Group 1', cards: [] }];
-const bodyConfig = [{ title: 'Group 1', cards: [] }];
 const config = new Map([[OnboardingTopicId.default, { body: defaultBodyConfig }]]);
 
 jest.mock('../../onboarding_context');
@@ -39,7 +38,7 @@ describe('useBodyConfig', () => {
 
     it('should return the body config for the selected topic', () => {
       const { result } = renderHook(() => useBodyConfig(OnboardingTopicId.default));
-      expect(result.current).toEqual(bodyConfig);
+      expect(result.current).toEqual(defaultBodyConfig);
     });
   });
 });
