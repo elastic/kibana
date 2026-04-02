@@ -15,22 +15,22 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
-import { humanizeDuration } from '../utils';
+import * as i18n from '../../translations';
+import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from '../shared';
+import { humanizeDuration } from '../../utils';
 
-interface ExecutionMetricsSectionProps {
+interface TimingSectionProps {
   gapSeconds: number | null;
   scheduleDelayMs: number | null;
   executionDurationMs: number | null;
 }
 
-export const ExecutionMetricsSection: React.FC<ExecutionMetricsSectionProps> = ({
+export const TimingSection: React.FC<TimingSectionProps> = ({
   gapSeconds,
   scheduleDelayMs,
   executionDurationMs,
 }) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'executionMetrics' });
+  const accordionId = useGeneratedHtmlId({ prefix: 'timing' });
 
   return (
     <EuiAccordion
@@ -46,14 +46,14 @@ export const ExecutionMetricsSection: React.FC<ExecutionMetricsSectionProps> = (
                   description: i18n.FLYOUT_TOOLTIP_SCHEDULING_DELAY,
                 },
                 {
-                  title: i18n.COLUMN_DURATION,
+                  title: i18n.DURATION,
                   description: i18n.FLYOUT_TOOLTIP_EXECUTION_DURATION,
                 },
               ]}
             />
           }
         >
-          {i18n.FLYOUT_ACCORDION_EXECUTION_METRICS}
+          {i18n.FLYOUT_ACCORDION_TIMING}
         </AccordionButtonContent>
       }
       initialIsOpen
@@ -78,7 +78,7 @@ export const ExecutionMetricsSection: React.FC<ExecutionMetricsSectionProps> = (
           </EuiFlexItem>
           <SectionSeparator />
           <EuiFlexItem>
-            <FieldLabel label={i18n.COLUMN_DURATION} />
+            <FieldLabel label={i18n.DURATION} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutExecutionDuration">
               {executionDurationMs !== null ? humanizeDuration(executionDurationMs) : '—'}
