@@ -33,3 +33,32 @@ export const GO_BACK_BUTTON = i18n.translate(
     defaultMessage: 'Go back',
   }
 );
+
+export const DELETE_INTEGRATION_MODAL_TITLE = i18n.translate(
+  'xpack.automaticImportV2.integrationManagement.deleteIntegrationModal.title',
+  {
+    defaultMessage: 'Delete this integration?',
+  }
+);
+
+export const DELETE_INTEGRATION_MODAL_BODY = i18n.translate(
+  'xpack.automaticImportV2.integrationManagement.deleteIntegrationModal.body',
+  {
+    defaultMessage:
+      'An integration must have at least one data stream. Do you want to delete this integration instead?',
+  }
+);
+
+export const DELETE_INTEGRATION_MODAL_CONFIRM = i18n.translate(
+  'xpack.automaticImportV2.integrationManagement.deleteIntegrationModal.confirm',
+  {
+    defaultMessage: 'Delete integration',
+  }
+);
+
+export const DELETE_INTEGRATION_MODAL_CANCEL = i18n.translate(
+  'xpack.automaticImportV2.integrationManagement.deleteIntegrationModal.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);

@@ -19,10 +19,11 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
+import { STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import type { StreamsTaskType, TaskContext } from '.';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
@@ -52,30 +53,6 @@ export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
   const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
   return saveQueries ? base : `${base}_no_save_queries`;
-}
-
-const FEATURES_IDENTIFICATION_RECENCY_MS = 12 * 60 * 60 * 1000; // 12 hours
-async function areFeaturesUpToDate({
-  taskClient,
-  featuresTaskId,
-}: {
-  taskClient: TaskClient<StreamsTaskType>;
-  featuresTaskId: string;
-}) {
-  const featuresTask = await taskClient.get<
-    FeaturesIdentificationTaskParams,
-    IdentifyFeaturesResult
-  >(featuresTaskId);
-
-  if (featuresTask.status !== TaskStatus.Completed) {
-    return false;
-  }
-
-  return (
-    featuresTask.last_completed_at &&
-    Date.now() - new Date(featuresTask.last_completed_at).getTime() <
-      FEATURES_IDENTIFICATION_RECENCY_MS
-  );
 }
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
@@ -115,32 +92,20 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     case OnboardingStep.FeaturesIdentification: {
                       const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
 
-                      if (
-                        await areFeaturesUpToDate({
-                          taskClient,
-                          featuresTaskId,
-                        })
-                      ) {
-                        featuresTaskResult = await taskClient.getStatus<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId);
-                      } else {
-                        await scheduleFeaturesIdentificationTask(
-                          {
-                            start: from,
-                            end: to,
-                            streamName,
-                          },
-                          taskClient,
-                          runContext.fakeRequest
-                        );
+                      await scheduleFeaturesIdentificationTask(
+                        {
+                          start: from,
+                          end: to,
+                          streamName,
+                        },
+                        taskClient,
+                        runContext.fakeRequest
+                      );
 
-                        featuresTaskResult = await waitForSubtask<
-                          FeaturesIdentificationTaskParams,
-                          IdentifyFeaturesResult
-                        >(featuresTaskId, runContext.taskInstance.id, taskClient);
-                      }
+                      featuresTaskResult = await waitForSubtask<
+                        FeaturesIdentificationTaskParams,
+                        IdentifyFeaturesResult
+                      >(featuresTaskId, runContext.taskInstance.id, taskClient);
 
                       if (featuresTaskResult.status !== TaskStatus.Completed) {
                         return;
@@ -188,14 +153,17 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 );
               } catch (error) {
                 // Get connector info for error enrichment (use rule generation connector; fallback to default)
-                let errorMessage = getErrorMessage(error);
+                let errorMessage = parseError(error).message;
                 try {
                   const onboardingLogger = taskContext.logger.get('onboarding');
                   const settings = await modelSettingsClient.getSettings();
-                  const connectorIdForError = await resolveConnectorId({
+                  const connectorIdForError = await resolveConnectorIdAndCheckAllowlist({
                     connectorId: settings.connectorIdRuleGeneration,
                     uiSettingsClient,
                     logger: onboardingLogger,
+                    featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                    searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                    request: runContext.fakeRequest,
                   });
                   onboardingLogger.debug(
                     `Using connector ${connectorIdForError} for rule generation (error enrichment)`

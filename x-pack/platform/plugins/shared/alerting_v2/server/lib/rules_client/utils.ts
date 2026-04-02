@@ -10,10 +10,20 @@ import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 
 /**
- * Handles nullable fields from the update schema:
- * - `null` → `undefined` (client explicitly wants to clear the field)
- * - `undefined` → keeps the existing value
- * - anything else → uses the new value
+ * For SO fields whose schema is `maybe(nullable(...))` — null is a valid
+ * stored value meaning "explicitly cleared".
+ */
+function applyNullableUpdate<T>(
+  value: T | null | undefined,
+  existing: T | undefined
+): T | null | undefined {
+  if (value === undefined) return existing;
+  return value; // null (clear) or new value (set)
+}
+
+/**
+ * For SO fields whose schema is `maybe(...)` without `nullable()` — null
+ * from the API means "clear", but must be stored as `undefined` (absent).
  */
 function nullToUndefined<T>(value: T | null | undefined, existing: T | undefined): T | undefined {
   if (value === null) return undefined;
@@ -75,11 +85,15 @@ export function transformCreateRuleBodyToRuleSoAttributes(
 }
 
 /**
- * Builds the next saved object attributes for a rule update by deep-merging
- * the update payload into the existing attributes.
+ * Builds the complete next saved-object attributes for a rule update.
  *
- * `null` in the update payload means "clear this optional field"; the value is
- * converted to `undefined` so the SO schema (which uses `maybe()`) accepts it.
+ * The caller is expected to persist these with `mergeAttributes: false` so
+ * the SO client does not deep-merge nested objects (which would silently
+ * preserve stale sub-fields).
+ *
+ * - `undefined` in the update payload → keeps the existing value.
+ * - `null` → clears the field (`undefined` for `maybe()`-only fields,
+ *   `null` for fields whose SO schema includes `nullable()`).
  */
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
@@ -101,9 +115,14 @@ export function buildUpdateRuleAttributes(
           },
         }
       : existingAttrs.evaluation,
-    // Optional top-level fields: `null` → `undefined` (clear), `undefined` → keep existing.
+    // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     recovery_policy: nullToUndefined(updateData.recovery_policy, existingAttrs.recovery_policy),
-    state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
+    // `null` → clear (null). SO schema uses `maybe(nullable())`.
+    state_transition: applyNullableUpdate(
+      updateData.state_transition,
+      existingAttrs.state_transition
+    ),
+    // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
