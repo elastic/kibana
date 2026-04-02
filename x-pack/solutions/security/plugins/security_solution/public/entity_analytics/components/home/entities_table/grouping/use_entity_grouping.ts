@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import * as uuid from 'uuid';
 import {
   type GroupOption,
@@ -232,6 +232,16 @@ export const useEntityGrouping = ({
       });
     },
   });
+
+  useEffect(() => {
+    const currentGroups = grouping.selectedGroups;
+    if (!hasResolutionLicense && currentGroups.includes(ENTITY_GROUPING_OPTIONS.RESOLUTION)) {
+      const filtered = currentGroups.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
+      const newGroups = filtered.length > 0 ? filtered : [ENTITY_GROUPING_OPTIONS.NONE];
+      grouping.setSelectedGroups(newGroups);
+      setUrlQuery({ groupBy: newGroups });
+    }
+  }, [hasResolutionLicense, grouping, setUrlQuery]);
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
   const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
