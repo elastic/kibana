@@ -255,20 +255,27 @@ const EditorField = ({
   // Debounced validation trigger - auto-cancels on unmount
   const { run: triggerValidation } = useDebounceFn(handleValidation, { wait: 300 });
 
-  // Set up editor: register suggestion provider
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
 
-      // Register our custom suggestion provider directly with Monaco
       if (suggestionProvider) {
+        const ownModel = editor.getModel();
+        const scopedProvider: monaco.languages.CompletionItemProvider = {
+          triggerCharacters: suggestionProvider.triggerCharacters,
+          provideCompletionItems(model, position, context, token) {
+            if (model !== ownModel || !editor.hasTextFocus()) {
+              return { suggestions: [] };
+            }
+            return suggestionProvider.provideCompletionItems(model, position, context, token);
+          },
+        };
         completionProviderDisposableRef.current = monaco.languages.registerCompletionItemProvider(
           ESQL_LANG_ID,
-          suggestionProvider
+          scopedProvider
         );
       }
 
-      // Run initial validation
       triggerValidation();
     },
     [triggerValidation, suggestionProvider]
@@ -312,7 +319,6 @@ const EditorField = ({
             value={displayValue}
             onChange={handleChange}
             height="44px"
-            suggestionProvider={suggestionProvider}
             editorDidMount={handleEditorDidMount}
             options={{
               minimap: { enabled: false },
@@ -322,8 +328,6 @@ const EditorField = ({
               scrollBeyondLastLine: false,
               automaticLayout: true,
               fontSize: 14,
-              quickSuggestions: true,
-              suggestOnTriggerCharacters: true,
               readOnly: disabled,
             }}
           />
