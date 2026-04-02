@@ -432,13 +432,36 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const validGrokField = grokMode ? validGrokSourceField : undefined;
 
-  const validCurrentProcessorSourceField =
-    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
-      ? currentProcessorSourceField
-      : undefined;
+  // Always show the source field when a processor is being edited, even if it's
+  // not yet in allColumns (e.g., when simulation fails during pattern typing).
+  const validCurrentProcessorSourceField = currentProcessorSourceField;
+
+  /**
+   * In Grok mode, show the source field plus extracted field names from patterns.
+   * Uses cheap regex parsing of pattern strings (no DraftGrokExpression resolution)
+   * so columns update immediately while typing without triggering expensive work.
+   */
+  const grokExtractedColumns = useMemo(() => {
+    if (!isGrokProcessorActive || !validGrokSourceField) {
+      return undefined;
+    }
+    const extractedFields: string[] = [];
+    const fieldRegex = /%\{[^:}]+:([^:}]+)(?::[^}]+)?\}/g;
+    for (const pattern of grokPatterns) {
+      let match;
+      while ((match = fieldRegex.exec(pattern)) !== null) {
+        if (match[1] && !extractedFields.includes(match[1])) {
+          extractedFields.push(match[1]);
+        }
+      }
+    }
+    return [validGrokSourceField, ...extractedFields];
+  }, [isGrokProcessorActive, validGrokSourceField, grokPatterns]);
 
   // Calculate if view mode should be forced to 'columns'
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+  const isViewModeForced = Boolean(
+    grokExtractedColumns || validGrokField || validCurrentProcessorSourceField
+  );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
   const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
@@ -473,14 +496,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     validCurrentProcessorSourceField,
   ]);
 
-  /**
-   * If we are in Grok mode and the field matches an existing field,
-   * we exclude the detected fields and only use the Grok field since it is highlighting extracted values
-   */
-  const grokColumns = useMemo(
-    () => (validGrokField ? [validGrokField] : undefined),
-    [validGrokField]
-  );
+  // Use grokExtractedColumns (cheap regex-based) for column display.
+  // This replaces the old grokColumns which only showed the source field.
+  const grokColumns = grokExtractedColumns;
 
   /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
@@ -572,6 +590,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     () =>
       grokMode && validGrokField
         ? (document: SampleDocument, columnId: string) => {
+            // Only apply grok highlighting to the source field.
+            // For extracted fields (e.g. attributes.ad.category), return undefined
+            // to fall through to the default cell renderer which shows the simulated value.
+            if (columnId !== validGrokField) {
+              return undefined;
+            }
+
             // Use the original (pre-transformation) value for the grok field.
             // This ensures highlighting works even when grok extracts into the same field it reads from.
             const value = getGrokFieldDisplayValue(
