@@ -189,22 +189,18 @@ describe('links', () => {
   it('should return all links for user with all sub-feature privileges', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(),
-      { ...allowedExperimentalValues }
-    );
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+      ...allowedExperimentalValues,
+    });
     expect(filteredLinks.links?.map((l) => l.id)).toEqual(links.links?.map((l) => l.id));
     const artifactsLink = filteredLinks.links?.find((l) => l.id === SecurityPageName.artifacts);
     expect(artifactsLink?.path).toBeDefined();
   });
 
   it('should not return any endpoint management link for user with all sub-feature privileges when no user authz', async () => {
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(true),
-      { ...allowedExperimentalValues }
-    );
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(true), {
+      ...allowedExperimentalValues,
+    });
     expect(filteredLinks).toEqual(
       getLinksWithout(
         SecurityPageName.artifacts,
@@ -227,11 +223,9 @@ describe('links', () => {
       );
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(),
-        { ...allowedExperimentalValues }
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+      });
       expect(filteredLinks.links?.map((l) => l.id)).toEqual(
         getLinksWithout(SecurityPageName.responseActionsHistory).links?.map((l) => l.id)
       );
@@ -252,11 +246,9 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(),
-        { ...allowedExperimentalValues }
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+      });
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.artifacts));
     });
@@ -274,11 +266,9 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(),
-        { ...allowedExperimentalValues }
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+      });
 
       const artifactsLink = filteredLinks.links?.find((l) => l.id === SecurityPageName.artifacts);
       expect(artifactsLink).toBeDefined();
@@ -298,11 +288,9 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(),
-        { ...allowedExperimentalValues }
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+      });
 
       const artifactsLink = filteredLinks.links?.find((l) => l.id === SecurityPageName.artifacts);
       expect(artifactsLink?.path).toBe(getEventFiltersListPath());
@@ -317,11 +305,9 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(),
-        { ...allowedExperimentalValues }
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+      });
 
       expect(filteredLinks.links?.map((l) => l.id)).toEqual(
         getLinksWithout(SecurityPageName.policies, SecurityPageName.cloudDefendPolicies).links?.map(
@@ -337,11 +323,9 @@ describe('links', () => {
         })
       );
 
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(),
-        { ...allowedExperimentalValues }
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+      });
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.scriptLibrary));
     });
@@ -354,11 +338,9 @@ describe('links', () => {
           canReadEndpointList: false,
         })
       );
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(),
-        { ...allowedExperimentalValues }
-      );
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+      });
       expect(filteredLinks.links?.map((l) => l.id)).toEqual(
         getLinksWithout(SecurityPageName.endpoints).links?.map((l) => l.id)
       );
