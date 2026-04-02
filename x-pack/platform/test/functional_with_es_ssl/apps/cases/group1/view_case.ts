@@ -143,7 +143,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
@@ -363,7 +363,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -400,7 +400,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -439,7 +439,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await newComment.getVisibleText()).equal(comment);
@@ -688,7 +688,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
 
         const createdComment = await find.byCssSelector(
-          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
 
         await createdComment.findByCssSelector('[data-test-subj="xyVisChart"]');

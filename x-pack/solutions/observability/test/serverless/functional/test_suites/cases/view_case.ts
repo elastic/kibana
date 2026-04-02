@@ -98,7 +98,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
