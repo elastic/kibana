@@ -355,6 +355,7 @@ export class RulesClient {
     return this.rulesSavedObjectService.findTags();
   }
 
+  @withApm
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
