@@ -31,12 +31,6 @@ export const createMemoryDeleteTool = ({
   confirmation: { askUser: 'never' },
   handler: async ({ id, name }, context) => {
     const memoryService = getMemoryService();
-    const { request, esClient } = context;
-    const { username: user } = await getUserFromRequest({
-      request,
-      security: getSecurity(),
-      esClient: esClient.asCurrentUser,
-    });
 
     if (!name && !id) {
       return {
@@ -45,6 +39,12 @@ export const createMemoryDeleteTool = ({
     }
 
     try {
+      const { request, esClient } = context;
+      const { username: user } = await getUserFromRequest({
+        request,
+        security: getSecurity(),
+        esClient: esClient.asCurrentUser,
+      });
       let entry;
 
       if (id) {

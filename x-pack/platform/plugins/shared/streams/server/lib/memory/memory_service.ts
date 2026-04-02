@@ -201,20 +201,10 @@ export class MemoryServiceImpl implements MemoryService {
     category: string;
     user: string;
   }): Promise<MemoryEntry> {
-    const doc = await this._getById(id);
-    if (!doc) {
-      throw notFound(`Memory entry with id '${id}' not found`);
-    }
-
-    const current = doc._source;
-    if (current.categories.includes(category)) {
-      return current;
-    }
-
-    return this.update({
+    return this._updateCategories({
       id,
-      categories: [...current.categories, category],
       user,
+      transform: (categories) => (categories.includes(category) ? null : [...categories, category]),
       changeSummary: `Added category "${category}"`,
     });
   }
@@ -228,22 +218,54 @@ export class MemoryServiceImpl implements MemoryService {
     category: string;
     user: string;
   }): Promise<MemoryEntry> {
+    return this._updateCategories({
+      id,
+      user,
+      transform: (categories) =>
+        categories.includes(category) ? categories.filter((c) => c !== category) : null,
+      changeSummary: `Removed category "${category}"`,
+    });
+  }
+
+  private async _updateCategories({
+    id,
+    user,
+    transform,
+    changeSummary,
+  }: {
+    id: string;
+    user: string;
+    transform: (categories: string[]) => string[] | null;
+    changeSummary: string;
+  }): Promise<MemoryEntry> {
     const doc = await this._getById(id);
     if (!doc) {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
 
-    const current = doc._source;
-    if (!current.categories.includes(category)) {
-      return current;
+    const newCategories = transform(doc._source.categories);
+    if (newCategories === null) {
+      return doc._source;
     }
 
-    return this.update({
-      id,
-      categories: current.categories.filter((c) => c !== category),
-      user,
-      changeSummary: `Removed category "${category}"`,
+    const now = new Date().toISOString();
+    const updatedEntry: MemoryEntry = {
+      ...doc._source,
+      categories: newCategories,
+      version: doc._source.version + 1,
+      updated_at: now,
+      updated_by: user,
+    };
+
+    await this.storage.getClient().index({
+      id: doc._id,
+      document: updatedEntry,
+      if_seq_no: doc._seq_no,
+      if_primary_term: doc._primary_term,
     });
+
+    await this._writeHistory(updatedEntry, 'update', changeSummary, user);
+    return updatedEntry;
   }
 
   async listCategories(): Promise<string[]> {
