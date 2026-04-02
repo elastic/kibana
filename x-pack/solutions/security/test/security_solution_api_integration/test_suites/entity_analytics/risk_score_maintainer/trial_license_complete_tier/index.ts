@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Risk Score Maintainer', function () {
     loadTestFile(require.resolve('./setup_and_status'));
     loadTestFile(require.resolve('./asset_criticality_csv_upload_v2'));
+    loadTestFile(require.resolve('./cleanup_legacy_risk_engine'));
   });
 }

@@ -22,55 +22,60 @@ export const cleanupLegacyRiskEngine = async ({
   logger,
   getStartServices,
 }: EntityAnalyticsMigrationsParams) => {
-  const [coreStart, startPlugins] = await getStartServices();
-  const taskManager = startPlugins.taskManager;
+  try {
+    const [coreStart, startPlugins] = await getStartServices();
+    const taskManager = startPlugins.taskManager;
 
-  if (!taskManager) {
-    logger.warn(
-      'Task Manager is unavailable; skipping legacy risk engine cleanup (transform + task removal).'
-    );
-    return;
-  }
-
-  const esClient = coreStart.elasticsearch.client.asInternalUser;
-  const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
-
-  const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
-    type: riskEngineConfigurationTypeName,
-    perPage: MAX_PER_PAGE,
-    namespaces: ['*'],
-  });
-
-  if (savedObjectsResponse.saved_objects.length === 0) {
-    return;
-  }
-
-  for (const savedObject of savedObjectsResponse.saved_objects) {
-    const namespace = first(savedObject.namespaces);
-
-    if (!namespace) {
-      logger.error('Unexpected saved object. Risk Score saved objects must have a namespace');
-    } else {
-      const transformId = getLatestTransformId(namespace);
-
-      await stopTransform({ esClient, logger, transformId }).catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.error(
-          `Failed to stop legacy latest transform ${transformId} for namespace ${namespace}: ${message}`
-        );
-      });
-
-      await deleteTransform({ esClient, logger, transformId }).catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.error(
-          `Failed to delete legacy latest transform ${transformId} for namespace ${namespace}: ${message}`
-        );
-      });
-
-      await removeRiskScoringTask({ logger, namespace, taskManager }).catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.error(`Failed to remove risk scoring task for namespace ${namespace}: ${message}`);
-      });
+    if (!taskManager) {
+      logger.warn(
+        'Task Manager is unavailable; skipping legacy risk engine cleanup (transform + task removal).'
+      );
+      return;
     }
+
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
+
+    const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
+      type: riskEngineConfigurationTypeName,
+      perPage: MAX_PER_PAGE,
+      namespaces: ['*'],
+    });
+
+    if (savedObjectsResponse.saved_objects.length === 0) {
+      return;
+    }
+
+    for (const savedObject of savedObjectsResponse.saved_objects) {
+      const namespace = first(savedObject.namespaces);
+
+      if (!namespace) {
+        logger.error('Unexpected saved object. Risk Score saved objects must have a namespace');
+      } else {
+        const transformId = getLatestTransformId(namespace);
+
+        await stopTransform({ esClient, logger, transformId }).catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          logger.error(
+            `Failed to stop legacy latest transform ${transformId} for namespace ${namespace}: ${message}`
+          );
+        });
+
+        await deleteTransform({ esClient, logger, transformId }).catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          logger.error(
+            `Failed to delete legacy latest transform ${transformId} for namespace ${namespace}: ${message}`
+          );
+        });
+
+        await removeRiskScoringTask({ logger, namespace, taskManager }).catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          logger.error(`Failed to remove risk scoring task for namespace ${namespace}: ${message}`);
+        });
+      }
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error(`Failed to clean up legacy risk engine resources: ${message}`);
   }
 };
