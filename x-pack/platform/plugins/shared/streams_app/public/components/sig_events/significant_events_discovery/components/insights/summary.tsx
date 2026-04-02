@@ -23,101 +23,37 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { TaskStatus } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
 import { AssetImage } from '../../../../asset_image';
-import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useTaskPolling } from '../../../../../hooks/use_task_polling';
-import { getFormattedError } from '../../../../../util/errors';
+import type { InsightsDiscoveryState } from '../../../../../hooks/sig_events/use_insights_discovery';
 import { impactBadgeColors, impactLabels } from './insight_constants';
 import { InsightFlyout } from './insight_flyout';
 import { formatGeneratedAt } from './utils';
 
-export function Summary({ count }: { count: number }) {
-  const {
-    core: { notifications },
-  } = useKibana();
+export function Summary({
+  count,
+  discoveryState,
+}: {
+  count: number;
+  discoveryState: InsightsDiscoveryState;
+}) {
   const { euiTheme } = useEuiTheme();
+  const { insights, task, isTaskPending, scheduleTask, cancelTask, isCancellingTask } =
+    discoveryState;
 
-  const {
-    scheduleInsightsDiscoveryTask,
-    getInsightsDiscoveryTaskStatus,
-    acknowledgeInsightsDiscoveryTask,
-    cancelInsightsDiscoveryTask,
-  } = useInsightsDiscoveryApi();
-
-  const [insights, setInsights] = useState<Insight[] | null>(null);
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
 
-  const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
-  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
-    /**
-     * Combining scheduling and immediate status update to prevent
-     * React updating the UI in between states causing flickering
-     */
-    await scheduleInsightsDiscoveryTask();
-    await getTaskStatus();
-  }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
-
+  // Clear selected insight when a new discovery run starts (insights reset to null).
+  const previousInsightsRef = useRef(insights);
   useEffect(() => {
-    getTaskStatus();
-  }, [getTaskStatus]);
-
-  const previousTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
-
-  useEffect(() => {
-    const previousStatus = previousTaskStatusRef.current;
-    previousTaskStatusRef.current = task?.status;
-
-    if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InProgress) {
-      setInsights(null);
-      setSelectedInsight(null); // <-- add this
-      return;
+    if (previousInsightsRef.current !== null && insights === null) {
+      setSelectedInsight(null);
     }
-
-    if (task?.status === TaskStatus.Failed) {
-      notifications.toasts.addError(getFormattedError(new Error(task.error)), {
-        title: i18n.translate('xpack.streams.insights.errorTitle', {
-          defaultMessage: 'Error generating insights',
-        }),
-      });
-      return;
-    }
-
-    if (task?.status === TaskStatus.Completed) {
-      if (previousStatus === TaskStatus.InProgress && task.insights.length === 0) {
-        notifications.toasts.addInfo({
-          title: i18n.translate('xpack.streams.insights.noInsightsTitle', {
-            defaultMessage: 'No insights found',
-          }),
-          text: i18n.translate('xpack.streams.insights.noInsightsDescription', {
-            defaultMessage:
-              'The AI could not generate any insights from the current significant events. Try again later when more events are available.',
-          }),
-        });
-      }
-      setInsights(task.insights);
-    }
-  }, [task, notifications.toasts]);
-
-  const { cancelTask, isCancellingTask } = useTaskPolling({
-    task,
-    onPoll: getInsightsDiscoveryTaskStatus,
-    onRefresh: getTaskStatus,
-    onCancel: cancelInsightsDiscoveryTask,
-  });
+    previousInsightsRef.current = insights;
+  }, [insights]);
 
   const handleSelectInsight = useCallback((insight: Insight) => setSelectedInsight(insight), []);
   const handleCloseFlyout = useCallback(() => setSelectedInsight(null), []);
-
-  const onRunDiscoveryClick = async () => {
-    await acknowledgeInsightsDiscoveryTask();
-    await scheduleTask();
-  };
-
-  const isTaskPending =
-    task?.status === TaskStatus.InProgress || isCancellingTask || isSchedulingTask;
 
   const columns = useMemo<Array<EuiBasicTableColumn<Insight>>>(
     () => [
@@ -224,45 +160,25 @@ export function Summary({ count }: { count: number }) {
   if (insights && insights.length > 0) {
     return (
       <>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  iconType="sparkles"
-                  onClick={onRunDiscoveryClick}
-                  isDisabled={isSchedulingTask}
-                  isLoading={isSchedulingTask}
-                  data-test-subj="significant_events_run_discovery_button"
-                >
-                  {i18n.translate('xpack.streams.insights.runDiscoveryButtonLabel', {
-                    defaultMessage: 'Run a discovery',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBasicTable
-              data-test-subj="streamsInsightsTable"
-              columns={columns}
-              items={insights}
-              itemId="id"
-              tableLayout="fixed"
-              rowProps={(insight: Insight) => ({
-                style: {
-                  height: '68px',
-                  background:
-                    selectedInsight?.id === insight.id
-                      ? euiTheme.colors.backgroundBaseInteractiveSelect
-                      : undefined,
-                },
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {selectedInsight && <InsightFlyout insight={selectedInsight} onClose={handleCloseFlyout} />}
+        <EuiBasicTable
+          data-test-subj="streamsInsightsTable"
+          columns={columns}
+          items={insights}
+          itemId="id"
+          tableLayout="fixed"
+          rowProps={(insight: Insight) => ({
+            style: {
+              height: '68px',
+              background:
+                selectedInsight?.id === insight.id
+                  ? euiTheme.colors.backgroundBaseInteractiveSelect
+                  : undefined,
+            },
+          })}
+        />
+        {selectedInsight && (
+          <InsightFlyout insight={selectedInsight} onClose={handleCloseFlyout} />
+        )}
       </>
     );
   }
