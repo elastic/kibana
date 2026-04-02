@@ -30,10 +30,6 @@ export interface DocumentFlyoutProps {
    */
   hit: DataTableRecord;
   /**
-   * Optional callback fired after assignees are updated.
-   */
-  onAssigneesUpdated?: () => void;
-  /**
    * Cell action renderer for the analyzer
    */
   renderCellActions: CellActionRenderer;
@@ -47,7 +43,7 @@ export interface DocumentFlyoutProps {
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions, onAssigneesUpdated }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
     const { services } = useKibana();
     const store = useStore();
     const history = useHistory();
@@ -94,7 +90,6 @@ export const DocumentFlyout = memo(
             hit={hit}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
-            onAssigneesUpdated={onAssigneesUpdated}
             onShowNotes={onShowNotes}
           />
         </EuiFlyoutHeader>

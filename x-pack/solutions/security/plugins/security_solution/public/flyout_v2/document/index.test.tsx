@@ -16,16 +16,16 @@ import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mo
 jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('./header', () => ({
   Header: ({
-    onAssigneesUpdated,
+    onAlertUpdated,
     onShowNotes,
   }: {
-    onAssigneesUpdated?: () => void;
+    onAlertUpdated: () => void;
     onShowNotes: () => void;
   }) => (
     <button
       type="button"
       data-test-subj="mock-header"
-      data-has-on-assignees-updated={String(onAssigneesUpdated != null)}
+      data-has-on-assignees-updated={String(onAlertUpdated != null)}
       onClick={onShowNotes}
     />
   ),
@@ -143,7 +143,6 @@ describe('<DocumentFlyout />', () => {
       <TestProviders startServices={startServices}>
         <DocumentFlyout
           hit={createAlertHit()}
-          onAssigneesUpdated={jest.fn()}
           renderCellActions={jest.fn()}
           onAlertUpdated={jest.fn()}
         />

@@ -67,12 +67,7 @@ export interface DocumentFlyoutWrapperProps {
  * It is currently used in Analyzer when opening a document from the detail panel.
  */
 export const DocumentFlyoutWrapper = memo(
-  ({
-    documentId,
-    indexName,
-    renderCellActions,
-    onAlertUpdated,
-  }: DocumentFlyoutWrapperProps) => {
+  ({ documentId, indexName, renderCellActions, onAlertUpdated }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';

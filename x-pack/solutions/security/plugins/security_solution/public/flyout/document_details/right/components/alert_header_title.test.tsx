@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { AlertHeaderTitle } from './alert_header_title';
 import moment from 'moment-timezone';
@@ -32,10 +31,8 @@ import {
   NOTES_TITLE_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
-import { createExpandableFlyoutApiMock } from '../../../../common/mock/expandable_flyout';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../flyout_v2/document/hooks/use_refetch_by_scope');
 jest.mock('../../../../flyout_v2/document/components/header_status', () => ({
   HeaderStatus: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
@@ -80,17 +77,12 @@ const renderHeader = (contextValue: DocumentDetailsContext) =>
   );
 
 describe('<AlertHeaderTitle />', () => {
-  const closeFlyoutMock = jest.fn();
   const refetchMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
     jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      closeFlyout: closeFlyoutMock,
-    });
     jest.mocked(useRefetchByScope).mockReturnValue({ refetch: refetchMock });
   });
 
@@ -126,7 +118,7 @@ describe('<AlertHeaderTitle />', () => {
     expect(queryByTestId(ASSIGNEES_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('refetches the table and closes the flyout when the alert status changes', () => {
+  it('refetches both table and flyout data when the alert status changes', () => {
     const refetchFlyoutData = jest.fn();
     const { getByTestId } = renderHeader({
       ...mockContextValue,
@@ -136,7 +128,6 @@ describe('<AlertHeaderTitle />', () => {
     getByTestId(STATUS_BUTTON_TEST_ID).click();
 
     expect(refetchMock).toHaveBeenCalledTimes(1);
-    expect(closeFlyoutMock).toHaveBeenCalledTimes(1);
-    expect(refetchFlyoutData).not.toHaveBeenCalled();
+    expect(refetchFlyoutData).toHaveBeenCalledTimes(1);
   });
 });

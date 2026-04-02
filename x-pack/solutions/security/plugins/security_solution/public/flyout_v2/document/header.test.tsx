@@ -51,12 +51,12 @@ jest.mock('./components/header_status', () => ({
   ),
 }));
 
-jest.mock('./components/notes', () => ({
-  Notes: ({ hit, onShowNotes }: { hit: DataTableRecord; onShowNotes?: () => void }) => (
+jest.mock('../shared/components/notes', () => ({
+  Notes: ({ documentId, onShowNotes }: { documentId: string; onShowNotes?: () => void }) => (
     <button
       type="button"
       data-test-subj="mockNotes"
-      data-hit-id={hit.id}
+      data-document-id={documentId}
       data-has-open-notes-tab={String(onShowNotes != null)}
       onClick={onShowNotes}
     />
@@ -64,17 +64,11 @@ jest.mock('./components/notes', () => ({
 }));
 
 jest.mock('./components/assignees', () => ({
-  Assignees: ({
-    hit,
-    onAssigneesUpdated,
-  }: {
-    hit: DataTableRecord;
-    onAssigneesUpdated?: () => void;
-  }) => (
+  Assignees: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => (
     <div
       data-test-subj="mockAssignees"
       data-hit-id={hit.id}
-      data-has-on-assignees-updated={String(onAssigneesUpdated != null)}
+      data-has-on-assignees-updated={String(onAlertUpdated != null)}
     />
   ),
 }));
@@ -113,10 +107,18 @@ const eventHit = createMockHit({
   'kibana.alert.risk_score': 21,
 });
 
-const renderHeader = (props: Parameters<typeof Header>[0]) =>
+const defaultHeaderProps: Pick<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'> = {
+  onAlertUpdated: jest.fn(),
+  onShowNotes: jest.fn(),
+};
+
+type RenderHeaderProps = Omit<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'> &
+  Partial<Pick<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'>>;
+
+const renderHeader = (props: RenderHeaderProps) =>
   render(
     <IntlProvider locale="en">
-      <Header {...props} />
+      <Header {...defaultHeaderProps} {...props} />
     </IntlProvider>
   );
 
@@ -159,10 +161,10 @@ describe('<DocumentHeader />', () => {
 
   it('should render the alert summary blocks for alerts', () => {
     const onOpenNotesTab = jest.fn();
-    const onAssigneesUpdated = jest.fn();
+    const onAlertUpdated = jest.fn();
     const { getByTestId } = renderHeader({
       hit: alertHit,
-      onAssigneesUpdated,
+      onAlertUpdated,
       onShowNotes: onOpenNotesTab,
     });
 

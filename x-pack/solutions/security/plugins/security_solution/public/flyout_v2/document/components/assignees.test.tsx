@@ -146,8 +146,8 @@ describe('<Assignees />', () => {
   });
 
   it('applies updated assignees and calls the success callback', async () => {
-    const onAssigneesUpdated = jest.fn();
-    const { getByTestId, queryByTestId } = renderAssignees({ onAssigneesUpdated });
+    const onAlertUpdated = jest.fn();
+    const { getByTestId, queryByTestId } = renderAssignees({ onAlertUpdated });
 
     fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
     fireEvent.click(getByTestId('mock-assignees-apply-panel'));
@@ -167,7 +167,7 @@ describe('<Assignees />', () => {
       onSuccess();
     });
 
-    expect(onAssigneesUpdated).toHaveBeenCalled();
+    expect(onAlertUpdated).toHaveBeenCalled();
 
     await waitFor(() => {
       expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).toBeInTheDocument();

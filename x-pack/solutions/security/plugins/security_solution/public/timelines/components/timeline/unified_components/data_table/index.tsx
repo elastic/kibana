@@ -196,7 +196,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                   indexName={eventData.ecs._index}
                   renderCellActions={cellActionRenderer}
                   onAlertUpdated={refetch}
-                  isTimelineFlyout
                 />
               ),
             }),

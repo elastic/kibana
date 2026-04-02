@@ -43,11 +43,7 @@ export interface HeaderProps {
   /**
    * Optional callback invoked after alert mutations to refresh flyout data.
    */
-  onAlertUpdated?: () => void;
-  /**
-   * Optional callback fired after assignees are updated.
-   */
-  onAssigneesUpdated?: () => void;
+  onAlertUpdated: () => void;
   /**
    * Callback that opens the notes details view.
    */
@@ -60,13 +56,7 @@ export interface HeaderProps {
  * and alert-only summary blocks (status, risk score assignees, and notes).
  */
 export const Header: FC<HeaderProps> = memo(
-  ({
-    hit,
-    renderCellActions = noopCellActionRenderer,
-    onAlertUpdated,
-    onAssigneesUpdated,
-    onShowNotes,
-  }) => {
+  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
     const { services } = useKibana();
     const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
     const ruleId = useMemo(
@@ -121,7 +111,7 @@ export const Header: FC<HeaderProps> = memo(
               <EuiFlexItem css={blockStyles}>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                   <EuiFlexItem>
-                    <Assignees hit={hit} onAssigneesUpdated={onAssigneesUpdated} />
+                    <Assignees hit={hit} onAlertUpdated={onAlertUpdated} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <Notes documentId={hit.raw._id ?? ''} onShowNotes={onShowNotes} />

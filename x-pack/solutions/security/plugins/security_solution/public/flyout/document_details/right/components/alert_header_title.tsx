@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
@@ -43,7 +42,6 @@ const urlParamOverride = { timeline: { isOpen: false } };
 export const AlertHeaderTitle = memo(() => {
   const { scopeId, isRulePreview, refetchFlyoutData, searchHit } = useDocumentDetailsContext();
   const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
-  const { closeFlyout } = useExpandableFlyoutApi();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
@@ -51,12 +49,7 @@ export const AlertHeaderTitle = memo(() => {
 
   const { refetch } = useRefetchByScope({ scopeId });
 
-  const onStatusUpdated = useCallback(() => {
-    refetch();
-    closeFlyout();
-  }, [closeFlyout, refetch]);
-
-  const onAssigneesUpdated = useCallback(() => {
+  const onAlertUpdated = useCallback(() => {
     refetch();
     refetchFlyoutData();
   }, [refetch, refetchFlyoutData]);
@@ -89,10 +82,10 @@ export const AlertHeaderTitle = memo(() => {
         <HeaderStatus
           hit={hit}
           renderCellActions={renderStatusCellActions}
-          onAlertUpdated={onStatusUpdated}
+          onAlertUpdated={onAlertUpdated}
         />
       ),
-    [hit, isRulePreview, onStatusUpdated, renderStatusCellActions]
+    [hit, isRulePreview, onAlertUpdated, renderStatusCellActions]
   );
 
   return (
@@ -121,11 +114,7 @@ export const AlertHeaderTitle = memo(() => {
         <EuiFlexItem css={blockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
-              <Assignees
-                hit={hit}
-                onAssigneesUpdated={onAssigneesUpdated}
-                showAssignees={!isRulePreview}
-              />
+              <Assignees hit={hit} onAlertUpdated={onAlertUpdated} showAssignees={!isRulePreview} />
             </EuiFlexItem>
             <EuiFlexItem>
               <Notes

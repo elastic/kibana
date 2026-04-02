@@ -64,150 +64,148 @@ export interface AssigneesProps {
    * Callback fired after the assignees update succeeds.
    * Used by the legacy flyout to refetch its context-backed data.
    */
-  onAssigneesUpdated?: () => void;
+  onAlertUpdated: () => void;
   /**
    * Boolean to indicate whether to show assignees.
    */
   showAssignees?: boolean;
 }
 
-export const Assignees = memo(
-  ({ hit, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
-    const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
-    const initialAssignedUserIds = useMemo(() => {
-      const value = getFieldValue(hit, ALERT_WORKFLOW_ASSIGNEE_IDS) as string[] | string | null;
+export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: AssigneesProps) => {
+  const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
+  const initialAssignedUserIds = useMemo(() => {
+    const value = getFieldValue(hit, ALERT_WORKFLOW_ASSIGNEE_IDS) as string[] | string | null;
 
-      if (Array.isArray(value)) {
-        return value;
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    return value ? [value] : [];
+  }, [hit]);
+  const [assignedUserIds, setAssignedUserIds] = useState(initialAssignedUserIds);
+
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
+  const upsellingMessage = useUpsellingMessage('alert_assignments');
+  const { hasAlertsUpdate } = useAlertsPrivileges();
+  const setAlertAssignees = useSetAlertAssignees();
+
+  const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
+  const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const searchInputId = useGeneratedHtmlId({ prefix: 'searchInput' });
+
+  useEffect(() => {
+    setAssignedUserIds(initialAssignedUserIds);
+  }, [initialAssignedUserIds]);
+
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen((value) => !value);
+  }, []);
+
+  const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
+    async (assignees) => {
+      setIsPopoverOpen(false);
+
+      if (!setAlertAssignees || !eventId) {
+        return;
       }
 
-      return value ? [value] : [];
-    }, [hit]);
-    const [assignedUserIds, setAssignedUserIds] = useState(initialAssignedUserIds);
+      const onSuccess = () => {
+        setAssignedUserIds((currentAssignedUserIds) => {
+          const remainingAssignees = currentAssignedUserIds.filter(
+            (uid) => !assignees.remove.includes(uid)
+          );
+          const newAssignees = assignees.add.filter((uid) => !remainingAssignees.includes(uid));
 
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const upsellingMessage = useUpsellingMessage('alert_assignments');
-    const { hasAlertsUpdate } = useAlertsPrivileges();
-    const setAlertAssignees = useSetAlertAssignees();
+          return [...remainingAssignees, ...newAssignees];
+        });
 
-    const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
-    const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
+        onAlertUpdated?.();
+      };
 
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const searchInputId = useGeneratedHtmlId({ prefix: 'searchInput' });
+      await setAlertAssignees(assignees, [eventId], onSuccess, noop);
+    },
+    [eventId, onAlertUpdated, setAlertAssignees]
+  );
 
-    useEffect(() => {
-      setAssignedUserIds(initialAssignedUserIds);
-    }, [initialAssignedUserIds]);
+  const isUpdateDisabled = !eventId || !hasAlertsUpdate || !isPlatinumPlus;
 
-    const togglePopover = useCallback(() => {
-      setIsPopoverOpen((value) => !value);
-    }, []);
-
-    const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
-      async (assignees) => {
-        setIsPopoverOpen(false);
-
-        if (!setAlertAssignees || !eventId) {
-          return;
-        }
-
-        const onSuccess = () => {
-          setAssignedUserIds((currentAssignedUserIds) => {
-            const remainingAssignees = currentAssignedUserIds.filter(
-              (uid) => !assignees.remove.includes(uid)
-            );
-            const newAssignees = assignees.add.filter((uid) => !remainingAssignees.includes(uid));
-
-            return [...remainingAssignees, ...newAssignees];
-          });
-
-          onAssigneesUpdated?.();
-        };
-
-        await setAlertAssignees(assignees, [eventId], onSuccess, noop);
-      },
-      [eventId, onAssigneesUpdated, setAlertAssignees]
-    );
-
-    const isUpdateDisabled = !eventId || !hasAlertsUpdate || !isPlatinumPlus;
-
-    const updateAssigneesPopover = useMemo(
-      () => (
-        <EuiPopover
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.document.header.assignees.updatePopoverAriaLabel',
-            {
-              defaultMessage: 'Update assignees',
-            }
-          )}
-          panelPaddingSize="none"
-          initialFocus={`[id="${searchInputId}"]`}
-          button={
-            <UpdateAssigneesButton
-              togglePopover={togglePopover}
-              isDisabled={isUpdateDisabled}
-              toolTipMessage={
-                upsellingMessage ??
-                i18n.translate(
-                  'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
-                  {
-                    defaultMessage: 'Assign alert',
-                  }
-                )
-              }
-            />
+  const updateAssigneesPopover = useMemo(
+    () => (
+      <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.document.header.assignees.updatePopoverAriaLabel',
+          {
+            defaultMessage: 'Update assignees',
           }
-          isOpen={isPopoverOpen}
-          panelStyle={{
-            minWidth: ASSIGNEES_PANEL_WIDTH,
-          }}
-          closePopover={togglePopover}
-        >
-          <AssigneesApplyPanel
-            searchInputId={searchInputId}
-            assignedUserIds={assignedUserIds}
-            onApply={handleApplyAssignees}
-          />
-        </EuiPopover>
-      ),
-      [
-        assignedUserIds,
-        handleApplyAssignees,
-        isPopoverOpen,
-        isUpdateDisabled,
-        searchInputId,
-        togglePopover,
-        upsellingMessage,
-      ]
-    );
-
-    return (
-      <AlertHeaderBlock
-        hasBorder
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.document.header.assignedTitle"
-            defaultMessage="Assignees"
+        )}
+        panelPaddingSize="none"
+        initialFocus={`[id="${searchInputId}"]`}
+        button={
+          <UpdateAssigneesButton
+            togglePopover={togglePopover}
+            isDisabled={isUpdateDisabled}
+            toolTipMessage={
+              upsellingMessage ??
+              i18n.translate(
+                'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
+                {
+                  defaultMessage: 'Assign alert',
+                }
+              )
+            }
           />
         }
-        data-test-subj={ASSIGNEES_TITLE_TEST_ID}
+        isOpen={isPopoverOpen}
+        panelStyle={{
+          minWidth: ASSIGNEES_PANEL_WIDTH,
+        }}
+        closePopover={togglePopover}
       >
-        {!showAssignees ? (
-          <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
-        ) : (
-          <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj={ASSIGNEES_TEST_ID}>
-            {assignedUsers && (
-              <EuiFlexItem grow={false}>
-                <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>{updateAssigneesPopover}</EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </AlertHeaderBlock>
-    );
-  }
-);
+        <AssigneesApplyPanel
+          searchInputId={searchInputId}
+          assignedUserIds={assignedUserIds}
+          onApply={handleApplyAssignees}
+        />
+      </EuiPopover>
+    ),
+    [
+      assignedUserIds,
+      handleApplyAssignees,
+      isPopoverOpen,
+      isUpdateDisabled,
+      searchInputId,
+      togglePopover,
+      upsellingMessage,
+    ]
+  );
+
+  return (
+    <AlertHeaderBlock
+      hasBorder
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.document.header.assignedTitle"
+          defaultMessage="Assignees"
+        />
+      }
+      data-test-subj={ASSIGNEES_TITLE_TEST_ID}
+    >
+      {!showAssignees ? (
+        <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
+      ) : (
+        <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj={ASSIGNEES_TEST_ID}>
+          {assignedUsers && (
+            <EuiFlexItem grow={false}>
+              <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>{updateAssigneesPopover}</EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </AlertHeaderBlock>
+  );
+});
 
 Assignees.displayName = 'Assignees';
