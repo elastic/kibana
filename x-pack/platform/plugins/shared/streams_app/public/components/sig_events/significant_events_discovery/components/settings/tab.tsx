@@ -98,12 +98,17 @@ export function SettingsTab() {
               )}
             </p>
           </EuiText>
-          <EuiSpacer size="s" />
-          <EuiLink href={modelSettingsUrl} external>
-            {i18n.translate('xpack.streams.significantEventsDiscovery.settings.modelSettingsLink', {
-              defaultMessage: 'Go to Model Settings',
-            })}
-          </EuiLink>
+          {modelSettingsUrl && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiLink href={modelSettingsUrl} external>
+                {i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.modelSettingsLink',
+                  { defaultMessage: 'Go to Model Settings' }
+                )}
+              </EuiLink>
+            </>
+          )}
         </EuiPanel>
       </EuiPanel>
 

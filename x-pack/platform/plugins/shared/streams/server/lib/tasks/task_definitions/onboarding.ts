@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { isInferenceProviderError } from '@kbn/inference-common';
 import type {
   GeneratedSignificantEventQuery,
   IdentifyFeaturesResult,
@@ -19,11 +18,8 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
-import { STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import type { StreamsTaskType, TaskContext } from '.';
 import { parseError } from '../../streams/errors/parse_error';
-import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
@@ -71,10 +67,11 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, saveQueries, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, inferenceClient, queryClient, streamsClient } =
-                await taskContext.getScopedClients({
+              const { taskClient, queryClient, streamsClient } = await taskContext.getScopedClients(
+                {
                   request: fakeRequest,
-                });
+                }
+              );
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -147,22 +144,9 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   { featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
-                // Get connector info for error enrichment
-                let errorMessage = parseError(error).message;
-                try {
-                  const connectorIdForError = await resolveConnectorForFeature({
-                    searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                    featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-                    featureName: 'query generation',
-                    request: fakeRequest,
-                  });
-                  const connector = await inferenceClient.getConnectorById(connectorIdForError);
-                  if (isInferenceProviderError(error)) {
-                    errorMessage = formatInferenceProviderError(error, connector);
-                  }
-                } catch {
-                  // Use generic error message if we cannot resolve the connector
-                }
+                // Errors here originate from waitForSubtask (plain Error), not from inference calls.
+                // isInferenceProviderError is always false, so no connector enrichment is needed.
+                const errorMessage = parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
