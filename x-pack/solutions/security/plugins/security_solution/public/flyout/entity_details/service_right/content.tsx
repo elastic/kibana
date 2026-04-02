@@ -8,6 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import type { ServiceItem } from '../../../../common/search_strategy';
+import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -18,6 +19,7 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
@@ -30,10 +32,13 @@ interface ServicePanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  entityRecord?: Entity;
+  entityStoreEntityId?: string;
 }
 
 export const ServicePanelContent = ({
   serviceName,
+  entityRecord,
   observedService,
   riskScoreState,
   recalculatingScore,
@@ -41,6 +46,7 @@ export const ServicePanelContent = ({
   scopeId,
   openDetailsPanel,
   onAssetCriticalityChange,
+  entityStoreEntityId,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
 
@@ -55,7 +61,14 @@ export const ServicePanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
             entityType={EntityType.service}
+            entityId={entityRecord?.entity.id}
           />
+          <EuiHorizontalRule />
+        </>
+      )}
+      {entityStoreEntityId && (
+        <>
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />
         </>
       )}
@@ -64,7 +77,7 @@ export const ServicePanelContent = ({
         onChange={onAssetCriticalityChange}
       />
       <ObservedEntity
-        observedData={observedService}
+        observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}

@@ -37,7 +37,6 @@ import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_ma
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentVisibilityBadge } from './agent_visibility_badge';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -72,25 +71,18 @@ const actionLabels = {
 const canCurrentUserEditAgent = ({
   agent,
   manageAgents,
-  experimentalFeaturesEnabled,
   currentUser,
   isAdmin,
   isCurrentUserLoading,
 }: {
   agent: AgentDefinition;
   manageAgents: boolean;
-  experimentalFeaturesEnabled: boolean;
   currentUser?: UserIdAndName | null;
   isAdmin: boolean;
   isCurrentUserLoading: boolean;
 }) => {
   if (agent.readonly || !manageAgents) {
     return false;
-  }
-
-  // When experimental visibility is off, ignore loading/visibility and allow edit (legacy behaviour).
-  if (!experimentalFeaturesEnabled) {
-    return true;
   }
 
   if (isCurrentUserLoading) {
@@ -107,13 +99,10 @@ const canCurrentUserEditAgent = ({
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents, isAdmin } = useUiPrivileges();
-  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser({
-    enabled: isExperimentalFeaturesEnabled,
-  });
+  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
@@ -128,7 +117,6 @@ export const AgentsList: React.FC = () => {
       canCurrentUserEditAgent({
         agent,
         manageAgents,
-        experimentalFeaturesEnabled: isExperimentalFeaturesEnabled,
         currentUser,
         isAdmin,
         isCurrentUserLoading,
@@ -139,8 +127,7 @@ export const AgentsList: React.FC = () => {
       name: columnNames.name,
       render: (name: string, agent: AgentDefinition) => {
         const canEdit = canEditAgent(agent);
-        const showCheckingTooltip =
-          !canEdit && isExperimentalFeaturesEnabled && isCurrentUserLoading;
+        const showCheckingTooltip = !canEdit && isCurrentUserLoading;
         const nameContent = !canEdit ? (
           <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
             {name}
@@ -203,7 +190,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) =>
-            createAgentBuilderUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
+            createAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: agent.id })),
         },
         {
           type: 'icon',
@@ -253,9 +240,7 @@ export const AgentsList: React.FC = () => {
       ],
     };
 
-    return isExperimentalFeaturesEnabled
-      ? [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions]
-      : [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
+    return [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions];
   }, [
     createAgentBuilderUrl,
     currentUser,
@@ -263,7 +248,6 @@ export const AgentsList: React.FC = () => {
     isAdmin,
     isCurrentUserLoading,
     manageAgents,
-    isExperimentalFeaturesEnabled,
   ]);
 
   const errorMessage = useMemo(

@@ -57,6 +57,14 @@ export const setDynamicSettings = async ({
   );
 };
 
+export const triggerMwSync = async (): Promise<void> => {
+  const url = SYNTHETICS_API_URLS.TRIGGER_TASK_RUN.replace(
+    '{taskType}',
+    'syncPrivateLocationMonitors'
+  );
+  await apiService.post(url);
+};
+
 export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {
   return await apiService.get<LocationMonitorsResponse>(
     SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,

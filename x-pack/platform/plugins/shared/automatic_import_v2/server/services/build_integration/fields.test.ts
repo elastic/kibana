@@ -9,30 +9,30 @@ import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import { fieldsMetadataPluginServerMock } from '@kbn/fields-metadata-plugin/server/mocks';
 import { generateFieldMappings, mergeSamples } from './fields';
 
-const KNOWN_ECS_FIELDS = new Set([
-  '@timestamp',
-  'message',
-  'source.ip',
-  'source.port',
-  'event.category',
-  'event.type',
-  'event.action',
-  'event.dataset',
-  'http.request.method',
-  'http.response.status_code',
-  'http.response.body.bytes',
-  'url.path',
-]);
+const KNOWN_ECS_FIELDS: Record<string, { name: string; type: string; source: string }> = {
+  '@timestamp': { name: '@timestamp', type: 'date', source: 'ecs' },
+  message: { name: 'message', type: 'match_only_text', source: 'ecs' },
+  'source.ip': { name: 'source.ip', type: 'ip', source: 'ecs' },
+  'source.port': { name: 'source.port', type: 'long', source: 'ecs' },
+  'event.category': { name: 'event.category', type: 'keyword', source: 'ecs' },
+  'event.type': { name: 'event.type', type: 'keyword', source: 'ecs' },
+  'event.action': { name: 'event.action', type: 'keyword', source: 'ecs' },
+  'event.dataset': { name: 'event.dataset', type: 'keyword', source: 'ecs' },
+  'http.request.method': { name: 'http.request.method', type: 'keyword', source: 'ecs' },
+  'http.response.status_code': { name: 'http.response.status_code', type: 'long', source: 'ecs' },
+  'http.response.body.bytes': { name: 'http.response.body.bytes', type: 'long', source: 'ecs' },
+  'url.path': { name: 'url.path', type: 'wildcard', source: 'ecs' },
+};
 
 const createMockFieldsMetadataClient = (): jest.Mocked<IFieldsMetadataClient> => {
   const mock: jest.Mocked<IFieldsMetadataClient> = {
     ...fieldsMetadataPluginServerMock.createFieldsMetadataClientMock(),
     find: jest.fn().mockImplementation(({ fieldNames, source }) => {
-      const matchedFields: Record<string, { name: string; source: string }> = {};
+      const matchedFields: Record<string, { name: string; type: string; source: string }> = {};
       if (source?.includes('ecs') && fieldNames) {
         for (const name of fieldNames) {
-          if (KNOWN_ECS_FIELDS.has(name)) {
-            matchedFields[name] = { name, source: 'ecs' };
+          if (name in KNOWN_ECS_FIELDS) {
+            matchedFields[name] = KNOWN_ECS_FIELDS[name];
           }
         }
       }
@@ -142,10 +142,10 @@ describe('fields', () => {
       const eventCategory = fields.find((f) => f.name === 'event.category');
       const message = fields.find((f) => f.name === 'message');
 
-      expect(sourceIp).toEqual({ name: 'source.ip', type: 'keyword', is_ecs: true });
+      expect(sourceIp).toEqual({ name: 'source.ip', type: 'ip', is_ecs: true });
       expect(sourcePort).toEqual({ name: 'source.port', type: 'long', is_ecs: true });
       expect(eventCategory).toEqual({ name: 'event.category', type: 'keyword', is_ecs: true });
-      expect(message).toEqual({ name: 'message', type: 'keyword', is_ecs: true });
+      expect(message).toEqual({ name: 'message', type: 'match_only_text', is_ecs: true });
     });
 
     it('calls fieldsMetadataClient.find with correct parameters', async () => {
@@ -291,9 +291,9 @@ describe('fields', () => {
       ];
       const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
-      // ECS fields
-      expect(fields).toContainEqual({ name: '@timestamp', type: 'keyword', is_ecs: true });
-      expect(fields).toContainEqual({ name: 'message', type: 'keyword', is_ecs: true });
+      // ECS fields — types come from ECS metadata, not sample value inference
+      expect(fields).toContainEqual({ name: '@timestamp', type: 'date', is_ecs: true });
+      expect(fields).toContainEqual({ name: 'message', type: 'match_only_text', is_ecs: true });
       expect(fields).toContainEqual({
         name: 'http.response.status_code',
         type: 'long',

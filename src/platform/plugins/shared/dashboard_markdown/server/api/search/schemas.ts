@@ -12,28 +12,28 @@ import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_sc
 
 const MAX_PER_PAGE = 10000;
 
-export const searchRequestBodySchema = schema.object({
+export const searchRequestQuerySchema = schema.object({
+  query: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
+      },
+    })
+  ),
   page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The page of markdown panels to return',
+        description: 'The search page to return',
       },
     })
   ),
   per_page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The number of markdown panels to return per page',
+        description: 'The number of items to return per page',
       },
       max: MAX_PER_PAGE,
-    })
-  ),
-  search: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'An Elasticsearch simple_query_string query that filters the markdown panels in the response by "title" and "description"',
-      },
     })
   ),
 });

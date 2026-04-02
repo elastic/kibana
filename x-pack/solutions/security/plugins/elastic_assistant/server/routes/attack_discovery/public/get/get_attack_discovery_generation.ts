@@ -13,6 +13,7 @@ import {
   GetAttackDiscoveryGenerationRequestParams,
   GetAttackDiscoveryGenerationRequestQuery,
 } from '@kbn/elastic-assistant-common';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -33,7 +34,7 @@ export const getAttackDiscoveryGenerationRoute = (
       path: ATTACK_DISCOVERY_GENERATIONS_BY_ID,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })

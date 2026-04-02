@@ -135,6 +135,7 @@ describe('AutomaticImportSetupService', () => {
           dataStreams: [],
           authenticatedUser: { username: 'test-user' } as any,
           version: '1.0.0',
+          categories: ['security'],
         } as any)
       ).rejects.toThrow('Saved Objects service not initialized.');
     });
@@ -166,6 +167,7 @@ describe('AutomaticImportSetupService', () => {
         integrationId: 'integration-123',
         authenticatedUser: { username: 'approver-user' } as any,
         version: '1.2.3',
+        categories: ['observability'],
       });
 
       expect(mockGetIntegration).toHaveBeenCalledWith('integration-123');
@@ -178,7 +180,9 @@ describe('AutomaticImportSetupService', () => {
       expect(updateData.last_updated_by).toBe('approver-user');
       expect(updateData.last_updated_at).toEqual(expect.any(String));
       expect(updateData.status).toBe('approved');
-      expect(updateData.metadata).toEqual(expect.objectContaining({ version: '0.0.1' }));
+      expect(updateData.metadata).toEqual(
+        expect.objectContaining({ version: '0.0.1', categories: ['observability'] })
+      );
 
       expect(updateData.changelog).toEqual([
         {
@@ -219,6 +223,7 @@ describe('AutomaticImportSetupService', () => {
         integrationId: 'integration-123',
         authenticatedUser: { username: 'approver-user' } as any,
         version: '1.1.0',
+        categories: ['security'],
       });
 
       const [updateData] = mockUpdateIntegration.mock.calls[0];
@@ -251,6 +256,7 @@ describe('AutomaticImportSetupService', () => {
           integrationId: 'integration-empty',
           authenticatedUser: { username: 'approver-user' } as any,
           version: '1.2.3',
+          categories: ['security'],
         })
       ).rejects.toThrow('Cannot approve integration integration-empty with no data streams');
 
@@ -285,6 +291,7 @@ describe('AutomaticImportSetupService', () => {
           integrationId: 'integration-123',
           authenticatedUser: { username: 'approver-user' } as any,
           version: '1.2.3',
+          categories: ['security'],
         })
       ).rejects.toThrow(
         'Cannot approve integration integration-123 until all data streams are completed'
@@ -319,6 +326,7 @@ describe('AutomaticImportSetupService', () => {
           dataStreams: [],
           authenticatedUser: { username: 'approver-user' } as any,
           version: '1.2.3',
+          categories: ['security'],
         } as any)
       ).rejects.toThrow('Failed to update integration');
     });
@@ -548,10 +556,10 @@ describe('AutomaticImportSetupService', () => {
       );
     });
 
-    it('should handle errors from task manager service', async () => {
+    it('should still delete saved object when task manager removal fails', async () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
-      const mockDeleteSavedObject = jest.fn();
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
@@ -565,18 +573,21 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
-        'Task removal failed'
-      );
+      await service.deleteDataStream('integration-123', 'data-stream-456');
 
-      expect(mockDeleteSamples).not.toHaveBeenCalled();
-      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+      expect(mockRemoveTask).toHaveBeenCalled();
+      expect(mockDeleteSamples).toHaveBeenCalledWith('integration-123', 'data-stream-456');
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'data-stream-456',
+        'integration-123',
+        undefined
+      );
     });
 
-    it('should handle errors from samples index service', async () => {
+    it('should still delete saved object when samples index deletion fails', async () => {
       const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockDeleteSavedObject = jest.fn();
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
@@ -590,11 +601,15 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamStatus: mockUpdateStatus,
       };
 
-      await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
-        'Sample deletion failed'
-      );
+      await service.deleteDataStream('integration-123', 'data-stream-456');
 
-      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+      expect(mockRemoveTask).toHaveBeenCalled();
+      expect(mockDeleteSamples).toHaveBeenCalled();
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'data-stream-456',
+        'integration-123',
+        undefined
+      );
     });
 
     it('should handle errors from saved object service', async () => {
@@ -714,7 +729,7 @@ describe('AutomaticImportSetupService', () => {
       );
     });
 
-    it('throws when ingest pipeline is missing even if completed', async () => {
+    it('returns empty pipeline and field_mapping when ingest pipeline is missing but completed', async () => {
       const mockGetDataStream = jest.fn().mockResolvedValue({
         attributes: {
           job_info: { status: 'completed' },
@@ -726,9 +741,11 @@ describe('AutomaticImportSetupService', () => {
         getDataStream: mockGetDataStream,
       };
 
-      await expect(service.getDataStreamResults('integration-1', 'ds-1')).rejects.toThrow(
-        'has no ingest pipeline results'
-      );
+      await expect(service.getDataStreamResults('integration-1', 'ds-1')).resolves.toEqual({
+        ingest_pipeline: {},
+        field_mapping: [],
+        results: [{ a: 1 }],
+      });
     });
   });
 
