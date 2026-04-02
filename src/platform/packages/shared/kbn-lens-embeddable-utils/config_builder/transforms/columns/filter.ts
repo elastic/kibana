@@ -10,13 +10,24 @@
 import type { Query } from '@kbn/es-query';
 import type { LensApiFilterType } from '../../schema/filter';
 
+type LensStateFilterLanguage = 'kuery' | 'lucene';
+type ApiFilterLanguage = LensApiFilterType['language'];
+
+export const toLensStateFilterLanguage = (
+  language: ApiFilterLanguage | string
+): LensStateFilterLanguage => (language === 'lucene' ? 'lucene' : 'kuery');
+
+export const toApiFilterLanguage = (
+  language: LensStateFilterLanguage | string
+): ApiFilterLanguage => (language === 'lucene' ? 'lucene' : 'kql');
+
 export function fromFilterAPIToLensState(filter: LensApiFilterType | undefined): Query | undefined {
   if (!filter) {
     return;
   }
 
   return {
-    language: filter.language,
+    language: toLensStateFilterLanguage(filter.language),
     query: filter.expression,
   };
 }
@@ -31,10 +42,11 @@ export function fromFilterLensStateToAPI({
   if (language !== 'kuery' && language !== 'lucene') {
     return;
   }
-  return { expression: query, language };
+
+  return { expression: query, language: toApiFilterLanguage(language) };
 }
 
 export const DEFAULT_FILTER = {
   expression: '*',
-  language: 'kuery',
+  language: toApiFilterLanguage('kuery'),
 } satisfies LensApiFilterType;

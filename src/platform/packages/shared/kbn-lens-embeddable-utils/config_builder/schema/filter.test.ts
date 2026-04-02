@@ -13,7 +13,7 @@ describe('Filter Schemas', () => {
   describe('filterSchema', () => {
     it('validates a valid KQL filter', () => {
       const input = {
-        language: 'kuery' as const,
+        language: 'kql',
         expression: 'status:active AND category:electronics',
       };
 
@@ -23,7 +23,7 @@ describe('Filter Schemas', () => {
 
     it('validates a valid Lucene filter', () => {
       const input = {
-        language: 'lucene' as const,
+        language: 'lucene',
         expression: 'status:active AND category:electronics',
       };
 
@@ -33,7 +33,7 @@ describe('Filter Schemas', () => {
 
     it('throws on invalid language', () => {
       const input = {
-        language: 'invalid' as const,
+        language: 'invalid',
         expression: 'status:active',
       };
 
@@ -42,7 +42,7 @@ describe('Filter Schemas', () => {
 
     it('throws on missing expression', () => {
       const input = {
-        language: 'kuery' as const,
+        language: 'kql',
       };
 
       expect(() => filterSchema.validate(input)).toThrow(/\[expression\]: expected value of type/);
@@ -53,7 +53,7 @@ describe('Filter Schemas', () => {
     it('validates a filter with label', () => {
       const input = {
         filter: {
-          language: 'kuery' as const,
+          language: 'kql',
           expression: 'status:active',
         },
         label: 'Active Status',
@@ -66,7 +66,7 @@ describe('Filter Schemas', () => {
     it('validates a filter without label', () => {
       const input = {
         filter: {
-          language: 'lucene' as const,
+          language: 'lucene',
           expression: 'status:active',
         },
       };
@@ -86,7 +86,7 @@ describe('Filter Schemas', () => {
     it('throws on invalid filter', () => {
       const input = {
         filter: {
-          language: 'invalid' as const,
+          language: 'invalid',
           expression: 'status:active',
         },
         label: 'Active Status',
@@ -98,7 +98,7 @@ describe('Filter Schemas', () => {
     it('validates complex KQL queries', () => {
       const input = {
         filter: {
-          language: 'kuery' as const,
+          language: 'kql',
           expression: 'status:active OR (category:electronics AND price >= 100)',
         },
         label: 'Complex Filter',
@@ -111,7 +111,7 @@ describe('Filter Schemas', () => {
     it('validates complex Lucene queries', () => {
       const input = {
         filter: {
-          language: 'lucene' as const,
+          language: 'lucene',
           expression: 'status:active OR (category:electronics AND price:[100 TO *])',
         },
         label: 'Complex Filter',

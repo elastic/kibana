@@ -32,7 +32,6 @@ import {
   waffleLegacyESQLState,
 } from './lens_state_config.mock';
 import type { LensPartitionVisualizationState } from '@kbn/lens-common';
-import { query } from 'express';
 
 describe('Partition', () => {
   describe('validateConverter', () => {

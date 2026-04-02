@@ -17,7 +17,7 @@ describe('Filters Transforms', () => {
       const input: LensApiFiltersOperation = {
         operation: 'filters',
         filters: [
-          { filter: { language: 'kuery', expression: 'status:active' }, label: 'Active' },
+          { filter: { language: 'kql', expression: 'status:active' }, label: 'Active' },
           { filter: { language: 'lucene', expression: 'status:inactive' } },
         ],
       };
@@ -78,7 +78,7 @@ describe('Filters Transforms', () => {
       expect(result.operation).toBe('filters');
       expect(result.label).toBe('Filters');
       expect(result.filters).toHaveLength(2);
-      expect(result.filters[0].filter).toEqual({ language: 'kuery', expression: 'status:active' });
+      expect(result.filters[0].filter).toEqual({ language: 'kql', expression: 'status:active' });
       expect(result.filters[0].label).toBe('Active');
       expect(result.filters[1].filter).toEqual({
         language: 'lucene',

@@ -43,7 +43,7 @@ import type { LensApiFilterType } from '../schema/filter';
 import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
 import type { LayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
-import { fromFilterLensStateToAPI } from './columns/filter';
+import { fromFilterLensStateToAPI, toLensStateFilterLanguage } from './columns/filter';
 
 export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -610,7 +610,10 @@ function extractFilterReferences(filters: Filter[], references: SavedObjectRefer
 }
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
-  return { query: query.expression, language: query.language as 'kuery' | 'lucene' };
+  return {
+    query: query.expression,
+    language: toLensStateFilterLanguage(query.language),
+  };
 };
 
 export const filtersAndQueryToApiFormat = (

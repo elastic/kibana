@@ -1158,7 +1158,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   ],
   query: {
     expression: 'test: true',
-    language: 'kuery',
+    language: 'kql',
   },
 };
 
@@ -1254,7 +1254,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   ],
   query: {
     expression: 'test: true',
-    language: 'kuery',
+    language: 'kql',
   },
 };
 
@@ -1345,6 +1345,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   ],
   query: {
     expression: 'test: true',
-    language: 'kuery',
+    language: 'kql',
   },
 };

@@ -692,7 +692,7 @@ describe('filtersAndQueryToApiFormat', () => {
         ],
         "query": Object {
           "expression": "brand: \\"apple\\"",
-          "language": "kuery",
+          "language": "kql",
         },
       }
     `);

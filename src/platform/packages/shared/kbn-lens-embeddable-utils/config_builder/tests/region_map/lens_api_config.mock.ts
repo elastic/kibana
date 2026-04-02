@@ -124,7 +124,7 @@ export const comprehensiveRegionMapWithAdHocDataView = {
       {
         filter: {
           expression: 'geo.dest : "US"',
-          language: 'kuery',
+          language: 'kql',
         },
         label: 'US',
       },
@@ -158,7 +158,7 @@ export const comprehensiveRegionMapWithDataView = {
       {
         filter: {
           expression: 'geo.dest : "US"',
-          language: 'kuery',
+          language: 'kql',
         },
         label: 'US',
       },

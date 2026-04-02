@@ -64,7 +64,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -117,7 +117,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -165,7 +165,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -211,7 +211,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -258,7 +258,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -323,7 +323,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -389,7 +389,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -450,7 +450,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -510,7 +510,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -587,7 +587,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -664,7 +664,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -723,7 +723,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -783,7 +783,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -860,7 +860,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -970,7 +970,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -1042,7 +1042,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -1153,7 +1153,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -1247,7 +1247,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -1341,7 +1341,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -1421,7 +1421,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
@@ -1585,7 +1585,7 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
     query: {
       expression: 'test: true',
-      language: 'kuery',
+      language: 'kql',
     },
   },
   {
