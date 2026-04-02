@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Streams } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
+import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/sig_events/use_stream_features_api';
@@ -42,6 +51,8 @@ export function KnowledgeIndicatorActionsCell({
   const invalidateKnowledgeIndicatorsData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: ['features', definition.name] }),
     ]);
   }, [definition.name, queryClient]);
@@ -153,41 +164,53 @@ export function KnowledgeIndicatorActionsCell({
     ]
   );
 
-  const queryActionItems = useMemo(
-    () =>
-      knowledgeIndicator.kind === 'query'
-        ? [
-            <EuiContextMenuItem
-              key="query-delete"
-              icon="trash"
-              disabled={isActionInProgress}
-              onClick={() => {
-                setIsActionsMenuOpen(false);
-                onDeleteRequest(knowledgeIndicator);
-              }}
-            >
-              {KI_ACTION_DELETE_LABEL}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="query-promote"
-              icon="sortUp"
-              disabled={isActionInProgress || knowledgeIndicator.rule.backed}
-              onClick={() =>
-                withActionLoading(() =>
-                  promoteAction.mutate(knowledgeIndicator.query.id, {
-                    onSettled: () => {
-                      setIsActionInProgress(false);
-                    },
-                  })
-                )
-              }
-            >
-              {KI_ACTION_PROMOTE_LABEL}
-            </EuiContextMenuItem>,
-          ]
-        : [],
-    [isActionInProgress, knowledgeIndicator, onDeleteRequest, promoteAction, withActionLoading]
-  );
+  const queryActionItems = useMemo(() => {
+    if (knowledgeIndicator.kind !== 'query') return [];
+
+    const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
+    const isPromoteDisabled =
+      isActionInProgress || knowledgeIndicator.rule.backed || isStats;
+
+    const promoteMenuItem = (
+      <EuiContextMenuItem
+        key="query-promote"
+        icon="sortUp"
+        disabled={isPromoteDisabled}
+        onClick={() =>
+          withActionLoading(() =>
+            promoteAction.mutate(knowledgeIndicator.query.id, {
+              onSettled: () => {
+                setIsActionInProgress(false);
+              },
+            })
+          )
+        }
+      >
+        {KI_ACTION_PROMOTE_LABEL}
+      </EuiContextMenuItem>
+    );
+
+    return [
+      <EuiContextMenuItem
+        key="query-delete"
+        icon="trash"
+        disabled={isActionInProgress}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          onDeleteRequest(knowledgeIndicator);
+        }}
+      >
+        {KI_ACTION_DELETE_LABEL}
+      </EuiContextMenuItem>,
+      isStats ? (
+        <EuiToolTip key="query-promote-wrapper" content={KI_STATS_PROMOTE_DISABLED_TOOLTIP}>
+          <span>{promoteMenuItem}</span>
+        </EuiToolTip>
+      ) : (
+        promoteMenuItem
+      ),
+    ];
+  }, [isActionInProgress, knowledgeIndicator, onDeleteRequest, promoteAction, withActionLoading]);
 
   return (
     <EuiPopover
@@ -292,5 +315,12 @@ const KI_PROMOTE_ACTION_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsTable.promoteActionErrorToastTitle',
   {
     defaultMessage: 'Failed to promote knowledge indicator',
+  }
+);
+
+const KI_STATS_PROMOTE_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsTable.statsPromoteDisabledTooltip',
+  {
+    defaultMessage: 'STATS queries cannot be promoted to rules yet',
   }
 );

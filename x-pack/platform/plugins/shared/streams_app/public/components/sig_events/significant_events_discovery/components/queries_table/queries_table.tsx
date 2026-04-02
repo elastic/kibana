@@ -81,6 +81,8 @@ import {
   STREAM_COLUMN,
   TABLE_CAPTION,
   TITLE_COLUMN,
+  STATS_DRAFT_BADGE_LABEL,
+  STATS_NOT_PROMOTED_TOOLTIP_CONTENT,
   UNABLE_TO_LOAD_QUERIES_BODY,
   UNABLE_TO_LOAD_QUERIES_TITLE,
   getEventsCount,
@@ -313,15 +315,29 @@ export function QueriesTable() {
         name: BACKED_STATUS_COLUMN,
         width: '120px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
+          const isStats = item.query.type === QUERY_TYPE_STATS;
+          if (item.rule_backed) {
+            return (
+              <EuiToolTip content={PROMOTED_TOOLTIP_CONTENT}>
+                <span tabIndex={0}>
+                  <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>
+                </span>
+              </EuiToolTip>
+            );
+          }
+          if (isStats) {
+            return (
+              <EuiToolTip content={STATS_NOT_PROMOTED_TOOLTIP_CONTENT}>
+                <span tabIndex={0}>
+                  <EuiBadge color="default">{STATS_DRAFT_BADGE_LABEL}</EuiBadge>
+                </span>
+              </EuiToolTip>
+            );
+          }
           return (
-            <EuiToolTip
-              content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
-            >
+            <EuiToolTip content={NOT_PROMOTED_TOOLTIP_CONTENT}>
               <span tabIndex={0}>
-                {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-                {!item.rule_backed && (
-                  <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
-                )}
+                <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
               </span>
             </EuiToolTip>
           );

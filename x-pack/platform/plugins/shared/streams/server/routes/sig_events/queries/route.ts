@@ -201,6 +201,8 @@ const bulkQueriesRoute = createServerRoute({
       operations: z.array(
         z.union([
           z.object({
+            // Note: `type` is accepted by the schema (defaults to 'match') but
+            // always overwritten server-side via deriveQueryType below.
             index: streamQuerySchema,
           }),
           z.object({

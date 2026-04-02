@@ -142,6 +142,15 @@ export async function generateSignificantEvents({
           const startTime = Date.now();
 
           const queries = toolCall.function.arguments.queries;
+          if (!Array.isArray(queries)) {
+            toolUsage.add_queries.failures += 1;
+            return {
+              response: {
+                queries: [],
+                error: 'Invalid payload: "queries" must be an array.',
+              },
+            };
+          }
           let hasFailures = false;
 
           const queryValidationResults = await Promise.all(

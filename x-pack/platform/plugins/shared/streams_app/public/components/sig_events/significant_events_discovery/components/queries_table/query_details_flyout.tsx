@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -25,6 +26,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -226,6 +228,20 @@ export function QueryDetailsFlyout({
         <EuiFlyoutBody>
           {!isEditMode && (
             <EuiFlexGroup direction="column" gutterSize="m">
+              {queryType === QUERY_TYPE_STATS && (
+                <EuiFlexItem grow={false}>
+                  <EuiCallOut
+                    announceOnMount
+                    title={STATS_CALLOUT_TITLE}
+                    color="primary"
+                    iconType="info"
+                    size="s"
+                  >
+                    <p>{STATS_CALLOUT_DESCRIPTION}</p>
+                  </EuiCallOut>
+                  <EuiSpacer size="s" />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <InfoPanel title={QUERY_INFORMATION_TITLE}>
                   {infoListItems.map((listItem, index) => (
@@ -475,6 +491,19 @@ const NO_OCCURRENCES_STATS_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesStatsDescription',
   {
     defaultMessage:
-      'No threshold breaches detected. The condition may not have been met in the observed time range.',
+      'This STATS query is not yet monitored in the background. Use "Open in Discover" to preview its results.',
+  }
+);
+
+const STATS_CALLOUT_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.statsCalloutTitle',
+  { defaultMessage: 'STATS query' }
+);
+
+const STATS_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.statsCalloutDescription',
+  {
+    defaultMessage:
+      'STATS queries detect aggregate patterns like rising error rates or latency spikes. They cannot be promoted to background scanning rules yet.',
   }
 );

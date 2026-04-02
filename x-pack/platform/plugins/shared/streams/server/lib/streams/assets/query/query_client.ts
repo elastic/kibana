@@ -315,6 +315,8 @@ function toQueryLinkFromQuery({
   stream: string;
   ruleBacked?: boolean;
 }): QueryLink {
+  // STATS queries are stored as drafts (rule_backed=false) because they cannot
+  // be promoted to alerting rules yet. promoteQueries explicitly skips them.
   const effectiveRuleBacked = query.type === QUERY_TYPE_STATS ? false : ruleBacked;
   const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
@@ -728,6 +730,8 @@ export class QueryClient {
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
       } else if (!currentLink.rule_backed) {
+        // Non-rule-backed queries (STATS or pre-promotion match queries): keep
+        // them in storage with updated content but skip rule create/update.
         allNextQueryLinks.push({ ...currentLink, query });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
@@ -891,8 +895,8 @@ export class QueryClient {
 
     const skippedStats = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
     if (skippedStats.length > 0) {
-      this.dependencies.logger.debug(
-        `Skipping ${skippedStats.length} STATS queries from promotion (not yet supported as rules).`
+      this.dependencies.logger.info(
+        `Skipping ${skippedStats.length} STATS queries from promotion for stream "${streamName}" (not yet supported as rules).`
       );
     }
 

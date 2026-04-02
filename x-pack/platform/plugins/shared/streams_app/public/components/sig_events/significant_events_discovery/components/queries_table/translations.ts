@@ -134,6 +134,21 @@ export const NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
+export const STATS_DRAFT_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.statsDraftBadgeLabel',
+  {
+    defaultMessage: 'Draft',
+  }
+);
+
+export const STATS_NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.statsNotPromotedTooltipContent',
+  {
+    defaultMessage:
+      'STATS queries cannot be promoted to background scanning rules yet. Use "Open in Discover" to preview results.',
+  }
+);
+
 export const getPromoteAllCalloutTitle = (count: number) =>
   i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle', {
     defaultMessage:

@@ -83,7 +83,10 @@ export class QueryService {
             ) {
               try {
                 featureFilter = JSON.parse(featureFilterJson) as Condition;
-              } catch {
+              } catch (parseError) {
+                this.logger.warn(
+                  `Failed to parse featureFilter JSON during migration for stream "${migrated[STREAM_NAME]}": ${parseError instanceof Error ? parseError.message : String(parseError)}`
+                );
                 featureFilter = undefined;
               }
             }
@@ -115,8 +118,10 @@ export class QueryService {
           if (derivedType !== QUERY_TYPE_STATS) {
             try {
               migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
-            } catch {
-              // Corrupt ES|QL that can't be parsed; leave unchanged to avoid blocking migration.
+            } catch (metadataError) {
+              this.logger.warn(
+                `ensureMetadata failed during migration for stream "${migrated[STREAM_NAME]}", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${metadataError instanceof Error ? metadataError.message : String(metadataError)}`
+              );
             }
           }
 

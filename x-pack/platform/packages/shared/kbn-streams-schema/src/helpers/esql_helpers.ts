@@ -178,11 +178,22 @@ export function deriveQueryType(esql: string): QueryType {
 
 // Detects `<var> * <number> / <var>` — a rate computation — regardless of variable names.
 const RATE_PATTERN = /\b\w+\s*\*\s*[\d.]+\s*\/\s*\w+\b/i;
-// Detects any `<identifier> > <number>` guard in a WHERE clause after STATS.
-const SAMPLE_SIZE_FLOOR_PATTERN = /\bWHERE\b[^|]*\b\w+\s*>\s*\d+/i;
+
+// Matches `<identifier> > <number>` or `<identifier> >= <number>` in the portion
+// of the query AFTER the STATS command. This avoids false positives from unrelated
+// WHERE conditions before STATS (e.g., `WHERE status > 500`).
+const SAMPLE_SIZE_FLOOR_PATTERN = /\b\w+\s*>=?\s*\d+/i;
 
 function checkSampleSizeFloor(esql: string, hints: string[]): void {
-  if (RATE_PATTERN.test(esql) && !SAMPLE_SIZE_FLOOR_PATTERN.test(esql)) {
+  if (!RATE_PATTERN.test(esql)) return;
+
+  // Only inspect the portion after `| STATS` for the floor guard, since
+  // pre-STATS WHERE clauses contain unrelated filter predicates.
+  const statsIdx = esql.search(/\|\s*STATS\b/i);
+  const postStats = statsIdx >= 0 ? esql.slice(statsIdx) : esql;
+  const postStatsWhere = postStats.match(/\bWHERE\b(.*)/is);
+
+  if (!postStatsWhere || !SAMPLE_SIZE_FLOOR_PATTERN.test(postStatsWhere[1])) {
     hints.push(
       'Warning: This query computes a rate but has no sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance rates that trigger false alerts.'
     );
@@ -362,9 +373,10 @@ export function extractBucketColumnName(esql: string): string | null {
     }
   }
 
-  // Regex fallback for cases where the AST doesn't expose the alias
+  // Regex fallback for cases where the AST doesn't expose the alias.
+  // Supports dotted identifiers (e.g. `foo.bar = BUCKET(...)`).
   const match = esql.match(
-    /(\w+)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i
+    /([\w.]+)\s*=\s*(?:BUCKET|TBUCKET)\s*\(/i
   );
   return match?.[1] ?? null;
 }

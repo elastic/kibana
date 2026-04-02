@@ -52,6 +52,8 @@ function stripLimitCommand(esql: string): string {
 }
 
 /**
+ * Builds the histogram query for match-type previews.
+ *
  * Takes the user's ES|QL query (which already contains FROM + WHERE), strips
  * everything after the WHERE clause, and appends
  * STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, <interval>)
@@ -59,6 +61,9 @@ function stripLimitCommand(esql: string): string {
  *
  * CHANGE_POINT silently returns no change-point columns when there are
  * insufficient data points (< 22 buckets), so it is always included.
+ *
+ * For STATS-type queries the user's own aggregation pipeline is executed
+ * directly — see {@link previewStatsQuery}.
  */
 function buildHistogramQuery(esqlQuery: string, bucketSize: string): string {
   let root;
@@ -298,6 +303,12 @@ async function previewStatsQuery(
     ? response.columns.find((col) => col.name === astBucketName)
     : response.columns.find((col) => col.name === '@timestamp' && col.type === 'date') ??
       response.columns.find((col) => col.type === 'date');
+
+  if (!bucketCol && firingCount > 0) {
+    logger?.warn(
+      `STATS preview returned ${firingCount} firing rows but no temporal bucket column could be resolved (astBucketName=${astBucketName ?? 'null'}, columns=${response.columns.map((c) => c.name).join(', ')}). Sparkline will be empty.`
+    );
+  }
 
   if (bucketCol) {
     const bucketIdx = response.columns.indexOf(bucketCol);

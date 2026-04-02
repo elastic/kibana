@@ -173,7 +173,7 @@ Note: The last query has no `evidence` because it's inferred from high-confidenc
 ```
 >>> ACTION: add_queries(queries=[
   {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries.", "esql": "FROM logs | WHERE body.text:\"connection refused\" AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "evidence": ["body.text: \"connection refused to users-db:5432\""]},
-  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health and recent deployments.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level == \"ERROR\", total = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65}
+  {"title": "Error rate spike", "type": "stats", "description": "Detects when the 5-minute error rate exceeds 10%, double the observed 5% baseline. Responder should check service health and recent deployments.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level == \"ERROR\", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 5 minutes) | EVAL error_rate = errors * 100.0 / total | WHERE total > 20 AND error_rate > 10", "category": "error", "severity_score": 65}
 ])
 ```
 
@@ -340,10 +340,16 @@ The optional `evidence` field grounds your queries in stream features. Include e
 
 ## ES|QL Query Reference
 
-You generate complete ES|QL queries. Every query MUST follow this structure:
+You generate complete ES|QL queries. There are two structural forms depending on query type:
 
+**Match queries** (document-level detection):
 ```
 FROM logs | WHERE <filtering_expression>
+```
+
+**STATS queries** (aggregation-based detection):
+```
+FROM logs | STATS <aggregations> BY <time_bucket> | [EVAL <computed>] | WHERE <threshold>
 ```
 
 Always use `FROM logs` as the source clause. The system will automatically replace it with the correct sources and metadata for the target stream.

@@ -206,6 +206,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       params: { kind: ['feature'] },
     });
 
-    expect(logger.debug).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 });
