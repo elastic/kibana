@@ -73,6 +73,7 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
@@ -93,6 +94,8 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
+  /** When true, panel state uses Discover session API format (discover_session_id, session tabs). */
+  getEmbeddableTransformsEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -208,6 +211,8 @@ export const buildServices = ({
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, false),
       getIsEsqlDefault: () =>
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+      getEmbeddableTransformsEnabled: () =>
+        core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
@@ -259,6 +264,9 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     cps: plugins.cps,
-    embeddableEditor: new EmbeddableEditorService(plugins.embeddable.getStateTransfer()),
+    embeddableEditor: new EmbeddableEditorService(
+      plugins.embeddable.getStateTransfer(),
+      core.application
+    ),
   };
 };
