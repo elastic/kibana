@@ -107,6 +107,14 @@ async function loadEndpoints({
       request
     );
     result.warnings.forEach((w) => logger.warn(w));
+
+    if (!result.soEntryFound) {
+      logger.debug(
+        'No saved-object configuration found for Observability AI Assistant inference endpoints; falling back'
+      );
+      return null;
+    }
+
     return result;
   } catch (error) {
     logger.warn(

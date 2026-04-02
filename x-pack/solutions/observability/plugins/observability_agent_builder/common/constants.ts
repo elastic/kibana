@@ -8,6 +8,11 @@
 // Agent IDs
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
+// Inference Feature Registry IDs
+export const OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID = 'observability';
+export const OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID =
+  'observability_ai_settings_subfeature';
+
 // Attachment type IDs
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';

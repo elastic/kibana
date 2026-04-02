@@ -6,6 +6,7 @@
  */
 
 export const OBSERVABILITY_AI_ASSISTANT_FEATURE_ID = 'observabilityAIAssistant';
-export const OBSERVABILITY_AI_ASSISTANT_INFERENCE_FEATURE_ID = 'observability_ai_assistant';
-export const OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID =
-  'observability_ai_assistant_subfeature';
+export const OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID = 'observability';
+export const OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID =
+  'observability_ai_settings_subfeature';
+

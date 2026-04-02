@@ -9,7 +9,7 @@ import type { InferenceFeatureConfig } from '@kbn/search-inference-endpoints/ser
 import {
   OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
   OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
-} from '../common/feature';
+} from '../common/constants';
 
 export const observabilityParentFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
@@ -19,7 +19,7 @@ export const observabilityParentFeature: InferenceFeatureConfig = {
   recommendedEndpoints: [],
 };
 
-const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
+const observabilityAiInsightsChatCompletionFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
   parentFeatureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
   featureName: 'Observability AI Settings',
@@ -29,6 +29,6 @@ const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
   recommendedEndpoints: [],
 };
 
-export const observabilityAIAssistantInferenceFeatures: InferenceFeatureConfig[] = [
-  observabilityAIAssistantChatCompletionFeature,
+export const observabilityAiInsightsInferenceFeatures: InferenceFeatureConfig[] = [
+  observabilityAiInsightsChatCompletionFeature,
 ];
