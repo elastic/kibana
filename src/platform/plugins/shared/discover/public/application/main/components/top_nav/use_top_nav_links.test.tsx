@@ -441,12 +441,8 @@ describe('useTopNavLinks', () => {
       const esqlConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
       const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
-      expect(
-        esqlConfig.items?.find((item) => item.id === AppMenuActionId.alerts)
-      ).toBeDefined();
-      expect(
-        classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts)
-      ).toBeDefined();
+      expect(esqlConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
+      expect(classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
     });
   });
 });
