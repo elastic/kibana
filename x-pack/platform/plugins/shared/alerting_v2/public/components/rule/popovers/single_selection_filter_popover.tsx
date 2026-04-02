@@ -93,6 +93,7 @@ export const SingleSelectionFilterPopover = ({
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      repositionOnScroll
       button={
         <EuiFilterButton
           iconType="arrowDown"
