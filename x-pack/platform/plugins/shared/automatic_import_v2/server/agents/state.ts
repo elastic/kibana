@@ -62,3 +62,6 @@ export const AutomaticImportAgentState = Annotation.Root({
 });
 
 export type AutomaticImportAgentStateType = typeof AutomaticImportAgentState.State;
+
+/** Partial state updates accepted by `createAutomaticImportAgent(...).invoke()` */
+export type AutomaticImportAgentStateUpdateType = typeof AutomaticImportAgentState.Update;

@@ -6,6 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  DEFAULT_ARTIFACT_VALUE_LIMIT,
+  ARTIFACT_VALUE_LIMITS,
+  MAX_ARTIFACT_VALUE_LIMIT,
+} from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration } from './validation';
 import { durationSchema } from './common';
 import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
@@ -178,9 +183,20 @@ const artifactSchema = z
   .object({
     id: z.string().min(1).max(256).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
-    value: z.string().min(1).max(1024).describe('Artifact value.'),
+    value: z.string().min(1).max(MAX_ARTIFACT_VALUE_LIMIT).describe('Artifact value.'),
   })
-  .strict();
+  .strict()
+  .check((ctx) => {
+    const limit = ARTIFACT_VALUE_LIMITS[ctx.value.type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT;
+    if (ctx.value.value.length > limit) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['value'],
+        message: `Artifact value must be at most ${limit} characters for type "${ctx.value.type}".`,
+        input: ctx.value.value,
+      });
+    }
+  });
 
 /** Create rule API schema */
 
@@ -261,7 +277,7 @@ export const updateRuleDataSchema = z
       .strict()
       .optional(),
     recovery_policy: recoveryPolicySchema.optional().nullable(),
-    state_transition: stateTransitionSchema,
+    state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).optional().nullable(),

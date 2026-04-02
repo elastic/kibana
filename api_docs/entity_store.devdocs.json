@@ -177,7 +177,7 @@
             "section": "def-common.IdentitySourceFields",
             "text": "IdentitySourceFields"
           },
-          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
@@ -488,7 +488,7 @@
           "\nEUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.\nAligns with the {@link euid} object from this module."
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 105,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -517,14 +517,14 @@
                 "section": "def-common.IdentitySourceFields",
                 "text": "IdentitySourceFields"
               },
-              "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+              "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
               "QueryDslQueryContainer",
               "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
               "QueryDslQueryContainer",
               "; }; }"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-            "lineNumber": 110,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -870,14 +870,14 @@
             "section": "def-common.IdentitySourceFields",
             "text": "IdentitySourceFields"
           },
-          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
           "QueryDslQueryContainer",
           "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
           "QueryDslQueryContainer",
           "; }; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
-        "lineNumber": 102,
+        "lineNumber": 108,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -956,8 +956,252 @@
     ]
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.ResolutionClient",
+        "type": "Class",
+        "tags": [],
+        "label": "ResolutionClient",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ logger, esClient, namespace }",
+                "description": [],
+                "signature": [
+                  "ResolutionClientOpts"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 67,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.linkEntities",
+            "type": "Function",
+            "tags": [],
+            "label": "linkEntities",
+            "description": [
+              "\nLinks one or more entities to a target entity by setting resolved_to.\nValidates chain prevention (can't link an alias) and has-aliases prevention\n(can't link an entity that has aliases pointing to it)."
+            ],
+            "signature": [
+              "(targetId: string, rawEntityIds: string[]) => Promise<",
+              "LinkResult",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.linkEntities.$1",
+                "type": "string",
+                "tags": [],
+                "label": "targetId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 78,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.linkEntities.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rawEntityIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 78,
+                "columnNumber": 47,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.unlinkEntities",
+            "type": "Function",
+            "tags": [],
+            "label": "unlinkEntities",
+            "description": [
+              "\nUnlinks alias entities by removing their resolved_to field.\nUnlinked entities become standalone."
+            ],
+            "signature": [
+              "(rawEntityIds: string[]) => Promise<",
+              "UnlinkResult",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.unlinkEntities.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rawEntityIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 147,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.getResolutionGroup",
+            "type": "Function",
+            "tags": [],
+            "label": "getResolutionGroup",
+            "description": [
+              "\nReturns the resolution group for any entity (target or alias).\nStandalone entities return as the target with empty aliases."
+            ],
+            "signature": [
+              "(entityId: string) => Promise<",
+              "ResolutionGroup",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.getResolutionGroup.$1",
+                "type": "string",
+                "tags": [],
+                "label": "entityId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 190,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldValue",
+        "description": [],
+        "signature": [
+          "(doc: any, field: string) => string | undefined"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getFieldValue.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+            "lineNumber": 40,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getFieldValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+            "lineNumber": 40,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "entityStore",
         "id": "def-server.getHistorySnapshotIndexPattern",
@@ -1392,7 +1636,7 @@
       "label": "EntityStoreSetupContract",
       "description": [],
       "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-      "lineNumber": 81,
+      "lineNumber": 82,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1416,7 +1660,7 @@
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
-          "lineNumber": 82,
+          "lineNumber": 83,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1518,6 +1762,68 @@
               "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
               "lineNumber": 78,
               "columnNumber": 53,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "entityStore",
+          "id": "def-server.EntityStoreStartContract.createResolutionClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createResolutionClient",
+          "description": [],
+          "signature": [
+            "(esClient: ",
+            "ElasticsearchClient",
+            ", namespace: string) => ",
+            {
+              "pluginId": "entityStore",
+              "scope": "server",
+              "docId": "kibEntityStorePluginApi",
+              "section": "def-server.ResolutionClient",
+              "text": "ResolutionClient"
+            }
+          ],
+          "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+          "lineNumber": 79,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createResolutionClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "esClient",
+              "description": [],
+              "signature": [
+                "ElasticsearchClient"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 79,
+              "columnNumber": 28,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createResolutionClient.$2",
+              "type": "string",
+              "tags": [],
+              "label": "namespace",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 79,
+              "columnNumber": 59,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true

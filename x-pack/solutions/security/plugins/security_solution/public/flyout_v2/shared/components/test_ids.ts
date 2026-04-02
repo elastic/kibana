@@ -26,6 +26,8 @@ export const TITLE_HEADER_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSu
 export const TITLE_HEADER_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const TITLE_LINK_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}LinkIcon`;
 export const ALERT_SUMMARY_PANEL_TEST_ID = `${PREFIX}HeaderAlertSummaryPanel` as const;
+export const STATUS_TITLE_TEST_ID = `${PREFIX}HeaderStatusTitle` as const;
+export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
 export const RISK_SCORE_TITLE_TEST_ID = `${PREFIX}HeaderRiskScoreTitle` as const;
 export const RISK_SCORE_VALUE_TEST_ID = `${PREFIX}HeaderRiskScoreValue` as const;
 export const ASSIGNEES_TITLE_TEST_ID = `${PREFIX}HeaderAssigneesTitle` as const;

@@ -32,6 +32,7 @@
     "@kbn/react-query",
     "@kbn/search-types",
     "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-constants",
     "@kbn/yaml-rule-editor",
     "@kbn/code-editor",
     "@kbn/monaco",
@@ -41,7 +42,7 @@
     "@kbn/lens-plugin",
     "@kbn/visualization-utils",
     "@kbn/expressions-plugin",
-    "@kbn/alerting-v2-constants"
+    "@kbn/alerting-v2-constants",
   ]
 }
 

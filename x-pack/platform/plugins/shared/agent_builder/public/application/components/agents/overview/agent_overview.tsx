@@ -52,7 +52,7 @@ export const AgentOverview: React.FC = () => {
 
   const { manageAgents, isAdmin } = useUiPrivileges();
   const hasConnectorsPrivileges = useHasConnectorsAllPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser();
 
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills } = useSkillsService();
@@ -62,14 +62,13 @@ export const AgentOverview: React.FC = () => {
 
   const canEditAgent = useMemo(() => {
     if (!manageAgents || !agent) return false;
-    if (!isExperimentalFeaturesEnabled) return true;
     return hasAgentWriteAccess({
       visibility: agent.visibility,
       owner: agent.created_by,
       currentUser: currentUser ?? undefined,
       isAdmin,
     });
-  }, [manageAgents, agent, isExperimentalFeaturesEnabled, currentUser, isAdmin]);
+  }, [manageAgents, agent, currentUser, isAdmin]);
 
   const canChangeVisibility = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;

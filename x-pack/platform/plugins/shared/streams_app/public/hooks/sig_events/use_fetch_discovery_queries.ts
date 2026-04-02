@@ -130,7 +130,7 @@ export const useFetchDiscoveryQueries = (
       query,
       page,
       perPage,
-      status,
+      status?.join(','),
       ...deps,
     ],
     queryFn: fetchDiscoveryQueries,

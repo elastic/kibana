@@ -18,7 +18,6 @@ import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
 import { internalPromptsRoutes } from './internal/sig_events/prompts/route';
 import { internalSignificantEventsRoutes } from './internal/sig_events/significant_events/route';
-import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { significantEventsRoutes } from './sig_events/streams/significant_events/route';
 import { queryRoutes } from './sig_events/queries/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
@@ -46,7 +45,6 @@ export const streamsRouteRepository = {
   ...timeSeriesRoutes,
   ...internalPromptsRoutes,
   ...internalSignificantEventsRoutes,
-  ...internalSignificantEventsSettingsRoutes,
   ...internalIngestRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,
