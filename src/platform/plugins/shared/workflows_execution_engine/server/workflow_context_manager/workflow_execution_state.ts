@@ -11,6 +11,16 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
+/**
+ * Step types whose outputs must never be evicted from in-memory state,
+ * even for non-latest iterations in a loop.
+ *
+ * - data.set: getVariables reads all executions, not just the latest
+ * - waitForInput: user-provided answers must be preserved for auditability
+ *   and downstream access across all loop iterations
+ */
+const EVICTION_EXEMPT_STEP_TYPES = new Set(['data.set', 'waitForInput']);
+
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
@@ -191,6 +201,8 @@ export class WorkflowExecutionState {
    * Preserves:
    * - The latest execution per stepId (needed by getContext → getLatestStepExecution)
    * - All data.set step outputs (needed by getVariables which reads all executions)
+   * - All waitForInput step outputs (user-provided values that must be preserved for
+   *   auditability and downstream access across all iterations)
    * - All metadata fields (needed by telemetry at terminal state)
    *
    * Note: eviction uses global-latest-wins semantics — it keeps the absolute latest
@@ -209,7 +221,7 @@ export class WorkflowExecutionState {
         const staleIds = executionIds.slice(0, -1);
         for (const execId of staleIds) {
           const stepExec = this.stepExecutions.get(execId);
-          if (stepExec && stepExec.stepType !== 'data.set') {
+          if (stepExec && !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType)) {
             stepExec.output = undefined;
             stepExec.input = undefined;
           }
