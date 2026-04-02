@@ -2753,7 +2753,7 @@
             }
           }
         },
-        "elasticRamen": {
+        "elasticConsole": {
           "properties": {
             "appId": {
               "type": "keyword",
