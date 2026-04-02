@@ -41,6 +41,7 @@ import type {
 } from '../../routes/schemas/alerting_schema';
 import type {
   AlertExecutionResult,
+  FormattedRecordAnomalyAlertDoc,
   InfluencerAnomalyAlertDoc,
   PreviewResponse,
   PreviewResultsKeys,
@@ -665,7 +666,7 @@ export function alertingServiceProvider(
             ),
             unique_key: getRecordKey(h._source),
           };
-        }) as RecordAnomalyAlertDoc[],
+        }) as FormattedRecordAnomalyAlertDoc[],
         topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
           return {
             ...h._source,
