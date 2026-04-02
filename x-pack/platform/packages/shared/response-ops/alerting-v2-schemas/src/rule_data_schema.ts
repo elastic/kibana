@@ -296,6 +296,13 @@ export const findRulesResponseSchema = z
   })
   .describe('Paginated list of rules.');
 
+/** Rule tags response schema. */
+export const ruleTagsResponseSchema = z
+  .object({
+    tags: z.array(z.string()).describe('The list of unique rule tags.'),
+  })
+  .describe('All unique tags across rules.');
+
 /** Bulk operation response schema. */
 export const bulkOperationResponseSchema = z
   .object({

@@ -10,6 +10,7 @@ import type { KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Response } from '@kbn/core-di-server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { ruleTagsResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -30,7 +31,18 @@ export class GetRuleTagsRoute {
     tags: ['oas-tag:alerting-v2'],
     availability: { stability: 'experimental' },
   } as const;
-  static validate = {} as const;
+  static validate = {
+    request: {},
+    response: {
+      200: {
+        body: () => ruleTagsResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   constructor(
     @inject(Response) private readonly response: KibanaResponseFactory,
