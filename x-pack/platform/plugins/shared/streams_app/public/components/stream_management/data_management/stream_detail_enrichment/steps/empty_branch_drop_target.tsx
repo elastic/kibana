@@ -31,8 +31,8 @@ export const EmptyBranchDropTarget = ({ parentId, branch, onDrop }: EmptyBranchD
       onDragLeave: () => setIsDraggedOver(false),
       onDrop: ({ source }) => {
         setIsDraggedOver(false);
-        const sourceStepId = source.data.stepId as string;
-        if (sourceStepId) {
+        const sourceStepId = source.data.stepId;
+        if (typeof sourceStepId === 'string' && sourceStepId) {
           onDrop(sourceStepId, parentId, branch === 'else' ? 'inside-else' : 'inside');
         }
       },

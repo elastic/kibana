@@ -59,7 +59,7 @@ export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep
   // If this is a where step, remove condition.steps and condition.else.
   // UI versions of the steps keep a flat array and work off parentId to represent hierarchy.
   if (isConditionBlock(step) && Array.isArray(step.condition.steps)) {
-    const { steps, else: elseSteps, ...conditionWithoutSteps } = step.condition;
+    const { steps, else: _elseSteps, ...conditionWithoutSteps } = step.condition;
     return {
       customIdentifier: id,
       parentId: options.parentId,
@@ -96,7 +96,7 @@ export const convertUIStepsToDSL = (
     };
     // Where block
     if (isConditionBlock(stepObj)) {
-      // Ensure condition is always present and has steps and else
+      // Initialize with empty steps/else arrays for child assignment; empty else is pruned in stripUIProperties
       stepObj.condition = { ...stepObj.condition, steps: [], else: [] };
       idToStep[customIdentifier] = {
         ...stepObj,

@@ -54,6 +54,7 @@ import {
   getActiveDataSourceSamplesFromParent,
   getStepsForSimulation,
   spawnStep,
+  stepHasElseBranch,
   type StepSpawner,
 } from './utils';
 import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
@@ -122,12 +123,11 @@ export const interactiveModeMachine = setup({
           const parentStep = assignArgs.context.stepRefs
             .find((ref) => ref.id === parentId)
             ?.getSnapshot()?.context.step;
-          const hasElseBranch = assignArgs.context.stepRefs.some(
-            (ref) =>
-              ref.getSnapshot()?.context.step.parentId === parentId &&
-              ref.getSnapshot()?.context.step.branch === 'else'
-          );
-          if (parentStep && isConditionBlock(parentStep) && !hasElseBranch) {
+          if (
+            parentStep &&
+            isConditionBlock(parentStep) &&
+            !stepHasElseBranch(assignArgs.context.stepRefs, parentId)
+          ) {
             assignArgs.context.parentRef.send({
               type: 'simulation.filterByConditionAuto',
               conditionId: parentId,
@@ -241,12 +241,11 @@ export const interactiveModeMachine = setup({
 
       const parentStep = context.stepRefs.find((ref) => ref.id === parentId)?.getSnapshot()
         ?.context.step;
-      const hasElseBranch = context.stepRefs.some(
-        (ref) =>
-          ref.getSnapshot()?.context.step.parentId === parentId &&
-          ref.getSnapshot()?.context.step.branch === 'else'
-      );
-      if (parentStep && isConditionBlock(parentStep) && !hasElseBranch) {
+      if (
+        parentStep &&
+        isConditionBlock(parentStep) &&
+        !stepHasElseBranch(context.stepRefs, parentId)
+      ) {
         context.parentRef.send({ type: 'simulation.filterByConditionAuto', conditionId: parentId });
       }
     },

@@ -223,7 +223,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                 </li>
               ))}
             </ConnectedNodesList>
-            {(hasElseBranch || !props.readOnly) && (
+            {(hasElseBranch || (!props.readOnly && ifBranchSteps.length > 0)) && (
               <>
                 <EuiSpacer size="s" />
                 <EuiFlexGroup

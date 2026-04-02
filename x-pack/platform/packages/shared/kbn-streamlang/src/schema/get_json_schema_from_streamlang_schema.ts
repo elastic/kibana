@@ -74,6 +74,22 @@ export function getJsonSchemaFromStreamlangSchema(
  * recursive condition schemas) are kept as-is since they were always references
  * and inlining them would explode the schema size.
  */
+/** Inlines `else.items.$ref` within a schema node's properties if present. */
+function inlineElseRefInProperties(
+  rootSchema: StreamlangJsonSchema,
+  node: Record<string, unknown> | undefined
+): void {
+  const props = node?.properties as Record<string, unknown> | undefined;
+  const elseArr = props?.else as Record<string, unknown> | undefined;
+  const elseItems = elseArr?.items as (Record<string, unknown> & { $ref?: string }) | undefined;
+  if (elseItems && typeof elseItems.$ref === 'string') {
+    const resolved = resolveJsonPointer(rootSchema, elseItems.$ref);
+    if (resolved && elseArr) {
+      elseArr.items = JSON.parse(JSON.stringify(resolved));
+    }
+  }
+}
+
 function inlineStepsItemsRef(schema: StreamlangJsonSchema): void {
   const schemaProps = (schema as Record<string, unknown>).properties as
     | Record<string, unknown>
@@ -93,33 +109,22 @@ function inlineStepsItemsRef(schema: StreamlangJsonSchema): void {
     steps.items = JSON.parse(JSON.stringify(resolved));
   }
 
-  // Also inline else.items.$ref if present inside the condition property
+  // Inline else.items.$ref wherever it appears in condition schemas (including anyOf variants)
   const conditionProp = schemaProps?.condition as Record<string, unknown> | undefined;
-  const conditionProps = conditionProp?.properties as Record<string, unknown> | undefined;
-  const elseArr = conditionProps?.else as Record<string, unknown> | undefined;
-  const elseItems = elseArr?.items as (Record<string, unknown> & { $ref?: string }) | undefined;
-  if (elseItems && typeof elseItems.$ref === 'string') {
-    const resolvedElse = resolveJsonPointer(schema, elseItems.$ref);
-    if (resolvedElse && elseArr) {
-      elseArr.items = JSON.parse(JSON.stringify(resolvedElse));
-    }
-  }
+  inlineElseRefsRecursively(schema, conditionProp);
+}
 
-  // Also check condition's anyOf variants for else.items.$ref
-  const conditionAnyOf = conditionProp?.anyOf as Array<Record<string, unknown>> | undefined;
-  if (Array.isArray(conditionAnyOf)) {
-    for (const variant of conditionAnyOf) {
-      const variantProps = variant?.properties as Record<string, unknown> | undefined;
-      const variantElse = variantProps?.else as Record<string, unknown> | undefined;
-      const variantElseItems = variantElse?.items as
-        | (Record<string, unknown> & { $ref?: string })
-        | undefined;
-      if (variantElseItems && typeof variantElseItems.$ref === 'string') {
-        const resolvedVariantElse = resolveJsonPointer(schema, variantElseItems.$ref);
-        if (resolvedVariantElse && variantElse) {
-          variantElse.items = JSON.parse(JSON.stringify(resolvedVariantElse));
-        }
-      }
+/** Walks a schema node and its anyOf variants to inline all else.items.$ref occurrences. */
+function inlineElseRefsRecursively(
+  rootSchema: StreamlangJsonSchema,
+  node: Record<string, unknown> | undefined
+): void {
+  if (!node) return;
+  inlineElseRefInProperties(rootSchema, node);
+  const anyOf = node.anyOf as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(anyOf)) {
+    for (const variant of anyOf) {
+      inlineElseRefsRecursively(rootSchema, variant);
     }
   }
 }

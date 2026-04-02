@@ -96,6 +96,17 @@ export function getStepsForSimulation({
   return newStepSnapshots.map((snapshot) => snapshot.context.step);
 }
 
+/**
+ * Checks whether any child of the given parent step is in the 'else' branch.
+ */
+export function stepHasElseBranch(stepRefs: StepActorRef[], parentId: string): boolean {
+  return stepRefs.some(
+    (ref) =>
+      ref.getSnapshot()?.context.step.parentId === parentId &&
+      ref.getSnapshot()?.context.step.branch === 'else'
+  );
+}
+
 export function getConfiguredSteps(context: InteractiveModeContext) {
   return context.stepRefs
     .map((proc) => proc.getSnapshot())

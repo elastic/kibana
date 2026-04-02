@@ -242,16 +242,22 @@ export function reorderSteps(
   // 3. Remove the block from the array
   const withoutBlock = [...stepRefs.slice(0, startIndex), ...stepRefs.slice(endIndex)];
 
-  // 4. Get the parentId of the block root
-  const blockRootParentId = stepRefs[startIndex].getSnapshot().context.step.parentId;
+  // 4. Get the parentId and branch of the block root
+  const blockRoot = stepRefs[startIndex].getSnapshot().context.step;
+  const blockRootParentId = blockRoot.parentId;
+  const blockRootBranch = blockRoot.branch ?? 'if';
 
   if (direction === 'up') {
-    // Find the previous block with the same parentId
+    // Find the previous block with the same parentId and branch
     let insertIndex = 0;
     for (let i = startIndex - 1; i >= 0; i--) {
       const candidate = stepRefs[i];
       const candidateStep = candidate.getSnapshot().context.step;
-      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+      if (
+        !allBlockIds.has(candidate.id) &&
+        candidateStep.parentId === blockRootParentId &&
+        (candidateStep.branch ?? 'if') === blockRootBranch
+      ) {
         // Find the start of this previous block in withoutBlock
         const candidateBlockStart = withoutBlock.findIndex((step) => step.id === candidate.id);
         insertIndex = candidateBlockStart;
@@ -262,12 +268,16 @@ export function reorderSteps(
     return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
   } else {
     // direction === 'down'
-    // Find the next block with the same parentId
+    // Find the next block with the same parentId and branch
     let insertIndex = withoutBlock.length;
     for (let i = endIndex; i < stepRefs.length; i++) {
       const candidate = stepRefs[i];
       const candidateStep = candidate.getSnapshot().context.step;
-      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+      if (
+        !allBlockIds.has(candidate.id) &&
+        candidateStep.parentId === blockRootParentId &&
+        (candidateStep.branch ?? 'if') === blockRootBranch
+      ) {
         // Find the end of this next block in withoutBlock
         let candidateBlockEnd = withoutBlock.findIndex((step) => step.id === candidate.id);
         // Find the last descendant of this block

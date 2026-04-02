@@ -142,6 +142,73 @@ apiTest.describe(
     });
 
     apiTest(
+      'documents with missing condition field: ingest else-branch fires, esql excludes from both branches',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              condition: {
+                field: 'attributes.status',
+                eq: 'active',
+                steps: [
+                  {
+                    action: 'set',
+                    to: 'attributes.outcome',
+                    value: 'if_branch',
+                  } as SetProcessor,
+                ],
+                else: [
+                  {
+                    action: 'set',
+                    to: 'attributes.outcome',
+                    value: 'else_branch',
+                  } as SetProcessor,
+                ],
+              },
+            },
+          ],
+        };
+
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
+
+        const mappingDoc = { attributes: { status: 'null', outcome: 'null' } };
+        const docs = [
+          { attributes: { status: 'active' } },
+          { attributes: { status: 'inactive' } },
+          // Document with missing condition field — exposes transpiler divergence
+          { attributes: { other: 'value' } },
+        ];
+
+        await testBed.ingest('ingest-else-missing', docs, processors);
+        const ingestResult = await testBed.getDocsOrdered('ingest-else-missing');
+
+        await testBed.ingest('esql-else-missing', [mappingDoc, ...docs]);
+        const esqlResult = await esql.queryOnIndex('esql-else-missing', query);
+
+        // Active doc: if-branch fires in both transpilers
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.outcome).toBe('if_branch');
+        expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+          expect.objectContaining({ 'attributes.outcome': 'if_branch' })
+        );
+
+        // Inactive doc: else-branch fires in both transpilers
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.outcome).toBe('else_branch');
+        expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+          expect.objectContaining({ 'attributes.outcome': 'else_branch' })
+        );
+
+        // Missing-field doc: KNOWN DIVERGENCE between transpilers
+        // Painless: null check makes inner condition false, NOT(false) = true → else fires
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.outcome).toBe('else_branch');
+        // ES|QL: NULL propagation means NOT(NULL) = NULL → neither branch fires, outcome stays null
+        expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+          expect.objectContaining({ 'attributes.outcome': null })
+        );
+      }
+    );
+
+    apiTest(
       'should produce same results after round-tripping through identifier utilities',
       async ({ testBed, esql }) => {
         const originalDSL: StreamlangDSL = {
