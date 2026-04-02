@@ -17,10 +17,21 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [salesforce-connector-configuration]
 
-Salesforce connectors use OAuth 2.0 Client Credentials and have the following configuration properties:
+The Salesforce connector supports **OAuth 2.0 Client Credentials** and **OAuth 2.0 authorization code** authentication in
+{{kib}}. The fields you fill in depend on which auth type you select.
 
 Token URL
-:   The OAuth 2.0 token endpoint for your Salesforce instance. The value is your **domain name** plus `/services/oauth2/token`. Examples: `https://login.salesforce.com/services/oauth2/token` (production), `https://test.salesforce.com/services/oauth2/token` (sandbox), or `https://yourcompany.my.salesforce.com/services/oauth2/token` (My Domain).
+:   The OAuth 2.0 token endpoint for your Salesforce instance. Use your **domain** plus `/services/oauth2/token`.
+    Examples: `https://login.salesforce.com/services/oauth2/token` (production),
+    `https://test.salesforce.com/services/oauth2/token` (sandbox), or
+    `https://yourcompany.my.salesforce.com/services/oauth2/token` (My Domain).
+
+Authorization URL
+:   Required when you use **OAuth 2.0 authorization code** authentication. Use the same **domain** as for Token URL, with
+    `/services/oauth2/authorize`. Examples: `https://login.salesforce.com/services/oauth2/authorize` (production),
+    `https://test.salesforce.com/services/oauth2/authorize` (sandbox), or
+    `https://yourcompany.my.salesforce.com/services/oauth2/authorize` (My Domain). Omit this when you use client
+    credentials only.
 
 Client ID
 :   The **Consumer Key** from your Salesforce External Client App OAuth settings (see **Get API credentials**).
@@ -28,7 +39,8 @@ Client ID
 Client Secret
 :   The **Consumer Secret** from your Salesforce External Client App OAuth settings.
 
-The connector uses the token URL to both obtain an access token and derive the instance base URL for API calls.
+The connector uses the token URL to obtain access tokens and to derive the instance base URL for API calls. The
+authorization URL is used only for the browser-based authorization step in the authorization code flow.
 
 ## Test connectors [salesforce-action-configuration]
 
@@ -114,9 +126,16 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
     client credentials flow in your org.
 11. Open the app again, scroll to **OAuth Settings**, and select **Consumer Key and Secret**. Use **Consumer Key** as
     **Client ID** and **Consumer Secret** as **Client Secret** in the connector configuration in {{kib}}.
-12. For **Token URL**, use your org’s OAuth token endpoint (**domain** + `/services/oauth2/token`):
+12. For **Token URL**, paste your org’s OAuth token endpoint (**domain** + `/services/oauth2/token`) into the connector
+    in {{kib}}:
     - Production: `https://login.salesforce.com/services/oauth2/token`
     - Sandbox: `https://test.salesforce.com/services/oauth2/token`
     - My Domain: `https://yourcompany.my.salesforce.com/services/oauth2/token`
+13. When you use **OAuth 2.0 authorization code** authentication in {{kib}}, also paste **Authorization URL** using the
+    same **domain** as Token URL with `/services/oauth2/authorize`:
+    - Production: `https://login.salesforce.com/services/oauth2/authorize`
+    - Sandbox: `https://test.salesforce.com/services/oauth2/authorize`
+    - My Domain: `https://yourcompany.my.salesforce.com/services/oauth2/authorize`
+    Skip this when you use **OAuth 2.0 Client Credentials** only.
 
 For more background, search Salesforce Help for **External Client Apps** and the **OAuth 2.0 client credentials flow**.
