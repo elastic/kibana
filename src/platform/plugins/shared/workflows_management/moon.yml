@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/test'
   - '@kbn/tooling-log'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

@@ -85,6 +85,7 @@ dependsOn:
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

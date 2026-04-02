@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-common'
   - '@kbn/cps'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod

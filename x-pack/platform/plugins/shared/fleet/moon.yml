@@ -125,6 +125,7 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/rule-data-utils'
   - '@kbn/doc-links'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod
