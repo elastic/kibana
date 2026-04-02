@@ -60,4 +60,6 @@ export const REMOVED_TYPES: string[] = [
   // Removed in 9.1 https://github.com/elastic/kibana/pull/231084
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
+  // Removed in 9.4 https://github.com/elastic/kibana/pull/260741
+  'streams-significant-events-settings',
 ].sort();
