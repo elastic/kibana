@@ -329,12 +329,15 @@ describe('WorkflowApi', () => {
   });
 
   describe('cancelAllWorkflowExecutions', () => {
-    it('should call POST /api/workflows/workflow/{workflowId}/executions/cancel-all', async () => {
+    it('should call POST /api/workflows/workflow/{workflowId}/executions/cancel_all_active', async () => {
       await api.cancelAllWorkflowExecutions('wf-1');
 
-      expect(http.post).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/executions/cancel-all', {
-        version: VERSION,
-      });
+      expect(http.post).toHaveBeenCalledWith(
+        '/api/workflows/workflow/wf-1/executions/cancel_all_active',
+        {
+          version: VERSION,
+        }
+      );
     });
   });
 
