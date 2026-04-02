@@ -33,7 +33,7 @@ import {
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
-interface EligibleStreamsResponse {
+export interface EligibleStreamsResponse {
   candidates: StreamCandidate[];
   alreadyRunning: StreamClassificationResult['alreadyRunning'];
   upToDate: StreamCandidate[];
