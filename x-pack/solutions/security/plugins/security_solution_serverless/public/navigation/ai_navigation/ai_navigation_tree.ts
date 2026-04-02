@@ -22,7 +22,8 @@ const SOLUTION_NAME = i18n.translate(
 
 export const createAiNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false
+  workflowsUiEnabled: boolean = false,
+  showAlertingV2: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -164,6 +165,19 @@ export const createAiNavigationTree = (
             },
           ],
         },
+        ...(showAlertingV2
+          ? [
+              {
+                id: 'v2_alerting_preview',
+                title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
+                renderAs: 'panelOpener' as const,
+                children: [
+                  { link: 'management:rules' as const },
+                  { link: 'management:notification_policies' as const },
+                ],
+              },
+            ]
+          : []),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [
