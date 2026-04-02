@@ -12,6 +12,7 @@ import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/serve
 import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import { dashboardSmlType } from './dashboard';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const references: SavedObjectReference[] = [
   {
@@ -227,7 +228,7 @@ describe('dashboardSmlType', () => {
       expect.arrayContaining([
         expect.objectContaining({
           uid: 'panel-1',
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
         }),
         expect.objectContaining({
           uid: 'section-1',
@@ -279,7 +280,7 @@ describe('dashboardSmlType', () => {
     expect(attachmentData?.panels).toEqual([
       expect.objectContaining({
         uid: 'panel-3',
-        type: 'lens',
+        type: LENS_EMBEDDABLE_TYPE,
         config: expect.objectContaining({
           attributes: expect.objectContaining({
             type: 'lnsXY',
