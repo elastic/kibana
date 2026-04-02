@@ -222,8 +222,10 @@ export class WorkflowExecutionState {
         for (const execId of staleIds) {
           const stepExec = this.stepExecutions.get(execId);
           if (stepExec?.stepType && !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType)) {
-            stepExec.output = undefined;
-            stepExec.input = undefined;
+            // Replace with a shallow copy so any pending stepDocumentsChanges entry
+            // for this execution is not mutated (it shares the same object reference
+            // when the step was first created via createStep).
+            this.stepExecutions.set(execId, { ...stepExec, output: undefined, input: undefined });
           }
         }
       }

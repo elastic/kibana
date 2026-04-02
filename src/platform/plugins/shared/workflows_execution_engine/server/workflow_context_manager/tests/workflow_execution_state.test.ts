@@ -975,6 +975,43 @@ describe('WorkflowExecutionState', () => {
         // No additional bulk upsert should have been triggered
         expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
       });
+
+      it('should not corrupt a pending flush entry when eviction runs before flush', async () => {
+        // createStep stores the same object ref in both stepExecutions and stepDocumentsChanges.
+        // Eviction must NOT mutate the pending flush entry, otherwise the step will be
+        // upserted to ES with output: undefined, contradicting the "in-memory only" contract.
+        underTest.upsertStep({
+          id: 'exec-1',
+          stepId: 'innerStep',
+          stepType: 'atomic',
+          output: { result: 'iter-0' },
+          input: { idx: 0 },
+        } as unknown as EsWorkflowStepExecution);
+        underTest.upsertStep({
+          id: 'exec-2',
+          stepId: 'innerStep',
+          stepType: 'atomic',
+          output: { result: 'iter-1' },
+          input: { idx: 1 },
+        } as unknown as EsWorkflowStepExecution);
+
+        // Evict BEFORE flushing — the pending entry for exec-1 must still carry its output
+        underTest.evictStaleLoopOutputs(['innerStep']);
+
+        await underTest.flush();
+
+        // exec-1 was pending. Its flush payload must still include the original output/input
+        // because eviction is in-memory-only and must not touch pending ES writes.
+        expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: 'exec-1',
+              output: { result: 'iter-0' },
+              input: { idx: 0 },
+            }),
+          ])
+        );
+      });
     });
 
     describe('error field preservation', () => {
