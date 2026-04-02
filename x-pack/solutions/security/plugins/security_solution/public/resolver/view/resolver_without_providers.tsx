@@ -64,6 +64,7 @@ export const ResolverWithoutProviders = React.memo(
       shouldUpdate,
       filters,
       renderCellActions,
+      onAlertUpdated,
     }: ResolverProps,
     refToForward
   ) {
@@ -135,6 +136,9 @@ export const ResolverWithoutProviders = React.memo(
       selectors.resolverTreeHasNodes(state.analyzer[resolverComponentInstanceID])
     );
     const colorMap = useColors();
+    const handleAlertUpdated = useCallback(() => {
+      onAlertUpdated?.();
+    }, [onAlertUpdated]);
 
     const onShowEvent = useCallback<NodeEventOnClick>(
       ({ documentId, indexName }) =>
@@ -149,6 +153,7 @@ export const ResolverWithoutProviders = React.memo(
                   documentId={documentId}
                   indexName={indexName}
                   renderCellActions={renderCellActions}
+                  onAlertUpdated={handleAlertUpdated}
                 />
               ),
             }),
@@ -159,7 +164,7 @@ export const ResolverWithoutProviders = React.memo(
               size: 's',
             }
           ),
-      [history, overlays, renderCellActions, services, store]
+      [handleAlertUpdated, history, overlays, renderCellActions, services, store]
     );
 
     const onShowPanel = useCallback(() => {

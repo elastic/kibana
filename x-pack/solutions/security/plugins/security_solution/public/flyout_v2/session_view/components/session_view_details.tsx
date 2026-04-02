@@ -52,6 +52,10 @@ export interface SessionViewDetailsProps {
    * Callback function to jump to a specific event in SessionView
    */
   onJumpToEvent: (event: ProcessEvent) => void;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -66,6 +70,7 @@ export const SessionViewDetails = memo(
     investigatedAlertId,
     renderCellActions,
     onJumpToEvent,
+    onAlertUpdated,
   }: SessionViewDetailsProps) => {
     const { services } = useKibana();
     const { overlays } = services;
@@ -84,6 +89,7 @@ export const SessionViewDetails = memo(
                 documentId={alertId}
                 indexName={alertIndex}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
@@ -95,7 +101,7 @@ export const SessionViewDetails = memo(
           }
         );
       },
-      [history, overlays, renderCellActions, services, store]
+      [history, onAlertUpdated, overlays, renderCellActions, services, store]
     );
 
     const handleJumpToEvent = useCallback(

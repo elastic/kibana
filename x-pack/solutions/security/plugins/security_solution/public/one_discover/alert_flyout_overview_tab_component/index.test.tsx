@@ -45,6 +45,7 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
 }));
 
 describe('AlertFlyoutOverviewTab', () => {
+  const onAlertUpdated = jest.fn();
   const servicesMock = {
     core: { overlays: {} },
     uiActions: {
@@ -94,6 +95,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
     });
@@ -139,6 +141,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await servicesPromise;
@@ -174,6 +177,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -205,6 +209,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -241,6 +246,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={Promise.resolve(storeLoading as never)}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -252,6 +258,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={Promise.resolve(storeReady as never)}
+          onAlertUpdated={onAlertUpdated}
         />
       );
       await Promise.resolve();
@@ -279,6 +286,7 @@ describe('AlertFlyoutOverviewTab', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={onAlertUpdated}
         />
       </Router>
     );

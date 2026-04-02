@@ -35,13 +35,6 @@ const DOCUMENT_NOT_FOUND = i18n.translate(
   }
 );
 
-const SOMETHING_WENT_WRONG = i18n.translate(
-  'xpack.securitySolution.flyout.document.overviewWrapper.somethingWentWrong',
-  {
-    defaultMessage: 'Something went wrong.',
-  }
-);
-
 const FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.document.overviewWrapper.fetchError',
   {
@@ -63,9 +56,9 @@ export interface DocumentFlyoutWrapperProps {
    */
   renderCellActions: CellActionRenderer;
   /**
-   * Optional callback invoked after alert mutations to refresh the hosting table.
+   * Callback invoked after alert mutations to refresh parent and current flyouts.
    */
-  onAlertUpdated?: () => void;
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -81,8 +74,10 @@ export const DocumentFlyoutWrapper = memo(
     const isDataViewInvalid =
       status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
 
-    const shouldSkipSearch =
-      isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView;
+    const shouldSkipSearch = useMemo(
+      () => isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView,
+      [dataView, documentId, indexName, isDataViewInvalid, isDataViewLoading]
+    );
 
     const [requestState, hit, refetchDocument] = useEsDocSearch({
       id: documentId ?? '',
@@ -90,8 +85,9 @@ export const DocumentFlyoutWrapper = memo(
       dataView,
       skip: shouldSkipSearch,
     });
+
     const handleAlertUpdated = useCallback(() => {
-      onAlertUpdated?.();
+      onAlertUpdated();
       refetchDocument();
     }, [onAlertUpdated, refetchDocument]);
 
@@ -161,15 +157,7 @@ export const DocumentFlyoutWrapper = memo(
       );
     }
 
-    return (
-      <EuiCallOut
-        announceOnMount
-        color="danger"
-        iconType="warning"
-        title={SOMETHING_WENT_WRONG}
-        data-test-subj="document-overview-something-went-wrong"
-      />
-    );
+    return null;
   }
 );
 

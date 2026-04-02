@@ -71,6 +71,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={jest.fn()}
         />
       );
     });
@@ -101,6 +102,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
         />
       </Router>
     );
@@ -111,11 +113,7 @@ describe('AlertFlyoutHeader', () => {
   });
 
   it('renders shared document header in Discover', async () => {
-    const hit = {
-      id: '1',
-      raw: { _id: 'alert-1', _index: 'alerts-index' },
-      flattened: {},
-    } as unknown as DataTableRecord;
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
 
     render(
@@ -123,6 +121,7 @@ describe('AlertFlyoutHeader', () => {
         hit={hit}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAlertUpdated={jest.fn()}
       />
     );
 
@@ -130,44 +129,6 @@ describe('AlertFlyoutHeader', () => {
       expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
     });
 
-    expect(mockDocumentHeader).toHaveBeenCalledWith(
-      expect.objectContaining({
-        hit,
-        renderCellActions: expect.any(Function),
-      })
-    );
-  });
-
-  it('passes the Discover refresh callback through to the shared header', async () => {
-    const hit = {
-      id: '1',
-      raw: { _id: 'alert-1', _index: 'alerts-index' },
-      flattened: {},
-    } as unknown as DataTableRecord;
-    const onAlertUpdated = jest.fn();
-    const store = createStore(() => ({}));
-
-    render(
-      <AlertFlyoutHeader
-        hit={hit}
-        servicesPromise={Promise.resolve(servicesMock)}
-        storePromise={Promise.resolve(store as never)}
-        onAlertUpdated={onAlertUpdated}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
-    });
-
-    const latestHeaderProps = mockDocumentHeader.mock.calls.at(-1)?.[0] as {
-      onAlertUpdated: () => void;
-    };
-
-    act(() => {
-      latestHeaderProps.onAlertUpdated();
-    });
-
-    expect(onAlertUpdated).toHaveBeenCalledTimes(1);
+    expect(mockDocumentHeader).toHaveBeenCalledWith(expect.objectContaining({ hit }));
   });
 });

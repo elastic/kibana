@@ -116,18 +116,18 @@ export interface SecuritySolutionCellRendererFeature {
   >;
 }
 
-export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
-  id: 'security-solution-alert-flyout-overview-tab';
-  render: (hit: DataTableRecord) => JSX.Element;
+interface SecuritySolutionAlertFlyoutRenderProps extends DocViewRenderProps {
+  onAlertUpdated: () => void;
 }
 
-export interface SecuritySolutionAlertFlyoutHeaderRenderProps extends DocViewRenderProps {
-  onAlertUpdated?: () => void;
+export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
+  id: 'security-solution-alert-flyout-overview-tab';
+  render: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
 export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
   id: 'security-solution-alert-flyout-header-title';
-  renderHeader: (props: SecuritySolutionAlertFlyoutHeaderRenderProps) => JSX.Element;
+  renderHeader: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
 export type SecuritySolutionFeature =

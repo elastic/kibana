@@ -22,9 +22,9 @@ export interface DocumentFlyoutProps {
    */
   renderCellActions: CellActionRenderer;
   /**
-   * Optional callback invoked after alert mutations to refresh the flyout document.
+   * Callback invoked after alert mutations to refresh related flyouts.
    */
-  onAlertUpdated?: () => void;
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -38,7 +38,11 @@ export const DocumentFlyout = memo(
         <Header hit={hit} renderCellActions={renderCellActions} onAlertUpdated={onAlertUpdated} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <OverviewTab hit={hit} renderCellActions={renderCellActions} />
+        <OverviewTab
+          hit={hit}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={onAlertUpdated}
+        />
       </EuiFlyoutBody>
     </>
   )

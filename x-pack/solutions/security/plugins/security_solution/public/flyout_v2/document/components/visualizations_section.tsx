@@ -43,6 +43,10 @@ export interface VisualizationsSectionProps {
    * Optional prop to pass cell action renderer to the analyzer graph.
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -50,7 +54,7 @@ export interface VisualizationsSectionProps {
  * It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(
-  ({ hit, renderCellActions }: VisualizationsSectionProps) => {
+  ({ hit, renderCellActions, onAlertUpdated }: VisualizationsSectionProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -70,7 +74,13 @@ export const VisualizationsSection = memo(
             services,
             store,
             history,
-            children: <AnalyzerGraph hit={hit} renderCellActions={renderCellActions} />,
+            children: (
+              <AnalyzerGraph
+                hit={hit}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
           }),
           {
             ownFocus: false,
@@ -79,7 +89,7 @@ export const VisualizationsSection = memo(
             type: 'overlay',
           }
         ),
-      [history, hit, overlays, renderCellActions, services, store]
+      [history, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
     const onShowSessionView = useCallback(
       () =>
@@ -94,6 +104,7 @@ export const VisualizationsSection = memo(
                 jumpToCursor={sessionViewConfig?.jumpToCursor}
                 jumpToEntityId={sessionViewConfig?.jumpToEntityId}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
@@ -107,6 +118,7 @@ export const VisualizationsSection = memo(
       [
         history,
         hit,
+        onAlertUpdated,
         overlays,
         renderCellActions,
         services,

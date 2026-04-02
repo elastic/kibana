@@ -198,7 +198,9 @@ describe('RowAction', () => {
     expect(flyoutElement.props.documentId).toBe('1');
     expect(flyoutElement.props.indexName).toBeUndefined();
     expect(flyoutElement.props.renderCellActions).toBeDefined();
-    expect(flyoutElement.props.onAlertUpdated).toBe(defaultProps.refetch);
+    expect(flyoutElement.props.onAlertUpdated).toEqual(expect.any(Function));
+    flyoutElement.props.onAlertUpdated();
+    expect(defaultProps.refetch).toHaveBeenCalledTimes(1);
   });
 
   describe('privileges', () => {

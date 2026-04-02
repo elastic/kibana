@@ -112,6 +112,10 @@ const RowActionComponent = ({
   } = useUserPrivileges();
   const showNotes = canReadNotes;
 
+  const handleAlertUpdated = useCallback(() => {
+    refetch?.();
+  }, [refetch]);
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (newFlyoutSystemEnabled && hit) {
       overlays.openSystemFlyout(
@@ -124,7 +128,7 @@ const RowActionComponent = ({
               documentId={eventId}
               indexName={indexName ?? undefined}
               renderCellActions={cellActionRenderer}
-              onAlertUpdated={refetch}
+              onAlertUpdated={handleAlertUpdated}
             />
           ),
         }),
@@ -163,7 +167,7 @@ const RowActionComponent = ({
     store,
     tableId,
     telemetry,
-    refetch,
+    handleAlertUpdated,
   ]);
 
   const toggleShowNotes = useCallback(() => {

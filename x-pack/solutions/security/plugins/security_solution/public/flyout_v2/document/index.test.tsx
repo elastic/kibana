@@ -28,7 +28,11 @@ describe('<DocumentFlyout />', () => {
   it('renders the header and overview tab', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <DocumentFlyout hit={createHit()} renderCellActions={jest.fn()} />
+        <DocumentFlyout
+          hit={createHit()}
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
       </TestProviders>
     );
 

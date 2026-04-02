@@ -23,9 +23,9 @@ export interface AlertFlyoutHeaderProps extends Pick<DocViewRenderProps, 'hit'> 
    */
   storePromise: Promise<SecurityAppStore>;
   /**
-   * Optional callback invoked after alert mutations to refresh the Discover table.
+   * Callback invoked after alert mutations to refresh the Discover table.
    */
-  onAlertUpdated?: () => void;
+  onAlertUpdated: () => void;
 }
 
 export const AlertFlyoutHeader = ({
