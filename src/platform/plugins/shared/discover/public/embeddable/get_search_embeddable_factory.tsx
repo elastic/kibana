@@ -39,8 +39,7 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import type { SearchEmbeddableState } from '../../common/embeddable/types';
-import type { SearchEmbeddableApi } from './types';
+import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
@@ -60,7 +59,7 @@ export const getSearchEmbeddableFactory = ({
   const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: EmbeddableFactory<
-    SearchEmbeddableState,
+    SearchEmbeddablePanelApiState,
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
@@ -71,6 +70,9 @@ export const getSearchEmbeddableFactory = ({
       parentApi,
       uuid,
     }) => {
+      const embeddableTransformsEnabled =
+        discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled();
+
       const runtimeState = await deserializeState({
         serializedState: initialState,
         discoverServices,
@@ -108,9 +110,9 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const titleManager = initializeTitleManager(initialState);
-      const timeRangeManager = initializeTimeRangeManager(initialState);
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const titleManager = initializeTitleManager(runtimeState);
+      const timeRangeManager = initializeTimeRangeManager(runtimeState);
+      const drilldownsManager = await initializeDrilldownsManager(uuid, runtimeState);
       const searchEmbeddable = await initializeSearchEmbeddableApi({
         initialState: runtimeState,
         dataLoading$,
@@ -127,6 +129,7 @@ export const getSearchEmbeddableFactory = ({
           serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
           selectedTabId: selectedTabId$.getValue(),
+          embeddableTransformsEnabled,
         });
 
       const inlineEditingApi = initializeInlineEditingApi({
@@ -139,7 +142,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
       });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
+      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),
@@ -157,6 +160,19 @@ export const getSearchEmbeddableFactory = ({
         getComparators: () => {
           const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
           const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
+
+          if (embeddableTransformsEnabled) {
+            const isByValue = !savedObjectId$.getValue();
+            return {
+              ...drilldownsManager.comparators,
+              ...titleComparators,
+              ...timeRangeComparators,
+              discover_session_id: 'skip',
+              selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
+              overrides: shouldSkipTabComparators ? 'skip' : 'deepEquality',
+              tabs: !isByValue || shouldSkipTabComparators ? 'skip' : 'deepEquality',
+            };
+          }
 
           return {
             ...drilldownsManager.comparators,

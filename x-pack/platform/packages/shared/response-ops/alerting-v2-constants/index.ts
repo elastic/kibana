@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+export * from './src';
+
 export const ALERTING_V2_RULE_API_PATH = '/api/alerting/v2/rules' as const;
 export const ALERTING_V2_ALERT_API_PATH = '/api/alerting/v2/alerts' as const;
 export const ALERTING_V2_NOTIFICATION_POLICY_API_PATH =
   '/api/alerting/v2/notification_policies' as const;
+// KQL private API path for data fields suggestions
+export const INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH =
+  '/internal/notification_policies/suggestions/values' as const;

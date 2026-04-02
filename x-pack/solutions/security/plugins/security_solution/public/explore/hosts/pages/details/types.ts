@@ -15,11 +15,15 @@ import type { hostsModel } from '../../store';
 
 interface HostBodyComponentDispatchProps {
   detailName: string;
+  identityFields?: Record<string, string>;
+  entityId?: string;
   hostDetailsPagePath: string;
 }
 
 export interface HostDetailsProps {
   detailName: string;
+  identityFields?: Record<string, string>;
+  entityId?: string;
   hostDetailsPagePath: string;
 }
 
@@ -40,7 +44,15 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
     indexNames: string[];
     hostDetailsFilter: Filter[];
+    /**
+     * Serialized ES query built with {@link HostDetailsTabsProps.hostDetailsFilter} (identity fields
+     * when Entity Store v2). Used for the Events histogram, Authentications tab, and Risk tab;
+     * other tabs use {@link HostDetailsTabsProps.filterQuery} only.
+     */
+    hostDetailsIdentityFilterQuery?: string;
     filterQuery?: string;
     dataViewSpec?: DataViewSpec;
     type: hostsModel.HostsType;
+    identityFields?: Record<string, string>;
+    entityId?: string;
   };
