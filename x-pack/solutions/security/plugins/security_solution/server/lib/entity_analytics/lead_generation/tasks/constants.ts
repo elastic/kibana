@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('search indices APIs', function () {
-    loadTestFile(require.resolve('./status'));
-  });
-}
+export const TYPE = 'entity_analytics:lead_generation:engine';
+export const VERSION = '1.0.0';
+export const TIMEOUT = '30m';
+export const INTERVAL = '24h';
+export const SCOPE = ['securitySolution'];
