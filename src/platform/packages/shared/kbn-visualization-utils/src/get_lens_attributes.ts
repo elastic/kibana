@@ -10,6 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { LensSavedObjectAttributes } from '@kbn/lens-common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { Suggestion } from './types';
 
 export const getLensAttributesFromSuggestion = ({
@@ -22,18 +24,7 @@ export const getLensAttributesFromSuggestion = ({
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
-}): {
-  references: Array<{ name: string; id: string; type: string }>;
-  visualizationType: string;
-  state: {
-    visualization: {};
-    datasourceStates: Record<string, unknown>;
-    query: Query | AggregateQuery;
-    filters: Filter[];
-  };
-  title: string;
-  version: 2;
-} => {
+}): LensSavedObjectAttributes => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -66,7 +57,7 @@ export const getLensAttributesFromSuggestion = ({
         }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
-    version: 2 as const,
+    version: LENS_ITEM_LATEST_VERSION,
   };
   return attributes;
 };

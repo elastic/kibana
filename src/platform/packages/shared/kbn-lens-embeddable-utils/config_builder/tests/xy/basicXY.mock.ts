@@ -18,6 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const minimalAttributesXY: LensAttributes = {
   visualizationType: 'lnsXY',
@@ -1068,7 +1069,7 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {

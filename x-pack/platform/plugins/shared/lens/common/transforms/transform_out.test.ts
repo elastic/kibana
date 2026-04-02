@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type {
-  LensByValueSerializedState,
-  LensConfigBuilder,
-  MetricVisualizationState,
-} from '@kbn/lens-common';
+import type { LensByValueSerializedState, MetricVisualizationState } from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V3 } from '@kbn/lens-common/content_management/constants';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensAttributesV1 } from '../content_management/v1';
 import type { LensAttributesV2 } from '../content_management/v2';
@@ -26,14 +23,13 @@ const createMetricVisualization = (): MetricVisualizationState => ({
   titleWeight: 'bold',
 });
 
-const createState = (
-  attributes: LensAttributesV1 | LensAttributesV2
-): LensByValueSerializedState => ({
-  attributes: {
-    ...attributes,
-    references: [],
-  },
-});
+const createState = (attributes: LensAttributesV1 | LensAttributesV2): LensByValueSerializedState =>
+  ({
+    attributes: {
+      ...attributes,
+      references: [],
+    },
+  } as unknown as LensByValueSerializedState);
 
 describe('getTransformOut', () => {
   it('migrates v1 metric attributes to v3 and removes titleWeight', () => {
@@ -50,7 +46,7 @@ describe('getTransformOut', () => {
         },
       }),
       []
-    );
+    ) as LensByValueSerializedState;
 
     expect(result.attributes?.version).toBe(LENS_ITEM_VERSION_V3);
     expect(result.attributes?.state?.visualization).toEqual({
@@ -73,7 +69,7 @@ describe('getTransformOut', () => {
         },
       }),
       []
-    );
+    ) as LensByValueSerializedState;
 
     expect(result.attributes?.version).toBe(LENS_ITEM_VERSION_V3);
     expect(result.attributes?.state?.visualization).toEqual({

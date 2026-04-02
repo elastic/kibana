@@ -16,6 +16,7 @@ import {
 } from '../__mocks__/data_view_with_timefield';
 import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 describe('LensVisService attributes', () => {
   const dataView: DataView = dataViewWithTimefieldMock;
@@ -742,7 +743,7 @@ describe('LensVisService attributes', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
-      version: 2,
+      version: LENS_ITEM_LATEST_VERSION,
       references: [],
       title: 'Heat map',
       visualizationType: 'lnsHeatmap',
