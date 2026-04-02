@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { DataViewBase } from '@kbn/es-query';
 import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { Aggregators } from '../../../../../common/alerting/metrics';
 import { getElasticsearchMetricQuery } from './metric_query';
@@ -46,6 +47,61 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       expect(searchBody.query.bool.filter).toMatchObject(
         expect.arrayContaining([{ exists: { field: 'system.is.a.good.puppy.dog' } }])
       );
+    });
+  });
+
+  describe('when using a custom aggregation with a wildcard KQL filter on a keyword field', () => {
+    const dataView: DataViewBase = {
+      title: 'metrics-*',
+      fields: [{ name: 'machine.os.keyword', type: 'string', esTypes: ['keyword'] }],
+    };
+
+    const customParams: MetricExpressionParams = {
+      aggType: Aggregators.CUSTOM,
+      timeUnit: 'm',
+      timeSize: 1,
+      threshold: [0],
+      comparator: COMPARATORS.GREATER_THAN,
+      customMetrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          filter: 'machine.os.keyword: *win 7*',
+        },
+      ],
+    };
+
+    const searchBodyWithDataView = getElasticsearchMetricQuery(
+      customParams,
+      timeframe,
+      100,
+      true,
+      void 0,
+      void 0,
+      void 0,
+      void 0,
+      void 0,
+      dataView
+    );
+
+    const searchBodyWithoutDataView = getElasticsearchMetricQuery(
+      customParams,
+      timeframe,
+      100,
+      true
+    );
+
+    test('generates a wildcard query when dataView is provided', () => {
+      const filterAgg =
+        searchBodyWithDataView.aggs.all.aggs.currentPeriod.aggs.aggregatedValue_A.filter;
+      expect(JSON.stringify(filterAgg)).not.toContain('query_string');
+      expect(JSON.stringify(filterAgg)).toContain('wildcard');
+    });
+
+    test('generates a query_string when no dataView is provided', () => {
+      const filterAgg =
+        searchBodyWithoutDataView.aggs.all.aggs.currentPeriod.aggs.aggregatedValue_A.filter;
+      expect(JSON.stringify(filterAgg)).toContain('query_string');
     });
   });
 
