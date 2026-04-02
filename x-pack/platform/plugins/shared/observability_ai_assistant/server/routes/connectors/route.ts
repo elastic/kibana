@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { resolveConnectorList, resolveConnectorById } from '../resolve_inference_connectors';
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/connectors',
@@ -16,7 +15,11 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<InferenceConnector[]> => resolveConnectorList(resources),
+  handler: async (resources): Promise<InferenceConnector[]> => {
+    const { request, plugins } = resources;
+    const inferenceStart = await plugins.inference.start();
+    return inferenceStart.getConnectorList(request);
+  },
 });
 
 const getConnectorByIdRoute = createObservabilityAIAssistantServerRoute({
@@ -31,8 +34,11 @@ const getConnectorByIdRoute = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<InferenceConnector> =>
-    resolveConnectorById({ ...resources, connectorId: resources.params.path.connectorId }),
+  handler: async (resources): Promise<InferenceConnector> => {
+    const { request, plugins, params } = resources;
+    const inferenceStart = await plugins.inference.start();
+    return inferenceStart.getConnectorById(params.path.connectorId, request);
+  },
 });
 
 export const connectorRoutes = {
