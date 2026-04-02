@@ -145,6 +145,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async clickFieldListItem(field: string) {
+    await this.waitUntilSidebarHasLoaded();
     await this.testSubjects.moveMouseTo(`field-${field}`);
     await this.testSubjects.click(`field-${field}`);
 
@@ -155,6 +156,7 @@ export class UnifiedFieldListPageObject extends FtrService {
     // will result in the "filter for" button being clicked instead of
     // the edit button, causing test flakiness
     await this.waitUntilFieldPopoverIsLoaded();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickFieldListItemToggle(field: string) {

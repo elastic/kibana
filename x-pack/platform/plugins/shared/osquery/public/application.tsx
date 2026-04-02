@@ -12,7 +12,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { createRoot } from 'react-dom/client';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { AppPluginStartDependencies } from './types';
 import { OsqueryApp } from './components/app';
 import { PLUGIN_NAME } from '../common';
@@ -29,8 +29,7 @@ export const renderApp = (
   storage: Storage,
   kibanaVersion: string
 ) => {
-  const root = createRoot(element);
-  root.render(
+  render(
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -51,8 +50,9 @@ export const renderApp = (
           </Router>
         </ExperimentalFeaturesProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    </KibanaRenderContextProvider>,
+    element
   );
 
-  return () => root.unmount();
+  return () => unmountComponentAtNode(element);
 };

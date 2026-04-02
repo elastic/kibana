@@ -1645,6 +1645,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForVisualization(visDataTestSubj?: string) {
+      const hasExpectedVisualization = async () => {
+        if (visDataTestSubj) {
+          return await testSubjects.exists(visDataTestSubj, { timeout: 1000 });
+        }
+
+        return (
+          (await testSubjects.exists('legacyMtrVis', { timeout: 1000 })) ||
+          (await testSubjects.exists('mtrVis', { timeout: 1000 })) ||
+          (await testSubjects.exists('xyVisChart', { timeout: 1000 })) ||
+          (await testSubjects.exists('partitionVisChart', { timeout: 1000 })) ||
+          (await testSubjects.exists('heatmapChart', { timeout: 1000 })) ||
+          (await testSubjects.exists('gaugeChart', { timeout: 1000 })) ||
+          (await testSubjects.exists('lnsDataTable', { timeout: 1000 }))
+        );
+      };
+
       const hasWorkspaceContainer = async () => {
         return await find.existsByCssSelector(
           `${testSubjects.getCssSelector('lnsWorkspace')} [data-shared-items-container]`,
@@ -1661,31 +1677,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await header.waitUntilLoadingHasFinished();
       await retry.waitFor('visualization render to stabilize', async () => {
+        const hasVisualization = await hasExpectedVisualization();
+
         if (await hasWorkspaceContainer()) {
           if (!(await isWorkspaceRenderComplete())) {
-            return false;
+            return hasVisualization;
           }
 
-          await common.sleep(1000);
+          await common.sleep(250);
 
           if (!(await isWorkspaceRenderComplete())) {
             return false;
           }
         }
 
-        if (!visDataTestSubj) {
-          return (
-            (await testSubjects.exists('legacyMtrVis', { timeout: 1000 })) ||
-            (await testSubjects.exists('mtrVis', { timeout: 1000 })) ||
-            (await testSubjects.exists('xyVisChart', { timeout: 1000 })) ||
-            (await testSubjects.exists('partitionVisChart', { timeout: 1000 })) ||
-            (await testSubjects.exists('heatmapChart', { timeout: 1000 })) ||
-            (await testSubjects.exists('gaugeChart', { timeout: 1000 })) ||
-            (await testSubjects.exists('lnsDataTable', { timeout: 1000 }))
-          );
-        }
-
-        return await testSubjects.exists(visDataTestSubj, { timeout: 1000 });
+        return hasVisualization;
       });
     },
 

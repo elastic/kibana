@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { useParams } from 'react-router-dom';
 
 import type { BuildFlavor } from '@kbn/config';
 import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
@@ -114,8 +114,7 @@ export const rolesManagementApp = Object.freeze({
           );
         };
 
-        const root = createRoot(element);
-        root.render(
+        render(
           startServices.rendering.addContext(
             <KibanaContextProvider services={startServices}>
               <Router history={history}>
@@ -149,11 +148,12 @@ export const rolesManagementApp = Object.freeze({
                 </BreadcrumbsProvider>
               </Router>
             </KibanaContextProvider>
-          )
+          ),
+          element
         );
 
         return () => {
-          root.unmount();
+          unmountComponentAtNode(element);
         };
       },
     } as RegisterManagementAppArgs;

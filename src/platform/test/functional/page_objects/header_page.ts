@@ -76,6 +76,7 @@ export class HeaderPageObject extends FtrService {
       allowHidden: true,
       timeout: this.defaultFindTimeout * 10,
     });
+    await this.common.waitUntilDomIsStable();
   }
 
   public async awaitKibanaChrome() {

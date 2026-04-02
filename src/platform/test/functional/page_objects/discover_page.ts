@@ -314,8 +314,17 @@ export class DiscoverPageObject extends FtrService {
   public async clickHistogramBar() {
     await this.elasticChart.waitForRenderComplete(undefined, 5000);
     const el = await this.elasticChart.getCanvas();
+    const size = await el.getSize();
 
-    await this.browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
+    await this.browser
+      .getActions()
+      .move({
+        origin: el._webElement,
+        x: Math.round(size.width / 2),
+        y: Math.round(size.height / 2),
+      })
+      .click()
+      .perform();
   }
 
   public async brushHistogram() {
@@ -329,12 +338,25 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getBreakdownFieldValue() {
-    const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+    await this.waitForBreakdownSelectorButton();
 
-    return breakdownButton.getVisibleText();
+    return await this.retry.try(async () => {
+      const breakdownButton = await this.testSubjects.find(
+        'unifiedHistogramBreakdownSelectorButton'
+      );
+      const text = await breakdownButton.getVisibleText();
+
+      if (!text) {
+        throw new Error('Breakdown selector button is rendered without text');
+      }
+
+      return text;
+    });
   }
 
   public async chooseBreakdownField(field: string, value?: string) {
+    await this.waitForBreakdownSelectorButton();
+
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
@@ -375,6 +397,17 @@ export class DiscoverPageObject extends FtrService {
 
   public async clearBreakdownField() {
     await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
+  }
+
+  private async waitForBreakdownSelectorButton() {
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+
+    await this.retry.waitFor('breakdown selector button to render', async () => {
+      return await this.testSubjects.exists('unifiedHistogramBreakdownSelectorButton', {
+        timeout: 1000,
+      });
+    });
   }
 
   public async isLensEditFlyoutOpen() {
@@ -531,10 +564,35 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getHitCount({ isPartial }: { isPartial?: boolean } = {}) {
-    await this.header.waitUntilLoadingHasFinished();
-    return await this.testSubjects.getVisibleText(
-      isPartial ? 'discoverQueryHitsPartial' : 'discoverQueryHits'
-    );
+    await this.waitUntilTabIsLoaded();
+
+    const queryHitsTestSubj = await this.retry.try(async () => {
+      if (isPartial === true) {
+        await this.testSubjects.existOrFail('discoverQueryHitsPartial');
+        return 'discoverQueryHitsPartial';
+      }
+
+      if (isPartial === false) {
+        await this.testSubjects.existOrFail('discoverQueryHits');
+        return 'discoverQueryHits';
+      }
+
+      const hasQueryHits = await this.testSubjects.exists('discoverQueryHits', { timeout: 1000 });
+      if (hasQueryHits) {
+        return 'discoverQueryHits';
+      }
+
+      const hasPartialQueryHits = await this.testSubjects.exists('discoverQueryHitsPartial', {
+        timeout: 1000,
+      });
+      if (hasPartialQueryHits) {
+        return 'discoverQueryHitsPartial';
+      }
+
+      throw new Error('Discover query hits are not available yet');
+    });
+
+    return await this.testSubjects.getVisibleText(queryHitsTestSubj);
   }
 
   public async getHitCountInt() {

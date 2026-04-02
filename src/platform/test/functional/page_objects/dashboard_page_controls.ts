@@ -448,7 +448,7 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
       if (isPopoverOpen) {
-        await this.testSubjects.click(`optionsList-control-${controlId}`);
+        await this.browser.pressKeys(this.browser.keys.ESCAPE);
         await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
       }
     });
@@ -503,21 +503,28 @@ export class DashboardPageControls extends FtrService {
     expectation: { suggestions: { [key: string]: number }; invalidSelections: string[] },
     skipOpen?: boolean
   ) {
-    await this.optionsListWaitForLoading(controlId);
-    if (!skipOpen) await this.optionsListOpenPopover(controlId);
     await this.retry.try(async () => {
+      await this.optionsListWaitForLoading(controlId);
+      if (!skipOpen) {
+        await this.optionsListOpenPopover(controlId);
+      }
+      await this.optionsListPopoverWaitForExpectedData(expectation);
+
       const availableOptions = await this.optionsListPopoverGetAvailableOptions();
       expect(availableOptions.suggestions).to.eql(expectation.suggestions);
       expect(availableOptions.invalidSelections.sort()).to.eql(
         expectation.invalidSelections.sort()
       );
+      if (await this.testSubjects.exists('optionsList-cardinality-label')) {
+        expect(await this.optionsListGetCardinalityValue()).to.be(
+          Object.keys(expectation.suggestions).length.toLocaleString()
+        );
+      }
     });
-    if (await this.testSubjects.exists('optionsList-cardinality-label')) {
-      expect(await this.optionsListGetCardinalityValue()).to.be(
-        Object.keys(expectation.suggestions).length.toLocaleString()
-      );
+
+    if (!skipOpen) {
+      await this.optionsListEnsurePopoverIsClosed(controlId);
     }
-    if (!skipOpen) await this.optionsListEnsurePopoverIsClosed(controlId);
   }
 
   public async optionsListGetCardinalityValue() {
@@ -606,6 +613,34 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`wait for the suggestions in the popover to load`);
     await this.optionsListPopoverAssertOpen();
     await this.testSubjects.waitForDeleted('optionsList-control-popover-loading');
+  }
+
+  private async optionsListPopoverWaitForExpectedData(expectation: {
+    suggestions: { [key: string]: number };
+    invalidSelections: string[];
+  }) {
+    const expectedSuggestions = Object.keys(expectation.suggestions).length;
+    const expectedInvalidSelections = expectation.invalidSelections.length;
+
+    await this.retry.try(async () => {
+      await this.optionsListPopoverWaitForLoading();
+
+      const availableOptions = await this.testSubjects.find(
+        `optionsList-control-available-options`
+      );
+      const optionCount = Number((await availableOptions.getAttribute('data-option-count')) ?? '0');
+      const invalidSelectionElements = await availableOptions.findAllByClassName(
+        'optionsList__selectionInvalid'
+      );
+
+      if (expectedSuggestions > 0 && optionCount === 0) {
+        throw new Error('Options list suggestions are still settling');
+      }
+
+      if (expectedInvalidSelections > 0 && invalidSelectionElements.length === 0) {
+        throw new Error('Options list invalid selections are still settling');
+      }
+    });
   }
 
   /* -----------------------------------------------------------

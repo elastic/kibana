@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
@@ -179,8 +179,7 @@ export const spacesManagementApp = Object.freeze({
           );
         };
 
-        const root = createRoot(element);
-        root.render(
+        render(
           coreStart.rendering.addContext(
             <KibanaContextProvider services={{ ...coreStart, cps }}>
               <RedirectAppLinks coreStart={coreStart}>
@@ -199,12 +198,13 @@ export const spacesManagementApp = Object.freeze({
                 </Router>
               </RedirectAppLinks>
             </KibanaContextProvider>
-          )
+          ),
+          element
         );
 
         return () => {
           chrome.docTitle.reset();
-          root.unmount();
+          unmountComponentAtNode(element);
         };
       },
     } as RegisterManagementAppArgs;

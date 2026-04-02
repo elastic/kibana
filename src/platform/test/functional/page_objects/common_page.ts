@@ -260,6 +260,75 @@ export class CommonPageObject extends FtrService {
     this.log.debug(`... sleep(${sleepMilliseconds}) end`);
   }
 
+  public async waitUntilDomIsStable({
+    idleMs = 75,
+    timeoutMs = 2000,
+  }: {
+    idleMs?: number;
+    timeoutMs?: number;
+  } = {}) {
+    await this.browser.executeAsync<void, number, number>(
+      (idleDuration, maxDuration, cb) => {
+        const root = document.body ?? document.documentElement;
+
+        if (!root || typeof MutationObserver === 'undefined') {
+          cb();
+          return;
+        }
+
+        const start = Date.now();
+        let lastMutationAt = Date.now();
+        let settled = false;
+
+        const finish = () => {
+          if (!settled) {
+            settled = true;
+            observer.disconnect();
+            cb();
+          }
+        };
+
+        const waitForPaint = () => {
+          if (typeof requestAnimationFrame !== 'function') {
+            finish();
+            return;
+          }
+
+          requestAnimationFrame(() => requestAnimationFrame(finish));
+        };
+
+        const pollForIdle = () => {
+          if (Date.now() - start >= maxDuration) {
+            finish();
+            return;
+          }
+
+          if (Date.now() - lastMutationAt >= idleDuration) {
+            waitForPaint();
+            return;
+          }
+
+          window.setTimeout(pollForIdle, idleDuration);
+        };
+
+        const observer = new MutationObserver(() => {
+          lastMutationAt = Date.now();
+        });
+
+        observer.observe(root, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          characterData: true,
+        });
+
+        pollForIdle();
+      },
+      idleMs,
+      timeoutMs
+    );
+  }
+
   async navigateToApp(
     appName: string,
     {
@@ -375,6 +444,8 @@ export class CommonPageObject extends FtrService {
           }
         });
       }
+
+      await this.waitUntilDomIsStable();
     });
   }
 

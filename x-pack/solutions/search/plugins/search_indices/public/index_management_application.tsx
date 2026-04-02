@@ -6,12 +6,12 @@
  */
 
 import type { CoreSetup, ScopedHistory } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { SearchIndexManagementApp } from './components/index_management/index_management_app';
 
 export const renderIndexManagementApp = async (
@@ -28,16 +28,16 @@ export const renderIndexManagementApp = async (
     ...depsStart,
     history,
   };
-  const root = createRoot(element);
-  root.render(
+  render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart, ...services }}>
         <I18nProvider>
           <SearchIndexManagementApp indexManagement={indexManagement} />
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    </KibanaRenderContextProvider>,
+    element
   );
 
-  return () => root.unmount();
+  return () => unmountComponentAtNode(element);
 };

@@ -6,14 +6,13 @@
  */
 
 import React, { type FC } from 'react';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-
-import { createRoot } from 'react-dom/client';
 import type { ExperimentalFeatures } from '../../server/config';
 import { SECTION_SLUG } from './common/constants';
 import type { AppDependencies } from './app_dependencies';
@@ -57,8 +56,7 @@ export const renderApp = (
     },
   });
 
-  const root = createRoot(element);
-  root.render(
+  render(
     <KibanaRenderContextProvider {...appDependencies}>
       <QueryClientProvider client={queryClient}>
         <KibanaContextProvider services={appDependencies}>
@@ -69,10 +67,11 @@ export const renderApp = (
           </EnabledFeaturesContextProvider>
         </KibanaContextProvider>
       </QueryClientProvider>
-    </KibanaRenderContextProvider>
+    </KibanaRenderContextProvider>,
+    element
   );
 
   return () => {
-    root.unmount();
+    unmountComponentAtNode(element);
   };
 };

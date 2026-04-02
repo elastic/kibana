@@ -10,7 +10,13 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'timePicker', 'common', 'header']);
+  const pageObjects = getPageObjects([
+    'svlCommonPage',
+    'timePicker',
+    'common',
+    'header',
+    'discover',
+  ]);
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -89,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.timePicker.setDefaultAbsoluteRange();
       await pageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+      expect((await pageObjects.discover.getHitCount()).length).to.be.greaterThan(0);
     });
 
     it('should access console with API key', async () => {

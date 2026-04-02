@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
 import { AppRoutes } from './app_routes';
@@ -23,17 +23,17 @@ export const renderApp = ({
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-  const root = createRoot(element);
-  root.render(
+  render(
     <SecurityApp history={history} services={services} store={store} theme$={theme$}>
       <ApplicationUsageTrackingProvider>
         {children ??
           (subPluginRoutes && <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />)}
       </ApplicationUsageTrackingProvider>
-    </SecurityApp>
+    </SecurityApp>,
+    element
   );
   return () => {
     services.data.search.session.clear();
-    root.unmount();
+    unmountComponentAtNode(element);
   };
 };

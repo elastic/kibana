@@ -11,11 +11,11 @@ import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 
 import type { AppMountParameters } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import { createRoot } from 'react-dom/client';
 import { VisualizeApp } from './app';
 import type { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
@@ -49,8 +49,7 @@ export const renderApp = (
     </KibanaRenderContextProvider>
   );
 
-  const root = createRoot(element);
-  root.render(app);
+  render(app, element);
 
-  return () => root.unmount();
+  return () => unmountComponentAtNode(element);
 };

@@ -10,9 +10,9 @@ import { Provider } from 'react-redux';
 import type SemVer from 'semver/classes/semver';
 
 import type { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { createRoot } from 'react-dom/client';
 import { API_BASE_PATH } from '../../common';
 import {
   createKibanaReactContext,
@@ -108,15 +108,15 @@ export const renderApp = (
   }
   const { history } = dependencies;
 
-  const root = createRoot(elem);
-  root.render(
+  render(
     <IndexManagementAppContext core={core} dependencies={dependencies}>
       <App history={history} />
-    </IndexManagementAppContext>
+    </IndexManagementAppContext>,
+    elem
   );
 
   return () => {
-    root.unmount();
+    unmountComponentAtNode(elem);
   };
 };
 

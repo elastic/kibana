@@ -11,12 +11,12 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import { createRoot } from 'react-dom/client';
 import {
   getCoreChrome,
   getMapsCapabilities,
@@ -102,8 +102,7 @@ export async function renderApp(
     );
   }
 
-  const root = createRoot(element);
-  root.render(
+  render(
     <KibanaRenderContextProvider {...getCore()}>
       <AppUsageTracker>
         <TableListViewKibanaProvider
@@ -136,10 +135,11 @@ export async function renderApp(
           </Router>
         </TableListViewKibanaProvider>
       </AppUsageTracker>
-    </KibanaRenderContextProvider>
+    </KibanaRenderContextProvider>,
+    element
   );
 
   return () => {
-    root.unmount();
+    unmountComponentAtNode(element);
   };
 }

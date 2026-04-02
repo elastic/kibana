@@ -7,6 +7,7 @@
 
 import React, { Suspense, lazy } from 'react';
 import type { CoreStart, NotificationsStart } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -19,7 +20,6 @@ import { QueryClientProvider } from '@kbn/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { createRoot } from 'react-dom/client';
 import { queryClient } from '../query_client';
 import type { Section } from '../constants';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
@@ -65,8 +65,7 @@ export async function mountManagementSection({
 
   const sectionsRegex = sections.join('|');
 
-  const root = createRoot(element);
-  root.render(
+  render(
     coreStart.rendering.addContext(
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
@@ -91,10 +90,11 @@ export async function mountManagementSection({
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>
-    )
+    ),
+    element
   );
 
   return () => {
-    root.unmount();
+    unmountComponentAtNode(element);
   };
 }

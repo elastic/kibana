@@ -9,6 +9,7 @@
 
 export const mockReactDomRender = jest.fn();
 export const mockReactDomUnmount = jest.fn();
+export const mockReactDomFlushSync = jest.fn((callback: () => void) => callback());
 export const mockReactDomCreateRoot = jest.fn().mockImplementation((container) => ({
   render: (component: unknown) => mockReactDomRender(component, container),
   unmount: () => mockReactDomUnmount(container),
@@ -16,6 +17,7 @@ export const mockReactDomCreateRoot = jest.fn().mockImplementation((container) =
 
 jest.mock('react-dom', () => ({
   render: mockReactDomRender,
+  flushSync: mockReactDomFlushSync,
   unmountComponentAtNode: mockReactDomUnmount,
 }));
 

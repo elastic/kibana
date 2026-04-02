@@ -62,10 +62,14 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
   const showGreaterOrEqualSign =
     hitsStatus === FetchStatus.PARTIAL || hitsStatus === FetchStatus.ERROR;
 
-  const formattedHits = (
-    <span
-      data-test-subj={showGreaterOrEqualSign ? 'discoverQueryHitsPartial' : 'discoverQueryHits'}
-    >
+  const formattedHits = showGreaterOrEqualSign ? (
+    <span data-test-subj="discoverQueryHits">
+      <span data-test-subj="discoverQueryHitsPartial">
+        <FormattedNumber value={hitsTotal ?? 0} />
+      </span>
+    </span>
+  ) : (
+    <span data-test-subj="discoverQueryHits">
       <FormattedNumber value={hitsTotal ?? 0} />
     </span>
   );

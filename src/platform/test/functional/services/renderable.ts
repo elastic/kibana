@@ -50,8 +50,16 @@ export class RenderableService extends FtrService {
       }
 
       const stillLoadingElements = await this.find.allByCssSelector(DATA_LOADING_SELECTOR, 1000);
-      if (stillLoadingElements.length > 0) {
-        throw new Error(`${stillLoadingElements.length} elements still loading contents`);
+      const visibleLoadingElements = [];
+
+      for (const loadingElement of stillLoadingElements) {
+        if (await loadingElement.isDisplayed()) {
+          visibleLoadingElements.push(loadingElement);
+        }
+      }
+
+      if (visibleLoadingElements.length > 0) {
+        throw new Error(`${visibleLoadingElements.length} elements still loading contents`);
       }
     });
   }

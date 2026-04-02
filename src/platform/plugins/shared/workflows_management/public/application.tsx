@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import type { AppMountParameters } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -23,16 +23,16 @@ export const renderApp = (
 ) => {
   const { theme } = services;
 
-  const root = createRoot(element);
-  root.render(
+  render(
     <KibanaThemeProvider theme={theme}>
       <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>
           <WorkflowsRoutes history={history} />
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaThemeProvider>
+    </KibanaThemeProvider>,
+    element
   );
 
-  return () => root.unmount();
+  return () => unmountComponentAtNode(element);
 };

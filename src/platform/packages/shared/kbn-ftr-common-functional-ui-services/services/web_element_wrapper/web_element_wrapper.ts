@@ -205,6 +205,33 @@ export class WebElementWrapper {
       await wrapper.scrollIntoViewIfNecessary(topOffsetOrOptions);
       await wrapper._webElement.click();
     });
+
+    // React 18 concurrent updates can commit on the next paint after the click returns.
+    // Let the DOM advance at least a frame or two before the next Selenium lookup.
+    try {
+      await this.driver.executeAsyncScript(`
+        const done = arguments[arguments.length - 1];
+        if (typeof requestAnimationFrame !== 'function') {
+          done();
+          return;
+        }
+
+        let settled = false;
+        const finish = () => {
+          if (!settled) {
+            settled = true;
+            done();
+          }
+        };
+
+        requestAnimationFrame(() => requestAnimationFrame(finish));
+        setTimeout(finish, 50);
+      `);
+    } catch {
+      // Best effort only. Some clicks trigger navigations or page disposals before
+      // the post-click paint wait can complete, and the caller's explicit waits
+      // should own those flows.
+    }
   }
 
   /**

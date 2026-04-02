@@ -8,10 +8,10 @@
 import type { History } from 'history';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { Redirect } from 'react-router-dom';
 
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
@@ -59,8 +59,7 @@ export const usersManagementApp = Object.freeze({
           import('../roles'),
         ]);
 
-        const root = createRoot(element);
-        root.render(
+        render(
           coreStart.rendering.addContext(
             <Providers
               services={coreStart}
@@ -120,11 +119,12 @@ export const usersManagementApp = Object.freeze({
                 </Routes>
               </Breadcrumb>
             </Providers>
-          )
+          ),
+          element
         );
 
         return () => {
-          root.unmount();
+          unmountComponentAtNode(element);
         };
       },
     } as RegisterManagementAppArgs;
