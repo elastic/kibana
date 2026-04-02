@@ -198,12 +198,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       obsAIAssistantManagement: {
         pathname: '/app/management/ai/observabilityAiAssistantManagement',
       },
-      enterpriseSearch: {
-        pathname: '/app/elasticsearch/overview',
-      },
-      elasticsearchIndices: {
-        pathname: '/app/elasticsearch/indices',
-      },
       searchPlayground: {
         pathname: '/app/search_playground',
       },

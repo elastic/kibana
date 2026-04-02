@@ -65,6 +65,8 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   const { data: cloudConnectors } = useGetCloudConnectors({
     cloudProvider,
     accountType,
+    packageName: packageInfo.name,
+    policyTemplate: templateName,
   });
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
@@ -165,6 +167,8 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           credentials={existingConnectionCredentials}
           setCredentials={updatePolicyWithExistingCredentials}
           accountType={accountType}
+          packageName={packageInfo.name}
+          policyTemplate={templateName}
         />
       ),
     },
