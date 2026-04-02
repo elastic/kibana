@@ -243,12 +243,9 @@ export class WorkflowApi {
   }
 
   async cancelAllWorkflowExecutions(workflowId: string): Promise<void> {
-    return this.http.post(
-      `${BASE}/workflow/${encodeURIComponent(workflowId)}/executions/cancel_all_active`,
-      {
-        version: API_VERSION,
-      }
-    );
+    return this.http.post(`${BASE}/workflow/${encodeURIComponent(workflowId)}/executions/cancel`, {
+      version: API_VERSION,
+    });
   }
 
   async getStepExecution(

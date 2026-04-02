@@ -45,12 +45,9 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     uiSettings?.get<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, false) ?? false;
   const [refetchInterval, setRefetchInterval] = useState(EXECUTIONS_LIST_REFETCH_INTERVAL);
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
-  const [isCancelLoadedNonTerminalInProgress, setIsCancelLoadedNonTerminalInProgress] =
-    useState(false);
+  const [isCancelInProgress, setIsCancelInProgress] = useState(false);
 
-  const canCancelLoadedNonTerminal = Boolean(
-    application?.capabilities.workflowsManagement.cancelWorkflowExecution
-  );
+  const canCancel = Boolean(application?.capabilities.workflowsManagement.cancelWorkflowExecution);
 
   const {
     data: workflowExecutions,
@@ -100,12 +97,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     setSelectedExecution(executionId);
   };
 
-  const onConfirmCancelLoadedNonTerminal = useCallback(async () => {
+  const onConfirmCancel = useCallback(async () => {
     if (!workflowId) {
       return;
     }
 
-    setIsCancelLoadedNonTerminalInProgress(true);
+    setIsCancelInProgress(true);
 
     try {
       await api.cancelAllWorkflowExecutions(workflowId);
@@ -115,7 +112,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       });
       notifications?.toasts.addSuccess({
         title: i18n.translate(
-          'workflows.workflowExecutionList.footerCancelNonTerminal.bulkSuccess',
+          'workflows.workflowExecutionList.cancelActiveExecutions.bulkSuccess',
           {
             defaultMessage: 'Cancellation requested for all active executions of this workflow',
           }
@@ -131,14 +128,14 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       });
       notifications?.toasts.addError(err, {
         title: i18n.translate(
-          'workflows.workflowExecutionList.footerCancelNonTerminal.bulkFailureTitle',
+          'workflows.workflowExecutionList.cancelActiveExecutions.bulkFailureTitle',
           {
             defaultMessage: 'Could not cancel active executions',
           }
         ),
       });
     } finally {
-      setIsCancelLoadedNonTerminalInProgress(false);
+      setIsCancelInProgress(false);
     }
   }, [api, notifications, refetch, telemetry, workflowId]);
 
@@ -154,9 +151,9 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
       showExecutor={showExecutor}
-      canCancelLoadedNonTerminal={canCancelLoadedNonTerminal}
-      isCancelLoadedNonTerminalInProgress={isCancelLoadedNonTerminalInProgress}
-      onConfirmCancelLoadedNonTerminal={onConfirmCancelLoadedNonTerminal}
+      canCancel={canCancel}
+      isCancelInProgress={isCancelInProgress}
+      onConfirmCancel={onConfirmCancel}
     />
   );
 }

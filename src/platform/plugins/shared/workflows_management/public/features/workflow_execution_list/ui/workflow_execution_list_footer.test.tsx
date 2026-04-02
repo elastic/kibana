@@ -53,13 +53,9 @@ describe('WorkflowExecutionListFooter', () => {
       <TestWrapper>
         <WorkflowExecutionListFooter
           loadedExecutions={overrides.loadedExecutions ?? [terminalExecution]}
-          canCancelLoadedNonTerminal={overrides.canCancelLoadedNonTerminal ?? true}
-          isCancelLoadedNonTerminalInProgress={
-            overrides.isCancelLoadedNonTerminalInProgress ?? false
-          }
-          onConfirmCancelLoadedNonTerminal={
-            overrides.onConfirmCancelLoadedNonTerminal ?? defaultConfirm
-          }
+          canCancel={overrides.canCancel ?? true}
+          isCancelInProgress={overrides.isCancelInProgress ?? false}
+          onConfirmCancel={overrides.onConfirmCancel ?? defaultConfirm}
         />
       </TestWrapper>
     );
@@ -78,7 +74,7 @@ describe('WorkflowExecutionListFooter', () => {
   it('disables the button when the user cannot cancel despite a non-terminal execution', () => {
     renderFooter({
       loadedExecutions: [runningExecution],
-      canCancelLoadedNonTerminal: false,
+      canCancel: false,
     });
     const button = screen.getByTestId('cancelAllActiveExecutionsButton');
     expect(button).toBeDisabled();
@@ -88,7 +84,7 @@ describe('WorkflowExecutionListFooter', () => {
   it('disables the button while cancel is in progress', () => {
     renderFooter({
       loadedExecutions: [runningExecution],
-      isCancelLoadedNonTerminalInProgress: true,
+      isCancelInProgress: true,
     });
     expect(screen.getByTestId('cancelAllActiveExecutionsButton')).toBeDisabled();
   });
@@ -97,7 +93,7 @@ describe('WorkflowExecutionListFooter', () => {
     const onConfirm = jest.fn().mockResolvedValue(undefined);
     renderFooter({
       loadedExecutions: [runningExecution],
-      onConfirmCancelLoadedNonTerminal: onConfirm,
+      onConfirmCancel: onConfirm,
     });
 
     fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
@@ -112,11 +108,11 @@ describe('WorkflowExecutionListFooter', () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it('calls onConfirmCancelLoadedNonTerminal when the modal is confirmed', async () => {
+  it('calls onConfirmCancel when the modal is confirmed', async () => {
     const onConfirm = jest.fn().mockResolvedValue(undefined);
     renderFooter({
       loadedExecutions: [runningExecution],
-      onConfirmCancelLoadedNonTerminal: onConfirm,
+      onConfirmCancel: onConfirm,
     });
 
     fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));

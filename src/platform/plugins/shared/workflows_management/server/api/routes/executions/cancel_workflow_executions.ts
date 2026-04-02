@@ -18,7 +18,7 @@ import { withLicenseCheck } from '../utils/with_license_check';
 export function registerCancelWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .post({
-      path: '/api/workflows/workflow/{workflowId}/executions/cancel_all_active',
+      path: '/api/workflows/workflow/{workflowId}/executions/cancel',
       access: 'public',
       security: WORKFLOW_EXECUTION_CANCEL_SECURITY,
       summary: 'Cancel all active workflow executions',

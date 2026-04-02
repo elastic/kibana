@@ -38,9 +38,9 @@ export interface WorkflowExecutionListProps {
   selectedId: string | null;
   setPaginationObserver: (ref: HTMLDivElement | null) => void;
   showExecutor?: boolean;
-  canCancelLoadedNonTerminal: boolean;
-  isCancelLoadedNonTerminalInProgress: boolean;
-  onConfirmCancelLoadedNonTerminal: () => Promise<void>;
+  canCancel: boolean;
+  isCancelInProgress: boolean;
+  onConfirmCancel: () => Promise<void>;
 }
 
 // TODO: use custom table? add pagination and search
@@ -58,9 +58,9 @@ export const WorkflowExecutionList = ({
   selectedId,
   setPaginationObserver,
   showExecutor = false,
-  canCancelLoadedNonTerminal,
-  isCancelLoadedNonTerminalInProgress,
-  onConfirmCancelLoadedNonTerminal,
+  canCancel,
+  isCancelInProgress,
+  onConfirmCancel,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
@@ -222,9 +222,9 @@ export const WorkflowExecutionList = ({
       <EuiFlexItem grow={false}>
         <WorkflowExecutionListFooter
           loadedExecutions={executions?.results ?? []}
-          canCancelLoadedNonTerminal={canCancelLoadedNonTerminal}
-          isCancelLoadedNonTerminalInProgress={isCancelLoadedNonTerminalInProgress}
-          onConfirmCancelLoadedNonTerminal={onConfirmCancelLoadedNonTerminal}
+          canCancel={canCancel}
+          isCancelInProgress={isCancelInProgress}
+          onConfirmCancel={onConfirmCancel}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -5,9 +5,9 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X POST "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/cancel_all_active" \
+        -X POST "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/cancel" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true"
   - lang: Console
     source: |
-      POST kbn://api/workflows/workflow/{workflowId}/executions/cancel_all_active
+      POST kbn://api/workflows/workflow/{workflowId}/executions/cancel

@@ -17,11 +17,7 @@ import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 type WorkflowExecutionListStoryProps = Omit<
   WorkflowExecutionListProps,
-  | 'canCancelLoadedNonTerminal'
-  | 'isCancelLoadedNonTerminalInProgress'
-  | 'onConfirmCancelLoadedNonTerminal'
-  | 'filters'
-  | 'onFiltersChange'
+  'canCancel' | 'isCancelInProgress' | 'onConfirmCancel' | 'filters' | 'onFiltersChange'
 >;
 
 const WorkflowExecutionListWithState = (
@@ -38,13 +34,12 @@ const WorkflowExecutionListWithState = (
         executedBy: [],
       }
   );
-  const [isCancelLoadedNonTerminalInProgress, setIsCancelLoadedNonTerminalInProgress] =
-    useState(false);
+  const [isCancelInProgress, setIsCancelInProgress] = useState(false);
 
-  const onConfirmCancelLoadedNonTerminal = useCallback(async () => {
-    setIsCancelLoadedNonTerminalInProgress(true);
+  const onConfirmCancel = useCallback(async () => {
+    setIsCancelInProgress(true);
     await new Promise((r) => setTimeout(r, 300));
-    setIsCancelLoadedNonTerminalInProgress(false);
+    setIsCancelInProgress(false);
   }, []);
 
   const { filters: _initialFilters, onFiltersChange: propsOnFiltersChange, ...rest } = props;
@@ -54,9 +49,9 @@ const WorkflowExecutionListWithState = (
       {...rest}
       filters={filters}
       onFiltersChange={propsOnFiltersChange ?? setFilters}
-      canCancelLoadedNonTerminal={true}
-      isCancelLoadedNonTerminalInProgress={isCancelLoadedNonTerminalInProgress}
-      onConfirmCancelLoadedNonTerminal={onConfirmCancelLoadedNonTerminal}
+      canCancel={true}
+      isCancelInProgress={isCancelInProgress}
+      onConfirmCancel={onConfirmCancel}
     />
   );
 };

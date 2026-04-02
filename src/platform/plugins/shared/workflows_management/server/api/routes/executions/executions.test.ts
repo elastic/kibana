@@ -446,8 +446,8 @@ describe('Execution Routes', () => {
     });
   });
 
-  describe('POST /api/workflows/workflow/{workflowId}/executions/cancel_all_active (cancel_workflow_executions)', () => {
-    const path = '/api/workflows/workflow/{workflowId}/executions/cancel_all_active';
+  describe('POST /api/workflows/workflow/{workflowId}/executions/cancel (cancel_workflow_executions)', () => {
+    const path = '/api/workflows/workflow/{workflowId}/executions/cancel';
 
     it('should register the route handler', () => {
       expect(handler('POST', path)).toBeDefined();

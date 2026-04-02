@@ -23,49 +23,49 @@ import { isTerminalStatus, type WorkflowExecutionListItemDto } from '@kbn/workfl
 
 export interface WorkflowExecutionListFooterProps {
   loadedExecutions: readonly WorkflowExecutionListItemDto[];
-  canCancelLoadedNonTerminal: boolean;
-  isCancelLoadedNonTerminalInProgress: boolean;
-  onConfirmCancelLoadedNonTerminal: () => Promise<void>;
+  canCancel: boolean;
+  isCancelInProgress: boolean;
+  onConfirmCancel: () => Promise<void>;
 }
 
 export const WorkflowExecutionListFooter = ({
   loadedExecutions,
-  canCancelLoadedNonTerminal,
-  isCancelLoadedNonTerminalInProgress,
-  onConfirmCancelLoadedNonTerminal,
+  canCancel,
+  isCancelInProgress,
+  onConfirmCancel,
 }: WorkflowExecutionListFooterProps) => {
   const styles = useMemoCss(componentStyles);
   const [isFooterCancelModalVisible, setIsFooterCancelModalVisible] = useState(false);
   const footerCancelModalTitleId = useGeneratedHtmlId();
 
-  const activeNonTerminalLoadedCount = useMemo(
+  const activeExecutionCount = useMemo(
     () => loadedExecutions.filter((e) => !isTerminalStatus(e.status)).length,
     [loadedExecutions]
   );
 
-  const hasActiveNonTerminalLoaded = activeNonTerminalLoadedCount > 0;
+  const hasActiveExecutions = activeExecutionCount > 0;
 
   const openFooterCancelModal = useCallback(() => {
-    if (hasActiveNonTerminalLoaded) {
+    if (hasActiveExecutions) {
       setIsFooterCancelModalVisible(true);
     }
-  }, [hasActiveNonTerminalLoaded]);
+  }, [hasActiveExecutions]);
 
   const closeFooterCancelModal = useCallback(() => {
-    if (!isCancelLoadedNonTerminalInProgress) {
+    if (!isCancelInProgress) {
       setIsFooterCancelModalVisible(false);
     }
-  }, [isCancelLoadedNonTerminalInProgress]);
+  }, [isCancelInProgress]);
 
   const confirmFooterCancel = useCallback(async () => {
     try {
-      await onConfirmCancelLoadedNonTerminal();
+      await onConfirmCancel();
     } finally {
       setIsFooterCancelModalVisible(false);
     }
-  }, [onConfirmCancelLoadedNonTerminal]);
+  }, [onConfirmCancel]);
 
-  if (!hasActiveNonTerminalLoaded) {
+  if (!hasActiveExecutions) {
     return null;
   }
 
@@ -74,11 +74,11 @@ export const WorkflowExecutionListFooter = ({
       {isFooterCancelModalVisible ? (
         <EuiConfirmModal
           title={i18n.translate(
-            'workflows.workflowExecutionList.footerCancelNonTerminal.modalTitle',
+            'workflows.workflowExecutionList.cancelActiveExecutions.modalTitle',
             {
               defaultMessage:
                 'Cancel {count, plural, one {# active execution} other {# active executions}}?',
-              values: { count: activeNonTerminalLoadedCount },
+              values: { count: activeExecutionCount },
             }
           )}
           titleProps={{ id: footerCancelModalTitleId }}
@@ -86,25 +86,25 @@ export const WorkflowExecutionListFooter = ({
           onCancel={closeFooterCancelModal}
           onConfirm={confirmFooterCancel}
           cancelButtonText={i18n.translate(
-            'workflows.workflowExecutionList.footerCancelNonTerminal.modalCancel',
+            'workflows.workflowExecutionList.cancelActiveExecutions.modalCancel',
             {
               defaultMessage: 'Cancel',
             }
           )}
           confirmButtonText={i18n.translate(
-            'workflows.workflowExecutionList.footerCancelNonTerminal.modalConfirm',
+            'workflows.workflowExecutionList.cancelActiveExecutions.modalConfirm',
             {
               defaultMessage: 'Cancel all',
             }
           )}
           buttonColor="warning"
           defaultFocusedButton="cancel"
-          isLoading={isCancelLoadedNonTerminalInProgress}
+          isLoading={isCancelInProgress}
           data-test-subj="cancelAllActiveExecutionsConfirmationModal"
         >
           <p>
             <FormattedMessage
-              id="workflows.workflowExecutionList.footerCancelNonTerminal.modalBody"
+              id="workflows.workflowExecutionList.cancelActiveExecutions.modalBody"
               defaultMessage="All non-terminal executions for this workflow in the current space will be cancelled, including any not shown on the current page."
             />
           </p>
@@ -121,14 +121,14 @@ export const WorkflowExecutionListFooter = ({
           iconType="cross"
           size="s"
           fullWidth
-          disabled={!canCancelLoadedNonTerminal || isCancelLoadedNonTerminalInProgress}
+          disabled={!canCancel || isCancelInProgress}
           onClick={openFooterCancelModal}
           data-test-subj="cancelAllActiveExecutionsButton"
         >
           <FormattedMessage
-            id="workflows.workflowExecutionList.footerCancelNonTerminal.button"
+            id="workflows.workflowExecutionList.cancelActiveExecutions.button"
             defaultMessage="Cancel {count, plural, one {# active execution} other {# active executions}}"
-            values={{ count: activeNonTerminalLoadedCount }}
+            values={{ count: activeExecutionCount }}
           />
         </EuiButton>
       </EuiFlexItem>

@@ -93,9 +93,9 @@ describe('WorkflowExecutionList', () => {
     onExecutionClick: jest.fn(),
     selectedId: null,
     setPaginationObserver: jest.fn(),
-    canCancelLoadedNonTerminal: true,
-    isCancelLoadedNonTerminalInProgress: false,
-    onConfirmCancelLoadedNonTerminal: jest.fn().mockResolvedValue(undefined),
+    canCancel: true,
+    isCancelInProgress: false,
+    onConfirmCancel: jest.fn().mockResolvedValue(undefined),
   };
 
   const renderComponent = (overrides: Partial<WorkflowExecutionListProps> = {}) => {
@@ -240,8 +240,8 @@ describe('WorkflowExecutionList', () => {
       expect(screen.getByTestId('cancelAllActiveExecutionsButton')).not.toBeDisabled();
     });
 
-    it('opens confirm modal and calls onConfirmCancelLoadedNonTerminal when confirmed', async () => {
-      const onConfirmCancelLoadedNonTerminal = jest.fn().mockResolvedValue(undefined);
+    it('opens confirm modal and calls onConfirmCancel when confirmed', async () => {
+      const onConfirmCancel = jest.fn().mockResolvedValue(undefined);
       const withRunning: WorkflowExecutionListDto = {
         ...mockExecutions,
         results: [
@@ -262,12 +262,12 @@ describe('WorkflowExecutionList', () => {
         ],
         total: 1,
       };
-      renderComponent({ executions: withRunning, onConfirmCancelLoadedNonTerminal });
+      renderComponent({ executions: withRunning, onConfirmCancel });
       fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
       const modal = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
       expect(modal).toBeInTheDocument();
       fireEvent.click(within(modal).getByRole('button', { name: 'Cancel all' }));
-      await waitFor(() => expect(onConfirmCancelLoadedNonTerminal).toHaveBeenCalled());
+      await waitFor(() => expect(onConfirmCancel).toHaveBeenCalled());
     });
   });
 });
