@@ -12,7 +12,7 @@ interface EntityStoreSetupContract {
 
 ```typescript
 interface EntityStoreStartContract {
-  createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+  createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient; // Exposes create + update only
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
 }
 ```

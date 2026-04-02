@@ -1,6 +1,7 @@
 # Entity Store API Routes
 
 > All routes use snake_case. Constants in `common/index.ts` as `ENTITY_STORE_ROUTES`.
+> Routes are transitioning from internal to public (v2). Check route definitions for current status.
 > Internal routes require headers: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`, `elastic-api-version: 2`.
 
 ## Lifecycle
@@ -19,15 +20,15 @@
 |--------|------|-------------|
 | POST | `/internal/security/entity_store/entities/{entityType}` | Create entity (sync) |
 | PUT | `/internal/security/entity_store/entities/{entityType}` | Update entity (sync) |
-| PUT | `/internal/security/entity_store/entities/bulk` | Bulk upsert (async, writes to UPDATES data stream) |
+| PUT | `/internal/security/entity_store/entities/bulk` | Bulk upsert (async, writes to LATEST index) |
 | DELETE | `/internal/security/entity_store/entities/` | Delete entity by EUID |
 | GET | `/internal/security/entity_store/entities` | List entities with filtering/pagination |
 
 ### CRUD Details
 
-- **Create**: `esClient.index()` with `op_type: 'create'`, returns 409 on conflict
+- **Create**: `esClient.create()`, returns 409 on conflict
 - **Update**: `esClient.update()` with `doc_as_upsert: false`, `retry_on_conflict: 3`
-- **Bulk**: `esClient.bulk()` with `create` ops to UPDATES data stream (async)
+- **Bulk**: `esClient.bulk()` with `create` ops to LATEST index (async)
 - **Delete**: `esClient.delete()` on LATEST index by hashed EUID
 - **`?force=true`** needed to update fields without `allowAPIUpdate: true`
 
