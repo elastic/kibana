@@ -24,6 +24,8 @@ import {
   EuiHorizontalRule,
   EuiInputPopover,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
   EuiTitle,
   keys,
   useEuiTheme,
@@ -86,6 +88,15 @@ const providerConfigConfig = {
   validations: [
     {
       validator: fieldValidators.emptyField(LABELS.PROVIDER_REQUIRED),
+      isBlocking: true,
+    },
+  ],
+};
+
+const taskTypeConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
       isBlocking: true,
     },
   ],
@@ -669,6 +680,52 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             isPreconfigured={isPreconfigured}
             isInternalProvider={isInternalProvider}
           />
+          {(selectedTaskType || config.taskType?.length) && (
+            <>
+              <EuiSpacer size="m" />
+              <UseField path="config.taskType" config={taskTypeConfig}>
+                {(field) => {
+                  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+                  return (
+                    <EuiFormRow
+                      id="taskType"
+                      fullWidth
+                      isInvalid={isInvalid}
+                      error={errorMessage}
+                      label={
+                        <FormattedMessage
+                          id="xpack.inferenceEndpointUICommon.components.taskTypeLabel"
+                          defaultMessage="Model task type"
+                        />
+                      }
+                    >
+                      <EuiSuperSelect
+                        data-test-subj="taskTypeSelect"
+                        fullWidth
+                        disabled={isEdit || taskTypeOptions.length <= 1}
+                        valueOfSelected={config.taskType}
+                        onChange={(value) => onTaskTypeOptionsSelect(value)}
+                        options={taskTypeOptions.map((option) => ({
+                          value: option.id,
+                          inputDisplay: option.label,
+                          dropdownDisplay: (
+                            <>
+                              <strong>{option.label}</strong>
+                              {LABELS.TASK_TYPE_DESCRIPTIONS[option.id as InferenceTaskType] && (
+                                <EuiText size="xs" color="subdued">
+                                  {LABELS.TASK_TYPE_DESCRIPTIONS[option.id as InferenceTaskType]}
+                                </EuiText>
+                              )}
+                            </>
+                          ),
+                        }))}
+                      />
+                    </EuiFormRow>
+                  );
+                }}
+              </UseField>
+            </>
+          )}
           <EuiSpacer size="s" />
           {optionalProviderFormFields.length > 0 ? (
             <>
@@ -697,8 +754,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           {/* ADDITIONAL OPTIONS */}
           <AdditionalOptionsFields
             config={config}
-            onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
-            taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
             isEdit={isEdit}
             allowContextWindowLength={allowContextWindowLength}
