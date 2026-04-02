@@ -483,6 +483,7 @@ export const PresentationPanelHoverActions = ({
                 isOpen={isContextMenuOpen}
                 className={contextMenuClasses}
                 closePopover={onClose}
+                aria-label={getContextMenuAriaLabel(title, index)}
                 data-test-subj={
                   isContextMenuOpen
                     ? 'embeddablePanelContextMenuOpen'

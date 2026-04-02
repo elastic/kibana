@@ -16,21 +16,22 @@ import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 @injectable()
 export class BulkEnableRulesRoute {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_enable`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk_enable`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
   static options = {
-    access: 'internal',
+    access: 'public',
     summary: 'Enable rules in bulk',
     tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

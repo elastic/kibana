@@ -442,6 +442,49 @@ describe('getNormalizedDataStreams', () => {
     expect(useApmVar).toBeDefined();
     expect(useApmVar?.default).toEqual(true);
   });
+
+  it('should use generic.otel as default dataset for dynamic_signal_types packages', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          name: 'otlpreceiver',
+          template_path: 'some/path.hbl',
+          title: 'OTLP',
+          description: 'OTLP input',
+          dynamic_signal_types: true,
+          vars: [],
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    // Dataset should be 'generic.otel', NOT the policy_template-based default 'nginx.otlpreceiver'
+    expect(result[0].dataset).toEqual('generic.otel');
+    expect(result[0].path).toEqual('generic.otel');
+  });
+
+  it('should use policy_template-based default dataset for non-dynamic_signal_types packages', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          name: 'mysqlreceiver',
+          type: 'metrics',
+          template_path: 'some/path.hbl',
+          title: 'MySQL OTel',
+          description: 'MySQL metrics via OTel',
+          vars: [],
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    // Without dynamic_signal_types, dataset is derived from packageName.templateName
+    expect(result[0].dataset).toEqual('nginx.mysqlreceiver');
+  });
 });
 
 describe('getNormalizedInputs - dynamic_signal_types propagation', () => {

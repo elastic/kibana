@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/logging'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod

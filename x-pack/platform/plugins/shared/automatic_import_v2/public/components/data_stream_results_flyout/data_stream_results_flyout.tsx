@@ -12,7 +12,6 @@ import type { DataStreamResultsFlyoutProps } from './types';
 
 export const DataStreamResultsFlyout = ({
   integrationId,
-  integrationName,
   dataStream,
   onClose,
 }: DataStreamResultsFlyoutProps) => {
