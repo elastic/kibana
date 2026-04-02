@@ -28,7 +28,7 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -39,11 +39,11 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import type { SearchEmbeddableState } from '../../common/embeddable/types';
-import type { SearchEmbeddableApi } from './types';
+import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { compareSelectedTabId } from './utils/compare_selected_tab_id';
 import { isTabDeleted } from './utils/is_tab_deleted';
 
 export const getSearchEmbeddableFactory = ({
@@ -59,7 +59,7 @@ export const getSearchEmbeddableFactory = ({
   const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: EmbeddableFactory<
-    SearchEmbeddableState,
+    SearchEmbeddablePanelApiState,
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
@@ -70,6 +70,9 @@ export const getSearchEmbeddableFactory = ({
       parentApi,
       uuid,
     }) => {
+      const embeddableTransformsEnabled =
+        discoverServices.discoverFeatureFlags.getEmbeddableTransformsEnabled();
+
       const runtimeState = await deserializeState({
         serializedState: initialState,
         discoverServices,
@@ -107,9 +110,9 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const titleManager = initializeTitleManager(initialState);
-      const timeRangeManager = initializeTimeRangeManager(initialState);
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const titleManager = initializeTitleManager(runtimeState);
+      const timeRangeManager = initializeTimeRangeManager(runtimeState);
+      const drilldownsManager = await initializeDrilldownsManager(uuid, runtimeState);
       const searchEmbeddable = await initializeSearchEmbeddableApi({
         initialState: runtimeState,
         dataLoading$,
@@ -126,6 +129,7 @@ export const getSearchEmbeddableFactory = ({
           serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
           selectedTabId: selectedTabId$.getValue(),
+          embeddableTransformsEnabled,
         });
 
       const inlineEditingApi = initializeInlineEditingApi({
@@ -138,7 +142,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
       });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
+      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),
@@ -157,6 +161,19 @@ export const getSearchEmbeddableFactory = ({
           const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
           const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
 
+          if (embeddableTransformsEnabled) {
+            const isByValue = !savedObjectId$.getValue();
+            return {
+              ...drilldownsManager.comparators,
+              ...titleComparators,
+              ...timeRangeComparators,
+              discover_session_id: 'skip',
+              selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
+              overrides: shouldSkipTabComparators ? 'skip' : 'deepEquality',
+              tabs: !isByValue || shouldSkipTabComparators ? 'skip' : 'deepEquality',
+            };
+          }
+
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
@@ -170,7 +187,9 @@ export const getSearchEmbeddableFactory = ({
                   Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
                 )
               : {}),
-            selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
+            selectedTabId: shouldSkipTabComparators
+              ? 'skip'
+              : (last, current) => compareSelectedTabId(tabs[0]?.id, last, current),
             attributes: 'skip',
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
@@ -204,10 +223,13 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
+      const getSelectedTabId = () =>
+        inlineEditingApi.draftSelectedTabId$.getValue() ?? selectedTabId$.getValue();
+
       const editApi = initializeEditApi({
         uuid,
         parentApi,
-        partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
+        partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$, getSelectedTabId },
         discoverServices,
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
@@ -237,6 +259,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
         blockingError$,
         savedObjectId$,
+        getSelectedTabId,
         defaultTitle$,
         defaultDescription$,
         hasTimeRange: () => {
@@ -272,9 +295,7 @@ export const getSearchEmbeddableFactory = ({
         serializeState: () => serialize(savedObjectId$.getValue()),
         getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         supportedTriggers: () => {
-          // No triggers are supported, but this is still required to pass the drilldown
-          // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
-          return [];
+          return [ON_OPEN_PANEL_MENU];
         },
       });
 

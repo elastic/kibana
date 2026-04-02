@@ -334,21 +334,23 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
-              <EuiFlexItem>
-                {isHistoryEnabled ? (
-                  <PackQueriesStatusTable
-                    actionId={liveQueryActionId}
-                    data={liveQueryDetails?.queries}
-                    startDate={liveQueryDetails?.['@timestamp']}
-                    expirationDate={liveQueryDetails?.expiration}
-                    agentIds={liveQueryDetails?.agents}
-                    showResultsHeader
-                    addToTimeline={addToTimeline}
-                  />
-                ) : (
-                  resultsStepContent
-                )}
-              </EuiFlexItem>
+              {data?.action_id ? (
+                <EuiFlexItem>
+                  {isHistoryEnabled ? (
+                    <PackQueriesStatusTable
+                      actionId={liveQueryActionId}
+                      data={liveQueryDetails?.queries}
+                      startDate={liveQueryDetails?.['@timestamp']}
+                      expirationDate={liveQueryDetails?.expiration}
+                      agentIds={liveQueryDetails?.agents}
+                      showResultsHeader
+                      addToTimeline={addToTimeline}
+                    />
+                  ) : (
+                    resultsStepContent
+                  )}
+                </EuiFlexItem>
+              ) : null}
             </>
           )}
         </EuiFlexGroup>

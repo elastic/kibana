@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceConnector } from '@kbn/inference-common';
 
-export type { InferenceTaskType };
+export type { InferenceTaskType, InferenceConnector };
 
 export interface InferenceFeatureConfig {
   featureId: string;
@@ -19,6 +22,8 @@ export interface InferenceFeatureConfig {
   taskType: InferenceTaskType;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
+  isTechPreview?: boolean;
+  isBeta?: boolean;
 }
 
 export type RegisterResult = { ok: true } | { ok: false; error: string };
@@ -36,12 +41,24 @@ export interface SearchInferenceEndpointsPluginSetup {
   features: InferenceFeatureRegistryContract;
 }
 
+export interface ResolvedInferenceEndpoints {
+  endpoints: InferenceConnector[];
+  warnings: string[];
+  soEntryFound: boolean;
+}
+
+export interface InferenceEndpointsContract {
+  getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
+}
+
 export interface SearchInferenceEndpointsPluginStart {
   features: InferenceFeatureRegistryStartContract;
+  endpoints: InferenceEndpointsContract;
 }
 
 export interface SearchInferenceEndpointsPluginStartDependencies {
   actions: ActionsPluginStartContract;
+  inference: InferenceServerStart;
 }
 
 export interface SearchInferenceEndpointsPluginSetupDependencies {

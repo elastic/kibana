@@ -21,6 +21,7 @@ export const fromEs = (document: SkillDocument): SkillPersistedDefinition => {
   return {
     id: document._source.id,
     name: document._source.name,
+    base_path: document._source.base_path,
     description: document._source.description,
     content: document._source.content ?? '',
     referenced_content: referencedContent,
@@ -47,6 +48,7 @@ export const createAttributes = ({
   return {
     id: createRequest.id,
     name: createRequest.name,
+    base_path: createRequest.base_path,
     space,
     description: createRequest.description,
     content: createRequest.content,
@@ -69,13 +71,12 @@ export const updateDocument = ({
 }): SkillProperties => {
   return {
     ...current,
-    ...(update.name !== undefined && { name: update.name }),
-    ...(update.description !== undefined && { description: update.description }),
-    ...(update.content !== undefined && { content: update.content }),
-    ...(update.referenced_content !== undefined && {
-      referenced_content: update.referenced_content,
-    }),
-    ...(update.tool_ids !== undefined && { tool_ids: update.tool_ids }),
+    name: update.name ?? current.name,
+    base_path: update.base_path ?? current.base_path,
+    description: update.description ?? current.description,
+    content: update.content ?? current.content,
+    referenced_content: update.referenced_content ?? current.referenced_content,
+    tool_ids: update.tool_ids ?? current.tool_ids,
     updated_at: updateDate.toISOString(),
   };
 };

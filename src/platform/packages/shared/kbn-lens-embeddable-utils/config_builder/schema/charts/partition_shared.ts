@@ -11,18 +11,20 @@ import { schema } from '@kbn/config-schema';
 import type { ColorMappingType, StaticColorType } from '../color';
 import { groupIsNotCollapsed } from '../../utils';
 
-export const legendVisibleSchema = schema.maybe(
-  schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')], {
-    meta: { description: 'Legend visibility: auto, show, or hide' },
-  })
-);
-
 export const valueDisplaySchema = schema.maybe(
   schema.object(
     {
-      mode: schema.oneOf(
-        [schema.literal('hidden'), schema.literal('absolute'), schema.literal('percentage')],
-        { meta: { description: 'Value display mode: hidden, absolute, or percentage' } }
+      visible: schema.maybe(
+        schema.boolean({
+          meta: { description: 'Show metric values on the chart' },
+        })
+      ),
+      mode: schema.maybe(
+        schema.oneOf([schema.literal('absolute'), schema.literal('percentage')], {
+          meta: {
+            description: 'How to format values when visible.',
+          },
+        })
       ),
       percent_decimals: schema.maybe(
         schema.number({
@@ -36,8 +38,8 @@ export const valueDisplaySchema = schema.maybe(
     {
       meta: {
         id: 'valueDisplay',
-        title: 'Value Display',
-        description: 'Configuration for displaying values in chart cells',
+        description:
+          'Configure the visibility and the format of the values rendered on each chart partition section',
       },
     }
   )

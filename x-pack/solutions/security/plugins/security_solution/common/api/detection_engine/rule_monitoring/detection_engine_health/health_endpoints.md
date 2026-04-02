@@ -891,7 +891,7 @@ Response:
         },
         {
           "count": 10,
-          "message": "An error occurred during rule execution message rare_method_for_a_username missing"
+          "message": "An error occurred during rule execution message rare_method_for_a_username_ea missing"
         }
       ],
       "top_warnings": [

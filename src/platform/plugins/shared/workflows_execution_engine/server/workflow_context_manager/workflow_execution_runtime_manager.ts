@@ -11,9 +11,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import agent from 'elastic-apm-node';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { buildWorkflowContext } from './build_workflow_context';
@@ -59,7 +64,7 @@ export class WorkflowExecutionRuntimeManager {
 
   private workflowExecutionState: WorkflowExecutionState;
   private entryTransactionId?: string;
-  private workflowTransaction?: any; // APM transaction instance
+  private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
   private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
@@ -204,9 +209,14 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+
+    if (scopeStack.isEmpty()) {
+      return;
+    }
+
     const entered = currentNode.type.replace(/^exit-/, 'enter-');
 
-    if (entered !== scopeStack.getCurrentScope()?.nodeType) {
+    if (entered !== scopeStack.getCurrentScope().nodeType) {
       return;
     }
 
@@ -265,10 +275,6 @@ export class WorkflowExecutionRuntimeManager {
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();
-      if (!currentScope) {
-        break;
-      }
-
       const matched = shouldStop?.(currentScope) ?? false;
       if (matched && !inclusive) {
         break;
@@ -348,8 +354,9 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowTransaction = workflowTransaction;
 
-        // Add workflow-specific labels
-        workflowTransaction.addLabels({
+        (agent as any).setCurrentTransaction(workflowTransaction);
+
+        addTransactionLabels({
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
@@ -357,9 +364,6 @@ export class WorkflowExecutionRuntimeManager {
           triggered_by: 'alerting',
           parent_alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
         });
-
-        // Make the workflow transaction the current transaction for subsequent spans
-        (agent as any).setCurrentTransaction(workflowTransaction);
 
         // Store the workflow transaction ID (not the alerting transaction ID)
         const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
@@ -399,14 +403,20 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowTransaction = existingTransaction;
 
-        // Add workflow-specific labels to the existing transaction
-        existingTransaction.addLabels({
+        const taskManagerLabels: Record<string, string | number | boolean> = {
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
           transaction_hierarchy: 'task->steps',
           triggered_by: 'task_manager',
-        });
+        };
+
+        const { triggeredBy } = this.workflowExecution;
+        if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+          taskManagerLabels.event_trigger_id = triggeredBy;
+        }
+
+        addTransactionLabels(taskManagerLabels);
 
         // Store the task transaction ID in the workflow execution
         const taskTransactionId = existingTransaction.ids?.['transaction.id'];

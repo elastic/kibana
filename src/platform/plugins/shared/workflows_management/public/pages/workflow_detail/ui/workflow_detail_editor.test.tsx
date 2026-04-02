@@ -78,28 +78,12 @@ jest.mock('../../../features/debug_graph/execution_graph', () => ({
   ),
 }));
 
-jest.mock('../../../features/run_workflow/ui/test_step_modal', () => ({
-  TestStepModal: ({ initialcontextOverride, onSubmit, onClose }: any) => (
-    <div data-test-subj="test-step-modal">
-      <button
-        type="button"
-        data-test-subj="workflowSubmitStepRun"
-        onClick={() => onSubmit({ stepInputs: {} })}
-      >
-        {'Submit'}
-      </button>
-      <button type="button" data-test-subj="close-step-modal" onClick={onClose}>
-        {'Close'}
-      </button>
-      <div data-test-subj="context-override">{JSON.stringify(initialcontextOverride)}</div>
-    </div>
-  ),
+const mockUseContextOverrideData = jest.fn((stepId: string) => ({
+  stepContext: { mockKey: 'mockValue' },
+  schema: {},
 }));
-
 jest.mock('./use_context_override_data', () => ({
-  useContextOverrideData: jest.fn(() => (stepId: string) => ({
-    stepContext: { mockKey: 'mockValue' },
-  })),
+  useContextOverrideData: () => mockUseContextOverrideData,
 }));
 
 describe('WorkflowDetailEditor', () => {
@@ -134,7 +118,8 @@ describe('WorkflowDetailEditor', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return <TestWrapper store={store}>{children}</TestWrapper>;
     };
-    return render(<WorkflowDetailEditor {...props} />, { wrapper });
+    const result = render(<WorkflowDetailEditor {...props} />, { wrapper });
+    return { ...result, store };
   };
 
   beforeEach(() => {
@@ -169,6 +154,10 @@ describe('WorkflowDetailEditor', () => {
       // Mock selectYamlString
       if (selector.toString().includes('selectYamlString')) {
         return mockYaml;
+      }
+      // Mock selectWorkflowId
+      if (selector.toString().includes('selectWorkflowId')) {
+        return 'workflow-1';
       }
       // Mock selectWorkflowDefinition
       if (selector.toString().includes('selectWorkflowDefinition')) {
@@ -217,52 +206,39 @@ describe('WorkflowDetailEditor', () => {
   });
 
   describe('step run functionality', () => {
-    it('should handle step run action', async () => {
-      const { getByTestId, queryByTestId } = renderEditor();
+    it('should dispatch setTestStepModalOpenStepId when step run needs modal', async () => {
+      const { getByTestId, store } = renderEditor();
       const runButton = getByTestId('test-step-run');
 
       await act(async () => {
         runButton.click();
       });
 
-      // Wait for the modal to appear (if context override data is returned)
-      await waitFor(() => {
-        expect(queryByTestId('test-step-modal')).toBeInTheDocument();
-      });
-
-      // The component should handle the step run internally
-      expect(mockUseWorkflowActions).toHaveBeenCalled();
+      expect(store?.getState().detail.testStepModalOpenStepId).toBe('test-step');
     });
 
-    it('should show toast error when step run fails', async () => {
-      const { getByTestId, queryByTestId } = renderEditor();
-      const runButton = getByTestId('test-step-run');
+    it('should show toast error when immediate step run (no modal) fails', async () => {
+      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
 
+      const mockMutateAsync = jest.fn().mockRejectedValue(new Error('Failed to run step'));
       mockUseWorkflowActions.mockReturnValue({
-        runIndividualStep: {
-          mutateAsync: jest.fn().mockRejectedValue(new Error('Failed to run step')),
-        },
+        runIndividualStep: { mutateAsync: mockMutateAsync },
       });
+
+      const { getByTestId } = renderEditor();
+      const runButton = getByTestId('test-step-run');
 
       await act(async () => {
         runButton.click();
       });
 
-      // Wait for the modal to appear
       await waitFor(() => {
-        expect(queryByTestId('test-step-modal')).toBeInTheDocument();
-      });
-
-      const submitButton = getByTestId('workflowSubmitStepRun');
-      await act(async () => {
-        submitButton.click();
+        expect(mockMutateAsync).toHaveBeenCalled();
       });
 
       expect(mockUseKibana().services.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('Failed to run step'),
-        {
-          title: 'Failed to run step',
-        }
+        { title: 'Failed to run step' }
       );
     });
   });

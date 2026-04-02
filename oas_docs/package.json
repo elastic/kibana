@@ -7,7 +7,7 @@
     "example": "examples"
   },
   "dependencies": {
-    "@redocly/cli": "2.19.2"
+    "@redocly/cli": "2.21.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

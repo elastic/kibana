@@ -15,6 +15,7 @@ export type {
   DashboardApi,
   DashboardInternalApi,
   DashboardCreationOptions,
+  DashboardInitializationState,
 } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';

@@ -550,6 +550,8 @@ paths:
                 ids:
                   items:
                     type: string
+                  maxItems: 1000
+                  minItems: 1
                   nullable: true
                   type: array
         description: The IDs of the Timelines to export.

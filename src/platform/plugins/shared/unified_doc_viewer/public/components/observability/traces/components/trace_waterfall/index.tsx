@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDelayRender } from '@elastic/eui';
+import { EuiDelayRender, type EuiFlyoutProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -164,10 +164,66 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     [setActiveFlyoutType, setActiveSection, setActiveDocId, setActiveDocIndex]
   );
 
-  const onExitFullScreen = useCallback(() => {
-    setShowFullScreenWaterfall(false);
-    clearActiveFlyout();
-  }, [setShowFullScreenWaterfall, clearActiveFlyout]);
+  // EUI's flyout manager fires `onClose` with a synthetic MouseEvent('navigation'),
+  // When the user switches tabs in discover, and back-button click.
+  // We must preserve restorable state during tab switching, but not back-button.
+  //
+  // NOTE: The 'navigation' event type string is an EUI internal, it is not part
+  // of EUI's public API and may change without notice. If this breaks after an EUI
+  // upgrade, check `flyout_managed.tsx` for the current synthetic event type.
+  // See https://github.com/elastic/eui/issues/9539 for an ER to make this less brittle.
+  //
+  // When we receive a 'navigation' event, we defer the state clearing to a
+  // `useEffect`. When switching tabs, the component is unmounting, so React
+  // will not run new effects, the deferred clear never happens and the restorable
+  // state is preserved. During a back-button click the component stays alive, the
+  // effect runs on the next render, and the state is cleared.
+  //
+  // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
+  const pendingCloseRef = useRef<'exit' | 'child' | null>(null);
+  // We have special conditions here where we want to force an effect to fire as
+  // result of a callback. Because we're relying on a ref to handle this state (which
+  // cannot trigger a re-render), calling a setState will force the component to render.
+  // Without doing this, when the user exits the flyout using the back button, it won't
+  // end up rendering, and the traces flyout will never re-open again.
+  const [, forceRender] = useState(0);
+
+  useEffect(() => {
+    if (pendingCloseRef.current === 'exit') {
+      setShowFullScreenWaterfall(false);
+      clearActiveFlyout();
+    } else if (pendingCloseRef.current === 'child') {
+      clearActiveFlyout();
+    }
+    pendingCloseRef.current = null;
+  });
+
+  const onExitFullScreen = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
+    (event) => {
+      if (event.type === 'navigation') {
+        pendingCloseRef.current = 'exit';
+        forceRender((n) => n + 1);
+        return;
+      }
+
+      setShowFullScreenWaterfall(false);
+      clearActiveFlyout();
+    },
+    [setShowFullScreenWaterfall, clearActiveFlyout]
+  );
+
+  const onCloseFlyout = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
+    (event) => {
+      if (event.type === 'navigation') {
+        pendingCloseRef.current = 'child';
+        forceRender((n) => n + 1);
+        return;
+      }
+
+      clearActiveFlyout();
+    },
+    [clearActiveFlyout]
+  );
 
   const actions = useMemo(
     () => [
@@ -195,6 +251,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
+          highlightedSpanId={activeDocId ?? docId}
+          scrollToHighlightedOnMount={docId != null}
           docId={activeDocId}
           docIndex={activeDocIndex}
           activeFlyoutType={activeFlyoutType}
@@ -202,8 +260,9 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           skipOpenAnimation={isRestoringRef.current}
           onNodeClick={onNodeClick}
           onErrorClick={onErrorClick}
-          onCloseFlyout={clearActiveFlyout}
+          onCloseFlyout={onCloseFlyout}
           onExitFullScreen={onExitFullScreen}
+          skipNextEventReport={isRestoringRef.current}
         />
       ) : null}
       <ContentFrameworkSection

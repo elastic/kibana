@@ -18,6 +18,9 @@ export type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
   InferenceFeatureConfig,
+  RegisterResult,
   InferenceFeatureRegistryContract,
   InferenceFeatureRegistryStartContract,
+  InferenceEndpointsContract,
+  ResolvedInferenceEndpoints,
 } from './types';

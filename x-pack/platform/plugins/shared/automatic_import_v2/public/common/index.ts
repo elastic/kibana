@@ -10,10 +10,10 @@ export { useFetchIndices } from './hooks/use_fetch_indices';
 export { useGetIntegrationById } from './hooks/use_get_integration_by_id';
 export { useGetAllIntegrations } from './hooks/use_get_all_integrations';
 export { useCreateUpdateIntegration } from './hooks/use_create_update_integration';
-export { useLoadConnectors } from './hooks/use_load_connectors';
 export { useValidateIndex } from './hooks/use_validate_index';
 export { useUploadSamples } from './hooks/use_upload_samples';
 export { useDeleteDataStream } from './hooks/use_delete_data_stream';
+export { useDeleteIntegration } from './hooks/use_delete_integration';
 export { useGetDataStreamResults } from './hooks/use_get_data_stream_results';
 export { useReanalyzeDataStream } from './hooks/use_reanalyze_data_stream';
 export { useUpdateDataStreamPipeline } from './hooks/use_update_data_stream_pipeline';
@@ -36,6 +36,7 @@ export {
   createIntegration,
   getAllIntegrations,
   getIntegrationById,
+  deleteIntegration,
   updateDataStreamPipeline,
 } from './lib/api';
 export { getIntegrationNameFromResponse } from './lib/api_parsers';
@@ -46,9 +47,20 @@ export type {
   UploadSamplesRequest,
   GetDataStreamResultsResponse,
   UpdateDataStreamPipelineRequest,
+  DeleteIntegrationRequest,
 } from './lib/api';
 
 export { getLangSmithOptions } from './lib/lang_smith';
 export type { LangSmithOptions } from './lib/lang_smith';
 
-export { generateId, normalizeTitleName } from './lib/helper_functions';
+export {
+  generateId,
+  normalizeTitleName,
+  isValidNameFormat,
+  isNotPurelyNumeric,
+  startsWithLetter,
+  meetsMinLength,
+  meetsMaxLength,
+  MIN_NAME_LENGTH,
+  MAX_NAME_LENGTH,
+} from './lib/helper_functions';

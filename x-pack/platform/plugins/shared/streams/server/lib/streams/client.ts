@@ -83,6 +83,7 @@ export class StreamsClient {
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
+      isSecurityEnabled: boolean;
       isWiredStreamViewsEnabled: boolean;
       isDev: boolean;
     }
@@ -464,6 +465,7 @@ export class StreamsClient {
         {
           type: 'upsert',
           definition: {
+            type: 'wired',
             name,
             description: '',
             updated_at: now,
@@ -490,20 +492,24 @@ export class StreamsClient {
   async createQueryStream({
     name,
     query,
+    field_descriptions,
   }: {
     name: string;
     query: Streams.QueryStream.UpsertRequest['stream']['query'];
+    field_descriptions?: Record<string, string>;
   }): Promise<UpsertStreamResponse> {
     await State.attemptChanges(
       [
         {
           type: 'upsert',
           definition: {
+            type: 'query',
             name,
             description: '',
             updated_at: new Date().toISOString(),
             query_streams: [],
             query,
+            ...(field_descriptions && { field_descriptions }),
           },
         },
       ],
@@ -574,6 +580,7 @@ export class StreamsClient {
         const privileges = await checkAccess({
           name,
           esClient: this.dependencies.esClient,
+          isSecurityEnabled: this.dependencies.isSecurityEnabled,
         });
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
@@ -601,7 +608,11 @@ export class StreamsClient {
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);
       }),
-      checkAccess({ name, esClient: this.dependencies.esClient }).then((privileges) => {
+      checkAccess({
+        name,
+        esClient: this.dependencies.esClient,
+        isSecurityEnabled: this.dependencies.isSecurityEnabled,
+      }).then((privileges) => {
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
@@ -651,6 +662,21 @@ export class StreamsClient {
    */
   async getPrivileges(nameOrNames: string | string[]) {
     const names = Array.isArray(nameOrNames) ? nameOrNames : [nameOrNames];
+
+    if (!this.dependencies.isSecurityEnabled) {
+      return {
+        manage: true,
+        monitor: true,
+        view_index_metadata: true,
+        lifecycle: true,
+        simulate: true,
+        text_structure: true,
+        read_failure_store: true,
+        manage_failure_store: true,
+        create_snapshot_repository: true,
+      };
+    }
+
     const isServerless = this.dependencies.isServerless;
     const REQUIRED_MANAGE_PRIVILEGES = [
       'manage_index_templates',
@@ -727,6 +753,7 @@ export class StreamsClient {
     const timestamp = new Date(0).toISOString();
 
     const definition: Streams.ClassicStream.Definition = {
+      type: 'classic',
       name: dataStream.name,
       description: '',
       updated_at: timestamp,
@@ -814,6 +841,7 @@ export class StreamsClient {
     const now = new Date().toISOString();
 
     return response.data_streams.map((dataStream) => ({
+      type: 'classic' as const,
       name: dataStream.name,
       description: '',
       updated_at: now,
@@ -848,11 +876,16 @@ export class StreamsClient {
       )
       .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
+    if (!this.dependencies.isSecurityEnabled) {
+      return streams;
+    }
+
     const privileges = await checkAccessBulk({
       names: streams
         .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
       esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
     return streams.filter((stream) => {

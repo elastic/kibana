@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { skillCreateRequestSchema, skillUpdateRequestSchema } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -44,10 +43,6 @@ const SKILL_ID_PARAMS_SCHEMA = schema.object({
   }),
 });
 
-const featureFlagConfig = {
-  featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-};
-
 export function registerSkillsRoutes({
   router,
   getInternalServices,
@@ -75,17 +70,29 @@ export function registerSkillsRoutes({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            query: schema.object({
+              include_plugins: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'Set to true to include skills from plugins.' },
+              }),
+            }),
+          },
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        const skills = await registry.list({ summaryOnly: true });
+        const skills = await registry.list({
+          summaryOnly: true,
+          includePlugins: request.query.include_plugins,
+        });
         const results = await Promise.all(skills.map(internalToPublicSummary));
         return response.ok<ListSkillsResponse>({
           body: { results },
         });
-      }, featureFlagConfig)
+      })
     );
 
   // get skill by ID
@@ -128,7 +135,7 @@ export function registerSkillsRoutes({
         return response.ok<GetSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // create skill
@@ -199,7 +206,7 @@ export function registerSkillsRoutes({
         return response.ok<CreateSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // update skill
@@ -274,7 +281,7 @@ export function registerSkillsRoutes({
         return response.ok<UpdateSkillResponse>({
           body: publicSkill,
         });
-      }, featureFlagConfig)
+      })
     );
 
   // delete skill
@@ -314,6 +321,6 @@ export function registerSkillsRoutes({
         return response.ok<DeleteSkillResponse>({
           body: { success },
         });
-      }, featureFlagConfig)
+      })
     );
 }

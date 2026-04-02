@@ -2,19 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "@kbn/ambient-common-types"
-    ]
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.json"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.json"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/dev-cli-runner",
     "@kbn/inference-common",
@@ -27,11 +18,15 @@
     "@kbn/some-dev-log",
     "@kbn/inference-tracing",
     "@kbn/repo-info",
-    "@kbn/test",
+    "@kbn/kbn-client",
+    "@kbn/test-es-server",
     "@kbn/inference-prompt-utils",
     "@kbn/tracing-utils",
     "@kbn/dev-cli-errors",
     "@kbn/config-schema",
     "@kbn/evals-common",
+    "@kbn/safer-lodash-set",
+    "@kbn/test",
+    "@kbn/es-errors"
   ]
 }

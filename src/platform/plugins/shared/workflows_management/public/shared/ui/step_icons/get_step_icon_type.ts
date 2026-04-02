@@ -37,7 +37,7 @@ export const getStepIconType = (nodeType: string): IconType => {
       iconType = 'globe';
       break;
     case 'console':
-      iconType = 'console';
+      iconType = 'commandLine';
       break;
     case 'data.set':
       iconType = 'database';
@@ -58,6 +58,9 @@ export const getStepIconType = (nodeType: string): IconType => {
     // flow control nodes
     case 'wait':
       iconType = 'clock';
+      break;
+    case 'waitForInput':
+      iconType = 'user';
       break;
     case 'enter-if':
     case 'exit-if':
@@ -85,10 +88,19 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'loop-continue':
       iconType = 'controls';
       break;
+    case 'switch':
+    case 'enter-switch':
+    case 'exit-switch':
+    case 'enter-case-branch':
+    case 'exit-case-branch':
+    case 'enter-default-branch':
+    case 'exit-default-branch':
+      iconType = 'productStreamsWired';
+      break;
 
     // connectors which use EUI icons
     case 'email':
-      iconType = 'email';
+      iconType = 'mail';
       break;
     case 'slack':
     case 'slack_api':

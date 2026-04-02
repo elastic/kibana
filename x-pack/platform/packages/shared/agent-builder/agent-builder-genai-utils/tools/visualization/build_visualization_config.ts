@@ -21,6 +21,8 @@ interface BuildVisualizationConfigParams {
   esql?: string;
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
+  includeTimeRange?: boolean;
+  additionalChartConfigInstructions?: string;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -41,6 +43,8 @@ export const buildVisualizationConfig = async ({
   esql,
   existingConfig,
   parsedExistingConfig = null,
+  includeTimeRange = true,
+  additionalChartConfigInstructions,
   modelProvider,
   logger,
   events,
@@ -62,7 +66,9 @@ export const buildVisualizationConfig = async ({
     await modelProvider.getDefaultModel(),
     logger,
     events,
-    esClient
+    esClient,
+    includeTimeRange,
+    additionalChartConfigInstructions
   );
 
   const finalState = await graph.invoke({

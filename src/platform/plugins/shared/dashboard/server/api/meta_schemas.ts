@@ -19,6 +19,7 @@ export const baseMetaSchema = schema.object({
       metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     })
   ),
+  owner: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
 });
 

@@ -15,9 +15,12 @@ import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import { groupBy } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { ExceptionItemImportError } from '@kbn/lists-plugin/server/exception_item_import_error';
 import { stringify } from '../../../endpoint/utils/stringify';
 import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
+  buildPerPolicyTag,
   getArtifactOwnerSpaceIds,
   isArtifactGlobal,
 } from '../../../../common/endpoint/service/artifacts/utils';
@@ -31,13 +34,20 @@ import {
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from './errors';
-import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 
 const OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.noGlobalArtifactAuthzApiMessage',
   {
     defaultMessage:
       'Management of "ownerSpaceId" tag requires global artifact management privilege',
+  }
+);
+
+const IMPORTING_TO_OTHER_SPACE_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.baseValidator.importingToOtherSpaceNotAllowedMessage',
+  {
+    defaultMessage:
+      'Importing artifacts to a different space requires global artifact management privilege',
   }
 );
 
@@ -48,6 +58,23 @@ export const GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
       'Management of global artifacts requires additional privilege (global artifact management)',
   }
 );
+
+const IMPORTING_ARTIFACT_NOT_VISIBLE_IN_CURRENT_SPACE_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.baseValidator.importingArtifactNotVisibleInCurrentSpace',
+  {
+    defaultMessage: 'Importing artifacts that are not visible in the current space is not allowed',
+  }
+);
+
+const IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID = (spaceIds: string[]): string =>
+  i18n.translate('xpack.securitySolution.baseValidator.invalidOwnerSpaceId', {
+    defaultMessage:
+      'Importing artifacts with invalid owner space IDs is not allowed. The following space {numberOfSpaces, plural, one {ID is} other {IDs are} } invalid or unaccessible by current user: {invalidSpaceIds}',
+    values: {
+      invalidSpaceIds: spaceIds.join(', '),
+      numberOfSpaces: spaceIds.length,
+    },
+  });
 
 const ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE = (spaceIds: string[]): string =>
   i18n.translate('xpack.securitySolution.baseValidator.cannotManageItemInCurrentSpace', {
@@ -114,14 +141,6 @@ export class BaseValidator {
     }
   }
 
-  protected async validateHasEndpointExceptionsPrivileges(
-    privilege: keyof EndpointAuthz
-  ): Promise<void> {
-    if (!(await this.endpointAuthzPromise)[privilege]) {
-      throw new EndpointExceptionsValidationError('Endpoint exceptions authorization failure', 403);
-    }
-  }
-
   protected async validateHasPrivilege(privilege: keyof EndpointAuthz): Promise<void> {
     if (!(await this.endpointAuthzPromise)[privilege]) {
       throw new EndpointArtifactExceptionValidationError(ENDPOINT_AUTHZ_ERROR_MESSAGE, 403);
@@ -182,7 +201,7 @@ export class BaseValidator {
     currentItem?: ExceptionListItemSchema
   ): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      const spaceId = await this.getActiveSpaceId();
+      const spaceId = this.getActiveSpaceId();
       const { packagePolicy, savedObjects } =
         this.endpointAppContext.getInternalFleetServices(spaceId);
       const policyIds = getPolicyIdsFromArtifact(item);
@@ -279,18 +298,88 @@ export class BaseValidator {
       }
 
       const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
-      const activeSpaceId = await this.getActiveSpaceId();
+      const activeSpaceId = this.getActiveSpaceId();
 
-      if (
-        ownerSpaceIds.length > 1 ||
-        (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== activeSpaceId)
-      ) {
+      if (ownerSpaceIds.some((spaceId) => spaceId !== activeSpaceId)) {
         throw new EndpointArtifactExceptionValidationError(
           `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
           403
         );
       }
     }
+  }
+
+  protected async validateImportOwnerSpaceIds(item: ExceptionItemLikeOptions): Promise<void> {
+    if (item.tags && item.tags.length > 0) {
+      const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
+      const activeSpaceId = this.getActiveSpaceId();
+
+      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+        await this.validateSpacesAreAccessible(ownerSpaceIds);
+
+        if (!(await this.isArtifactVisibleInCurrentSpace(ownerSpaceIds, activeSpaceId, item))) {
+          throw new EndpointArtifactExceptionValidationError(
+            `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${IMPORTING_ARTIFACT_NOT_VISIBLE_IN_CURRENT_SPACE_NOT_ALLOWED_MESSAGE}`,
+            403
+          );
+        }
+
+        return;
+      }
+
+      if (ownerSpaceIds.some((spaceId) => spaceId !== activeSpaceId)) {
+        throw new EndpointArtifactExceptionValidationError(
+          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${IMPORTING_TO_OTHER_SPACE_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
+    }
+  }
+
+  private async validateSpacesAreAccessible(ownerSpaceIds: string[]) {
+    const accessibleSpacesIds = new Set(await this.getAccessibleSpaceIds());
+    const invalidSpaceIds = ownerSpaceIds.filter((spaceId) => !accessibleSpacesIds.has(spaceId));
+
+    if (invalidSpaceIds.length > 0) {
+      throw new EndpointArtifactExceptionValidationError(
+        IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID(invalidSpaceIds),
+        403
+      );
+    }
+  }
+
+  protected async isArtifactVisibleInCurrentSpace(
+    ownerSpaceIds: string[],
+    activeSpaceId: string,
+    item: ExceptionItemLikeOptions
+  ): Promise<boolean> {
+    if (ownerSpaceIds.includes(activeSpaceId) || isArtifactGlobal(item)) {
+      return true;
+    }
+
+    const assignedPolicyIds = getPolicyIdsFromArtifact(item);
+    if (assignedPolicyIds.length === 0) {
+      // not assigned to any policy while existing in another space, so not visible in current space
+      return false;
+    }
+
+    const { packagePolicy, savedObjects } =
+      this.endpointAppContext.getInternalFleetServices(activeSpaceId);
+
+    const soClient = savedObjects.createInternalScopedSoClient({ spaceId: activeSpaceId });
+
+    const assignedPackagePoliciesVisibleInCurrentSpace = await packagePolicy.getByIDs(
+      soClient,
+      assignedPolicyIds,
+      { ignoreMissing: true }
+    );
+
+    if (assignedPackagePoliciesVisibleInCurrentSpace.length > 0) {
+      // assigned to at least one policy visible in current space
+      return true;
+    }
+
+    return false;
   }
 
   protected wasOwnerSpaceIdTagsChanged(
@@ -300,7 +389,7 @@ export class BaseValidator {
     return !isEqual(getArtifactOwnerSpaceIds(updatedItem), getArtifactOwnerSpaceIds(currentItem));
   }
 
-  protected async getActiveSpaceId(): Promise<string> {
+  protected getActiveSpaceId(): string {
     if (!this.request) {
       throw new EndpointArtifactExceptionValidationError(
         'Unable to determine space id. Missing HTTP Request object',
@@ -308,7 +397,20 @@ export class BaseValidator {
       );
     }
 
-    return (await this.endpointAppContext.getActiveSpace(this.request)).id;
+    return this.endpointAppContext.getActiveSpaceId(this.request);
+  }
+
+  protected async getAccessibleSpaceIds(): Promise<string[]> {
+    if (!this.request) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Unable to determine space id. Missing HTTP Request object',
+        500
+      );
+    }
+
+    const accessibleSpaces = await this.endpointAppContext.getAccessibleSpaces(this.request);
+
+    return accessibleSpaces.map((space) => space.id);
   }
 
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
@@ -341,7 +443,7 @@ export class BaseValidator {
     const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
 
     // Per-space items can only be managed from one of the `ownerSpaceId`'s
-    if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+    if (!itemOwnerSpaces.includes(this.getActiveSpaceId())) {
       throw new EndpointArtifactExceptionValidationError(
         ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
         403
@@ -368,7 +470,7 @@ export class BaseValidator {
     const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
 
     // Per-space items can only be deleted from one of the `ownerSpaceId`'s
-    if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+    if (!itemOwnerSpaces.includes(this.getActiveSpaceId())) {
       throw new EndpointArtifactExceptionValidationError(
         ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
         403
@@ -389,7 +491,7 @@ export class BaseValidator {
       return;
     }
 
-    const activeSpaceId = await this.getActiveSpaceId();
+    const activeSpaceId = this.getActiveSpaceId();
     const ownerSpaceIds = getArtifactOwnerSpaceIds(currentSavedItem);
     const policyIds = getPolicyIdsFromArtifact(currentSavedItem);
 
@@ -438,5 +540,93 @@ export class BaseValidator {
       `Item not found in space [${activeSpaceId}]`,
       404
     );
+  }
+
+  protected async validatePreImportItems(
+    items: PromiseFromStreams,
+    validator: (item: ExceptionItemLikeOptions) => Promise<void>
+  ): Promise<void> {
+    const validatedItems: PromiseFromStreams['items'] = [];
+
+    for (const _item of items.items) {
+      if (_item instanceof Error) {
+        validatedItems.push(_item);
+      } else {
+        const item: ExceptionItemLikeOptions = {
+          name: _item.name,
+          description: _item.description,
+          entries: _item.entries,
+          osTypes: _item.os_types,
+          tags: _item.tags,
+          namespaceType: _item.namespace_type,
+          comments: _item.comments,
+          listId: _item.list_id,
+        };
+
+        try {
+          await validator(item);
+
+          validatedItems.push({
+            ..._item,
+
+            name: item.name,
+            description: item.description,
+            entries: item.entries,
+            os_types: item.osTypes,
+            tags: item.tags,
+            namespace_type: item.namespaceType,
+            comments: item.comments,
+            list_id: item.listId ?? _item.list_id,
+          });
+        } catch (error) {
+          validatedItems.push(new ExceptionItemImportError(error, _item.list_id, _item.item_id));
+        }
+      }
+    }
+
+    items.items = validatedItems;
+  }
+
+  protected async removeInvalidPolicyIds(item: ExceptionItemLikeOptions): Promise<void> {
+    if (this.isItemByPolicy(item)) {
+      const { packagePolicy, savedObjects } = this.endpointAppContext.getInternalFleetServices();
+      const policyIdsInArtifact = getPolicyIdsFromArtifact(item);
+      const soClient = savedObjects.createInternalUnscopedSoClient();
+
+      if (policyIdsInArtifact.length === 0) {
+        return;
+      }
+
+      const matchingPoliciesFromAllSpaces: PackagePolicy[] =
+        (await packagePolicy.getByIDs(soClient, policyIdsInArtifact, {
+          ignoreMissing: true,
+          spaceIds: ['*'],
+        })) ?? [];
+
+      const matchingPolicyIdsFromAllSpaces = new Set<string>();
+      matchingPoliciesFromAllSpaces.forEach(({ id }) => matchingPolicyIdsFromAllSpaces.add(id));
+
+      const invalidPolicyIds: string[] = policyIdsInArtifact.filter(
+        (policyId) => !matchingPolicyIdsFromAllSpaces.has(policyId)
+      );
+
+      const invalidPolicyIdTags = new Set<string>();
+      invalidPolicyIds.forEach((invalidPolicyId) =>
+        invalidPolicyIdTags.add(buildPerPolicyTag(invalidPolicyId))
+      );
+
+      if (invalidPolicyIdTags.size > 0) {
+        item.tags = item.tags.filter((tag) => !invalidPolicyIdTags.has(tag));
+
+        item.comments = [
+          ...(item.comments ?? []),
+          {
+            comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n${invalidPolicyIds
+              .map((id) => `- "${id}"`)
+              .join('\n')}`,
+          },
+        ];
+      }
+    }
   }
 }

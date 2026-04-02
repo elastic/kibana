@@ -52,8 +52,8 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
 const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
   return [
     {
-      label: UnmappedFieldsStrategy.FAIL,
-      text: UnmappedFieldsStrategy.FAIL,
+      label: UnmappedFieldsStrategy.DEFAULT,
+      text: UnmappedFieldsStrategy.DEFAULT,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
         defaultMessage: 'Fails the query if unmapped fields are present',
@@ -94,7 +94,7 @@ const getApproximateCompletionItems = (
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
-    availableParameters.num_rows.suggestions = numOfRowsValueItems;
+    availableParameters.rows.suggestions = numOfRowsValueItems;
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
 

@@ -33,7 +33,7 @@ import {
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
-import { registerRules } from './lib/rules/register_rules';
+import { registerRules } from './lib/sig_events/rules/register_rules';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
@@ -50,11 +50,14 @@ import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wire
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
-import { ModelSettingsConfigService } from './lib/saved_objects/significant_events/model_settings_config_service';
+import { ModelSettingsConfigService } from './lib/sig_events/saved_objects/model_settings_config_service';
 import { TaskService } from './lib/tasks/task_service';
-import { InsightService } from './lib/significant_events/insights/client/insight_service';
+import { InsightService } from './lib/sig_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
+import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
+import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -82,6 +85,7 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
+  private patternExtractionService?: PatternExtractionService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -99,6 +103,11 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
+    this.patternExtractionService = new PatternExtractionService(
+      this.config.workers.patternExtraction,
+      this.logger.get('patternExtraction')
+    );
+
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
       core,
@@ -113,6 +122,11 @@ export class StreamsPlugin
 
     registerRules({ plugins, logger: this.logger.get('rules') });
     registerStreamsSavedObjects(core.savedObjects);
+
+    registerSignificantEventsInferenceFeatures(
+      plugins.searchInferenceEndpoints,
+      this.logger.get('inference-features')
+    );
 
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
@@ -155,6 +169,7 @@ export class StreamsPlugin
           insightService.getInternalClient(),
           contentService.getClient(),
           queryService.getClient({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
             rulesClient: await pluginsStart.alerting.getRulesClientWithRequestInSpace(
               request,
@@ -163,6 +178,9 @@ export class StreamsPlugin
           }),
         ]);
 
+      const license = await licensing.getLicense();
+      const isSecurityEnabled = license.getFeature('security').isEnabled;
+
       const streamsClient = await streamsService.getClient({
         attachmentClient,
         queryClient,
@@ -170,6 +188,7 @@ export class StreamsPlugin
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
+        isSecurityEnabled,
       });
 
       const modelSettingsClient = modelSettingsConfigService.getClient({
@@ -191,8 +210,18 @@ export class StreamsPlugin
         uiSettingsClient,
         taskClient,
         modelSettingsClient,
+        isSecurityEnabled,
       };
     };
+
+    if (plugins.agentBuilder) {
+      registerStreamsAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        getScopedClients,
+        server: this.server,
+        logger: this.logger,
+      });
+    }
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
@@ -200,6 +229,7 @@ export class StreamsPlugin
       getScopedClients,
       logger: this.logger,
       telemetry: telemetryClient,
+      server: this.server,
     });
 
     plugins.features.registerKibanaFeature({
@@ -261,6 +291,7 @@ export class StreamsPlugin
         server: this.server,
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
+        patternExtractionService: this.patternExtractionService,
         getScopedClients,
       },
       core,
@@ -272,7 +303,11 @@ export class StreamsPlugin
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
-        createStreamsGlobalSearchResultProvider(core, this.logger)
+        createStreamsGlobalSearchResultProvider(core, this.logger, async () => {
+          const [, pluginsStart] = await core.getStartServices();
+          const license = await pluginsStart.licensing.getLicense();
+          return license.getFeature('security').isEnabled;
+        })
       );
     }
 
@@ -300,7 +335,7 @@ export class StreamsPlugin
           const [attachmentClient, featureClient, queryClient] = await Promise.all([
             attachmentService.getClient({ soClient, rulesClient }),
             featureService.getClient(),
-            queryService.getClient({ soClient, rulesClient }),
+            queryService.getClient({ esClient, soClient, rulesClient }),
           ]);
 
           const streamsClient = await streamsService.getClient({
@@ -310,6 +345,7 @@ export class StreamsPlugin
             esClient,
             esClientAsInternalUser: esClient,
             uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+            isSecurityEnabled: false,
           });
 
           await streamsClient.enableStreams();
@@ -353,7 +389,10 @@ export class StreamsPlugin
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.inference = plugins.inference;
+      this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
+      this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
@@ -379,5 +418,7 @@ export class StreamsPlugin
     return {};
   }
 
-  public stop() {}
+  public async stop() {
+    await this.patternExtractionService?.stop();
+  }
 }
