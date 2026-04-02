@@ -935,7 +935,7 @@ export const RuleDetailsPage = connector(
                         {newExecutionResultsTableEnabled ? (
                           <ExecutionResultsTable
                             ruleId={ruleId}
-                            selectAlertsTab={navigateToAlertsTab}
+                            navigateToAlertsTab={navigateToAlertsTab}
                           />
                         ) : (
                           <ExecutionLogTable

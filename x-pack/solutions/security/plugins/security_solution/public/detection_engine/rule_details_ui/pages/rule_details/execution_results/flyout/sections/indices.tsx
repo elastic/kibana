@@ -15,12 +15,12 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
+import * as i18n from '../../translations';
+import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from '../shared';
 
 interface IndicesSectionProps {
-  matchedIndicesCount: number | null | undefined;
-  frozenIndicesQueriedCount: number | null | undefined;
+  matchedIndicesCount: number | null;
+  frozenIndicesQueriedCount: number | null;
 }
 
 export const IndicesSection: React.FC<IndicesSectionProps> = ({
