@@ -11,7 +11,6 @@ import {
   type EsqlResponseErrorCause,
   EsqlResponseError,
   extractEsqlEmbeddedError,
-  extractEsqlResponseErrorCause,
   formatErrorCause,
 } from './esql_response_error';
 
@@ -38,32 +37,33 @@ describe('formatErrorCause', () => {
   });
 });
 
-describe('extractEsqlResponseErrorCause', () => {
-  it('extracts error cause from response error object', () => {
+describe('extractEsqlEmbeddedError', () => {
+  it('returns cause when response has error object (no top-level status)', () => {
     expect(
-      extractEsqlResponseErrorCause({
+      extractEsqlEmbeddedError({
         error: { type: 'remote_transport_exception', reason: 'ccs query failed' },
       })
     ).toEqual({
-      type: 'remote_transport_exception',
-      reason: 'ccs query failed',
+      cause: {
+        type: 'remote_transport_exception',
+        reason: 'ccs query failed',
+      },
+      status: undefined,
     });
   });
 
   it('returns undefined when response has no error object', () => {
-    expect(extractEsqlResponseErrorCause({ columns: [], values: [] })).toBeUndefined();
+    expect(extractEsqlEmbeddedError({ columns: [], values: [] })).toBeUndefined();
   });
 
   it('returns undefined when error is null', () => {
-    expect(extractEsqlResponseErrorCause({ error: null })).toBeUndefined();
+    expect(extractEsqlEmbeddedError({ error: null })).toBeUndefined();
   });
 
   it('returns undefined when error is not an object', () => {
-    expect(extractEsqlResponseErrorCause({ error: 'not-an-object' })).toBeUndefined();
+    expect(extractEsqlEmbeddedError({ error: 'not-an-object' })).toBeUndefined();
   });
-});
 
-describe('extractEsqlEmbeddedError', () => {
   it('returns cause and top-level status when present', () => {
     expect(
       extractEsqlEmbeddedError({
@@ -76,26 +76,26 @@ describe('extractEsqlEmbeddedError', () => {
     });
   });
 
-  it('omits status when absent or not a finite number', () => {
+  it('leaves status undefined when absent or not a finite number', () => {
     expect(
       extractEsqlEmbeddedError({
         error: { type: 'x', reason: 'y' },
       })
-    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+    ).toEqual({ cause: { type: 'x', reason: 'y' }, status: undefined });
 
     expect(
       extractEsqlEmbeddedError({
         error: { type: 'x', reason: 'y' },
         status: '400',
       } as object)
-    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+    ).toEqual({ cause: { type: 'x', reason: 'y' }, status: undefined });
 
     expect(
       extractEsqlEmbeddedError({
         error: { type: 'x', reason: 'y' },
         status: Number.NaN,
       })
-    ).toEqual({ cause: { type: 'x', reason: 'y' } });
+    ).toEqual({ cause: { type: 'x', reason: 'y' }, status: undefined });
   });
 });
 
