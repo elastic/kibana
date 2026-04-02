@@ -221,7 +221,7 @@ export class WorkflowExecutionState {
         const staleIds = executionIds.slice(0, -1);
         for (const execId of staleIds) {
           const stepExec = this.stepExecutions.get(execId);
-          if (stepExec && !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType)) {
+          if (stepExec?.stepType && !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType)) {
             stepExec.output = undefined;
             stepExec.input = undefined;
           }
