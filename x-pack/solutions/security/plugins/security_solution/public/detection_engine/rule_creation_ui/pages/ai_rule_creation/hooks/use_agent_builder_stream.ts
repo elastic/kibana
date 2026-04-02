@@ -13,14 +13,15 @@ import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-common';
 import { isErrorResult, isOtherResult } from '@kbn/agent-builder-common/tools';
-import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
-import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
-  SecurityAgentBuilderAttachments,
-  THREAT_HUNTING_AGENT_ID,
-} from '../../../../../../common/constants';
+  agentBuilderDefaultAgentId,
+  getKibanaDefaultAgentCapabilities,
+} from '@kbn/agent-builder-common/agents';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useSecurityAgentId } from '../../../../../agent_builder/hooks/use_security_agent_id';
 import { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import * as i18n from '../translations';
 import type { ToolProgressUpdate } from '../agent_builder_updates';
@@ -61,6 +62,7 @@ export const useAgentBuilderStream = () => {
   const { services } = useKibana();
   const { http } = services;
   const { addError } = useAppToasts();
+  const agentId = useSecurityAgentId();
   const [isStreaming, setIsStreaming] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -106,7 +108,7 @@ export const useAgentBuilderStream = () => {
 
       try {
         const payload = {
-          agent_id: THREAT_HUNTING_AGENT_ID,
+          agent_id: agentId ?? agentBuilderDefaultAgentId,
           input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${message}`,
           connector_id: connectorId,
           capabilities: getKibanaDefaultAgentCapabilities(),
@@ -187,7 +189,7 @@ export const useAgentBuilderStream = () => {
         cancelRuleCreation();
       }
     },
-    [showErrorToast, cancelRuleCreation, http]
+    [showErrorToast, cancelRuleCreation, http, agentId]
   );
 
   useEffect(() => {

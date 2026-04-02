@@ -6,8 +6,17 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSplitPanel } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSplitPanel,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useRuleFormMeta } from '../contexts';
 
 interface BaseFieldGroupProps {
   title: string;
@@ -51,6 +60,8 @@ const isUncontrolledFieldGroup = (
 
 export const FieldGroup = (props: FieldGroupProps) => {
   const { title, children } = props;
+  const { layout } = useRuleFormMeta();
+  const id = useGeneratedHtmlId({ prefix: 'fieldGroup' });
   const isControlled = isControlledFieldGroup(props);
   const isUncontrolled = isUncontrolledFieldGroup(props);
   const isCollapsible = isControlled || isUncontrolled;
@@ -71,6 +82,34 @@ export const FieldGroup = (props: FieldGroupProps) => {
       setUncontrolledIsOpen((prev) => !prev);
     }
   }, [isControlled, isUncontrolled, props]);
+
+  if (layout === 'flyout') {
+    const accordionProps = isControlled
+      ? {
+          forceState: props.isOpen ? ('open' as const) : ('closed' as const),
+          onToggle: () => props.onToggle(),
+        }
+      : isUncontrolled
+      ? { initialIsOpen: props.defaultOpen ?? false }
+      : { initialIsOpen: true };
+
+    return (
+      <EuiAccordion
+        id={id}
+        buttonContent={
+          <EuiTitle size="xxs">
+            <h3>
+              <strong>{title}</strong>
+            </h3>
+          </EuiTitle>
+        }
+        paddingSize="s"
+        {...accordionProps}
+      >
+        {children}
+      </EuiAccordion>
+    );
+  }
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
