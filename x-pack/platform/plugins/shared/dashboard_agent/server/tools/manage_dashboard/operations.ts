@@ -161,10 +161,14 @@ const editVisualizationPanelSchema = z.object({
     ),
 });
 
-export const editVisualizationPanelsOperationSchema = z.object({
-  operation: z.literal('edit_visualization_panels'),
-  panels: z.array(editVisualizationPanelSchema).min(1),
-});
+export const editVisualizationPanelsOperationSchema = z
+  .object({
+    operation: z.literal('edit_visualization_panels'),
+    panels: z.array(editVisualizationPanelSchema).min(1),
+  })
+  .describe(
+    'Update existing ES|QL-backed Lens visualization panels by panelId. DSL, form-based, and other non-ES|QL panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+  );
 
 export const updatePanelLayoutsOperationSchema = z.object({
   operation: z.literal('update_panel_layouts'),
