@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SpawnSyncReturns } from 'node:child_process';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { runGitRemoteGuardHook } from './git_remote_guard_hook';
@@ -24,18 +25,18 @@ const REMOTES = [
   'bamieh\tgit@github.com:Bamieh/kibana.git (push)',
 ].join('\n');
 
-const ok = (stdout: string) =>
-  ({ stdout, status: 0, stderr: '', pid: 0, output: [], signal: null } as any);
-const fail = () =>
-  ({
-    stdout: '',
-    status: 1,
-    stderr: '',
-    pid: 0,
-    output: [],
-    signal: null,
-    error: new Error(),
-  } as any);
+const spawnResult = (overrides: Partial<SpawnSyncReturns<string>>): SpawnSyncReturns<string> => ({
+  stdout: '',
+  stderr: '',
+  status: 0,
+  pid: 0,
+  output: [],
+  signal: null,
+  ...overrides,
+});
+
+const ok = (stdout: string) => spawnResult({ stdout });
+const fail = () => spawnResult({ status: 1, error: new Error() });
 
 const setupGit = (overrides: Record<string, string> = {}) => {
   const responses: Record<string, string> = {
@@ -73,11 +74,11 @@ const runHook = (payload: object, { claude = false }: { claude?: boolean } = {})
     runGitRemoteGuardHook();
   } catch (e: any) {
     if (!e.message.startsWith('EXIT:')) throw e;
+  } finally {
+    writeSpy.mockRestore();
+    exitSpy.mockRestore();
+    process.argv = originalArgv;
   }
-
-  writeSpy.mockRestore();
-  exitSpy.mockRestore();
-  process.argv = originalArgv;
 
   return output.trim() ? JSON.parse(output.trim()) : null;
 };
