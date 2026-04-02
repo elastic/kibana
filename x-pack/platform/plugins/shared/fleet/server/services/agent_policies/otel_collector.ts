@@ -148,23 +148,28 @@ export function generateOtelcolConfig(
   return attachOtelcolExporter(config, dataOutput);
 }
 
+function buildDataStreamStatements(
+  type: string,
+  dataset: string | null,
+  namespace: string
+): string[] {
+  return [
+    `set(attributes["data_stream.type"], "${type}")`,
+    ...(dataset !== null ? [`set(attributes["data_stream.dataset"], "${dataset}")`] : []),
+    `set(attributes["data_stream.namespace"], "${namespace}")`,
+  ];
+}
+
 function generateOtelTypeTransforms(
   type: string,
-  dataset: string,
+  dataset: string | null,
   namespace: string
 ): Record<string, any> {
   switch (type) {
     case 'logs':
       return {
         log_statements: [
-          {
-            context: 'log',
-            statements: [
-              `set(attributes["data_stream.type"], "logs")`,
-              `set(attributes["data_stream.dataset"], "${dataset}")`,
-              `set(attributes["data_stream.namespace"], "${namespace}")`,
-            ],
-          },
+          { context: 'log', statements: buildDataStreamStatements('logs', dataset, namespace) },
         ],
       };
     case 'metrics':
@@ -172,31 +177,17 @@ function generateOtelTypeTransforms(
         metric_statements: [
           {
             context: 'datapoint',
-            statements: [
-              `set(attributes["data_stream.type"], "metrics")`,
-              `set(attributes["data_stream.dataset"], "${dataset}")`,
-              `set(attributes["data_stream.namespace"], "${namespace}")`,
-            ],
+            statements: buildDataStreamStatements('metrics', dataset, namespace),
           },
         ],
       };
     case 'traces':
       return {
         trace_statements: [
-          {
-            context: 'span',
-            statements: [
-              `set(attributes["data_stream.type"], "traces")`,
-              `set(attributes["data_stream.dataset"], "${dataset}")`,
-              `set(attributes["data_stream.namespace"], "${namespace}")`,
-            ],
-          },
+          { context: 'span', statements: buildDataStreamStatements('traces', null, namespace) },
           {
             context: 'spanevent',
-            statements: [
-              `set(attributes["data_stream.type"], "logs")`,
-              `set(attributes["data_stream.namespace"], "${namespace}")`,
-            ],
+            statements: buildDataStreamStatements('logs', null, namespace),
           },
         ],
       };
@@ -205,11 +196,7 @@ function generateOtelTypeTransforms(
         profile_statements: [
           {
             context: 'profile',
-            statements: [
-              `set(attributes["data_stream.type"], "profiles")`,
-              `set(attributes["data_stream.dataset"], "${dataset}")`,
-              `set(attributes["data_stream.namespace"], "${namespace}")`,
-            ],
+            statements: buildDataStreamStatements('profiles', dataset, namespace),
           },
         ],
       };
@@ -242,11 +229,11 @@ function generateOTelAttributesTransform(
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && signalTypes) {
-    // When dynamic_signal_types is true, generate transforms for each signal type. This allows the collector to route data
-    // to the appropriate datastreams based on the pipelines configured in the policy.
-    // Generate transforms for each signal type found in pipelines
+    // When dynamic_signal_types is true, do not override data_stream.dataset — defer to the ES
+    // exporter's routing logic (scope.name, explicit data_stream.* attrs, or generic.otel default).
+    // Only set type and namespace so signals land in the correct namespace.
     signalTypes.forEach((signalType) => {
-      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
+      const typeTransforms = generateOtelTypeTransforms(signalType, null, namespace);
       Object.assign(transformStatements, typeTransforms);
     });
   } else {

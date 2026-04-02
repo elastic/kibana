@@ -12,7 +12,6 @@ import { StreamDescription } from '../../../../sig_events/stream_detail_systems/
 import { DeleteStreamPanel } from './delete_stream';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
-import { StreamDiscoveryConfiguration } from '../../../../sig_events/stream_detail_systems/stream_discovery_configuration';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 
 export function ClassicAdvancedView({
@@ -38,8 +37,6 @@ export function ClassicAdvancedView({
             refreshDefinition={refreshDefinition}
             aiFeatures={aiFeatures}
           />
-          <EuiSpacer />
-          <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           <EuiSpacer />
         </>
       ) : null}

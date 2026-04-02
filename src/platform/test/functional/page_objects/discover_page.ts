@@ -448,6 +448,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('unifiedHistogramChart');
   }
 
+  public async isTableVisible() {
+    return await this.testSubjects.exists('discoverDocTable');
+  }
+
   public async toggleChartVisibility() {
     if (await this.isChartVisible()) {
       await this.testSubjects.click('dscHideHistogramButton');
@@ -465,6 +469,16 @@ export class DiscoverPageObject extends FtrService {
   public async closeHistogramPanel() {
     await this.testSubjects.click('dscHideHistogramButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async openTablePanel() {
+    await this.testSubjects.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  public async closeTablePanel() {
+    await this.testSubjects.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   public async getHistogramHeight() {

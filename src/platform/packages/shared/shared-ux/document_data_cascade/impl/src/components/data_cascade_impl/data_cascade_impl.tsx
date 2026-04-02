@@ -202,14 +202,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
 
-  const shouldRenderStickyHeader = useMemo(() => {
-    return (
-      enableStickyGroupHeader &&
-      activeStickyIndex !== null &&
-      (virtualizerInstance.current?.scrollOffset ?? 0) >
-        (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0)
-    );
-  }, [activeStickyIndex, enableStickyGroupHeader]);
+  const shouldRenderStickyHeader =
+    activeStickyIndex !== null &&
+    (virtualizerInstance.current?.scrollOffset ?? 0) >
+      (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0);
 
   const cascadeTreeGridRenderer = useCallback(
     (containerSize: EuiAutoSize) => {
