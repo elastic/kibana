@@ -11,6 +11,8 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
+const MAX_TAG_LENGTH = 64;
+
 export const TagsField = () => {
   const { control } = useFormContext<FormValues>();
 
@@ -18,6 +20,17 @@ export const TagsField = () => {
     <Controller
       name="metadata.labels"
       control={control}
+      rules={{
+        validate: (value) => {
+          if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
+            return i18n.translate('xpack.alertingV2.ruleForm.tagTooLongError', {
+              defaultMessage: 'Each tag must be no longer than {maxLength} characters.',
+              values: { maxLength: MAX_TAG_LENGTH },
+            });
+          }
+          return true;
+        },
+      }}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
         const options = selectedOptions;
