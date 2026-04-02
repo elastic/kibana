@@ -101,7 +101,13 @@ describe('TaskManagerService Integration Tests', () => {
       expect(taskManagerStartSpy).toHaveBeenCalled();
       taskManagerStart = taskManagerStartSpy.mock.results[0].value;
 
-      const encodedApiKey = Buffer.from('test-api-key-id:test-api-key').toString('base64');
+      const apiKeyResponse = await esClient.security.createApiKey({
+        name: 'automatic-import-test-key',
+        role_descriptors: {},
+      });
+      const encodedApiKey = Buffer.from(`${apiKeyResponse.id}:${apiKeyResponse.api_key}`).toString(
+        'base64'
+      );
       kibanaRequest = httpServerMock.createFakeKibanaRequest({
         headers: {
           authorization: `ApiKey ${encodedApiKey}`,
