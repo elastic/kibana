@@ -10,6 +10,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
@@ -35,12 +36,18 @@ import {
   buildChangePointLensAttributesByRecordId,
   deriveEntityAttributes,
   formatChangePointAnnotationLabel,
-  getBurstDetectionHistogram,
+  getBestIntervalFromResults,
   getChangePointColumnIdsFromColumns,
   getChangePointResultsFromTable,
+  getForkColumnMetaForChangePointTable,
   getTimeColumnId,
   getValueColumnId,
 } from './helpers';
+import {
+  applyBurstBarChartAggregateOnlyToLensAttributes,
+  buildChangePointBurstBarAggregateEsqlUnsplit,
+  resolveEsqlResultColumnId,
+} from './change_point_lens_esql';
 import { CHANGE_POINT_TOOLTIP_ANNOTATION_LAYER_ID, FORK_COLUMN_ID } from './constants';
 import type { ChangePointResult, ChangePointExperienceViewProps, DataLayerLike } from './types';
 
@@ -66,6 +73,9 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
   );
+  const [burstLensAttributes, setBurstLensAttributes] = useState<
+    TypedLensByValueInput['attributes'] | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const columns = useMemo(
@@ -141,16 +151,6 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
       forkBranchLabels
     );
   }, [fetchParams.table, multipleEntityMode, forkBranchLabels, colsToUse, changePointColumnIds]);
-
-  const entityLabels = useMemo(
-    () => forkBranchLabels?.map((b) => b.branchLabel) ?? [],
-    [forkBranchLabels]
-  );
-
-  const burstDetectionHistogramData = useMemo(() => {
-    if (!multipleEntityMode || !forkBranchLabels?.length || heatmapResults.length === 0) return [];
-    return getBurstDetectionHistogram(heatmapResults, entityLabels, fetchParams.timeRange);
-  }, [heatmapResults, forkBranchLabels, multipleEntityMode, entityLabels, fetchParams.timeRange]);
 
   const entityAttributesMap = useMemo(() => {
     if (!lensAttributes || !multipleEntityMode || !forkBranchLabels) return {};
@@ -243,6 +243,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
         !fetchParams.dataView
       ) {
         setLensAttributes(null);
+        setBurstLensAttributes(null);
         setIsLoading(false);
         return;
       }
@@ -252,6 +253,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
 
       if (!effectiveSourceQuery && !isForkMode) {
         setLensAttributes(null);
+        setBurstLensAttributes(null);
         setError('Could not derive source query for change point');
         setIsLoading(false);
         return;
@@ -259,6 +261,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
 
       if (!isForkMode && !sourceColumns.length) {
         setLensAttributes(null);
+        setBurstLensAttributes(null);
         setIsLoading(false);
         return;
       }
@@ -269,6 +272,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
         const timeRange = fetchParams.timeRange;
 
         let attributes: TypedLensByValueInput['attributes'];
+        let burstAttrs: TypedLensByValueInput['attributes'] | null = null;
 
         if (isForkMode && forkBranchLabels) {
           const forkTable = fetchParams.table;
@@ -340,6 +344,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
             : [];
           if (!validEntities.length) {
             setLensAttributes(null);
+            setBurstLensAttributes(null);
             setError('Could not get columns for fork branches');
             setIsLoading(false);
             return;
@@ -362,6 +367,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
           if (cancelled) return;
           if (!suggestions?.length) {
             setLensAttributes(null);
+            setBurstLensAttributes(null);
             setError('No XY chart suggestion for fork source data');
             setIsLoading(false);
             return;
@@ -448,9 +454,85 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
             suggestion: forkSuggestion,
             dataView: fetchParams.dataView,
           }) as TypedLensByValueInput['attributes'];
+
+          const fullEsqlCandidate =
+            isOfAggregateQueryType(fetchParams.query) &&
+            (fetchParams.query as { esql?: string }).esql?.trim();
+          const fullEsqlForBurst = typeof fullEsqlCandidate === 'string' ? fullEsqlCandidate : '';
+          if (
+            fullEsqlForBurst &&
+            forkTimeColumnId &&
+            forkPvalueColumnId &&
+            forkTable?.columns?.length &&
+            !cancelled
+          ) {
+            const forkMeta = getForkColumnMetaForChangePointTable(
+              forkTable,
+              FORK_COLUMN_ID,
+              forkBranchLabels
+            );
+            const aggInterval = getBestIntervalFromResults(changePointResults);
+            const burstEsql = buildChangePointBurstBarAggregateEsqlUnsplit({
+              changePointQueryEsql: fullEsqlForBurst,
+              timeColumnId: forkTimeColumnId,
+              pvalueColumnId: forkPvalueColumnId,
+              interval: aggInterval,
+              meta: forkMeta,
+              forkBranches: forkBranchLabels,
+            });
+            const absoluteTimeRange = timeRange
+              ? { from: timeRange.from, to: timeRange.to }
+              : data.query.timefilter.timefilter.getAbsoluteTime();
+
+            if (burstEsql && !cancelled) {
+              const burstColumns = await getESQLQueryColumns({
+                esqlQuery: burstEsql,
+                search: data.search.search,
+                signal: fetchParams.abortController?.signal,
+                timeRange: absoluteTimeRange,
+              });
+              if (!cancelled && burstColumns?.length) {
+                const burstContext = {
+                  dataViewSpec,
+                  fieldName: '',
+                  textBasedColumns: burstColumns,
+                  query: { esql: burstEsql },
+                };
+                const burstSuggestions = stateHelper.suggestions(
+                  burstContext,
+                  fetchParams.dataView,
+                  [],
+                  ChartType.XY,
+                  undefined
+                );
+                if (burstSuggestions?.length) {
+                  const burstAttrsRaw = getLensAttributesFromSuggestion({
+                    filters: fetchParams.filters ?? [],
+                    query: { esql: burstEsql },
+                    suggestion: burstSuggestions[0],
+                    dataView: fetchParams.dataView,
+                  }) as TypedLensByValueInput['attributes'];
+                  const xId = resolveEsqlResultColumnId(burstColumns, 'cp_tb');
+                  const yId = resolveEsqlResultColumnId(burstColumns, 'cp_cnt');
+                  burstAttrs = applyBurstBarChartAggregateOnlyToLensAttributes(
+                    burstAttrsRaw,
+                    xId,
+                    yId,
+                    {
+                      yTitle: i18n.translate(
+                        'discover.contextAwareness.changePointBurstHistogram.yAxisTitle',
+                        { defaultMessage: 'Number of entities' }
+                      ),
+                    }
+                  );
+                }
+              }
+            }
+          }
         } else {
           if (!sourceQuery) {
             setLensAttributes(null);
+            setBurstLensAttributes(null);
             setIsLoading(false);
             return;
           }
@@ -473,6 +555,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
           if (cancelled) return;
           if (!suggestions?.length) {
             setLensAttributes(null);
+            setBurstLensAttributes(null);
             setError('No XY chart suggestion for source data');
             setIsLoading(false);
             return;
@@ -622,11 +705,13 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
           }
         }
 
+        setBurstLensAttributes(burstAttrs);
         setLensAttributes(attributes);
       } catch (e) {
         if (!cancelled) {
           setError(e instanceof Error ? e.message : 'Failed to load chart');
           setLensAttributes(null);
+          setBurstLensAttributes(null);
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -708,7 +793,7 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
     viewMode === 'burst-detection' &&
     forkBranchLabels &&
     forkBranchLabels.length > 0 &&
-    burstDetectionHistogramData.length > 0;
+    Boolean(burstLensAttributes);
 
   const renderChartContent = () => {
     if (showHeatmap) {
@@ -769,7 +854,16 @@ export const ChangePointExperienceView: React.FC<ChangePointExperienceViewProps>
         <EuiFlexGroup direction="column" gutterSize="none" css={css({ flex: 1, minHeight: 0 })}>
           <EuiFlexItem grow css={css({ minHeight: 0 })}>
             <div css={chartCss} data-test-subj="changePointBurstHistogramContainer">
-              <ChangePointBurstHistogram data={burstDetectionHistogramData} charts={charts} />
+              <ChangePointBurstHistogram
+                lens={lens}
+                attributes={burstLensAttributes}
+                abortController={fetchParams.abortController}
+                lastReloadRequestTime={fetchParams.lastReloadRequestTime}
+                searchSessionId={fetchParams.searchSessionId}
+                timeRange={fetchParams.timeRange}
+                onBrushEnd={handleBrushEnd}
+                onFilter={onFilter}
+              />
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

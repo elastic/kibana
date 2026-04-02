@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  LensEmbeddableInput,
+  LensPublicStart,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
@@ -26,8 +31,14 @@ export interface BurstDetectionHistogramBucket {
 }
 
 export interface ChangePointBurstHistogramProps {
-  data: BurstDetectionHistogramBucket[];
-  charts: ChartsPluginStart;
+  lens: LensPublicStart;
+  attributes: TypedLensByValueInput['attributes'] | null;
+  abortController?: AbortController;
+  lastReloadRequestTime?: number;
+  searchSessionId?: string;
+  timeRange?: TimeRange;
+  onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  onFilter?: LensEmbeddableInput['onFilter'];
 }
 
 /** Props for the change point experience view; matches ChartSectionConfiguration's renderChartSection (default T = object). */
