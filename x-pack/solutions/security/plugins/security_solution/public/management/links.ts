@@ -206,10 +206,7 @@ export interface ArtifactAuthz {
  */
 export const getFirstAllowedArtifactPath = (
   artifactAuthz: ArtifactAuthz,
-  experimentalFeatures: Pick<
-    ExperimentalFeatures,
-    'endpointExceptionsMovedUnderManagement' | 'trustedDevices'
-  >
+  experimentalFeatures: ExperimentalFeatures
 ): string => {
   const { endpointExceptionsMovedUnderManagement, trustedDevices: trustedDevicesEnabled } =
     experimentalFeatures;
@@ -246,11 +243,13 @@ export const getFirstAllowedArtifactPath = (
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins,
-  experimentalFeatures: Pick<
-    ExperimentalFeatures,
-    'endpointExceptionsMovedUnderManagement' | 'trustedDevices'
-  >
+  experimentalFeatures: ExperimentalFeatures
 ): Promise<LinkItem> => {
+  const {
+    endpointExceptionsMovedUnderManagement,
+    trustedDevices: trustedDevicesEnabled,
+  } = experimentalFeatures;
+
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
   const isServerless = KibanaServices.getBuildFlavor() === 'serverless';
@@ -291,11 +290,11 @@ export const getManagementFilteredLinks = async (
   }
 
   const canReadAnyArtifact =
-    canReadEndpointExceptions ||
+    (endpointExceptionsMovedUnderManagement && canReadEndpointExceptions) ||
     canReadTrustedApplications ||
-    canReadTrustedDevices ||
+    (trustedDevicesEnabled && canReadTrustedDevices) ||
     canReadEventFilters ||
-    showHostIsolationExceptions ||
+    (showHostIsolationExceptions && canReadHostIsolationExceptions) ||
     canReadBlocklist;
   if (!canReadAnyArtifact) {
     linksToExclude.push(SecurityPageName.artifacts);
