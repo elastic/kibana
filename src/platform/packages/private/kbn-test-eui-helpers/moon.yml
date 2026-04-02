@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-eui-helpers'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-eui-helpers'
+  title: '@kbn/test-eui-helpers'
   description: Moon project for @kbn/test-eui-helpers
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-test-eui-helpers
+  sourceRoot: src/platform/packages/private/kbn-test-eui-helpers
 dependsOn: []
 tags:
   - shared-common
@@ -32,14 +31,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

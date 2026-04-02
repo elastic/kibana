@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ai-assistant-icon'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ai-assistant-icon'
+  title: '@kbn/ai-assistant-icon'
   description: Moon project for @kbn/ai-assistant-icon
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/ai-assistant/icon
+  sourceRoot: x-pack/platform/packages/shared/ai-assistant/icon
 dependsOn:
   - '@kbn/i18n'
 tags:
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

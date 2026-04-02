@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-customization-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/discover-customization-examples-plugin'
+  title: '@kbn/discover-customization-examples-plugin'
   description: Moon project for @kbn/discover-customization-examples-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: examples/discover_customization_examples
+  sourceRoot: examples/discover_customization_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/discover-plugin'

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-settings-components-field-category'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-settings-components-field-category'
+  title: '@kbn/management-settings-components-field-category'
   description: Moon project for @kbn/management-settings-components-field-category
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-management/settings/components/field_category
+  sourceRoot: src/platform/packages/shared/kbn-management/settings/components/field_category
 dependsOn:
   - '@kbn/management-settings-utilities'
   - '@kbn/management-settings-field-definition'
@@ -37,14 +36,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-page-kibana-template-types'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-page-kibana-template-types'
+  title: '@kbn/shared-ux-page-kibana-template-types'
   description: Moon project for @kbn/shared-ux-page-kibana-template-types
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/page/kibana_template/types
+  sourceRoot: src/platform/packages/shared/shared-ux/page/kibana_template/types
 dependsOn:
   - '@kbn/shared-ux-page-solution-nav'
   - '@kbn/shared-ux-page-no-data-config-types'

@@ -616,6 +616,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-lock-manager @elastic/obs-ai-assistant
+src/platform/packages/shared/kbn-kbn-client @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-exploration-team
@@ -753,6 +754,13 @@ src/platform/packages/shared/kbn-profiling-utils @elastic/obs-presentation-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-onboarding-team
+src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-docker-servers @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-es-server @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-kibana-server @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-saml-auth @elastic/appex-qa
+src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/react/kibana_context/common @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/render @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
@@ -1019,11 +1027,8 @@ src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/telemetry @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/telemetry @elastic/kibana-core
 src/platform/packages/private/kbn-telemetry-tools @elastic/kibana-core
-src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
-src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
-src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 x-pack/solutions/security/test/security_solution_api_integration @elastic/secutity-detection-engine
 src/platform/test
 x-pack/solutions/observability/test

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/opentelemetry-attributes'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/opentelemetry-attributes'
+  title: '@kbn/opentelemetry-attributes'
   description: Moon project for @kbn/opentelemetry-attributes
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-opentelemetry-attributes
+  sourceRoot: src/platform/packages/shared/kbn-opentelemetry-attributes
 dependsOn: []
 tags:
   - shared-common
@@ -31,14 +30,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

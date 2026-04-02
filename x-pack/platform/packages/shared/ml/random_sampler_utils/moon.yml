@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-random-sampler-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ml-random-sampler-utils'
+  title: '@kbn/ml-random-sampler-utils'
   description: Moon project for @kbn/ml-random-sampler-utils
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/ml/random_sampler_utils
+  sourceRoot: x-pack/platform/packages/shared/ml/random_sampler_utils
 dependsOn:
   - '@kbn/ml-is-populated-object'
 tags:
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/yarn-install-scripts'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/yarn-install-scripts'
+  title: '@kbn/yarn-install-scripts'
   description: Moon project for @kbn/yarn-install-scripts
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-yarn-install-scripts
+  sourceRoot: packages/kbn-yarn-install-scripts
 dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/dev-cli-runner'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

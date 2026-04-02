@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures, test as baseTest } from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { mergeTests, test as scoutTest } from '@kbn/scout';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 import { StreamsPageObjects, extendPageObjects } from './page_objects';
+
+const baseTest = mergeTests(scoutTest, synthtraceFixture);
 
 export interface StreamsTestFixtures extends ScoutTestFixtures {
   pageObjects: StreamsPageObjects;
 }
 
-export const test = baseTest.extend<StreamsTestFixtures, ScoutWorkerFixtures>({
+export const test = baseTest.extend<StreamsTestFixtures, ScoutWorkerFixtures & SynthtraceFixture>({
   pageObjects: async (
     {
       pageObjects,

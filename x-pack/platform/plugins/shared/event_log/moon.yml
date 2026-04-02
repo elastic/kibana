@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/event-log-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/event-log-plugin'
+  title: '@kbn/event-log-plugin'
   description: Moon project for @kbn/event-log-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/event_log
+  sourceRoot: x-pack/platform/plugins/shared/event_log
 dependsOn:
   - '@kbn/core'
   - '@kbn/spaces-plugin'
@@ -44,14 +43,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
