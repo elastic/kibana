@@ -39,6 +39,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "contentManagement",
       "evals",
       "licenseManagement",
       "security",
