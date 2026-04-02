@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -25,6 +26,8 @@ export const createGenerateConfigPrompt = ({
   additionalChartConfigInstructions?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
+  const chartTypeConfigPromptContent = getChartTypeConfigPromptContent(chartType);
+
   return [
     [
       'system',
@@ -64,6 +67,8 @@ NUMBER FORMAT RULES:
   - Durations (response time, latency) → { type: "duration", from: "<source unit>", to: "" } where <source unit> matches the ES field unit (e.g. "ms", "s", "micros")
 - When column names or the user query hint at a unit (e.g. "cpu", "percent", "bytes_in", "disk_used", "latency_ms"), infer the correct format even if the user did not explicitly ask for it.
 - Do NOT apply a format when the metric is a plain count, rate, or when the unit is ambiguous.
+
+${chartTypeConfigPromptContent ? `${chartTypeConfigPromptContent}` : ''}
 
 ${additionalChartConfigInstructions ?? ''}
 
