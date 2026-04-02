@@ -17,10 +17,18 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-calendar-connector-configuration]
 
-Google Calendar connectors have the following configuration properties:
+Google Calendar connectors support **Bearer Token** or **OAuth 2.0 authorization code** authentication. Choose the type
+when you create or edit the connector.
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Google Calendar API scopes. Refer to [Get API credentials](#google-calendar-api-credentials) for instructions.
+:   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get API credentials**.
+
+OAuth 2.0 authorization code
+:   Uses a **Web application** OAuth client in Google Cloud. Default **Authorization URL**
+    `https://accounts.google.com/o/oauth2/v2/auth` and **Token URL** `https://oauth2.googleapis.com/token`. **Client ID**
+    and **Client Secret** come from that client. Default **Scope** is
+    `https://www.googleapis.com/auth/calendar.readonly`. Register {{kib}}’s OAuth redirect URI in Google Cloud as
+    described under **Get API credentials**.
 
 ## Test connectors [google-calendar-action-configuration]
 
@@ -63,18 +71,44 @@ Free/Busy
 
 ## Connector networking configuration [google-calendar-connector-networking-configuration]
 
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the **Action configuration settings** in the configuration reference for alerting to customize connector networking,
+such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use
+`xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [google-calendar-api-credentials]
 
-To use the Google Calendar connector, you need a Google OAuth 2.0 access token with Calendar API scopes. You can obtain one using the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/):
+### OAuth 2.0 authorization code (recommended for ongoing use)
 
-1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
+Use this path when you select **OAuth 2.0 authorization code** in {{kib}}. In **Google Cloud Console**, create a **Web
+application** OAuth client and set **Authorized JavaScript origins** and **Authorized redirect URIs** (same pattern as
+common Google OAuth setup guides for web apps).
+
+1. Select or create a project. Enable the **Google Calendar API** (**APIs & Services** > **Library**).
+2. **APIs & Services** > **OAuth consent screen**: configure the app and add Calendar scopes (at minimum
+   `https://www.googleapis.com/auth/calendar.readonly`, or broader scopes if your policy allows).
+3. **APIs & Services** > **Credentials** > **Create credentials** > **OAuth client ID** > **Web application**.
+4. **Authorized JavaScript origins**: add your {{kib}} base origin (for example `https://my-kibana.example.com`).
+5. **Authorized redirect URIs**: add the callback for your host (copy and edit the hostname):
+
+```text
+https://<your-kibana-host>/api/actions/connector/_oauth_callback
+```
+
+6. Save the client. Copy **Client ID** and **Client secret** into the connector in {{kib}}. Keep the default
+   **Authorization URL** and **Token URL** unless your environment requires different Google OAuth endpoints.
+
+### Bearer token (manual, short-lived)
+
+To use **Bearer Token** authentication, obtain a Google OAuth 2.0 access token with Calendar API scopes—for example via
+Google’s **OAuth 2.0 Playground** (`https://developers.google.com/oauthplayground/`).
+
+1. Open the OAuth 2.0 Playground in your browser using that URL.
 2. In the list of APIs, select **Calendar API v3** and select the `https://www.googleapis.com/auth/calendar.readonly` scope (or `https://www.googleapis.com/auth/calendar` for full access).
 3. Select **Authorize APIs** and sign in with your Google account.
 4. Select **Exchange authorization code for tokens**.
 5. Copy the **Access token** and enter it as the **Bearer Token** when configuring the connector in {{kib}}.
 
 ::::{note}
-OAuth 2.0 Playground tokens expire after 1 hour. For production use, implement a proper OAuth 2.0 flow with token refresh. Refer to the [Google Identity documentation](https://developers.google.com/identity/protocols/oauth2) for details.
+OAuth 2.0 Playground tokens expire after about an hour. For production, prefer **OAuth 2.0 authorization code** in {{kib}}
+so tokens can be refreshed, or implement your own refresh flow when using bearer tokens.
 ::::

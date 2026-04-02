@@ -17,10 +17,18 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-cloud-storage-connector-configuration]
 
-Google Cloud Storage connectors have the following configuration property:
+Google Cloud Storage connectors support **Bearer Token** or **OAuth 2.0 authorization code** authentication.
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. Refer to [Get API credentials](#google-cloud-storage-api-credentials) for instructions.
+:   A Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. See **Get API credentials**.
+
+OAuth 2.0 authorization code
+:   Uses a **Web application** OAuth client in Google Cloud. Default **Authorization URL**
+    `https://accounts.google.com/o/oauth2/v2/auth` and **Token URL** `https://oauth2.googleapis.com/token`. **Client ID**
+    and **Client Secret** come from that client. Default scopes are
+    `https://www.googleapis.com/auth/devstorage.read_only` and
+    `https://www.googleapis.com/auth/cloudplatformprojects.readonly`. Register {{kib}}’s OAuth redirect URI in Google
+    Cloud as described under **Get API credentials**.
 
 ## Test connectors [google-cloud-storage-action-configuration]
 
@@ -61,13 +69,40 @@ Download object
 
 ## Connector networking configuration [google-cloud-storage-connector-networking-configuration]
 
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the **Action configuration settings** in the configuration reference for alerting to customize connector networking,
+such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use
+`xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [google-cloud-storage-api-credentials]
 
-To use the Google Cloud Storage connector, you need a Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. You can obtain one using the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/):
+### OAuth 2.0 authorization code (recommended for ongoing use)
 
-1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
+Use when you select **OAuth 2.0 authorization code** in {{kib}}. In **Google Cloud Console**, create a **Web
+application** OAuth client with **Authorized JavaScript origins** ({{kib}} base URL) and **Authorized redirect URIs**
+({{kib}} callback below)—the same structural steps as typical Google web-app OAuth documentation.
+
+1. Select or create a project. Enable **Cloud Storage API** and **Cloud Resource Manager API** (**APIs & Services** >
+   **Library**).
+2. **APIs & Services** > **OAuth consent screen**: add scopes for read-only storage and project listing (at minimum
+   `https://www.googleapis.com/auth/devstorage.read_only` and
+   `https://www.googleapis.com/auth/cloudplatformprojects.readonly`, or broader scopes if your policy allows).
+3. **APIs & Services** > **Credentials** > **Create credentials** > **OAuth client ID** > **Web application**.
+4. **Authorized JavaScript origins**: your {{kib}} origin (for example `https://my-kibana.example.com`).
+5. **Authorized redirect URIs**:
+
+```text
+https://<your-kibana-host>/api/actions/connector/_oauth_callback
+```
+
+6. Copy **Client ID** and **Client secret** into the connector. Use default **Authorization URL** and **Token URL** unless
+   your environment specifies otherwise.
+
+### Bearer token (manual, short-lived)
+
+Obtain a Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes—for example using the
+Google’s **OAuth 2.0 Playground** (`https://developers.google.com/oauthplayground/`).
+
+1. Open the OAuth 2.0 Playground in your browser using that URL.
 2. In the list of APIs, select **Cloud Storage JSON API v1** and select the `https://www.googleapis.com/auth/devstorage.read_only` scope. Then also select **Cloud Resource Manager API v1** and select the `https://www.googleapis.com/auth/cloudplatformprojects.readonly` scope.
 3. Select **Authorize APIs** and sign in with your Google account.
 4. Select **Exchange authorization code for tokens**.
