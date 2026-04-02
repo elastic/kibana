@@ -30,7 +30,8 @@ function createFilterExpression(
   field: string,
   value: unknown,
   operation: SupportedOperation,
-  fieldType?: string
+  fieldType?: string,
+  esFieldType?: string
 ): { expression: string; isMultiValue?: boolean } {
   // Handle is not null / is null operations
   if (operation === 'is_not_null' || operation === 'is_null') {
@@ -44,18 +45,27 @@ function createFilterExpression(
     if (!fieldName) {
       return { expression: '', isMultiValue: true };
     }
-    const matchClauses = value.map((val) => {
-      const escapedValue = typeof val === 'string' ? escapeStringValue(val) : val;
-      return `MATCH(${fieldName}, ${escapedValue})`;
-    });
 
-    if (operation === '-') {
-      return {
-        expression: matchClauses.map((clause) => `NOT ${clause}`).join(' AND '),
-        isMultiValue: true,
-      };
+    const escapedValues = value.map((val) =>
+      typeof val === 'string' ? escapeStringValue(val) : val
+    );
+    let expression: string;
+    if (esFieldType) {
+      const mvContainsValue =
+        escapedValues.length === 1 ? escapedValues[0] : `[${escapedValues.join(', ')}]`;
+      expression =
+        operation === '-'
+          ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esFieldType})`
+          : `MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esFieldType})`;
+    } else {
+      const matchClauses = escapedValues.map((val) => `MATCH(${fieldName}, ${val})`);
+      expression =
+        operation === '-'
+          ? matchClauses.map((clause) => `NOT ${clause}`).join(' AND ')
+          : matchClauses.join(' AND ');
     }
-    return { expression: matchClauses.join(' AND '), isMultiValue: true };
+
+    return { expression, isMultiValue: true };
   }
 
   // Handle single values with standard operators
@@ -191,7 +201,8 @@ export function appendWhereClauseToESQLQuery(
   field: string,
   value: unknown,
   operation: SupportedOperation,
-  fieldType?: string
+  fieldType?: string,
+  esFieldType?: string
 ): string | undefined {
   const { root } = Parser.parse(baseESQLQuery);
   const lastCommand = root.commands[root.commands.length - 1];
@@ -201,7 +212,8 @@ export function appendWhereClauseToESQLQuery(
     field,
     value,
     operation,
-    fieldType
+    fieldType,
+    esFieldType
   );
 
   if (!filterExpression) {
