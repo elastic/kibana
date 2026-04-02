@@ -76,6 +76,8 @@ export const EntityAnalyticsHomePage = () => {
     isLoading: isLeadsLoading,
     isGenerating,
     generate,
+    isScheduled,
+    toggleSchedule,
   } = useHuntingLeads();
   const openAgentBuilderWithLead = useLeadAttachment();
 
@@ -194,6 +196,8 @@ export const EntityAnalyticsHomePage = () => {
                 onHuntInChat={handleHuntInChat}
                 onLeadInfoClick={leadDetailsEnabled ? handleLeadInfoClick : undefined}
                 onGenerate={generate}
+                isScheduled={isScheduled}
+                onToggleSchedule={toggleSchedule}
               />
             </EuiFlexItem>
 

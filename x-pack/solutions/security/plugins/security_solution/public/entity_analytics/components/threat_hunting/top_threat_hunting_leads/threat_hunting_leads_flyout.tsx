@@ -111,7 +111,10 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
         <EuiFieldSearch
           placeholder="Search leads..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPageIndex(0);
+          }}
           fullWidth
           data-test-subj="leadSearchField"
         />

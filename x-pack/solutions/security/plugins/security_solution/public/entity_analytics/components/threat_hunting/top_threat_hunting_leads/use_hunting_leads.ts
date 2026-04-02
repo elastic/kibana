@@ -17,8 +17,16 @@ const POLL_TIMEOUT_MS = 120_000;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
+
 export const useHuntingLeads = () => {
-  const { fetchLeads, generateLeads: generateLeadsApi } = useEntityAnalyticsRoutes();
+  const {
+    fetchLeads,
+    generateLeads: generateLeadsApi,
+    fetchLeadGenerationStatus,
+    enableLeadGeneration,
+    disableLeadGeneration,
+  } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
   const { addSuccess, addError } = useAppToasts();
 
@@ -60,6 +68,17 @@ export const useHuntingLeads = () => {
     },
   });
 
+  const { data: statusData } = useQuery({
+    queryKey: [LEAD_SCHEDULE_QUERY_KEY],
+    queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
+  });
+
+  const { mutate: toggleSchedule } = useMutation({
+    mutationFn: (enabled: boolean) => (enabled ? enableLeadGeneration() : disableLeadGeneration()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [LEAD_SCHEDULE_QUERY_KEY] }),
+    onError: (error: Error) => addError(error, { title: 'Failed to update schedule' }),
+  });
+
   return {
     leads: data?.leads?.map(fromApiLead) ?? [],
     totalCount: data?.total ?? 0,
@@ -67,5 +86,7 @@ export const useHuntingLeads = () => {
     isGenerating,
     generate,
     refetch,
+    isScheduled: statusData?.isEnabled ?? false,
+    toggleSchedule,
   };
 };

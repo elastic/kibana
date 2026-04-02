@@ -99,6 +99,8 @@ import {
   LEAD_GENERATION_STATUS_URL,
   DISMISS_LEAD_URL,
   BULK_UPDATE_LEADS_URL,
+  ENABLE_LEAD_GENERATION_URL,
+  DISABLE_LEAD_GENERATION_URL,
 } from '../../../common/entity_analytics/lead_generation/constants';
 import type {
   FindLeadsResponse,
@@ -853,6 +855,18 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    const enableLeadGeneration = () =>
+      http.fetch<{ success: boolean }>(ENABLE_LEAD_GENERATION_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+      });
+
+    const disableLeadGeneration = () =>
+      http.fetch<{ success: boolean }>(DISABLE_LEAD_GENERATION_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -900,6 +914,8 @@ export const useEntityAnalyticsRoutes = () => {
       generateLeads,
       dismissLead,
       bulkUpdateLeads,
+      enableLeadGeneration,
+      disableLeadGeneration,
     };
   }, [
     http,

@@ -178,6 +178,16 @@ export const getModuleLabel = (moduleId: string): string => {
   }
 };
 
+export const AUTO_REFRESH = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoRefresh',
+  { defaultMessage: 'Auto-refresh' }
+);
+
+export const SCHEDULE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleTooltip',
+  { defaultMessage: 'When enabled, leads are automatically regenerated every 24 hours' }
+);
+
 export const getStalenessLabel = (staleness: string): string => {
   switch (staleness) {
     case 'fresh':

@@ -15,7 +15,9 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { HuntingLead } from './types';
 import { LeadCard } from './lead_card';
@@ -33,6 +35,8 @@ interface TopThreatHuntingLeadsProps {
   onHuntInChat: () => void;
   onLeadInfoClick?: (lead: HuntingLead) => void;
   onGenerate: () => void;
+  isScheduled?: boolean;
+  onToggleSchedule?: (enabled: boolean) => void;
 }
 
 export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
@@ -45,6 +49,8 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   onHuntInChat,
   onLeadInfoClick,
   onGenerate,
+  isScheduled,
+  onToggleSchedule,
 }) => {
   return (
     <EuiPanel hasBorder data-test-subj="topThreatHuntingLeads">
@@ -65,7 +71,20 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            {onToggleSchedule && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.SCHEDULE_TOOLTIP}>
+                  <EuiSwitch
+                    label={i18n.AUTO_REFRESH}
+                    checked={!!isScheduled}
+                    onChange={(e) => onToggleSchedule(e.target.checked)}
+                    compressed
+                    data-test-subj="leadScheduleToggle"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButton
                 size="s"
