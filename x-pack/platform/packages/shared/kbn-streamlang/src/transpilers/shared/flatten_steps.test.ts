@@ -182,6 +182,48 @@ describe('flattenSteps', () => {
     ]);
   });
 
+  it('should flatten nested else-inside-else branches', () => {
+    const steps = [
+      {
+        condition: {
+          field: 'a',
+          eq: '1',
+          steps: [{ action: 'set', to: 'result', value: 'a' }],
+          else: [
+            {
+              condition: {
+                field: 'b',
+                eq: '2',
+                steps: [{ action: 'set', to: 'result', value: 'b' }],
+                else: [{ action: 'set', to: 'result', value: 'c' }],
+              },
+            },
+          ],
+        },
+      },
+    ] as StreamlangStep[];
+
+    expect(flattenSteps(steps)).toEqual([
+      { action: 'set', to: 'result', value: 'a', where: { field: 'a', eq: '1' } },
+      {
+        action: 'set',
+        to: 'result',
+        value: 'b',
+        where: {
+          and: [{ not: { field: 'a', eq: '1' } }, { field: 'b', eq: '2' }],
+        },
+      },
+      {
+        action: 'set',
+        to: 'result',
+        value: 'c',
+        where: {
+          and: [{ not: { field: 'a', eq: '1' } }, { not: { field: 'b', eq: '2' } }],
+        },
+      },
+    ]);
+  });
+
   it('should handle empty else branch', () => {
     const steps = [
       {

@@ -52,6 +52,41 @@ describe('stripCustomIdentifiers', () => {
     expect(block.condition.else![0]).not.toHaveProperty('customIdentifier');
   });
 
+  it('strips identifiers from nested conditions inside else branches', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          condition: {
+            field: 'a',
+            eq: '1',
+            steps: [],
+            else: [
+              {
+                condition: {
+                  field: 'b',
+                  eq: '2',
+                  steps: [{ action: 'set', to: 'c', value: '3', customIdentifier: 'inner-id' }],
+                },
+                customIdentifier: 'inner-cond',
+              },
+            ],
+          },
+          customIdentifier: 'outer-cond',
+        },
+      ],
+    };
+
+    const result = stripCustomIdentifiers(dsl);
+    expect(result.steps[0]).not.toHaveProperty('customIdentifier');
+    const outer = result.steps[0] as {
+      condition: {
+        else?: Array<{ customIdentifier?: string; condition: { steps: StreamlangStep[] } }>;
+      };
+    };
+    expect(outer.condition.else![0]).not.toHaveProperty('customIdentifier');
+    expect(outer.condition.else![0].condition.steps[0]).not.toHaveProperty('customIdentifier');
+  });
+
   it('omits else key when not present in original', () => {
     const dsl: StreamlangDSL = {
       steps: [

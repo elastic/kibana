@@ -344,8 +344,6 @@ export function reorderStepsByDragDrop(
   // Remove source block from array
   const withoutSource = [...stepRefs.slice(0, sourceBlockStart), ...stepRefs.slice(sourceBlockEnd)];
 
-  const updatedSourceBlock = sourceBlock;
-
   // Find target position in the filtered array
   const targetIndexInFiltered = withoutSource.findIndex((ref) => ref.id === targetStepId);
   if (targetIndexInFiltered === -1) {
@@ -391,7 +389,7 @@ export function reorderStepsByDragDrop(
   // Insert source block at the calculated position
   return [
     ...withoutSource.slice(0, insertIndex),
-    ...updatedSourceBlock,
+    ...sourceBlock,
     ...withoutSource.slice(insertIndex),
   ];
 }

@@ -2397,6 +2397,52 @@ describe('validateStreamlang', () => {
       expect(placementErrors).toHaveLength(1);
     });
 
+    it('should detect forbidden processors inside else branches for wired streams', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'a',
+              eq: '1',
+              steps: [],
+              else: [
+                {
+                  action: 'manual_ingest_pipeline',
+                  processors: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+      expect(result.errors.some((e) => e.type === 'forbidden_processor')).toBe(true);
+    });
+
+    it('should detect remove_by_prefix inside else branches', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'a',
+              eq: '1',
+              steps: [],
+              else: [
+                {
+                  action: 'remove_by_prefix',
+                  from: 'test_',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'classic' });
+      expect(result.errors.some((e) => e.type === 'invalid_processor_placement')).toBe(true);
+    });
+
     it('should reject forbidden processors in else branches for wired streams', () => {
       const dsl: StreamlangDSL = {
         steps: [

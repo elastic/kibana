@@ -105,16 +105,6 @@ export interface AdditiveChangesResult {
 }
 
 /**
- * Checks if changes between two DSLs are purely additive (new steps at the end only).
- * 1. Compares steps sequentially from the beginning
- * 2. Stops immediately when finding a difference
- * 3. Only returns new steps if all previous steps match exactly
- *
- * @param previousDSL - The previous state of the DSL
- * @param nextDSL - The new state of the DSL
- * @returns Result indicating if changes are purely additive and what the new steps are
- */
-/**
  * Collects the custom identifiers for a slice of steps (including nested where branches)
  * into the provided set. The set is used instead of an array so callers can union
  * results from multiple branches without worrying about duplicates.
@@ -159,7 +149,7 @@ const stripNestedStepsForComparison = (step: StreamlangStep) => {
       condition: {
         ...conditionWithoutSteps,
         steps: [],
-        ...(elseSteps ? { else: [] } : {}),
+        else: [],
       },
     };
   }

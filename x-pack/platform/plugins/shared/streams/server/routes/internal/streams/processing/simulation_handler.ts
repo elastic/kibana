@@ -889,8 +889,14 @@ const collectConditionBlockIds = (processing: StreamlangDSL): Set<string> => {
       if ('condition' in step && !('action' in step)) {
         if (step.customIdentifier) {
           ids.add(step.customIdentifier);
+          if (step.condition.else && step.condition.else.length > 0) {
+            ids.add(`${step.customIdentifier}:else`);
+          }
         }
         traverse(step.condition.steps);
+        if (step.condition.else) {
+          traverse(step.condition.else);
+        }
       }
     }
   };

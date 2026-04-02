@@ -40,6 +40,10 @@ import { ConnectedNodesList } from './connected_nodes_list';
 import { NestedChildrenProcessingSummary } from './nested_children_processing_summary';
 import { WhereBlockSummary } from './summary';
 
+// Maximum condition nesting depth allowed in interactive mode (matches validate_structural check).
+// Level is 0-indexed, so level >= 2 means a child condition would reach depth 3.
+export const MAX_INTERACTIVE_NESTING_LEVEL = 2;
+
 export const WhereBlock = (props: StepConfigurationProps) => {
   const { stepRef, stepUnderEdit, rootLevelMap, stepsProcessingSummaryMap, level } = props;
   const { euiTheme } = useEuiTheme();
@@ -59,17 +63,18 @@ export const WhereBlock = (props: StepConfigurationProps) => {
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
   const [isExpanded, toggle] = useToggle(true);
 
-  const childSteps = useInteractiveModeSelector((state) =>
-    state.context.stepRefs.filter(
+  const { childSteps, ifBranchSteps, elseBranchSteps } = useInteractiveModeSelector((state) => {
+    const allChildren = state.context.stepRefs.filter(
       (ref) => ref.getSnapshot().context.step.parentId === step.customIdentifier
-    )
-  );
-  const ifBranchSteps = childSteps.filter(
-    (ref) => ref.getSnapshot().context.step.branch !== 'else'
-  );
-  const elseBranchSteps = childSteps.filter(
-    (ref) => ref.getSnapshot().context.step.branch === 'else'
-  );
+    );
+    return {
+      childSteps: allChildren,
+      ifBranchSteps: allChildren.filter((ref) => ref.getSnapshot().context.step.branch !== 'else'),
+      elseBranchSteps: allChildren.filter(
+        (ref) => ref.getSnapshot().context.step.branch === 'else'
+      ),
+    };
+  });
   const { filterSimulationByCondition, clearSimulationConditionFilter, reorderStepByDragDrop } =
     useStreamEnrichmentEvents();
   const hasChildren = childSteps.length > 0;
@@ -207,22 +212,24 @@ export const WhereBlock = (props: StepConfigurationProps) => {
         {hasChildren && isExpanded && (
           <>
             <EuiSpacer size="s" />
-            <ConnectedNodesList>
-              {ifBranchSteps.map((childStep, index) => (
-                <li key={childStep.id}>
-                  <StepsListItem
-                    stepRef={childStep}
-                    level={level + 1}
-                    stepUnderEdit={stepUnderEdit}
-                    rootLevelMap={rootLevelMap}
-                    stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                    isFirstStepInLevel={index === 0}
-                    isLastStepInLevel={index === ifBranchSteps.length - 1}
-                    readOnly={props.readOnly}
-                  />
-                </li>
-              ))}
-            </ConnectedNodesList>
+            {ifBranchSteps.length > 0 && (
+              <ConnectedNodesList>
+                {ifBranchSteps.map((childStep, index) => (
+                  <li key={childStep.id}>
+                    <StepsListItem
+                      stepRef={childStep}
+                      level={level + 1}
+                      stepUnderEdit={stepUnderEdit}
+                      rootLevelMap={rootLevelMap}
+                      stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                      isFirstStepInLevel={index === 0}
+                      isLastStepInLevel={index === ifBranchSteps.length - 1}
+                      readOnly={props.readOnly}
+                    />
+                  </li>
+                ))}
+              </ConnectedNodesList>
+            )}
             {(hasElseBranch || !props.readOnly) && (
               <>
                 <EuiSpacer size="s" />
@@ -261,7 +268,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                         parentId={step.customIdentifier}
                         branch="else"
                         mode="inline"
-                        nestingDisabled={level >= 2}
+                        nestingDisabled={level >= MAX_INTERACTIVE_NESTING_LEVEL}
                       />
                     </EuiFlexItem>
                   )}

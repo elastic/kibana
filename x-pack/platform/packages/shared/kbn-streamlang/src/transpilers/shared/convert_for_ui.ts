@@ -53,7 +53,7 @@ export const convertStepToUIDefinition = <TStepDefinition extends StreamlangStep
   step: TStepDefinition,
   options: { parentId: StreamlangStepWithUIAttributes['parentId']; branch?: 'if' | 'else' }
 ): StreamlangStepWithUIAttributes => {
-  const id = step.customIdentifier || createId();
+  const id = step.customIdentifier ?? createId();
   const branch = options.branch ?? 'if';
 
   // If this is a where step, remove condition.steps and condition.else.

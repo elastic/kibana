@@ -443,6 +443,40 @@ describe('checkAdditiveChanges', () => {
     expect(result.newStepIds).toContain('id-else-1');
   });
 
+  it('treats adding a new else branch as additive', () => {
+    const previousDSL: StreamlangDSL = {
+      steps: [
+        {
+          condition: {
+            field: 'status',
+            eq: 'active',
+            steps: [{ action: 'set', to: 'field1', value: 'yes', customIdentifier: 'id-if-1' }],
+          },
+          customIdentifier: 'where1',
+        },
+      ],
+    };
+
+    const nextDSL: StreamlangDSL = {
+      steps: [
+        {
+          condition: {
+            field: 'status',
+            eq: 'active',
+            steps: [{ action: 'set', to: 'field1', value: 'yes', customIdentifier: 'id-if-1' }],
+            else: [{ action: 'set', to: 'field2', value: 'no', customIdentifier: 'id-else-1' }],
+          },
+          customIdentifier: 'where1',
+        },
+      ],
+    };
+
+    const result = checkAdditiveChanges(previousDSL, nextDSL);
+
+    expect(result.isPurelyAdditive).toBe(true);
+    expect(result.newStepIds).toContain('id-else-1');
+  });
+
   it('returns true when no changes are made', () => {
     const dsl: StreamlangDSL = {
       steps: [{ action: 'set', to: 'field1', value: 'value1' }],

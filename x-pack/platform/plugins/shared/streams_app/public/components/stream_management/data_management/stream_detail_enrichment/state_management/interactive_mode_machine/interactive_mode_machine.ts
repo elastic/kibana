@@ -12,7 +12,6 @@ import {
   convertStepsForUI,
   convertUIStepsToDSL,
   isActionBlock,
-  isConditionBlock,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
@@ -53,8 +52,8 @@ import type {
 import {
   getActiveDataSourceSamplesFromParent,
   getStepsForSimulation,
+  maybeAutoFilterByParentCondition,
   spawnStep,
-  stepHasElseBranch,
   type StepSpawner,
 } from './utils';
 import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
@@ -114,26 +113,12 @@ export const interactiveModeMachine = setup({
           conversionOptions.branch ?? 'if'
         );
 
-        // If the processor is created under a condition block without an else branch,
-        // automatically select that condition to filter the simulation preview.
-        // When a condition has both if and else branches, all documents are covered,
-        // so filtering would not be useful.
-        const parentId = conversionOptions.parentId;
-        if (parentId && conversionOptions.branch !== 'else') {
-          const parentStep = assignArgs.context.stepRefs
-            .find((ref) => ref.id === parentId)
-            ?.getSnapshot()?.context.step;
-          if (
-            parentStep &&
-            isConditionBlock(parentStep) &&
-            !stepHasElseBranch(assignArgs.context.stepRefs, parentId)
-          ) {
-            assignArgs.context.parentRef.send({
-              type: 'simulation.filterByConditionAuto',
-              conditionId: parentId,
-            });
-          }
-        }
+        maybeAutoFilterByParentCondition(
+          assignArgs.context.stepRefs,
+          conversionOptions.parentId,
+          assignArgs.context.parentRef,
+          conversionOptions.branch
+        );
 
         return {
           stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
@@ -236,18 +221,12 @@ export const interactiveModeMachine = setup({
       const step = stepRef?.getSnapshot()?.context.step;
       if (!step || !isActionBlock(step)) return;
 
-      const parentId = step.parentId;
-      if (!parentId) return;
-
-      const parentStep = context.stepRefs.find((ref) => ref.id === parentId)?.getSnapshot()
-        ?.context.step;
-      if (
-        parentStep &&
-        isConditionBlock(parentStep) &&
-        !stepHasElseBranch(context.stepRefs, parentId)
-      ) {
-        context.parentRef.send({ type: 'simulation.filterByConditionAuto', conditionId: parentId });
-      }
+      maybeAutoFilterByParentCondition(
+        context.stepRefs,
+        step.parentId,
+        context.parentRef,
+        step.branch
+      );
     },
     deleteStep: assign(({ context }, params: { id: string }) => {
       const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);

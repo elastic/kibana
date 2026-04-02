@@ -100,10 +100,22 @@ async function buildSimulationProcessorsFromSteps({
 
       // Process else-branch steps with negated condition
       if (elseSteps && elseSteps.length > 0) {
+        const negatedCondition = combineConditionsAsAnd(parentCondition, { not: restCondition });
+
+        // Emit noop for else-branch condition tracking
+        if (conditionId && negatedCondition) {
+          processors.push(
+            ...createConditionNoopProcessor({
+              conditionId: `${conditionId}:else`,
+              condition: negatedCondition,
+            })
+          );
+        }
+
         processors.push(
           ...(await buildSimulationProcessorsFromSteps({
             steps: elseSteps,
-            parentCondition: combineConditionsAsAnd(parentCondition, { not: restCondition }),
+            parentCondition: negatedCondition,
             resolverOptions,
           }))
         );

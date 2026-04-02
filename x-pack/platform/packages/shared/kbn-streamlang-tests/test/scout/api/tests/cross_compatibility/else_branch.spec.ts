@@ -208,6 +208,176 @@ apiTest.describe(
       }
     );
 
+    apiTest('should handle nested conditions inside else branch', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'attributes.status',
+              eq: 'active',
+              steps: [
+                {
+                  action: 'set',
+                  to: 'attributes.outcome',
+                  value: 'active',
+                } as SetProcessor,
+              ],
+              else: [
+                {
+                  condition: {
+                    field: 'attributes.status',
+                    eq: 'pending',
+                    steps: [
+                      {
+                        action: 'set',
+                        to: 'attributes.outcome',
+                        value: 'pending',
+                      } as SetProcessor,
+                    ],
+                    else: [
+                      {
+                        action: 'set',
+                        to: 'attributes.outcome',
+                        value: 'unknown',
+                      } as SetProcessor,
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
+
+      const mappingDoc = { attributes: { status: 'null', outcome: 'null' } };
+      const docs = [
+        { attributes: { status: 'active' } },
+        { attributes: { status: 'pending' } },
+        { attributes: { status: 'inactive' } },
+      ];
+
+      await testBed.ingest('ingest-nested-else', docs, processors);
+      const ingestResult = await testBed.getDocsOrdered('ingest-nested-else');
+
+      await testBed.ingest('esql-nested-else', [mappingDoc, ...docs]);
+      const esqlResult = await esql.queryOnIndex('esql-nested-else', query);
+
+      // Active → 'active' (if-branch fires)
+      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.outcome).toBe('active');
+      expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+        expect.objectContaining({ 'attributes.outcome': 'active' })
+      );
+
+      // Pending → 'pending' (else-branch, then nested if-branch fires)
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.outcome).toBe('pending');
+      expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+        expect.objectContaining({ 'attributes.outcome': 'pending' })
+      );
+
+      // Inactive → 'unknown' (else-branch, then nested else-branch fires)
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.outcome).toBe('unknown');
+      expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+        expect.objectContaining({ 'attributes.outcome': 'unknown' })
+      );
+    });
+
+    apiTest(
+      'should handle if-else inside an else branch with multiple steps',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              condition: {
+                field: 'attributes.priority',
+                eq: 'high',
+                steps: [
+                  {
+                    action: 'set',
+                    to: 'attributes.level',
+                    value: '1',
+                  } as SetProcessor,
+                ],
+                else: [
+                  {
+                    action: 'set',
+                    to: 'attributes.level',
+                    value: '2',
+                  } as SetProcessor,
+                  {
+                    condition: {
+                      field: 'attributes.priority',
+                      eq: 'low',
+                      steps: [
+                        {
+                          action: 'set',
+                          to: 'attributes.tag',
+                          value: 'deprioritized',
+                        } as SetProcessor,
+                      ],
+                      else: [
+                        {
+                          action: 'set',
+                          to: 'attributes.tag',
+                          value: 'normal',
+                        } as SetProcessor,
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
+
+        const mappingDoc = {
+          attributes: { priority: 'null', level: 'null', tag: 'null' },
+        };
+        const docs = [
+          { attributes: { priority: 'high' } },
+          { attributes: { priority: 'low' } },
+          { attributes: { priority: 'medium' } },
+        ];
+
+        await testBed.ingest('ingest-else-nested-multi', docs, processors);
+        const ingestResult = await testBed.getDocsOrdered('ingest-else-nested-multi');
+
+        await testBed.ingest('esql-else-nested-multi', [mappingDoc, ...docs]);
+        const esqlResult = await esql.queryOnIndex('esql-else-nested-multi', query);
+
+        // High priority → level=1, no tag set
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.level).toBe('1');
+        expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+          expect.objectContaining({ 'attributes.level': '1' })
+        );
+
+        // Low priority → level=2, tag=deprioritized
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.level).toBe('2');
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.tag).toBe('deprioritized');
+        expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+          expect.objectContaining({
+            'attributes.level': '2',
+            'attributes.tag': 'deprioritized',
+          })
+        );
+
+        // Medium priority → level=2, tag=normal
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.level).toBe('2');
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.tag).toBe('normal');
+        expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+          expect.objectContaining({
+            'attributes.level': '2',
+            'attributes.tag': 'normal',
+          })
+        );
+      }
+    );
+
     apiTest(
       'should produce same results after round-tripping through identifier utilities',
       async ({ testBed, esql }) => {

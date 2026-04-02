@@ -62,18 +62,6 @@ export function getJsonSchemaFromStreamlangSchema(
  * Only non-recursive references are inlined (we skip refs that would create
  * infinite expansion by tracking the ref chain).
  */
-/**
- * Inline the `steps.items` `$ref` so Monaco YAML can traverse the processor
- * schemas directly for hover documentation and autocomplete.
- *
- * Zod v4's `z.toJSONSchema()` emits `$ref` for reused schemas, while the old
- * `zodToJsonSchema` library inlined them. Monaco YAML needs inline schemas to
- * show hover documentation — it cannot resolve `$ref` for that purpose.
- *
- * We only inline the `steps.items` pointer (one level). Deeper `$ref`s (e.g.
- * recursive condition schemas) are kept as-is since they were always references
- * and inlining them would explode the schema size.
- */
 /** Inlines `else.items.$ref` within a schema node's properties if present. */
 function inlineElseRefInProperties(
   rootSchema: StreamlangJsonSchema,

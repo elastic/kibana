@@ -144,17 +144,75 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
 
-    // Expect: condition noop (set + remove), if-branch proc, else-branch proc = 4
-    expect(processors).toHaveLength(4);
+    // Expect: condition noop (set + remove), if-branch proc, else-noop (set + remove), else-branch proc = 6
+    expect(processors).toHaveLength(6);
     // First two: condition noop
     expect(processors[0]!.set?.tag).toBe('cond-1');
     expect(processors[1]!.remove?.tag).toBe('cond-1:noop-cleanup');
     // If-branch processor with original condition
     expect(processors[2]!.set?.tag).toBe('proc-if');
     expect(processors[2]!.set?.if).toBe(conditionToPainless({ field: 'foo', eq: 'bar' }));
+    // Else-branch noop
+    expect(processors[3]!.set?.tag).toBe('cond-1:else');
+    expect(processors[4]!.remove?.tag).toBe('cond-1:else:noop-cleanup');
     // Else-branch processor with negated condition
-    expect(processors[3]!.set?.tag).toBe('proc-else');
-    expect(processors[3]!.set?.if).toBe(conditionToPainless({ not: { field: 'foo', eq: 'bar' } }));
+    expect(processors[5]!.set?.tag).toBe('proc-else');
+    expect(processors[5]!.set?.if).toBe(conditionToPainless({ not: { field: 'foo', eq: 'bar' } }));
+  });
+
+  it('emits noop processors for condition blocks nested inside else branches', async () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          customIdentifier: 'cond-outer',
+          condition: {
+            field: 'a',
+            eq: '1',
+            steps: [
+              {
+                customIdentifier: 'proc-if',
+                action: 'set',
+                to: 'target',
+                value: 'if-value',
+              },
+            ],
+            else: [
+              {
+                customIdentifier: 'cond-inner',
+                condition: {
+                  field: 'b',
+                  eq: '2',
+                  steps: [
+                    {
+                      customIdentifier: 'proc-inner-if',
+                      action: 'set',
+                      to: 'target',
+                      value: 'inner-if',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const processors = await buildSimulationProcessorsWithConditionNoops(dsl);
+
+    // Outer condition noop (set + remove)
+    expect(processors[0]!.set?.tag).toBe('cond-outer');
+    expect(processors[1]!.remove?.tag).toBe('cond-outer:noop-cleanup');
+    // If-branch processor
+    expect(processors[2]!.set?.tag).toBe('proc-if');
+    // Else-branch noop (set + remove)
+    expect(processors[3]!.set?.tag).toBe('cond-outer:else');
+    expect(processors[4]!.remove?.tag).toBe('cond-outer:else:noop-cleanup');
+    // Inner condition noop (set + remove) — nested inside else
+    expect(processors[5]!.set?.tag).toBe('cond-inner');
+    expect(processors[6]!.remove?.tag).toBe('cond-inner:noop-cleanup');
+    // Inner if-branch processor
+    expect(processors[7]!.set?.tag).toBe('proc-inner-if');
   });
 
   it('transpiles enrich steps when an enrich policy resolver is provided', async () => {
