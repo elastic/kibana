@@ -13,7 +13,8 @@ import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
-import type { DataCascadeImplRef } from '../../lib/core/api';
+import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
+import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 
 /**
@@ -21,7 +22,7 @@ import type { SelectionDropdownProps } from './data_cascade_header/group_selecti
  */
 export type CascadeSizing = keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
 
-interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
+export interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
   /**
    * The row instance that was interacted with in the group by hierarchy.
    */
@@ -53,26 +54,12 @@ type OnCascadeLeafNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInte
 
 type OnCascadeLeafNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
 
-/**
- * Provides the props required to anchor another virtualized list
- * within our already virtualized row, and have it controlled by the same scrollable parent, if we wish so.
- */
-export interface CascadeRowCellNestedVirtualizationAnchorProps<G extends GroupNode>
-  extends Pick<CascadeVirtualizerProps<G>, 'getScrollElement'> {
-  getScrollOffset: () => number;
-  getScrollMargin: () => number;
-  /**
-   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
-   * This is only required if the nested virtualization implementation used here measures its rows.
-   */
-  preventSizeChangePropagation: () => () => void;
-}
-
-export interface CascadeRowCellRendererProps<G extends GroupNode, L extends LeafNode>
-  extends CascadeRowCellNestedVirtualizationAnchorProps<G> {
+export interface CascadeRowCellRendererProps<G extends GroupNode, L extends LeafNode> {
   data: L[] | null;
   cellId: string;
   nodePath: string[];
+  virtualizerController: ChildVirtualizerController;
+  rowIndex: number;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
@@ -202,6 +189,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * Style for the virtual row of the cascade row.
    */
   virtualRowStyle: React.CSSProperties;
+  /**
+   * Accessor for the parent cascade virtualizer instance.
+   */
+  getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
 }
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
@@ -263,13 +254,9 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    */
   allowMultipleRowToggle?: boolean;
   /**
-   * Initial vertical scroll position in pixels. When set, the list and scroll container start at this offset.
+   * Persisted restorable state to restore the component to a previous state on mount.
    */
-  initialScrollOffset?: number;
-  /**
-   * Initial scroll rectangle dimensions. When set, the list and scroll container start at this size.
-   */
-  initialRect?: { width: number; height: number };
+  initialState?: DataCascadeRestorableState;
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
   cascadeRef: React.ForwardedRef<DataCascadeImplRef<G, L>>;
 }

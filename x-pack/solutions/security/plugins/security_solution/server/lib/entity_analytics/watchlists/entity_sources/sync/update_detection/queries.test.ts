@@ -5,9 +5,55 @@
  * 2.0.
  */
 
-import { buildEntitiesSearchBody } from './queries';
+import { buildEntitiesSearchBody, buildIndexSourceSearchBody } from './queries';
 
 describe('Watchlist sync queries', () => {
+  describe('buildIndexSourceSearchBody', () => {
+    it('constructs search body with terms filter on identifier field', () => {
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe', 'admin']);
+      expect(searchBody.size).toBe(0);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        terms: { 'user.name': ['jdoe', 'admin'] },
+      });
+      expect(searchBody.aggs?.identifiers?.composite?.sources).toEqual([
+        { identifier: { terms: { field: 'user.name' } } },
+      ]);
+      expect(searchBody.aggs?.identifiers?.composite?.size).toBe(100);
+      expect(searchBody.runtime_mappings).toBeUndefined();
+    });
+
+    it('applies queryRule as KQL filter', () => {
+      const searchBody = buildIndexSourceSearchBody(
+        'user.name',
+        ['jdoe'],
+        undefined,
+        100,
+        'event.action: "login"'
+      );
+      const must = searchBody.query?.bool?.must as unknown[];
+      expect(must).toHaveLength(2);
+      expect(must[0]).toEqual({ terms: { 'user.name': ['jdoe'] } });
+      // KQL parsed query should be present as second filter
+      expect(must[1]).toBeDefined();
+    });
+
+    it('handles pagination with afterKey', () => {
+      const afterKey = { identifier: 'jdoe' };
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe'], afterKey);
+      expect(searchBody.aggs?.identifiers?.composite?.after).toEqual(afterKey);
+    });
+
+    it('uses custom page size', () => {
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe'], undefined, 50);
+      expect(searchBody.aggs?.identifiers?.composite?.size).toBe(50);
+    });
+
+    it('does not add KQL filter when queryRule is undefined', () => {
+      const searchBody = buildIndexSourceSearchBody('host.name', ['server-1']);
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
+    });
+  });
+
   describe('buildEntitiesSearchBody', () => {
     it('constructs the correct search body with default page size', () => {
       const searchBody = buildEntitiesSearchBody('user');

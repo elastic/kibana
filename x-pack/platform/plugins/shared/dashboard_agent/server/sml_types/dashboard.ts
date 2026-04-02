@@ -83,7 +83,7 @@ const toDashboardState = (
   attributes: DashboardSavedObjectAttributes,
   references: SavedObjectReference[] | undefined
 ): DashboardState => {
-  return transformDashboardOut(attributes, references) as DashboardState;
+  return transformDashboardOut(attributes, references).dashboardState as DashboardState;
 };
 
 export const dashboardSmlType: SmlTypeDefinition = {

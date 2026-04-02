@@ -31,7 +31,7 @@ export {
 } from './saved_objects';
 
 export type { RruleSchedule } from './task';
-export { TaskStatus, TaskPriority, TaskCost } from './task';
+export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 

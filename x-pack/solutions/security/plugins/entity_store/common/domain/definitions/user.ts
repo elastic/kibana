@@ -7,6 +7,7 @@
 
 import type { Condition } from '@kbn/streamlang';
 import {
+  ENTITY_SOURCE_FIELD_EVALUATION,
   fieldNotOneOfCondition,
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
@@ -61,8 +62,6 @@ const idpPostAggFilter: EntityDefinitionWithoutId['postAggFilter'] = {
   ],
 };
 
-const idpEventTypeCondition = idpPostAggFilter;
-
 const nonIdpDocumentFilter: Condition = {
   and: [
     isNotEmptyCondition('user.name'),
@@ -75,6 +74,7 @@ const nonIdpPostAggFilter = nonIdpDocumentFilter;
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
+  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   identityField: {
     fieldEvaluations: [
       {
@@ -89,6 +89,10 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
           { sourceMatchesAny: ['o365', 'o365_metrics'], then: 'microsoft_365' },
           { sourceMatchesAny: ['entityanalytics_ad'], then: 'active_directory' },
+          {
+            condition: nonIdpDocumentFilter,
+            then: USER_ENTITY_NAMESPACE.Local,
+          },
         ],
       },
     ],
@@ -142,17 +146,10 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   indexPatterns: [],
   /** Post-aggregation filter (after LOOKUP JOIN): keep row when entity.id exists (shared) OR IDP OR non-IDP. Logical field names; main logs ESQL maps STATS destinations to `recent.*`. */
   postAggFilter: { or: [entityIdExistsAfterLookup, idpPostAggFilter, nonIdpPostAggFilter] },
-  /** Pre-agg: non-IDP local path sets entity.namespace + Medium confidence (before STATS / EU ID). */
-  whenConditionTrueSetFieldsPreAgg: [
-    {
-      condition: { and: [{ not: idpEventTypeCondition }, nonIdpDocumentFilter] },
-      fields: {
-        'entity.namespace': USER_ENTITY_NAMESPACE.Local,
-        'entity.confidence': ENTITY_CONFIDENCE.Medium,
-      },
-    },
-  ],
-  /** Post-STATS: entity.name (local: user.name@host.name when host.name present, else user.name) and High confidence when not local (logs ESQL only). */
+  /**
+   * Post-STATS: entity.name for local vs non-local; entity.confidence from namespace (local → medium,
+   * else → high). Logs ESQL maps to `recent.*` after STATS.
+   */
   whenConditionTrueSetFieldsAfterStats: [
     {
       condition: {
@@ -183,17 +180,15 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         'entity.confidence': ENTITY_CONFIDENCE.High,
       },
     },
+    {
+      condition: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+      fields: {
+        'entity.confidence': ENTITY_CONFIDENCE.Medium,
+      },
+    },
   ],
   fields: [
     newestValue({ source: 'entity.name' }),
-    // Having multiple values in event.module or data_stream.dataset is a good feature
-    // but causes complexity for CCS extraction.
-    // That's why event.module and data_stream.dataset always use MV_FIRST on its usage
-    collect({ source: 'event.module' }),
-    // keep field length large for safety to not lose idps
-    // with many datasets
-    collect({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
-
     collect({ source: 'event.kind' }),
     collect({ source: 'event.category' }),
     collect({ source: 'event.type' }),

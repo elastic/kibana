@@ -6377,7 +6377,7 @@
         "label": "CLOUD_CONNECTOR_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 104,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6390,7 +6390,7 @@
             "label": "LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 105,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6403,7 +6403,7 @@
             "label": "INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 106,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6416,7 +6416,7 @@
             "label": "CREATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6429,7 +6429,7 @@
             "label": "UPDATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 108,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6442,7 +6442,7 @@
             "label": "DELETE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6455,7 +6455,7 @@
             "label": "USAGE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 110,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6471,7 +6471,7 @@
         "label": "EPM_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6484,7 +6484,7 @@
             "label": "BULK_INSTALL_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6497,7 +6497,7 @@
             "label": "BULK_UPGRADE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 31,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6510,7 +6510,7 @@
             "label": "BULK_UPGRADE_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 32,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6523,7 +6523,7 @@
             "label": "BULK_UNINSTALL_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 33,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6536,7 +6536,7 @@
             "label": "BULK_UNINSTALL_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 34,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6549,7 +6549,7 @@
             "label": "BULK_ROLLBACK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 35,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6562,7 +6562,7 @@
             "label": "BULK_ROLLBACK_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 36,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6575,7 +6575,7 @@
             "label": "LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6588,7 +6588,7 @@
             "label": "INSTALLED_LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 38,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6601,7 +6601,7 @@
             "label": "LIMITED_LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6614,7 +6614,7 @@
             "label": "INFO_WITHOUT_VERSION_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 40,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6627,7 +6627,7 @@
             "label": "INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 41,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6638,6 +6638,19 @@
             "type": "string",
             "tags": [],
             "label": "DATA_STREAMS_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "lineNumber": 42,
@@ -6699,13 +6712,26 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.DELETE_WITHOUT_VERSION_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "DELETE_WITHOUT_VERSION_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.EPM_API_ROUTES.DELETE_PATTERN",
             "type": "string",
             "tags": [],
             "label": "DELETE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6718,7 +6744,7 @@
             "label": "INSTALL_KIBANA_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6731,7 +6757,7 @@
             "label": "DELETE_KIBANA_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6744,7 +6770,7 @@
             "label": "INSTALL_RULE_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6757,7 +6783,7 @@
             "label": "FILEPATH_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6770,7 +6796,7 @@
             "label": "KNOWLEDGE_BASE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6783,7 +6809,7 @@
             "label": "CATEGORIES_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6796,7 +6822,7 @@
             "label": "VERIFICATION_KEY_ID",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6809,7 +6835,7 @@
             "label": "STATS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6822,7 +6848,7 @@
             "label": "BULK_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6835,7 +6861,7 @@
             "label": "INPUTS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6848,7 +6874,7 @@
             "label": "PACKAGES_DATASTREAM_ASSETS",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6861,7 +6887,7 @@
             "label": "ROLLBACK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6874,7 +6900,7 @@
             "label": "ROLLBACK_AVAILABLE_CHECK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6887,7 +6913,7 @@
             "label": "BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6900,7 +6926,7 @@
             "label": "REAUTHORIZE_TRANSFORMS",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6913,7 +6939,7 @@
             "label": "REVIEW_UPGRADE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -30696,7 +30722,7 @@
             "label": "install_status",
             "description": [],
             "signature": [
-              "\"installing\" | \"installed\" | \"install_failed\""
+              "\"installed\" | \"installing\" | \"install_failed\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "lineNumber": 757,
@@ -30738,7 +30764,7 @@
             "label": "install_source",
             "description": [],
             "signature": [
-              "\"upload\" | \"custom\" | \"registry\" | \"bundled\""
+              "\"custom\" | \"upload\" | \"registry\" | \"bundled\""
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "lineNumber": 760,
@@ -36803,7 +36829,7 @@
         "label": "CreateAgentlessPolicyResponse",
         "description": [],
         "signature": [
-          "{ readonly item: Readonly<{ namespace?: string | undefined; version?: string | undefined; description?: string | undefined; spaceIds?: string[] | undefined; inputs?: Record<string, Readonly<{ streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; var_group_selections?: Record<string, string> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; } & {}>> | undefined; enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; } & {}>> | Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; var_group_selections?: Record<string, string> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; policy_template?: string | undefined; keep_enabled?: boolean | undefined; migrate_from?: string | undefined; compiled_input?: any; } & { type: string; streams: Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; var_group_selections?: Record<string, string> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; keep_enabled?: boolean | undefined; compiled_stream?: any; migrate_from?: string | undefined; } & { enabled: boolean; data_stream: Readonly<{ type?: string | undefined; elasticsearch?: Readonly<{ privileges?: Readonly<{ indices?: string[] | undefined; } & {}> | undefined; dynamic_dataset?: boolean | undefined; dynamic_namespace?: boolean | undefined; } & {}> | undefined; } & { dataset: string; }>; }>[]; enabled: boolean; }>[] | undefined; is_managed?: boolean | undefined; policy_id?: string | null | undefined; policy_ids?: string[] | undefined; output_id?: string | null | undefined; cloud_connector_id?: string | null | undefined; cloud_connector_name?: string | null | undefined; package?: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { name: string; version: string; }> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; var_group_selections?: Record<string, string> | undefined; elasticsearch?: Readonly<{ privileges?: Readonly<{ cluster?: string[] | undefined; } & {}> | undefined; } & {}> | undefined; overrides?: Readonly<{ inputs?: Record<string, any> | undefined; } & {}> | null | undefined; supports_agentless?: boolean | null | undefined; supports_cloud_connector?: boolean | null | undefined; additional_datastreams_permissions?: string[] | null | undefined; agents?: number | undefined; secret_references?: Readonly<{} & { id: string; }>[] | undefined; package_agent_version_condition?: string | undefined; } & { id: string; name: string; enabled: boolean; revision: number; created_at: string; created_by: string; updated_at: string; updated_by: string; }>; }"
+          "{ readonly item: Readonly<{ namespace?: string | undefined; version?: string | undefined; description?: string | undefined; spaceIds?: string[] | undefined; inputs?: Record<string, Readonly<{ streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; var_group_selections?: Record<string, string> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; } & {}>> | undefined; enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; } & {}>> | Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; var_group_selections?: Record<string, string> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; policy_template?: string | undefined; keep_enabled?: boolean | undefined; migrate_from?: string | undefined; compiled_input?: any; } & { type: string; streams: Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; var_group_selections?: Record<string, string> | undefined; deprecated?: Readonly<{ since?: string | undefined; replaced_by?: Record<\"input\" | \"package\" | \"dataStream\" | \"variable\" | \"policyTemplate\", string> | undefined; } & { description: string; }> | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; keep_enabled?: boolean | undefined; compiled_stream?: any; migrate_from?: string | undefined; } & { enabled: boolean; data_stream: Readonly<{ type?: string | undefined; elasticsearch?: Readonly<{ privileges?: Readonly<{ indices?: string[] | undefined; } & {}> | undefined; dynamic_dataset?: boolean | undefined; dynamic_namespace?: boolean | undefined; } & {}> | undefined; } & { dataset: string; }>; }>[]; enabled: boolean; }>[] | undefined; is_managed?: boolean | undefined; policy_id?: string | null | undefined; policy_ids?: string[] | undefined; output_id?: string | null | undefined; cloud_connector_id?: string | null | undefined; cloud_connector_name?: string | null | undefined; package?: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { name: string; version: string; }> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; var_group_selections?: Record<string, string> | undefined; elasticsearch?: Readonly<{ privileges?: Readonly<{ cluster?: string[] | undefined; } & {}> | undefined; } & {}> | undefined; overrides?: Readonly<{ inputs?: Record<string, any> | undefined; } & {}> | null | undefined; supports_agentless?: boolean | null | undefined; supports_cloud_connector?: boolean | null | undefined; additional_datastreams_permissions?: string[] | null | undefined; agents?: number | undefined; secret_references?: Readonly<{} & { id: string; }>[] | undefined; package_agent_version_condition?: string | undefined; } & { id: string; name: string; enabled: boolean; created_at: string; updated_at: string; revision: number; created_by: string; updated_by: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
         "lineNumber": 122,
@@ -36837,7 +36863,7 @@
         "label": "DisplayedAssetTypes",
         "description": [],
         "signature": [
-          "(\"index\" | \"search\" | \"transform\" | \"map\" | \"alert\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"ilm_policy\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"slo_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\" | \"esql_view\")[]"
+          "(\"index\" | \"search\" | \"transform\" | \"map\" | \"alert\" | \"ingest_pipeline\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"visualization\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"slo_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\" | \"esql_view\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "lineNumber": 120,
@@ -38202,7 +38228,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"connector\" | \"monitoring\" | \"security\" | \"siem\" | \"observability\" | \"infrastructure\" | \"kubernetes\" | \"opentelemetry\" | \"cloud\" | \"web\" | \"custom\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"asset_inventory\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"misconfiguration_workflow\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"vulnerability_workflow\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
+          "\"connector\" | \"monitoring\" | \"security\" | \"siem\" | \"observability\" | \"custom\" | \"infrastructure\" | \"kubernetes\" | \"opentelemetry\" | \"cloud\" | \"web\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"asset_inventory\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"misconfiguration_workflow\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"vulnerability_workflow\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
         "lineNumber": 94,
@@ -38340,7 +38366,15 @@
         "signature": [
           "{ type?: ",
           "PackageSpecPackageType",
-          " | undefined; name: string; version: string; description?: string | undefined; title: string; path?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
+          " | undefined; name: string; version: string; description?: string | undefined; title: string; path?: string | undefined; download?: string | undefined; internal?: boolean | undefined; categories?: (",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackageSpecCategory",
+            "text": "PackageSpecCategory"
+          },
+          " | undefined)[] | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -38356,15 +38390,7 @@
             "section": "def-common.RegistryImage",
             "text": "RegistryImage"
           },
-          "[]) | undefined; categories?: (",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackageSpecCategory",
-            "text": "PackageSpecCategory"
-          },
-          " | undefined)[] | undefined; deprecated?: ",
+          "[]) | undefined; deprecated?: ",
           "DeprecationInfo",
           " | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; data_streams?: ",
           {
@@ -38439,7 +38465,7 @@
         "label": "SETUP_API_ROUTE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 232,
+        "lineNumber": 233,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38578,7 +38604,7 @@
         "label": "AGENT_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 167,
+        "lineNumber": 168,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38591,7 +38617,7 @@
             "label": "LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38604,7 +38630,7 @@
             "label": "INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 169,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38617,7 +38643,7 @@
             "label": "UPDATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 170,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38630,7 +38656,7 @@
             "label": "EFFECTIVE_CONFIG_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 171,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38643,7 +38669,7 @@
             "label": "BULK_UPDATE_AGENT_TAGS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38656,7 +38682,7 @@
             "label": "DELETE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 173,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38669,7 +38695,7 @@
             "label": "CHECKIN_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38682,7 +38708,7 @@
             "label": "ACKS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 175,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38695,7 +38721,7 @@
             "label": "ACTIONS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38708,7 +38734,7 @@
             "label": "MIGRATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 177,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38721,7 +38747,7 @@
             "label": "BULK_MIGRATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38734,7 +38760,7 @@
             "label": "CANCEL_ACTIONS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 179,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38747,7 +38773,7 @@
             "label": "UNENROLL_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38760,7 +38786,7 @@
             "label": "BULK_UNENROLL_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 181,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38773,7 +38799,7 @@
             "label": "REASSIGN_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 182,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38786,7 +38812,7 @@
             "label": "BULK_REASSIGN_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 183,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38799,7 +38825,7 @@
             "label": "REQUEST_DIAGNOSTICS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 184,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38812,7 +38838,7 @@
             "label": "BULK_REQUEST_DIAGNOSTICS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 185,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38825,7 +38851,7 @@
             "label": "AVAILABLE_VERSIONS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 186,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38838,7 +38864,7 @@
             "label": "STATUS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 187,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38851,7 +38877,7 @@
             "label": "DATA_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 188,
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38864,7 +38890,7 @@
             "label": "UPGRADE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 189,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38877,7 +38903,7 @@
             "label": "BULK_UPGRADE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 190,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38890,7 +38916,7 @@
             "label": "ACTION_STATUS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 191,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38903,7 +38929,7 @@
             "label": "LIST_TAGS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 192,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38916,7 +38942,7 @@
             "label": "LIST_UPLOADS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 193,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38929,7 +38955,7 @@
             "label": "GET_UPLOAD_FILE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 194,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38942,7 +38968,7 @@
             "label": "DELETE_UPLOAD_FILE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 195,
+            "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38955,7 +38981,7 @@
             "label": "PRIVILEGE_LEVEL_CHANGE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 196,
+            "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38968,7 +38994,7 @@
             "label": "BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 197,
+            "lineNumber": 198,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38981,7 +39007,7 @@
             "label": "ROLLBACK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 198,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38994,7 +39020,7 @@
             "label": "BULK_ROLLBACK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 199,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39007,7 +39033,7 @@
             "label": "GENERATE_REPORT_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 200,
+            "lineNumber": 201,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39023,7 +39049,7 @@
         "label": "AGENT_POLICY_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 86,
+        "lineNumber": 87,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -39036,7 +39062,7 @@
             "label": "LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39049,7 +39075,7 @@
             "label": "BULK_GET_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39062,7 +39088,7 @@
             "label": "INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 89,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39075,7 +39101,7 @@
             "label": "CREATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39088,7 +39114,7 @@
             "label": "UPDATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39101,7 +39127,7 @@
             "label": "COPY_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39114,7 +39140,7 @@
             "label": "DELETE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39127,7 +39153,7 @@
             "label": "FULL_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 94,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39140,7 +39166,7 @@
             "label": "FULL_INFO_DOWNLOAD_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39153,7 +39179,7 @@
             "label": "LIST_OUTPUTS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 96,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39166,7 +39192,7 @@
             "label": "INFO_OUTPUTS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 97,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39179,7 +39205,7 @@
             "label": "AUTO_UPGRADE_AGENTS_STATUS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 98,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39192,7 +39218,7 @@
             "label": "CREATE_WITH_PACKAGE_POLICIES",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 99,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39205,7 +39231,7 @@
             "label": "CLEANUP_REVISIONS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -39221,7 +39247,7 @@
         "label": "agentPolicyRouteService",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-        "lineNumber": 230,
+        "lineNumber": 229,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -39237,7 +39263,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 231,
+            "lineNumber": 230,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39255,7 +39281,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 235,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39273,7 +39299,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 239,
+            "lineNumber": 238,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39289,7 +39315,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 239,
+                "lineNumber": 238,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39309,7 +39335,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 243,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39325,7 +39351,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 243,
+                "lineNumber": 242,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39345,7 +39371,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 250,
+            "lineNumber": 249,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39363,7 +39389,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 254,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39379,7 +39405,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 254,
+                "lineNumber": 253,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39399,7 +39425,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 258,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39415,7 +39441,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 258,
+                "lineNumber": 257,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39435,7 +39461,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 262,
+            "lineNumber": 261,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39453,7 +39479,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 266,
+            "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39469,7 +39495,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 266,
+                "lineNumber": 265,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39489,7 +39515,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 270,
+            "lineNumber": 269,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39505,7 +39531,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 270,
+                "lineNumber": 269,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39525,7 +39551,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 277,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39543,7 +39569,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 281,
+            "lineNumber": 280,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39561,7 +39587,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 285,
+            "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39577,7 +39603,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 285,
+                "lineNumber": 284,
                 "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39597,7 +39623,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 289,
+            "lineNumber": 288,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39615,7 +39641,7 @@
               "(agentPolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 293,
+            "lineNumber": 292,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39631,7 +39657,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 293,
+                "lineNumber": 292,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39651,7 +39677,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 297,
+            "lineNumber": 296,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39686,7 +39712,7 @@
         "label": "agentRouteService",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-        "lineNumber": 316,
+        "lineNumber": 315,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -39702,7 +39728,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 317,
+            "lineNumber": 316,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39718,7 +39744,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 317,
+                "lineNumber": 316,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39738,7 +39764,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 318,
+            "lineNumber": 317,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39754,7 +39780,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 318,
+                "lineNumber": 317,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39774,7 +39800,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 319,
+            "lineNumber": 318,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39792,7 +39818,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 320,
+            "lineNumber": 319,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39808,7 +39834,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 320,
+                "lineNumber": 319,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39828,7 +39854,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 322,
+            "lineNumber": 321,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39846,7 +39872,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 323,
+            "lineNumber": 322,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39862,7 +39888,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 323,
+                "lineNumber": 322,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39882,7 +39908,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 325,
+            "lineNumber": 324,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39900,7 +39926,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 326,
+            "lineNumber": 325,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39916,7 +39942,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 326,
+                "lineNumber": 325,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -39936,7 +39962,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 328,
+            "lineNumber": 327,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39954,7 +39980,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 329,
+            "lineNumber": 328,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39972,7 +39998,7 @@
               "(actionId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 330,
+            "lineNumber": 329,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -39988,7 +40014,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 330,
+                "lineNumber": 329,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40008,7 +40034,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 332,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40026,7 +40052,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 333,
+            "lineNumber": 332,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40044,7 +40070,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 334,
+            "lineNumber": 333,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40062,7 +40088,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 335,
+            "lineNumber": 334,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40078,7 +40104,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 335,
+                "lineNumber": 334,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40098,7 +40124,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 337,
+            "lineNumber": 336,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40116,7 +40142,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 338,
+            "lineNumber": 337,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40134,7 +40160,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 339,
+            "lineNumber": 338,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40150,7 +40176,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 339,
+                "lineNumber": 338,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40170,7 +40196,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 341,
+            "lineNumber": 340,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40188,7 +40214,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 342,
+            "lineNumber": 341,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40204,7 +40230,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 342,
+                "lineNumber": 341,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40224,7 +40250,7 @@
               "(fileId: string, fileName: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 344,
+            "lineNumber": 343,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40240,7 +40266,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 344,
+                "lineNumber": 343,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40257,7 +40283,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 344,
+                "lineNumber": 343,
                 "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40277,7 +40303,7 @@
               "(fileId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 349,
+            "lineNumber": 348,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40293,7 +40319,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 349,
+                "lineNumber": 348,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40313,7 +40339,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 351,
+            "lineNumber": 350,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40331,7 +40357,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 352,
+            "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40347,7 +40373,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 352,
+                "lineNumber": 351,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40367,7 +40393,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 354,
+            "lineNumber": 353,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40385,7 +40411,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 355,
+            "lineNumber": 354,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40401,7 +40427,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 355,
+                "lineNumber": 354,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40421,7 +40447,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 357,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40439,7 +40465,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 358,
+            "lineNumber": 357,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40455,7 +40481,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 358,
+                "lineNumber": 357,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40475,7 +40501,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 360,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40493,7 +40519,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 361,
+            "lineNumber": 360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40511,7 +40537,7 @@
               "(agentId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 362,
+            "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40527,7 +40553,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 362,
+                "lineNumber": 361,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -40547,7 +40573,7 @@
         "label": "AGENTS_SETUP_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 222,
+        "lineNumber": 223,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -40560,7 +40586,7 @@
             "label": "INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 223,
+            "lineNumber": 224,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40573,7 +40599,7 @@
             "label": "CREATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 224,
+            "lineNumber": 225,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40589,7 +40615,7 @@
         "label": "API_VERSIONS",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 266,
+        "lineNumber": 267,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -40602,7 +40628,7 @@
             "label": "public",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 267,
+            "lineNumber": 268,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40615,7 +40641,7 @@
                 "label": "v1",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-                "lineNumber": 268,
+                "lineNumber": 269,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -40630,7 +40656,7 @@
             "label": "internal",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 270,
+            "lineNumber": 271,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40643,7 +40669,7 @@
                 "label": "v1",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-                "lineNumber": 271,
+                "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -40661,7 +40687,7 @@
         "label": "APP_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 158,
+        "lineNumber": 159,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -40674,7 +40700,7 @@
             "label": "HEALTH_CHECK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 159,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40687,7 +40713,7 @@
             "label": "CHECK_PERMISSIONS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 160,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40700,7 +40726,7 @@
             "label": "GENERATE_SERVICE_TOKEN_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 161,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40713,7 +40739,7 @@
             "label": "AGENT_POLICIES_SPACES",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 162,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40726,7 +40752,7 @@
             "label": "SPACE_AWARENESS_MIGRATION",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 163,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40742,7 +40768,7 @@
         "label": "appRoutesService",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-        "lineNumber": 411,
+        "lineNumber": 410,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -40758,7 +40784,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 412,
+            "lineNumber": 411,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40776,7 +40802,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 413,
+            "lineNumber": 412,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40794,7 +40820,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 414,
+            "lineNumber": 413,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -40812,7 +40838,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 415,
+            "lineNumber": 414,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41186,7 +41212,7 @@
         "label": "EPM_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -41199,7 +41225,7 @@
             "label": "BULK_INSTALL_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41212,7 +41238,7 @@
             "label": "BULK_UPGRADE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 31,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41225,7 +41251,7 @@
             "label": "BULK_UPGRADE_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 32,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41238,7 +41264,7 @@
             "label": "BULK_UNINSTALL_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 33,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41251,7 +41277,7 @@
             "label": "BULK_UNINSTALL_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 34,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41264,7 +41290,7 @@
             "label": "BULK_ROLLBACK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 35,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41277,7 +41303,7 @@
             "label": "BULK_ROLLBACK_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 36,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41290,7 +41316,7 @@
             "label": "LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41303,7 +41329,7 @@
             "label": "INSTALLED_LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 38,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41316,7 +41342,7 @@
             "label": "LIMITED_LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41329,7 +41355,7 @@
             "label": "INFO_WITHOUT_VERSION_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 40,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41342,7 +41368,7 @@
             "label": "INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 41,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41353,6 +41379,19 @@
             "type": "string",
             "tags": [],
             "label": "DATA_STREAMS_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "lineNumber": 42,
@@ -41414,13 +41453,26 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.DELETE_WITHOUT_VERSION_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "DELETE_WITHOUT_VERSION_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.DELETE_PATTERN",
             "type": "string",
             "tags": [],
             "label": "DELETE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41433,7 +41485,7 @@
             "label": "INSTALL_KIBANA_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41446,7 +41498,7 @@
             "label": "DELETE_KIBANA_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41459,7 +41511,7 @@
             "label": "INSTALL_RULE_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41472,7 +41524,7 @@
             "label": "FILEPATH_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41485,7 +41537,7 @@
             "label": "KNOWLEDGE_BASE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41498,7 +41550,7 @@
             "label": "CATEGORIES_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41511,7 +41563,7 @@
             "label": "VERIFICATION_KEY_ID",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41524,7 +41576,7 @@
             "label": "STATS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41537,7 +41589,7 @@
             "label": "BULK_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41550,7 +41602,7 @@
             "label": "INPUTS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41563,7 +41615,7 @@
             "label": "PACKAGES_DATASTREAM_ASSETS",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41576,7 +41628,7 @@
             "label": "ROLLBACK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41589,7 +41641,7 @@
             "label": "ROLLBACK_AVAILABLE_CHECK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41602,7 +41654,7 @@
             "label": "BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41615,7 +41667,7 @@
             "label": "REAUTHORIZE_TRANSFORMS",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41628,7 +41680,7 @@
             "label": "REVIEW_UPGRADE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41803,7 +41855,7 @@
               "(pkgName: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 67,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41819,7 +41871,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 67,
+                "lineNumber": 64,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -41839,7 +41891,7 @@
               "(filePath: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 71,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41855,7 +41907,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 71,
+                "lineNumber": 68,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -41875,7 +41927,7 @@
               "(pkgName: string, pkgVersion?: string | undefined) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 75,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41891,7 +41943,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 75,
+                "lineNumber": 72,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -41908,7 +41960,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 75,
+                "lineNumber": 72,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -41928,7 +41980,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 87,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41946,7 +41998,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 91,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41964,7 +42016,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 95,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41982,7 +42034,7 @@
               "(taskId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 99,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -41998,7 +42050,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 99,
+                "lineNumber": 97,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42018,7 +42070,7 @@
               "(taskId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 103,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42034,7 +42086,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 103,
+                "lineNumber": 101,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42054,7 +42106,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 107,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42072,7 +42124,7 @@
               "(taskId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 111,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42088,7 +42140,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 111,
+                "lineNumber": 109,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42108,7 +42160,7 @@
               "(pkgName: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 115,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42124,7 +42176,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 115,
+                "lineNumber": 113,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42144,7 +42196,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 119,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42162,7 +42214,7 @@
               "(pkgName: string, pkgVersion?: string | undefined) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 123,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42178,7 +42230,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 123,
+                "lineNumber": 121,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42195,7 +42247,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 123,
+                "lineNumber": 121,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42215,7 +42267,7 @@
               "(pkgName: string, pkgVersion: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 135,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42231,7 +42283,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 135,
+                "lineNumber": 134,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42248,7 +42300,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 135,
+                "lineNumber": 134,
                 "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42268,7 +42320,7 @@
               "(pkgName: string, pkgVersion: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 141,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42284,7 +42336,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 141,
+                "lineNumber": 140,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42301,7 +42353,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 141,
+                "lineNumber": 140,
                 "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42321,7 +42373,7 @@
               "(pkgName: string, pkgVersion: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 147,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42337,7 +42389,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 147,
+                "lineNumber": 146,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42354,7 +42406,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 147,
+                "lineNumber": 146,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42374,7 +42426,7 @@
               "(pkgName: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 154,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42390,7 +42442,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 154,
+                "lineNumber": 153,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42410,7 +42462,7 @@
               "(pkgName: string, pkgVersion: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 158,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42426,7 +42478,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 158,
+                "lineNumber": 157,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42443,7 +42495,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 158,
+                "lineNumber": 157,
                 "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42463,7 +42515,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 163,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42481,7 +42533,7 @@
               "(pkgName: string, pkgVersion: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 166,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42497,7 +42549,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 166,
+                "lineNumber": 165,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42514,7 +42566,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 166,
+                "lineNumber": 165,
                 "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42534,7 +42586,7 @@
               "(pkgName: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 172,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42550,7 +42602,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 172,
+                "lineNumber": 171,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42570,7 +42622,7 @@
               "(pkgName: string, pkgVersion: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 175,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42586,7 +42638,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 175,
+                "lineNumber": 174,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42603,7 +42655,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 175,
+                "lineNumber": 174,
                 "columnNumber": 55,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42640,7 +42692,7 @@
         "label": "fleetSetupRouteService",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-        "lineNumber": 311,
+        "lineNumber": 310,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -42656,7 +42708,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 312,
+            "lineNumber": 311,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42674,7 +42726,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 313,
+            "lineNumber": 312,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42709,7 +42761,7 @@
         "label": "PACKAGE_POLICY_API_ROUTES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -42722,7 +42774,7 @@
             "label": "LIST_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42735,7 +42787,7 @@
             "label": "BULK_GET_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42748,7 +42800,7 @@
             "label": "INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42761,7 +42813,7 @@
             "label": "CREATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42774,7 +42826,7 @@
             "label": "UPDATE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42787,7 +42839,7 @@
             "label": "DELETE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42800,7 +42852,7 @@
             "label": "UPGRADE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42813,7 +42865,7 @@
             "label": "DRYRUN_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42826,7 +42878,7 @@
             "label": "ORPHANED_INTEGRATION_POLICIES",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -42842,7 +42894,7 @@
         "label": "packagePolicyRouteService",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-        "lineNumber": 183,
+        "lineNumber": 182,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -42858,7 +42910,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 184,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42876,7 +42928,7 @@
               "(packagePolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 188,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42892,7 +42944,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 188,
+                "lineNumber": 187,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42912,7 +42964,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 192,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42930,7 +42982,7 @@
               "(packagePolicyId: string) => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 196,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42946,7 +42998,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-                "lineNumber": 196,
+                "lineNumber": 195,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -42966,7 +43018,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 200,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42984,7 +43036,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 204,
+            "lineNumber": 203,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -43002,7 +43054,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 208,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -43020,7 +43072,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 212,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -43038,7 +43090,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 216,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -43056,7 +43108,7 @@
         "label": "setupRouteService",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-        "lineNumber": 432,
+        "lineNumber": 431,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -43072,7 +43124,7 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
-            "lineNumber": 433,
+            "lineNumber": 432,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

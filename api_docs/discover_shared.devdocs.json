@@ -14,7 +14,7 @@
           "\nService types"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 261,
+        "lineNumber": 262,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,7 +45,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 265,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -61,7 +61,7 @@
         "label": "DiscoverFeaturesServiceStart",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 268,
+        "lineNumber": 269,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -92,7 +92,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 269,
+            "lineNumber": 270,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -108,7 +108,7 @@
         "label": "ObservabilityLogsAIAssistantFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -124,7 +124,7 @@
               "\"observability-logs-ai-assistant\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -148,7 +148,7 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -170,7 +170,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-                "lineNumber": 56,
+                "lineNumber": 57,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -190,7 +190,7 @@
         "label": "ObservabilityLogsAIAssistantFeatureRenderDeps",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 51,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -212,7 +212,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -228,7 +228,7 @@
         "label": "ObservabilityLogsAIInsightFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -244,7 +244,7 @@
               "\"observability-logs-ai-insight\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -268,7 +268,7 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -290,7 +290,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-                "lineNumber": 64,
+                "lineNumber": 65,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -310,7 +310,7 @@
         "label": "ObservabilityLogsAiInsightFeatureRenderDeps",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -332,7 +332,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -348,7 +348,7 @@
         "label": "ObservabilityStreamsFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -364,7 +364,7 @@
               "\"streams\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -388,7 +388,7 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -410,7 +410,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-                "lineNumber": 47,
+                "lineNumber": 48,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -438,7 +438,7 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -460,7 +460,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-                "lineNumber": 48,
+                "lineNumber": 49,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -530,6 +530,22 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.ObservabilityStreamsFeatureRenderDeps.renderCpsWarning",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "renderCpsWarning",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -542,7 +558,7 @@
         "label": "SecuritySolutionAlertFlyoutOverviewTabFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 117,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -558,7 +574,7 @@
               "\"security-solution-alert-flyout-overview-tab\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 118,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -582,7 +598,7 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 119,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -604,7 +620,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-                "lineNumber": 119,
+                "lineNumber": 120,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -626,7 +642,7 @@
           "*************** Security Solution"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 108,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -642,7 +658,7 @@
               "\"security-solution-cell-renderer\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 111,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -666,7 +682,7 @@
               "> | undefined>"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -722,7 +738,7 @@
           "SecuritySolutionFeature"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 248,
+        "lineNumber": 249,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

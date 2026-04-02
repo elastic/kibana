@@ -106,6 +106,34 @@ describe('event_chain_context', () => {
     expect(getEventChainContext(request)).toBeUndefined();
   });
 
+  it('returns undefined when header value is an array with null first element', () => {
+    const request = {
+      headers: { [EVENT_CHAIN_DEPTH_HEADER]: [null as any] },
+    } as unknown as KibanaRequest;
+    expect(getEventChainContext(request)).toBeUndefined();
+  });
+
+  it('returns undefined when header value is an array with non-string first element', () => {
+    const request = {
+      headers: { [EVENT_CHAIN_DEPTH_HEADER]: [42 as any] },
+    } as unknown as KibanaRequest;
+    expect(getEventChainContext(request)).toBeUndefined();
+  });
+
+  it('returns undefined when header value is an empty string', () => {
+    const request = {
+      headers: { [EVENT_CHAIN_DEPTH_HEADER]: '' },
+    } as unknown as KibanaRequest;
+    expect(getEventChainContext(request)).toBeUndefined();
+  });
+
+  it('uses first element when header value is a string array', () => {
+    const request = {
+      headers: { [EVENT_CHAIN_DEPTH_HEADER]: ['3', '5'] },
+    } as unknown as KibanaRequest;
+    expect(getEventChainContext(request)).toEqual({ depth: 3 });
+  });
+
   describe('getOutboundEventChainHeaders', () => {
     it('returns empty object when request has no event chain context', () => {
       const request = {} as KibanaRequest;

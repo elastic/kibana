@@ -663,7 +663,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionEditSchemaMock(), edit: [] },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(expect.stringContaining('Invalid input'));
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining('edit: Too small: expected array to have >=1 items')
+      );
     });
 
     it('rejects payloads if search query dry_run is invalid', async () => {

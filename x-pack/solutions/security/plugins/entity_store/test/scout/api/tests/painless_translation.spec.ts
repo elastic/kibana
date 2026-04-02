@@ -13,7 +13,7 @@ import {
   ENTITY_STORE_TAGS,
   UPDATES_INDEX,
 } from '../fixtures/constants';
-import { ingestDoc } from '../fixtures/helpers';
+import { clearEntityStoreIndices, ingestDoc } from '../fixtures/helpers';
 import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_metadata';
 import {
   USER_TS_EXTRACTION_CASES,
@@ -116,13 +116,14 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
     );
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   for (const entityType of Object.values(EntityType.options)) {

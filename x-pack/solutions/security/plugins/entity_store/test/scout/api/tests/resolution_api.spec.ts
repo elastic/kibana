@@ -8,6 +8,7 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
+import { get } from 'lodash';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
@@ -16,6 +17,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
@@ -46,13 +48,14 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     expect([200, 201]).toContain(response.statusCode);
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest('Link: should link entities to a target', async ({ apiClient, esClient }) => {
@@ -77,10 +80,10 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 
     // Verify via ES that resolved_to is set on alias docs
     const alias1Doc = await getEntitySource(esClient, alias1);
-    expect(alias1Doc[RESOLVED_TO_FIELD]).toBe(targetId);
+    expect(get(alias1Doc, RESOLVED_TO_FIELD)).toBe(targetId);
 
     const alias2Doc = await getEntitySource(esClient, alias2);
-    expect(alias2Doc[RESOLVED_TO_FIELD]).toBe(targetId);
+    expect(get(alias2Doc, RESOLVED_TO_FIELD)).toBe(targetId);
   });
 
   apiTest('Link: should skip already-linked entities', async ({ apiClient }) => {
@@ -213,10 +216,10 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
 
     // Verify via ES that resolved_to is null
     const alias1Doc = await getEntitySource(esClient, alias1);
-    expect(alias1Doc[RESOLVED_TO_FIELD]).toBeNull();
+    expect(get(alias1Doc, RESOLVED_TO_FIELD)).toBeNull();
 
     const alias2Doc = await getEntitySource(esClient, alias2);
-    expect(alias2Doc[RESOLVED_TO_FIELD]).toBeNull();
+    expect(get(alias2Doc, RESOLVED_TO_FIELD)).toBeNull();
 
     // Group should show standalone
     const group = await apiClient.get(

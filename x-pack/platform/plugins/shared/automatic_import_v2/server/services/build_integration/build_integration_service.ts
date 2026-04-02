@@ -9,6 +9,7 @@ import AdmZip from 'adm-zip';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { IntegrationAttributes, DataStreamAttributes } from '..';
+import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 import type {
   DataStreamManifest,
   DataStreamManifestStream,
@@ -22,8 +23,10 @@ import {
   addFieldsToZip,
   addIngestPipelineToZip,
   addManifestToZip,
+  addReadmeToZip,
 } from './util';
 import { generateFieldMappings } from './fields';
+import { buildReadme } from './package_readme';
 import { getInputVars } from './input_vars';
 
 const FORMAT_VERSION = '3.4.0';
@@ -173,6 +176,8 @@ export const buildIntegrationPackage = async (
       ];
   addChangelogToZip(zip, packageName, changelog);
 
+  const fieldMappingsPerStream = new Map<string, FieldMappingEntry[]>();
+
   for (const dataStream of dataStreams) {
     const dataStreamManifest = createDataStreamManifest(dataStream);
     addDataStreamToZip(zip, packageName, dataStream.data_stream_id, dataStreamManifest);
@@ -193,8 +198,12 @@ export const buildIntegrationPackage = async (
         (dataStream.result?.pipeline_docs as Array<Record<string, unknown>>) ?? [],
         fieldsMetadataClient
       ));
+    fieldMappingsPerStream.set(dataStream.data_stream_id, fieldMappings);
     addFieldsToZip(zip, packageName, dataStream.data_stream_id, manifest.name, fieldMappings);
   }
+
+  const readmeContent = buildReadme(integration, dataStreams, fieldMappingsPerStream);
+  addReadmeToZip(zip, packageName, readmeContent);
 
   const buffer = await zip.toBufferPromise();
   return { buffer, packageName };
