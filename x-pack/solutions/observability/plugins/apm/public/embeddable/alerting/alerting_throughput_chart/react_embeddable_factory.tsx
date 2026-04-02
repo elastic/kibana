@@ -39,7 +39,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      function serializeState() {
+      function serializeState(): EmbeddableApmAlertingVizProps {
         return {
           ...titleManager.getLatestState(),
           serviceName: serviceName$.getValue(),
@@ -55,7 +55,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<EmbeddableApmAlertingVizProps>({
         parentApi,
         uuid,
         serializeState,

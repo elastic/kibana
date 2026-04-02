@@ -16,16 +16,52 @@ interface Props {
   url: RenderingMetadata['uiPublicUrl'];
 }
 
+type FontFaceWeightValue = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+type FontFaceWeight = FontFaceWeightValue | `${FontFaceWeightValue} ${FontFaceWeightValue}`;
+type FontFaceDisplay = 'swap' | 'auto' | 'block' | 'fallback' | 'optional';
+
 interface FontFace {
   family: string;
   variants: Array<{
     style: 'normal' | 'italic';
-    weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+    weight: FontFaceWeight;
     sources: string[];
     unicodeRange?: string;
     format?: string;
+    display?: FontFaceDisplay;
   }>;
 }
+
+/**
+ * `Elastic UI Numeric` is a derivative of Inter with OpenType numeric features
+ * (tnum, zero, ss01, ss07) baked into the default glyphs. This allows canvas-based
+ * rendering to display tabular numbers and slashed zeros without requiring CSS
+ * font-feature-settings, which is not supported by Firefox's canvas implementation.
+ *
+ * The font only contains numeric characters and common punctuation, using unicode-range
+ * to apply only to those characters. When used alongside Inter, numeric characters
+ * will render with the enhanced features while letters use standard Inter.
+ *
+ * Future numeric/typographic enhancements for charts can be added to this font family while
+ * keeping the public API stable (hence the generic name).
+ *
+ * @see https://github.com/elastic/kibana/issues/249382
+ */
+const getElasticUINumeric = (url: string): FontFace => {
+  return {
+    family: 'Elastic UI Numeric',
+    variants: [
+      {
+        style: 'normal',
+        weight: '100 900',
+        sources: [`${url}/fonts/elastic_ui_numeric/ElasticUINumeric-Variable.woff2`],
+        format: 'woff2',
+        display: 'swap',
+        unicodeRange: 'U+20, U+24-25, U+28-29, U+2B-2F, U+30-3A, U+A0, U+202F, U+2212',
+      },
+    ],
+  };
+};
 
 /**
  * `Inter` is the latest version of `Inter UI`
@@ -184,6 +220,7 @@ const getRoboto = (url: string): FontFace => {
 };
 
 export const Fonts: FunctionComponent<Props> = ({ url }) => {
+  const elasticUINumericFont = getElasticUINumeric(url);
   const sansFont = getInter(url);
   const codeFont = getRoboto(url);
 
@@ -192,9 +229,9 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
     <style
       dangerouslySetInnerHTML={{
         __html: `
-        ${[sansFont, codeFont]
+        ${[elasticUINumericFont, sansFont, codeFont]
           .flatMap(({ family, variants }) =>
-            variants.map(({ style, weight, format, sources, unicodeRange }) => {
+            variants.map(({ style, weight, format, sources, unicodeRange, display }) => {
               const src = sources
                 .map((source) =>
                   source.startsWith(url)
@@ -203,17 +240,18 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
                 )
                 .join(', ');
 
+              const fontFaceRules = [
+                `font-family: '${family}';`,
+                `font-style: ${style};`,
+                `font-weight: ${weight};`,
+                ...(display ? [`font-display: ${display};`] : []),
+                `src: ${src};`,
+                ...(unicodeRange ? [`unicode-range: ${unicodeRange};`] : []),
+              ];
+
               return `
         @font-face {
-          font-family: '${family}';
-          font-style: ${style};
-          font-weight: ${weight};
-          src: ${src};${
-                unicodeRange
-                  ? `
-          unicode-range: ${unicodeRange};`
-                  : ''
-              }
+          ${fontFaceRules.join('\n          ')}
         }`;
             })
           )

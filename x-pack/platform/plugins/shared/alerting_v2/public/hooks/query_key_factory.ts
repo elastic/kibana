@@ -22,6 +22,11 @@ export const workflowKeys = {
   search: (params: { query: string }) => [...workflowKeys.searches(), params] as const,
 };
 
+export const matcherSuggestionKeys = {
+  all: ['matcherSuggestions'] as const,
+  dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
+};
+
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
