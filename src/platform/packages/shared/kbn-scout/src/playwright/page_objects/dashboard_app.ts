@@ -136,9 +136,9 @@ export class DashboardApp {
     await this.waitForRenderComplete();
   }
 
-  /** Clicks "Create new dashboard" on the listing page and waits for the editor toolbar to load. */
+  /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard() {
-    await this.page.testSubj.click('newItemButton');
+    await this.page.gotoApp('dashboards', { hash: '/create' });
     await expect(this.addTopNavButton).toBeVisible();
   }
 
