@@ -602,9 +602,7 @@ export const ManageIntegrationsTable: React.FC<{
             isPackageReady={isIntegrationPackageReady(item)}
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
-            DataStreamResultsFlyoutComponent={
-              automaticImport?.components.DataStreamResultsFlyout
-            }
+            DataStreamResultsFlyoutComponent={automaticImport?.components.DataStreamResultsFlyout}
             onFetchReviewDetails={fetchIntegrationReviewDetails}
             onApproveAndDeploy={approveAndDeployIntegration}
             onDownloadZip={downloadZipPackage}

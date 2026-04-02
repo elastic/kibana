@@ -14,7 +14,9 @@ import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/typ
  * These schemas define the structure of event payloads for BigQuery.
 
  */
-export const telemetryEventsSchemas: Partial<Record<AutomaticImportTelemetryEventType, RootSchema<object>>> = {
+export const telemetryEventsSchemas: Partial<
+  Record<AutomaticImportTelemetryEventType, RootSchema<object>>
+> = {
   [AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded]: {
     sessionId: {
       type: 'keyword',

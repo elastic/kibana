@@ -7,8 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import type { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { AutomaticImportSamplesIndexService, AutomaticImportSamplesIndexName } from '../services';
 import type { AddSamplesToDataStreamParams } from '../services/samples_index/index_service';
 

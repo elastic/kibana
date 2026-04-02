@@ -225,7 +225,7 @@ apiTest.describe(
           'report.exe',
           'script.php',
           '..\\..\\windows\\system32\\evtx.log',
-          'very-long-' + 'a'.repeat(200) + '.log',
+          `very-long-${'a'.repeat(200)}.log`,
         ];
         for (const sourceValue of oddNames) {
           const response = await apiClient.post(`${dsBasePath}/${VALIDATION_DS_ID}/upload`, {
