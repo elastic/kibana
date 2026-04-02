@@ -33,8 +33,9 @@ export const getHostsColumns = (
       truncateText: false,
       mobileOptions: { show: true },
       sortable: true,
-      render: (hostName) => {
+      render: (hostName, hostEdge) => {
         if (hostName != null && hostName.length > 0) {
+          const name = hostName[0];
           return (
             <SecurityCellActions
               mode={CellActionsMode.HOVER_DOWN}
@@ -42,11 +43,11 @@ export const getHostsColumns = (
               showActionTooltips
               triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
-                value: hostName[0],
+                value: name,
                 field: 'host.name',
               }}
             >
-              <HostDetailsLink hostName={hostName[0]} />
+              <HostDetailsLink hostName={name} entityId={hostEdge.node.entityId ?? undefined} />
             </SecurityCellActions>
           );
         }
@@ -59,7 +60,8 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
+            {i18n.LAST_SEEN}{' '}
+            <EuiIcon color="subdued" type="info" className="eui-alignTop" aria-hidden={true} />
           </>
         </EuiToolTip>
       ),
@@ -82,7 +84,8 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.OS} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
+            {i18n.OS}{' '}
+            <EuiIcon color="subdued" type="info" className="eui-alignTop" aria-hidden={true} />
           </>
         </EuiToolTip>
       ),

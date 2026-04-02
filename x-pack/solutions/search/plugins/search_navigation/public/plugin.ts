@@ -12,19 +12,25 @@ import type {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import type { Subscription } from 'rxjs';
+import { firstValueFrom, type Subscription } from 'rxjs';
 import type { ChromeBreadcrumb, ChromeStyle } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import {
+  INDEX_MANAGEMENT_LOCATOR_ID,
+  type IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,
   ClassicNavItem,
   SearchNavigationSetBreadcrumbsOptions,
   AppPluginStartDependencies,
+  AppPluginSetupDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
+import { SearchIndexManagementLocatorDefinition } from './locator';
 
 export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
@@ -41,7 +47,20 @@ export class SearchNavigationPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(_core: CoreSetup): SearchNavigationPluginSetup {
+  public setup(core: CoreSetup, plugins: AppPluginSetupDependencies): SearchNavigationPluginSetup {
+    const indexManagementLocator = plugins.share.url.locators.get<IndexManagementLocatorParams>(
+      INDEX_MANAGEMENT_LOCATOR_ID
+    );
+    const getChromeStyle = async (): Promise<'classic' | 'project' | undefined> => {
+      const [coreStart] = await core.getStartServices();
+      return firstValueFrom(coreStart.chrome.getChromeStyle$());
+    };
+    plugins.share.url.locators.create(
+      new SearchIndexManagementLocatorDefinition({
+        getChromeStyle,
+        indexManagementLocator: indexManagementLocator ?? undefined,
+      })
+    );
     return {};
   }
 

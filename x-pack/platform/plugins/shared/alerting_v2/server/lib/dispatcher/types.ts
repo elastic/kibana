@@ -8,6 +8,7 @@
 export type RuleId = string;
 export type NotificationPolicyId = string;
 export type NotificationGroupId = string;
+export type AlertEpisodeData = Record<string, unknown>;
 
 export interface NotificationPolicyDestination {
   type: 'workflow';
@@ -20,6 +21,7 @@ export interface AlertEpisode {
   group_hash: string;
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  data?: AlertEpisodeData;
 }
 
 export interface AlertEpisodeSuppression {
@@ -66,8 +68,11 @@ export interface NotificationPolicy {
   matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
   /** data.* fields used to group episodes into a single notification */
   groupBy: string[];
-  /** Minimum interval between notifications for the same group */
+  /** How episodes are grouped into notification payloads */
+  groupingMode?: 'per_episode' | 'all' | 'per_field';
+  /** Throttle configuration controlling notification frequency */
   throttle?: {
+    strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
     interval?: string; // e.g. '1h', '30m', '5m'
   };
   snoozedUntil?: string | null;
@@ -86,7 +91,6 @@ export interface MatchedPair {
 export interface NotificationGroup {
   id: NotificationGroupId;
   spaceId: string;
-  ruleId: RuleId;
   policyId: NotificationPolicyId;
   destinations: NotificationPolicyDestination[];
   groupKey: Record<string, unknown>;
@@ -95,7 +99,6 @@ export interface NotificationGroup {
 
 export interface NotificationPolicyWorkflowPayload {
   id: NotificationGroupId;
-  ruleId: RuleId;
   policyId: NotificationPolicyId;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
@@ -104,6 +107,12 @@ export interface NotificationPolicyWorkflowPayload {
 export interface LastNotifiedRecord {
   notification_group_id: NotificationGroupId;
   last_notified: string;
+  episode_status?: string;
+}
+
+export interface LastNotifiedInfo {
+  lastNotified: Date;
+  episodeStatus?: string;
 }
 
 export interface DispatcherPipelineInput {

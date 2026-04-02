@@ -16,12 +16,14 @@ import {
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { ONE_WEEK_IN_HOURS } from '../../shared/constants';
 import { ObservedEntity } from '../../shared/components/observed_entity';
 import { useObservedUserItems } from '../hooks/use_observed_user_items';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
+import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
@@ -159,8 +161,17 @@ const ObservedDataSectionContent = memo(
 
     const { jobNameById } = useInstalledSecurityJobNameById();
     const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
+    const euidApi = useEntityStoreEuidApi();
+    const euid = euidApi?.euid;
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
-      criteriaFields: getCriteriaFromUsersType(UsersType.details, userName),
+      criteriaFields: getCriteriaFromUsersType(UsersType.details, userName, identityFields, euid),
+      filterQuery: buildAnomaliesTableInfluencersFilterQuery({
+        euid,
+        entityType: 'user',
+        isScopedToEntity: true,
+        identityFields,
+        fallbackDisplayName: userName,
+      }),
       startDate: from,
       endDate: to,
       skip: isInitializing,
