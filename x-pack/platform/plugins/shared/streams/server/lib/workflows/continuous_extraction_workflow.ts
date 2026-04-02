@@ -45,48 +45,44 @@ export const createContinuousKiExtractionWorkflowService = (
     await managementApi.cancelWorkflowExecution(executionId, DEFAULT_SPACE_ID);
   };
 
+  const hardDeleteIfExists = async (request: KibanaRequest) => {
+    const existing = await managementApi.getWorkflow(
+      CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+      DEFAULT_SPACE_ID
+    );
+
+    if (!existing) {
+      return;
+    }
+
+    try {
+      await cancelRunningExecution();
+    } catch (error) {
+      log.warn(`Best-effort cancellation failed, proceeding with delete: ${error}`);
+    }
+
+    const result = await managementApi.deleteWorkflows(
+      [CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
+      DEFAULT_SPACE_ID,
+      request,
+      { force: true }
+    );
+
+    if (result.deleted === 0 && result.failures.length > 0) {
+      const reasons = result.failures.map((f) => `${f.id}: ${f.error}`).join('; ');
+      throw new Error(
+        `Failed to delete workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}: ${reasons}`
+      );
+    }
+
+    log.info(
+      `Hard-deleted continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
+    );
+  };
+
   return {
     async ensureWorkflow({ enabled, request }) {
-      const existing = await managementApi.getWorkflow(
-        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-        DEFAULT_SPACE_ID
-      );
-
-      if (existing) {
-        const yamlChanged = existing.yaml !== WORKFLOW_YAML;
-        const enabledChanged = existing.enabled !== enabled;
-
-        if (!yamlChanged && !enabledChanged) {
-          log.debug(
-            `Continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID} is already up to date`
-          );
-          return;
-        }
-
-        if (!enabled && enabledChanged) {
-          try {
-            await cancelRunningExecution();
-          } catch (error) {
-            log.warn(`Best-effort cancellation failed, proceeding with disable: ${error}`);
-          }
-        }
-
-        const patch: { yaml?: string; enabled?: boolean } = {};
-        if (yamlChanged) patch.yaml = WORKFLOW_YAML;
-        if (enabledChanged) patch.enabled = enabled;
-
-        await managementApi.updateWorkflow(
-          CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-          patch,
-          DEFAULT_SPACE_ID,
-          request
-        );
-
-        log.info(
-          `Updated continuous KI extraction workflow ${CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID}`
-        );
-        return;
-      }
+      await hardDeleteIfExists(request);
 
       if (!enabled) {
         return;
