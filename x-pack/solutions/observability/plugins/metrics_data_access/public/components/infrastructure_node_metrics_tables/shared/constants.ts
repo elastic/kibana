@@ -34,11 +34,11 @@ export const SYSTEM_MEMORY_TOTAL = 'system.memory.total';
 export const SYSTEM_MEMORY_USED_PCT = 'system.memory.used.pct';
 
 /** SemConv (OpenTelemetry) host metric field names */
-export const SEMCONV_SYSTEM_CPU_LOGICAL_COUNT = 'system.cpu.logical.count';
-export const SEMCONV_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
-export const SEMCONV_SYSTEM_MEMORY_TOTAL = 'system.memory.total';
-export const SEMCONV_SYSTEM_MEMORY_USAGE = 'system.memory.usage';
-export const SEMCONV_SYSTEM_MEMORY_UTILIZATION = 'system.memory.utilization';
+export const SEMCONV_SYSTEM_CPU_LOGICAL_COUNT = 'metrics.system.cpu.logical.count';
+export const SEMCONV_SYSTEM_CPU_UTILIZATION = 'metrics.system.cpu.utilization';
+export const SEMCONV_SYSTEM_MEMORY_TOTAL = 'metrics.system.memory.total';
+export const SEMCONV_SYSTEM_MEMORY_USAGE = 'metrics.system.memory.usage';
+export const SEMCONV_SYSTEM_MEMORY_UTILIZATION = 'metrics.system.memory.utilization';
 
 // --- Pod metric field names ---
 
