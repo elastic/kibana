@@ -54,7 +54,7 @@ export const EntityStoreUtils = (
 
     // Use the supported uninstall API so maintainers are removed via
     // entityMaintainersClient.removeAll() and don't leak task state between tests.
-    let uninstallUrl = '/internal/security/entity_store/uninstall?apiVersion=2';
+    let uninstallUrl = '/api/security/entity_store/uninstall';
     if (namespace !== 'default') {
       uninstallUrl = `/s/${namespace}${uninstallUrl}`;
     }
@@ -63,6 +63,7 @@ export const EntityStoreUtils = (
         .post(uninstallUrl)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '2023-10-31')
         .send({ entityTypes: ['user', 'host', 'service'] })
         .expect(200);
     } catch (e) {
@@ -346,6 +347,7 @@ export const EntityStoreUtils = (
       .post(maintainersUrl)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
       .send({});
 
     expect([200, 201]).to.contain(maintainersRes.status);
@@ -359,7 +361,7 @@ export const EntityStoreUtils = (
     entityType: EntityType;
     body: Record<string, unknown>;
   }) => {
-    let url = `/internal/security/entity_store/entities/${entityType}?apiVersion=2&force=true`;
+    let url = `/api/security/entity_store/entities/${entityType}?force=true`;
     if (namespace !== 'default') {
       url = `/s/${namespace}${url}`;
     }
@@ -368,6 +370,7 @@ export const EntityStoreUtils = (
       .put(url)
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2023-10-31')
       .send(body);
 
     if (response.status !== 200) {
