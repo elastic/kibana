@@ -47,7 +47,7 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
     select: (result) => {
       const map = new Map<string, AlertEpisodeGroupAction>();
       for (const row of result.rows) {
-        map.set(row.groupHash, {
+        map.set(row.group_hash, {
           groupHash: row.group_hash as string,
           ruleId: (row.rule_id as string) ?? null,
           lastDeactivateAction: (row.last_deactivate_action as string) ?? null,

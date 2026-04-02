@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertEpisodeStatus, RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeAction, AlertEpisodeGroupAction } from '../../types/action';
@@ -18,7 +18,7 @@ export interface RelatedAlertEpisodeProps {
   rule: RuleResponse;
   episodeAction?: AlertEpisodeAction;
   groupAction?: AlertEpisodeGroupAction;
-  onNavigate: () => void;
+  href: string;
 }
 
 export function RelatedAlertEpisode({
@@ -26,28 +26,21 @@ export function RelatedAlertEpisode({
   rule,
   episodeAction,
   groupAction,
-  onNavigate,
+  href,
 }: RelatedAlertEpisodeProps) {
   const status = episode['episode.status'] as AlertEpisodeStatus | undefined;
   const episodeId = episode['episode.id'] as string | undefined;
   return (
-    <EuiPanel
-      hasBorder
+    <EuiCard
+      display="subdued"
       paddingSize="m"
-      color="subdued"
-      grow={false}
-      onClick={onNavigate}
-      data-test-subj={
-        episodeId != null ? `relatedAlertEpisode-${episodeId}` : 'relatedAlertEpisode'
-      }
-    >
-      <EuiFlexGroup direction="column" gutterSize="s">
+      href={href}
+      textAlign="left"
+      titleSize="xs"
+      titleElement="h3"
+      title={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={true} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h3>{rule.metadata.name}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{rule.metadata.name}</EuiFlexItem>
           {status ? (
             <EuiFlexItem grow={false}>
               <AlertEpisodeStatusBadges
@@ -58,24 +51,28 @@ export function RelatedAlertEpisode({
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          wrap
-          data-test-subj="relatedAlertEpisodeGrouping"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.alertingV2EpisodesUi.relatedAlertEpisode.groupingLabel', {
-                defaultMessage: 'Grouping',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertEpisodeGroupingFields fields={rule.grouping?.fields ?? []} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      }
+      data-test-subj={
+        episodeId != null ? `relatedAlertEpisode-${episodeId}` : 'relatedAlertEpisode'
+      }
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        wrap
+        data-test-subj="relatedAlertEpisodeGrouping"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertingV2EpisodesUi.relatedAlertEpisode.groupingLabel', {
+              defaultMessage: 'Grouping',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AlertEpisodeGroupingFields fields={rule.grouping?.fields ?? []} />
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCard>
   );
 }

@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiCodeBlock,
   EuiDescriptionList,
@@ -17,6 +18,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
@@ -47,7 +49,7 @@ import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/action
 import { AlertEpisodeGroupingFields } from '@kbn/alerting-v2-episodes-ui/components/grouping/grouping_fields';
 import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
 import { css } from '@emotion/react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../../common/locators/paths';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -119,7 +121,6 @@ type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 export function EpisodeDetailsPage() {
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
-  const history = useHistory();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { services } = useKibana();
   const { euiTheme } = useEuiTheme();
@@ -397,12 +398,7 @@ export function EpisodeDetailsPage() {
                   title: i18n.translate('xpack.observability.episodeDetails.groupingLabel', {
                     defaultMessage: 'Grouping',
                   }),
-                  description: (
-                    <AlertEpisodeGroupingFields
-                      fields={rule?.grouping?.fields ?? []}
-                      emptyDisplay="—"
-                    />
-                  ),
+                  description: <AlertEpisodeGroupingFields fields={rule?.grouping?.fields ?? []} />,
                 },
                 {
                   title: i18n.translate('xpack.observability.episodeDetails.triggeredLabel', {
@@ -426,13 +422,37 @@ export function EpisodeDetailsPage() {
             {rule ? (
               <>
                 <EuiSpacer size="l" />
-                <EuiTitle size="xxs">
-                  <h3 data-test-subj="observabilityEpisodeDetailsRuleOverviewHeading">
-                    {i18n.translate('xpack.observability.episodeDetails.ruleOverviewTitle', {
-                      defaultMessage: 'Rule overview',
-                    })}
-                  </h3>
-                </EuiTitle>
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  responsive={false}
+                  gutterSize="s"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <h3 data-test-subj="observabilityEpisodeDetailsRuleOverviewHeading">
+                        {i18n.translate('xpack.observability.episodeDetails.ruleOverviewTitle', {
+                          defaultMessage: 'Rule overview',
+                        })}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      color="text"
+                      iconType="eye"
+                      href={http.basePath.prepend(
+                        paths.observability.alertingV2ManagementRuleDetails(rule.id)
+                      )}
+                      data-test-subj="observabilityEpisodeDetailsViewRuleDetailsButton"
+                    >
+                      {i18n.translate('xpack.observability.episodeDetails.viewRuleDetails', {
+                        defaultMessage: 'View rule details',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiPanel
                   hasBorder
@@ -501,16 +521,15 @@ export function EpisodeDetailsPage() {
             ) : null}
           </>
         ) : runbookArtifact?.value != null && runbookArtifact.value.length > 0 ? (
-          <EuiText
-            size="s"
+          <EuiMarkdownFormat
+            textSize="s"
             css={css`
-              white-space: pre-wrap;
-              word-break: break-word;
+              word-wrap: break-word;
             `}
             data-test-subj="observabilityEpisodeDetailsRunbookContent"
           >
             {runbookArtifact.value}
-          </EuiText>
+          </EuiMarkdownFormat>
         ) : (
           <EuiText
             size="s"
@@ -622,9 +641,9 @@ export function EpisodeDetailsPage() {
                                 ? relatedGroupActionsMap?.get(relatedGroupHash)
                                 : undefined
                             }
-                            onNavigate={() =>
-                              history.push(paths.observability.alertingV2EpisodeDetails(relatedId))
-                            }
+                            href={http.basePath.prepend(
+                              paths.observability.alertingV2EpisodeDetails(relatedId)
+                            )}
                           />
                         );
                       })}

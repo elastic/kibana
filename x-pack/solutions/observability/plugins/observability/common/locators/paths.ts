@@ -35,6 +35,9 @@ export const SLO_DETAIL_PATH = '/:sloId' as const;
 
 const RULES_APP_BASE_PATH = '/app/rules';
 
+/** Kibana management → Alerting V2 → Rules (stack management UI). */
+const MANAGEMENT_ALERTING_V2_RULES_BASE_PATH = '/app/management/alertingV2/rules';
+
 function getAlertingV2EpisodeDetailRelativePath(episodeId: string): string {
   return ALERTING_V2_EPISODE_DETAIL_PATH.replace(':episodeId', encodeURIComponent(episodeId));
 }
@@ -55,6 +58,8 @@ export const paths = {
     alertingV2: `${OBSERVABILITY_BASE_PATH}${ALERTING_V2_PATH}`,
     alertingV2EpisodeDetails: (episodeId: string) =>
       `${OBSERVABILITY_BASE_PATH}${getAlertingV2EpisodeDetailRelativePath(episodeId)}`,
+    alertingV2ManagementRuleDetails: (ruleId: string) =>
+      `${MANAGEMENT_ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(ruleId)}`,
   },
 };
 
@@ -62,5 +67,6 @@ export const relativePaths = {
   observability: {
     ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURIComponent(ruleId)}`,
     editRule: (id: string) => `${RULES_PATH}/edit/${encodeURIComponent(id)}`,
+    alertingV2EpisodeDetails: getAlertingV2EpisodeDetailRelativePath,
   },
 };
