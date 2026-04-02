@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import React from 'react';
+import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
+import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
+import { TestWrapper } from '../../../shared/test_utils';
+
+describe('WorkflowExecutionListFooter', () => {
+  const terminalExecution: WorkflowExecutionListItemDto = {
+    id: 'exec-1',
+    spaceId: 'default',
+    status: ExecutionStatus.COMPLETED,
+    isTestRun: false,
+    startedAt: '2024-01-01T10:00:00Z',
+    finishedAt: '2024-01-01T10:01:00Z',
+    error: null,
+    duration: 60000,
+    workflowId: 'wf-1',
+    workflowName: 'Test Workflow',
+    executedBy: 'user1',
+    triggeredBy: 'manual',
+  };
+
+  const runningExecution: WorkflowExecutionListItemDto = {
+    id: 'exec-running',
+    spaceId: 'default',
+    status: ExecutionStatus.RUNNING,
+    isTestRun: false,
+    startedAt: '2024-01-01T12:00:00Z',
+    finishedAt: '2024-01-01T12:00:00Z',
+    error: null,
+    duration: 1000,
+    workflowId: 'wf-1',
+    workflowName: 'Test Workflow',
+    executedBy: 'user1',
+    triggeredBy: 'manual',
+  };
+
+  const defaultConfirm = jest.fn().mockResolvedValue(undefined);
+
+  const renderFooter = (
+    overrides: Partial<React.ComponentProps<typeof WorkflowExecutionListFooter>> = {}
+  ) => {
+    return render(
+      <TestWrapper>
+        <WorkflowExecutionListFooter
+          loadedExecutions={overrides.loadedExecutions ?? [terminalExecution]}
+          canCancelLoadedNonTerminal={overrides.canCancelLoadedNonTerminal ?? true}
+          isCancelLoadedNonTerminalInProgress={
+            overrides.isCancelLoadedNonTerminalInProgress ?? false
+          }
+          onConfirmCancelLoadedNonTerminal={
+            overrides.onConfirmCancelLoadedNonTerminal ?? defaultConfirm
+          }
+        />
+      </TestWrapper>
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('disables the button when all loaded executions are terminal', () => {
+    renderFooter({ loadedExecutions: [terminalExecution] });
+    expect(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton')).toBeDisabled();
+  });
+
+  it('disables the button when the user cannot cancel despite a non-terminal execution', () => {
+    renderFooter({
+      loadedExecutions: [runningExecution],
+      canCancelLoadedNonTerminal: false,
+    });
+    expect(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton')).toBeDisabled();
+  });
+
+  it('disables the button while cancel is in progress', () => {
+    renderFooter({
+      loadedExecutions: [runningExecution],
+      isCancelLoadedNonTerminalInProgress: true,
+    });
+    expect(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton')).toBeDisabled();
+  });
+
+  it('opens the modal and closes on Cancel without calling the confirm handler', async () => {
+    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    renderFooter({
+      loadedExecutions: [runningExecution],
+      onConfirmCancelLoadedNonTerminal: onConfirm,
+    });
+
+    fireEvent.click(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton'));
+    const modal = await screen.findByTestId('workflowExecutionListFooterCancelModal');
+    fireEvent.click(within(modal).getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('workflowExecutionListFooterCancelModal')
+      ).not.toBeInTheDocument();
+    });
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  it('calls onConfirmCancelLoadedNonTerminal when the modal is confirmed', async () => {
+    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    renderFooter({
+      loadedExecutions: [runningExecution],
+      onConfirmCancelLoadedNonTerminal: onConfirm,
+    });
+
+    fireEvent.click(screen.getByTestId('workflowExecutionListFooterCancelNonTerminalButton'));
+    const modal = await screen.findByTestId('workflowExecutionListFooterCancelModal');
+    fireEvent.click(within(modal).getByRole('button', { name: 'Cancel all' }));
+
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
+  });
+});
