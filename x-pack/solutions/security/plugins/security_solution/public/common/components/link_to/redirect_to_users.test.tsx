@@ -8,13 +8,19 @@
 import { UsersTableType } from '../../../explore/users/store/model';
 import { parseEntityResolutionFromUrlState } from './entity_resolution_query_params';
 import {
-  decodeEntityIdentifiersFromUrl,
-  encodeEntityIdentifiersForUrl,
   getTabsOnUsersDetailsUrl,
   getTabsOnUsersUrl,
   getUsersDetailsUrl,
   parseEntityIdentifiersFromUrlParam,
 } from './redirect_to_users';
+
+/** Inverse of decodeEntityIdentifiersFromUrl — builds a base64url segment for tests. */
+const encodeJsonForLegacyEntitySegment = (value: unknown): string => {
+  const json = JSON.stringify(value);
+  const binary = unescape(encodeURIComponent(json));
+  const base64 = btoa(binary);
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
 
 const queryFromUrl = (url: string): string | undefined => {
   const i = url.indexOf('?');
@@ -22,46 +28,66 @@ const queryFromUrl = (url: string): string | undefined => {
 };
 
 describe('redirect_to_users', () => {
-  describe('encodeEntityIdentifiersForUrl / decodeEntityIdentifiersFromUrl', () => {
-    it('round-trips identity fields and entityId', () => {
-      const identityFields = { 'user.name': 'domain\\alice' };
-      const entityId = 'ent-123';
-      const encoded = encodeEntityIdentifiersForUrl(identityFields, entityId);
-      expect(decodeEntityIdentifiersFromUrl(encoded)).toEqual({
-        ...identityFields,
-        entityId,
-      });
-    });
-
-    it('returns null for empty or invalid encoded payloads', () => {
-      expect(decodeEntityIdentifiersFromUrl('')).toBeNull();
-      expect(decodeEntityIdentifiersFromUrl('not-valid-base64!!!')).toBeNull();
-      expect(decodeEntityIdentifiersFromUrl(encodeURIComponent('["array"]'))).toBeNull();
-    });
-  });
-
   describe('parseEntityIdentifiersFromUrlParam', () => {
-    it('returns an empty object for missing or empty input', () => {
+    it('returns an empty object when the param is undefined or empty', () => {
       expect(parseEntityIdentifiersFromUrlParam(undefined)).toEqual({});
       expect(parseEntityIdentifiersFromUrlParam('')).toEqual({});
     });
 
-    it('returns empty when decoding fails', () => {
-      expect(parseEntityIdentifiersFromUrlParam('@@@')).toEqual({});
+    it('returns an empty object when the segment cannot be decoded', () => {
+      expect(parseEntityIdentifiersFromUrlParam('not-valid-base64!!!')).toEqual({});
+      // Valid base64 but invalid JSON
+      expect(parseEntityIdentifiersFromUrlParam('e30')).toEqual({}); // base64url for "{"
     });
 
-    it('splits entityId from other identity keys', () => {
-      const encoded = encodeEntityIdentifiersForUrl({ 'user.name': 'bob' }, 'e-99');
-      expect(parseEntityIdentifiersFromUrlParam(encoded)).toEqual({
-        entityId: 'e-99',
-        identityFields: { 'user.name': 'bob' },
+    it('returns undefined entityId and identityFields when decoded JSON is an empty object', () => {
+      expect(parseEntityIdentifiersFromUrlParam(encodeJsonForLegacyEntitySegment({}))).toEqual({
+        entityId: undefined,
+        identityFields: undefined,
       });
     });
 
-    it('drops empty entityId string from the result', () => {
-      const encoded = encodeEntityIdentifiersForUrl({ 'user.name': 'bob' }, '');
-      expect(parseEntityIdentifiersFromUrlParam(encoded)).toEqual({
-        identityFields: { 'user.name': 'bob' },
+    it('returns an empty object when JSON is not a plain object', () => {
+      expect(parseEntityIdentifiersFromUrlParam(encodeJsonForLegacyEntitySegment([]))).toEqual({});
+      expect(parseEntityIdentifiersFromUrlParam(encodeJsonForLegacyEntitySegment('x'))).toEqual({});
+    });
+
+    it('extracts entityId when it is a non-empty string', () => {
+      expect(
+        parseEntityIdentifiersFromUrlParam(encodeJsonForLegacyEntitySegment({ entityId: 'ent-1' }))
+      ).toEqual({ entityId: 'ent-1' });
+    });
+
+    it('omits entityId when it is empty or not a string', () => {
+      expect(
+        parseEntityIdentifiersFromUrlParam(encodeJsonForLegacyEntitySegment({ entityId: '' }))
+      ).toEqual({ entityId: undefined, identityFields: undefined });
+      expect(
+        parseEntityIdentifiersFromUrlParam(encodeJsonForLegacyEntitySegment({ entityId: 99 }))
+      ).toEqual({ entityId: undefined, identityFields: undefined });
+    });
+
+    it('extracts identityFields from keys other than entityId', () => {
+      expect(
+        parseEntityIdentifiersFromUrlParam(
+          encodeJsonForLegacyEntitySegment({ 'user.name': 'alice', 'user.domain': 'corp' })
+        )
+      ).toEqual({
+        identityFields: { 'user.name': 'alice', 'user.domain': 'corp' },
+      });
+    });
+
+    it('returns both entityId and identityFields when both are present', () => {
+      expect(
+        parseEntityIdentifiersFromUrlParam(
+          encodeJsonForLegacyEntitySegment({
+            entityId: 'id-1',
+            'user.name': 'alice',
+          })
+        )
+      ).toEqual({
+        entityId: 'id-1',
+        identityFields: { 'user.name': 'alice' },
       });
     });
   });
