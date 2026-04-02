@@ -337,7 +337,8 @@ export class DiscoverApp {
   async selectTextBaseLang() {
     if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
       await this.page.testSubj.click('select-text-based-language-btn');
-      await this.waitForDocTableRendered();
+      await this.waitUntilSearchingHasFinished();
+      await this.codeEditor.waitCodeEditorReady('ESQLEditor');
     }
   }
 
