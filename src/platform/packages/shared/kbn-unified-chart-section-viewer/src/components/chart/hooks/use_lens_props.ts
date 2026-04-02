@@ -60,6 +60,7 @@ export const useLensProps = ({
   yBounds,
   error,
   userMessages,
+  onLoad,
 }: {
   title: string;
   query: string;
@@ -69,6 +70,7 @@ export const useLensProps = ({
   yBounds?: LensYBoundsConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  onLoad?: LensProps['onLoad'];
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
@@ -104,6 +106,7 @@ export const useLensProps = ({
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         userMessages,
+        onLoad,
       });
     },
     [
@@ -112,6 +115,7 @@ export const useLensProps = ({
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
       userMessages,
+      onLoad,
     ]
   );
 
@@ -210,6 +214,7 @@ const getLensProps = ({
   lastReloadRequestTime,
   esqlVariables,
   userMessages,
+  onLoad,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
@@ -217,6 +222,7 @@ const getLensProps = ({
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  onLoad?: LensProps['onLoad'];
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
@@ -230,4 +236,5 @@ const getLensProps = ({
   },
   lastReloadRequestTime,
   userMessages,
+  onLoad,
 });

@@ -25,7 +25,7 @@ export const ChartSizes = {
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
+export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams' | 'onLensLoad'> &
   Omit<LensWrapperProps, 'lensProps' | 'description' | 'abortController'> & {
     size?: ChartSize;
     discoverFetch$: UnifiedMetricsGridProps['fetch$'];
@@ -43,6 +43,7 @@ export const Chart = ({
   services,
   onBrushEnd,
   onFilter,
+  onLensLoad,
   onViewDetails,
   onExploreInDiscoverTab,
   fetchParams,
@@ -77,6 +78,7 @@ export const Chart = ({
     yBounds,
     error,
     userMessages,
+    onLoad: onLensLoad,
   });
 
   return (

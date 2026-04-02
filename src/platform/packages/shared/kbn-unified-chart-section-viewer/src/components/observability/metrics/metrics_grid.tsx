@@ -27,7 +27,7 @@ import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
-  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+  'services' | 'onBrushEnd' | 'onFilter' | 'onLensLoad' | 'fetchParams' | 'actions'
 > & {
   dimensions: Dimension[];
   searchTerm?: string;
@@ -45,6 +45,7 @@ export const MetricsGrid = ({
   metricItems,
   onBrushEnd,
   onFilter,
+  onLensLoad,
   actions,
   dimensions,
   whereStatements,
@@ -147,6 +148,7 @@ export const MetricsGrid = ({
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
+                  onLensLoad={onLensLoad}
                   actions={actions}
                   fetchParams={fetchParams}
                   discoverFetch$={discoverFetch$}
@@ -178,7 +180,7 @@ export const MetricsGrid = ({
 interface ChartItemProps
   extends Pick<
     UnifiedMetricsGridProps,
-    'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+    'services' | 'onBrushEnd' | 'onFilter' | 'onLensLoad' | 'fetchParams' | 'actions'
   > {
   id: string;
   metricItem: ParsedMetricItem;
@@ -206,6 +208,7 @@ const ChartItem = React.memo(
     services,
     onBrushEnd,
     onFilter,
+    onLensLoad,
     actions,
     fetchParams,
     discoverFetch$,
@@ -260,6 +263,7 @@ const ChartItem = React.memo(
           services={services}
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
+          onLensLoad={onLensLoad}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}

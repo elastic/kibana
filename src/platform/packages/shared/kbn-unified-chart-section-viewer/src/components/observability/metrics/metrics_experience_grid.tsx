@@ -27,6 +27,7 @@ export const MetricsExperienceGrid = ({
   histogramCss,
   onBrushEnd,
   onFilter,
+  onLensLoad,
   actions,
   services,
   fetch$: discoverFetch$,
@@ -150,6 +151,7 @@ export const MetricsExperienceGrid = ({
         fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
+        onLensLoad={onLensLoad}
         actions={actions}
         histogramCss={histogramCss}
         isDiscoverLoading={isDiscoverLoading}

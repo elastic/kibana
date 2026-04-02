@@ -322,4 +322,11 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
+  /**
+   * Callback invoked when a Lens embeddable finishes loading, providing its inspector adapters
+   */
+  onLensLoad?: (
+    isLoading: boolean,
+    adapters: Partial<DefaultInspectorAdapters> | undefined
+  ) => void;
 }

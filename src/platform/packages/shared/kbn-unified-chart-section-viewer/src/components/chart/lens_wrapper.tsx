@@ -9,7 +9,6 @@
 import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
@@ -111,20 +110,10 @@ export function LensWrapper({
 
   const handleOnLoad = useCallback(
     (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => {
-      if (!isLoading && adapters?.requests && esqlQuery) {
-        const requestTitle = i18n.translate('metricsExperience.inspectorEsqlRequestTitle', {
-          defaultMessage: 'Table',
-        });
-        const request = adapters.requests.start(requestTitle, {
-          description: i18n.translate('metricsExperience.inspectorEsqlRequestDescription', {
-            defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-          }),
-        });
-        request.json({ query: esqlQuery });
-        request.ok({ json: {} });
-      }
+      // Forward to the consumer's onLoad callback (e.g. for Discover inspector integration)
+      lensProps.onLoad?.(isLoading, adapters);
     },
-    [esqlQuery]
+    [lensProps]
   );
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
