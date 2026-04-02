@@ -1,7 +1,7 @@
 ---
 navigation_title: "Slack (v2)"
 type: reference
-description: "Use the Slack (v2) connector to search messages, resolve channel IDs, and send messages to Slack channels using the Slack Web API."
+description: "Use the Slack (v2) connector to search messages, resolve channel IDs, send messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, resolve public channel IDs, and send messages to Slack public channels using the Slack Web API.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, resolve public channel IDs, send messages, create channels, and invite users to Slack channels using the Slack Web API.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -54,6 +54,16 @@ Resolve channel ID
     - `limit` (optional): Channels per page (1 to 1000). Defaults to `1000`.
     - `maxPages` (optional): Maximum pages to scan before giving up. Defaults to `10`.
 
+Create conversation
+:   Create a new Slack channel (public or private).
+    - `name` (required): Channel name. Must contain only lowercase letters, numbers, hyphens, and underscores (80 characters or fewer).
+    - `isPrivate` (optional): Whether to create a private channel. Defaults to `false`.
+
+Invite to conversation
+:   Invite users to a Slack channel.
+    - `channel` (required): The channel ID to invite users to (for example, `C123...` or `G456...`).
+    - `users` (required): Comma-separated list of user IDs to invite (for example, `U01PWE77HD2,U02ABC1234`).
+
 Send message
 :   Send a message to a Slack conversation ID.
     - `channel` (required): Conversation ID (for example, `C123...`). Use **Resolve channel ID** first if you only have a channel name.
@@ -74,5 +84,6 @@ To use the Slack (v2) connector, you need a Slack app and a Slack **user token**
 2. Add **User Token Scopes** for the actions you intend to use:
    - **Resolve channel ID**: `channels:read`
    - **Send message (public channels)**: `chat:write`
+   - **Create conversation / Invite to conversation**: `groups:write`
    - **Search messages**: `search:read.public`, `search:read.private`, `search:read.im`, `search:read.mpim`, `search:read.files`
 3. Copy the **User OAuth Token** (for example, `xoxp-...`) and enter it in the **Temporary Slack user token** field when configuring the connector in {{kib}}.
