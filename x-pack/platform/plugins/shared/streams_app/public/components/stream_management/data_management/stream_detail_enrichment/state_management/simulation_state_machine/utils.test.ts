@@ -13,6 +13,7 @@ import {
   collectDescendantProcessorIdsForCondition,
   collectDocumentsAffectedByProcessors,
   getOriginalSampleDocument,
+  getSourceField,
 } from './utils';
 
 const makeAction = (
@@ -138,6 +139,92 @@ describe('Simulation utils', () => {
 
     it('returns undefined when currentDocIndex is undefined', () => {
       expect(getOriginalSampleDocument(samples, undefined)).toBeUndefined();
+    });
+  });
+
+  describe('getSourceField', () => {
+    it('returns from for grok processor', () => {
+      expect(getSourceField({ action: 'grok', from: 'message' } as any)).toBe('message');
+    });
+
+    it('returns from for dissect processor', () => {
+      expect(getSourceField({ action: 'dissect', from: 'message' } as any)).toBe('message');
+    });
+
+    it('returns to for set processor', () => {
+      expect(getSourceField({ action: 'set', to: 'target_field' } as any)).toBe('target_field');
+    });
+
+    it('returns from for split processor', () => {
+      expect(getSourceField({ action: 'split', from: 'tags' } as any)).toBe('tags');
+    });
+
+    it('returns from for replace processor', () => {
+      expect(getSourceField({ action: 'replace', from: 'message' } as any)).toBe('message');
+    });
+
+    it('returns from for redact processor', () => {
+      expect(getSourceField({ action: 'redact', from: 'message' } as any)).toBe('message');
+    });
+
+    it('returns from for uppercase processor', () => {
+      expect(getSourceField({ action: 'uppercase', from: 'name' } as any)).toBe('name');
+    });
+
+    it('returns from for lowercase processor', () => {
+      expect(getSourceField({ action: 'lowercase', from: 'name' } as any)).toBe('name');
+    });
+
+    it('returns from for trim processor', () => {
+      expect(getSourceField({ action: 'trim', from: 'value' } as any)).toBe('value');
+    });
+
+    it('returns from for sort processor', () => {
+      expect(getSourceField({ action: 'sort', from: 'items' } as any)).toBe('items');
+    });
+
+    it('returns from for remove processor', () => {
+      expect(getSourceField({ action: 'remove', from: 'unwanted' } as any)).toBe('unwanted');
+    });
+
+    it('returns from for remove_by_prefix processor', () => {
+      expect(getSourceField({ action: 'remove_by_prefix', from: 'temp.' } as any)).toBe('temp.');
+    });
+
+    it('returns to for math processor', () => {
+      expect(getSourceField({ action: 'math', to: 'result' } as any)).toBe('result');
+    });
+
+    it('returns to for concat processor', () => {
+      expect(getSourceField({ action: 'concat', to: 'full_name' } as any)).toBe('full_name');
+    });
+
+    it('returns from for enrich processor', () => {
+      expect(getSourceField({ action: 'enrich', from: 'ip_address' } as any)).toBe('ip_address');
+    });
+
+    it('returns first element of from for join processor', () => {
+      expect(getSourceField({ action: 'join', from: ['field_a', 'field_b'] } as any)).toBe(
+        'field_a'
+      );
+    });
+
+    it('returns undefined for manual_ingest_pipeline processor', () => {
+      expect(
+        getSourceField({ action: 'manual_ingest_pipeline' } as any)
+      ).toBeUndefined();
+    });
+
+    it('returns undefined for drop_document processor', () => {
+      expect(getSourceField({ action: 'drop_document' } as any)).toBeUndefined();
+    });
+
+    it('returns undefined when from is empty string', () => {
+      expect(getSourceField({ action: 'grok', from: '' } as any)).toBeUndefined();
+    });
+
+    it('returns undefined when from is whitespace only', () => {
+      expect(getSourceField({ action: 'grok', from: '   ' } as any)).toBeUndefined();
     });
   });
 });

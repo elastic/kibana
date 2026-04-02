@@ -36,16 +36,35 @@ export function getSourceField(
 ): string | undefined {
   const processorSourceField = (() => {
     switch (processor.action) {
+      // Processors where the primary field of interest is the target (`to`)
       case 'append':
       case 'set':
+      case 'math':
+      case 'concat':
         return processor.to;
+      // Processors where the primary field of interest is the source (`from`)
       case 'convert':
       case 'rename':
       case 'grok':
       case 'dissect':
       case 'date':
+      case 'split':
+      case 'replace':
+      case 'redact':
+      case 'uppercase':
+      case 'lowercase':
+      case 'trim':
+      case 'sort':
+      case 'remove':
+      case 'remove_by_prefix':
+      case 'enrich':
         return processor.from;
+      case 'join':
+        return processor.from?.[0];
+      case 'network_direction':
+      case 'json_extract':
       case 'manual_ingest_pipeline':
+      case 'drop_document':
         return undefined;
       default:
         return undefined;
