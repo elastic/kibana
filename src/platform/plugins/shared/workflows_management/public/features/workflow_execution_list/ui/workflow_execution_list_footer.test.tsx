@@ -80,7 +80,9 @@ describe('WorkflowExecutionListFooter', () => {
       loadedExecutions: [runningExecution],
       canCancelLoadedNonTerminal: false,
     });
-    expect(screen.getByTestId('cancelAllActiveExecutionsButton')).toBeDisabled();
+    const button = screen.getByTestId('cancelAllActiveExecutionsButton');
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('Cancel 1 active execution');
   });
 
   it('disables the button while cancel is in progress', () => {
@@ -133,7 +135,10 @@ describe('WorkflowExecutionListFooter', () => {
       loadedExecutions: [runningExecution, secondRunning, terminalExecution],
     });
 
-    fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
+    const footerButton = screen.getByTestId('cancelAllActiveExecutionsButton');
+    expect(footerButton).toHaveTextContent('Cancel 2 active executions');
+
+    fireEvent.click(footerButton);
     const modal = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
 
     expect(modal).toHaveTextContent('2');

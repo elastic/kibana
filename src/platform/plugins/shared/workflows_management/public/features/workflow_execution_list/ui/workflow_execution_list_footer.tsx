@@ -127,7 +127,8 @@ export const WorkflowExecutionListFooter = ({
         >
           <FormattedMessage
             id="workflows.workflowExecutionList.footerCancelNonTerminal.button"
-            defaultMessage="Cancel all active"
+            defaultMessage="Cancel {count, plural, one {# active execution} other {# active executions}}"
+            values={{ count: activeNonTerminalLoadedCount }}
           />
         </EuiButton>
       </EuiFlexItem>
