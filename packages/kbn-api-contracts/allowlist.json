@@ -10,6 +10,24 @@
       "prUrl": "https://github.com/elastic/kibana/pull/258986"
     },
     {
+      "path": "/api/fleet/outputs",
+      "method": "get",
+      "reason": "Extract shared OutputSslSchema/OutputShipperSchema with meta:{id} to fix type explosion, replace schema.conditional() Kafka fields with schema.maybe() to fix union wrapper regression. Coordinated with provider team — these changes eliminate ~450 lines of adapter code.",
+      "approvedBy": "@elastic/terraform-provider"
+    },
+    {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "get",
+      "reason": "Extract shared OutputSslSchema/OutputShipperSchema with meta:{id} to fix type explosion, replace schema.conditional() Kafka fields with schema.maybe() to fix union wrapper regression. Coordinated with provider team — these changes eliminate ~450 lines of adapter code.",
+      "approvedBy": "@elastic/terraform-provider"
+    },
+    {
+      "path": "/api/fleet/outputs/{outputId}",
+      "method": "put",
+      "reason": "Extract shared OutputSslSchema/OutputShipperSchema with meta:{id} to fix type explosion, replace schema.conditional() Kafka fields with schema.maybe() to fix union wrapper regression. Coordinated with provider team — these changes eliminate ~450 lines of adapter code.",
+      "approvedBy": "@elastic/terraform-provider"
+    },
+    {
       "path": "/api/fleet/agent_policies",
       "method": "get",
       "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
