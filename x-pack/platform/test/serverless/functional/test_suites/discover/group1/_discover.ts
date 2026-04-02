@@ -257,8 +257,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.discover.waitUntilTabIsLoaded();
         const time = await PageObjects.timePicker.getTimeConfig();
-        // Legacy picker shows "~ 15 minutes ago", new DateRangePicker returns
-        // dateMath (with /m rounding when roundRelativeTime setting is enabled)
         expect(
           time.start === '~ 15 minutes ago' ||
             time.start === 'now-15m' ||

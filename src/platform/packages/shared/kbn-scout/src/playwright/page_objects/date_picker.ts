@@ -93,13 +93,14 @@ export class DatePicker {
           },
           {
             timeout: 20000,
-            intervals: [500],
+            intervals: [500], // Retry every 0.5s
           }
         )
         .toBe(true);
     }
 
     if (await showBtn.isVisible()) {
+      // Click to show start/end time pickers
       await showBtn.click();
       await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor();
       await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
@@ -233,6 +234,9 @@ export class DatePicker {
         'dateRangePickerControlButton',
         containerLocator
       );
+      // Note: data-date-range stores ISO 8601 strings (e.g. "2025-01-01T00:00:00.000Z"),
+      // not the human-readable format passed as `from`/`to`. We assert visibility only
+      // to confirm the picker updated without risking a format-mismatch failure.
       await expect(
         controlButton,
         `Date picker should reflect the updated time range`
@@ -317,6 +321,7 @@ export class DatePicker {
       await this.openCustomRangePanel(containerLocator);
       await this.typeAbsoluteRangeNewPicker({ from, to, validateDates, containerLocator });
     } else {
+      await this.showStartEndTimes(containerLocator);
       await this.typeAbsoluteRangeLegacy({ from, to, validateDates, containerLocator });
     }
   }
