@@ -41,7 +41,7 @@ jobs:
             const codeownerTeams = new Set(
               affectedCodeowners.map(normalize).filter((t) => t.startsWith('elastic/'))
             );
-            if (codeownerTeams.length === 0) {
+            if (codeownerTeams.size === 0) {
               core.info('No elastic teams found in CODEOWNERS for changed files');
               return;
             }
