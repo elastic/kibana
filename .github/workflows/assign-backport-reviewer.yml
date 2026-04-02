@@ -21,24 +21,32 @@ jobs:
         id: codeowners
         uses: dytab/affected-codeowners@4f89e2b82e991c1dfc9f7000e8989212d8bfe086 # v1.0.0
 
-      - name: Find matching teams
-        id: match-teams
+      - name: Select reviewers
+        id: select-reviewers
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
-            const owners = JSON.parse('${{ steps.codeowners.outputs.individual-owners }}');
-            const normalize = (s) => s.replace(/^@/, '');
+            const affectedCodeowners = ${{ steps.codeowners.outputs.individual-owners }};
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const currentPrNumber = context.payload.pull_request.number;
+            const prAuthor = context.payload.pull_request.user.login;
+            const normalize = (s) => s.replace(/^@/, '').trim();
+            const toTeamSlug = (team) => team.split('/')[1] ?? team;
+            const isHumanReviewer = (login) =>
+              Boolean(login) &&
+              login !== 'kibanamachine' &&
+              !login.endsWith('[bot]');
 
-            const codeownerTeams = owners.map(normalize).filter((t) => t.startsWith('elastic/'));
+            const codeownerTeams = new Set(
+              affectedCodeowners.map(normalize).filter((t) => t.startsWith('elastic/'))
+            );
             if (codeownerTeams.length === 0) {
               core.info('No elastic teams found in CODEOWNERS for changed files');
-              core.setOutput('teams', '[]');
               return;
             }
-            core.info(`CODEOWNERS teams: ${codeownerTeams.join(', ')}`);
 
-            const author = context.payload.pull_request.user.login;
             let authorTeams;
             try {
               const result = await github.graphql(
@@ -49,35 +57,96 @@ jobs:
                     }
                   }
                 }`,
-                { login: author }
+                { login: prAuthor }
               );
-              authorTeams = result.organization.teams.nodes.map((t) => normalize(t.combinedSlug));
+              authorTeams = new Set(result.organization.teams.nodes.map((t) => normalize(t.combinedSlug)));
             } catch (error) {
               core.warning(`Failed to query author's org teams: ${error.message}`);
-              core.setOutput('teams', '[]');
               return;
             }
-            core.info(`Author ${author} teams: ${authorTeams.join(', ')}`);
 
-            const authorTeamSet = new Set(authorTeams);
-            const matchedTeams = codeownerTeams.filter((t) => authorTeamSet.has(t));
+            const matchedTeams = [...codeownerTeams.intersection(authorTeams)];
 
-            core.info(matchedTeams.length > 0
-              ? `Matched teams: ${matchedTeams.join(', ')}`
-              : 'No overlap between author teams and CODEOWNERS teams');
-            core.setOutput('teams', JSON.stringify(matchedTeams));
+            if (matchedTeams.length > 0) {
+              core.setOutput('team_reviewers', matchedTeams.map(toTeamSlug).join(','));
+              return;
+            }
+
+            const title = context.payload.pull_request.title ?? '';
+            const body = context.payload.pull_request.body ?? '';
+            const sourcePullRequestIndex = body.indexOf('"sourcePullRequest"');
+            const originalPrNumberFromMetadata =
+              sourcePullRequestIndex === -1
+                ? undefined
+                : body
+                    .slice(sourcePullRequestIndex)
+                    .match(/"number"\s*:\s*(\d+)/)?.[1];
+            const originalPrNumberFromTitle = title.match(/\(#(\d+)\)\s*$/)?.[1];
+            const originalPrNumber = Number(
+              originalPrNumberFromMetadata ?? originalPrNumberFromTitle
+            );
+
+            if (!Number.isInteger(originalPrNumber)) {
+              return;
+            }
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number: originalPrNumber,
+              per_page: 100,
+            });
+            const fallbackReview = reviews
+              .filter((review) => {
+                const login = review.user?.login;
+                return (
+                  review.state === 'APPROVED' &&
+                  isHumanReviewer(login) &&
+                  Boolean(review.submitted_at)
+                );
+              })
+              .sort((a, b) => Date.parse(b.submitted_at) - Date.parse(a.submitted_at))[0];
+
+            if (!fallbackReview) {
+              return;
+            }
+
+            core.setOutput('reviewer', fallbackReview.user.login);
 
       - name: Update reviewers
-        env:
-          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
-        run: |
-          TEAMS='${{ steps.match-teams.outputs.teams }}'
-          if [ "$TEAMS" = "[]" ] || [ -z "$TEAMS" ]; then
-            echo "No matching teams, nothing to do"
-            exit 0
-          fi
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const currentPrNumber = context.payload.pull_request.number;
+            const teamReviewers = '${{ steps.select-reviewers.outputs.team_reviewers }}'
+              .split(',')
+              .filter(Boolean);
+            const reviewer = '${{ steps.select-reviewers.outputs.reviewer }}';
 
-          REVIEWER_ARGS=$(echo "$TEAMS" | jq -r '.[]' | paste -sd,)
-          gh pr edit "${{ github.event.pull_request.number }}" \
-            --add-reviewer "$REVIEWER_ARGS" \
-            --remove-reviewer kibanamachine
+            if (teamReviewers.length === 0 && !reviewer) {
+              return;
+            }
+
+            await github.rest.pulls.requestReviewers({
+              owner,
+              repo,
+              pull_number: currentPrNumber,
+              reviewers: reviewer ? [reviewer] : undefined,
+              team_reviewers: teamReviewers.length > 0 ? teamReviewers : undefined,
+            });
+
+            try {
+              await github.rest.pulls.removeRequestedReviewers({
+                owner,
+                repo,
+                pull_number: currentPrNumber,
+                reviewers: ['kibanamachine'],
+              });
+            } catch (error) {
+              if (error.status !== 422) {
+                throw error;
+              }
+            }
