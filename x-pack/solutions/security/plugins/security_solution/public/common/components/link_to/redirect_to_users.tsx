@@ -11,18 +11,6 @@ import { mergeEntityResolutionIntoUrlState } from './entity_resolution_query_par
 export type EntityIdentifiers = Record<string, string>;
 
 /**
- * Encodes entity identifiers as a single base64url blob (legacy path-segment URLs only).
- */
-export const encodeEntityIdentifiersForUrl = (
-  identityFields: Record<string, string>,
-  entityId?: string
-): string => {
-  const json = JSON.stringify({ ...identityFields, entityId });
-  const base64 = btoa(unescape(encodeURIComponent(json)));
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-};
-
-/**
  * Decodes entity identifiers from a legacy base64url path segment. Returns null if invalid.
  */
 export const decodeEntityIdentifiersFromUrl = (encoded: string): EntityIdentifiers | null => {
