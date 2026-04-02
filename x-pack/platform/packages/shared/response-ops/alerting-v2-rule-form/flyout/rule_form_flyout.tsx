@@ -76,7 +76,13 @@ export const RuleFormFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill isLoading={isLoading} form={RULE_FORM_ID} type="submit">
+            <EuiButton
+              fill
+              isLoading={isLoading}
+              form={RULE_FORM_ID}
+              type="submit"
+              data-test-subj="ruleV2FlyoutSaveButton"
+            >
               <FormattedMessage
                 id="xpack.alertingV2.ruleForm.createRuleButtonLabel"
                 defaultMessage="Create rule"

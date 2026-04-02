@@ -167,10 +167,11 @@ export const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataManagement.title', {
       defaultMessage: 'Data Management',
     }),
-    onPanelClick: ({ application }) => {
-      application.navigateToApp('management', {
-        path: 'data/index_management',
-      });
+    onPanelClick: async ({ share }) => {
+      const indexManagementLocator = share.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
+      if (indexManagementLocator) {
+        await indexManagementLocator.navigate({ page: 'index_list' });
+      }
     },
     dataTestSubj: 'searchHomepageNavLinks-dataManagement',
   },

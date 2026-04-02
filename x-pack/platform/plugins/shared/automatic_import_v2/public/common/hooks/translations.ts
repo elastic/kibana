@@ -74,6 +74,20 @@ export const DELETE_DATA_STREAM_SUCCESS = i18n.translate(
   }
 );
 
+export const DELETE_INTEGRATION_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.hooks.deleteIntegration.success',
+  {
+    defaultMessage: 'Integration deleted successfully',
+  }
+);
+
+export const DELETE_INTEGRATION_ERROR = i18n.translate(
+  'xpack.automaticImportV2.hooks.deleteIntegration.error',
+  {
+    defaultMessage: 'Failed to delete integration',
+  }
+);
+
 export const DELETE_DATA_STREAM_ERROR = i18n.translate(
   'xpack.automaticImportV2.hooks.deleteDataStream.error',
   {

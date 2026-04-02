@@ -91,6 +91,7 @@ export const useAgentOptions = ({
         prepend: <AgentOptionPrepend agent={agent} />,
         textWrap: 'wrap',
         data: { agent },
+        'data-test-subj': `agentBuilderAgentOption-${agent.id}`,
       };
       return option;
     });
