@@ -1,4 +1,4 @@
-name: Assign backport reviewer
+name: Assign manual backport reviewer
 
 on:
   pull_request_target:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   assign-reviewer:
-    name: Assign team reviewer for manual backport
+    name: Find reviewer for manual backport
     runs-on: ubuntu-latest
     if: |
       github.event.pull_request.user.login != 'kibanamachine' &&
