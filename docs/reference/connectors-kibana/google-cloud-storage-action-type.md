@@ -80,23 +80,28 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 Use when you select **OAuth 2.0 authorization code** in {{kib}}. Create a **Web application** OAuth client with
 **Authorized JavaScript origins** ({{kib}} base URL) and **Authorized redirect URIs** ({{kib}} callback below).
 
-Start in **[Google Cloud Console](https://console.cloud.google.com/)**. URLs below are convenience entry points; if Google
-changes them, use the console navigation (**APIs & Services**) instead.
+Start in **[Google Cloud Console](https://console.cloud.google.com/)**. 
 
 1. Select or create a project. Enable **Cloud Storage API** and **Cloud Resource Manager API** (**APIs & Services** >
    **Library**).
-2. **APIs & Services** > **OAuth consent screen**: add scopes for read-only storage and project listing (at minimum
+2. Open **APIs & Services** > **OAuth consent screen**.
+- Create OAuth Client
+- Select Web Application,
+- The **Name** can be something like 'Elastic' or 'Kibana'
+- Under **Authorized JavaScript origins**, add the base origin of your {{kib}} deployment (scheme, host, and port only—for
+  example `https://my-kibana.example.com`).
+- Under **Authorized redirect URIs**, add {{kib}}’s connector OAuth callback for your host. Copy the pattern below and
+  substitute your public {{kib}} hostname:
+  ```text
+  https://<your-kibana-host>/api/actions/connector/_oauth_callback
+  ```
+
+3. Open **APIs & Services** > **Data Access** and choose scopes your integration needs (at minimum the readonly scopes
+   the connector uses by default:
    `https://www.googleapis.com/auth/devstorage.read_only` and
    `https://www.googleapis.com/auth/cloudplatformprojects.readonly`, or broader scopes if your policy allows).
-3. **APIs & Services** > **Credentials** > **Create credentials** > **OAuth client ID** > **Web application**.
-4. **Authorized JavaScript origins**: your {{kib}} origin (for example `https://my-kibana.example.com`).
-5. **Authorized redirect URIs**:
 
-```text
-https://<your-kibana-host>/api/actions/connector/_oauth_callback
-```
-
-6. Copy **Client ID** and **Client secret** into the connector. Use default **Authorization URL** and **Token URL** unless
+4. Copy **Client ID** and **Client secret** into the connector. Use default **Authorization URL** and **Token URL** unless
    your environment specifies otherwise.
 
 ### Bearer token (manual, short-lived)

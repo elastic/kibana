@@ -75,26 +75,27 @@ This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}
 client in Google Cloud (similar to common guides that use **Authorized JavaScript origins** and **Authorized redirect
 URIs**).
 
-Start in **[Google Cloud Console](https://console.cloud.google.com/)**. URLs below are convenience entry points; if Google
-changes them, use the console navigation (**APIs & Services**) instead.
+Start in **[Google Cloud Console](https://console.cloud.google.com/)**. 
 
 1. In Google Cloud Console, select or create a project. Enable the **Google Drive API** for that project (**APIs &
    Services** > **Library**).
-2. Open **APIs & Services** > **OAuth consent screen**. Complete the consent screen and add the Drive scopes your
-   integration needs (at minimum the readonly scopes the connector uses by default:
+2. Open **APIs & Services** > **OAuth consent screen**. 
+   - Create OAuth Client 
+   - Select Web Application,
+   - The **Name** can be something like 'Elastic' or 'Kibana'   
+   - Under **Authorized JavaScript origins**, add the base origin of your {{kib}} deployment (scheme, host, and port only—for
+      example `https://my-kibana.example.com`). 
+   - Under **Authorized redirect URIs**, add {{kib}}’s connector OAuth callback for your host. Copy the pattern below and
+   substitute your public {{kib}} hostname:
+    ```text
+    https://<your-kibana-host>/api/actions/connector/_oauth_callback
+    ```
+3. Open **APIs & Services** > **Data Access** and choose scopes your integration needs (at minimum the readonly scopes
+   the connector uses by default:
    `https://www.googleapis.com/auth/drive.readonly` and
    `https://www.googleapis.com/auth/drive.metadata.readonly`, or broader scopes if your policy allows).
-3. Open **APIs & Services** > **Credentials** > **Create credentials** > **OAuth client ID**. Choose **Web application**.
-4. Under **Authorized JavaScript origins**, add the base origin of your {{kib}} deployment (scheme, host, and port only—for
-   example `https://my-kibana.example.com`).
-5. Under **Authorized redirect URIs**, add {{kib}}’s connector OAuth callback for your host. Copy the pattern below and
-   substitute your public {{kib}} hostname:
 
-```text
-https://<your-kibana-host>/api/actions/connector/_oauth_callback
-```
-
-6. Create the client, then copy **Client ID** and **Client secret** into the connector in {{kib}} when you select **OAuth
+4. Create the client, then copy **Client ID** and **Client secret** into the connector in {{kib}} when you select **OAuth
    2.0 authorization code**. Use the default **Authorization URL** and **Token URL** unless your environment uses
    Google-specific endpoints documented for your tenant.
 

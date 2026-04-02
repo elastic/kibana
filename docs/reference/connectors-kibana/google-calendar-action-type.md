@@ -83,21 +83,24 @@ such as proxies, certificates, or TLS settings. You can set configurations that 
 Use this path when you select **OAuth 2.0 authorization code** in {{kib}}. Create a **Web application** OAuth client with
 **Authorized JavaScript origins** and **Authorized redirect URIs** (standard Google web-app OAuth pattern).
 
-Start in **[Google Cloud Console](https://console.cloud.google.com/)**. URLs below are convenience entry points; if Google
-changes them, use the console navigation (**APIs & Services**) instead.
+Start in **[Google Cloud Console](https://console.cloud.google.com/)**. 
 
 1. Select or create a project. Enable the **Google Calendar API** (**APIs & Services** > **Library**).
-2. **APIs & Services** > **OAuth consent screen**: configure the app and add Calendar scopes (at minimum
+2. Open **APIs & Services** > **OAuth consent screen**.
+  - Create OAuth Client
+  - Select Web Application,
+  - The **Name** can be something like 'Elastic' or 'Kibana'
+  - Under **Authorized JavaScript origins**, add the base origin of your {{kib}} deployment (scheme, host, and port only—for
+    example `https://my-kibana.example.com`).
+  - Under **Authorized redirect URIs**, add {{kib}}’s connector OAuth callback for your host. Copy the pattern below and
+    substitute your public {{kib}} hostname:
+    ```text
+    https://<your-kibana-host>/api/actions/connector/_oauth_callback
+    ```
+3. Open **APIs & Services** > **Data Access** and choose scopes your integration needs (at minimum the readonly scopes
+   the connector uses by default:
    `https://www.googleapis.com/auth/calendar.readonly`, or broader scopes if your policy allows).
-3. **APIs & Services** > **Credentials** > **Create credentials** > **OAuth client ID** > **Web application**.
-4. **Authorized JavaScript origins**: add your {{kib}} base origin (for example `https://my-kibana.example.com`).
-5. **Authorized redirect URIs**: add the callback for your host (copy and edit the hostname):
-
-```text
-https://<your-kibana-host>/api/actions/connector/_oauth_callback
-```
-
-6. Save the client. Copy **Client ID** and **Client secret** into the connector in {{kib}}. Keep the default
+4. Save the client. Copy **Client ID** and **Client secret** into the connector in {{kib}}. Keep the default
    **Authorization URL** and **Token URL** unless your environment requires different Google OAuth endpoints.
 
 ### Bearer token (manual, short-lived)
