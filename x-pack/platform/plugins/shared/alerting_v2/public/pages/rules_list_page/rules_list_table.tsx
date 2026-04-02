@@ -337,6 +337,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                       color="hollow"
                       data-test-subj="overflowLabelsBadge"
                       iconType="tag"
+                      title=""
                     >
                       {i18n.translate('xpack.alertingV2.rulesList.labels.overflow', {
                         defaultMessage: '+{count}',
