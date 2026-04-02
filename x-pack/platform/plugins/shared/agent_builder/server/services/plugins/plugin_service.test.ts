@@ -210,7 +210,7 @@ describe('PluginsService', () => {
             referenced_content: [
               { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
             ],
-            tool_ids: ['tool-a', 'tool-b'],
+            tool_ids: ['tool-1', 'tool-2'],
             plugin_id: 'test-plugin-uuid',
           },
           {
