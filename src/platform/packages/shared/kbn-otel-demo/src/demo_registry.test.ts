@@ -348,6 +348,55 @@ describe('demo_registry', () => {
           expect(yaml).toContain('test-value-12345');
         }
       });
+
+      it('should include hostAliases in collector pod when provided', () => {
+        const config = DEMO_CONFIGS[demoType];
+        const manifestGenerator = DEMO_MANIFESTS[demoType];
+        const yaml = manifestGenerator.generate({
+          ...mockOptions,
+          config,
+          hostAliases: [{ ip: '192.168.65.254', hostnames: ['host.minikube.internal'] }],
+        });
+
+        expect(yaml).toContain('hostAliases');
+        expect(yaml).toContain('192.168.65.254');
+        expect(yaml).toContain('host.minikube.internal');
+      });
+
+      it('should not include hostAliases when not provided', () => {
+        const config = DEMO_CONFIGS[demoType];
+        const manifestGenerator = DEMO_MANIFESTS[demoType];
+        const yaml = manifestGenerator.generate({
+          ...mockOptions,
+          config,
+        });
+
+        expect(yaml).not.toContain('hostAliases');
+      });
+
+      it('should use custom collector image when provided', () => {
+        const config = DEMO_CONFIGS[demoType];
+        const manifestGenerator = DEMO_MANIFESTS[demoType];
+        const yaml = manifestGenerator.generate({
+          ...mockOptions,
+          config,
+          collectorImage: 'docker.elastic.co/elastic-agent/elastic-otel-collector:9.0.0',
+        });
+
+        expect(yaml).toContain('docker.elastic.co/elastic-agent/elastic-otel-collector:9.0.0');
+        expect(yaml).not.toContain('otel/opentelemetry-collector-contrib');
+      });
+
+      it('should use vanilla collector image by default', () => {
+        const config = DEMO_CONFIGS[demoType];
+        const manifestGenerator = DEMO_MANIFESTS[demoType];
+        const yaml = manifestGenerator.generate({
+          ...mockOptions,
+          config,
+        });
+
+        expect(yaml).toContain('otel/opentelemetry-collector-contrib');
+      });
     });
   });
 });

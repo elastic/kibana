@@ -19,8 +19,10 @@ import {
   waitForPodsReady,
   deleteNamespace,
   getMinikubeIp,
+  getMinikubeHostGatewayIp,
 } from './util/assert_minikube_available';
 import { getFullOtelCollectorConfig } from './get_otel_collector_config';
+import { getEdotK8sCollectorConfig } from './get_edot_k8s_collector_config';
 import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
@@ -36,6 +38,50 @@ import {
 } from './demo_registry';
 
 const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
+const EDOT_IMAGE = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
+
+/**
+ * Resolves the latest available EDOT Collector image version by walking back
+ * from the current Kibana version (e.g. 9.4.0 → 9.3.0 → 9.2.0).
+ */
+async function resolveEdotCollectorVersion(log: ToolingLog): Promise<string> {
+  const { kibanaPackageJson } = await import('@kbn/repo-info');
+  const semver = await import('semver');
+  const current = semver.parse(kibanaPackageJson.version.replace(/-SNAPSHOT$/, ''));
+  if (!current) {
+    return kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
+  }
+
+  let { major, minor, patch } = current;
+  while (major > 0) {
+    const version = `${major}.${minor}.${patch}`;
+    try {
+      await execa.command(`docker manifest inspect ${EDOT_IMAGE}:${version}`, {
+        stdio: 'ignore',
+        timeout: 10000,
+      });
+      log.debug(`Found EDOT image: ${EDOT_IMAGE}:${version}`);
+      return version;
+    } catch {
+      log.debug(`Image ${EDOT_IMAGE}:${version} not found, trying older version...`);
+    }
+
+    if (patch > 0) {
+      patch--;
+    } else if (minor > 0) {
+      minor--;
+      patch = 0;
+    } else {
+      major--;
+      minor = 0;
+      patch = 0;
+    }
+  }
+
+  const fallback = kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
+  log.warning(`Could not find any EDOT Collector image, falling back to ${fallback}`);
+  return fallback;
+}
 
 /**
  * Stops and removes a demo environment from Kubernetes.
@@ -102,6 +148,7 @@ export async function deployDemo({
   version,
   scenarioIds = [],
   forceRebuildImages = false,
+  useEdot = false,
 }: {
   log: ToolingLog;
   demoType?: DemoType;
@@ -110,6 +157,7 @@ export async function deployDemo({
   version?: string;
   scenarioIds?: string[];
   forceRebuildImages?: boolean;
+  useEdot?: boolean;
 }): Promise<DeployResult> {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
@@ -232,14 +280,45 @@ export async function deployDemo({
     log.write('');
   }
 
+  // Resolve the EDOT collector image tag if needed
+  let collectorImage: string | undefined;
+  if (useEdot) {
+    const edotImage = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
+    const edotVersion = await resolveEdotCollectorVersion(log);
+    collectorImage = `${edotImage}:${edotVersion}`;
+    log.info(`Using EDOT Collector: ${collectorImage}`);
+  }
+
   // Generate OTel Collector configuration
-  const collectorConfig = getFullOtelCollectorConfig({
-    elasticsearchEndpoint: elasticsearchHost,
-    username: kibanaCredentials.username,
-    password: kibanaCredentials.password,
-    logsIndex,
-    namespace: demoConfig.namespace,
-  });
+  const collectorConfig = useEdot
+    ? getEdotK8sCollectorConfig({
+        elasticsearchEndpoint: elasticsearchHost,
+        username: kibanaCredentials.username,
+        password: kibanaCredentials.password,
+        namespace: demoConfig.namespace,
+      })
+    : getFullOtelCollectorConfig({
+        elasticsearchEndpoint: elasticsearchHost,
+        username: kibanaCredentials.username,
+        password: kibanaCredentials.password,
+        logsIndex,
+        namespace: demoConfig.namespace,
+      });
+
+  // Resolve host gateway IP so pods can reach host.minikube.internal via hostAliases.
+  // CoreDNS inside pods doesn't resolve this hostname from minikube's /etc/hosts.
+  const hostAliases: Array<{ ip: string; hostnames: string[] }> = [];
+  if (elasticsearchHost.includes('host.minikube.internal')) {
+    const gatewayIp = await getMinikubeHostGatewayIp();
+    if (gatewayIp) {
+      hostAliases.push({ ip: gatewayIp, hostnames: ['host.minikube.internal'] });
+      log.debug(`Resolved host.minikube.internal → ${gatewayIp} (will inject as hostAlias)`);
+    } else {
+      log.warning(
+        'Could not resolve host.minikube.internal IP — collector may fail to reach Elasticsearch'
+      );
+    }
+  }
 
   // Generate Kubernetes manifests with scenario overrides
   log.info('Generating Kubernetes manifests...');
@@ -253,6 +332,8 @@ export async function deployDemo({
     logsIndex,
     collectorConfigYaml: collectorConfig,
     envOverrides,
+    hostAliases: hostAliases.length > 0 ? hostAliases : undefined,
+    collectorImage,
   });
 
   log.debug(`Writing manifests to ${manifestsFilePath}`);
@@ -406,6 +487,7 @@ export async function ensureOtelDemo({
   teardown = false,
   scenarioIds = [],
   forceRebuildImages = false,
+  useEdot = false,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
@@ -416,6 +498,7 @@ export async function ensureOtelDemo({
   teardown?: boolean;
   scenarioIds?: string[];
   forceRebuildImages?: boolean;
+  useEdot?: boolean;
 }) {
   if (teardown) {
     await teardownDemo({ log, demoType });
@@ -430,6 +513,7 @@ export async function ensureOtelDemo({
     version,
     scenarioIds,
     forceRebuildImages,
+    useEdot,
   });
 
   await streamDemoLogs({ log, namespace, signal });

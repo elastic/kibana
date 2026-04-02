@@ -82,6 +82,7 @@ run(
     const patch = Boolean(flags.patch);
     const reset = Boolean(flags.reset);
     const forceRebuildImages = Boolean(flags['rebuild-images']);
+    const useEdot = Boolean(flags.edot);
 
     // Parse scenario flags
     const scenarioIds: string[] = [];
@@ -120,6 +121,7 @@ run(
       teardown,
       scenarioIds,
       forceRebuildImages,
+      useEdot,
     }).catch((error) => {
       throw new Error(`Failed to manage ${demoConfig.displayName}`, { cause: error });
     });
@@ -142,7 +144,15 @@ run(
     `,
     flags: {
       string: ['config', 'logs-index', 'scenario', 'demo', 'version'],
-      boolean: ['teardown', 'list-demos', 'list-scenarios', 'patch', 'reset', 'rebuild-images'],
+      boolean: [
+        'teardown',
+        'list-demos',
+        'list-scenarios',
+        'patch',
+        'reset',
+        'rebuild-images',
+        'edot',
+      ],
       alias: {
         c: 'config',
         s: 'scenario',
@@ -167,6 +177,7 @@ run(
         --reset, -r        Reset all scenarios to defaults
         --teardown         Stop and remove demo deployment
         --rebuild-images   Force rebuild of custom images (for demos that require building from source)
+        --edot             Use EDOT Collector (Elastic Distribution of OTel) for APM-compatible trace processing
       `,
     },
   }
