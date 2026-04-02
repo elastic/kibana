@@ -6,16 +6,14 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { useFetchAlertingEpisodesQuery } from './use_fetch_alerting_episodes_query';
-import type { PropsWithChildren } from 'react';
-import React from 'react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
 jest.mock('../apis/fetch_alerting_episodes');
 
@@ -43,17 +41,8 @@ const mockEpisodesData = {
   ],
 } as unknown as Datatable;
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const queryClient = createTestQueryClient();
+const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchAlertingEpisodesQuery', () => {
   beforeEach(() => {

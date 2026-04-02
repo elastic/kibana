@@ -23,5 +23,5 @@ export async function read(
     id
   );
 
-  return getMarkdownCRUResponseBody(savedObject, 'read');
+  return getMarkdownCRUResponseBody(savedObject);
 }
