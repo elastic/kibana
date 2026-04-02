@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -332,12 +333,17 @@ function KnowledgeIndicatorsGenerationControls({
       {isGenerating ? (
         <>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              size="m"
-              aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
-              iconType="stop"
-              onClick={onCancelGenerationClick}
-            />
+            <EuiToolTip content={CANCEL_GENERATION_BUTTON_TOOLTIP}>
+              <EuiButtonIcon
+                size="m"
+                aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                iconType="stop"
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  onCancelGenerationClick();
+                }}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}
@@ -437,6 +443,13 @@ const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.significantEventsTable.cancelGenerationButtonAriaLabel',
   {
     defaultMessage: 'Cancel generation',
+  }
+);
+
+const CANCEL_GENERATION_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelGenerationButtonTooltip',
+  {
+    defaultMessage: 'Stop this process',
   }
 );
 
