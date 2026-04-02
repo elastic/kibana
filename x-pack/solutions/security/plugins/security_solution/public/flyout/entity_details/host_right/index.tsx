@@ -273,8 +273,6 @@ export const HostPanel = ({
   const noEntityInStore =
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
 
-  const hasGraphView = Boolean(entityFromStore);
-
   return (
     <>
       <FlyoutNavigation
@@ -283,7 +281,6 @@ export const HostPanel = ({
           hasMisconfigurationFindings ||
           hasVulnerabilitiesFindings ||
           hasNonClosedAlerts ||
-          hasGraphView ||
           !!entityStoreEntityId
         }
         expandDetails={openDefaultPanel}

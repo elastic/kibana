@@ -276,8 +276,6 @@ export const UserPanel = ({
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  const hasGraphView = Boolean(entityFromStore);
-
   return (
     <>
       <FlyoutNavigation
@@ -285,7 +283,6 @@ export const UserPanel = ({
           hasUserDetailsData ||
           hasMisconfigurationFindings ||
           hasNonClosedAlerts ||
-          hasGraphView ||
           !!entityStoreEntityId
         }
         expandDetails={openDefaultPanel}
