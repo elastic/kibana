@@ -301,10 +301,10 @@ describe('UiamAPIKeys', () => {
 
     it('surfaces the UIAM error code in error_details type when a Boom error with payload occurs', async () => {
       const request = createMockRequest('ApiKey essu_uiam_credential_123');
-      const boomError = new Boom.Boom('APIKEY_MISSING');
+      const boomError = new Boom.Boom('APIKEY_REVOKED');
       boomError.output = {
         statusCode: 404,
-        payload: { error: { code: '0x28D520', message: 'APIKEY_MISSING' } } as any,
+        payload: { error: { code: '0xD38358', message: 'APIKEY_REVOKED' } } as any,
         headers: {},
       };
       mockUiam.revokeApiKey.mockRejectedValue(boomError);
@@ -321,7 +321,7 @@ describe('UiamAPIKeys', () => {
           {
             type: 'exception',
             reason: expect.stringContaining('Failed to invalidate API key key_id_123'),
-            code: '0x28D520',
+            code: '0xD38358',
           },
         ],
       });
