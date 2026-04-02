@@ -28,9 +28,8 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
 } from '@kbn/apm-types';
-import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { Duration } from '@kbn/apm-ui-shared';
-import { css } from '@emotion/react';
 import { ContentFrameworkTable } from '../../../../content_framework';
 import { isTransaction } from '../../helpers';
 import {
@@ -72,7 +71,6 @@ export interface AboutProps
 }
 
 export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: AboutProps) => {
-  const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
   const traceRootSpan = useFetchTraceRootSpanContext();
@@ -104,14 +102,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   };
 
   return (
-    <EuiPanel
-      hasBorder={true}
-      hasShadow={false}
-      paddingSize="s"
-      css={css`
-        padding-bottom: ${euiTheme.base / 4}px;
-      `}
-    >
+    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
       <ContentFrameworkTable
         fieldNames={isSpan ? spanFieldNames : transactionFieldNames}
         id={'aboutTable'}

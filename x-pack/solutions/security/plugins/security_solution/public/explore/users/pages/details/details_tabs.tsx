@@ -30,23 +30,31 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     type,
     detailName,
     userDetailFilter,
+    userDetailsIdentityFilterQuery,
+    identityFields,
+    entityId,
   }) => {
     const tabProps = {
       deleteQuery,
       endDate: to,
       filterQuery,
-      indexNames,
       skip: isInitializing || filterQuery === undefined,
       setQuery,
       startDate: from,
       type,
-      userName: detailName,
+      indexNames,
+      identityFields,
+      entityId,
     };
 
     return (
       <Routes>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody
+            {...tabProps}
+            identityScopedFilterQuery={userDetailsIdentityFilterQuery}
+            userName={detailName}
+          />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
@@ -54,6 +62,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
             additionalFilters={userDetailFilter}
+            histogramFilterQuery={userDetailsIdentityFilterQuery}
             tableId={TableId.usersPageEvents}
             {...tabProps}
           />
@@ -62,7 +71,8 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
           <RiskDetailsTabBody
             {...tabProps}
             riskEntity={EntityType.user}
-            entityName={tabProps.userName}
+            entityName={detailName}
+            identityScopedFilterQuery={userDetailsIdentityFilterQuery}
           />
         </Route>
       </Routes>

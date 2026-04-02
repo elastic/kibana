@@ -15,6 +15,7 @@ export const DASHBOARD_API_PATH = 'api/dashboards';
 export const SLO_OVERVIEW_EMBEDDABLE_ID = 'slo_overview';
 export const SLO_ERROR_BUDGET_ID = 'slo_error_budget';
 export const SLO_BURN_RATE_EMBEDDABLE_ID = 'slo_burn_rate';
+export const SLO_ALERTS_EMBEDDABLE_ID = 'slo_alerts';
 
 /** Common headers for Dashboard API requests (internal API version 1) */
 export const COMMON_HEADERS = {

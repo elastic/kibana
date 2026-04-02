@@ -189,6 +189,8 @@ export interface Response {
 export interface ExtraOptions {
   breakdownField?: string;
   dnsIsPtrIncluded?: boolean;
+  /** When true, host KPI Lens charts use Entity Store v2 latest indices as the data source. */
+  entityStoreV2Enabled?: boolean;
   filters?: Filter[];
   ruleId?: string;
   showLegend?: boolean;
