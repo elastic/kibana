@@ -77,9 +77,11 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ### OAuth 2.0 authorization code (recommended for ongoing use)
 
-Use when you select **OAuth 2.0 authorization code** in {{kib}}. In **Google Cloud Console**, create a
-**Web application** OAuth client with **Authorized JavaScript origins** ({{kib}} base URL) and **Authorized redirect
-URIs** ({{kib}} callback below)—the same structural steps as typical Google web-app OAuth documentation.
+Use when you select **OAuth 2.0 authorization code** in {{kib}}. Create a **Web application** OAuth client with
+**Authorized JavaScript origins** ({{kib}} base URL) and **Authorized redirect URIs** ({{kib}} callback below).
+
+Start in **[Google Cloud Console](https://console.cloud.google.com/)**. URLs below are convenience entry points; if Google
+changes them, use the console navigation (**APIs & Services**) instead.
 
 1. Select or create a project. Enable **Cloud Storage API** and **Cloud Resource Manager API** (**APIs & Services** >
    **Library**).
@@ -99,8 +101,8 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
 
 ### Bearer token (manual, short-lived)
 
-Obtain a Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes—for example using the
-Google’s **OAuth 2.0 Playground** (`https://developers.google.com/oauthplayground/`).
+Obtain a Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes—for example using Google’s
+OAuth 2.0 Playground.
 
 1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 2. In the list of APIs, select **Cloud Storage JSON API v1** and select the `https://www.googleapis.com/auth/devstorage.read_only` scope. Then also select **Cloud Resource Manager API v1** and select the `https://www.googleapis.com/auth/cloudplatformprojects.readonly` scope.

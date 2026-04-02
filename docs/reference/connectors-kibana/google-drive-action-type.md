@@ -72,8 +72,11 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 ### OAuth 2.0 authorization code (recommended for ongoing use)
 
 This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}. Configure a **Web application** OAuth
-client in **Google Cloud Console** (similar in spirit to third-party guides that use
-**Authorized JavaScript origins** and **Authorized redirect URIs** for a web app OAuth client).
+client in Google Cloud (similar to common guides that use **Authorized JavaScript origins** and **Authorized redirect
+URIs**).
+
+Start in **[Google Cloud Console](https://console.cloud.google.com/)**. URLs below are convenience entry points; if Google
+changes them, use the console navigation (**APIs & Services**) instead.
 
 1. In Google Cloud Console, select or create a project. Enable the **Google Drive API** for that project (**APIs &
    Services** > **Library**).
@@ -98,7 +101,7 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
 ### Bearer token (manual, short-lived)
 
 To use **Bearer Token** authentication, you need a Google OAuth 2.0 access token with Drive API scopes. One way to obtain
-a token for testing is Google’s **OAuth 2.0 Playground** (`https://developers.google.com/oauthplayground/`).
+a token for testing is Google’s OAuth 2.0 Playground.
 
 1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 2. In the list of APIs, select **Drive API v3** and select the `https://www.googleapis.com/auth/drive.readonly` scope (or `https://www.googleapis.com/auth/drive` for full access).

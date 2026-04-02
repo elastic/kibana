@@ -80,9 +80,11 @@ such as proxies, certificates, or TLS settings. You can set configurations that 
 
 ### OAuth 2.0 authorization code (recommended for ongoing use)
 
-Use this path when you select **OAuth 2.0 authorization code** in {{kib}}. In **Google Cloud Console**, create a
-**Web application** OAuth client and set **Authorized JavaScript origins** and **Authorized redirect URIs** (same pattern
-as common Google OAuth setup guides for web apps).
+Use this path when you select **OAuth 2.0 authorization code** in {{kib}}. Create a **Web application** OAuth client with
+**Authorized JavaScript origins** and **Authorized redirect URIs** (standard Google web-app OAuth pattern).
+
+Start in **[Google Cloud Console](https://console.cloud.google.com/)**. URLs below are convenience entry points; if Google
+changes them, use the console navigation (**APIs & Services**) instead.
 
 1. Select or create a project. Enable the **Google Calendar API** (**APIs & Services** > **Library**).
 2. **APIs & Services** > **OAuth consent screen**: configure the app and add Calendar scopes (at minimum
@@ -101,7 +103,7 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
 ### Bearer token (manual, short-lived)
 
 To use **Bearer Token** authentication, obtain a Google OAuth 2.0 access token with Calendar API scopes—for example via
-Google’s **OAuth 2.0 Playground** (`https://developers.google.com/oauthplayground/`).
+Google’s OAuth 2.0 Playground.
 
 1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 2. In the list of APIs, select **Calendar API v3** and select the `https://www.googleapis.com/auth/calendar.readonly` scope (or `https://www.googleapis.com/auth/calendar` for full access).
