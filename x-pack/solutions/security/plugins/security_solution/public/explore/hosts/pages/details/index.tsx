@@ -6,15 +6,24 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
   EuiWindowEvent,
 } from '@elastic/eui';
+import {
+  bulkUpdateEntities,
+  FF_ENABLE_ENTITY_STORE_V2,
+  useEntityStoreEuidApi,
+} from '@kbn/entity-store/public';
+import { useQueryClient } from '@kbn/react-query';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -23,14 +32,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import {
-  useAssetCriticalityData,
-  useAssetCriticalityPrivileges,
-} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import {
-  AssetCriticalitySelector,
-  AssetCriticalityTitle,
-} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -40,8 +43,10 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
+import { Title } from '../../../../common/components/header_page/title';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -54,7 +59,7 @@ import {
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { inputsSelectors } from '../../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -63,7 +68,11 @@ import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import type { HostDetailsProps } from './types';
 import { HostsType } from '../../store/model';
-import { getHostDetailsPageFilters } from './helpers';
+import { getHostDetailsPageFilters, getIdentityFieldsPageFilters } from './helpers';
+import {
+  identityFieldsHaveUsableValues,
+  mergeLegacyIdentityWhenStoreEntityMissing,
+} from '../../../../flyout/document_details/shared/utils';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../display';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -79,11 +88,86 @@ import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/ap
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
+import {
+  applyEntityStoreSearchCachePatch,
+  useEntityFromStore,
+  type EntityStoreRecord,
+} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { ObservedDataSection as HostObservedDataSection } from '../../../../flyout/entity_details/host_right/components/observed_data_section';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout/entity_details/host_right';
+import { useObservedHost } from '../../../../flyout/entity_details/host_right/hooks/use_observed_host';
+import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
+import type { Entity } from '../../../../../common/api/entity_analytics';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
 
-const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
+const HostDetailsHeaderTitle: React.FC<{
+  detailName: string;
+  displayEntityId?: string;
+}> = ({ detailName, displayEntityId }) => (
+  <>
+    <Title title={detailName} />
+    {displayEntityId ? (
+      <>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued" data-test-subj="host-details-page-entity-id">
+          {displayEntityId}
+        </EuiText>
+      </>
+    ) : null}
+  </>
+);
+HostDetailsHeaderTitle.displayName = 'HostDetailsHeaderTitle';
+
+const HostDetailsAssetCriticalitySection: React.FC<{
+  canRead: boolean;
+  detailName: string;
+  entityStoreV2Enabled: boolean;
+  noEntityInStore: boolean;
+  observedHostEntityRecord: EntityStoreRecord | null | undefined;
+  storeRecord: EntityStoreRecord | null | undefined;
+  onSaveViaEntityStore: (updatedRecord: Entity) => Promise<void>;
+  onCriticalityChange: () => void;
+}> = ({
+  canRead,
+  detailName,
+  entityStoreV2Enabled,
+  noEntityInStore,
+  observedHostEntityRecord,
+  storeRecord,
+  onSaveViaEntityStore,
+  onCriticalityChange,
+}) => {
+  if (!canRead || (entityStoreV2Enabled && noEntityInStore)) {
+    return null;
+  }
+  return (
+    <AssetCriticalityAccordion
+      entity={{ name: detailName, type: EntityType.host }}
+      onChange={onCriticalityChange}
+      entityRecord={entityStoreV2Enabled ? observedHostEntityRecord ?? undefined : undefined}
+      criticalityFromEntityStore={
+        entityStoreV2Enabled && observedHostEntityRecord
+          ? storeRecord?.asset?.criticality
+          : undefined
+      }
+      onSaveViaEntityStore={entityStoreV2Enabled && storeRecord ? onSaveViaEntityStore : undefined}
+    />
+  );
+};
+HostDetailsAssetCriticalitySection.displayName = 'HostDetailsAssetCriticalitySection';
+
+const HostDetailsComponent: React.FC<HostDetailsProps> = ({
+  detailName,
+  hostDetailsPagePath,
+  entityId,
+  identityFields,
+}) => {
+  const { search: urlStateQuery } = useLocation();
   const dispatch = useDispatch();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -99,8 +183,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const capabilities = useMlCapabilities();
   const {
-    services: { uiSettings },
+    services: { http, uiSettings },
   } = useKibana();
+  const queryClient = useQueryClient();
+
+  const resolvedIdentityFields = useMemo(
+    () => identityFields ?? { [ES_HOST_FIELD]: detailName },
+    [identityFields, detailName]
+  );
 
   const hostDetailsPageFilters: Filter[] = useMemo(
     () => getHostDetailsPageFilters(detailName),
@@ -141,13 +231,95 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const hostStoreIdentityFields = useMemo(() => {
+    if (entityId) {
+      return undefined;
+    }
+    return Object.keys(resolvedIdentityFields).length > 0 ? resolvedIdentityFields : undefined;
+  }, [entityId, resolvedIdentityFields]);
+
+  const entityFromStoreResult = useEntityFromStore({
+    entityId,
+    identityFields: hostStoreIdentityFields,
+    entityType: 'host',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
+
+  const euidApi = useEntityStoreEuidApi();
+
+  const noEntityInStore =
+    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !entityFromStoreResult.entityRecord;
+
+  const hostDetailsEventsPageFilters = useMemo(() => {
+    if (!entityStoreV2Enabled || noEntityInStore) {
+      return getHostDetailsPageFilters(detailName);
+    }
+    const fromStore =
+      euidApi?.euid?.getEntityIdentifiersFromDocument('host', entityFromStoreResult.entityRecord) ??
+      {};
+    const merged = mergeLegacyIdentityWhenStoreEntityMissing(fromStore, resolvedIdentityFields);
+    if (identityFieldsHaveUsableValues(merged)) {
+      return getIdentityFieldsPageFilters(merged);
+    }
+    return getHostDetailsPageFilters(detailName);
+  }, [
+    detailName,
+    entityFromStoreResult.entityRecord,
+    entityStoreV2Enabled,
+    noEntityInStore,
+    euidApi?.euid,
+    resolvedIdentityFields,
+  ]);
+
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
+
+  const observedHost = useObservedHost(
+    detailName,
+    PageScope.explore,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
+
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
     hostName: detailName,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0,
+    skip: selectedPatterns.length === 0 || entityStoreV2Enabled,
   });
+
+  const hostDetailsForOverview = entityStoreV2Enabled ? observedHost.details : hostOverview;
+  const isHostOverviewLoading = entityStoreV2Enabled ? observedHost.isLoading : loading;
+
+  const hostRiskScoreStateFromEntityStore = useMemo(
+    () =>
+      entityStoreV2Enabled && observedHost.entityRecord
+        ? buildRiskScoreStateFromEntityRecord(EntityType.host, observedHost.entityRecord, {
+            refetch: observedHost.refetchEntityStore ?? (() => {}),
+            isLoading: observedHost.isLoading,
+            error: null,
+            inspect: entityFromStoreResult?.inspect,
+          })
+        : undefined,
+    [
+      entityFromStoreResult?.inspect,
+      entityStoreV2Enabled,
+      observedHost.entityRecord,
+      observedHost.isLoading,
+      observedHost.refetchEntityStore,
+    ]
+  );
+
+  const displayEntityId = useMemo(
+    () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
+    [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
+  );
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
@@ -173,6 +345,39 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     globalFilters,
     uiSettings,
   ]);
+
+  const [rawFilteredQueryForHostDetailsIdentity] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataView),
+          [query],
+          [...hostDetailsEventsPageFilters, ...globalFilters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch {
+      return [undefined];
+    }
+  }, [
+    newDataViewPickerEnabled,
+    experimentalDataView,
+    oldSourcererDataView,
+    query,
+    hostDetailsEventsPageFilters,
+    globalFilters,
+    uiSettings,
+  ]);
+
+  const stringifiedHostDetailsIdentityFilterQuery = useMemo(
+    () =>
+      rawFilteredQueryForHostDetailsIdentity != null
+        ? JSON.stringify(rawFilteredQueryForHostDetailsIdentity)
+        : undefined,
+    [rawFilteredQueryForHostDetailsIdentity]
+  );
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -208,9 +413,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     () => ({
       type: EntityType.host as const,
       name: detailName,
-      identifiers: { 'host.name': detailName },
+      identifiers: resolvedIdentityFields,
     }),
-    [detailName]
+    [detailName, resolvedIdentityFields]
   );
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
@@ -219,12 +424,20 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     onSuccess: refetchRiskScore,
   });
 
+  const handleSaveAssetCriticalityViaEntityStore = useCallback(
+    async (updatedRecord: Entity) => {
+      await bulkUpdateEntities(http, {
+        entityType: 'host',
+        body: updatedRecord as Record<string, unknown>,
+        force: true,
+      });
+      applyEntityStoreSearchCachePatch(queryClient, 'host', updatedRecord as EntityStoreRecord);
+      calculateEntityRiskScore();
+    },
+    [http, queryClient, calculateEntityRiskScore]
+  );
+
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
-  const criticality = useAssetCriticalityData({
-    entity,
-    enabled: canReadAssetCriticality,
-    onChange: calculateEntityRiskScore,
-  });
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -258,52 +471,117 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   />
                 }
                 title={detailName}
+                titleNode={
+                  <HostDetailsHeaderTitle
+                    detailName={detailName}
+                    displayEntityId={displayEntityId}
+                  />
+                }
                 rightSideItems={[
-                  hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
+                  hostDetailsForOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
                     <ResponderActionButton
-                      agentId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                      agentId={hostDetailsForOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
                       agentType="endpoint"
                     />
                   ),
                 ]}
               />
-              {canReadAssetCriticality && (
+              {noEntityInStore && (
                 <>
-                  <AssetCriticalityTitle />
-                  <EuiSpacer size="s" />
-                  <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
-                  <EuiHorizontalRule margin="m" />
+                  <EuiCallOut
+                    title={NO_CORRESPONDING_ENTITY_EXISTS}
+                    color="warning"
+                    iconType="warning"
+                    data-test-subj="host-details-no-entity-warning"
+                    announceOnMount
+                  />
+                  <EuiSpacer size="m" />
+                  <HostObservedDataSection
+                    identityFields={resolvedIdentityFields}
+                    observedHost={observedHost}
+                    contextID={PageScope.explore}
+                    scopeId={PageScope.explore}
+                    queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
+                  />
+                  <EuiHorizontalRule />
+                  <EuiSpacer />
                 </>
               )}
-              <AnomalyTableProvider
-                criteriaFields={hostToCriteria(hostOverview)}
-                startDate={from}
-                endDate={to}
-                skip={isInitializing}
-              >
-                {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
-                  <HostOverviewManage
-                    id={id}
-                    isInDetailsSidePanel={false}
-                    data={hostOverview as HostItem}
-                    anomaliesData={anomaliesData}
-                    isLoadingAnomaliesData={isLoadingAnomaliesData}
-                    loading={loading}
+              <HostDetailsAssetCriticalitySection
+                canRead={canReadAssetCriticality}
+                detailName={detailName}
+                entityStoreV2Enabled={entityStoreV2Enabled}
+                noEntityInStore={noEntityInStore}
+                observedHostEntityRecord={observedHost.entityRecord}
+                storeRecord={entityFromStoreResult.entityRecord}
+                onSaveViaEntityStore={handleSaveAssetCriticalityViaEntityStore}
+                onCriticalityChange={calculateEntityRiskScore}
+              />
+              {!noEntityInStore && (
+                <>
+                  <AnomalyTableProvider
+                    criteriaFields={hostToCriteria(hostDetailsForOverview, euidApi?.euid)}
+                    filterQuery={buildAnomaliesTableInfluencersFilterQuery({
+                      euid: euidApi?.euid,
+                      entityType: 'host',
+                      isScopedToEntity: true,
+                      identityFields: resolvedIdentityFields,
+                      fallbackDisplayName: detailName,
+                    })}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={narrowDateRange}
-                    setQuery={setQuery}
-                    refetch={refetch}
-                    inspect={inspect}
-                    hostName={detailName}
-                    indexNames={selectedPatterns}
-                    jobNameById={jobNameById}
-                    scopeId={PageScope.explore}
-                  />
-                )}
-              </AnomalyTableProvider>
-              <EuiHorizontalRule />
-              <EuiSpacer />
+                    skip={isInitializing}
+                  >
+                    {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
+                      <HostOverviewManage
+                        id={id}
+                        isInDetailsSidePanel={false}
+                        data={hostDetailsForOverview as HostItem}
+                        anomaliesData={anomaliesData}
+                        isLoadingAnomaliesData={isLoadingAnomaliesData}
+                        loading={isHostOverviewLoading}
+                        startDate={from}
+                        endDate={to}
+                        narrowDateRange={narrowDateRange}
+                        setQuery={setQuery}
+                        refetch={
+                          entityStoreV2Enabled
+                            ? observedHost.refetchEntityStore ??
+                              observedHost.refetchObservedDetails ??
+                              refetch
+                            : refetch
+                        }
+                        inspect={
+                          entityStoreV2Enabled
+                            ? entityFromStoreResult?.inspect ??
+                              observedHost.observedDetailsInspect ??
+                              inspect
+                            : inspect
+                        }
+                        hostName={detailName}
+                        indexNames={
+                          entityStoreV2Enabled ? securityDefaultPatterns : selectedPatterns
+                        }
+                        jobNameById={jobNameById}
+                        scopeId={PageScope.explore}
+                        riskScoreState={hostRiskScoreStateFromEntityStore}
+                        firstSeenFromEntityStore={
+                          entityStoreV2Enabled
+                            ? observedHost.firstSeen?.date ?? undefined
+                            : undefined
+                        }
+                        lastSeenFromEntityStore={
+                          entityStoreV2Enabled
+                            ? observedHost.lastSeen?.date ?? undefined
+                            : undefined
+                        }
+                      />
+                    )}
+                  </AnomalyTableProvider>
+                  <EuiHorizontalRule />
+                  <EuiSpacer />
+                </>
+              )}
 
               {canReadAlerts && (
                 <>
@@ -312,12 +590,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
                         entityFilter={entityFilter}
+                        identityFields={resolvedIdentityFields}
                         additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
                         entityFilter={{ ...entityFilter, entityType: EntityType.host }}
+                        identityFields={resolvedIdentityFields}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
                       />
@@ -332,6 +612,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   hostName: detailName,
                   isEnterprise: isEnterprisePlus,
+                  entityId,
+                  identityFields: resolvedIdentityFields,
+                  urlStateQuery,
                 })}
               />
 
@@ -342,7 +625,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}
-              hostDetailsFilter={hostDetailsPageFilters}
+              hostDetailsFilter={hostDetailsEventsPageFilters}
+              hostDetailsIdentityFilterQuery={stringifiedHostDetailsIdentityFilterQuery}
               to={to}
               from={from}
               detailName={detailName}
@@ -350,6 +634,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               setQuery={setQuery}
               filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
+              identityFields={resolvedIdentityFields}
+              entityId={entityId}
             />
           </SecuritySolutionPageWrapper>
         </>

@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,7 @@ interface RulesTableProps {
   rules: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   searchTerm: string;
+  selectedKnowledgeIndicatorId?: string;
   onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
@@ -41,6 +43,7 @@ export function RulesTable({
   rules,
   occurrencesByQueryId,
   searchTerm,
+  selectedKnowledgeIndicatorId,
   onViewDetails,
 }: RulesTableProps) {
   const [selectedRules, setSelectedRules] = useState<KnowledgeIndicator[]>([]);
@@ -110,13 +113,19 @@ export function RulesTable({
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  iconType="expand"
-                  aria-label={VIEW_DETAILS_ARIA_LABEL}
+                  iconType={selectedKnowledgeIndicatorId === item.query.id ? 'minimize' : 'expand'}
+                  aria-label={
+                    selectedKnowledgeIndicatorId === item.query.id
+                      ? MINIMIZE_DETAILS_ARIA_LABEL
+                      : VIEW_DETAILS_ARIA_LABEL
+                  }
                   onClick={() => onViewDetails(item)}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <span>{item.query.title || item.query.id}</span>
+                <EuiLink onClick={() => onViewDetails(item)}>
+                  {item.query.title || item.query.id}
+                </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -187,7 +196,7 @@ export function RulesTable({
         ),
       },
     ],
-    [isDeleting, occurrencesByQueryId, onViewDetails]
+    [isDeleting, occurrencesByQueryId, onViewDetails, selectedKnowledgeIndicatorId]
   );
 
   return (
@@ -340,3 +349,10 @@ const DELETE_RULES_MODAL_TITLE = (count: number) =>
 const VIEW_DETAILS_ARIA_LABEL = i18n.translate('xpack.streams.rulesTable.viewDetailsAriaLabel', {
   defaultMessage: 'View details',
 });
+
+const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.streams.rulesTable.minimizeDetailsAriaLabel',
+  {
+    defaultMessage: 'Collapse details',
+  }
+);
