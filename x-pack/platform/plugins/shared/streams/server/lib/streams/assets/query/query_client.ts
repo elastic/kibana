@@ -9,7 +9,11 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { IStorageClient } from '@kbn/storage-adapter';
+import type {
+  IStorageClient,
+  StorageClientSearchRequest,
+  StorageClientSearchResponse,
+} from '@kbn/storage-adapter';
 import {
   type StreamQuery,
   type Streams,
@@ -217,17 +221,17 @@ interface QueryBulkDeleteOperation {
 
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
-function fromStorage(link: StoredQueryLink): QueryLink {
+function fromStorage(link: StoredQueryLink, logger?: Logger): QueryLink {
   const esql = link[QUERY_ESQL_QUERY];
   const storedType = link[QUERY_TYPE];
   const type = deriveQueryType(esql);
 
   if (storedType && storedType !== type) {
     logger?.warn(
-      `Query ${storageFields[ASSET_ID]}: stored type "${storedType}" disagrees with derived type "${type}" — using derived type as authoritative.`
+      `Query ${link[ASSET_ID]}: stored type "${storedType}" disagrees with derived type "${type}" — using derived type as authoritative.`
     );
   }
-  
+
   return {
     [ASSET_UUID]: link[ASSET_UUID],
     [ASSET_ID]: link[ASSET_ID],
@@ -252,8 +256,11 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   };
 }
 
-function mapSearchHits(response: { hits: { hits: Array<{ _source: StoredQueryLink }> } }) {
-  return response.hits.hits.map((hit) => fromStorage(hit._source));
+function mapSearchHits<TSearchRequest extends StorageClientSearchRequest>(
+  response: StorageClientSearchResponse<StoredQueryLink, TSearchRequest>,
+  logger?: Logger
+) {
+  return response.hits.hits.map((hit) => fromStorage(hit._source, logger));
 }
 
 export function buildSearchEmbeddingText(
@@ -350,7 +357,7 @@ export class QueryClient {
       },
     });
 
-    const existingQueryLinks = mapSearchHits(assetsResponse);
+    const existingQueryLinks = mapSearchHits(assetsResponse, this.dependencies.logger);
 
     const nextQueryLinks = links.map((link) => {
       return { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
@@ -435,7 +442,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(queriesResponse);
+    return mapSearchHits(queriesResponse, this.dependencies.logger);
   }
 
   /**
@@ -496,7 +503,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(assetsResponse);
+    return mapSearchHits(assetsResponse, this.dependencies.logger);
   }
 
   async findQueries(
@@ -571,7 +578,7 @@ export class QueryClient {
       query: buildKeywordQuery(query, filter),
     });
 
-    return mapSearchHits(assetsResponse);
+    return mapSearchHits(assetsResponse, this.dependencies.logger);
   }
 
   private async findQueriesBySemantic(
@@ -592,7 +599,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(assetsResponse);
+    return mapSearchHits(assetsResponse, this.dependencies.logger);
   }
 
   private async findQueriesByHybrid(
@@ -636,7 +643,7 @@ export class QueryClient {
       },
     });
 
-    return mapSearchHits(assetsResponse);
+    return mapSearchHits(assetsResponse, this.dependencies.logger);
   }
 
   private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
