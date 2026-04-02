@@ -227,8 +227,14 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   fullWidth
                   value={tableSearchValue}
                   onChange={(event) => setTableSearchValue(event.target.value)}
-                  placeholder={SIGNIFICANT_EVENTS_SEARCH_PLACEHOLDER}
-                  aria-label={SIGNIFICANT_EVENTS_SEARCH_ARIA_LABEL}
+                  placeholder={
+                    isRulesSelected
+                      ? RULES_SEARCH_PLACEHOLDER
+                      : KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER
+                  }
+                  aria-label={
+                    isRulesSelected ? RULES_SEARCH_ARIA_LABEL : KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL
+                  }
                 />
               </EuiFlexItem>
               {!isRulesSelected ? (
@@ -322,15 +328,29 @@ function KnowledgeIndicatorsGenerationControls({
   onCancelGenerationClick: () => void;
 }) {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {isGenerating ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
-            iconType="stop"
-            onClick={onCancelGenerationClick}
-          />
-        </EuiFlexItem>
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              size="m"
+              aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+              iconType="stop"
+              onClick={onCancelGenerationClick}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              padding: 0 8px;
+              align-self: stretch;
+              display: flex;
+              align-items: center;
+            `}
+          >
+            <div style={{ width: 1, alignSelf: 'stretch', backgroundColor: 'currentColor', opacity: 0.15 }} />
+          </EuiFlexItem>
+        </>
       ) : null}
       <EuiFlexItem grow={false}>
         <EuiButton
@@ -364,17 +384,31 @@ const RULES_FILTER_LABEL = i18n.translate(
   }
 );
 
-const SIGNIFICANT_EVENTS_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.streams.significantEventsTable.searchPlaceholder',
+const KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchPlaceholder',
   {
-    defaultMessage: 'Search significant events',
+    defaultMessage: 'Search knowledge indicators',
   }
 );
 
-const SIGNIFICANT_EVENTS_SEARCH_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.searchAriaLabel',
+const KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchAriaLabel',
   {
-    defaultMessage: 'Search significant events',
+    defaultMessage: 'Search knowledge indicators',
+  }
+);
+
+const RULES_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchPlaceholder',
+  {
+    defaultMessage: 'Search rules',
+  }
+);
+
+const RULES_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchAriaLabel',
+  {
+    defaultMessage: 'Search rules',
   }
 );
 
