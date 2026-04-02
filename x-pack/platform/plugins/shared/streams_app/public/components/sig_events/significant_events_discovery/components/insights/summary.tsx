@@ -10,12 +10,11 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPanel,
   EuiText,
-  EuiTitle,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -268,82 +267,69 @@ export function Summary({ count }: { count: number }) {
   }
 
   return (
-    <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <EuiPanel color="subdued" paddingSize="l">
-          <EuiFlexGroup
-            direction="column"
-            alignItems="center"
-            justifyContent="center"
-            style={{ minHeight: '30vh', minWidth: '40vh' }}
+    <EuiEmptyPrompt
+      aria-live="polite"
+      titleSize="xs"
+      icon={<AssetImage type="significantEventsDiscovery" />}
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundTitle',
+            {
+              defaultMessage:
+                '{count} {count, plural, one {event} other {events}} found in your system',
+              values: { count },
+            }
+          )}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate(
+            'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundDescription',
+            {
+              defaultMessage:
+                'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+            }
+          )}
+        </p>
+      }
+      actions={
+        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center">
+          <EuiButton
+            fill
+            size="m"
+            iconType="sparkles"
+            onClick={() => scheduleTask()}
+            isDisabled={isTaskPending}
+            isLoading={isTaskPending}
+            data-test-subj="significant_events_generate_insights_button"
           >
-            <EuiFlexItem grow={false}>
-              <AssetImage type="significantEventsEmptyState" size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h2>
-                  {i18n.translate(
-                    'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundTitle',
-                    {
-                      defaultMessage:
-                        '{count} {count, plural, one {event} other {events}} detected',
-                      values: { count },
-                    }
-                  )}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" textAlign="center" css={{ maxWidth: 400 }}>
-                {i18n.translate(
-                  'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundDescription',
-                  {
-                    defaultMessage:
-                      'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
-                  }
-                )}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiButton
-                  fill
-                  size="m"
-                  iconType="sparkles"
-                  onClick={() => scheduleTask()}
-                  isDisabled={isTaskPending}
-                  isLoading={isTaskPending}
-                  data-test-subj="significant_events_generate_insights_button"
-                >
-                  {task?.status === TaskStatus.InProgress
-                    ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                        defaultMessage: 'Discovering Significant Events',
-                      })
-                    : i18n.translate('xpack.streams.insights.generateButtonLabel', {
-                        defaultMessage: 'Discover Significant Events',
-                      })}
-                </EuiButton>
-                {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
-                  <EuiButton
-                    onClick={cancelTask}
-                    isDisabled={isCancellingTask}
-                    data-test-subj="significant_events_cancel_insights_generation_button"
-                  >
-                    {isCancellingTask
-                      ? i18n.translate('xpack.streams.insights.cancellingTaskButtonLabel', {
-                          defaultMessage: 'Cancelling',
-                        })
-                      : i18n.translate('xpack.streams.insights.cancelTaskButtonLabel', {
-                          defaultMessage: 'Cancel',
-                        })}
-                  </EuiButton>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            {task?.status === TaskStatus.InProgress
+              ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
+                  defaultMessage: 'Discovering Significant Events',
+                })
+              : i18n.translate('xpack.streams.insights.generateButtonLabel', {
+                  defaultMessage: 'Discover Significant Events',
+                })}
+          </EuiButton>
+          {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
+            <EuiButton
+              onClick={cancelTask}
+              isDisabled={isCancellingTask}
+              data-test-subj="significant_events_cancel_insights_generation_button"
+            >
+              {isCancellingTask
+                ? i18n.translate('xpack.streams.insights.cancellingTaskButtonLabel', {
+                    defaultMessage: 'Cancelling',
+                  })
+                : i18n.translate('xpack.streams.insights.cancelTaskButtonLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+            </EuiButton>
+          )}
+        </EuiFlexGroup>
+      }
+    />
   );
 }
