@@ -13,15 +13,17 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { MemoryToolsOptions } from './types';
 
 const memoryListSchema = z.object({
-  parent_path: z
+  category: z
     .string()
     .optional()
-    .describe('List entries under this path. Omit to list root-level entries.'),
-  recursive: z
+    .describe(
+      'List pages in this category (e.g. "services" or "streams/logs-otel"). Omit to list all pages.'
+    ),
+  show_category_tree: z
     .boolean()
     .optional()
     .describe(
-      'If true, return the full tree structure instead of just direct children. Default: false.'
+      'If true, return the full category tree structure instead of a flat page list. Default: false.'
     ),
 });
 
@@ -31,17 +33,17 @@ export const createMemoryListTool = ({
   id: platformStreamsMemoryTools.memoryList,
   type: ToolType.builtin,
   description:
-    'Browse the memory hierarchy. Returns metadata only (no content) — ' +
-    'use memory_read to get content of specific entries. ' +
-    'Shows paths, titles, line counts, and whether entries have children.',
+    'Browse memory pages by category or as a category tree. Returns metadata only (no content) — ' +
+    'use memory_read to get content of specific pages. ' +
+    'Shows names, titles, categories, and whether pages have references.',
   schema: memoryListSchema,
   tags: ['memory'],
-  handler: async ({ parent_path: parentPath, recursive }, context) => {
+  handler: async ({ category, show_category_tree: showCategoryTree }, context) => {
     const memoryService = getMemoryService();
 
     try {
-      if (recursive) {
-        const tree = await memoryService.getTree();
+      if (showCategoryTree) {
+        const tree = await memoryService.getCategoryTree();
         return {
           results: [
             {
@@ -53,13 +55,9 @@ export const createMemoryListTool = ({
         };
       }
 
-      const entries = await memoryService.listChildren({
-        parentPath: parentPath ?? '',
-      });
-
-      // Collect all parent paths to determine which entries have children
-      const allEntries = await memoryService.listAll();
-      const parentPaths = new Set(allEntries.map((e) => e.parent_path));
+      const entries = category
+        ? await memoryService.listByCategory({ category })
+        : await memoryService.listAll();
 
       return {
         results: [
@@ -67,13 +65,14 @@ export const createMemoryListTool = ({
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
             data: {
-              parent_path: parentPath ?? '',
+              category: category ?? 'all',
               total: entries.length,
               items: entries.map((e) => ({
                 id: e.id,
-                path: e.path,
+                name: e.name,
                 title: e.title,
-                has_children: parentPaths.has(e.path),
+                categories: e.categories,
+                references: e.references,
                 updated_at: e.updated_at,
                 updated_by: e.updated_by,
                 line_count: e.content.split('\n').length,
@@ -101,9 +100,9 @@ export const createMemoryListTool = ({
       {
         ...result,
         data: {
-          summary: `Listed ${data.total ?? 'tree'} memory entries under "${
-            data.parent_path ?? '/'
-          }"`,
+          summary: `Listed ${data.total ?? 'tree'} memory pages${
+            data.category && data.category !== 'all' ? ` in "${data.category}"` : ''
+          }`,
         },
       },
     ];

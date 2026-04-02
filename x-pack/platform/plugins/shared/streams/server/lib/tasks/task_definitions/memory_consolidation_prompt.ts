@@ -12,42 +12,44 @@ const systemPrompt = `You are a wiki curator responsible for keeping a knowledge
 
 ## Your goal
 
-Review the memory wiki and consolidate, reorganize, and clean up entries to maintain a high-quality knowledge base.
+Review the memory wiki and consolidate, reorganize, and clean up pages to maintain a high-quality knowledge base.
 
 ## Operations to consider
 
 1. **Merge duplicates**: If two pages cover the same topic, merge them into one and delete the other.
 2. **Remove stale entries**: Delete pages that are outdated, no longer relevant, or contain only trivial information.
-3. **Improve organization**: Move pages to better paths if the current hierarchy doesn't make sense.
-4. **Fill gaps**: If you notice cross-references to pages that don't exist, or obvious gaps in coverage, note them but don't fabricate content.
-5. **Consolidate fragments**: If multiple small pages could be a single coherent page, merge them.
-6. **Fix inconsistencies**: If pages contradict each other, resolve the contradiction (preferring more recent information).
+3. **Improve categorization**: Ensure pages have appropriate categories. Add missing categories, remove incorrect ones. Categories should help users find pages from different angles.
+4. **Add cross-references**: When pages reference concepts that have their own pages, add the reference IDs.
+5. **Fill gaps**: If you notice cross-references to pages that don't exist, or obvious gaps in coverage, note them but don't fabricate content.
+6. **Consolidate fragments**: If multiple small pages could be a single coherent page, merge them.
+7. **Fix inconsistencies**: If pages contradict each other, resolve the contradiction (preferring more recent information).
 
 ## Key principles
 
 - **Read before acting**: Always read a page's content before deciding to modify or delete it.
 - **Preserve valuable content**: When merging, keep all unique information from both sources.
 - **Be conservative with deletion**: Only delete pages that are clearly stale, duplicated, or trivial.
-- **Maintain cross-references**: When moving or merging pages, update any pages that reference them.
-- **Skip system pages**: Don't modify pages under the \`_system/\` path.`;
+- **Maintain cross-references**: When merging or deleting pages, update any pages that reference them.
+- **Skip system pages**: Don't modify pages with names starting with \`_system/\`.`;
 
-const taskPrompt = `## Current wiki state ({{entryCount}} entries)
+const taskPrompt = `## Current wiki state ({{entryCount}} pages)
 
 {{{existingPages}}}
 
 ## Task
 
-Review the wiki entries above. Read pages that might need consolidation, and perform cleanup operations:
+Review the wiki pages above. Read pages that might need consolidation, and perform cleanup operations:
 - Merge duplicate or highly overlapping pages
 - Remove stale or trivial entries
-- Improve path organization where it would help navigation
+- Improve categorization so pages can be found from multiple angles
+- Add missing cross-references between related pages
 - Fix any inconsistencies between pages
 
-Work through the entries methodically. Not every entry needs changes — focus on the highest-impact improvements.`;
+Work through the pages methodically. Not every page needs changes — focus on the highest-impact improvements.`;
 
 export const MemoryConsolidationPrompt = createPrompt({
   name: 'memory_consolidation',
-  description: 'Consolidate and clean up memory wiki entries',
+  description: 'Consolidate and clean up memory wiki pages',
   input: z.object({
     entryCount: z.number(),
     existingPages: z.string(),
@@ -66,16 +68,16 @@ export const MemoryConsolidationPrompt = createPrompt({
     },
     tools: {
       read_memory_page: {
-        description: 'Read the full content of a wiki page by path.',
+        description: 'Read the full content of a wiki page by name.',
         schema: {
           type: 'object' as const,
           properties: {
-            path: {
+            name: {
               type: 'string' as const,
-              description: 'The wiki page path',
+              description: 'The wiki page name',
             },
           },
-          required: ['path'] as const,
+          required: ['name'] as const,
         },
       },
       write_memory_page: {
@@ -83,9 +85,9 @@ export const MemoryConsolidationPrompt = createPrompt({
         schema: {
           type: 'object' as const,
           properties: {
-            path: {
+            name: {
               type: 'string' as const,
-              description: 'The wiki page path',
+              description: 'Unique page name',
             },
             title: {
               type: 'string' as const,
@@ -95,13 +97,23 @@ export const MemoryConsolidationPrompt = createPrompt({
               type: 'string' as const,
               description: 'Markdown content',
             },
+            categories: {
+              type: 'array' as const,
+              items: { type: 'string' as const },
+              description: 'Categories this page belongs to',
+            },
+            references: {
+              type: 'array' as const,
+              items: { type: 'string' as const },
+              description: 'IDs of other pages referenced from this content',
+            },
             tags: {
               type: 'array' as const,
               items: { type: 'string' as const },
               description: 'Tags for classification',
             },
           },
-          required: ['path', 'title', 'content'] as const,
+          required: ['name', 'title', 'content'] as const,
         },
       },
       delete_memory_page: {
@@ -109,18 +121,18 @@ export const MemoryConsolidationPrompt = createPrompt({
         schema: {
           type: 'object' as const,
           properties: {
-            path: {
+            name: {
               type: 'string' as const,
-              description: 'The wiki page path to delete',
+              description: 'The wiki page name to delete',
             },
           },
-          required: ['path'] as const,
+          required: ['name'] as const,
         },
       },
       get_recent_changes: {
         description:
-          'Get recent changes across all memory entries. Shows what was changed, by whom, and when. ' +
-          'Useful for identifying recently modified entries and understanding edit patterns.',
+          'Get recent changes across all memory pages. Shows what was changed, by whom, and when. ' +
+          'Useful for identifying recently modified pages and understanding edit patterns.',
         schema: {
           type: 'object' as const,
           properties: {

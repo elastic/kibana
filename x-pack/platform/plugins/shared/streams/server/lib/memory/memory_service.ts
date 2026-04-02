@@ -17,7 +17,7 @@ import type {
   MemoryEntry,
   MemoryVersionRecord,
   MemoryChangeType,
-  MemoryTreeNode,
+  MemoryCategoryNode,
   MemorySearchResult,
   CreateMemoryParams,
   UpdateMemoryParams,
@@ -35,11 +35,6 @@ interface HistoryDocument {
   _source: MemoryVersionRecord;
 }
 
-const getParentPath = (path: string): string => {
-  const parts = path.split('/');
-  return parts.length > 1 ? parts.slice(0, -1).join('/') : '';
-};
-
 export class MemoryServiceImpl implements MemoryService {
   private readonly storage: MemoryStorage;
   private readonly historyStorage: MemoryHistoryStorage;
@@ -49,22 +44,23 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   async create(params: CreateMemoryParams): Promise<MemoryEntry> {
-    const { path, title, content, tags = [], user } = params;
+    const { name, title, content, categories = [], references = [], tags = [], user } = params;
 
-    // Check for duplicate path
-    const existing = await this._getByPath(path);
+    // Check for duplicate name
+    const existing = await this._getByName(name);
     if (existing) {
-      throw badRequest(`Memory entry at path '${path}' already exists`);
+      throw badRequest(`Memory entry with name '${name}' already exists`);
     }
 
     const now = new Date().toISOString();
     const id = uuidV4();
     const entry: MemoryEntry = {
       id,
-      path,
+      name,
       title,
       content,
-      parent_path: getParentPath(path),
+      categories,
+      references,
       version: 1,
       tags,
       created_at: now,
@@ -74,7 +70,7 @@ export class MemoryServiceImpl implements MemoryService {
     };
 
     await this.storage.getClient().index({ document: entry });
-    await this._writeHistory(entry, 'create', `Created entry at ${path}`, user);
+    await this._writeHistory(entry, 'create', `Created entry "${name}"`, user);
 
     return entry;
   }
@@ -87,8 +83,8 @@ export class MemoryServiceImpl implements MemoryService {
     return doc._source;
   }
 
-  async getByPath({ path }: { path: string }): Promise<MemoryEntry | undefined> {
-    const doc = await this._getByPath(path);
+  async getByName({ name }: { name: string }): Promise<MemoryEntry | undefined> {
+    const doc = await this._getByName(name);
     return doc?._source;
   }
 
@@ -99,17 +95,24 @@ export class MemoryServiceImpl implements MemoryService {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
 
+    // If renaming, check for duplicate name
+    if (params.name !== undefined && params.name !== doc._source.name) {
+      const existingWithName = await this._getByName(params.name);
+      if (existingWithName) {
+        throw badRequest(`Memory entry with name '${params.name}' already exists`);
+      }
+    }
+
     const current = doc._source;
     const now = new Date().toISOString();
     const updatedEntry: MemoryEntry = {
       ...current,
       ...(params.content !== undefined && { content: params.content }),
       ...(params.title !== undefined && { title: params.title }),
+      ...(params.name !== undefined && { name: params.name }),
+      ...(params.categories !== undefined && { categories: params.categories }),
+      ...(params.references !== undefined && { references: params.references }),
       ...(params.tags !== undefined && { tags: params.tags }),
-      ...(params.path !== undefined && {
-        path: params.path,
-        parent_path: getParentPath(params.path),
-      }),
       version: current.version + 1,
       updated_at: now,
       updated_by: user,
@@ -121,11 +124,11 @@ export class MemoryServiceImpl implements MemoryService {
     });
 
     const changeType: MemoryChangeType =
-      params.path !== undefined && params.path !== current.path ? 'move' : 'update';
+      params.name !== undefined && params.name !== current.name ? 'rename' : 'update';
     await this._writeHistory(
       updatedEntry,
       changeType,
-      changeSummary ?? `Updated entry at ${updatedEntry.path}`,
+      changeSummary ?? `Updated entry "${updatedEntry.name}"`,
       user
     );
 
@@ -143,18 +146,18 @@ export class MemoryServiceImpl implements MemoryService {
     await this._writeHistory(
       { ...doc._source, updated_at: now },
       'delete',
-      `Deleted entry at ${doc._source.path}`,
+      `Deleted entry "${doc._source.name}"`,
       user
     );
   }
 
-  async move({
+  async rename({
     id,
-    newPath,
+    newName,
     user,
   }: {
     id: string;
-    newPath: string;
+    newName: string;
     user: string;
   }): Promise<MemoryEntry> {
     const doc = await this._getById(id);
@@ -162,30 +165,122 @@ export class MemoryServiceImpl implements MemoryService {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
 
-    // Check if target path already exists
-    const existing = await this._getByPath(newPath);
+    // Check if target name already exists
+    const existing = await this._getByName(newName);
     if (existing) {
-      throw badRequest(`Memory entry at path '${newPath}' already exists`);
+      throw badRequest(`Memory entry with name '${newName}' already exists`);
     }
 
-    const oldPath = doc._source.path;
+    const oldName = doc._source.name;
     return this.update({
       id,
-      path: newPath,
+      name: newName,
       user,
-      changeSummary: `Moved from ${oldPath} to ${newPath}`,
+      changeSummary: `Renamed from "${oldName}" to "${newName}"`,
     });
   }
 
+  // ── Categories ──
+
+  async addCategory({
+    id,
+    category,
+    user,
+  }: {
+    id: string;
+    category: string;
+    user: string;
+  }): Promise<MemoryEntry> {
+    const doc = await this._getById(id);
+    if (!doc) {
+      throw notFound(`Memory entry with id '${id}' not found`);
+    }
+
+    const current = doc._source;
+    if (current.categories.includes(category)) {
+      return current;
+    }
+
+    return this.update({
+      id,
+      categories: [...current.categories, category],
+      user,
+      changeSummary: `Added category "${category}"`,
+    });
+  }
+
+  async removeCategory({
+    id,
+    category,
+    user,
+  }: {
+    id: string;
+    category: string;
+    user: string;
+  }): Promise<MemoryEntry> {
+    const doc = await this._getById(id);
+    if (!doc) {
+      throw notFound(`Memory entry with id '${id}' not found`);
+    }
+
+    const current = doc._source;
+    if (!current.categories.includes(category)) {
+      return current;
+    }
+
+    return this.update({
+      id,
+      categories: current.categories.filter((c) => c !== category),
+      user,
+      changeSummary: `Removed category "${category}"`,
+    });
+  }
+
+  async listCategories(): Promise<string[]> {
+    const entries = await this.listAll();
+    const categorySet = new Set<string>();
+    for (const entry of entries) {
+      for (const cat of entry.categories) {
+        categorySet.add(cat);
+      }
+    }
+    return Array.from(categorySet).sort();
+  }
+
+  async getCategoryTree(): Promise<MemoryCategoryNode[]> {
+    const entries = await this.listAll();
+    return buildCategoryTree(entries);
+  }
+
+  // ── References ──
+
+  async getBacklinks({ id }: { id: string }): Promise<MemoryEntry[]> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ term: { references: id } }],
+        },
+      },
+      size: 1000,
+    });
+    return response.hits.hits.map((hit) => (hit as MemoryDocument)._source);
+  }
+
+  // ── Search & browse ──
+
   async search(params: SearchMemoryParams): Promise<MemorySearchResult[]> {
-    const { query, tags, parentPath, size = 10 } = params;
+    const { query, tags, categories, references, size = 10 } = params;
 
     const filters: QueryDslQueryContainer[] = [];
     if (tags && tags.length > 0) {
       filters.push({ terms: { tags } });
     }
-    if (parentPath !== undefined) {
-      filters.push({ prefix: { path: parentPath ? `${parentPath}/` : '' } });
+    if (categories && categories.length > 0) {
+      filters.push({ terms: { categories } });
+    }
+    if (references && references.length > 0) {
+      filters.push({ terms: { references } });
     }
 
     const response = await this.storage.getClient().search({
@@ -197,7 +292,7 @@ export class MemoryServiceImpl implements MemoryService {
             {
               multi_match: {
                 query,
-                fields: ['title^3', 'content', 'tags^2', 'path^2'],
+                fields: ['title^3', 'content', 'tags^2', 'name^2', 'categories^2'],
                 type: 'best_fields',
                 fuzziness: 'AUTO',
               },
@@ -206,7 +301,7 @@ export class MemoryServiceImpl implements MemoryService {
         },
       },
       size,
-      _source: ['id', 'path', 'title', 'content', 'updated_at', 'updated_by', 'tags'],
+      _source: ['id', 'name', 'title', 'content', 'updated_at', 'updated_by', 'tags', 'categories'],
       highlight: {
         fields: {
           content: { fragment_size: 200, number_of_fragments: 1 },
@@ -222,30 +317,16 @@ export class MemoryServiceImpl implements MemoryService {
 
       return {
         id: source.id,
-        path: source.path,
+        name: source.name,
         title: source.title,
         snippet,
         score: hit._score ?? 0,
         updated_at: source.updated_at,
         updated_by: source.updated_by,
         tags: source.tags ?? [],
+        categories: source.categories ?? [],
       };
     });
-  }
-
-  async listChildren({ parentPath }: { parentPath: string }): Promise<MemoryEntry[]> {
-    const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [{ term: { parent_path: parentPath } }],
-        },
-      },
-      size: 1000,
-      sort: [{ path: { order: 'asc' } }],
-    });
-
-    return response.hits.hits.map((hit) => (hit as MemoryDocument)._source);
   }
 
   async listAll(): Promise<MemoryEntry[]> {
@@ -253,16 +334,28 @@ export class MemoryServiceImpl implements MemoryService {
       track_total_hits: false,
       query: { match_all: {} },
       size: 10000,
-      sort: [{ path: { order: 'asc' } }],
+      sort: [{ name: { order: 'asc' } }],
     });
 
     return response.hits.hits.map((hit) => (hit as MemoryDocument)._source);
   }
 
-  async getTree(): Promise<MemoryTreeNode[]> {
-    const entries = await this.listAll();
-    return buildTree(entries);
+  async listByCategory({ category }: { category: string }): Promise<MemoryEntry[]> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [{ term: { categories: category } }],
+        },
+      },
+      size: 1000,
+      sort: [{ name: { order: 'asc' } }],
+    });
+
+    return response.hits.hits.map((hit) => (hit as MemoryDocument)._source);
   }
+
+  // ── History ──
 
   async getHistory({
     entryId,
@@ -330,8 +423,7 @@ export class MemoryServiceImpl implements MemoryService {
       ...doc._source,
       content: targetVersion.content,
       title: targetVersion.title,
-      path: targetVersion.path,
-      parent_path: getParentPath(targetVersion.path),
+      name: targetVersion.name,
       version: doc._source.version + 1,
       updated_at: now,
       updated_by: user,
@@ -377,14 +469,14 @@ export class MemoryServiceImpl implements MemoryService {
     return response.hits.hits[0] as MemoryDocument;
   }
 
-  private async _getByPath(path: string): Promise<MemoryDocument | undefined> {
+  private async _getByName(name: string): Promise<MemoryDocument | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
       query: {
         bool: {
-          filter: [{ term: { path } }],
+          filter: [{ term: { name } }],
         },
       },
     });
@@ -404,7 +496,7 @@ export class MemoryServiceImpl implements MemoryService {
       id: uuidV4(),
       entry_id: entry.id,
       version: entry.version,
-      path: entry.path,
+      name: entry.name,
       title: entry.title,
       content: entry.content,
       change_type: changeType,
@@ -417,54 +509,59 @@ export class MemoryServiceImpl implements MemoryService {
 }
 
 /**
- * Build a tree structure from a flat list of memory entries.
+ * Build a category tree from all memory entries.
+ * Categories use "/" as separator for hierarchy (e.g. "streams/logs-otel").
  */
-const buildTree = (entries: MemoryEntry[]): MemoryTreeNode[] => {
-  const nodeMap = new Map<string, MemoryTreeNode>();
-  const roots: MemoryTreeNode[] = [];
+const buildCategoryTree = (entries: MemoryEntry[]): MemoryCategoryNode[] => {
+  const nodeMap = new Map<string, MemoryCategoryNode>();
 
-  // First pass: create nodes for all entries and their parent paths
-  for (const entry of entries) {
-    const node: MemoryTreeNode = {
-      path: entry.path,
-      title: entry.title,
-      id: entry.id,
-      has_children: false,
+  const getOrCreateNode = (category: string): MemoryCategoryNode => {
+    const existing = nodeMap.get(category);
+    if (existing) return existing;
+
+    const parts = category.split('/');
+    const node: MemoryCategoryNode = {
+      name: parts[parts.length - 1],
+      category,
+      pages: [],
       children: [],
     };
-    nodeMap.set(entry.path, node);
+    nodeMap.set(category, node);
 
-    // Ensure all ancestor paths exist as directory nodes
-    const parts = entry.path.split('/');
-    for (let i = 1; i < parts.length; i++) {
-      const ancestorPath = parts.slice(0, i).join('/');
-      if (!nodeMap.has(ancestorPath)) {
-        nodeMap.set(ancestorPath, {
-          path: ancestorPath,
-          title: parts[i - 1],
-          has_children: false,
-          children: [],
-        });
+    // Ensure all ancestors exist
+    if (parts.length > 1) {
+      const parentCategory = parts.slice(0, -1).join('/');
+      const parent = getOrCreateNode(parentCategory);
+      if (!parent.children.some((c) => c.category === category)) {
+        parent.children.push(node);
       }
+    }
+
+    return node;
+  };
+
+  // Populate pages into categories
+  for (const entry of entries) {
+    for (const category of entry.categories) {
+      const node = getOrCreateNode(category);
+      node.pages.push({ id: entry.id, name: entry.name, title: entry.title });
     }
   }
 
-  // Second pass: wire up parent-child relationships
-  for (const [path, node] of nodeMap) {
-    const parentPath = getParentPath(path);
-    if (parentPath && nodeMap.has(parentPath)) {
-      const parent = nodeMap.get(parentPath)!;
-      parent.children.push(node);
-      parent.has_children = true;
-    } else {
+  // Collect roots (categories with no parent)
+  const roots: MemoryCategoryNode[] = [];
+  for (const [category, node] of nodeMap) {
+    const parts = category.split('/');
+    if (parts.length === 1) {
       roots.push(node);
     }
   }
 
-  // Sort children alphabetically
-  const sortNodes = (nodes: MemoryTreeNode[]) => {
-    nodes.sort((a, b) => a.path.localeCompare(b.path));
+  // Sort everything alphabetically
+  const sortNodes = (nodes: MemoryCategoryNode[]) => {
+    nodes.sort((a, b) => a.category.localeCompare(b.category));
     for (const node of nodes) {
+      node.pages.sort((a, b) => a.name.localeCompare(b.name));
       sortNodes(node.children);
     }
   };

@@ -27,9 +27,9 @@ export const createMemoryRecentChangesTool = ({
   id: platformStreamsMemoryTools.memoryRecentChanges,
   type: ToolType.builtin,
   description:
-    'Get recent changes across all memory entries. Returns version history records ' +
+    'Get recent changes across all memory pages. Returns version history records ' +
     'showing what was changed, by whom, and when. Useful for understanding recent ' +
-    'activity and identifying entries that may need consolidation.',
+    'activity and identifying pages that may need consolidation.',
   schema: memoryRecentChangesSchema,
   tags: ['memory'],
   handler: async ({ size }, context) => {
@@ -47,7 +47,7 @@ export const createMemoryRecentChangesTool = ({
               total: changes.length,
               changes: changes.map((c) => ({
                 entry_id: c.entry_id,
-                path: c.path,
+                name: c.name,
                 title: c.title,
                 version: c.version,
                 change_type: c.change_type,

@@ -13,7 +13,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
   MemoryEntry,
-  MemoryTreeNode,
+  MemoryCategoryNode,
   MemorySearchResult,
   MemoryVersionRecord,
 } from '../../../lib/memory';
@@ -51,7 +51,7 @@ const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',
   options: {
     access: 'internal',
-    summary: 'Create a memory entry',
+    summary: 'Create a memory page',
   },
   security: {
     authz: {
@@ -60,9 +60,11 @@ const createEntryRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      path: z.string(),
+      name: z.string(),
       title: z.string(),
       content: z.string(),
+      categories: z.array(z.string()).optional(),
+      references: z.array(z.string()).optional(),
       tags: z.array(z.string()).optional(),
     }),
   }),
@@ -75,6 +77,8 @@ const createEntryRoute = createServerRoute({
 
     return memory.create({
       ...params.body,
+      categories: params.body.categories ?? [],
+      references: params.body.references ?? [],
       tags: params.body.tags ?? [],
       user,
     });
@@ -85,7 +89,7 @@ const getEntryRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/entries/{id}',
   options: {
     access: 'internal',
-    summary: 'Get a memory entry by ID',
+    summary: 'Get a memory page by ID',
   },
   security: {
     authz: {
@@ -103,11 +107,11 @@ const getEntryRoute = createServerRoute({
   },
 });
 
-const getEntryByPathRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/memory/entries/by-path',
+const getEntryByNameRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/entries/by-name',
   options: {
     access: 'internal',
-    summary: 'Get a memory entry by path',
+    summary: 'Get a memory page by name',
   },
   security: {
     authz: {
@@ -115,15 +119,15 @@ const getEntryByPathRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({ path: z.string() }),
+    query: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
-    const entry = await memory.getByPath({ path: params.query.path });
+    const entry = await memory.getByName({ name: params.query.name });
     if (!entry) {
-      throw new Error(`Entry not found at path: ${params.query.path}`);
+      throw new Error(`Page not found with name: ${params.query.name}`);
     }
     return entry;
   },
@@ -133,7 +137,7 @@ const updateEntryRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/memory/entries/{id}',
   options: {
     access: 'internal',
-    summary: 'Update a memory entry',
+    summary: 'Update a memory page',
   },
   security: {
     authz: {
@@ -145,8 +149,10 @@ const updateEntryRoute = createServerRoute({
     body: z.object({
       title: z.string().optional(),
       content: z.string().optional(),
+      name: z.string().optional(),
+      categories: z.array(z.string()).optional(),
+      references: z.array(z.string()).optional(),
       tags: z.array(z.string()).optional(),
-      path: z.string().optional(),
       change_summary: z.string().optional(),
     }),
   }),
@@ -170,7 +176,7 @@ const deleteEntryRoute = createServerRoute({
   endpoint: 'DELETE /internal/streams/memory/entries/{id}',
   options: {
     access: 'internal',
-    summary: 'Delete a memory entry',
+    summary: 'Delete a memory page',
   },
   security: {
     authz: {
@@ -198,11 +204,11 @@ const deleteEntryRoute = createServerRoute({
   },
 });
 
-const moveEntryRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/memory/entries/{id}/move',
+const renameEntryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/entries/{id}/rename',
   options: {
     access: 'internal',
-    summary: 'Move a memory entry to a new path',
+    summary: 'Rename a memory page',
   },
   security: {
     authz: {
@@ -211,7 +217,7 @@ const moveEntryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ id: z.string() }),
-    body: z.object({ new_path: z.string() }),
+    body: z.object({ new_name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     await assertMemoryEnabled(getScopedClients, request);
@@ -220,9 +226,9 @@ const moveEntryRoute = createServerRoute({
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
 
-    return memory.move({
+    return memory.rename({
       id: params.path.id,
-      newPath: params.body.new_path,
+      newName: params.body.new_name,
       user,
     });
   },
@@ -232,7 +238,7 @@ const searchRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/search',
   options: {
     access: 'internal',
-    summary: 'Search memory entries',
+    summary: 'Search memory pages',
   },
   security: {
     authz: {
@@ -243,7 +249,8 @@ const searchRoute = createServerRoute({
     body: z.object({
       query: z.string(),
       tags: z.array(z.string()).optional(),
-      parent_path: z.string().optional(),
+      categories: z.array(z.string()).optional(),
+      references: z.array(z.string()).optional(),
       size: z.number().min(1).max(50).optional(),
     }),
   }),
@@ -260,18 +267,19 @@ const searchRoute = createServerRoute({
     const results = await memory.search({
       query: params.body.query,
       tags: params.body.tags,
-      parentPath: params.body.parent_path,
+      categories: params.body.categories,
+      references: params.body.references,
       size: params.body.size,
     });
     return { results };
   },
 });
 
-const getTreeRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/memory/tree',
+const getCategoryTreeRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/categories',
   options: {
     access: 'internal',
-    summary: 'Get memory tree hierarchy',
+    summary: 'Get memory category tree',
   },
   security: {
     authz: {
@@ -284,11 +292,11 @@ const getTreeRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
-  }): Promise<{ tree: MemoryTreeNode[] }> => {
+  }): Promise<{ tree: MemoryCategoryNode[] }> => {
     await assertMemoryEnabled(getScopedClients, request);
     const memory = getMemoryService(server, logger);
 
-    const tree = await memory.getTree();
+    const tree = await memory.getCategoryTree();
     return { tree };
   },
 });
@@ -297,7 +305,7 @@ const getHistoryRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/entries/{id}/history',
   options: {
     access: 'internal',
-    summary: 'Get version history for a memory entry',
+    summary: 'Get version history for a memory page',
   },
   security: {
     authz: {
@@ -335,7 +343,7 @@ const getVersionRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/entries/{id}/history/{version}',
   options: {
     access: 'internal',
-    summary: 'Get a specific version of a memory entry',
+    summary: 'Get a specific version of a memory page',
   },
   security: {
     authz: {
@@ -369,7 +377,7 @@ const rollbackRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries/{id}/rollback',
   options: {
     access: 'internal',
-    summary: 'Rollback a memory entry to a specific version',
+    summary: 'Rollback a memory page to a specific version',
   },
   security: {
     authz: {
@@ -399,7 +407,7 @@ const recentChangesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/recent-changes',
   options: {
     access: 'internal',
-    summary: 'Get recent changes across all memory entries',
+    summary: 'Get recent changes across all memory pages',
   },
   security: {
     authz: {
@@ -533,12 +541,12 @@ const consolidateMemoryRoute = createServerRoute({
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
-  ...getEntryByPathRoute,
+  ...getEntryByNameRoute,
   ...updateEntryRoute,
   ...deleteEntryRoute,
-  ...moveEntryRoute,
+  ...renameEntryRoute,
   ...searchRoute,
-  ...getTreeRoute,
+  ...getCategoryTreeRoute,
   ...getHistoryRoute,
   ...getVersionRoute,
   ...rollbackRoute,

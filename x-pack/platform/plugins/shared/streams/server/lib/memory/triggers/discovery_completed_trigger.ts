@@ -20,14 +20,14 @@ interface DiscoveryInsight {
 /**
  * Trigger that fires after insights discovery completes.
  * Uses a reasoning agent with memory tools to synthesize
- * new insights into wiki pages.
+ * new insights into wiki pages organized by categories.
  *
  * Expected payload: { insights: Array<{ title: string; evidence: Array<{ stream_name?: string }> }> }
  */
 export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
   id: DISCOVERY_COMPLETED_TRIGGER_ID,
   description:
-    'Fires after insights discovery completes. Synthesizes discovery insights into architecture overview memory entries.',
+    'Fires after insights discovery completes. Synthesizes discovery insights into wiki pages organized by categories.',
   execute: async (context) => {
     const { memory, logger, trigger, inferenceClient } = context;
     const { insights } = trigger.payload as {
@@ -58,17 +58,12 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
 
     for (const { streamName, streamInsights } of streamGroups) {
       try {
-        const existingEntries = allEntries.filter(
-          (e) =>
-            e.path.startsWith(`stream/${streamName}/`) ||
-            e.path.startsWith(`architecture/${streamName}/`) ||
-            e.path.startsWith(`operations/${streamName}/`)
-        );
-
         const existingPages =
-          existingEntries.length > 0
-            ? existingEntries.map((e) => `- **${e.path}** — ${e.title}`).join('\n')
-            : 'No existing pages for this stream.';
+          allEntries.length > 0
+            ? allEntries
+                .map((e) => `- **${e.name}** — ${e.title} [categories: ${e.categories.join(', ')}]`)
+                .join('\n')
+            : 'No existing pages.';
 
         const user = 'system:discovery-completed-trigger';
 
@@ -83,50 +78,58 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
           maxSteps: 10,
           toolCallbacks: {
             read_memory_page: async (toolCall) => {
-              const { path } = toolCall.function.arguments;
-              const entry = await memory.getByPath({ path });
+              const { name } = toolCall.function.arguments;
+              const entry = await memory.getByName({ name });
               if (!entry) {
-                return { response: { error: `No page found at path "${path}"` } };
+                return { response: { error: `No page found with name "${name}"` } };
               }
               return {
                 response: {
-                  path: entry.path,
+                  id: entry.id,
+                  name: entry.name,
                   title: entry.title,
                   content: entry.content,
+                  categories: entry.categories,
+                  references: entry.references,
                 },
               };
             },
 
             write_memory_page: async (toolCall) => {
-              const { path, title, content, tags } = toolCall.function.arguments;
+              const { name, title, content, categories, references, tags } =
+                toolCall.function.arguments;
 
-              const existing = await memory.getByPath({ path });
+              const existing = await memory.getByName({ name });
 
               if (existing) {
                 await memory.update({
                   id: existing.id,
                   content,
                   title,
+                  categories,
+                  references,
                   user,
                   changeSummary: 'Updated from discovery insights',
                 });
-                logger.info(`Updated wiki page: ${path}`);
+                logger.info(`Updated wiki page: ${name}`);
               } else {
                 await memory.create({
-                  path,
+                  name,
                   title,
                   content,
+                  categories: categories ?? [],
+                  references: references ?? [],
                   tags: [...(tags ?? []), 'auto-generated'],
                   user,
                 });
-                logger.info(`Created wiki page: ${path}`);
+                logger.info(`Created wiki page: ${name}`);
               }
 
               return {
                 response: {
                   success: true,
                   action: existing ? 'updated' : 'created',
-                  path,
+                  name,
                 },
               };
             },

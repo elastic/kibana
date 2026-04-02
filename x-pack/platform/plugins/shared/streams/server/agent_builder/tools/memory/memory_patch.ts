@@ -38,8 +38,8 @@ const patchOperationSchema = z.object({
 });
 
 const memoryPatchSchema = z.object({
-  id: z.string().optional().describe('Target entry by UUID.'),
-  path: z.string().optional().describe('Target entry by wiki path.'),
+  id: z.string().optional().describe('Target page by UUID.'),
+  name: z.string().optional().describe('Target page by unique name.'),
   operations: z
     .array(patchOperationSchema)
     .min(1)
@@ -150,7 +150,7 @@ export const createMemoryPatchTool = ({
   id: platformStreamsMemoryTools.memoryPatch,
   type: ToolType.builtin,
   description:
-    'Apply targeted edits to an existing memory entry without sending the full document. ' +
+    'Apply targeted edits to an existing memory page without sending the full document. ' +
     'Supports: (A) search-and-replace with old_text/new_text, ' +
     '(B) heading-level replace with heading/content, ' +
     '(C) append with append (optionally under a heading). ' +
@@ -158,7 +158,7 @@ export const createMemoryPatchTool = ({
   schema: memoryPatchSchema,
   tags: ['memory'],
   confirmation: { askUser: 'never' },
-  handler: async ({ id, path, operations, change_summary: changeSummary }, context) => {
+  handler: async ({ id, name, operations, change_summary: changeSummary }, context) => {
     const memoryService = getMemoryService();
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
@@ -167,20 +167,20 @@ export const createMemoryPatchTool = ({
       esClient: esClient.asCurrentUser,
     });
 
-    if (!path && !id) {
+    if (!name && !id) {
       return {
-        results: [createErrorResult({ message: 'Either "path" or "id" must be provided.' })],
+        results: [createErrorResult({ message: 'Either "name" or "id" must be provided.' })],
       };
     }
 
     try {
       const entry = id
         ? await memoryService.get({ id })
-        : await memoryService.getByPath({ path: path! });
+        : await memoryService.getByName({ name: name! });
 
       if (!entry) {
         return {
-          results: [createErrorResult({ message: `Memory entry not found: ${path ?? id}` })],
+          results: [createErrorResult({ message: `Memory page not found: ${name ?? id}` })],
         };
       }
 
@@ -238,7 +238,7 @@ export const createMemoryPatchTool = ({
 
       const resultData: Record<string, unknown> = {
         id: updated.id,
-        path: updated.path,
+        name: updated.name,
         version: updated.version,
         operations_applied: appliedCount,
       };
@@ -274,9 +274,9 @@ export const createMemoryPatchTool = ({
       {
         ...result,
         data: {
-          summary: `Patched memory entry "${data.path}" (${data.operations_applied} ops, v${data.version})`,
+          summary: `Patched memory page "${data.name}" (${data.operations_applied} ops, v${data.version})`,
           id: data.id,
-          path: data.path,
+          name: data.name,
           version: data.version,
         },
       },

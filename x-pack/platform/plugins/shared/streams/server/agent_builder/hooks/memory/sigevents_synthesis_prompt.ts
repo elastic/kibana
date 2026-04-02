@@ -18,17 +18,19 @@ Given raw knowledge indicators (features, queries, patterns) discovered from a d
 - **Read before writing**: Always read existing pages before updating them. Preserve accurate content and correct anything now outdated.
 - **Brief pages**: Keep pages short — a few paragraphs max. Brief pages stay accurate as the system evolves.
 - **Only document what you have evidence for**: Don't invent services or components.
+- **Cross-reference**: When mentioning a concept that has its own page, reference it by ID. Prefer linking over duplicating content.
 
-## Page conventions
+## Organization
 
-- \`stream/{stream}/overview\` — what the stream carries, its role, key characteristics
-- \`stream/{stream}/services/{name}\` — per-service: role, dependencies, communication patterns
-- \`stream/{stream}/infrastructure/{name}\` — per-component: role, configuration, operational characteristics
-- \`stream/{stream}/patterns\` — failure modes, error correlations, things to watch
+Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
+- A page can belong to multiple categories simultaneously
+- Recommended categories: "services", "infrastructure", "streams/{stream-name}", "operations", "architecture"
+- Create new categories as needed — they emerge organically
+- Give each page a descriptive, unique name (e.g. "nginx-overview", "redis-cache-config")
 
 ## Writing style
 
-Write as if explaining to a new team member joining the on-call rotation. Be factual and direct. Use cross-references between pages where relevant (e.g. "See also: [Service X](stream/{stream}/services/x)").`;
+Write as if explaining to a new team member joining the on-call rotation. Be factual and direct. Use cross-references between pages where relevant.`;
 
 const taskPrompt = `Stream: \`{{{streamName}}}\`
 
@@ -42,9 +44,9 @@ const taskPrompt = `Stream: \`{{{streamName}}}\`
 
 ## Task
 
-Analyze the indicators above. Read existing pages that might need updating. Then write or update wiki pages that capture a concise, high-level understanding of this stream's architecture.
+Analyze the indicators above. Read existing pages that might need updating. Then write or update wiki pages that capture a concise, high-level understanding of the system's architecture.
 
-Focus on entities with clear evidence: the stream overview, distinct services, infrastructure components, and operational patterns.`;
+Focus on entities with clear evidence: service descriptions, infrastructure components, and operational patterns. Assign pages to relevant categories (e.g. "services", "streams/{{{streamName}}}", "architecture"). Cross-reference related pages.`;
 
 export const SigeventsSynthesisPrompt = createPrompt({
   name: 'sigevents_synthesis',
@@ -69,16 +71,16 @@ export const SigeventsSynthesisPrompt = createPrompt({
     tools: {
       read_memory_page: {
         description:
-          'Read the full content of an existing wiki page by path. Use before updating a page to understand what is already there.',
+          'Read the full content of an existing wiki page by name. Use before updating a page to understand what is already there.',
         schema: {
           type: 'object' as const,
           properties: {
-            path: {
+            name: {
               type: 'string' as const,
-              description: 'The wiki page path (e.g. "stream/logs.otel/overview")',
+              description: 'The wiki page name (e.g. "nginx-overview")',
             },
           },
-          required: ['path'] as const,
+          required: ['name'] as const,
         },
       },
       write_memory_page: {
@@ -87,9 +89,9 @@ export const SigeventsSynthesisPrompt = createPrompt({
         schema: {
           type: 'object' as const,
           properties: {
-            path: {
+            name: {
               type: 'string' as const,
-              description: 'The wiki page path (e.g. "stream/logs.otel/services/nginx")',
+              description: 'Unique page name (e.g. "nginx-service-overview")',
             },
             title: {
               type: 'string' as const,
@@ -99,13 +101,24 @@ export const SigeventsSynthesisPrompt = createPrompt({
               type: 'string' as const,
               description: 'Concise markdown content for the page',
             },
+            categories: {
+              type: 'array' as const,
+              items: { type: 'string' as const },
+              description:
+                'Categories this page belongs to (e.g. ["services", "streams/logs-otel"])',
+            },
+            references: {
+              type: 'array' as const,
+              items: { type: 'string' as const },
+              description: 'IDs of other pages referenced from this content',
+            },
             tags: {
               type: 'array' as const,
               items: { type: 'string' as const },
-              description: 'Tags for classification (e.g. ["architecture", "logs.otel"])',
+              description: 'Tags for classification',
             },
           },
-          required: ['path', 'title', 'content', 'tags'] as const,
+          required: ['name', 'title', 'content', 'categories'] as const,
         },
       },
     } as const,

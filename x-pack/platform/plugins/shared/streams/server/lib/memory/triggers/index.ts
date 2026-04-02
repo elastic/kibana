@@ -12,4 +12,3 @@ export {
   discoveryCompletedTrigger,
   DISCOVERY_COMPLETED_TRIGGER_ID,
 } from './discovery_completed_trigger';
-export { chatLearningTrigger, CHAT_LEARNING_TRIGGER_ID } from './chat_learning_trigger';

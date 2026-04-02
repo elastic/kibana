@@ -104,20 +104,20 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                   const indicatorSummaries = buildIndicatorSummaries(indicators);
 
                   const allEntries = await memory.listAll();
-                  const existingEntries = allEntries.filter(
-                    (e) =>
-                      e.path.startsWith(`architecture/${streamName}/`) ||
-                      e.path.startsWith(`operations/${streamName}/`)
-                  );
 
                   const existingPages =
-                    existingEntries.length > 0
-                      ? existingEntries.map((e) => `- **${e.path}** — ${e.title}`).join('\n')
-                      : 'No existing pages for this stream.';
+                    allEntries.length > 0
+                      ? allEntries
+                          .map(
+                            (e) =>
+                              `- **${e.name}** — ${e.title} [categories: ${e.categories.join(
+                                ', '
+                              )}]`
+                          )
+                          .join('\n')
+                      : 'No existing pages.';
 
-                  taskLogger.info(
-                    `Found ${existingEntries.length} existing memory entries for stream "${streamName}"`
-                  );
+                  taskLogger.info(`Found ${allEntries.length} existing memory entries total`);
 
                   let pagesWritten = 0;
 
@@ -154,51 +154,59 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                       },
 
                       read_memory_page: async (toolCall) => {
-                        const { path } = toolCall.function.arguments;
+                        const { name } = toolCall.function.arguments;
                         taskLogger.info(
-                          `Stream "${streamName}": agent reading memory page "${path}"`
+                          `Stream "${streamName}": agent reading memory page "${name}"`
                         );
 
-                        const entry = await memory.getByPath({ path });
+                        const entry = await memory.getByName({ name });
                         if (!entry) {
                           return {
-                            response: { error: `No page found at path "${path}"` },
+                            response: { error: `No page found with name "${name}"` },
                           };
                         }
 
                         return {
                           response: {
-                            path: entry.path,
+                            id: entry.id,
+                            name: entry.name,
                             title: entry.title,
                             content: entry.content,
+                            categories: entry.categories,
+                            references: entry.references,
                           },
                         };
                       },
 
                       write_memory_page: async (toolCall) => {
-                        const { path, title, content, tags } = toolCall.function.arguments;
+                        const { name, title, content, categories, references, tags } =
+                          toolCall.function.arguments;
                         const user = 'agent:memory_generation';
 
-                        const existing = await memory.getByPath({ path });
+                        const existing = await memory.getByName({ name });
 
                         if (existing) {
                           await memory.update({
                             id: existing.id,
                             content,
                             title,
+                            categories,
+                            references,
                             user,
                             changeSummary: 'Updated from discovery indicators',
                           });
-                          taskLogger.info(`Updated existing wiki page: ${path}`);
+                          taskLogger.info(`Updated existing wiki page: ${name}`);
                         } else {
                           await memory.create({
-                            path,
+                            name,
                             title,
                             content,
+                            categories: categories ?? [],
+                            references: references ?? [],
                             tags: [...(tags ?? []), 'auto-generated'],
                             user,
                           });
-                          taskLogger.info(`Created new wiki page: ${path}`);
+                          taskLogger.info(`Created new wiki page: ${name}`);
                         }
 
                         pagesWritten++;
@@ -207,7 +215,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                           response: {
                             success: true,
                             action: existing ? 'updated' : 'created',
-                            path,
+                            name,
                           },
                         };
                       },

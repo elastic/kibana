@@ -76,7 +76,7 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                 const allEntries = await memory.listAll();
 
                 // Filter out system entries
-                const entries = allEntries.filter((e) => !e.path.startsWith('_system/'));
+                const entries = allEntries.filter((e) => !e.name.startsWith('_system/'));
 
                 if (entries.length === 0) {
                   taskLogger.info('No memory entries to consolidate');
@@ -95,7 +95,10 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
 
                 const existingPages = entries
                   .map(
-                    (e) => `- **${e.path}** — ${e.title} (v${e.version}, updated ${e.updated_at})`
+                    (e) =>
+                      `- **${e.name}** — ${e.title} [categories: ${e.categories.join(', ')}] (v${
+                        e.version
+                      }, updated ${e.updated_at})`
                   )
                   .join('\n');
 
@@ -111,16 +114,19 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                   maxSteps: 30,
                   toolCallbacks: {
                     read_memory_page: async (toolCall) => {
-                      const { path } = toolCall.function.arguments;
-                      const entry = await memory.getByPath({ path });
+                      const { name } = toolCall.function.arguments;
+                      const entry = await memory.getByName({ name });
                       if (!entry) {
-                        return { response: { error: `No page found at path "${path}"` } };
+                        return { response: { error: `No page found with name "${name}"` } };
                       }
                       return {
                         response: {
-                          path: entry.path,
+                          id: entry.id,
+                          name: entry.name,
                           title: entry.title,
                           content: entry.content,
+                          categories: entry.categories,
+                          references: entry.references,
                           tags: entry.tags,
                           version: entry.version,
                           updated_at: entry.updated_at,
@@ -130,37 +136,42 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                     },
 
                     write_memory_page: async (toolCall) => {
-                      const { path, title, content, tags } = toolCall.function.arguments;
+                      const { name, title, content, categories, references, tags } =
+                        toolCall.function.arguments;
                       const user = 'agent:memory_consolidation';
 
-                      const existing = await memory.getByPath({ path });
+                      const existing = await memory.getByName({ name });
 
                       if (existing) {
                         await memory.update({
                           id: existing.id,
                           content,
                           title,
+                          categories,
+                          references,
                           tags,
                           user,
                           changeSummary: 'Updated during memory consolidation',
                         });
-                        taskLogger.info(`Updated memory page: ${path}`);
+                        taskLogger.info(`Updated memory page: ${name}`);
                       } else {
                         await memory.create({
-                          path,
+                          name,
                           title,
                           content,
+                          categories: categories ?? [],
+                          references: references ?? [],
                           tags: [...(tags ?? []), 'auto-generated'],
                           user,
                         });
-                        taskLogger.info(`Created memory page: ${path}`);
+                        taskLogger.info(`Created memory page: ${name}`);
                       }
 
                       return {
                         response: {
                           success: true,
                           action: existing ? 'updated' : 'created',
-                          path,
+                          name,
                         },
                       };
                     },
@@ -174,7 +185,7 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                         response: {
                           total: changes.length,
                           changes: changes.map((c) => ({
-                            path: c.path,
+                            name: c.name,
                             title: c.title,
                             version: c.version,
                             change_type: c.change_type,
@@ -187,19 +198,19 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
                     },
 
                     delete_memory_page: async (toolCall) => {
-                      const { path } = toolCall.function.arguments;
+                      const { name } = toolCall.function.arguments;
                       const user = 'agent:memory_consolidation';
 
-                      const entry = await memory.getByPath({ path });
+                      const entry = await memory.getByName({ name });
                       if (!entry) {
-                        return { response: { error: `No page found at path "${path}"` } };
+                        return { response: { error: `No page found with name "${name}"` } };
                       }
 
                       await memory.delete({ id: entry.id, user });
-                      taskLogger.info(`Deleted memory page: ${path}`);
+                      taskLogger.info(`Deleted memory page: ${name}`);
 
                       return {
-                        response: { success: true, deleted: path },
+                        response: { success: true, deleted: name },
                       };
                     },
                   },

@@ -52,11 +52,7 @@ import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { ModelSettingsConfigService } from './lib/sig_events/saved_objects/model_settings_config_service';
-import {
-  MemoryTriggerRegistry,
-  discoveryCompletedTrigger,
-  chatLearningTrigger,
-} from './lib/memory/triggers';
+import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
 import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
 import { MEMORY_CONSOLIDATION_TASK_TYPE } from './lib/tasks/task_definitions/memory_consolidation';
@@ -449,7 +445,6 @@ export class StreamsPlugin
       // Set up memory trigger registry with all built-in triggers
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
       memoryTriggerRegistry.register(discoveryCompletedTrigger);
-      memoryTriggerRegistry.register(chatLearningTrigger);
       this.server.memoryTriggerRegistry = memoryTriggerRegistry;
 
       // Set up recurring memory tasks (conversation scraper + consolidation).

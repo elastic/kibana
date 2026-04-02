@@ -14,8 +14,8 @@ import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
 
 const memoryDeleteSchema = z.object({
-  id: z.string().optional().describe('Delete entry by UUID.'),
-  path: z.string().optional().describe('Delete entry by wiki path.'),
+  id: z.string().optional().describe('Delete page by UUID.'),
+  name: z.string().optional().describe('Delete page by unique name.'),
 });
 
 export const createMemoryDeleteTool = ({
@@ -25,11 +25,11 @@ export const createMemoryDeleteTool = ({
   id: platformStreamsMemoryTools.memoryDelete,
   type: ToolType.builtin,
   description:
-    'Delete a memory entry. The entry is removed but its version history is preserved for auditing.',
+    'Delete a memory page. The page is removed but its version history is preserved for auditing.',
   schema: memoryDeleteSchema,
   tags: ['memory'],
   confirmation: { askUser: 'never' },
-  handler: async ({ id, path }, context) => {
+  handler: async ({ id, name }, context) => {
     const memoryService = getMemoryService();
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
@@ -38,25 +38,25 @@ export const createMemoryDeleteTool = ({
       esClient: esClient.asCurrentUser,
     });
 
-    if (!path && !id) {
+    if (!name && !id) {
       return {
-        results: [createErrorResult({ message: 'Either "path" or "id" must be provided.' })],
+        results: [createErrorResult({ message: 'Either "name" or "id" must be provided.' })],
       };
     }
 
     try {
       let entryId = id;
-      let entryPath = path;
+      let entryName = name;
 
       if (!entryId) {
-        const entry = await memoryService.getByPath({ path: path! });
+        const entry = await memoryService.getByName({ name: name! });
         if (!entry) {
           return {
-            results: [createErrorResult({ message: `Memory entry not found at path: ${path}` })],
+            results: [createErrorResult({ message: `Memory page not found with name: ${name}` })],
           };
         }
         entryId = entry.id;
-        entryPath = entry.path;
+        entryName = entry.name;
       }
 
       await memoryService.delete({ id: entryId!, user });
@@ -68,7 +68,7 @@ export const createMemoryDeleteTool = ({
             type: ToolResultType.other,
             data: {
               deleted: true,
-              path: entryPath,
+              name: entryName,
             },
           },
         ],

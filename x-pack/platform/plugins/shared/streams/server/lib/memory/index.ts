@@ -9,7 +9,7 @@ export type {
   MemoryEntry,
   MemoryVersionRecord,
   MemoryChangeType,
-  MemoryTreeNode,
+  MemoryCategoryNode,
   MemorySearchResult,
   CreateMemoryParams,
   UpdateMemoryParams,

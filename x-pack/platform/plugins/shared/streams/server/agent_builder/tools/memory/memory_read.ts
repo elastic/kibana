@@ -13,11 +13,8 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { MemoryToolsOptions } from './types';
 
 const memoryReadSchema = z.object({
-  path: z
-    .string()
-    .optional()
-    .describe('Read entry by its wiki path (e.g. "architecture/web-frontend/overview").'),
-  id: z.string().optional().describe('Read entry by its UUID.'),
+  name: z.string().optional().describe('Read page by its unique name (e.g. "nginx-overview").'),
+  id: z.string().optional().describe('Read page by its UUID.'),
   heading: z
     .string()
     .optional()
@@ -28,7 +25,7 @@ const memoryReadSchema = z.object({
     .number()
     .min(0)
     .optional()
-    .describe('Start from this line number (0-indexed). For paginating large entries.'),
+    .describe('Start from this line number (0-indexed). For paginating large pages.'),
   limit: z
     .number()
     .min(1)
@@ -76,19 +73,19 @@ export const createMemoryReadTool = ({
   id: platformStreamsMemoryTools.memoryRead,
   type: ToolType.builtin,
   description:
-    'Read a specific memory entry by path or ID. Supports targeted reads: ' +
+    'Read a specific memory page by name or ID. Supports targeted reads: ' +
     'request a specific heading section or a line range to avoid loading the full document. ' +
     'Always returns the list of headings and total line count for navigation.',
   schema: memoryReadSchema,
   tags: ['memory'],
-  handler: async ({ path, id, heading, offset, limit }, context) => {
+  handler: async ({ name, id, heading, offset, limit }, context) => {
     const memoryService = getMemoryService();
 
-    if (!path && !id) {
+    if (!name && !id) {
       return {
         results: [
           createErrorResult({
-            message: 'Either "path" or "id" must be provided.',
+            message: 'Either "name" or "id" must be provided.',
           }),
         ],
       };
@@ -97,13 +94,13 @@ export const createMemoryReadTool = ({
     try {
       const entry = id
         ? await memoryService.get({ id })
-        : await memoryService.getByPath({ path: path! });
+        : await memoryService.getByName({ name: name! });
 
       if (!entry) {
         return {
           results: [
             createErrorResult({
-              message: `Memory entry not found: ${path ?? id}`,
+              message: `Memory page not found: ${name ?? id}`,
             }),
           ],
         };
@@ -120,7 +117,7 @@ export const createMemoryReadTool = ({
           return {
             results: [
               createErrorResult({
-                message: `Heading "${heading}" not found in entry. Available headings: ${allHeadings.join(
+                message: `Heading "${heading}" not found in page. Available headings: ${allHeadings.join(
                   ', '
                 )}`,
               }),
@@ -144,9 +141,11 @@ export const createMemoryReadTool = ({
             type: ToolResultType.other,
             data: {
               id: entry.id,
-              path: entry.path,
+              name: entry.name,
               title: entry.title,
               version: entry.version,
+              categories: entry.categories,
+              references: entry.references,
               updated_at: entry.updated_at,
               updated_by: entry.updated_by,
               content,

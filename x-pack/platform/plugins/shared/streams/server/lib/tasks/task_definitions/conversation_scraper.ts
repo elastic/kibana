@@ -27,7 +27,7 @@ export interface ConversationScraperTaskResult {
 
 export const CONVERSATION_SCRAPER_TASK_TYPE = 'streams_conversation_scraper';
 
-const LAST_SCRAPE_PATH = '_system/last_scrape_timestamp';
+const LAST_SCRAPE_NAME = '_system/last_scrape_timestamp';
 const MAX_CONVERSATIONS_PER_SCRAPE = 100;
 
 export function createStreamsConversationScraperTask(taskContext: TaskContext) {
@@ -96,7 +96,7 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
 
               try {
                 // Read last scrape timestamp from memory
-                const lastScrapeEntry = await memory.getByPath({ path: LAST_SCRAPE_PATH });
+                const lastScrapeEntry = await memory.getByName({ name: LAST_SCRAPE_NAME });
                 const lastScrapeTime = lastScrapeEntry?.content?.trim() ?? '1970-01-01T00:00:00Z';
 
                 taskLogger.info(`Scraping conversations updated since ${lastScrapeTime}`);
@@ -136,8 +136,13 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                 const allEntries = await memory.listAll();
                 const existingPages =
                   allEntries.length > 0
-                    ? allEntries.map((e) => `- **${e.path}** — ${e.title}`).join('\n')
-                    : 'No existing memory entries.';
+                    ? allEntries
+                        .map(
+                          (e) =>
+                            `- **${e.name}** — ${e.title} [categories: ${e.categories.join(', ')}]`
+                        )
+                        .join('\n')
+                    : 'No existing memory pages.';
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
@@ -193,44 +198,52 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                     },
 
                     read_memory_page: async (toolCall) => {
-                      const { path } = toolCall.function.arguments;
-                      const entry = await memory.getByPath({ path });
+                      const { name } = toolCall.function.arguments;
+                      const entry = await memory.getByName({ name });
                       if (!entry) {
-                        return { response: { error: `No page found at path "${path}"` } };
+                        return { response: { error: `No page found with name "${name}"` } };
                       }
                       return {
                         response: {
-                          path: entry.path,
+                          id: entry.id,
+                          name: entry.name,
                           title: entry.title,
                           content: entry.content,
+                          categories: entry.categories,
+                          references: entry.references,
                         },
                       };
                     },
 
                     write_memory_page: async (toolCall) => {
-                      const { path, title, content, tags } = toolCall.function.arguments;
+                      const { name, title, content, categories, references, tags } =
+                        toolCall.function.arguments;
                       const user = 'agent:conversation_scraper';
 
-                      const existing = await memory.getByPath({ path });
+                      const existing = await memory.getByName({ name });
 
                       if (existing) {
                         await memory.update({
                           id: existing.id,
                           content,
                           title,
+                          categories,
+                          references,
                           user,
                           changeSummary: 'Updated from conversation scraping',
                         });
-                        taskLogger.info(`Updated memory page: ${path}`);
+                        taskLogger.info(`Updated memory page: ${name}`);
                       } else {
                         await memory.create({
-                          path,
+                          name,
                           title,
                           content,
+                          categories: categories ?? [],
+                          references: references ?? [],
                           tags: [...(tags ?? []), 'auto-generated', 'conversation-scraper'],
                           user,
                         });
-                        taskLogger.info(`Created memory page: ${path}`);
+                        taskLogger.info(`Created memory page: ${name}`);
                       }
 
                       pagesWritten++;
@@ -238,7 +251,7 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                         response: {
                           success: true,
                           action: existing ? 'updated' : 'created',
-                          path,
+                          name,
                         },
                       };
                     },
@@ -260,7 +273,7 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
                   });
                 } else {
                   await memory.create({
-                    path: LAST_SCRAPE_PATH,
+                    name: LAST_SCRAPE_NAME,
                     title: 'Last Scrape Timestamp',
                     content: latestTimestamp,
                     tags: ['system'],

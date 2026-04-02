@@ -17,18 +17,22 @@ const memorySearchSchema = z.object({
     .string()
     .max(1000)
     .describe(
-      'Search query to find relevant memory entries. Matched against titles, content, tags, and paths.'
+      'Search query to find relevant memory pages. Matched against titles, content, tags, names, and categories.'
     ),
   tags: z
     .array(z.string())
     .optional()
-    .describe('Optional tag filter — only return entries with at least one of these tags.'),
-  parent_path: z
-    .string()
+    .describe('Optional tag filter — only return pages with at least one of these tags.'),
+  categories: z
+    .array(z.string())
     .optional()
     .describe(
-      'Optional path prefix to scope the search (e.g. "architecture" to search only under architecture/).'
+      'Optional category filter — only return pages in at least one of these categories (e.g. ["services", "streams/logs-otel"]).'
     ),
+  references: z
+    .array(z.string())
+    .optional()
+    .describe('Optional filter by referenced page IDs — only return pages that reference these.'),
   size: z
     .number()
     .min(1)
@@ -43,19 +47,20 @@ export const createMemorySearchTool = ({
   id: platformStreamsMemoryTools.memorySearch,
   type: ToolType.builtin,
   description:
-    'Search the shared memory for relevant entries. Returns metadata and short snippets only — ' +
-    'use memory_read to get full content of specific entries. ' +
+    'Search the shared memory for relevant pages. Returns metadata and short snippets only — ' +
+    'use memory_read to get full content of specific pages. ' +
     'Memory contains persistent knowledge accumulated across conversations.',
   schema: memorySearchSchema,
   tags: ['memory'],
-  handler: async ({ query, tags, parent_path: parentPath, size }, context) => {
+  handler: async ({ query, tags, categories, references, size }, context) => {
     const memoryService = getMemoryService();
 
     try {
       const results = await memoryService.search({
         query,
         tags,
-        parentPath,
+        categories,
+        references,
         size,
       });
 
@@ -66,7 +71,7 @@ export const createMemorySearchTool = ({
               tool_result_id: getToolResultId(),
               type: ToolResultType.other,
               data: {
-                message: 'No memory entries found matching the query.',
+                message: 'No memory pages found matching the query.',
                 query,
                 total: 0,
                 items: [],
@@ -85,10 +90,11 @@ export const createMemorySearchTool = ({
               total: results.length,
               items: results.map((r) => ({
                 id: r.id,
-                path: r.path,
+                name: r.name,
                 title: r.title,
                 snippet: r.snippet,
                 score: r.score,
+                categories: r.categories,
                 updated_at: r.updated_at,
                 updated_by: r.updated_by,
               })),

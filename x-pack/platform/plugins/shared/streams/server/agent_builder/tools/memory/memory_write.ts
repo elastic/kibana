@@ -14,13 +14,23 @@ import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
 
 const memoryWriteSchema = z.object({
-  path: z
+  name: z
     .string()
     .describe(
-      'Wiki path for the entry (e.g. "architecture/web-frontend/overview"). Creates or overwrites.'
+      'Unique name for the page (e.g. "nginx-overview"). Creates a new page or overwrites the existing one with this name.'
     ),
-  title: z.string().describe('Human-readable title for the entry.'),
-  content: z.string().describe('Full markdown content for the entry.'),
+  title: z.string().describe('Human-readable title for the page.'),
+  content: z.string().describe('Full markdown content for the page.'),
+  categories: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Categories this page belongs to (e.g. ["services", "streams/logs-otel"]). A page can belong to multiple categories.'
+    ),
+  references: z
+    .array(z.string())
+    .optional()
+    .describe('IDs of other memory pages referenced from this content.'),
   tags: z.array(z.string()).optional().describe('Optional classification tags.'),
   change_summary: z.string().optional().describe('Human-readable description of what was changed.'),
 });
@@ -32,13 +42,16 @@ export const createMemoryWriteTool = ({
   id: platformStreamsMemoryTools.memoryWrite,
   type: ToolType.builtin,
   description:
-    'Create a new memory entry or overwrite an existing one at a path. ' +
-    'For surgical edits to existing entries, prefer memory_patch instead. ' +
-    'Use this for new entries or full rewrites.',
+    'Create a new memory page or overwrite an existing one by name. ' +
+    'For surgical edits to existing pages, prefer memory_patch instead. ' +
+    'Use this for new pages or full rewrites. Pages can belong to multiple categories.',
   schema: memoryWriteSchema,
   tags: ['memory'],
   confirmation: { askUser: 'never' },
-  handler: async ({ path, title, content, tags, change_summary: changeSummary }, context) => {
+  handler: async (
+    { name, title, content, categories, references, tags, change_summary: changeSummary },
+    context
+  ) => {
     const memoryService = getMemoryService();
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
@@ -48,18 +61,20 @@ export const createMemoryWriteTool = ({
     });
 
     try {
-      // Check if entry exists at this path
-      const existing = await memoryService.getByPath({ path });
+      // Check if page exists with this name
+      const existing = await memoryService.getByName({ name });
 
       if (existing) {
-        // Overwrite existing entry
+        // Overwrite existing page
         const updated = await memoryService.update({
           id: existing.id,
           title,
           content,
+          categories,
+          references,
           tags,
           user,
-          changeSummary: changeSummary ?? `Overwrote entry at ${path}`,
+          changeSummary: changeSummary ?? `Overwrote page "${name}"`,
         });
         return {
           results: [
@@ -68,7 +83,7 @@ export const createMemoryWriteTool = ({
               type: ToolResultType.other,
               data: {
                 id: updated.id,
-                path: updated.path,
+                name: updated.name,
                 version: updated.version,
                 created: false,
               },
@@ -77,11 +92,13 @@ export const createMemoryWriteTool = ({
         };
       }
 
-      // Create new entry
+      // Create new page
       const created = await memoryService.create({
-        path,
+        name,
         title,
         content,
+        categories,
+        references,
         tags,
         user,
       });
@@ -93,7 +110,7 @@ export const createMemoryWriteTool = ({
             type: ToolResultType.other,
             data: {
               id: created.id,
-              path: created.path,
+              name: created.name,
               version: created.version,
               created: true,
             },
@@ -105,7 +122,7 @@ export const createMemoryWriteTool = ({
         results: [
           createErrorResult({
             message: `Memory write failed: ${(error as Error).message}`,
-            metadata: { path },
+            metadata: { name },
           }),
         ],
       };
@@ -121,9 +138,9 @@ export const createMemoryWriteTool = ({
       {
         ...result,
         data: {
-          summary: `${action} memory entry at "${data.path}" (v${data.version})`,
+          summary: `${action} memory page "${data.name}" (v${data.version})`,
           id: data.id,
-          path: data.path,
+          name: data.name,
           version: data.version,
         },
       },

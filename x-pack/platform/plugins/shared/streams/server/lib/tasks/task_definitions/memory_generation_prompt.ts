@@ -21,16 +21,15 @@ Synthesize knowledge indicators (features, insights, queries) discovered from a 
 - **Relationships are the prize**: The most valuable insight is how things connect — which services depend on which, what infrastructure supports what, which error patterns correlate. Focus on these connections.
 - **Only fetch what you need**: You have access to indicator summaries. Use \`get_indicator_details\` selectively to understand specifics — don't fetch every indicator.
 - **Read before writing**: Before updating an existing page, read it with \`read_memory_page\` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
+- **Cross-reference**: When a page mentions a concept that has its own page, reference it. Prefer linking over duplicating content.
 
-## Page conventions
+## Organization
 
-Organize pages by path:
-- \`architecture/{stream}/overview\` — what the stream carries, its role, key characteristics
-- \`architecture/{stream}/services/{name}\` — per-service: role, dependencies, communication patterns
-- \`architecture/{stream}/infrastructure/{name}\` — per-component: role, configuration, operational characteristics
-- \`operations/{stream}/patterns\` — failure modes, error correlations, things to watch
-
-Only create pages for entities you have evidence for. Keep paths lowercase with hyphens.
+Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
+- A page can belong to multiple categories simultaneously
+- Recommended categories: "services", "infrastructure", "streams/{stream-name}", "operations", "architecture"
+- Give each page a descriptive, unique name (e.g. "nginx-service-overview", "redis-cache-patterns")
+- Create categories as needed — they emerge organically
 
 ## Writing style
 
@@ -48,7 +47,9 @@ const taskPrompt = `Stream: \`{{{streamName}}}\`
 
 ## Task
 
-Review the indicator summaries above. Fetch details for indicators that seem important for understanding the system architecture and relationships. Read any existing pages that need updating. Then write or update wiki pages that capture a concise, high-level understanding of this stream's architecture.
+Review the indicator summaries above. Fetch details for indicators that seem important for understanding the system architecture and relationships. Read any existing pages that need updating. Then write or update wiki pages that capture a concise, high-level understanding of this system's architecture.
+
+Assign pages to relevant categories (e.g. "services", "streams/{{{streamName}}}", "architecture"). Cross-reference related pages by ID.
 
 Remember: brief pages that capture relationships across indicators are far more valuable than detailed pages that repeat raw data.`;
 
@@ -90,27 +91,27 @@ export const MemorySynthesisPrompt = createPrompt({
       },
       read_memory_page: {
         description:
-          'Read the full content of an existing wiki page by path. Use before updating a page to understand what is already there.',
+          'Read the full content of an existing wiki page by name. Use before updating a page to understand what is already there.',
         schema: {
           type: 'object' as const,
           properties: {
-            path: {
+            name: {
               type: 'string' as const,
-              description: 'The wiki page path (e.g. "architecture/logs.otel/overview")',
+              description: 'The wiki page name (e.g. "nginx-service-overview")',
             },
           },
-          required: ['path'] as const,
+          required: ['name'] as const,
         },
       },
       write_memory_page: {
         description:
-          'Create or update a wiki page. If a page already exists at the given path, it will be updated. Content should be concise markdown — a few paragraphs at most.',
+          'Create or update a wiki page. If a page already exists with the given name, it will be updated. Content should be concise markdown — a few paragraphs at most.',
         schema: {
           type: 'object' as const,
           properties: {
-            path: {
+            name: {
               type: 'string' as const,
-              description: 'The wiki page path (e.g. "architecture/logs.otel/services/nginx")',
+              description: 'Unique page name (e.g. "nginx-service-overview")',
             },
             title: {
               type: 'string' as const,
@@ -120,13 +121,24 @@ export const MemorySynthesisPrompt = createPrompt({
               type: 'string' as const,
               description: 'Concise markdown content for the page',
             },
+            categories: {
+              type: 'array' as const,
+              items: { type: 'string' as const },
+              description:
+                'Categories this page belongs to (e.g. ["services", "streams/logs-otel"])',
+            },
+            references: {
+              type: 'array' as const,
+              items: { type: 'string' as const },
+              description: 'IDs of other pages referenced from this content',
+            },
             tags: {
               type: 'array' as const,
               items: { type: 'string' as const },
-              description: 'Tags for classification (e.g. ["architecture", "logs.otel"])',
+              description: 'Tags for classification',
             },
           },
-          required: ['path', 'title', 'content', 'tags'] as const,
+          required: ['name', 'title', 'content', 'categories'] as const,
         },
       },
     } as const,

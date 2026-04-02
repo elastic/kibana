@@ -18,11 +18,11 @@ const storageSettings = {
   schema: {
     properties: {
       id: types.keyword({}),
-      path: types.keyword({}),
+      name: types.keyword({}),
       title: types.text({}),
       content: types.text({}),
-      parent_path: types.keyword({}),
-      space: types.keyword({}),
+      categories: types.keyword({}),
+      references: types.keyword({}),
       version: types.long({}),
       tags: types.keyword({}),
       created_at: types.date({}),

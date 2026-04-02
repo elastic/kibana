@@ -9,19 +9,24 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 
 /**
- * A memory entry as stored in the main memory index.
+ * A memory page as stored in the main memory index.
+ * Pages have stable UUIDs and mutable names. Organization
+ * is via categories (Wikipedia-style, many-to-many) rather
+ * than a fixed path hierarchy.
  */
 export interface MemoryEntry {
-  /** Unique ID */
+  /** Stable UUID — never changes once created */
   id: string;
-  /** Wiki-style path, e.g. "ops/runbooks/deploy-checklist" */
-  path: string;
+  /** Human-readable unique name (mutable). Used for display and lookup. */
+  name: string;
   /** Human-readable title */
   title: string;
   /** Markdown content */
   content: string;
-  /** Parent directory path, e.g. "ops/runbooks" */
-  parent_path: string;
+  /** Categories this page belongs to (e.g. ["services", "streams/logs-otel"]) */
+  categories: string[];
+  /** IDs of other pages referenced from this page's content */
+  references: string[];
   /** Monotonically increasing version per entry */
   version: number;
   /** Tags for classification */
@@ -39,7 +44,7 @@ export interface MemoryVersionRecord {
   id: string;
   entry_id: string;
   version: number;
-  path: string;
+  name: string;
   title: string;
   content: string;
   change_type: MemoryChangeType;
@@ -48,17 +53,20 @@ export interface MemoryVersionRecord {
   created_by: string;
 }
 
-export type MemoryChangeType = 'create' | 'update' | 'delete' | 'move';
+export type MemoryChangeType = 'create' | 'update' | 'delete' | 'rename';
 
 /**
- * A node in the memory tree hierarchy.
+ * A node in the category tree hierarchy.
  */
-export interface MemoryTreeNode {
-  path: string;
-  title: string;
-  id?: string;
-  has_children: boolean;
-  children: MemoryTreeNode[];
+export interface MemoryCategoryNode {
+  /** Category name segment (e.g. "services" or "logs-otel") */
+  name: string;
+  /** Full category path (e.g. "streams/logs-otel") */
+  category: string;
+  /** Pages directly in this category */
+  pages: Array<{ id: string; name: string; title: string }>;
+  /** Sub-categories */
+  children: MemoryCategoryNode[];
 }
 
 /**
@@ -66,20 +74,23 @@ export interface MemoryTreeNode {
  */
 export interface MemorySearchResult {
   id: string;
-  path: string;
+  name: string;
   title: string;
   snippet: string;
   score: number;
   updated_at: string;
   updated_by: string;
   tags: string[];
+  categories: string[];
 }
 
 /** Parameters for creating a memory entry */
 export interface CreateMemoryParams {
-  path: string;
+  name: string;
   title: string;
   content: string;
+  categories?: string[];
+  references?: string[];
   tags?: string[];
   user: string;
 }
@@ -89,8 +100,10 @@ export interface UpdateMemoryParams {
   id: string;
   content?: string;
   title?: string;
+  name?: string;
+  categories?: string[];
+  references?: string[];
   tags?: string[];
-  path?: string;
   user: string;
   changeSummary?: string;
 }
@@ -99,7 +112,8 @@ export interface UpdateMemoryParams {
 export interface SearchMemoryParams {
   query: string;
   tags?: string[];
-  parentPath?: string;
+  categories?: string[];
+  references?: string[];
   size?: number;
 }
 
@@ -111,22 +125,31 @@ export interface MemoryServiceDeps {
 
 /**
  * Memory service interface — manages the persistent knowledge base.
- * Memory is global (space-agnostic).
+ * Memory is global (space-agnostic). Pages are organized via categories
+ * (Wikipedia-style) rather than a fixed path hierarchy.
  */
 export interface MemoryService {
   // CRUD
   create(params: CreateMemoryParams): Promise<MemoryEntry>;
   get(params: { id: string }): Promise<MemoryEntry>;
-  getByPath(params: { path: string }): Promise<MemoryEntry | undefined>;
+  getByName(params: { name: string }): Promise<MemoryEntry | undefined>;
   update(params: UpdateMemoryParams): Promise<MemoryEntry>;
   delete(params: { id: string; user: string }): Promise<void>;
-  move(params: { id: string; newPath: string; user: string }): Promise<MemoryEntry>;
+  rename(params: { id: string; newName: string; user: string }): Promise<MemoryEntry>;
+
+  // Categories
+  addCategory(params: { id: string; category: string; user: string }): Promise<MemoryEntry>;
+  removeCategory(params: { id: string; category: string; user: string }): Promise<MemoryEntry>;
+  listCategories(): Promise<string[]>;
+  getCategoryTree(): Promise<MemoryCategoryNode[]>;
+
+  // References
+  getBacklinks(params: { id: string }): Promise<MemoryEntry[]>;
 
   // Search & browse
   search(params: SearchMemoryParams): Promise<MemorySearchResult[]>;
-  listChildren(params: { parentPath: string }): Promise<MemoryEntry[]>;
   listAll(): Promise<MemoryEntry[]>;
-  getTree(): Promise<MemoryTreeNode[]>;
+  listByCategory(params: { category: string }): Promise<MemoryEntry[]>;
 
   // History
   getHistory(params: { entryId: string; size?: number }): Promise<MemoryVersionRecord[]>;

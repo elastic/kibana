@@ -28,17 +28,18 @@ export const createMemoryDiscoveryTools = ({
   const tools: Record<string, ToolDefinition> = {
     memory_search: {
       description:
-        'Search the knowledge base for relevant entries about system architecture, services, and operational patterns. Returns metadata and snippets — use memory_read for full content.',
+        'Search the knowledge base for relevant pages about system architecture, services, and operational patterns. Returns metadata and snippets — use memory_read for full content.',
       schema: {
         type: 'object' as const,
         properties: {
           query: {
             type: 'string' as const,
-            description: 'Search query to match against titles, content, tags, and paths.',
+            description: 'Search query to match against titles, content, tags, and categories.',
           },
-          parent_path: {
-            type: 'string' as const,
-            description: 'Optional path prefix to scope the search.',
+          categories: {
+            type: 'array' as const,
+            items: { type: 'string' as const },
+            description: 'Optional category filter to scope the search.',
           },
           size: {
             type: 'number' as const,
@@ -49,24 +50,24 @@ export const createMemoryDiscoveryTools = ({
       },
     },
     memory_read: {
-      description: 'Read the full content of a specific knowledge base entry by path or ID.',
+      description: 'Read the full content of a specific knowledge base page by name or ID.',
       schema: {
         type: 'object' as const,
         properties: {
-          path: {
+          name: {
             type: 'string' as const,
-            description: 'Read entry by wiki path (e.g. "architecture/nginx/overview").',
+            description: 'Read page by its unique name (e.g. "nginx-overview").',
           },
           id: {
             type: 'string' as const,
-            description: 'Read entry by UUID.',
+            description: 'Read page by UUID.',
           },
         },
       },
     },
     memory_list: {
       description:
-        'List all knowledge base entries. Returns paths, titles, and IDs only — use memory_read for full content.',
+        'List all knowledge base pages. Returns names, titles, categories, and IDs only — use memory_read for full content.',
       schema: {
         type: 'object' as const,
         properties: {},
@@ -76,29 +77,26 @@ export const createMemoryDiscoveryTools = ({
 
   const callbacks: Record<string, ToolCallback> = {
     memory_search: async (toolCall) => {
-      const {
-        query,
-        parent_path: parentPath,
-        size,
-      } = toolCall.function.arguments as {
+      const { query, categories, size } = toolCall.function.arguments as {
         query: string;
-        parent_path?: string;
+        categories?: string[];
         size?: number;
       };
       try {
         const results = await memoryService.search({
           query,
-          parentPath,
+          categories,
           size,
         });
         return {
           response: {
-            results: results.map(({ id, path, title, snippet, tags }) => ({
+            results: results.map(({ id, name, title, snippet, tags, categories: cats }) => ({
               id,
-              path,
+              name,
               title,
               snippet,
               tags,
+              categories: cats,
             })),
           },
         };
@@ -107,23 +105,25 @@ export const createMemoryDiscoveryTools = ({
       }
     },
     memory_read: async (toolCall) => {
-      const { path, id } = toolCall.function.arguments as { path?: string; id?: string };
+      const { name, id } = toolCall.function.arguments as { name?: string; id?: string };
       try {
         let entry;
         if (id) {
           entry = await memoryService.get({ id });
-        } else if (path) {
-          entry = await memoryService.getByPath({ path });
+        } else if (name) {
+          entry = await memoryService.getByName({ name });
         }
         if (!entry) {
-          return { response: { error: 'Entry not found' } };
+          return { response: { error: 'Page not found' } };
         }
         return {
           response: {
             id: entry.id,
-            path: entry.path,
+            name: entry.name,
             title: entry.title,
             content: entry.content,
+            categories: entry.categories,
+            references: entry.references,
             tags: entry.tags,
           },
         };
@@ -136,7 +136,13 @@ export const createMemoryDiscoveryTools = ({
         const entries = await memoryService.listAll();
         return {
           response: {
-            entries: entries.map(({ id, path, title, tags }) => ({ id, path, title, tags })),
+            entries: entries.map(({ id, name, title, tags, categories }) => ({
+              id,
+              name,
+              title,
+              tags,
+              categories,
+            })),
           },
         };
       } catch (error) {
@@ -146,10 +152,10 @@ export const createMemoryDiscoveryTools = ({
   };
 
   const promptSnippet = `
-You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, and operational patterns. Use the memory tools to look up relevant context before generating your analysis:
-- **memory_search** — Search by keyword to find relevant entries
-- **memory_read** — Read the full content of a specific entry by path or ID
-- **memory_list** — List all entries to discover what knowledge exists
+You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, and operational patterns. Pages are organized by categories (like Wikipedia). Use the memory tools to look up relevant context before generating your analysis:
+- **memory_search** — Search by keyword to find relevant pages (supports category filter)
+- **memory_read** — Read the full content of a specific page by name or ID
+- **memory_list** — List all pages to discover what knowledge exists
 
 Check the knowledge base first if the stream or service being analyzed might have existing documentation.`;
 

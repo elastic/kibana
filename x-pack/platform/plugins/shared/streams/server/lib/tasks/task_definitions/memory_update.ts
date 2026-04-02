@@ -14,7 +14,7 @@ import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import { MemoryServiceImpl } from '../../memory';
 import { MemoryTriggerRegistry } from '../../memory/triggers';
-import { discoveryCompletedTrigger, chatLearningTrigger } from '../../memory/triggers';
+import { discoveryCompletedTrigger } from '../../memory/triggers';
 
 export interface MemoryUpdateTaskParams {
   triggerId: string;
@@ -80,7 +80,6 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
               // Create a local trigger registry for this task execution
               const registry = new MemoryTriggerRegistry({ logger: taskLogger });
               registry.register(discoveryCompletedTrigger);
-              registry.register(chatLearningTrigger);
 
               try {
                 taskLogger.info(
