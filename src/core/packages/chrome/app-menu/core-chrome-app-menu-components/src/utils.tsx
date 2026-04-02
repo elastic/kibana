@@ -10,13 +10,15 @@
 import React, { type MouseEvent, type ReactNode } from 'react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
-  EuiBadge,
   type EuiButtonColor,
   type EuiThemeComputed,
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { AppMenuBadge } from './components/app_menu_badge';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
   AppMenuConfig,
@@ -141,12 +143,15 @@ export const mapAppMenuItemToPanelItem = (
       : { onClick: hasClickHandler ? handleClick : undefined };
 
   const itemName: ReactNode = item.labelBadgeText ? (
-    <>
-      {upperFirst(item.label)}{' '}
-      <EuiBadge color="primary" data-test-subj={item.testId ? `${item.testId}-badge` : undefined}>
-        {item.labelBadgeText}
-      </EuiBadge>
-    </>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AppMenuBadge
+          text={item.labelBadgeText}
+          data-test-subj={item.testId ? `${item.testId}-badge` : undefined}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   ) : (
     upperFirst(item.label)
   );

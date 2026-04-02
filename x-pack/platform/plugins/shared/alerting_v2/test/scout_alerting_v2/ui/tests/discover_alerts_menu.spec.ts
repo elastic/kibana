@@ -26,10 +26,6 @@ test.describe(
       await apiServices.sampleData.install(SAMPLE_DATA_SET);
     });
 
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.sampleData.remove(SAMPLE_DATA_SET);
-    });
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto();
@@ -37,6 +33,10 @@ test.describe(
         'FROM kibana_sample_data_ecommerce | LIMIT 10'
       );
       await pageObjects.discover.waitUntilSearchingHasFinished();
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.sampleData.remove(SAMPLE_DATA_SET);
     });
 
     test('should show Alerts menu with v2 ES|QL rule row and New badge', async ({
