@@ -48,14 +48,14 @@ const RULE_STATUS_TO_UNIFIED: Partial<Record<RuleExecutionStatus, UnifiedExecuti
 
 interface ExecutionResultsTableProps {
   ruleId: string;
-  selectAlertsTab: () => void;
+  navigateToAlertsTab: () => void;
 }
 
 export const ExecutionResultsTable: React.FC<ExecutionResultsTableProps> = ({
   ruleId,
-  selectAlertsTab,
+  navigateToAlertsTab,
 }) => {
-  const onFilterByExecutionId = useFilterByExecutionId(selectAlertsTab);
+  const onFilterByExecutionId = useFilterByExecutionId(navigateToAlertsTab);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [selectedItem, setSelectedItem] = useState<UnifiedExecutionResult | null>(null);
