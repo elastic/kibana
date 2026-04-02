@@ -222,10 +222,6 @@ export const ManageIntegrationsTable: React.FC<{
           `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`,
           { version: '1' }
         );
-        (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-          'aiv2_integration_delete_confirmed',
-          {}
-        );
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.fleet.epmList.manageIntegrations.actions.deleteSuccessTitle',
@@ -242,7 +238,7 @@ export const ManageIntegrationsTable: React.FC<{
         throw error;
       }
     },
-    [http, notifications, onRefetch, automaticImportVTwo]
+    [http, notifications, onRefetch]
   );
 
   const fetchIntegrationReviewDetails = useCallback(

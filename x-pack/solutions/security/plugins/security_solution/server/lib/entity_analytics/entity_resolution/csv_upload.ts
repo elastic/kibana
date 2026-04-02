@@ -24,6 +24,7 @@ export type { ResolutionCsvUploadRowResponse, ResolutionCsvUploadResponse };
 const VALID_ENTITY_TYPES = new Set(RESOLUTION_CSV_VALID_ENTITY_TYPES);
 const RESERVED_COLUMNS = new Set(RESOLUTION_CSV_REQUIRED_COLUMNS);
 const ENTITY_SEARCH_PAGE_SIZE = 100;
+const MAX_MATCHED_ENTITIES = 1000;
 const ENTITY_ID_FIELD = 'entity.id';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
@@ -188,6 +189,12 @@ async function findMatchingEntities(
       }
     }
 
+    if (entityIds.length > MAX_MATCHED_ENTITIES) {
+      throw new Error(
+        `Matched more than ${MAX_MATCHED_ENTITIES} entities. Narrow your identifying fields to be more specific.`
+      );
+    }
+
     searchAfter = nextSearchAfter;
   } while (searchAfter);
 
@@ -222,7 +229,12 @@ async function processRow(
   }
 
   // 3. Find alias matches
-  const matchedEntityIds = await findMatchingEntities(type, identityFields, resolvedTo, deps);
+  let matchedEntityIds: string[];
+  try {
+    matchedEntityIds = await findMatchingEntities(type, identityFields, resolvedTo, deps);
+  } catch (e) {
+    return errorResult(e instanceof Error ? e.message : String(e));
+  }
 
   if (matchedEntityIds.length === 0) {
     return { status: 'unmatched', matchedEntities: 0, linkedEntities: 0, skippedEntities: 0 };
