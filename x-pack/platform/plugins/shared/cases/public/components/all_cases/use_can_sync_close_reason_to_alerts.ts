@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 interface CaseSyncSettings {
   syncAlerts: boolean;
@@ -30,9 +30,9 @@ type UseCanSyncCloseReasonToAlertsParams = SingleCaseParams | BulkCaseParams;
 export const useCanSyncCloseReasonToAlerts = (
   params: UseCanSyncCloseReasonToAlertsParams
 ): boolean => {
-  const { features } = useCasesContext();
+  const { isSyncAlertsEnabled } = useCasesFeatures();
 
-  if (!features.alerts.sync) {
+  if (!isSyncAlertsEnabled) {
     return false;
   }
 

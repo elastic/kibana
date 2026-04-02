@@ -516,22 +516,27 @@ export const bulkUpdate = async (
 
     // Validate close reasons
     await Promise.all(
-      casesToUpdate
-        .filter(({ updateReq }) => updateReq.closeReason != null)
-        .map(async ({ updateReq, originalCase }) => {
-          const { closeReason } = updateReq;
-          if (closeReason == null) {
-            return Promise.resolve();
+      casesToUpdate.map(async ({ updateReq, originalCase }) => {
+        const { closeReason } = updateReq;
+        if (closeReason == null) {
+          return;
+        }
+
+        // The UX only allows a close reason to be provided when syncAlerts is on
+        if (!originalCase.attributes.settings.syncAlerts) {
+          throw Boom.badRequest(
+            `Cannot provide a close reason for case ${updateReq.id} when sync alerts is disabled.`
+          );
+        }
+        // The validator is used by specific owners (e.g., securitySolution) to restrict valid close reasons.
+        // If no validator is registered, all close reasons are accepted.
+        if (closeReasonValidator != null) {
+          const isValid = await closeReasonValidator(closeReason, originalCase.attributes.owner);
+          if (!isValid) {
+            throw Boom.badRequest(`Invalid close reason: "${closeReason}"`);
           }
-          // The validator is used by specific owners (e.g., securitySolution) to restrict valid close reasons.
-          // If no validator is registered, all non-empty close reasons are accepted.
-          if (closeReasonValidator != null) {
-            const isValid = await closeReasonValidator(closeReason, originalCase.attributes.owner);
-            if (!isValid) {
-              throw Boom.badRequest(`Invalid close reason: "${closeReason}"`);
-            }
-          }
-        })
+        }
+      })
     );
 
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
