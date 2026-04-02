@@ -477,7 +477,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderExpanderColumn = useCallback(
     (item: PackQueryStatusItem) =>
-      item?.action_id && item?.id && data?.length && data.length > 1 ? (
+      item?.action_id && item?.id ? (
         <EuiButtonIcon
           data-test-subj={`toggleIcon-${item.id}`}
           onClick={getHandleErrorsToggle(item)}
@@ -486,10 +486,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
             defaultMessage: 'Toggle results',
           })}
         />
-      ) : (
-        <></>
-      ),
-    [data, getHandleErrorsToggle, itemIdToExpandedRowMap]
+      ) : null,
+    [getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
 
   const columns = useMemo(
