@@ -116,7 +116,7 @@ export const previewRulesRoute = (
         try {
           const [coreStart, { data, security: securityService, share, dataViews }] =
             await getStartServices();
-          const searchSourceClient = await data.search.searchSource.asScoped(request, {
+          const searchSourceClientWithCps = await data.search.searchSource.asScoped(request, {
             projectRouting: 'space',
           });
           const scopedClusterClientWithCps = coreStart.elasticsearch.client.asScoped(request, {
@@ -284,7 +284,7 @@ export const previewRulesRoute = (
                   getSearchSourceClient: async () =>
                     wrapSearchSourceClient({
                       abortController,
-                      searchSourceClient,
+                      searchSourceClient: searchSourceClientWithCps,
                     }),
                   getMaintenanceWindowIds: async () => [],
                   getMaintenanceWindowNames: async () => [],
@@ -292,7 +292,9 @@ export const previewRulesRoute = (
                   getDataViews: async () => dataViewsService,
                   share,
                   getAsyncSearchClient: (strategy) => {
-                    const client = data.search.asScoped(request, { projectRouting: 'space' });
+                    const clientWithCps = data.search.asScoped(request, {
+                      projectRouting: 'space',
+                    });
                     return wrapAsyncSearchClient({
                       rule: {
                         name: rule.name,
@@ -302,7 +304,7 @@ export const previewRulesRoute = (
                       },
                       logger,
                       strategy,
-                      client,
+                      client: clientWithCps,
                       abortController,
                     });
                   },
