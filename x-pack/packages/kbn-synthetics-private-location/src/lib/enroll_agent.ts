@@ -11,7 +11,7 @@ import type { CliOptions } from '../types';
 import type { KibanaAPIClient } from './kibana_api_client';
 
 export async function enrollAgent(
-  { kibanaUrl, elasticsearchHost }: CliOptions,
+  { kibanaUrl, elasticsearchHost, kibanaUsername, kibanaPassword }: CliOptions,
   enrollmentToken: string,
   kibanaApiClient: KibanaAPIClient
 ) {
@@ -23,6 +23,7 @@ export async function enrollAgent(
   if (formattedElasticsearchHost.hostname === 'localhost') {
     formattedElasticsearchHost.hostname = 'host.docker.internal';
   }
+  const kibanaHostUrl = formattedKibanaURL.href.replace(/\/$/, '');
   const version = `${await kibanaApiClient.getKibanaVersion()}-SNAPSHOT`;
   await new Promise((res, rej) => {
     try {
@@ -39,11 +40,11 @@ export async function enrollAgent(
           '-e',
           'FLEET_INSECURE=1',
           '-e',
-          `KIBANA_HOST=${formattedKibanaURL.origin}`,
+          `KIBANA_HOST=${kibanaHostUrl}`,
           '-e',
-          'KIBANA_USERNAME=elastic',
+          `KIBANA_USERNAME=${kibanaUsername}`,
           '-e',
-          'KIBANA_PASSWORD=changeme',
+          `KIBANA_PASSWORD=${kibanaPassword}`,
           '-e',
           'KIBANA_FLEET_SETUP=1',
           '-p',

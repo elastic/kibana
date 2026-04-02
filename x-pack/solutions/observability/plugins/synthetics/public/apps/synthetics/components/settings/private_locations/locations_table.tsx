@@ -33,6 +33,8 @@ import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
+import { PolicySizeFlyout } from './policy_size_flyout';
+import { DiagnosticsAllFlyout } from './diagnostics_all_flyout';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
 interface ListItem extends PrivateLocation {
@@ -54,6 +56,8 @@ export const PrivateLocationsTable = ({
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [diagnosticLocation, setDiagnosticLocation] = useState<PrivateLocation | null>(null);
+  const [isDiagnosticsAllOpen, setIsDiagnosticsAllOpen] = useState(false);
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -118,6 +122,14 @@ export const PrivateLocationsTable = ({
       name: ACTIONS_LABEL,
       actions: [
         {
+          name: DIAGNOSTICS_LABEL,
+          description: DIAGNOSTICS_LABEL,
+          icon: 'inspect',
+          type: 'icon',
+          'data-test-subj': 'action-diagnostics',
+          onClick: (item: ListItem) => setDiagnosticLocation(item),
+        },
+        {
           name: EDIT_LOCATION,
           description: EDIT_LOCATION,
           isPrimary: true,
@@ -154,6 +166,14 @@ export const PrivateLocationsTable = ({
 
   const renderToolRight = () => {
     return [
+      <EuiButton
+        key="diagnosticsAllButton"
+        data-test-subj="diagnosticsAllButton"
+        onClick={() => setIsDiagnosticsAllOpen(true)}
+        iconType="inspect"
+      >
+        {DIAGNOSTICS_ALL_LABEL}
+      </EuiButton>,
       <NoPermissionsTooltip
         canEditSynthetics={canSave}
         canManagePrivateLocations={canManagePrivateLocations}
@@ -175,6 +195,15 @@ export const PrivateLocationsTable = ({
 
   return (
     <div>
+      {diagnosticLocation && (
+        <PolicySizeFlyout
+          location={diagnosticLocation}
+          onClose={() => setDiagnosticLocation(null)}
+        />
+      )}
+      {isDiagnosticsAllOpen && (
+        <DiagnosticsAllFlyout onClose={() => setIsDiagnosticsAllOpen(false)} />
+      )}
       <EuiText>
         {START_ADDING_LOCATIONS_DESCRIPTION} <PrivateLocationDocsLink label={LEARN_MORE} />
       </EuiText>
@@ -241,6 +270,13 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManage
   defaultMessage: 'Agent Policy',
 });
 
+const DIAGNOSTICS_LABEL = i18n.translate(
+  'xpack.synthetics.settingsRoute.privateLocations.diagnosticsLabel',
+  {
+    defaultMessage: 'Diagnostics',
+  }
+);
+
 const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',
   {
@@ -255,6 +291,11 @@ const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLoca
 const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
   defaultMessage: 'Create location',
 });
+
+const DIAGNOSTICS_ALL_LABEL = i18n.translate(
+  'xpack.synthetics.settingsRoute.privateLocations.diagnosticsAllLabel',
+  { defaultMessage: 'Run diagnostics' }
+);
 
 export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
   defaultMessage: 'Learn more.',

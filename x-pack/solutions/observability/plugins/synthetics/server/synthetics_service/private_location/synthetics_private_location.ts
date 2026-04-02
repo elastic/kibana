@@ -471,6 +471,7 @@ export class SyntheticsPrivateLocation {
       this.packagePolicyService.bulkDelete({
         policyIdsToDelete: uniqueToDelete,
         spaceId,
+        prefetchedPolicies: existingPolicies as NewPackagePolicyWithId[],
       }),
     ]);
 
@@ -498,33 +499,55 @@ export class SyntheticsPrivateLocation {
 
   /**
    * Fetches existing package policies for the given configs and locations.
-   * Looks for new (space-agnostic) format and legacy format for all spaces
-   * that have any synthetics monitors.
+   * First checks new-format IDs only; then looks up legacy-format IDs across
+   * all spaces only when some policies are missing, avoiding the expensive
+   * `getAllSpacesWithMonitors` aggregation when it's not needed.
    */
   async getExistingPolicies(
     configs: HeartbeatConfig[],
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
+    const newFormatIds = new Set<string>();
+    for (const config of configs) {
+      for (const privateLocation of allPrivateLocations) {
+        newFormatIds.add(this.getPolicyId(config, privateLocation.id));
+      }
+    }
+
+    const newFormatPolicies = await this.packagePolicyService.getByIds({
+      spaceId,
+      packagePolicyIds: Array.from(newFormatIds),
+    });
+
+    const foundNewFormatIds = new Set(newFormatPolicies.map((p) => p.id));
+    const allNewFormatFound = [...newFormatIds].every((id) => foundNewFormatIds.has(id));
+
+    if (allNewFormatFound) {
+      return { policies: newFormatPolicies, allSpaces: new Set([spaceId]) };
+    }
+
     const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
     const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
-    const policyIdsToFetch = new Set<string>();
+    const legacyIds = new Set<string>();
 
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
-        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
         this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
-          (id) => policyIdsToFetch.add(id)
+          (id) => legacyIds.add(id)
         );
       }
     }
 
-    const policies = await this.packagePolicyService.getByIds({
+    const legacyPolicies = await this.packagePolicyService.getByIds({
       spaceId,
-      packagePolicyIds: Array.from(policyIdsToFetch),
+      packagePolicyIds: Array.from(legacyIds),
     });
 
-    return { policies, allSpaces };
+    return {
+      policies: [...newFormatPolicies, ...legacyPolicies],
+      allSpaces,
+    };
   }
 
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {

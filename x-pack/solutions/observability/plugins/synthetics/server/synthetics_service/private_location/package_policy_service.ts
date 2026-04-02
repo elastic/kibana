@@ -140,24 +140,32 @@ export class PackagePolicyService {
   async bulkDelete({
     policyIdsToDelete,
     spaceId,
+    prefetchedPolicies,
   }: {
     policyIdsToDelete: string[];
     spaceId: string;
+    /** When provided, skips the extra `getByIds` call for policies already fetched by the caller. */
+    prefetchedPolicies?: NewPackagePolicyWithId[];
   }) {
     if (policyIdsToDelete.length === 0) {
       return;
     }
 
+    const deleteSet = new Set(policyIdsToDelete);
+    const policies = prefetchedPolicies
+      ? prefetchedPolicies.filter((p) => deleteSet.has(p.id!))
+      : await this.getByIds({ spaceId, packagePolicyIds: policyIdsToDelete });
+
     const promises = (
       await this.getDefaultAndSpacePackagePolicies({
-        policies: await this.getByIds({ spaceId, packagePolicyIds: policyIdsToDelete }),
+        policies,
         spaceId,
       })
-    ).map(({ client, policies }) =>
+    ).map(({ client, policies: routedPolicies }) =>
       this.server.fleet.packagePolicyService.delete(
         client,
         this.getInternalEsClient(),
-        policies.map((policy) => policy.id!),
+        routedPolicies.map((policy) => policy.id!),
         {
           force: true,
           asyncDeploy: true,

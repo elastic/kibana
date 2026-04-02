@@ -5,19 +5,31 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { isEmpty } from 'lodash';
+import type {
+  ISavedObjectsRepository,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
+import { isEmpty, uniqBy } from 'lodash';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { getAgentPoliciesAsInternalUser } from '../routes/settings/private_locations/get_agent_policies';
-import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
+import type {
+  PrivateLocationAttributes,
+  SyntheticsPrivateLocationsAttributes,
+} from '../runtime_types/private_locations';
 import type { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
 import type { RouteContext } from '../routes/types';
-import { privateLocationSavedObjectName } from '../../common/saved_objects/private_locations';
+import {
+  legacyPrivateLocationsSavedObjectId,
+  legacyPrivateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
+} from '../../common/saved_objects/private_locations';
 import type { EditPrivateLocationAttributes } from '../routes/settings/private_locations/edit_private_location';
 
 export class PrivateLocationRepository {
   internalSOClient: ISavedObjectsRepository;
   constructor(private routeContext: RouteContext) {
-    const { server } = routeContext;
+    const { server, spaceId } = routeContext;
     this.internalSOClient = server.coreStart.savedObjects.createInternalRepository();
   }
 
@@ -135,7 +147,61 @@ export class PrivateLocationRepository {
       });
     }
   }
+
+  getPrivateLocations = async (): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
+    try {
+      const { savedObjectsClient, spaceId } = this.routeContext;
+
+      const [results, legacyLocations] = await Promise.all([
+        getNewPrivateLocations(savedObjectsClient, spaceId),
+        getLegacyPrivateLocations(savedObjectsClient),
+      ]);
+
+      return uniqBy([...results, ...legacyLocations], 'id');
+    } catch (getErr) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        return [];
+      }
+      throw getErr;
+    }
+  };
 }
+
+const getNewPrivateLocations = async (client: SavedObjectsClientContract, spaceId?: string) => {
+  const finder = client.createPointInTimeFinder<PrivateLocationAttributes>({
+    type: privateLocationSavedObjectName,
+    perPage: 1000,
+    ...(spaceId ? { namespaces: [spaceId] } : {}),
+  });
+
+  const results: Array<
+    SavedObject<PrivateLocationAttributes>['attributes'] & {
+      spaces: SavedObject<PrivateLocationAttributes>['namespaces'];
+      id: SavedObject<PrivateLocationAttributes>['id'];
+    }
+  > = [];
+
+  for await (const response of finder.find()) {
+    results.push(
+      ...response.saved_objects.map((r) => ({ ...r.attributes, id: r.id, spaces: r.namespaces }))
+    );
+  }
+
+  finder.close().catch((e) => {});
+  return results;
+};
+
+const getLegacyPrivateLocations = async (client: SavedObjectsClientContract) => {
+  try {
+    const obj = await client.get<SyntheticsPrivateLocationsAttributes>(
+      legacyPrivateLocationsSavedObjectName,
+      legacyPrivateLocationsSavedObjectId
+    );
+    return obj?.attributes.locations ?? [];
+  } catch (getErr) {
+    return [];
+  }
+};
 
 const formatSpaces = (spaces: string[] | undefined) => {
   return (

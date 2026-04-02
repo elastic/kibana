@@ -146,9 +146,14 @@ export class SyntheticsMonitorClient {
       await this.syntheticsService.deleteConfigs(deletedPublicConfigs);
     }
 
+    const relevantPrivateLocations = this.getRelevantPrivateLocations(
+      monitors,
+      allPrivateLocations
+    );
+
     const privateEditPromise = this.privateLocationAPI.editMonitors(
       privateConfigs,
-      allPrivateLocations,
+      relevantPrivateLocations,
       spaceId,
       maintenanceWindows
     );
@@ -233,6 +238,30 @@ export class SyntheticsMonitorClient {
     const syncErrors = this.syntheticsService.runOnceConfigs(publicConfig);
 
     return await Promise.all([newPolicies, syncErrors]);
+  }
+
+  /**
+   * Returns only the private locations relevant to the monitors being edited —
+   * the union of current and previous private locations. This avoids iterating
+   * over ALL private locations in the system during policy reconciliation.
+   */
+  private getRelevantPrivateLocations(
+    monitors: Array<{
+      monitor: MonitorFields;
+      decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
+    }>,
+    allPrivateLocations: SyntheticsPrivateLocations
+  ): SyntheticsPrivateLocations {
+    const relevantIds = new Set<string>();
+    for (const { monitor, decryptedPreviousMonitor } of monitors) {
+      for (const loc of monitor[ConfigKey.LOCATIONS]) {
+        if (!loc.isServiceManaged) relevantIds.add(loc.id);
+      }
+      for (const loc of decryptedPreviousMonitor.attributes[ConfigKey.LOCATIONS]) {
+        if (!loc.isServiceManaged) relevantIds.add(loc.id);
+      }
+    }
+    return allPrivateLocations.filter((loc) => relevantIds.has(loc.id));
   }
 
   hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>) {

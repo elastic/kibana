@@ -305,6 +305,23 @@ export class MonitorConfigRepository {
     return combineAndSortSavedObjects<T>(results, options, page, perPage);
   }
 
+  /**
+   * Decrypts monitors by their IDs in parallel. Faster than `findDecryptedMonitors`
+   * (which uses PIT finders + KQL filters) when the exact IDs are known.
+   */
+  async bulkGetDecrypted(
+    ids: string[],
+    spaceId: string
+  ): Promise<Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>> {
+    const results = await Promise.all(
+      ids.map(async (id) => {
+        const { decryptedMonitor } = await this.getDecrypted(id, spaceId);
+        return decryptedMonitor;
+      })
+    );
+    return results;
+  }
+
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
     const getDecrypted = async (soType: string) => {
       // Handle legacy filter if the type is legacy
