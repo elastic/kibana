@@ -229,8 +229,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('visualizeSaveButton');
 
         await visualize.ensureSavePanelOpen();
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
-        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
+        const libraryCheckbox = await find.allByCssSelector('#add-to-library-checkbox');
+        expect(libraryCheckbox).to.be.empty();
 
         await timeToVisualize.saveFromModal('My New Vis 1', {
           addToDashboard: 'new',
