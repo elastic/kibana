@@ -235,8 +235,13 @@ export const dataLoaders = (
     },
 
     deleteIndexedEndpointHosts: async (indexedData: IndexedHostsAndAlertsResponse) => {
-      const { kbnClient, esClient } = await stackServicesPromise;
-      return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
+      const { kbnClient, esClient, log } = await stackServicesPromise;
+      return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData).catch((error) => {
+        // Log any cleanup error but don't return a failed promise since we likely don't want the test
+        // that loaded it to fail on clean up.
+        log.warning(`Failed to delete indexed endpoint hosts and alerts: ${error.message}`, error);
+        return null;
+      });
     },
 
     indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
