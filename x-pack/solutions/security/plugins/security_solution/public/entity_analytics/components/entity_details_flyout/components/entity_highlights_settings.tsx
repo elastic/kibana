@@ -109,9 +109,13 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     () => ({
       attachmentType: SecurityAgentBuilderAttachments.entity,
       attachmentData: {
-        identifierType: entityType,
-        identifier: entityIdentifier,
-        attachmentLabel: `${entityType}: ${entityIdentifier}`,
+        entities: [
+          {
+            entityType,
+            entityId: entityIdentifier,
+            attachmentLabel: `${entityType}: ${entityIdentifier}`,
+          },
+        ],
       },
       attachmentPrompt: ENTITY_PROMPT,
     }),

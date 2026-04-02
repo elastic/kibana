@@ -22,12 +22,15 @@ import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common
 import { getRiskScoreTimeSeriesIndex } from '../../../../common/entity_analytics/risk_engine/indices';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import {
+  ENTITY_STORE_ENTITY_TYPE_FIELD,
+  ENTITY_STORE_ENTITY_ID_FIELD,
+  ENTITY_STORE_RISK_SCORE_FIELD,
+  getRowValue,
+  addOrUpdateEntityAttachment,
+} from '../../utils/entity_utils';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityTool } from '../constants';
-
-const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
-const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
-const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -82,14 +85,6 @@ export const normalizeEntityId = (
   return entityId.startsWith(prefix) ? entityId : `${prefix}${entityId}`;
 };
 
-const getRowValue = (
-  columns: Array<{ name: string }>,
-  row: unknown[],
-  columnName: string
-): unknown => {
-  const idx = columns.findIndex((col) => col.name === columnName);
-  return idx >= 0 ? row[idx] : undefined;
-};
 interface GetAlertIdsFromRiskScoreIndexParams {
   entityId: string;
   entityType: string;
@@ -254,7 +249,7 @@ const enrichEntityResult = async ({
   let resultRow = [...row];
 
   // Check if entity has a risk score; if so, fetch inputs from the risk score index
-  const riskScoreNorm = getRowValue(columns, row, ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD);
+  const riskScoreNorm = getRowValue(columns, row, ENTITY_STORE_RISK_SCORE_FIELD);
   if (riskScoreNorm != null) {
     const esType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
     const esId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
@@ -355,7 +350,7 @@ export const getEntityTool = (
         }
       },
     },
-    handler: async (params, { spaceId, esClient }) => {
+    handler: async (params, { attachments, spaceId, esClient }) => {
       logger.debug(
         `${SECURITY_GET_ENTITY_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -397,9 +392,64 @@ export const getEntityTool = (
           )
         );
 
+        let resultAttachmentId: string | undefined;
+        let resultAttachmentVersion: number | undefined;
+
+        try {
+          const attachment = await addOrUpdateEntityAttachment({
+            attachments,
+            entities: enrichedResults.map((res) => {
+              const firstValue = res.data.values[0];
+              const entityTypeValue = getRowValue(
+                res.data.columns,
+                firstValue,
+                ENTITY_STORE_ENTITY_TYPE_FIELD
+              );
+              const entityIdValue = getRowValue(
+                res.data.columns,
+                firstValue,
+                ENTITY_STORE_ENTITY_ID_FIELD
+              );
+              const riskScoreRaw = getRowValue(
+                res.data.columns,
+                firstValue,
+                ENTITY_STORE_RISK_SCORE_FIELD
+              );
+              const riskScore = typeof riskScoreRaw === 'number' ? riskScoreRaw : undefined;
+              return {
+                entityType: String(entityTypeValue ?? '') as IdentifierType,
+                entityId: String(entityIdValue ?? ''),
+                ...(riskScore !== undefined && { riskScore }),
+              };
+            }),
+            description: `Entity: ${normalizedEntityId}`,
+          });
+
+          resultAttachmentId = attachment?.id;
+          resultAttachmentVersion = attachment?.current_version ?? 1;
+        } catch (error) {
+          logger.warn(
+            `Could not add entity attachment: ${error instanceof Error ? error.message : error}`
+          );
+        }
+
         success = true;
         entitiesReturned = enrichedResults.length;
-        return { results: enrichedResults };
+
+        return {
+          results: [
+            ...enrichedResults,
+            ...(resultAttachmentId
+              ? [
+                  {
+                    tool_result_id: getToolResultId(),
+                    type: 'attachment',
+                    data: { attachmentId: resultAttachmentId, version: resultAttachmentVersion },
+                  },
+                ]
+              : []),
+          ],
+        };
       } catch (error) {
         errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {

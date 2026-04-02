@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { entityAttachmentDefinition } from './entity_attachment';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -31,13 +32,6 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
       defaultMessage: 'Security Alert',
     }),
     icon: 'bell',
-  },
-  {
-    type: SecurityAgentBuilderAttachments.entity,
-    label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.entity.label', {
-      defaultMessage: 'Risk Entity',
-    }),
-    icon: 'user',
   },
   {
     type: SecurityAgentBuilderAttachments.rule,
@@ -67,4 +61,5 @@ export const registerAttachmentUiDefinitions = ({
       createAttachmentTypeConfig(label, icon)
     );
   });
+  attachments.addAttachmentType(SecurityAgentBuilderAttachments.entity, entityAttachmentDefinition);
 };

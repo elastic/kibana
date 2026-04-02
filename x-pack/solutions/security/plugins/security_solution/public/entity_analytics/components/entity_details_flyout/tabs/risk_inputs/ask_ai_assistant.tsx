@@ -71,9 +71,13 @@ export const AskAiAssistant = <T extends EntityType>({
     () => ({
       attachmentType: SecurityAgentBuilderAttachments.entity,
       attachmentData: {
-        identifierType: entityType,
-        identifier: entityName,
-        attachmentLabel: `${entityType}: ${entityName}`,
+        entities: [
+          {
+            entityType,
+            entityId: entityName,
+            attachmentLabel: `${entityType}: ${entityName}`,
+          },
+        ],
       },
       attachmentPrompt: ENTITY_PROMPT,
     }),

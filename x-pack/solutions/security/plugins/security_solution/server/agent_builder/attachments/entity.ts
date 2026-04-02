@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ExperimentalFeatures } from '../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
-import { securityAttachmentDataSchema } from './security_attachment_data_schema';
-
-const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  identifierType: z.enum(['host', 'user', 'service', 'generic']),
-  identifier: z.string().min(1),
-});
+import {
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_GET_ENTITY_TOOL_ID,
+  SECURITY_SEARCH_ENTITIES_TOOL_ID,
+} from '../tools';
+import { entityAttachmentDataSchema } from '../utils/entity_utils';
 
 /**
  * Creates the definition for the `entity` attachment type.
  */
-export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
+export const createEntityAttachmentType = (
+  experimentalFeatures: ExperimentalFeatures
+): AttachmentTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.entity,
     validate: (input) => {
-      const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
+      const parseResult = entityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
         return { valid: true, data: parseResult.data };
       } else {
@@ -30,7 +31,10 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
       }
     },
     format: () => ({}),
-    getTools: () => [SECURITY_ENTITY_RISK_SCORE_TOOL_ID],
+    getTools: () =>
+      experimentalFeatures.entityAnalyticsEntityStoreV2
+        ? [SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
+        : [SECURITY_ENTITY_RISK_SCORE_TOOL_ID],
     getAgentDescription: () => {
       const description = `You have access to a risk entity that needs to be evaluated. The entity has an identifierType and identifier that you should use to query the risk score.
 

@@ -8,6 +8,7 @@
 import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { coreMock } from '@kbn/core/server/mocks';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import {
@@ -16,6 +17,8 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
+import type { EntityAttachmentData } from '../../utils/entity_utils';
+import { ENTITY_ATTACHMENT_CONVERSATION_ID } from '../../utils/entity_utils';
 import type { ExperimentalFeatures } from '../../../../common';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
@@ -803,6 +806,129 @@ describe('getEntityTool', () => {
       expect(errorResult.data.message).toContain(
         'Error fetching entity from Entity Store: ES|QL failure'
       );
+    });
+
+    describe('attachments', () => {
+      const mockAttachment = {
+        id: ENTITY_ATTACHMENT_CONVERSATION_ID,
+        current_version: 1,
+        type: 'entity',
+        active: true,
+        versions: [],
+      };
+
+      let attachmentsMock: ReturnType<
+        typeof agentBuilderMocks.tools.createHandlerContext
+      >['attachments'];
+
+      beforeEach(() => {
+        attachmentsMock = agentBuilderMocks.tools.createHandlerContext().attachments;
+        attachmentsMock.get.mockReturnValue(undefined);
+        attachmentsMock.add.mockResolvedValue(mockAttachment);
+      });
+
+      it('calls attachments.add with entity data including riskScore', async () => {
+        (executeEsql as jest.Mock)
+          // 1. Entity lookup: entity has a risk score
+          .mockResolvedValueOnce({
+            columns: [
+              { name: 'entity.id', type: 'keyword' },
+              { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+              { name: 'entity.risk.calculated_score_norm', type: 'double' },
+            ],
+            values: [['host:server1', 'host', 75.5]],
+          })
+          // 2. Risk score inputs lookup: no inputs found
+          .mockResolvedValueOnce({ columns: [], values: [] });
+
+        await tool.handler(
+          { entityType: 'host', entityId: 'server1' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+            attachments: attachmentsMock,
+          })
+        );
+
+        expect(attachmentsMock.add).toHaveBeenCalledTimes(1);
+        expect(attachmentsMock.add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              entities: [{ entityType: 'host', entityId: 'host:server1', riskScore: 75.5 }],
+            }),
+          })
+        );
+      });
+
+      it('calls attachments.add without riskScore when entity has no risk score', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [['host:server1', 'host']],
+        });
+
+        await tool.handler(
+          { entityType: 'host', entityId: 'server1' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+            attachments: attachmentsMock,
+          })
+        );
+
+        expect(attachmentsMock.add).toHaveBeenCalledTimes(1);
+        const calledWith = attachmentsMock.add.mock.calls[0][0] as {
+          data: { entities: EntityAttachmentData['entities'] };
+        };
+        expect(calledWith.data.entities[0]).not.toHaveProperty('riskScore');
+        expect(calledWith.data.entities[0]).toEqual({
+          entityType: 'host',
+          entityId: 'host:server1',
+        });
+      });
+
+      it('includes attachment result in output when attachment is created', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [['host:server1', 'host']],
+        });
+
+        const result = (await tool.handler(
+          { entityType: 'host', entityId: 'server1' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+            attachments: attachmentsMock,
+          })
+        )) as ToolHandlerStandardReturn;
+
+        const attachmentResult = result.results.find((r) => r.type === 'attachment');
+        expect(attachmentResult).toBeDefined();
+        expect(attachmentResult?.data).toEqual({
+          attachmentId: ENTITY_ATTACHMENT_CONVERSATION_ID,
+          version: 1,
+        });
+      });
+
+      it('omits attachment result when attachment creation throws', async () => {
+        (executeEsql as jest.Mock).mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          ],
+          values: [['host:server1', 'host']],
+        });
+        attachmentsMock.add.mockRejectedValueOnce(new Error('attachment error'));
+
+        const result = (await tool.handler(
+          { entityType: 'host', entityId: 'server1' },
+          createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+            attachments: attachmentsMock,
+          })
+        )) as ToolHandlerStandardReturn;
+
+        expect(result.results.every((r) => r.type !== 'attachment')).toBe(true);
+        expect(result.results[0].type).toBe(ToolResultType.esqlResults);
+      });
     });
 
     describe('telemetry', () => {
