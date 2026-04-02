@@ -87,6 +87,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "hideTable": false,
             "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
@@ -121,6 +122,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -149,6 +151,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
@@ -178,6 +181,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "hideTable": false,
             "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
@@ -212,6 +216,7 @@ describe('tab mapping utils', () => {
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -240,6 +245,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
@@ -328,6 +334,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "the-saved-search-id-with-timefield",
           "isTextBasedQuery": false,
           "managed": true,
@@ -396,6 +403,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -435,6 +443,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -548,6 +557,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -591,6 +601,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
           "label": "Tab 2",
@@ -647,6 +658,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -694,6 +706,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
           "label": "Tab 2",

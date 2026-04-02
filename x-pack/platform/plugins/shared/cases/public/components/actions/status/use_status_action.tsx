@@ -151,6 +151,7 @@ export const useStatusAction = ({
               userProfile,
             });
           },
+          originalCases: selectedCases,
         },
         { onSuccess: onActionSuccess }
       );
