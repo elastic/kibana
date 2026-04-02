@@ -217,7 +217,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
                     rootLevelMap={rootLevelMap}
                     stepsProcessingSummaryMap={stepsProcessingSummaryMap}
                     isFirstStepInLevel={index === 0}
-                    isLastStepInLevel={index === ifBranchSteps.length - 1 && !hasElseBranch}
+                    isLastStepInLevel={index === ifBranchSteps.length - 1}
                     readOnly={props.readOnly}
                   />
                 </li>
