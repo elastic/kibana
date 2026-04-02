@@ -14,16 +14,13 @@ export const filterSchema = schema.object(
     language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
       defaultValue: 'kuery',
     }),
-    /**
-     * Filter query
-     */
     query: schema.string({
       meta: {
-        description: 'Filter query',
+        description: 'A query expression in KQL or Lucene syntax',
       },
     }),
   },
-  { meta: { id: 'filterSimple', title: 'Simple Filter' } }
+  { meta: { id: 'filterSimple', title: 'Filter' } }
 );
 
 export const filterWithLabelSchema = schema.object(

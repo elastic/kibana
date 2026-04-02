@@ -14,20 +14,27 @@ export function fromFilterAPIToLensState(filter: LensApiFilterType | undefined):
   if (!filter) {
     return;
   }
-  return filter;
+
+  return {
+    language: filter.language,
+    query: filter.query,
+  };
 }
 
-export function fromFilterLensStateToAPI(filter: Query): LensApiFilterType | undefined {
-  if (typeof filter.query !== 'string') {
+export function fromFilterLensStateToAPI({
+  query,
+  language,
+}: Query): LensApiFilterType | undefined {
+  if (typeof query !== 'string') {
     return;
   }
-  return {
-    query: filter.query,
-    language: filter.language as 'kuery' | 'lucene',
-  };
+  if (language !== 'kuery' && language !== 'lucene') {
+    return;
+  }
+  return { query, language };
 }
 
 export const DEFAULT_FILTER = {
   query: '*',
-  language: 'kuery' as 'kuery' | 'lucene',
-};
+  language: 'kuery',
+} satisfies LensApiFilterType;
