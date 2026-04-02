@@ -56,7 +56,7 @@ export function SettingsTab() {
   );
   const [indexPatterns, setIndexPatterns] = useState<string>(savedIndexPatterns);
 
-  const ce = useContinuousExtractionSettings({
+  const continuousExtraction = useContinuousExtractionSettings({
     globalClient: core.settings.globalClient,
     http: core.http,
   });
@@ -64,13 +64,13 @@ export function SettingsTab() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
 
-  const hasChanges = indexPatterns !== savedIndexPatterns || ce.hasChanged;
+  const hasChanges = indexPatterns !== savedIndexPatterns || continuousExtraction.hasChanged;
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
-    ce.reset();
+    continuousExtraction.reset();
     setSaveError(null);
-  }, [savedIndexPatterns, ce]);
+  }, [savedIndexPatterns, continuousExtraction]);
 
   const handleSave = useCallback(async () => {
     setSaveError(null);
@@ -84,15 +84,15 @@ export function SettingsTab() {
         setSavedIndexPatterns(indexPatterns);
       }
 
-      if (ce.hasChanged) {
-        await ce.save();
+      if (continuousExtraction.hasChanged) {
+        await continuousExtraction.save();
       }
     } catch (err) {
       setSaveError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setIsSaving(false);
     }
-  }, [core.settings.client, indexPatterns, savedIndexPatterns, ce]);
+  }, [core.settings.client, indexPatterns, savedIndexPatterns, continuousExtraction]);
 
   return (
     <>
@@ -208,7 +208,7 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {ce.saved.enabled && (
+          {continuousExtraction.saved.enabled && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -221,7 +221,9 @@ export function SettingsTab() {
                     defaultMessage:
                       'Continuous extraction is active. Knowledge indicators are extracted every {hours} hours.',
                     values: {
-                      hours: ce.saved.intervalHours ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
+                      hours:
+                        continuousExtraction.saved.intervalHours ??
+                        DEFAULT_EXTRACTION_INTERVAL_HOURS,
                     },
                   }
                 )}
@@ -265,9 +267,12 @@ export function SettingsTab() {
                       'xpack.streams.significantEventsDiscovery.settings.enableContinuousExtraction',
                       { defaultMessage: 'Enable continuous KI extraction' }
                     )}
-                    checked={ce.draft.enabled}
+                    checked={continuousExtraction.draft.enabled}
                     onChange={(e) =>
-                      ce.setDraft((prev) => ({ ...prev, enabled: e.target.checked }))
+                      continuousExtraction.setDraft((prev) => ({
+                        ...prev,
+                        enabled: e.target.checked,
+                      }))
                     }
                   />
                 </EuiFormRow>
@@ -287,9 +292,9 @@ export function SettingsTab() {
                 >
                   <EuiFieldNumber
                     data-test-subj="streams-settings-extraction-interval"
-                    value={ce.draft.intervalHours}
+                    value={continuousExtraction.draft.intervalHours}
                     onChange={(e) =>
-                      ce.setDraft((prev) => ({
+                      continuousExtraction.setDraft((prev) => ({
                         ...prev,
                         intervalHours: Math.max(
                           MIN_EXTRACTION_INTERVAL_HOURS,
@@ -298,7 +303,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_EXTRACTION_INTERVAL_HOURS}
-                    disabled={!ce.draft.enabled}
+                    disabled={!continuousExtraction.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -316,14 +321,14 @@ export function SettingsTab() {
                 >
                   <EuiTextArea
                     data-test-subj="streams-settings-excluded-streams"
-                    value={ce.draft.excludedStreamPatterns}
+                    value={continuousExtraction.draft.excludedStreamPatterns}
                     onChange={(e) =>
-                      ce.setDraft((prev) => ({
+                      continuousExtraction.setDraft((prev) => ({
                         ...prev,
                         excludedStreamPatterns: e.target.value,
                       }))
                     }
-                    disabled={!ce.draft.enabled}
+                    disabled={!continuousExtraction.draft.enabled}
                     placeholder={i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
                       { defaultMessage: 'logs.debug.*' }

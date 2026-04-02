@@ -311,6 +311,26 @@ export class TaskClient<TaskType extends string> {
   }
 
   /**
+   * Requests cancellation for all in-progress tasks of a given type.
+   * Sets each to BeingCanceled; the cancellable-task wrapper handles actual abort.
+   * @returns the IDs of tasks that were set to BeingCanceled
+   */
+  public async cancelByType(type: string): Promise<string[]> {
+    const tasks = await this.findByType(type);
+    const inProgress = tasks.filter((t) => t.status === TaskStatus.InProgress);
+
+    if (inProgress.length === 0) {
+      return [];
+    }
+
+    this.logger.debug(`Canceling ${inProgress.length} in-progress task(s) of type ${type}`);
+
+    await Promise.all(inProgress.map((t) => this.cancel(t.id)));
+
+    return inProgress.map((t) => t.id);
+  }
+
+  /**
    * Deletes all tasks of a given type in a single bulk request.
    * @returns the number of tasks deleted
    */
