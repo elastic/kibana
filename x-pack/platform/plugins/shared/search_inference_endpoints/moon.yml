@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/features-plugin'
   - '@kbn/ui-theme'
-  - '@kbn/deeplinks-search'
   - '@kbn/deeplinks-management'
   - '@kbn/management-plugin'
   - '@kbn/serverless'
