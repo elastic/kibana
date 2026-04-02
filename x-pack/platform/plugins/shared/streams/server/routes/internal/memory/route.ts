@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskResult } from '@kbn/streams-schema';
 import { notFound } from '@hapi/boom';
-import type { GetScopedClients } from '../../types';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
@@ -33,10 +33,9 @@ import {
   type MemoryConsolidationTaskResult,
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
 
-const assertMemoryEnabled = async (getScopedClients: GetScopedClients, request: KibanaRequest) => {
-  const { modelSettingsClient } = await getScopedClients({ request });
-  const settings = await modelSettingsClient.getSettings();
-  if (!settings.useMemory) {
+const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
+  const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+  if (!useMemory) {
     throw new Error('Memory is disabled. Enable useMemory in settings to use this feature.');
   }
 };
@@ -70,7 +69,8 @@ const createEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -101,7 +101,8 @@ const getEntryRoute = createServerRoute({
     path: z.object({ id: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     return memory.get({ id: params.path.id });
@@ -123,7 +124,8 @@ const getEntryByNameRoute = createServerRoute({
     query: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const entry = await memory.getByName({ name: params.query.name });
@@ -158,7 +160,8 @@ const updateEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -194,7 +197,8 @@ const deleteEntryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ deleted: boolean }> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -221,7 +225,8 @@ const renameEntryRoute = createServerRoute({
     body: z.object({ new_name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
@@ -262,7 +267,8 @@ const searchRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ results: MemorySearchResult[] }> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const results = await memory.search({
@@ -294,7 +300,8 @@ const getCategoryTreeRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ tree: MemoryCategoryNode[] }> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const tree = await memory.getCategoryTree();
@@ -329,7 +336,8 @@ const getHistoryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ history: MemoryVersionRecord[] }> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const history = await memory.getHistory({
@@ -364,7 +372,8 @@ const getVersionRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<MemoryVersionRecord> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     return memory.getVersion({
@@ -400,7 +409,8 @@ const recentChangesRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ changes: MemoryVersionRecord[] }> => {
-    await assertMemoryEnabled(getScopedClients, request);
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
     const memory = getMemoryService(server, logger);
 
     const changes = await memory.getRecentChanges({
@@ -432,11 +442,8 @@ const scrapeConversationsRoute = createServerRoute({
     request,
     getScopedClients,
   }): Promise<TaskResult<ConversationScraperTaskResult>> => {
-    const { taskClient, modelSettingsClient } = await getScopedClients({ request });
-    const settings = await modelSettingsClient.getSettings();
-    if (!settings.useMemory) {
-      throw new Error('Memory is disabled. Enable useMemory in settings to use this feature.');
-    }
+    const { taskClient, uiSettingsClient: scraperUiSettings } = await getScopedClients({ request });
+    await assertMemoryEnabled(scraperUiSettings);
 
     const { body } = params;
 
@@ -480,11 +487,10 @@ const consolidateMemoryRoute = createServerRoute({
     request,
     getScopedClients,
   }): Promise<TaskResult<MemoryConsolidationTaskResult>> => {
-    const { taskClient, modelSettingsClient } = await getScopedClients({ request });
-    const settings = await modelSettingsClient.getSettings();
-    if (!settings.useMemory) {
-      throw new Error('Memory is disabled. Enable useMemory in settings to use this feature.');
-    }
+    const { taskClient, uiSettingsClient: consolidateUiSettings } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled(consolidateUiSettings);
 
     const { body } = params;
 

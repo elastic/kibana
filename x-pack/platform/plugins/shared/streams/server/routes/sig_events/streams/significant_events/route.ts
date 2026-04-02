@@ -12,6 +12,7 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
@@ -205,7 +206,6 @@ const generateSignificantEventsRoute = createServerRoute({
       soClient,
       featureClient,
       scopedClusterClient,
-      modelSettingsClient,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -217,8 +217,8 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
-    const settings = await modelSettingsClient.getSettings();
-    const memoryTools = settings.useMemory
+    const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+    const memoryTools = useMemory
       ? createMemoryDiscoveryTools({
           memoryService: new MemoryServiceImpl({
             logger: logger.get('memory'),

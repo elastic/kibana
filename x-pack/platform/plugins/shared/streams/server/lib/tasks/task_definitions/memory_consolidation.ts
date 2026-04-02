@@ -8,6 +8,7 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -43,16 +44,18 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
               const { _task } = runContext.taskInstance
                 .params as TaskParams<MemoryConsolidationTaskParams>;
 
-              const { taskClient, inferenceClient, modelSettingsClient, uiSettingsClient } =
+              const { taskClient, inferenceClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
 
               const taskLogger = taskContext.logger.get('memory_consolidation');
 
-              const settings = await modelSettingsClient.getSettings();
+              const useMemory = await uiSettingsClient.get<boolean>(
+                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              );
 
-              if (!settings.useMemory) {
+              if (!useMemory) {
                 taskLogger.info('Memory is disabled, skipping memory consolidation');
                 if (_task) {
                   await taskClient.complete<
@@ -64,7 +67,6 @@ export function createStreamsMemoryConsolidationTask(taskContext: TaskContext) {
               }
 
               const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
                 logger: taskLogger,
               });

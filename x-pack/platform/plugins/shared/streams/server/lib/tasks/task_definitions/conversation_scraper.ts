@@ -10,6 +10,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import type { ReadOnlyConversationClient } from '@kbn/agent-builder-plugin/server';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -48,16 +49,18 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
               const { _task } = runContext.taskInstance
                 .params as TaskParams<ConversationScraperTaskParams>;
 
-              const { taskClient, inferenceClient, modelSettingsClient, uiSettingsClient } =
+              const { taskClient, inferenceClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
 
               const taskLogger = taskContext.logger.get('conversation_scraper');
 
-              const settings = await modelSettingsClient.getSettings();
+              const useMemory = await uiSettingsClient.get<boolean>(
+                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              );
 
-              if (!settings.useMemory) {
+              if (!useMemory) {
                 taskLogger.info('Memory is disabled, skipping conversation scraping');
                 if (_task) {
                   await taskClient.complete<
@@ -86,7 +89,6 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
               }
 
               const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
                 logger: taskLogger,
               });

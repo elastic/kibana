@@ -15,13 +15,14 @@ import {
   STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
+import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 import type { MemoryGenerationTaskParams } from '../../tasks/task_definitions/memory_generation';
 import { MEMORY_GENERATION_TASK_TYPE } from '../../tasks/task_definitions/memory_generation';
 import { MemoryServiceImpl } from '../../memory';
@@ -49,6 +50,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
               const { streamNames, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsDiscoveryTaskParams>;
@@ -60,26 +62,25 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 queryClient,
                 insightClient,
-                modelSettingsClient,
                 uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('insights_discovery');
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorIdAndCheckAllowlist({
-                connectorId: settings.connectorIdDiscovery,
-                uiSettingsClient,
-                logger: taskLogger,
-                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+              const connectorId = await resolveConnectorForFeature({
                 searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                request: runContext.fakeRequest,
+                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+                featureName: 'discovery',
+                request: fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
-              const memoryTools = settings.useMemory
+              const useMemory = await uiSettingsClient.get<boolean>(
+                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              );
+              const memoryTools = useMemory
                 ? createMemoryDiscoveryTools({
                     memoryService: new MemoryServiceImpl({
                       logger: taskLogger.get('memory'),
@@ -131,9 +132,9 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                     );
                   } catch (persistError) {
                     taskContext.logger.error(
-                      `Failed to persist ${result.insights.length} insights: ${getErrorMessage(
-                        persistError
-                      )}`
+                      `Failed to persist ${result.insights.length} insights: ${
+                        parseError(persistError).message
+                      }`
                     );
                   }
                 }
@@ -144,7 +145,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   { insights, tokensUsed: result.tokens_used }
                 );
 
-                if (insights.length > 0 && settings.useMemory && runContext.fakeRequest) {
+                if (insights.length > 0 && useMemory && runContext.fakeRequest) {
                   try {
                     await taskClient.schedule<MemoryGenerationTaskParams>({
                       task: {
@@ -162,12 +163,16 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   }
                 }
               } catch (error) {
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                // Get connector info for error enrichment, preserving the original error if lookup fails
+                let errorMessage = parseError(error).message;
+                try {
+                  const connector = await inferenceClient.getConnectorById(connectorId);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Connector lookup failed — use the original error message
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

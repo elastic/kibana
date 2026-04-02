@@ -155,6 +155,9 @@ export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEn
 export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
 export const OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE = 'observability:streamsEnableOverviewPage';
+export const OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS =
+  'observability:streamsSigEventsIndexPatterns';
+export const OBSERVABILITY_STREAMS_ENABLE_MEMORY = 'observability:streamsEnableMemory';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

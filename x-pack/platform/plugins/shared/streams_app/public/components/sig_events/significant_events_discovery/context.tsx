@@ -6,9 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 
 interface DiscoverySettingsContextValue {
   isMemoryEnabled: boolean;
@@ -26,38 +25,15 @@ export const DiscoverySettingsProvider: React.FC<{ children: React.ReactNode }> 
   children,
 }) => {
   const {
-    dependencies: {
-      start: { streams },
-    },
+    core: { uiSettings },
   } = useKibana();
-
-  const {
-    features: { significantEventsDiscovery },
-  } = useStreamsPrivileges();
-
-  const isDiscoveryAvailable = Boolean(
-    significantEventsDiscovery?.available && significantEventsDiscovery?.enabled
-  );
-
-  const settingsFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      if (!isDiscoveryAvailable) {
-        return undefined;
-      }
-      return streams.streamsRepositoryClient.fetch(
-        'GET /internal/streams/_significant_events/settings',
-        { signal }
-      );
-    },
-    [streams.streamsRepositoryClient, isDiscoveryAvailable]
-  );
 
   const value = useMemo(
     () => ({
-      isMemoryEnabled: settingsFetch.value?.useMemory === true,
-      isLoading: isDiscoveryAvailable && settingsFetch.loading,
+      isMemoryEnabled: uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY, false),
+      isLoading: false,
     }),
-    [settingsFetch.value?.useMemory, settingsFetch.loading, isDiscoveryAvailable]
+    [uiSettings]
   );
 
   return (

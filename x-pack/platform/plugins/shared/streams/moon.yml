@@ -97,6 +97,7 @@ tags:
 fileGroups:
   src:
     - common/**/*
+    - docs/**/*
     - scripts/**/*
     - server/**/*
     - public/**/*

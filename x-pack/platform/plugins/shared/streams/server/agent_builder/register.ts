@@ -9,7 +9,6 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
-import type { ModelSettingsConfigClient } from '../lib/sig_events/saved_objects/model_settings_config_client';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { streamExplorationSkill } from './skills/stream_exploration_skill';
@@ -20,13 +19,13 @@ export const registerStreamsAgentBuilder = async ({
   getScopedClients,
   server,
   logger,
-  getModelSettingsClient,
+  isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-  getModelSettingsClient: () => ModelSettingsConfigClient | undefined;
+  isMemoryEnabled: () => Promise<boolean>;
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
 
@@ -35,17 +34,6 @@ export const registerStreamsAgentBuilder = async ({
       logger: logger.get('memory'),
       esClient: server.core.elasticsearch.client.asInternalUser,
     });
-
-  const isMemoryEnabled = async (): Promise<boolean> => {
-    try {
-      const client = getModelSettingsClient();
-      if (!client) return false;
-      const settings = await client.getSettings();
-      return settings.useMemory ?? false;
-    } catch {
-      return false;
-    }
-  };
 
   agentBuilder.skills.register(streamExplorationSkill);
 

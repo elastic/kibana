@@ -7,6 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -51,7 +52,6 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
               const {
                 taskClient,
                 inferenceClient,
-                modelSettingsClient,
                 uiSettingsClient,
                 insightClient,
                 scopedClusterClient,
@@ -59,9 +59,15 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
                 request: runContext.fakeRequest,
               });
 
-              const settings = await modelSettingsClient.getSettings();
+              const useMemory = await uiSettingsClient.get<boolean>(
+                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              );
+              if (!useMemory) {
+                taskLogger.info('Memory is disabled, skipping memory update');
+                return;
+              }
+
               const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
                 logger: taskLogger,
               });

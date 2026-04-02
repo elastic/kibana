@@ -16,7 +16,10 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
   OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
+  OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
 } from '@kbn/management-settings-ids';
+import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 
@@ -47,6 +50,27 @@ export function registerFeatureFlags(
         });
 
         core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.sigEventsIndexPatternsSettingsName', {
+              defaultMessage: 'Significant Events index patterns',
+            }) as string,
+            value: DEFAULT_INDEX_PATTERNS,
+            description: i18n.translate('xpack.streams.sigEventsIndexPatternsSettingsDescription', {
+              defaultMessage:
+                'Comma-separated list of index patterns used for Significant Events stream filtering and analysis.',
+            }),
+            type: 'string',
+            schema: schema.string(),
+            requiresPageReload: false,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+        });
+
+        core.uiSettings.register({
           [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: {
             category: ['observability'],
             name: i18n.translate('xpack.streams.significantEventsDiscoverySettingsName', {
@@ -62,6 +86,27 @@ export function registerFeatureFlags(
             type: 'boolean',
             schema: schema.boolean(),
             requiresPageReload: true,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+        });
+
+        core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_ENABLE_MEMORY]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.memorySettingsName', {
+              defaultMessage: 'Streams memory',
+            }) as string,
+            value: false,
+            description: i18n.translate('xpack.streams.memorySettingsDescription', {
+              defaultMessage:
+                'Enable the Streams memory feature for accumulating knowledge from significant events discovery.',
+            }),
+            type: 'boolean',
+            schema: schema.boolean(),
+            requiresPageReload: false,
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
             readonly: true,

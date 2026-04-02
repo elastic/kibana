@@ -16,7 +16,10 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+} from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -46,12 +49,10 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
-import { ModelSettingsConfigClientImpl } from './lib/sig_events/saved_objects/model_settings_config_client';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
-import { ModelSettingsConfigService } from './lib/sig_events/saved_objects/model_settings_config_service';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
 import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
@@ -62,6 +63,7 @@ import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer'
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
+import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -126,21 +128,20 @@ export class StreamsPlugin
 
     registerRules({ plugins, logger: this.logger.get('rules') });
     registerStreamsSavedObjects(core.savedObjects);
-
     registerSignificantEventsInferenceFeatures(
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
     );
 
+    const inferenceResolver = createInferenceResolver(this.logger);
+
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger);
+    const featureService = new FeatureService(core, inferenceResolver, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger);
+    const queryService = new QueryService(core, inferenceResolver, this.logger);
     const taskService = new TaskService(plugins.taskManager);
-    const modelSettingsConfigService = new ModelSettingsConfigService(this.logger);
-
     const getScopedClients = async ({
       request,
     }: {
@@ -195,10 +196,6 @@ export class StreamsPlugin
         isSecurityEnabled,
       });
 
-      const modelSettingsClient = modelSettingsConfigService.getClient({
-        soClient,
-      });
-
       return {
         scopedClusterClient,
         soClient,
@@ -213,7 +210,6 @@ export class StreamsPlugin
         licensing,
         uiSettingsClient,
         taskClient,
-        modelSettingsClient,
         isSecurityEnabled,
       };
     };
@@ -224,12 +220,13 @@ export class StreamsPlugin
         getScopedClients,
         server: this.server,
         logger: this.logger,
-        getModelSettingsClient: () => {
+        isMemoryEnabled: async () => {
           try {
             const soClient = this.server!.core.savedObjects.createInternalRepository();
-            return modelSettingsConfigService.getClient({ soClient });
+            const uiSettings = this.server!.core.uiSettings.asScopedToClient(soClient);
+            return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
           } catch {
-            return undefined;
+            return false;
           }
         },
       })
@@ -410,10 +407,11 @@ export class StreamsPlugin
         .getStartServices()
         .then(async ([coreStart]) => {
           const soClient = coreStart.savedObjects.getUnsafeInternalClient();
-          const modelSettingsClient = new ModelSettingsConfigClientImpl(soClient, this.logger);
-          await modelSettingsClient.updateSettings({
-            useMemory: this.config.significantEvents.useMemory,
-          });
+          const startupUiSettings = coreStart.uiSettings.asScopedToClient(soClient);
+          await startupUiSettings.set(
+            OBSERVABILITY_STREAMS_ENABLE_MEMORY,
+            this.config.significantEvents.useMemory
+          );
           if (this.config.significantEvents.useMemory) {
             this.server?.ensureMemorySkillRegistered?.();
             await this.server?.ensureMemoryTasksScheduled?.();

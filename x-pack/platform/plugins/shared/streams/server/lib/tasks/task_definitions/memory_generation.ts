@@ -9,6 +9,7 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { BaseFeature, GeneratedSignificantEventQuery, Insight } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -48,7 +49,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
               const { insights, features, queries, _task } = runContext.taskInstance
                 .params as TaskParams<MemoryGenerationTaskParams>;
 
-              const { taskClient, inferenceClient, modelSettingsClient, uiSettingsClient } =
+              const { taskClient, inferenceClient, uiSettingsClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
@@ -74,9 +75,11 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                   `${queries?.length ?? 0} query/queries`
               );
 
-              const settings = await modelSettingsClient.getSettings();
+              const useMemory = await uiSettingsClient.get<boolean>(
+                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              );
 
-              if (!settings.useMemory) {
+              if (!useMemory) {
                 taskLogger.info('Memory is disabled, skipping memory generation');
                 await taskClient.complete<MemoryGenerationTaskParams, MemoryGenerationTaskResult>(
                   _task,
@@ -87,7 +90,6 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
               }
 
               const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
                 logger: taskLogger,
               });
