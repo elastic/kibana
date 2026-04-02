@@ -126,7 +126,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'cases.deleteObservable',
-    handlerHash: '9ae9e16704f98b7a09aa234269b1258669287933ba263f0462dc9efa3b9a56a9',
+    handlerHash: '0222a4609fe11df28447a5e4637db381ffdc5818a47ae34b3ff54ec8c0ef56e5',
   },
   {
     id: 'cases.findCases',
