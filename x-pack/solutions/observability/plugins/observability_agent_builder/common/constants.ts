@@ -8,6 +8,11 @@
 // Agent IDs
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
+// Inference Feature IDs
+export const OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID = 'observability' as const;
+export const OBSERVABILITY_AI_INSIGHTS_INFERENCE_FEATURE_ID =
+  'observability_ai_insights_chat_completion' as const;
+
 // Attachment type IDs
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';

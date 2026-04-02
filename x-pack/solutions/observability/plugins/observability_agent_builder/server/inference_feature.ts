@@ -8,8 +8,8 @@
 import type { InferenceFeatureConfig } from '@kbn/search-inference-endpoints/server';
 import {
   OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
-  OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID,
-} from '../common/feature';
+  OBSERVABILITY_AI_INSIGHTS_INFERENCE_FEATURE_ID,
+} from '../common/constants';
 
 export const observabilityParentFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
@@ -19,11 +19,11 @@ export const observabilityParentFeature: InferenceFeatureConfig = {
   recommendedEndpoints: [],
 };
 
-const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
-  featureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID,
+const observabilityAiInsightsChatCompletionFeature: InferenceFeatureConfig = {
+  featureId: OBSERVABILITY_AI_INSIGHTS_INFERENCE_FEATURE_ID,
   parentFeatureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
-  featureName: 'AI Assistant and Contextual Insights',
-  featureDescription: 'AI Assistant and Contextual Insights inference endpoint configuration',
+  featureName: 'AI Insights',
+  featureDescription: 'AI Insights inference endpoint configuration',
   taskType: 'chat_completion',
   recommendedEndpoints: [
     '.anthropic-claude-4.6-sonnet-chat_completion',
@@ -31,6 +31,6 @@ const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
   ],
 };
 
-export const observabilityAIAssistantInferenceFeatures: InferenceFeatureConfig[] = [
-  observabilityAIAssistantChatCompletionFeature,
+export const observabilityAiInsightsInferenceFeatures: InferenceFeatureConfig[] = [
+  observabilityAiInsightsChatCompletionFeature,
 ];

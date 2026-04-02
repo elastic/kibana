@@ -17,11 +17,10 @@
       "ruleRegistry",
       "dataViews",
       "metricsDataAccess",
-      "inference",
       "discoverShared",
       "licensing"
     ],
-    "optionalPlugins": ["ml", "spaces"],
+    "optionalPlugins": ["ml", "spaces", "searchInferenceEndpoints"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "extraPublicDirs": []
   }
