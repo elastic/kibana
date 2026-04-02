@@ -19,10 +19,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'array',
     items: {
       type: 'keyword',
-      _meta: {
-        description:
-          'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
-      },
+      _meta: { description: 'Non-default value of setting.' },
     },
   },
   'securitySolution:includedDataStreamNamespacesForRuleExecution': {
@@ -763,7 +760,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:streamsSigEventsIndexPatterns': {
     type: 'keyword',
     _meta: {
-      description: 'Non-default value of setting.',
+      description:
+        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
   'observability:enableDiagnosticMode': {
