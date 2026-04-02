@@ -52,6 +52,7 @@ export interface SavedSearchAttributes {
   description: string;
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   kibanaSavedObjectMeta: {
@@ -77,7 +78,8 @@ export interface SavedSearchAttributes {
 }
 
 export type SavedSearchByValueAttributes = SavedSearchAttributes & {
-  references: Reference[];
+  /** @deprecated References are now extracted/injected by server transforms */
+  references?: Reference[];
 };
 
 /** @internal **/
@@ -112,6 +114,7 @@ export interface DiscoverSessionTab {
   columns: string[];
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   serializedSearchSource: SerializedSearchSourceFields;

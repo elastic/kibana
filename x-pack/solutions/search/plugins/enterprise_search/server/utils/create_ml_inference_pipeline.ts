@@ -49,7 +49,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   // Check if the sub-pipeline reference is already in the list of processors,
   // if so, don't modify it
   const existingSubPipeline = parentPipeline.processors.find(
-    (p) => p.pipeline?.name === pipelineName
+    (p) => p?.pipeline?.name === pipelineName
   );
   if (existingSubPipeline) {
     return Promise.resolve({

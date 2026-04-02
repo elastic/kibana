@@ -5,168 +5,122 @@
  * 2.0.
  */
 
-import { filterVisualizationIds, upsertMarkdownPanel } from './manage_dashboard/utils';
-import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { Logger } from '@kbn/core/server';
+import { resolvePanelsFromAttachments } from './manage_dashboard/utils';
 
-// TODO: Add tests for normalizePanels and resolveLensConfigFromAttachment once attachment mocking utilities are available
-// These functions require AttachmentStateManager which is complex to mock
+const createMockLogger = (): Logger =>
+  ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  } as unknown as Logger);
 
-describe('filterVisualizationIds', () => {
-  it('should remove specified IDs from the array', () => {
-    const ids = ['viz1', 'viz2', 'viz3', 'viz4'];
-    const result = filterVisualizationIds(ids, ['viz2', 'viz4']);
+const createAttachmentManager = (
+  attachmentsById: Record<string, VersionedAttachment>
+): AttachmentStateManager => {
+  return {
+    getAttachmentRecord: (id: string) => attachmentsById[id],
+  } as unknown as AttachmentStateManager;
+};
 
-    expect(result).toEqual(['viz1', 'viz3']);
-  });
-
-  it('should return all IDs when no IDs match for removal', () => {
-    const ids = ['viz1', 'viz2'];
-    const result = filterVisualizationIds(ids, ['non-existent']);
-
-    expect(result).toEqual(['viz1', 'viz2']);
-  });
-
-  it('should return empty array when all IDs are removed', () => {
-    const ids = ['viz1', 'viz2'];
-    const result = filterVisualizationIds(ids, ['viz1', 'viz2']);
-
-    expect(result).toEqual([]);
-  });
-
-  it('should return original array when removal list is empty', () => {
-    const ids = ['viz1', 'viz2'];
-    const result = filterVisualizationIds(ids, []);
-
-    expect(result).toEqual(['viz1', 'viz2']);
-  });
-
-  it('should handle empty input array', () => {
-    const result = filterVisualizationIds([], ['viz1']);
-    expect(result).toEqual([]);
-  });
+const toVersionedAttachment = ({
+  id,
+  type,
+  data,
+}: {
+  id: string;
+  type: string;
+  data: unknown;
+}): VersionedAttachment => ({
+  id,
+  type,
+  current_version: 1,
+  versions: [
+    {
+      version: 1,
+      data,
+      created_at: '2026-01-01T00:00:00.000Z',
+      content_hash: `${id}-hash`,
+    },
+  ],
 });
 
-describe('AttachmentPanel types', () => {
-  it('should support lens panel entry type', () => {
-    const entry = {
-      type: 'lens',
-      panelId: 'panel-1',
-      visualization: { type: 'Metric', value: 'count()' },
-      title: 'Test Metric',
-    };
+describe('resolvePanelsFromAttachments', () => {
+  it('resolves visualization attachments into lens panels', async () => {
+    const attachments = createAttachmentManager({
+      'viz-1': toVersionedAttachment({
+        id: 'viz-1',
+        type: 'visualization',
+        data: {
+          query: 'Show request count',
+          visualization: { type: 'metric', title: 'Request count' },
+          chart_type: 'metric',
+          esql: 'FROM logs-* | STATS count(*)',
+        },
+      }),
+    });
 
-    expect(entry.type).toBe('lens');
-    expect(entry.panelId).toBe('panel-1');
-    expect(entry.visualization).toBeDefined();
-  });
+    const result = resolvePanelsFromAttachments({
+      attachmentInputs: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
+      attachments,
+      logger: createMockLogger(),
+    });
 
-  it('should support generic panel entry type', () => {
-    const entry = {
-      type: 'DASHBOARD_MARKDOWN',
-      panelId: 'panel-2',
-      rawConfig: { content: '# Test' },
-      title: 'Markdown Panel',
-    };
-
-    expect(entry.type).toBe('DASHBOARD_MARKDOWN');
-    expect(entry.panelId).toBe('panel-2');
-    expect(entry.rawConfig).toBeDefined();
-  });
-
-  it('should work with union type', () => {
-    const lensPanel = {
-      type: 'lens',
-      panelId: 'panel-1',
-      visualization: { type: 'Metric' },
-    };
-
-    const genericPanel = {
-      type: 'DASHBOARD_MARKDOWN',
-      panelId: 'panel-2',
-      rawConfig: { content: '# Test' },
-    };
-
-    expect(lensPanel.panelId).toBe('panel-1');
-    expect(genericPanel.panelId).toBe('panel-2');
-  });
-});
-
-describe('upsertMarkdownPanel', () => {
-  it('adds a markdown panel when one does not exist', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'lens',
-        panelId: 'panel-1',
-        visualization: { type: 'Metric' },
-      },
-    ];
-
-    const result = upsertMarkdownPanel(existingPanels, '# Summary');
-
-    expect(result.changedPanel).toBeDefined();
-    expect(result.panels).toHaveLength(2);
+    expect(result.failures).toEqual([]);
+    expect(result.panels).toHaveLength(1);
     expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
-      rawConfig: { content: '# Summary' },
+      type: 'lens',
+      config: {
+        title: 'Request count',
+        attributes: expect.objectContaining({
+          type: 'metric',
+        }),
+      },
     });
   });
 
-  it('updates existing markdown panel content in place', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'DASHBOARD_MARKDOWN',
-        panelId: 'markdown-1',
-        rawConfig: { content: '# Old summary' },
-      },
-      {
-        type: 'lens',
-        panelId: 'panel-1',
-        visualization: { type: 'Metric' },
-      },
-    ];
-
-    const result = upsertMarkdownPanel(existingPanels, '# New summary');
-
-    expect(result.changedPanel).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
-      panelId: 'markdown-1',
-      rawConfig: { content: '# New summary' },
+  it('treats unsupported attachment types as panel-resolution failures', async () => {
+    const attachments = createAttachmentManager({
+      'unsupported-1': toVersionedAttachment({
+        id: 'unsupported-1',
+        type: 'unsupported_type',
+        data: {
+          foo: 'bar',
+        },
+      }),
     });
-    expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
-      panelId: 'markdown-1',
-      rawConfig: { content: '# New summary' },
+
+    const result = resolvePanelsFromAttachments({
+      attachmentInputs: [{ attachmentId: 'unsupported-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
+      attachments,
+      logger: createMockLogger(),
     });
-    expect(result.panels[1]).toEqual(existingPanels[1]);
+
+    expect(result.panels).toEqual([]);
+    expect(result.failures).toEqual([
+      expect.objectContaining({
+        type: 'attachment_panels',
+        identifier: 'unsupported-1',
+      }),
+    ]);
   });
 
-  it('does not change panels when markdown content is unchanged', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'DASHBOARD_MARKDOWN',
-        panelId: 'markdown-1',
-        rawConfig: { content: '# Summary' },
-      },
-    ];
+  it('collects per-attachment failures without failing the whole operation', async () => {
+    const result = resolvePanelsFromAttachments({
+      attachmentInputs: [{ attachmentId: 'missing-id', grid: { x: 0, y: 0, w: 24, h: 9 } }],
+      attachments: createAttachmentManager({}),
+      logger: createMockLogger(),
+    });
 
-    const result = upsertMarkdownPanel(existingPanels, '# Summary');
-
-    expect(result.changedPanel).toBeUndefined();
-    expect(result.panels).toEqual(existingPanels);
-  });
-
-  it('does not change panels when markdown content is not provided', () => {
-    const existingPanels: AttachmentPanel[] = [
-      {
-        type: 'lens',
-        panelId: 'panel-1',
-        visualization: { type: 'Metric' },
-      },
-    ];
-
-    const result = upsertMarkdownPanel(existingPanels);
-
-    expect(result.changedPanel).toBeUndefined();
-    expect(result.panels).toEqual(existingPanels);
+    expect(result.panels).toEqual([]);
+    expect(result.failures).toEqual([
+      expect.objectContaining({
+        type: 'attachment_panels',
+        identifier: 'missing-id',
+      }),
+    ]);
   });
 });

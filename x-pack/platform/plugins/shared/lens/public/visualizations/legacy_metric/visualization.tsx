@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- */ import React from 'react';
+ */
+
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Ast } from '@kbn/interpreter';
@@ -180,7 +183,7 @@ export const getLegacyMetricVisualization = ({
   ],
   hideFromChartSwitch(frame: FramePublicAPI) {
     return Object.values(frame.datasourceLayers).some(
-      (datasource) => datasource && datasource.datasourceId === 'textBased'
+      (datasource) => datasource && datasource.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
     );
   },
 

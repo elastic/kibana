@@ -82,6 +82,7 @@ const ItemText = styled.span`
   align-items: center;
   height: ${({ theme }) => theme.euiTheme.size.l};
   max-width: 100%;
+  overflow-x: auto;
 
   /* add margin to all direct descendants */
   & > * {
@@ -211,6 +212,8 @@ function ServiceNameBadge({ item, color }: { item: IWaterfallSpanOrTransaction; 
       color="hollow"
       iconType="dot"
       css={css`
+        max-width: 30%;
+        flex-shrink: 0;
         & .euiBadge__icon {
           color: ${color};
         }
@@ -404,7 +407,7 @@ function EmbeddableRelatedErrors({
       // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiBadge
         color={euiTheme.colors.danger}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         href={getRelatedErrorsHref(item.id) as any}
         onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
           e.stopPropagation();
@@ -485,7 +488,7 @@ function RelatedErrors({
     return (
       <EuiBadge
         color={euiTheme.colors.danger}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         onClick={onClick}
         tabIndex={0}
         role="button"

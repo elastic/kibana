@@ -15,7 +15,7 @@ export interface SyncBadgeProps {
    * Is the request synchronous? True will show blocking, false will show async.
    */
   sync?: boolean;
-  agentName: AgentName;
+  agentName?: AgentName;
 }
 
 const BLOCKING_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeBlocking', {
@@ -45,8 +45,8 @@ const agentsSyncMap: Record<string, boolean> = {
   go: false,
 };
 
-export function getSyncLabel(agentName: AgentName, sync?: boolean) {
-  if (sync === undefined) {
+export function getSyncLabel(agentName?: AgentName, sync?: boolean) {
+  if (sync === undefined || agentName === undefined) {
     return;
   }
 

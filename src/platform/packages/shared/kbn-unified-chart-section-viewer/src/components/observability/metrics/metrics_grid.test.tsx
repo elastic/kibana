@@ -20,6 +20,12 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
+import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+
+jest.mock('@kbn/discover-utils', () => ({
+  DiscoverFlyouts: { metricInsights: 'metricInsights' },
+  dismissAllFlyoutsExceptFor: jest.fn(),
+}));
 
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -28,12 +34,12 @@ jest.mock('../../chart', () => ({
 jest.mock('../../../common/utils', () => ({
   ...jest.requireActual('../../../common/utils'),
   createESQLQuery: jest.fn((params) => {
-    const { metric, splitAccessors = [] } = params;
+    const { metricItem, splitAccessors = [] } = params;
     const splitAccessorsStr =
       splitAccessors.length > 0
         ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
         : '';
-    return `FROM ${metric.index} | STATS AVG(${metric.name}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${splitAccessorsStr}`;
+    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${splitAccessorsStr}`;
   }),
 }));
 
@@ -58,18 +64,22 @@ describe('MetricsGrid', () => {
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   } as unknown as UnifiedHistogramServices;
 
-  const fields: MetricsGridProps['fields'] = [
+  const metricItems: MetricsGridProps['metricItems'] = [
     {
-      name: 'system.cpu.utilization',
-      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
-      index: 'metrics-*',
-      type: ES_FIELD_TYPES.LONG,
+      metricName: 'system.cpu.utilization',
+      dataStream: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      dimensionFields: [{ name: 'host.name' }],
     },
     {
-      name: 'system.memory.utilization',
-      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
-      index: 'metrics-*',
-      type: ES_FIELD_TYPES.LONG,
+      metricName: 'system.memory.utilization',
+      dataStream: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      dimensionFields: [{ name: 'host.name' }],
     },
   ];
 
@@ -77,7 +87,7 @@ describe('MetricsGrid', () => {
     columns: 2,
     dimensions: [],
     discoverFetch$: undefined as unknown as UnifiedHistogramFetch$,
-    fields,
+    metricItems,
     fetchParams,
     services,
     actions,
@@ -100,7 +110,7 @@ describe('MetricsGrid', () => {
     const { getAllByTestId } = renderMetricsGrid({ columns: 3 });
 
     const charts = getAllByTestId('chart');
-    expect(charts).toHaveLength(fields.length);
+    expect(charts).toHaveLength(metricItems.length);
   });
 
   it('passes the correct size prop', () => {
@@ -108,7 +118,7 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         {...defaultProps}
         columns={3}
-        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
+        dimensions={[{ name: 'host.name' }]}
         discoverFetch$={discoverFetch$}
       />
     );
@@ -119,7 +129,7 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         {...defaultProps}
         columns={4}
-        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
+        dimensions={[{ name: 'host.name' }]}
         discoverFetch$={discoverFetch$}
       />
     );
@@ -127,18 +137,52 @@ describe('MetricsGrid', () => {
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
   });
 
+  it('passes getUserMessages(metric) result to each chart when getUserMessages is provided', () => {
+    const messagesForCpu = [
+      {
+        uniqueId: 'cpu-message',
+        severity: 'warning' as const,
+        shortMessage: 'CPU',
+        longMessage: 'CPU message',
+        fixableInEditor: false,
+        displayLocations: [{ id: 'embeddableBadge' as const }],
+      },
+    ];
+
+    const getUserMessages = jest.fn((metric: (typeof metricItems)[0]) =>
+      metric.metricName === 'system.cpu.utilization' ? messagesForCpu : undefined
+    );
+
+    renderMetricsGrid({ getUserMessages });
+
+    expect(getUserMessages).toHaveBeenCalledTimes(metricItems.length);
+    expect(getUserMessages).toHaveBeenNthCalledWith(1, metricItems[0]);
+    expect(getUserMessages).toHaveBeenNthCalledWith(2, metricItems[1]);
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ userMessages: messagesForCpu }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ userMessages: undefined }),
+      expect.anything()
+    );
+  });
+
   it('handles multiple dimensions correctly in ESQL query and chart layers', () => {
     const multipleDimensions = [
-      { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-      { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
-      { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
+      { name: 'host.name' },
+      { name: 'service.name' },
+      { name: 'container.id' },
     ];
 
     renderMetricsGrid({ dimensions: multipleDimensions });
 
     expect(createESQLQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        metric: expect.any(Object),
+        metricItem: expect.any(Object),
         splitAccessors: ['host.name', 'service.name', 'container.id'],
       })
     );
@@ -147,7 +191,7 @@ describe('MetricsGrid', () => {
       expect.objectContaining({
         chartLayers: expect.arrayContaining([
           expect.objectContaining({
-            breakdown: 'host.name',
+            breakdown: ['host.name', 'service.name', 'container.id'],
           }),
         ]),
       }),
@@ -233,23 +277,27 @@ describe('MetricsGrid', () => {
 
     it('should handle vertical arrow navigation in multi-row grid', async () => {
       const user = userEvent.setup({ delay: null });
-      const multipleFields: MetricsGridProps['fields'] = [
-        ...fields,
+      const multipleFields: MetricsGridProps['metricItems'] = [
+        ...metricItems,
         {
-          name: 'system.disk.utilization',
-          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
-          index: 'metrics-*',
-          type: ES_FIELD_TYPES.LONG,
+          metricName: 'system.disk.utilization',
+          dataStream: 'metrics-*',
+          units: ['ms'],
+          metricTypes: ['counter'],
+          fieldTypes: [ES_FIELD_TYPES.LONG],
+          dimensionFields: [{ name: 'host.name' }],
         },
         {
-          name: 'system.network.utilization',
-          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
-          index: 'metrics-*',
-          type: ES_FIELD_TYPES.LONG,
+          metricName: 'system.network.utilization',
+          dataStream: 'metrics-*',
+          units: ['ms'],
+          metricTypes: ['counter'],
+          fieldTypes: [ES_FIELD_TYPES.LONG],
+          dimensionFields: [{ name: 'host.name' }],
         },
       ];
 
-      renderMetricsGrid({ fields: multipleFields });
+      renderMetricsGrid({ metricItems: multipleFields });
 
       const gridElement = screen.getByRole('grid');
       const gridCells = screen.getAllByRole('gridcell');
@@ -342,6 +390,34 @@ describe('MetricsGrid', () => {
         expect(gridCells[1]).toHaveAttribute('tabindex', '0');
         expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
       });
+    });
+  });
+
+  describe('flyout dismissal on view details', () => {
+    it('should call dismissAllFlyoutsExceptFor with metricInsights when handleViewDetails is triggered', () => {
+      renderMetricsGrid();
+
+      // Get the onViewDetails callback passed to the first Chart
+      const chartCalls = (Chart as jest.Mock).mock.calls;
+      expect(chartCalls.length).toBeGreaterThan(0);
+
+      const firstChartProps = chartCalls[0][0];
+      expect(firstChartProps.onViewDetails).toBeDefined();
+
+      // Clear mock to isolate calls from handleViewDetails vs flyout mount useEffect
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
+
+      // Trigger the onViewDetails callback
+      act(() => {
+        firstChartProps.onViewDetails();
+      });
+
+      // Verify dismissAllFlyoutsExceptFor was called from handleViewDetails
+      // AND from the flyout's useEffect on mount (2 calls total).
+      // The first call is the early dismissal in handleViewDetails (before flyout mounts),
+      // the second is the safety-net useEffect inside MetricInsightsFlyout.
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(2);
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
     });
   });
 });

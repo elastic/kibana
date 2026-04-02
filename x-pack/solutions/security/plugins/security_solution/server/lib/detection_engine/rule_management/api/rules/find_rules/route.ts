@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import {
@@ -76,6 +76,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
               filter: query.filter,
               sortField: query.sort_field,
               sortOrder: query.sort_order,
+              schedulerId: query.gap_auto_fill_scheduler_id,
             });
 
             if (truncated) {

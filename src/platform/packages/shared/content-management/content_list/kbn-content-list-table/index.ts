@@ -23,7 +23,14 @@ export {
 } from './src/content_list_table';
 
 // Column components.
-export { NameColumn, NameCell, type NameColumnProps, type NameCellProps } from './src/column';
+export {
+  NameColumn,
+  NameCell,
+  NameCellTags,
+  type NameColumnProps,
+  type NameCellProps,
+  type NameCellTagsProps,
+} from './src/column';
 export {
   ActionsColumn,
   type ActionsColumnProps,
@@ -31,6 +38,12 @@ export {
   UpdatedAtCell,
   type UpdatedAtColumnProps,
   type UpdatedAtCellProps,
+  StarredColumn,
+  StarredCell,
+  StarButton,
+  type StarredColumnProps,
+  type StarredCellProps,
+  type StarButtonProps,
 } from './src/column';
 export type { ColumnNamespace, ColumnProps } from './src/column';
 

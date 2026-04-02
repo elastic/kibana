@@ -25,14 +25,22 @@ import {
   EuiCallOut,
   EuiCheckableCard,
   EuiFilePicker,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
-import type { DataStream, InputType } from '../../../../../common';
+import {
+  normalizeLogSamplesFromFileContent,
+  UPLOAD_SAMPLES_MAX_LINES,
+  type DataStream,
+  type InputType,
+} from '../../../../../common';
+import { PLUGIN_ID } from '../../../../../common/constants';
 import type { LogsSourceOption } from '../../forms/types';
 import { useIntegrationForm } from '../../forms/integration_form';
+import * as formI18n from '../../forms/translations';
 import * as i18n from './translations';
 import { FormStyledLabel } from '../../../../common/components/form_styled_label';
 import {
@@ -41,8 +49,10 @@ import {
   useCreateUpdateIntegration,
   useGetIntegrationById,
   useUploadSamples,
-  generateId,
+  normalizeTitleName,
+  useKibana,
 } from '../../../../common';
+import { useTelemetry } from '../../../telemetry_context';
 
 interface CreateDataStreamFlyoutProps {
   onClose: () => void;
@@ -124,9 +134,12 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 ];
 
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
+  const { euiTheme } = useEuiTheme();
   const styles = useLayoutStyles();
   const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
-  // React Query has a cache but needs to integration ID to find it.
+  const { reportAnalyzeLogsTriggered } = useTelemetry();
+  const { notifications, application } = useKibana().services;
+
   const { integration } = useGetIntegrationById(currentIntegrationId);
   const { form, formData } = useIntegrationForm();
 
@@ -144,7 +157,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const [fileError, setFileError] = useState<string | undefined>(undefined);
   const [uploadedFileName, setUploadedFileName] = useState<string | undefined>(undefined);
 
-  const logsSourceOption = formData?.logsSourceOption ?? 'upload';
+  const logsSourceOption = formData?.logsSourceOption ?? 'file';
   const logSample = formData?.logSample;
   const selectedIndex = formData?.selectedIndex ?? '';
 
@@ -157,7 +170,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       })),
     ];
 
-    // Filter Indices logic here
     return rawOptions.filter((option) => option.value !== '' && !option.value?.startsWith('.'));
   }, [indices]);
 
@@ -192,7 +204,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const handleLogsSourceChange = useCallback(
     async (option: LogsSourceOption) => {
       form.setFieldValue('logsSourceOption', option);
-      if (option === 'upload') {
+      if (option === 'file') {
         clearIndexValidationError();
       } else {
         setFileError(undefined);
@@ -216,17 +228,27 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     [validateIndex, clearIndexValidationError]
   );
 
-  // Check if integration-level required fields are filled (only when creating new integration)
   const isIntegrationFieldsValid =
     !!formData?.title?.trim() && !!formData?.description?.trim() && !!formData?.connectorId?.trim();
 
+  const existingDataStreamNames = useMemo(
+    () => new Set((integration?.dataStreams ?? []).map((ds) => ds.title.toLowerCase())),
+    [integration?.dataStreams]
+  );
+
+  const hasDuplicateDataStreamName =
+    !!formData?.dataStreamTitle?.trim() &&
+    existingDataStreamNames.has(formData.dataStreamTitle.trim().toLowerCase());
+
   const isDataStreamFieldsValid =
     !!formData?.dataStreamTitle?.trim() &&
+    !!formData?.dataStreamDescription?.trim() &&
+    !hasDuplicateDataStreamName &&
     formData?.dataCollectionMethod != null &&
     formData.dataCollectionMethod.length > 0;
 
   const isLogSourceValid =
-    (logsSourceOption === 'upload' && !!logSample) ||
+    (logsSourceOption === 'file' && !!logSample) ||
     (logsSourceOption === 'index' && !!selectedIndex && !indexValidationError);
 
   const isAnalyzeDisabled =
@@ -238,11 +260,92 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     isLoading ||
     isUploadingSamples;
 
+  const analyzeLogsValidationReasons = useMemo(() => {
+    const reasons: string[] = [];
+    if (!formData?.title?.trim()) {
+      reasons.push(formI18n.TITLE_REQUIRED);
+    }
+    if (!formData?.description?.trim()) {
+      reasons.push(formI18n.DESCRIPTION_REQUIRED);
+    }
+    if (!formData?.connectorId?.trim()) {
+      reasons.push(formI18n.CONNECTOR_REQUIRED);
+    }
+    if (!formData?.dataStreamTitle?.trim()) {
+      reasons.push(formI18n.DATA_STREAM_TITLE_REQUIRED);
+    } else if (hasDuplicateDataStreamName) {
+      reasons.push(formI18n.DATA_STREAM_TITLE_ALREADY_EXISTS);
+    }
+    if (!formData?.dataStreamDescription?.trim()) {
+      reasons.push(formI18n.DATA_STREAM_DESCRIPTION_REQUIRED);
+    }
+    if (!formData?.dataCollectionMethod?.length) {
+      reasons.push(formI18n.DATA_COLLECTION_METHOD_REQUIRED);
+    }
+    if (logsSourceOption === 'file' && !logSample) {
+      reasons.push(formI18n.LOG_SAMPLE_REQUIRED);
+    }
+    if (logsSourceOption === 'index') {
+      if (!selectedIndex) {
+        reasons.push(formI18n.SELECTED_INDEX_REQUIRED);
+      } else if (indexValidationError) {
+        reasons.push(indexValidationError);
+      }
+    }
+    return reasons;
+  }, [
+    formData?.title,
+    formData?.description,
+    formData?.connectorId,
+    formData?.dataStreamTitle,
+    formData?.dataStreamDescription,
+    formData?.dataCollectionMethod,
+    hasDuplicateDataStreamName,
+    logsSourceOption,
+    logSample,
+    selectedIndex,
+    indexValidationError,
+  ]);
+
+  const analyzeLogsDisabledTooltipContent = useMemo(() => {
+    if (!isAnalyzeDisabled) {
+      return null;
+    }
+    if (analyzeLogsValidationReasons.length > 0) {
+      return (
+        <EuiText size="xs" component="div">
+          <ul
+            css={css`
+              margin-block: 0;
+              padding-inline-start: ${euiTheme.size.base};
+            `}
+          >
+            {analyzeLogsValidationReasons.map((reason, index) => (
+              <li key={`${reason}-${index}`}>{reason}</li>
+            ))}
+          </ul>
+        </EuiText>
+      );
+    }
+    if (isParsing || isValidatingIndex || isLoading || isUploadingSamples) {
+      return i18n.ANALYZE_LOGS_DISABLED_LOADING;
+    }
+    return null;
+  }, [
+    analyzeLogsValidationReasons,
+    euiTheme.size.base,
+    isAnalyzeDisabled,
+    isLoading,
+    isParsing,
+    isUploadingSamples,
+    isValidatingIndex,
+  ]);
+
   const handleAnalyzeLogs = useCallback(async () => {
     if (!formData) return;
 
-    const integrationId = currentIntegrationId ?? generateId();
-    const dataStreamId = generateId();
+    const integrationId = currentIntegrationId ?? normalizeTitleName(formData.title);
+    const dataStreamId = normalizeTitleName(formData.dataStreamTitle);
     const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
       name: method as InputType['name'],
     }));
@@ -254,34 +357,64 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       inputTypes,
     };
 
-    if (logsSourceOption === 'upload' && logSample) {
-      const samples = logSample
-        .split('\n')
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0);
+    try {
+      if (logsSourceOption === 'file' && logSample) {
+        const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent(logSample);
 
-      await uploadSamplesMutation.mutateAsync({
+        if (linesOmittedOverLimit > 0) {
+          notifications.toasts.addWarning({
+            title: i18n.SAMPLES_NORMALIZED_WARNING_TITLE,
+            text: i18n.SAMPLES_NORMALIZED_WARNING_LINES_OMITTED(
+              linesOmittedOverLimit,
+              UPLOAD_SAMPLES_MAX_LINES
+            ),
+          });
+        }
+
+        await uploadSamplesMutation.mutateAsync({
+          integrationId,
+          dataStreamId,
+          samples,
+          originalSource: {
+            sourceType: 'file',
+            sourceValue: uploadedFileName ?? 'uploaded-file.log',
+          },
+        });
+      } else if (logsSourceOption === 'index' && selectedIndex) {
+        await uploadSamplesMutation.mutateAsync({
+          integrationId,
+          dataStreamId,
+          sourceIndex: selectedIndex,
+          originalSource: {
+            sourceType: 'index',
+            sourceValue: selectedIndex,
+          },
+        });
+      }
+
+      const result = await createUpdateIntegrationMutation.mutateAsync({
+        connectorId: formData.connectorId,
         integrationId,
-        dataStreamId,
-        samples,
-        originalSource: {
-          sourceType: 'file',
-          sourceValue: uploadedFileName ?? 'uploaded-file.log',
-        },
+        title: formData.title,
+        description: formData.description,
+        ...(formData.logo ? { logo: formData.logo } : {}),
+        dataStreams: [newDataStream],
       });
-    } else if (logsSourceOption === 'index' && selectedIndex) {
-      // For index source, we don't need to upload
-      // TODO: Add logic to fetch samples from the index.
-    }
 
-    await createUpdateIntegrationMutation.mutateAsync({
-      connectorId: formData.connectorId,
-      integrationId,
-      title: formData.title,
-      description: formData.description,
-      ...(formData.logo ? { logo: formData.logo } : {}),
-      dataStreams: [newDataStream],
-    });
+      onClose();
+
+      if (!currentIntegrationId && result.integration_id) {
+        application.navigateToApp(PLUGIN_ID, { path: `/edit/${result.integration_id}` });
+      }
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error('Unknown error'), {
+        title: i18n.CREATE_DATA_STREAM_ERROR,
+      });
+    } finally {
+      reportAnalyzeLogsTriggered({
+        logsSource: logsSourceOption,
+      });
+    }
   }, [
     formData,
     createUpdateIntegrationMutation,
@@ -291,6 +424,10 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     logSample,
     selectedIndex,
     uploadedFileName,
+    onClose,
+    reportAnalyzeLogsTriggered,
+    notifications,
+    application,
   ]);
 
   return (
@@ -329,7 +466,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                 onChange={(e) => field.setValue(e.target.value)}
                 isInvalid={field.errors.length > 0}
                 placeholder=""
-                data-test-subj="dataStreamTitleInput"
+                data-test-subj="dataStreamTitleInputV2"
                 css={styles.formField}
                 fullWidth
               />
@@ -350,7 +487,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                 onChange={(e) => field.setValue(e.target.value)}
                 isInvalid={field.errors.length > 0}
                 placeholder=""
-                data-test-subj="dataStreamDescriptionInput"
+                data-test-subj="dataStreamDescriptionInputV2"
                 css={styles.formField}
                 fullWidth
               />
@@ -394,6 +531,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         <EuiText size="s" color="subdued">
           {i18n.LOGS_SECTION_DESCRIPTION}
         </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="s">{i18n.LOG_SAMPLE_REQUIRED_FOR_ANALYSIS}</EuiText>
 
         <EuiSpacer size="m" />
 
@@ -404,8 +543,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         <EuiCheckableCard
           id="logsSourceUpload"
           label={<FormStyledLabel text={i18n.UPLOAD_LOG_FILE_LABEL} />}
-          checked={logsSourceOption === 'upload'}
-          onChange={() => handleLogsSourceChange('upload')}
+          checked={logsSourceOption === 'file'}
+          onChange={() => handleLogsSourceChange('file')}
           data-test-subj="logsSourceUploadCard"
           css={styles.checkableCard}
         >
@@ -419,7 +558,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               aria-label={i18n.ARIA_LABELS.uploadLogFile}
               isLoading={isParsing}
               isInvalid={fileError != null}
-              disabled={logsSourceOption !== 'upload'}
+              disabled={logsSourceOption !== 'file'}
             />
           </EuiFormRow>
         </EuiCheckableCard>
@@ -477,15 +616,31 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleAnalyzeLogs}
-              disabled={isAnalyzeDisabled}
-              isLoading={isParsing || isLoading || isUploadingSamples}
-              data-test-subj="analyzeLogsButton"
-            >
-              {i18n.ANALYZE_LOGS_BUTTON}
-            </EuiButton>
+            {isAnalyzeDisabled && analyzeLogsDisabledTooltipContent != null ? (
+              <EuiToolTip content={analyzeLogsDisabledTooltipContent} position="top">
+                <span tabIndex={0}>
+                  <EuiButton
+                    fill
+                    onClick={handleAnalyzeLogs}
+                    disabled={isAnalyzeDisabled}
+                    isLoading={isParsing || isLoading || isUploadingSamples}
+                    data-test-subj="analyzeLogsButton"
+                  >
+                    {i18n.ANALYZE_LOGS_BUTTON}
+                  </EuiButton>
+                </span>
+              </EuiToolTip>
+            ) : (
+              <EuiButton
+                fill
+                onClick={handleAnalyzeLogs}
+                disabled={isAnalyzeDisabled}
+                isLoading={isParsing || isLoading || isUploadingSamples}
+                data-test-subj="analyzeLogsButton"
+              >
+                {i18n.ANALYZE_LOGS_BUTTON}
+              </EuiButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

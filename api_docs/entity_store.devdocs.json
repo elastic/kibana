@@ -2,26 +2,2369 @@
   "id": "entityStore",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.bulkUpdateEntities",
+        "type": "Function",
+        "tags": [],
+        "label": "bulkUpdateEntities",
+        "description": [
+          "\nBulk-update a single entity document via the Entity Store v2 CRUD bulk route."
+        ],
+        "signature": [
+          "(http: ",
+          "HttpSetup",
+          ", params: ",
+          {
+            "pluginId": "entityStore",
+            "scope": "public",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-public.BulkUpdateEntitiesParams",
+            "text": "BulkUpdateEntitiesParams"
+          },
+          ", options: { signal?: AbortSignal | undefined; } | undefined) => Promise<",
+          {
+            "pluginId": "entityStore",
+            "scope": "public",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-public.BulkUpdateEntitiesResponse",
+            "text": "BulkUpdateEntitiesResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.bulkUpdateEntities.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.bulkUpdateEntities.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "entityStore",
+                "scope": "public",
+                "docId": "kibEntityStorePluginApi",
+                "section": "def-public.BulkUpdateEntitiesParams",
+                "text": "BulkUpdateEntitiesParams"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.bulkUpdateEntities.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 34,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-public.bulkUpdateEntities.$3.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+                "lineNumber": 34,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.EntityStoreEuidApiProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "EntityStoreEuidApiProvider",
+        "description": [],
+        "signature": [
+          "({ children }: Readonly<{ children: React.ReactNode; }>) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/euid_api_context.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.EntityStoreEuidApiProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "Readonly<{ children: React.ReactNode; }>"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/euid_api_context.tsx",
+            "lineNumber": 16,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.loadEuidApi",
+        "type": "Function",
+        "tags": [],
+        "label": "loadEuidApi",
+        "description": [
+          "Load the EUID API (euid, filter builders). Use when you need them; prefer useEntityStoreEuidApi() in React."
+        ],
+        "signature": [
+          "() => Promise<{ euid: { getEuidFromObject: (entityType: any, doc: any) => string | undefined; getEntityIdentifiersFromDocument: (entityType: any, doc: unknown) => Record<string, string> | undefined; getEuidFromTimelineNonEcsData: (entityType: any, rows: readonly ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.NonEcsTimelineDataRow",
+            "text": "NonEcsTimelineDataRow"
+          },
+          "[] | undefined) => string | undefined; getEuidSourceFields: (entityType: any) => ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.IdentitySourceFields",
+            "text": "IdentitySourceFields"
+          },
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "QueryDslQueryContainer",
+          "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
+          "QueryDslQueryContainer",
+          "; }; }; }>"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.searchEntitiesFromEntityStore",
+        "type": "Function",
+        "tags": [],
+        "label": "searchEntitiesFromEntityStore",
+        "description": [
+          "\nList/search Entity Store v2 unified latest index via the internal list-entities route\n(`ENTITY_STORE_ROUTES.CRUD_GET`, page mode). Requires Entity Store v2 feature flag."
+        ],
+        "signature": [
+          "(http: ",
+          "HttpSetup",
+          ", params: ",
+          {
+            "pluginId": "entityStore",
+            "scope": "public",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-public.SearchEntitiesFromEntityStoreParams",
+            "text": "SearchEntitiesFromEntityStoreParams"
+          },
+          ", options: { signal?: AbortSignal | undefined; } | undefined) => Promise<",
+          {
+            "pluginId": "entityStore",
+            "scope": "public",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-public.SearchEntitiesFromEntityStoreResponse",
+            "text": "SearchEntitiesFromEntityStoreResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.searchEntitiesFromEntityStore.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.searchEntitiesFromEntityStore.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "entityStore",
+                "scope": "public",
+                "docId": "kibEntityStorePluginApi",
+                "section": "def-public.SearchEntitiesFromEntityStoreParams",
+                "text": "SearchEntitiesFromEntityStoreParams"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.searchEntitiesFromEntityStore.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 35,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-public.searchEntitiesFromEntityStore.$3.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+                "lineNumber": 35,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.useEntityStoreEuidApi",
+        "type": "Function",
+        "tags": [],
+        "label": "useEntityStoreEuidApi",
+        "description": [],
+        "signature": [
+          "() => ",
+          "EntityStoreEuidApi",
+          " | null"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/euid_api_context.tsx",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.useInstallEntityStoreV2",
+        "type": "Function",
+        "tags": [],
+        "label": "useInstallEntityStoreV2",
+        "description": [
+          "\nHook to install Entity Store V2. Should be called from the root Security Solution app component."
+        ],
+        "signature": [
+          "(services: ",
+          "Services",
+          ") => void"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.tsx",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.useInstallEntityStoreV2.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [
+              "- Kibana services required to install Entity Store V2"
+            ],
+            "signature": [
+              "Services"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.tsx",
+            "lineNumber": 56,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.BulkUpdateEntitiesParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdateEntitiesParams",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.BulkUpdateEntitiesParams.entityType",
+            "type": "Any",
+            "tags": [],
+            "label": "entityType",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.BulkUpdateEntitiesParams.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.BulkUpdateEntitiesParams.force",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "force",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.BulkUpdateEntitiesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdateEntitiesResponse",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.BulkUpdateEntitiesResponse.ok",
+            "type": "boolean",
+            "tags": [],
+            "label": "ok",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.BulkUpdateEntitiesResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "{ _id?: string | undefined; status?: number | undefined; type?: string | undefined; reason?: string | undefined; }[]"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/bulk_update_entities_api.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.EntityStoreEuidApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "EntityStoreEuidApi",
+        "description": [
+          "\nEUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.\nAligns with the {@link euid} object from this module."
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.EntityStoreEuidApi.euid",
+            "type": "Object",
+            "tags": [],
+            "label": "euid",
+            "description": [],
+            "signature": [
+              "{ getEuidFromObject: (entityType: any, doc: any) => string | undefined; getEntityIdentifiersFromDocument: (entityType: any, doc: unknown) => Record<string, string> | undefined; getEuidFromTimelineNonEcsData: (entityType: any, rows: readonly ",
+              {
+                "pluginId": "entityStore",
+                "scope": "common",
+                "docId": "kibEntityStorePluginApi",
+                "section": "def-common.NonEcsTimelineDataRow",
+                "text": "NonEcsTimelineDataRow"
+              },
+              "[] | undefined) => string | undefined; getEuidSourceFields: (entityType: any) => ",
+              {
+                "pluginId": "entityStore",
+                "scope": "common",
+                "docId": "kibEntityStorePluginApi",
+                "section": "def-common.IdentitySourceFields",
+                "text": "IdentitySourceFields"
+              },
+              "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+              "QueryDslQueryContainer",
+              "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
+              "QueryDslQueryContainer",
+              "; }; }"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.IdentitySourceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "IdentitySourceFields",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.IdentitySourceFields.requiresOneOf",
+            "type": "Array",
+            "tags": [],
+            "label": "requiresOneOf",
+            "description": [
+              "Fields that participate in identity (EUID composition)."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.IdentitySourceFields.identitySourceFields",
+            "type": "Array",
+            "tags": [],
+            "label": "identitySourceFields",
+            "description": [
+              "All field names used in EUID composition, deduplicated."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.NonEcsTimelineDataRow",
+        "type": "Interface",
+        "tags": [],
+        "label": "NonEcsTimelineDataRow",
+        "description": [
+          "\nStructural match for timeline non-ECS rows (e.g. `TimelineNonEcsData` from\n`@kbn/timelines-plugin/common`) so this module stays free of timelines imports."
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/non_ecs_timeline_data.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.NonEcsTimelineDataRow.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/non_ecs_timeline_data.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.NonEcsTimelineDataRow.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "readonly (string | null | undefined)[] | null | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/non_ecs_timeline_data.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.SearchEntitiesFromEntityStoreParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchEntitiesFromEntityStoreParams",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreParams.entityTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "entityTypes",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreParams.filterQuery",
+            "type": "string",
+            "tags": [],
+            "label": "filterQuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreParams.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreParams.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreParams.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreParams.sortOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [],
+            "signature": [
+              "\"asc\" | \"desc\" | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.SearchEntitiesFromEntityStoreResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchEntitiesFromEntityStoreResponse",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreResponse.records",
+            "type": "Array",
+            "tags": [],
+            "label": "records",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreResponse.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreResponse.per_page",
+            "type": "number",
+            "tags": [],
+            "label": "per_page",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreResponse.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-public.SearchEntitiesFromEntityStoreResponse.inspect",
+            "type": "Object",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              "{ dsl: string[]; response: string[]; } | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/public/search_entities_api.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.ALL_ENTITY_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "ALL_ENTITY_TYPES",
+        "description": [],
+        "signature": [
+          "unknown[]"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 91,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.EntityStoreEuid",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityStoreEuid",
+        "description": [
+          "Full EUID API (memory + painless + esql + dsl) — same object for Node and browser lazy chunk."
+        ],
+        "signature": [
+          "{ getEuidFromObject: (entityType: any, doc: any) => string | undefined; getEntityIdentifiersFromDocument: (entityType: any, doc: unknown) => Record<string, string> | undefined; getEuidFromTimelineNonEcsData: (entityType: any, rows: readonly ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.NonEcsTimelineDataRow",
+            "text": "NonEcsTimelineDataRow"
+          },
+          "[] | undefined) => string | undefined; getEuidSourceFields: (entityType: any) => ",
+          {
+            "pluginId": "entityStore",
+            "scope": "common",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-common.IdentitySourceFields",
+            "text": "IdentitySourceFields"
+          },
+          "; painless: { getEuidEvaluation: (entityType: any) => string; getEuidRuntimeMapping: (entityType: any) => { type: \"keyword\"; script: { source: string; }; }; }; esql: { getEuidDocumentsContainsIdFilter: (entityType: any) => string; getEuidEvaluation: (entityType: any, { withTypeId }?: { withTypeId?: boolean | undefined; }) => string; getEuidFilterBasedOnDocument: (entityType: any, doc: any) => string | undefined; getFieldEvaluations: (entityType: any) => string | undefined; }; dsl: { getEuidFilterBasedOnDocument: (entityType: any, doc: any) => ",
+          "QueryDslQueryContainer",
+          "; getEuidDocumentsContainsIdFilter: (entityType: any) => ",
+          "QueryDslQueryContainer",
+          "; }; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/euid_helpers.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.EntityType",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.EntityType",
+        "type": "Any",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.FF_ENABLE_ENTITY_STORE_V2",
+        "type": "string",
+        "tags": [],
+        "label": "FF_ENABLE_ENTITY_STORE_V2",
+        "description": [],
+        "signature": [
+          "\"securitySolution:entityStoreEnableV2\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-public.ENTITY_STORE_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "ENTITY_STORE_ROUTES",
+        "description": [],
+        "signature": [
+          "{ readonly INSTALL: \"/internal/security/entity_store/install\"; readonly UPDATE: \"/internal/security/entity_store\"; readonly UNINSTALL: \"/internal/security/entity_store/uninstall\"; readonly STATUS: \"/internal/security/entity_store/status\"; readonly START: \"/internal/security/entity_store/start\"; readonly STOP: \"/internal/security/entity_store/stop\"; readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly CRUD_CREATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/internal/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/internal/security/entity_store/entities\"; readonly CRUD_DELETE: \"/internal/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/internal/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/internal/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/internal/security/entity_store/resolution/group\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "classes": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.ResolutionClient",
+        "type": "Class",
+        "tags": [],
+        "label": "ResolutionClient",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ logger, esClient, namespace }",
+                "description": [],
+                "signature": [
+                  "ResolutionClientOpts"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 67,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.linkEntities",
+            "type": "Function",
+            "tags": [],
+            "label": "linkEntities",
+            "description": [
+              "\nLinks one or more entities to a target entity by setting resolved_to.\nValidates chain prevention (can't link an alias) and has-aliases prevention\n(can't link an entity that has aliases pointing to it)."
+            ],
+            "signature": [
+              "(targetId: string, rawEntityIds: string[]) => Promise<",
+              "LinkResult",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.linkEntities.$1",
+                "type": "string",
+                "tags": [],
+                "label": "targetId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 78,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.linkEntities.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rawEntityIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 78,
+                "columnNumber": 47,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.unlinkEntities",
+            "type": "Function",
+            "tags": [],
+            "label": "unlinkEntities",
+            "description": [
+              "\nUnlinks alias entities by removing their resolved_to field.\nUnlinked entities become standalone."
+            ],
+            "signature": [
+              "(rawEntityIds: string[]) => Promise<",
+              "UnlinkResult",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.unlinkEntities.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rawEntityIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 147,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.ResolutionClient.getResolutionGroup",
+            "type": "Function",
+            "tags": [],
+            "label": "getResolutionGroup",
+            "description": [
+              "\nReturns the resolution group for any entity (target or alias).\nStandalone entities return as the target with empty aliases."
+            ],
+            "signature": [
+              "(entityId: string) => Promise<",
+              "ResolutionGroup",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.ResolutionClient.getResolutionGroup.$1",
+                "type": "string",
+                "tags": [],
+                "label": "entityId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/domain/resolution/resolution_client.ts",
+                "lineNumber": 190,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldValue",
+        "description": [],
+        "signature": [
+          "(doc: any, field: string) => string | undefined"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getFieldValue.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+            "lineNumber": 40,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getFieldValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/commons.ts",
+            "lineNumber": 40,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getHistorySnapshotIndexPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "getHistorySnapshotIndexPattern",
+        "description": [
+          "\nReturns the index pattern matching all history snapshot indices for a namespace.\nUsed for delete and status."
+        ],
+        "signature": [
+          "(namespace: string) => string"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/asset_manager/history_snapshot_index.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getHistorySnapshotIndexPattern.$1",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/asset_manager/history_snapshot_index.ts",
+            "lineNumber": 46,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getLatestEntitiesIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getLatestEntitiesIndexName",
+        "description": [],
+        "signature": [
+          "(namespace: string) => `.entities.v${number}.latest.security_${string}`"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getLatestEntitiesIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 40,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.BulkObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkObject",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObject.type",
+            "type": "Any",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObject.doc",
+            "type": "Any",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.BulkObjectResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkObjectResponse",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse.status",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.RegisterEntityMaintainerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegisterEntityMaintainerConfig",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.initialState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialState",
+            "description": [],
+            "signature": [
+              "EntityMaintainerState"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.run",
+            "type": "Function",
+            "tags": [],
+            "label": "run",
+            "description": [],
+            "signature": [
+              "(context: EntityMaintainerTaskMethodContext) => Promise<",
+              "EntityMaintainerState",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "entityStore",
+                "id": "def-server.RegisterEntityMaintainerConfig.run.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "EntityMaintainerTaskMethodContext"
+                ],
+                "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+                "lineNumber": 75,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "EntityMaintainerTaskMethod",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.RegisterEntityMaintainerConfig.minLicense",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "minLicense",
+            "description": [],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.ENGINE_METADATA_TYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ENGINE_METADATA_TYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"entity.EngineMetadata.Type\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/logs_extraction/query_builder_commons.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.EntityStoreCRUDClient",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityStoreCRUDClient",
+        "description": [],
+        "signature": [
+          "{ searchLatestEntities: (params: ",
+          "SearchEntitiesV2Params",
+          ") => Promise<",
+          "SearchEntitiesV2Result",
+          ">; updateEntity: (entityType: any, doc: any, force: boolean) => Promise<void>; bulkUpdateEntity: ({ objects, force, }: BulkUpdateEntityParams) => Promise<",
+          {
+            "pluginId": "entityStore",
+            "scope": "server",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-server.BulkObjectResponse",
+            "text": "BulkObjectResponse"
+          },
+          "[]>; deleteEntity: (id: string) => Promise<void>; listEntities: (params?: ",
+          "ListEntitiesParams",
+          " | undefined) => Promise<",
+          "ListEntitiesResult",
+          ">; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.EntityUpdateClient",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityUpdateClient",
+        "description": [],
+        "signature": [
+          "{ searchLatestEntities: (params: ",
+          "SearchEntitiesV2Params",
+          ") => Promise<",
+          "SearchEntitiesV2Result",
+          ">; updateEntity: (entityType: any, doc: any, force: boolean) => Promise<void>; bulkUpdateEntity: ({ objects, force, }: BulkUpdateEntityParams) => Promise<",
+          {
+            "pluginId": "entityStore",
+            "scope": "server",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-server.BulkObjectResponse",
+            "text": "BulkObjectResponse"
+          },
+          "[]>; listEntities: (params?: ",
+          "ListEntitiesParams",
+          " | undefined) => Promise<",
+          "ListEntitiesResult",
+          ">; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "entityStore",
+      "id": "def-server.EntityStoreSetupContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "EntityStoreSetupContract",
+      "description": [],
+      "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+      "lineNumber": 82,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "entityStore",
+          "id": "def-server.EntityStoreSetupContract.registerEntityMaintainer",
+          "type": "Function",
+          "tags": [],
+          "label": "registerEntityMaintainer",
+          "description": [],
+          "signature": [
+            "(config: ",
+            {
+              "pluginId": "entityStore",
+              "scope": "server",
+              "docId": "kibEntityStorePluginApi",
+              "section": "def-server.RegisterEntityMaintainerConfig",
+              "text": "RegisterEntityMaintainerConfig"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+          "lineNumber": 83,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreSetupContract.registerEntityMaintainer.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "entityStore",
+                  "scope": "server",
+                  "docId": "kibEntityStorePluginApi",
+                  "section": "def-server.RegisterEntityMaintainerConfig",
+                  "text": "RegisterEntityMaintainerConfig"
+                }
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 73,
+              "columnNumber": 41,
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "entityStore",
+      "id": "def-server.EntityStoreStartContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "EntityStoreStartContract",
+      "description": [],
+      "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+      "lineNumber": 77,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "entityStore",
+          "id": "def-server.EntityStoreStartContract.createCRUDClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createCRUDClient",
+          "description": [],
+          "signature": [
+            "(esClient: ",
+            "ElasticsearchClient",
+            ", namespace: string) => ",
+            {
+              "pluginId": "entityStore",
+              "scope": "server",
+              "docId": "kibEntityStorePluginApi",
+              "section": "def-server.EntityStoreCRUDClient",
+              "text": "EntityStoreCRUDClient"
+            }
+          ],
+          "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+          "lineNumber": 78,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createCRUDClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "esClient",
+              "description": [],
+              "signature": [
+                "ElasticsearchClient"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 78,
+              "columnNumber": 22,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createCRUDClient.$2",
+              "type": "string",
+              "tags": [],
+              "label": "namespace",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 78,
+              "columnNumber": 53,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "entityStore",
+          "id": "def-server.EntityStoreStartContract.createResolutionClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createResolutionClient",
+          "description": [],
+          "signature": [
+            "(esClient: ",
+            "ElasticsearchClient",
+            ", namespace: string) => ",
+            {
+              "pluginId": "entityStore",
+              "scope": "server",
+              "docId": "kibEntityStorePluginApi",
+              "section": "def-server.ResolutionClient",
+              "text": "ResolutionClient"
+            }
+          ],
+          "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+          "lineNumber": 79,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createResolutionClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "esClient",
+              "description": [],
+              "signature": [
+                "ElasticsearchClient"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 79,
+              "columnNumber": 28,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createResolutionClient.$2",
+              "type": "string",
+              "tags": [],
+              "label": "namespace",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 79,
+              "columnNumber": 59,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.getEntitiesAliasPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "getEntitiesAliasPattern",
+        "description": [],
+        "signature": [
+          "<TDataset extends Dataset>({ dataset, }: AliasPatternOptions<TDataset>) => `entities-${TDataset}`"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.getEntitiesAliasPattern.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataset,\n}",
+            "description": [],
+            "signature": [
+              "AliasPatternOptions<TDataset>"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 36,
+            "columnNumber": 67,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.getEntityIndexPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "getEntityIndexPattern",
+        "description": [],
+        "signature": [
+          "<TDataset extends Dataset>({ schemaVersion, dataset, namespace, }: IndexPatternOptions<TDataset>) => `.entities.v${number}.${TDataset}.security_${string}`"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.getEntityIndexPattern.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  schemaVersion,\n  dataset,\n  namespace,\n}",
+            "description": [],
+            "signature": [
+              "IndexPatternOptions<TDataset>"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 29,
+            "columnNumber": 65,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.getErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getErrorMessage",
+        "description": [],
+        "signature": [
+          "(error: unknown) => string"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.getErrorMessage.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+            "lineNumber": 77,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.getLatestEntitiesIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getLatestEntitiesIndexName",
+        "description": [],
+        "signature": [
+          "(namespace: string) => `.entities.v${number}.latest.security_${string}`"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.getLatestEntitiesIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+            "lineNumber": 40,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.IdentitySourceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "IdentitySourceFields",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.IdentitySourceFields.requiresOneOf",
+            "type": "Array",
+            "tags": [],
+            "label": "requiresOneOf",
+            "description": [
+              "Fields that participate in identity (EUID composition)."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.IdentitySourceFields.identitySourceFields",
+            "type": "Array",
+            "tags": [],
+            "label": "identitySourceFields",
+            "description": [
+              "All field names used in EUID composition, deduplicated."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.NonEcsTimelineDataRow",
+        "type": "Interface",
+        "tags": [],
+        "label": "NonEcsTimelineDataRow",
+        "description": [
+          "\nStructural match for timeline non-ECS rows (e.g. `TimelineNonEcsData` from\n`@kbn/timelines-plugin/common`) so this module stays free of timelines imports."
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/non_ecs_timeline_data.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.NonEcsTimelineDataRow.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/non_ecs_timeline_data.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.NonEcsTimelineDataRow.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "readonly (string | null | undefined)[] | null | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/domain/euid/non_ecs_timeline_data.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.ALL_ENTITY_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "ALL_ENTITY_TYPES",
+        "description": [],
+        "signature": [
+          "unknown[]"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 91,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.AssetCriticalityLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "AssetCriticalityLevel",
+        "description": [
+          "\nThe criticality level of the asset."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.AssetCriticalityLevel",
+        "type": "Any",
+        "tags": [],
+        "label": "AssetCriticalityLevel",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.Entity",
+        "type": "Type",
+        "tags": [],
+        "label": "Entity",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 355,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.ENTITY_BASE_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_BASE_PREFIX",
+        "description": [],
+        "signature": [
+          "\"entities\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.ENTITY_HISTORY",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_HISTORY",
+        "description": [],
+        "signature": [
+          "\"history\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.ENTITY_LATEST",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_LATEST",
+        "description": [],
+        "signature": [
+          "\"latest\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.ENTITY_SCHEMA_VERSION_V2",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_SCHEMA_VERSION_V2",
+        "description": [],
+        "signature": [
+          "\"v2\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.ENTITY_UPDATES",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_UPDATES",
+        "description": [],
+        "signature": [
+          "\"updates\""
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/entity_index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityMaintainerResponseItem",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityMaintainerResponseItem",
+        "description": [],
+        "signature": [
+          "{ id: string; taskStatus: any; interval: string; description: any; nextRunAt: any; minLicense: any; customState: any; runs: number; lastSuccessTimestamp: any; lastErrorTimestamp: any; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityMaintainerTaskStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityMaintainerTaskStatus",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityMaintainerTaskStatus",
+        "type": "Any",
+        "tags": [],
+        "label": "EntityMaintainerTaskStatus",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityStoreStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityStoreStatus",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityStoreStatus",
+        "type": "Any",
+        "tags": [],
+        "label": "EntityStoreStatus",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityType",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityType",
+        "type": "Any",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "entityStore",
         "id": "def-common.FF_ENABLE_ENTITY_STORE_V2",
@@ -33,8 +2376,25 @@
           "\"securitySolution:entityStoreEnableV2\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 11,
+        "lineNumber": 24,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.GetEntityMaintainersResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetEntityMaintainersResponse",
+        "description": [],
+        "signature": [
+          "{ maintainers: { id: string; taskStatus: any; interval: string; description: any; nextRunAt: any; minLicense: any; customState: any; runs: number; lastSuccessTimestamp: any; lastErrorTimestamp: any; }[]; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -50,7 +2410,7 @@
           "\"entityStore\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 8,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,13 +2427,208 @@
           "\"Entity Store\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 9,
+        "lineNumber": 22,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.Record",
+        "type": "Any",
+        "tags": [],
+        "label": "Record",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 69,
+        "columnNumber": 22,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.satisfies",
+        "type": "Any",
+        "tags": [],
+        "label": "satisfies",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 69,
+        "columnNumber": 12,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.API_VERSIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "API_VERSIONS",
+        "description": [],
+        "signature": [
+          "{ readonly public: { readonly v1: \"2023-10-31\"; }; readonly internal: { readonly v2: \"2\"; }; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.Entity",
+        "type": "Object",
+        "tags": [],
+        "label": "Entity",
+        "description": [],
+        "signature": [
+          "ZodType",
+          "<any, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<any, unknown>>"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 356,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.ENTITY_STORE_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "ENTITY_STORE_ROUTES",
+        "description": [],
+        "signature": [
+          "{ readonly INSTALL: \"/internal/security/entity_store/install\"; readonly UPDATE: \"/internal/security/entity_store\"; readonly UNINSTALL: \"/internal/security/entity_store/uninstall\"; readonly STATUS: \"/internal/security/entity_store/status\"; readonly START: \"/internal/security/entity_store/start\"; readonly STOP: \"/internal/security/entity_store/stop\"; readonly CHECK_PRIVILEGES: \"/internal/security/entity_store/check_privileges\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly FORCE_HISTORY_SNAPSHOT: \"/internal/security/entity_store/force_history_snapshot\"; readonly CRUD_CREATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_UPDATE: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_BULK_UPDATE: \"/internal/security/entity_store/entities/bulk\"; readonly CRUD_GET: \"/internal/security/entity_store/entities\"; readonly CRUD_DELETE: \"/internal/security/entity_store/entities/\"; readonly RESOLUTION_LINK: \"/internal/security/entity_store/resolution/link\"; readonly RESOLUTION_UNLINK: \"/internal/security/entity_store/resolution/unlink\"; readonly RESOLUTION_GROUP: \"/internal/security/entity_store/resolution/group\"; readonly ENTITY_MAINTAINERS_START: \"/internal/security/entity_store/entity_maintainers/start/{id}\"; readonly ENTITY_MAINTAINERS_STOP: \"/internal/security/entity_store/entity_maintainers/stop/{id}\"; readonly ENTITY_MAINTAINERS_RUN: \"/internal/security/entity_store/entity_maintainers/run/{id}\"; readonly ENTITY_MAINTAINERS_GET: \"/internal/security/entity_store/entity_maintainers\"; readonly ENTITY_MAINTAINERS_INIT: \"/internal/security/entity_store/entity_maintainers/init\"; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.EntityMaintainerResponseItem",
+        "type": "Object",
+        "tags": [],
+        "label": "EntityMaintainerResponseItem",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ id: ",
+          "ZodString",
+          "; taskStatus: any; interval: ",
+          "ZodString",
+          "; description: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; nextRunAt: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; minLicense: any; customState: ",
+          "ZodNullable",
+          "<",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">>; runs: ",
+          "ZodNumber",
+          "; lastSuccessTimestamp: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; lastErrorTimestamp: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.GetEntityMaintainersResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetEntityMaintainersResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ maintainers: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ id: ",
+          "ZodString",
+          "; taskStatus: any; interval: ",
+          "ZodString",
+          "; description: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; nextRunAt: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; minLicense: any; customState: ",
+          "ZodNullable",
+          "<",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">>; runs: ",
+          "ZodNumber",
+          "; lastSuccessTimestamp: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; lastErrorTimestamp: ",
+          "ZodNullable",
+          "<",
+          "ZodString",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/entity_maintainers.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

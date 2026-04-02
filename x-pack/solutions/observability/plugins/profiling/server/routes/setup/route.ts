@@ -55,6 +55,7 @@ export function registerSetupRoute({
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
+          isServerless: dependencies.esCapabilities.serverless,
         });
 
         return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
@@ -108,6 +109,11 @@ export function registerSetupRoute({
           spaceId:
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         };
+
+        // For now, we don't support serverless setup
+        if (dependencies.esCapabilities.serverless) {
+          return response.badRequest({ body: { message: 'Serverless setup is not supported' } });
+        }
 
         const scopedESClient = (await context.core).elasticsearch.client;
         const { type, setupState } =

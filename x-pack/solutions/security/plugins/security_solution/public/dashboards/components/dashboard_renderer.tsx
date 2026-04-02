@@ -19,7 +19,11 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
+import type {
+  DashboardInitializationState,
+  DashboardInternalApi,
+} from '@kbn/dashboard-plugin/public/dashboard_api/types';
+import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -28,9 +32,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<
-  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
->({});
+const initialInput = new BehaviorSubject<DashboardInitializationState>({});
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -168,7 +170,12 @@ const DashboardRendererComponent = ({
 
   useEffect(() => {
     /** We need to update the initial input on navigation so that changes to filter pills, queries, etc. get applied */
-    initialInput.next({ time_range: timeRange, viewMode, query, filters });
+    initialInput.next({
+      time_range: timeRange,
+      viewMode,
+      query,
+      filters: fromStoredFilters(filters),
+    });
   }, [timeRange, viewMode, query, filters]);
 
   /** Dashboard renderer is stored in the state as it's a temporary solution for

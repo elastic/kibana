@@ -61,9 +61,8 @@ export const getInitialState = (model: DFAModelItem): MlInferenceState => {
   if (modelType !== undefined) {
     targetField = model.inference_config
       ? `ml.inference.${
-          model.inference_config[
-            modelType as keyof Exclude<DFAModelItem['inference_config'], undefined>
-          ]!.results_field
+          model.inference_config[modelType as keyof NonNullable<DFAModelItem['inference_config']>]!
+            .results_field
         }`
       : undefined;
   }
@@ -74,6 +73,7 @@ export const getInitialState = (model: DFAModelItem): MlInferenceState => {
     error: false,
     fieldMap: undefined,
     ignoreFailure: false,
+    // @ts-expect-error - ExactlyOne in the ES types makes it really hard to comply without force-casting.
     inferenceConfig: model.inference_config,
     modelId: model.model_id,
     onFailure: getDefaultOnFailureConfiguration(),

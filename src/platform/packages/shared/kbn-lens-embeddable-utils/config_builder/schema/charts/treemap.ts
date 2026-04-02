@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 
@@ -23,12 +23,12 @@ import {
 import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendVisibleSchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -40,28 +40,30 @@ const treemapSharedStateSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
         meta: {
           id: 'treemapLegend',
+          title: 'Legend',
           description: 'Configuration for the treemap chart legend appearance and behavior',
         },
       }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 
   /**
-   * Position of the labels: hidden or visible
+   * Labels configuration
    */
-  label_position: schema.maybe(
-    schema.oneOf([schema.literal('hidden'), schema.literal('visible')], {
-      meta: {
-        description: 'Position of the labels: hidden or visible',
+  labels: schema.maybe(
+    schema.object(
+      {
+        visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
       },
-    })
+      { meta: { description: 'Labels configuration' } }
+    )
   ),
 };
 
@@ -150,6 +152,7 @@ export const treemapStateSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'treemapNoESQL',
+      title: 'Treemap Chart (DSL)',
       description:
         'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
@@ -157,7 +160,7 @@ export const treemapStateSchemaNoESQL = schema.object(
   }
 );
 
-const treemapStateSchemaESQL = schema.object(
+export const treemapStateSchemaESQL = schema.object(
   {
     type: schema.literal('treemap'),
     ...sharedPanelInfoSchema,
@@ -168,7 +171,7 @@ const treemapStateSchemaESQL = schema.object(
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
     metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
+      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
       {
         minSize: 1,
         maxSize: 100,
@@ -179,7 +182,7 @@ const treemapStateSchemaESQL = schema.object(
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of breakdown dimensions (minimum 1)' },
@@ -189,6 +192,7 @@ const treemapStateSchemaESQL = schema.object(
   {
     meta: {
       id: 'treemapESQL',
+      title: 'Treemap Chart (ES|QL)',
       description:
         'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
@@ -198,7 +202,8 @@ const treemapStateSchemaESQL = schema.object(
 
 export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
-    id: 'treemapChartSchema',
+    id: 'treemapChart',
+    title: 'Treemap Chart',
     description:
       'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  columnsMetaOverridingBytesType,
+  createFormatFieldValueSpy,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render } from '@testing-library/react';
 import React from 'react';
 import SourceDocument from './source_document';
 import type { EsHitRecord } from '@kbn/discover-utils/src/types';
@@ -49,6 +56,7 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => false}
         maxEntries={100}
         isPlainRecord={true}
+        columnsMeta={undefined}
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
@@ -79,10 +87,77 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => true}
         maxEntries={100}
         isPlainRecord={true}
+        columnsMeta={undefined}
       />
     );
 
     expect(mockConvert).toHaveBeenCalled();
     expect(component.html()).toContain('my bar value');
+  });
+
+  describe('with columnsMeta', () => {
+    it('should use data view field type when columnsMeta is undefined', () => {
+      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const testDataView = createDataViewWithBytesField();
+
+      const row = buildDataTableRecord(
+        {
+          _id: '1',
+          _index: 'test',
+          _score: 1,
+          _source: { bytes: 100 },
+        },
+        testDataView
+      );
+
+      render(
+        <SourceDocument
+          useTopLevelObjectColumns={false}
+          row={row}
+          dataView={testDataView}
+          columnId="_source"
+          fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
+          shouldShowFieldHandler={() => true}
+          maxEntries={100}
+          isPlainRecord={true}
+          columnsMeta={undefined}
+        />
+      );
+
+      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
+      formatFieldValueSpy.mockRestore();
+    });
+
+    it('should use columnsMeta type instead of data view field type when provided', () => {
+      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const testDataView = createDataViewWithBytesField();
+
+      const row = buildDataTableRecord(
+        {
+          _id: '1',
+          _index: 'test',
+          _score: 1,
+          _source: { bytes: '100' },
+        },
+        testDataView
+      );
+
+      render(
+        <SourceDocument
+          useTopLevelObjectColumns={false}
+          row={row}
+          dataView={testDataView}
+          columnId="_source"
+          fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
+          shouldShowFieldHandler={() => true}
+          maxEntries={100}
+          isPlainRecord={true}
+          columnsMeta={columnsMetaOverridingBytesType}
+        />
+      );
+
+      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
+      formatFieldValueSpy.mockRestore();
+    });
   });
 });

@@ -209,6 +209,9 @@ export interface FindingsGroupingAggregation {
   accountName?: {
     buckets?: GenericBuckets[];
   };
+  cloudProvider?: {
+    buckets?: GenericBuckets[];
+  };
   clusterName?: {
     buckets?: GenericBuckets[];
   };

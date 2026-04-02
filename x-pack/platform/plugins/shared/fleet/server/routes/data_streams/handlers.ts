@@ -104,8 +104,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       dataStreamsStatsByName,
       dataStreamsMeteringStatsByName
     );
-    const dataStreamNames = keys(dataStreams);
-
+    // filter out data streams starting with ".", e.g. ".workflows-events"
+    const dataStreamNames = keys(dataStreams).filter((name) => !name.startsWith('.'));
     // Map package SOs
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};

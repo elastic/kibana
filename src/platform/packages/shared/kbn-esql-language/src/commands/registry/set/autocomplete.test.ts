@@ -18,7 +18,7 @@ jest.mock('../../definitions/generated/settings', () => {
   const originalModule = jest.requireActual('../../definitions/generated/settings');
   return {
     ...originalModule,
-    settings: originalModule.settings.map((s: any) =>
+    settings: originalModule.settings.map((s: { name: string; ignoreAsSuggestion?: boolean }) =>
       s.name === 'project_routing' ? { ...s, ignoreAsSuggestion: false } : s
     ),
   };
@@ -116,11 +116,11 @@ describe('SET Autocomplete', () => {
 
     describe('Unmapped fields setting', () => {
       it('suggests unmapped fields values after assignment operator', async () => {
-        await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"NULLIFY";']);
+        await setExpectSuggestions('SET unmapped_fields = ', ['"DEFAULT";', '"NULLIFY";']);
       });
 
       it('suggests unmapped fields values for partial input', async () => {
-        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'NULLIFY']);
+        await setExpectSuggestions('SET unmapped_fields = "N', ['DEFAULT', 'NULLIFY']);
       });
     });
 
@@ -139,13 +139,11 @@ describe('SET Autocomplete', () => {
       });
 
       it('suggests map parameter name after completing a parameter entry', async () => {
-        await setExpectSuggestions('SET approximation = { "num_rows": 100, ', [
-          '"confidence_level": ',
-        ]);
+        await setExpectSuggestions('SET approximation = { "rows": 100, ', ['"confidence_level": ']);
       });
 
-      it('suggests map parameter values after parameter name and colon: num_rows', async () => {
-        await setExpectSuggestions('SET approximation = { "num_rows": ', [
+      it('suggests map parameter values after parameter name and colon: rows', async () => {
+        await setExpectSuggestions('SET approximation = { "rows": ', [
           '100000',
           '1000000',
           '500000',

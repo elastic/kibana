@@ -36,8 +36,19 @@ export function useGetIntegrationById(
 
       return response.integrationResponse;
     },
-    refetchInterval: 30 * 1000,
-    refetchOnWindowFocus: true,
+    refetchInterval: (queryData, query) => {
+      if (query.state.status === 'error') {
+        return false;
+      }
+      return 30 * 1000;
+    },
+    retry: (failureCount, err) => {
+      const fetchError = err as { response?: { status?: number } };
+      if (fetchError?.response?.status === 404) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     enabled: !!integrationId,
   });
 

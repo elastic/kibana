@@ -9,7 +9,7 @@
 
 import {
   ADD_PANEL_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DashboardStartDependencies } from '../plugin';
@@ -31,13 +31,13 @@ export const registerActions = async (plugins: DashboardStartDependencies) => {
     const { ClonePanelAction } = await import('../dashboard_renderer/dashboard_module');
     return new ClonePanelAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CLONE_PANEL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CLONE_PANEL);
 
   uiActions.registerActionAsync(ACTION_EXPAND_PANEL, async () => {
     const { ExpandPanelAction } = await import('../dashboard_renderer/dashboard_module');
     return new ExpandPanelAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPAND_PANEL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPAND_PANEL);
 
   uiActions.registerActionAsync(BADGE_FILTERS_NOTIFICATION, async () => {
     const { FiltersNotificationAction } = await import('../dashboard_renderer/dashboard_module');
@@ -56,24 +56,24 @@ export const registerActions = async (plugins: DashboardStartDependencies) => {
       const { ExportCSVAction } = await import('../dashboard_renderer/dashboard_module');
       return new ExportCSVAction();
     });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPORT_CSV);
+    uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPORT_CSV);
   }
 
   uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
     const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
     return new AddToLibraryAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_ADD_TO_LIBRARY);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_ADD_TO_LIBRARY);
 
   uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
     const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
     return new UnlinkFromLibraryAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_UNLINK_FROM_LIBRARY);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_UNLINK_FROM_LIBRARY);
 
   uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
     const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
     return new CopyToDashboardAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_COPY_TO_DASHBOARD);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_COPY_TO_DASHBOARD);
 };

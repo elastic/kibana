@@ -57,6 +57,11 @@ export interface CasePersistedAttributes {
   time_to_acknowledge?: number | null;
   time_to_investigate?: number | null;
   time_to_resolve?: number | null;
+  template?: {
+    id: string;
+    version: number;
+  } | null;
+  extended_fields?: Record<string, unknown> | null;
 }
 
 type CasePersistedCustomFields = Array<{

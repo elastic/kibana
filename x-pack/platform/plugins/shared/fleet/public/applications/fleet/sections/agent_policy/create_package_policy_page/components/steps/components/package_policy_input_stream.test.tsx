@@ -19,6 +19,8 @@ import type {
   RegistryVarGroup,
 } from '../../../../../../types';
 
+import { ExperimentalFeaturesService } from '../../../../../../services';
+
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
 jest.mock('../../../../../../../../hooks', () => ({
@@ -179,6 +181,9 @@ describe('PackagePolicyInputStreamConfig', () => {
   let mockUpdatePackagePolicyInputStream: jest.Mock;
 
   beforeEach(() => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableVarGroups: true,
+    } as any);
     testRenderer = createFleetTestRendererMock();
     mockUpdatePackagePolicyInputStream = jest.fn();
 
@@ -186,7 +191,9 @@ describe('PackagePolicyInputStreamConfig', () => {
       isAgentlessEnabled: false,
       isAgentlessDefault: false,
       isAgentlessAgentPolicy: jest.fn(),
-      isAgentlessIntegration: jest.fn(),
+      getAgentlessStatusForPackage: jest
+        .fn()
+        .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
       isServerless: false,
       isCloud: false,
     });
@@ -196,10 +203,16 @@ describe('PackagePolicyInputStreamConfig', () => {
     jest.resetAllMocks();
   });
 
+  /**
+   * Renders `PackagePolicyInputStreamConfig`. Pass `inputPolicyTemplate` (parent input’s
+   * `policy_template`) for composable multi-template packages so `dynamic_signal_types` matches
+   * the correct template.
+   */
   const render = (
     packageInputStream: RegistryStreamWithDataStream = mockPackageInputStreamWithVarGroups,
     packagePolicyInputStream: NewPackagePolicyInputStream = mockPackagePolicyInputStream,
-    packageInfo: PackageInfo = mockPackageInfo
+    packageInfo: PackageInfo = mockPackageInfo,
+    inputPolicyTemplate?: string
   ) => {
     renderResult = testRenderer.render(
       <PackagePolicyInputStreamConfig
@@ -210,6 +223,7 @@ describe('PackagePolicyInputStreamConfig', () => {
         inputStreamValidationResults={{ vars: {} }}
         forceShowErrors={false}
         totalStreams={2}
+        inputPolicyTemplate={inputPolicyTemplate}
       />
     );
   };
@@ -336,7 +350,9 @@ describe('PackagePolicyInputStreamConfig', () => {
         isAgentlessEnabled: true,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: true,
       });
@@ -357,7 +373,9 @@ describe('PackagePolicyInputStreamConfig', () => {
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: false,
       });
@@ -420,6 +438,10 @@ describe('PackagePolicyInputStreamConfig', () => {
   });
 
   describe('dynamic_signal_types behavior', () => {
+    // Data Stream Type UI applies only to `packageInfo.type === 'input'` (see dev_docs/input_packages.md).
+    // Input packages are documented with a single policy template; composable multi-template behavior
+    // for `dynamic_signal_types` / `policy_template` is covered in policy_template.test.ts
+    // (`packagePolicyInputAllowsUndefinedDataStreamType`).
     const mockOtelInputStream: RegistryStreamWithDataStream = {
       input: 'otelcol',
       title: 'OTel Collector',

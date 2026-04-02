@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Builder, type ESQLAstItem, type ESQLAstCommand } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstItem, ESQLAstCommand } from '@elastic/esql/types';
 import type { ConcatProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { combineOr } from './common';

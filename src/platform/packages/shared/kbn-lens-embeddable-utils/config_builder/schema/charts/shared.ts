@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type Props } from '@kbn/config-schema';
+import { schema, type Props, type TypeOf } from '@kbn/config-schema';
+
 import {
   countMetricOperationSchema,
   uniqueCountMetricOperationSchema,
@@ -31,17 +32,33 @@ import {
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
 
+export const baseLegendVisibilitySchema = schema.maybe(
+  schema.oneOf([schema.literal('visible'), schema.literal('hidden')], {
+    meta: { description: 'Legend visibility' },
+  })
+);
+
+export const legendVisibilitySchemaWithAuto = schema.maybe(
+  schema.oneOf([schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')], {
+    meta: { description: 'Legend visibility' },
+  })
+);
+
 export const legendSizeSchema = schema.maybe(
   schema.oneOf(
     [
       schema.literal('auto'),
-      schema.literal('small'),
-      schema.literal('medium'),
-      schema.literal('large'),
-      schema.literal('xlarge'),
+      schema.literal('s'),
+      schema.literal('m'),
+      schema.literal('l'),
+      schema.literal('xl'),
     ],
     {
-      meta: { id: 'legendSize', description: 'Legend size: auto, small, medium, large, or xlarge' },
+      meta: {
+        id: 'legendSize',
+        title: 'Legend Size',
+        description: 'Legend size',
+      },
     }
   )
 );
@@ -131,3 +148,15 @@ export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(baseSch
     bucketFiltersOperationSchema.extends(baseSchema),
   ]);
 }
+
+export const xScaleSchema = schema.maybe(
+  schema.oneOf([schema.literal('ordinal'), schema.literal('temporal'), schema.literal('linear')], {
+    meta: {
+      // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
+      description:
+        "X-axis scale type for ES|QL charts. Use 'temporal' for timestamp/date fields (e.g., @timestamp, DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
+    },
+  })
+);
+
+export type XScaleSchemaType = TypeOf<typeof xScaleSchema>;

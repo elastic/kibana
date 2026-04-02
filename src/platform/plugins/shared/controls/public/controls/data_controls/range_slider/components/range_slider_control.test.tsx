@@ -29,6 +29,8 @@ describe('RangeSliderControl', () => {
     fieldFormatter: undefined,
     onChange: jest.fn(),
     isEdit: false,
+    isPinned: true,
+    label: 'Test',
   };
 
   it('renders range slider without selection', () => {

@@ -57,6 +57,7 @@ import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service'
 import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 import type { GetDataViewsService } from '../lib/data_views_utils';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
+import type { ServerlessInfo } from '../types';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -111,7 +112,8 @@ export function createSharedServices(
   getAuditService: () => CoreAuditService | null,
   isMlReady: () => Promise<void>,
   compatibleModuleType: CompatibleModule | null,
-  enabledFeatures: MlFeatures
+  enabledFeatures: MlFeatures,
+  serverless: ServerlessInfo
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -139,7 +141,8 @@ export function createSharedServices(
       getFieldsFormat,
       getDataViews,
       getAuditService,
-      mlLicense
+      mlLicense,
+      serverless
     );
 
     const {
@@ -213,7 +216,8 @@ function getRequestItemsProvider(
   getFieldsFormat: () => FieldFormatsStart | null,
   getDataViews: () => DataViewsPluginStart,
   getAuditService: () => CoreAuditService | null,
-  mlLicense: MlLicense
+  mlLicense: MlLicense,
+  serverless: ServerlessInfo
 ) {
   return (request: KibanaRequest) => {
     let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
@@ -273,7 +277,13 @@ function getRequestItemsProvider(
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       const auditLogger = new MlAuditLogger(auditService, request);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger, mlLicense);
+      mlClient = getMlClient(
+        scopedClient,
+        mlSavedObjectService,
+        auditLogger,
+        mlLicense,
+        serverless
+      );
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
@@ -284,7 +294,13 @@ function getRequestItemsProvider(
       };
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       const auditLogger = new MlAuditLogger(auditService);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger, mlLicense);
+      mlClient = getMlClient(
+        scopedClient,
+        mlSavedObjectService,
+        auditLogger,
+        mlLicense,
+        serverless
+      );
     }
 
     const getDataViewsService = getDataViewsServiceFactory(

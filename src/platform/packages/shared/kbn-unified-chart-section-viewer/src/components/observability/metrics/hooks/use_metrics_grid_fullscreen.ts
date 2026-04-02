@@ -75,6 +75,7 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
 
   const styles = useMemo(() => {
     const fullScreenZIndex = Number(euiTheme.levels.header) - 1;
+    const menuZIndex = Number(euiTheme.levels.menu);
     return {
       [METRICS_GRID_FULL_SCREEN_CLASS]: css`
         z-index: ${fullScreenZIndex} !important;
@@ -82,9 +83,20 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         inset: 0;
         ${logicalCSS('right', 'var(--euiPushFlyoutOffsetInlineEnd, 0px)')}
         background-color: ${euiTheme.colors.backgroundBasePlain};
+
+        // Embeddable panels set high z-index values that can stack above the
+        // fullscreen overlay and interfere with flyouts. Reset to auto so they
+        // participate in normal stacking context.
+        // See https://github.com/elastic/kibana/issues/260087
+        .embPanel {
+          z-index: auto !important;
+        }
+
+        .embPanel__hoverActions {
+          z-index: ${Number(euiTheme.levels.flyout) - 2} !important;
+        }
       `,
       [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
-        ${logicalCSS('height', '100vh')}
         overflow: hidden;
 
         .euiHeader[data-fixed-header] {
@@ -98,10 +110,11 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         .euiFlyout {
           ${logicalCSS('top', '0 !important')}
           ${logicalCSS('height', '100%')}
+          z-index: ${menuZIndex + 1} !important;
         }
 
         [id^='echTooltipPortalMainTooltip'] {
-          z-index: ${fullScreenZIndex + 1} !important;
+          z-index: ${menuZIndex} !important;
         }
       `,
     };

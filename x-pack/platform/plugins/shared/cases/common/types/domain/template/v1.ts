@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { FieldSchema } from './fields';
 
 /**
@@ -86,6 +86,10 @@ export const TemplateSchema = z.object({
    * Whether this is the latest version for a templateId
    */
   isLatest: z.boolean().optional(),
+  /**
+   * Whether this template is enabled. Disabled templates are not shown in the case creation flow.
+   */
+  isEnabled: z.boolean().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
@@ -97,6 +101,8 @@ export const ParsedTemplateDefinitionSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  category: z.string().nullable().optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(fields.map((field) => field.name));

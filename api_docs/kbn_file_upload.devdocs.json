@@ -1178,7 +1178,7 @@
           ", {}>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-        "lineNumber": 30,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1194,7 +1194,7 @@
               "CoreStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 31,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1217,7 +1217,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 32,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1874,17 +1874,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1956,7 +1954,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
@@ -2517,61 +2515,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/file-upload",
-        "id": "def-public.createOpenFileUploadLiteTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "createOpenFileUploadLiteTrigger",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-        "lineNumber": 20,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/file-upload",
-            "id": "def-public.createOpenFileUploadLiteTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/file-upload",
-            "id": "def-public.createOpenFileUploadLiteTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/file-upload",
-            "id": "def-public.createOpenFileUploadLiteTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 25,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/file-upload",
         "id": "def-public.FileUploadContext",

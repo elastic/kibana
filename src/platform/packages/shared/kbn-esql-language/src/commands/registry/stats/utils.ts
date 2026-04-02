@@ -6,15 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
-} from '../../../types';
+} from '@elastic/esql/types';
 import {
   isFunctionExpression,
   isFieldExpression,
@@ -24,9 +22,10 @@ import {
   isLiteral,
   isAssignment,
   isColumn,
-} from '../../../ast/is';
-import { Walker } from '../../../ast/walker';
-import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
+  Walker,
+} from '@elastic/esql';
+import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
+import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
@@ -202,15 +201,10 @@ export const getCommaAndPipe = (
   }
   // special case: cursor right after a column name
   else if (isColumn(expressionRoot) && rightAfterColumn(innerText, expressionRoot, columnExists)) {
-    const { fragment, rangeToReplace } = getFragmentData(innerText);
+    pipeSuggestion.text = ` ${pipeSuggestion.text}`;
+    pipeSuggestion.preserveTypedPrefix = true;
 
-    pipeSuggestion.filterText = fragment;
-    pipeSuggestion.text = fragment + ' ' + pipeSuggestion.text;
-    pipeSuggestion.rangeToReplace = rangeToReplace;
-
-    commaSuggestion.filterText = fragment;
-    commaSuggestion.text = fragment + commaSuggestion.text;
-    commaSuggestion.rangeToReplace = rangeToReplace;
+    commaSuggestion.preserveTypedPrefix = true;
   }
 
   return [pipeSuggestion, commaSuggestion];

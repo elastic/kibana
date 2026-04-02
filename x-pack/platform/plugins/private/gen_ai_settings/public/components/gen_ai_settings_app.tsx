@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiTitle,
   EuiLink,
   useEuiTheme,
@@ -22,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -32,13 +31,14 @@ import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
 import { useGenAiConnectors } from '../hooks/use_genai_connectors';
-import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
 import { ChatExperience } from './chat_experience/chat_experience';
+import { PrePromptWorkflowSection } from './pre_prompt_workflow_section';
 import { DocumentationSection } from './documentation';
+import { AnonymizationProfilesSection } from './anonymization_profiles_section';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -50,6 +50,8 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
   (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
 
+const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
   const { application, http, docLinks, productDocBase, analytics } = services;
@@ -59,9 +61,15 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showAiBreadcrumb,
     showAiAssistantsVisibilitySetting,
     showChatExperienceSetting,
+    showAnonymizationProfilesSection,
   } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
+
+  const isModelSettingsPageEnabled = services.settings?.client?.get<boolean>(
+    MODEL_SETTINGS_FEATURE_FLAG_ID,
+    false
+  );
 
   // Determine current chat experience (including unsaved changes)
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
@@ -80,7 +88,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     application.capabilities.actions?.save === true;
   const canManageSpaces = application.capabilities.management.kibana.spaces;
   const connectors = useGenAiConnectors();
-  const hasElasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const hasElasticManagedLlm = (connectors.connectors || []).some(
+    (connector) => connector.isPreconfigured
+  );
 
   useEffect(() => {
     const breadcrumbs = [
@@ -307,38 +317,41 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               </EuiTitle>
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner>
-              <EuiDescribedFormGroup
-                data-test-subj="connectorsSection"
-                fullWidth
-                title={
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="sparkles" size="m" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <h3 data-test-subj="connectorsTitle">
-                          <FormattedMessage
-                            id="genAiSettings.aiConnectorLabel"
-                            defaultMessage="Default AI Connector"
-                          />
-                        </h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                description={connectorDescription}
-              >
-                <EuiFormRow fullWidth>
-                  <EuiFlexGroup gutterSize="m" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <DefaultAIConnector connectors={connectors} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFormRow>
-              </EuiDescribedFormGroup>
-
-              {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+              {!isModelSettingsPageEnabled && (
+                <>
+                  <EuiDescribedFormGroup
+                    data-test-subj="connectorsSection"
+                    fullWidth
+                    title={
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size="xs">
+                            <h3 data-test-subj="connectorsTitle">
+                              <FormattedMessage
+                                id="genAiSettings.aiConnectorLabel"
+                                defaultMessage="Default AI Connector"
+                              />
+                            </h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                    description={connectorDescription}
+                  >
+                    <EuiFormRow fullWidth>
+                      <EuiFlexGroup gutterSize="m" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <DefaultAIConnector connectors={connectors} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFormRow>
+                  </EuiDescribedFormGroup>
+                  {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
+                </>
+              )}
 
               {showSpacesIntegration && canManageSpaces && (
                 <EuiDescribedFormGroup
@@ -429,11 +442,34 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 
+          <PrePromptWorkflowSection />
+
           {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>
               <EuiSpacer size="l" />
 
               <DocumentationSection productDocBase={productDocBase} />
+            </>
+          )}
+
+          {showAnonymizationProfilesSection && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiSplitPanel.Outer hasBorder grow={false}>
+                <EuiSplitPanel.Inner color="subdued">
+                  <EuiTitle size="s">
+                    <h3 data-test-subj="anonymizationSectionTitle">
+                      <FormattedMessage
+                        id="genAiSettings.anonymization.sectionTitle"
+                        defaultMessage="Anonymization"
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiSplitPanel.Inner>
+                <EuiSplitPanel.Inner>
+                  <AnonymizationProfilesSection />
+                </EuiSplitPanel.Inner>
+              </EuiSplitPanel.Outer>
             </>
           )}
         </EuiPageSection>

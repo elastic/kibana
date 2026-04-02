@@ -12,28 +12,23 @@
 - Plugin IDs are additional camelCase IDs under `plugin.id` in `kibana.jsonc`, used by core platform and other plugins.
 - Modules are grouped by domain (platform vs solutions) with visibility rules (`shared` vs `private`) that limit cross-group access.
 - Utility scripts live in `scripts/` (e.g., `node scripts/generate.js`).
-
-## Critical Thinking
-- Fix root cause (not band-aid).
-- Unsure: read more code; if still stuck, ask w/ short options. Never guess.
-- Conflicts: call out; pick safer path.
-- Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
+Always run `node scripts/check_changes.ts` to validate your changes
 
 ### Jest unit
-`yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
+`node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`
 - Config is auto-discovered from the test file path (walks up to nearest `jest.config.js`). Simplest usage:
-  `yarn test:jest src/core/packages/http/server-internal/src/http_server.test.ts`
+  `node scripts/jest src/core/packages/http/server-internal/src/http_server.test.ts`
 - Only one `--config` per run. To test multiple packages, run separate commands.
 
 ### Jest integration
-`yarn test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
+`node scripts/jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
 - Auto-discovers `jest.integration.config.js` (not `jest.config.js`). Same single-config constraint as above.
 
 ### Function Test Runner (FTR)
-`yarn test:ftr [--config <file1> [--config <file2> ...]]`
+`node scripts/functional_tests [--config <file1> [--config <file2> ...]]`
 - For new tests, prefer using Scout
 
 ### Scout (UI/API with Playwright)
@@ -43,9 +38,9 @@
 Follow existing patterns in the target area first; below are common defaults.
 
 ### Type check
-`yarn test:type_check [--project path/to/tsconfig.json]`
+`node scripts/type_check [--project path/to/tsconfig.json]`
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
-  `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
+  `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
 
 ### TypeScript & Types
@@ -85,6 +80,9 @@ Follow existing patterns in the target area first; below are common defaults.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
 ## Contribution Hygiene
+- Unsure: read more code; if still stuck, ask w/ short options. Never guess.
+- Fix root cause (not band-aid).
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
+- Always open PRs as draft.

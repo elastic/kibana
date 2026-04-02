@@ -15,35 +15,56 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { createFormSchema, REQUIRED_FIELDS } from './integration_form_validation';
 import type { IntegrationFormData } from './types';
-import { useKibana, getInstalledPackages } from '../../../common';
+import { useKibana, getInstalledPackages, getAllIntegrations } from '../../../common';
 import * as i18n from './translations';
 import { DEFAULT_DATA_STREAM_VALUES, DEFAULT_INTEGRATION_VALUES } from './constants';
+import { normalizeTitleName } from '../../../common/lib/helper_functions';
 
 export interface IntegrationFormProviderProps {
   children?: React.ReactNode;
   initialValue?: Partial<IntegrationFormData>;
+  existingDataStreamTitles?: Set<string>;
   onSubmit: (data: IntegrationFormData) => Promise<void>;
 }
 
 export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = ({
   children,
   initialValue,
+  existingDataStreamTitles,
   onSubmit,
 }) => {
   const { http, notifications } = useKibana().services;
   const [packageNames, setPackageNames] = useState<Set<string>>();
 
-  // Load installed package names for duplicate title validation
+  // Load installed package names and existing AIV2 integration IDs for duplicate title validation
   useEffect(() => {
     const abortController = new AbortController();
     const deps = { http, abortSignal: abortController.signal };
     (async () => {
       try {
-        const packagesResponse = await getInstalledPackages(deps);
+        const [packagesResponse, aiv2Integrations] = await Promise.all([
+          getInstalledPackages(deps),
+          getAllIntegrations(deps),
+        ]);
         if (abortController.signal.aborted) return;
+
+        const allNames = new Set<string>();
+
+        // Add installed package IDs
         if (packagesResponse?.items?.length) {
-          setPackageNames(new Set(packagesResponse.items.map((pkg) => pkg.id)));
+          packagesResponse.items.forEach((pkg) => allNames.add(pkg.id));
         }
+
+        // Add AIV2 integration IDs (normalized to match how new titles are converted)
+        if (aiv2Integrations?.length) {
+          aiv2Integrations.forEach((integration) => {
+            // Add both the raw integrationId and the normalized title
+            allNames.add(integration.integrationId);
+            allNames.add(normalizeTitleName(integration.title));
+          });
+        }
+
+        setPackageNames(allNames);
       } catch (e) {
         if (!abortController.signal.aborted) {
           notifications?.toasts.addError(e, {
@@ -61,8 +82,8 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   // avoid validation errors.
   const currentIntegrationTitle = !initialValue?.integrationId ? undefined : initialValue?.title;
   const schema = useMemo(
-    () => createFormSchema(packageNames, currentIntegrationTitle),
-    [packageNames, currentIntegrationTitle]
+    () => createFormSchema(packageNames, currentIntegrationTitle, existingDataStreamTitles),
+    [packageNames, currentIntegrationTitle, existingDataStreamTitles]
   );
 
   const defaultValue = useMemo((): IntegrationFormData => {
@@ -130,7 +151,7 @@ export const useIntegrationForm = () => {
     // Additional conditional validation for log source having a sample or an index selected
     const logsSourceOption = formData.logsSourceOption;
     const logSourceValid =
-      (logsSourceOption === 'upload' && !!formData.logSample) ||
+      (logsSourceOption === 'file' && !!formData.logSample) ||
       (logsSourceOption === 'index' && formData.selectedIndex && formData.selectedIndex.trim());
 
     return baseFieldsValid && logSourceValid;

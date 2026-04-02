@@ -6,7 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { camelCase } from 'lodash';
+import { camelCase, isEqual } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/constants';
 import type { ReadAuthRulePatchProps } from '../../../../../../../../common/api/detection_engine';
@@ -38,14 +38,23 @@ export const patchReadAuthEditRuleFields = async ({
     rulePatch,
   });
 
-  const nextRule = { ...rulePatch, rule_source };
+  const nextRule = {
+    ...rulePatch,
+    // Avoid sending a ruleSource write when it did not change.
+    // Some read-privilege roles are only meant to edit exceptionsList.
+    ...(isEqual(rule_source, existingRule.rule_source) ? {} : { rule_source }),
+  };
+  const nextRuleWithRuleSource = {
+    ...nextRule,
+    rule_source: nextRule.rule_source ?? existingRule.rule_source,
+  };
 
   const operations = Object.keys(nextRule).map((field) => {
     const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
     return {
       field: camelCasedField,
       operation: 'set' as const,
-      value: getReadAuthFieldValue(field, nextRule),
+      value: getReadAuthFieldValue(field, nextRuleWithRuleSource),
     };
   });
 

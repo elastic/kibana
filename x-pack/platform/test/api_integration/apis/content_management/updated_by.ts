@@ -21,12 +21,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'Sample dashboard',
-            },
+            title: 'Sample dashboard',
           });
 
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
         expect(createResponse.body.data).to.be.ok();
         expect(createResponse.body.meta).to.not.have.key('updated_by');
 
@@ -35,9 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'updated title',
-            },
+            title: 'updated title',
           });
 
         expect(updateResponse.status).to.be(200);
@@ -64,9 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'Sample dashboard',
-            },
+            title: 'Sample dashboard',
           });
       });
 
@@ -75,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('updated_by is with profile_id', async () => {
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
         expect(createResponse.body.data).to.be.ok();
         expect(createResponse.body.meta).to.have.key('updated_by');
         expect(createResponse.body.meta.updated_by).to.be(interactiveUser.uid);
@@ -87,9 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'updated title',
-            },
+            title: 'updated title',
           });
 
         expect(updateResponse.status).to.be(200);
@@ -124,9 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
           .send({
-            data: {
-              title: 'updated title',
-            },
+            title: 'updated title',
           });
 
         expect(updateResponse.status).to.be(200);

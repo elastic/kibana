@@ -30,6 +30,7 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
         schema.literal(gapFillStatus.UNFILLED),
         schema.literal(gapFillStatus.IN_PROGRESS),
         schema.literal(gapFillStatus.FILLED),
+        schema.literal(gapFillStatus.ERROR),
       ])
     )
   ),
@@ -47,10 +48,26 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   maxRulesToFetch: schema.maybe(schema.number()),
   ruleIds: schema.maybe(schema.arrayOf(schema.string())),
+  schedulerId: schema.maybe(schema.string()),
+});
+
+export const gapsSummarySchema = schema.object({
+  totalUnfilledDurationMs: schema.number(),
+  totalInProgressDurationMs: schema.number(),
+  totalFilledDurationMs: schema.number(),
+  totalErrorDurationMs: schema.number(),
+  totalDurationMs: schema.number(),
+  rulesByGapFillStatus: schema.object({
+    unfilled: schema.number(),
+    inProgress: schema.number(),
+    filled: schema.number(),
+    error: schema.number(),
+  }),
 });
 
 export const getRuleIdsWithGapsResponseSchema = schema.object({
   total: schema.number(),
   ruleIds: schema.arrayOf(schema.string()),
   latestGapTimestamp: schema.maybe(schema.number()),
+  summary: gapsSummarySchema,
 });

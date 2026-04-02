@@ -66,6 +66,18 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Trusted device list export failed',
     }
   ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageImportSuccessToastTitle',
+    {
+      defaultMessage: 'Trusted device list imported successfully',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageImportErrorToastTitle',
+    {
+      defaultMessage: 'Trusted device list import failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.trustedDevices.list.showingTotal', {
       defaultMessage:
@@ -150,6 +162,10 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
     {
       defaultMessage: 'Add trusted device',
     }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import trusted device list' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.searchPlaceholderInfo',

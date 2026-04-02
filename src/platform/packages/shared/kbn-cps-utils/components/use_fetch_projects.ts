@@ -8,34 +8,62 @@
  */
 
 import { useEffect, useState } from 'react';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject, ProjectsData } from '../types';
 
+export interface UseFetchProjectsResult {
+  originProject: CPSProject | null;
+  linkedProjects: CPSProject[];
+  isLoading: boolean;
+  error: Error | null;
+}
+
+const INITIAL_STATE: UseFetchProjectsResult = {
+  originProject: null,
+  linkedProjects: [],
+  isLoading: true,
+  error: null,
+};
+
 /**
- * Hook for fetching projects data from CPSManager
+ * Hook for fetching projects data from CPSManager.
+ * Uses a single state object to batch all updates into one re-render per fetch cycle.
  */
-export const useFetchProjects = (fetchProjects: () => Promise<ProjectsData | null>) => {
-  const [originProject, setOriginProject] = useState<CPSProject | null>(null);
-  const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
+export const useFetchProjects = (
+  fetchProjects: (routing?: ProjectRouting) => Promise<ProjectsData | null>,
+  routing?: ProjectRouting
+): UseFetchProjectsResult => {
+  const [state, setState] = useState<UseFetchProjectsResult>(INITIAL_STATE);
 
   useEffect(() => {
     let isMounted = true;
+    setState((prev) => (prev.isLoading ? prev : { ...prev, isLoading: true, error: null }));
 
-    fetchProjects()
+    fetchProjects(routing)
       .then((projectsData) => {
-        if (isMounted && projectsData) {
-          setOriginProject(projectsData.origin);
-          setLinkedProjects(projectsData.linkedProjects);
+        if (isMounted) {
+          setState({
+            originProject: projectsData?.origin ?? null,
+            linkedProjects: projectsData?.linkedProjects ?? [],
+            isLoading: false,
+            error: null,
+          });
         }
       })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch projects:', error);
+      .catch((err) => {
+        if (isMounted) {
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: err instanceof Error ? err : new Error(String(err)),
+          }));
+        }
       });
 
     return () => {
       isMounted = false;
     };
-  }, [fetchProjects]);
+  }, [fetchProjects, routing]);
 
-  return { originProject, linkedProjects };
+  return state;
 };

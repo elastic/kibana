@@ -640,23 +640,28 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-const typeEsqlQueryBar = (query: string) => {
-  // eslint-disable-next-line cypress/no-force
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
-};
-
 /**
- * clears ES|QL search bar first
- * types new query
+ * Pastes query into the ES|QL Monaco editor via a synthetic ClipboardEvent.
+ * This avoids flakiness in the tests when typing in the ES|QL query bar.
  */
 export const fillEsqlQueryBar = (query: string) => {
-  // before typing anything in query bar, we need to clear it
-  // Since first click on ES|QL query bar trigger re-render. We need to clear search bar during second attempt
-  typeEsqlQueryBar(' ');
-  typeEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a{del}' : '{ctrl}a{del}');
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('exist').click({ force: true });
 
-  // only after this query can be safely typed
-  typeEsqlQueryBar(query);
+  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
+
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text/plain', query);
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData: dataTransfer,
+      bubbles: true,
+      cancelable: true,
+    });
+    $textarea[0].dispatchEvent(pasteEvent);
+  });
+
+  cy.get(ESQL_QUERY_BAR).contains(query);
 };
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {

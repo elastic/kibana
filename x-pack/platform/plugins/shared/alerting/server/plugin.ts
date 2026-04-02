@@ -53,8 +53,6 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
-
 import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -116,6 +114,8 @@ import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
+import { UiamApiKeyProvisioningTask } from './provisioning';
+import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -204,7 +204,6 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   kql: KQLPluginSetup;
-  cps?: CPSServerSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -251,7 +250,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
-  private cpsSetup?: CPSServerSetup;
+  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -279,7 +278,6 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
-    this.cpsSetup = plugins.cps;
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -417,6 +415,15 @@ export class AlertingPlugin {
       plugins.taskManager,
       this.config
     );
+
+    uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+
+    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
+      logger: this.logger,
+      isServerless: this.isServerless,
+      analytics: core.analytics,
+    });
+    this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
@@ -661,6 +668,8 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       securityService: core.security,
       shouldGrantUiam,
+      isServerless: this.isServerless,
+      featureFlags: core.featureFlags,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -773,6 +782,10 @@ export class AlertingPlugin {
       () => {}
     ); // it shouldn't reject, but just in case
 
+    this.uiamApiKeyProvisioningTask
+      ?.start({ core, taskManager: plugins.taskManager })
+      .catch(() => {});
+
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
@@ -787,17 +800,7 @@ export class AlertingPlugin {
   }
 
   private getShouldGrantUiam(core: CoreStart): boolean {
-    const cpsEnabled = this.cpsSetup?.getCpsEnabled() ?? false;
-    if (!cpsEnabled) {
-      return false;
-    }
-    if (!core.security.authc.apiKeys.uiam) {
-      this.logger.error(
-        'CPS is enabled but UIAM API key service is not available. UIAM API keys will not be granted.'
-      );
-      return false;
-    }
-    return true;
+    return !!core.security.authc.apiKeys.uiam;
   }
 
   private createRouteHandlerContext = (
@@ -839,6 +842,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.uiamApiKeyProvisioningTask?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

@@ -32,7 +32,7 @@ if [[ "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" != "" ]]; then # if we're in a P
   # GITHUB_PR_DRAFT is set by our pr build trigger bot
   buildkite-agent meta-data set "ingest:is_draft_pr" "${GITHUB_PR_DRAFT:-false}"
   # GITHUB_PR_LABELS is set by our pr build trigger bot, and is a comma-separated list of labels on the PR
-  if [[ -n "${GITHUB_PR_LABELS:-}" ]]; then
+  if [[ "${GITHUB_PR_LABELS:-}" =~ [^[:space:]] ]]; then
     buildkite-agent meta-data set "ingest:pr_labels" "$GITHUB_PR_LABELS"
   fi
 fi

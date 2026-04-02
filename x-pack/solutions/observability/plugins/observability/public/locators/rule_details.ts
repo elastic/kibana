@@ -19,7 +19,7 @@ import {
 } from '../pages/rule_details/constants';
 import type { TabId } from '../pages/rule_details/rule_details';
 
-type RuleDetailsControlConfigs = Array<Omit<FilterControlConfig, 'sort'>>;
+type RuleDetailsControlConfigs = Array<FilterControlConfig>;
 export interface RuleDetailsLocatorParams extends SerializableRecord {
   ruleId: string;
   tabId?: TabId;

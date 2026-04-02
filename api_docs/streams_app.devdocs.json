@@ -12,7 +12,7 @@
         "label": "StreamsApplicationProps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -29,7 +29,7 @@
               "<unknown>"
             ],
             "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -59,7 +59,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
-        "lineNumber": 43,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -110,7 +110,7 @@
       "label": "StreamsAppPublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
-      "lineNumber": 77,
+      "lineNumber": 79,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -126,7 +126,7 @@
       "label": "StreamsAppPublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
-      "lineNumber": 79,
+      "lineNumber": 81,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -220,7 +220,13 @@
         "description": [],
         "signature": [
           "EntityBase & { type: \"stream\"; properties: ",
-          "IngestStream",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Streams",
+            "text": "Streams"
+          },
           ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
@@ -239,7 +245,13 @@
         "description": [],
         "signature": [
           "EntityBase & { type: \"stream\"; properties: ",
-          "IngestStream",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Streams",
+            "text": "Streams"
+          },
           ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",

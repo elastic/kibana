@@ -7,9 +7,8 @@
 
 import {
   EuiFieldText,
-  EuiFormLabel,
+  EuiFormPrepend,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
   EuiScreenReaderOnly,
   EuiTextTruncate,
@@ -23,7 +22,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsRoutingSelector } from '../data_management/stream_detail_routing/state_management/stream_routing_state_machine';
+import { useStreamsRoutingSelector } from '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
   onChange?: (value: string) => void;
@@ -237,16 +236,12 @@ export function StreamNameFormRow({
         onChange={handleChange}
         minLength={MIN_NAME_LENGTH}
         prepend={
-          prefix
-            ? [
-                <EuiIcon type="streamsWired" />,
-                <EuiFormLabel
-                  css={css`
-                    inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
-                  `}
-                  id={descriptionId}
-                  data-test-subj="streamsAppRoutingStreamNamePrefix"
-                >
+          prefix ? (
+            <EuiFormPrepend
+              id={descriptionId}
+              iconLeft="productStreamsWired"
+              label={
+                <>
                   <EuiScreenReaderOnly>
                     <span>
                       {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
@@ -259,9 +254,16 @@ export function StreamNameFormRow({
                     truncation="start"
                     data-test-subj={`streamNamePrefix`}
                   />
-                </EuiFormLabel>,
-              ]
-            : undefined
+                </>
+              }
+              css={css`
+                .euiFormLabel {
+                  inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+                }
+              `}
+              data-test-subj="streamsAppRoutingStreamNamePrefix"
+            />
+          ) : undefined
         }
       />
     </EuiFormRow>

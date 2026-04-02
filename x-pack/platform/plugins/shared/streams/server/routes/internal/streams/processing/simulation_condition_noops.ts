@@ -8,6 +8,7 @@
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition, StreamlangDSL, StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { conditionToPainless, isConditionBlock, transpileIngestPipeline } from '@kbn/streamlang';
+import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 
 type StreamlangStep = StreamlangDSL['steps'][number];
 
@@ -23,7 +24,7 @@ function createConditionNoopProcessor({
 }: {
   conditionId: string;
   condition: Condition;
-}): IngestProcessorContainer[] {
+}): NonNullable<IngestProcessorContainer>[] {
   let painlessIf: string;
   try {
     painlessIf = conditionToPainless(condition);
@@ -62,14 +63,16 @@ function createConditionNoopProcessor({
   ];
 }
 
-function buildSimulationProcessorsFromSteps({
+async function buildSimulationProcessorsFromSteps({
   steps,
   parentCondition,
+  resolverOptions,
 }: {
   steps: StreamlangStep[];
   parentCondition?: Condition;
-}): IngestProcessorContainer[] {
-  const processors: IngestProcessorContainer[] = [];
+  resolverOptions?: StreamlangResolverOptions;
+}): Promise<NonNullable<IngestProcessorContainer>[]> {
+  const processors: NonNullable<IngestProcessorContainer>[] = [];
 
   for (const step of steps) {
     if (isConditionBlock(step)) {
@@ -87,10 +90,11 @@ function buildSimulationProcessorsFromSteps({
       }
 
       processors.push(
-        ...buildSimulationProcessorsFromSteps({
+        ...(await buildSimulationProcessorsFromSteps({
           steps: nestedSteps,
           parentCondition: combinedCondition,
-        })
+          resolverOptions,
+        }))
       );
 
       continue;
@@ -110,10 +114,16 @@ function buildSimulationProcessorsFromSteps({
           } as StreamlangProcessorDefinition)
         : processorStep;
 
-    const transpiled = transpileIngestPipeline(
-      { steps: [stepWithCombinedWhere] } as StreamlangDSL,
-      { ignoreMalformed: true, traceCustomIdentifiers: true }
-    ).processors;
+    const transpiled = (
+      await transpileIngestPipeline(
+        { steps: [stepWithCombinedWhere] } as StreamlangDSL,
+        {
+          ignoreMalformed: true,
+          traceCustomIdentifiers: true,
+        },
+        resolverOptions
+      )
+    ).processors as NonNullable<IngestProcessorContainer>[];
 
     processors.push(...transpiled);
   }
@@ -134,8 +144,12 @@ function buildSimulationProcessorsFromSteps({
  *
  * These processors are never exposed as steps in the UI; they exist only in the ES `_simulate` request.
  */
-export function buildSimulationProcessorsWithConditionNoops(
-  processing: StreamlangDSL
-): IngestProcessorContainer[] {
-  return buildSimulationProcessorsFromSteps({ steps: processing.steps });
+export async function buildSimulationProcessorsWithConditionNoops(
+  processing: StreamlangDSL,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<NonNullable<IngestProcessorContainer>[]> {
+  return await buildSimulationProcessorsFromSteps({
+    steps: processing.steps,
+    resolverOptions,
+  });
 }

@@ -150,6 +150,16 @@ describe('SloDetailsHistory', () => {
     expect(screen.getByText('Objective')).toBeTruthy();
   });
 
+  it('shows reset control for calendar aligned time window', () => {
+    const slo = buildSlo({
+      timeWindow: buildCalendarAlignedTimeWindow(),
+    });
+
+    render(<SloDetailsHistory slo={slo} />);
+
+    expect(screen.getByTestId('sloSloDetailsHistoryResetButton')).toBeDisabled();
+  });
+
   it('works with rolling time window', () => {
     const slo = buildSlo({
       timeWindow: buildRollingTimeWindow(),
@@ -159,6 +169,7 @@ describe('SloDetailsHistory', () => {
     expect(screen.queryByTestId('errorRatePanel')).toBeTruthy();
     expect(screen.getByText('Observed value')).toBeTruthy();
     expect(screen.getByText('Objective')).toBeTruthy();
+    expect(screen.queryByTestId('sloSloDetailsHistoryResetButton')).toBeNull();
   });
 
   it('handles NO_DATA status in historical data', () => {

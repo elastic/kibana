@@ -848,7 +848,7 @@
         "label": "MlCapabilitiesResponse",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
-        "lineNumber": 208,
+        "lineNumber": 211,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -864,7 +864,7 @@
               "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canDeleteForecast: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; canCreateInferenceEndpoint: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
-            "lineNumber": 209,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -877,7 +877,7 @@
             "label": "upgradeInProgress",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
-            "lineNumber": 210,
+            "lineNumber": 213,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -890,7 +890,7 @@
             "label": "isPlatinumOrTrialLicense",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
-            "lineNumber": 211,
+            "lineNumber": 214,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -903,7 +903,7 @@
             "label": "mlFeatureEnabledInSpace",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
-            "lineNumber": 212,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1409,7 +1409,7 @@
         "description": [],
         "signature": [
           "MlEmbeddableBaseApi",
-          "<Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "<Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1417,7 +1417,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; perPage?: number | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1425,36 +1425,36 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>> & ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; perPage?: number | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDataViews",
+            "section": "def-common.PublishesDataViews",
             "text": "PublishesDataViews"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTimeRange",
+            "section": "def-common.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesFilters",
+            "section": "def-common.PublishesFilters",
             "text": "PublishesFilters"
           },
           " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
+            "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<",
@@ -1476,17 +1476,17 @@
           " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
+            "section": "def-common.PublishesTitle",
             "text": "PublishesTitle"
           },
           " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasEditCapabilities",
+            "section": "def-common.HasEditCapabilities",
             "text": "HasEditCapabilities"
           },
           " & ",
@@ -1509,7 +1509,7 @@
           "\nPersisted state for the Anomaly Swim Lane Embeddable."
         ],
         "signature": [
-          "Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1517,7 +1517,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; perPage?: number | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1525,7 +1525,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; perPage?: number | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
         "lineNumber": 60,
@@ -1672,7 +1672,7 @@
         " | undefined; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
-      "lineNumber": 368,
+      "lineNumber": 381,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1767,11 +1767,11 @@
         "MlJob",
         ">[] | undefined; estimateModelMemory?: boolean | undefined; }): Promise<",
         "DataRecognizerConfigResponse",
-        ">; getVisualizerFieldHistograms({ indexPattern, query, fields, samplerShardSize, runtimeMappings, }: { indexPattern: string; query: any; fields: ",
+        ">; getVisualizerFieldHistograms({ indexPattern, query, fields, samplerShardSize, runtimeMappings, projectRouting, }: { indexPattern: string; query: any; fields: ",
         "FieldHistogramRequestConfig",
         "[]; samplerShardSize?: number | undefined; runtimeMappings?: ",
         "MappingRuntimeFields",
-        " | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
+        " | undefined; projectRouting?: string | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
         "MlCalendar",
         "[]>; addCalendar(obj: ",
         "MlCalendar",
@@ -1787,11 +1787,11 @@
         "MlAnalysisConfig",
         "; indexPattern: string; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): ",
         "Observable",
-        "<{ modelMemoryLimit: string; }>; getCardinalityOfFields({ index, fieldNames, query, timeFieldName, earliestMs, latestMs, }: { index: string; fieldNames: string[]; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): Promise<any>; getTimeFieldRange({ index, timeFieldName, query, runtimeMappings, indicesOptions, allowFutureTime, }: { index: string; timeFieldName?: string | undefined; query: any; runtimeMappings?: ",
+        "<{ modelMemoryLimit: string; }>; getCardinalityOfFields({ index, fieldNames, query, timeFieldName, earliestMs, latestMs, }: { index: string; fieldNames: string[]; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): Promise<any>; getTimeFieldRange({ index, timeFieldName, query, runtimeMappings, indicesOptions, allowFutureTime, projectRouting, }: { index: string; timeFieldName?: string | undefined; query: any; runtimeMappings?: ",
         "MappingRuntimeFields",
         " | undefined; indicesOptions?: ",
         "IndicesOptions",
-        " | undefined; allowFutureTime?: boolean | undefined; }): Promise<",
+        " | undefined; allowFutureTime?: boolean | undefined; projectRouting?: string | undefined; }): Promise<",
         "GetTimeFieldRangeResponse",
         ">; esSearch(obj: any): Promise<any>; esSearch$(obj: any): ",
         "Observable",
@@ -1907,7 +1907,7 @@
         "Filter",
         ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
         "Filter",
-        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
@@ -1973,7 +1973,7 @@
         "GetStoppedPartitionResult",
         ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
         "GetDatafeedResultsChartDataResult",
-        ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+        ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
@@ -1983,7 +1983,7 @@
         },
         " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
         "QueryDslQueryContainer",
-        " | undefined): ",
+        "): ",
         "Observable",
         "<",
         "ExplorerChartsData",
@@ -2023,7 +2023,7 @@
         "CombinedJobWithStats",
         "[]>; groups(): Promise<",
         "Group",
-        "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
+        "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[], closeJobs?: boolean | undefined): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
         "ResetJobsResponse",
         ">; forceStopAndCloseJob(jobId: string): Promise<{ success: boolean; }>; jobAuditMessages({ jobId, from, start, end, }: { jobId: string; from?: number | undefined; start?: string | undefined; end?: string | undefined; }): Promise<{ messages: ",
         "JobMessage",
@@ -2244,7 +2244,7 @@
         " & React.RefAttributes<{}>>; }; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
-      "lineNumber": 369,
+      "lineNumber": 382,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3017,7 +3017,7 @@
           },
           "[]>; forceStartDatafeeds: (datafeedIds: string[], start?: number | undefined, end?: number | undefined) => Promise<",
           "Results",
-          ">; stopDatafeeds: (datafeedIds: string[]) => Promise<",
+          ">; stopDatafeeds: (datafeedIds: string[], closeJobs?: boolean) => Promise<",
           "Results",
           ">; }"
         ],
@@ -3258,7 +3258,7 @@
         "TrainedModelsProvider"
       ],
       "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
-      "lineNumber": 78,
+      "lineNumber": 77,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3276,7 +3276,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
-      "lineNumber": 79,
+      "lineNumber": 78,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

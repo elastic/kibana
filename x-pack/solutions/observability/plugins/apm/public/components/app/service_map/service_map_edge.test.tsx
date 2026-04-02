@@ -11,20 +11,14 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { ServiceMapEdge } from './service_map_edge';
 import type { ServiceMapEdgeData } from '../../../../common/service_map';
-import { MOCK_PRIMARY_COLOR, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
+import { MOCK_PRIMARY_COLOR, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
-// Mock EUI theme
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
-          primary: MOCK_EUI_THEME.colors.primary,
-        },
-      },
+      euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
       colorMode: 'LIGHT',
     }),
   };

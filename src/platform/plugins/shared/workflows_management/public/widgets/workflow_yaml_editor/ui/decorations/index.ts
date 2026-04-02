@@ -13,3 +13,4 @@ export { useTriggerTypeDecorations } from './use_trigger_type_decorations';
 export { useConnectorTypeDecorations } from './use_connector_type_decorations';
 export { useLineDifferencesDecorations } from './use_line_differences_decorations';
 export { useAlertTriggerDecorations } from './use_alert_trigger_decorations';
+export { useWorkflowIdDecorations } from './use_workflow_id_decorations';

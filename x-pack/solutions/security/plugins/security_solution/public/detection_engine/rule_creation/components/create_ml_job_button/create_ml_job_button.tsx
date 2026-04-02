@@ -20,7 +20,7 @@ export function CreateCustomMlJobButton(): JSX.Element {
   });
 
   return (
-    <EuiButton iconType="popout" iconSide="right" href={mlADLink}>
+    <EuiButton iconType="external" iconSide="right" href={mlADLink}>
       {i18n.CREATE_CUSTOM_JOB_BUTTON_TITLE}
     </EuiButton>
   );

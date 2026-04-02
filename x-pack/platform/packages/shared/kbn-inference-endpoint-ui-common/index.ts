@@ -10,6 +10,7 @@ export { InferenceServiceFormFields } from './src/components/inference_service_f
 // eslint-disable-next-line import/no-default-export
 export { InferenceFlyoutWrapper as default } from './src/components/inference_flyout_wrapper';
 export { useProviders } from './src/hooks/use_providers';
+export { useInferenceEndpointMutation } from './src/hooks/use_inference_endpoint_mutation';
 export { isInferenceEndpointExists } from './src/hooks/inference_endpoint_exists';
 export { SERVICE_PROVIDERS } from './src/components/providers/render_service_provider/service_provider';
 

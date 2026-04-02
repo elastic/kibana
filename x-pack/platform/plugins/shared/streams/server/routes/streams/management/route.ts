@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { conditionSchema, isNeverCondition } from '@kbn/streamlang';
 import { routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
+import { forkStreamRequest } from '../../../oas_examples';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
@@ -19,8 +20,20 @@ export const forkStreamsRoute = createServerRoute({
     description: 'Forks a wired stream and creates a child stream',
     summary: 'Fork a stream',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              forkStream: { value: forkStreamRequest },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -64,6 +77,7 @@ export const resyncStreamsRoute = createServerRoute({
     description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date',
     summary: 'Resync streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -93,12 +107,21 @@ export const getStreamsStatusRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
-  }): Promise<{ enabled: boolean | 'conflict'; can_manage: boolean }> => {
+  }): Promise<{
+    logs: boolean | 'conflict';
+    'logs.otel': boolean | 'conflict';
+    'logs.ecs': boolean | 'conflict';
+    can_manage: boolean;
+  }> => {
     const { streamsClient } = await getScopedClients({ request });
 
     const privileges = await streamsClient.getPrivileges('logs,logs.*');
+    const streamStatus = await streamsClient.checkStreamStatus();
 
-    return { enabled: await streamsClient.checkStreamStatus(), can_manage: privileges.manage };
+    return {
+      ...streamStatus,
+      can_manage: privileges.manage,
+    };
   },
 });
 
@@ -113,7 +136,11 @@ export const getClassicStreamsStatusRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+
+    if (!isSecurityEnabled) {
+      return { can_manage: true };
+    }
 
     const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
 

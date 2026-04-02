@@ -12,6 +12,7 @@ import {
   getAttackDiscoveryMarkdownFields,
   resolveConnectorId,
 } from '@kbn/elastic-assistant-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -39,6 +40,7 @@ import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_
 import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
 
 export interface AttackDiscoveryScheduleExecutorParams {
+  inference: InferenceServerStart;
   options: AttackDiscoveryExecutorOptions;
   logger: Logger;
   publicBaseUrl: string | undefined;
@@ -46,6 +48,7 @@ export interface AttackDiscoveryScheduleExecutorParams {
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
+  inference,
   options,
   logger,
   publicBaseUrl,
@@ -90,6 +93,15 @@ export const attackDiscoveryScheduleExecutor = async ({
   };
 
   try {
+    // Resolve the connector server-side to get the authoritative actionTypeId.
+    // Uses pre-scoped services since the executor runs without a KibanaRequest.
+    const resolvedConnector = await inference.getConnectorByIdWithoutClientRequest(
+      params.apiConfig.connectorId,
+      actionsClient,
+      esClient
+    );
+    const inferenceClient = inference.getClientWithoutRequest(actionsClient, esClient);
+
     const { anonymizedAlerts, attackDiscoveries, replacements } = await generateAttackDiscoveries({
       actionsClient,
       config: {
@@ -98,8 +110,13 @@ export const attackDiscoveryScheduleExecutor = async ({
         filter: combinedFilter,
         anonymizationFields,
         subAction: 'invokeAI',
+        apiConfig: {
+          ...restParams.apiConfig,
+          actionTypeId: resolvedConnector.type,
+        },
       },
       esClient,
+      inferenceClient,
       logger,
       savedObjectsClient,
     });
@@ -128,7 +145,11 @@ export const attackDiscoveryScheduleExecutor = async ({
 
     const alertsParams = {
       alertsContextCount: anonymizedAlerts.length,
-      anonymizedAlerts,
+      anonymizedAlerts: anonymizedAlerts as Array<{
+        id?: string;
+        metadata: Record<string, never>;
+        pageContent: string;
+      }>, // TODO: remove this when the generator returns metadata: z.record(z.string(), z.unknown()) instead of metadata: z.object({}),
       apiConfig: params.apiConfig,
       connectorName: params.apiConfig.name,
       enableFieldRendering: true, // Always enable field rendering for scheduled discoveries. It's still possible for clients who read the generated discoveries to specify false when retrieving them.

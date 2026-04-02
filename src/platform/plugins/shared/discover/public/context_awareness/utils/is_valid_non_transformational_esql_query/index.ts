@@ -9,7 +9,7 @@
 
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 
 export function isValidNonTransformationalESQLQuery(
   query: AggregateQuery | Query | undefined

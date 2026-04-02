@@ -45,6 +45,12 @@ export const DATA_STREAM_TITLE_REQUIRED = i18n.translate(
     defaultMessage: 'Data stream title is required',
   }
 );
+export const DATA_STREAM_TITLE_ALREADY_EXISTS = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.titleAlreadyExists',
+  {
+    defaultMessage: 'A data stream with this name already exists',
+  }
+);
 export const DATA_STREAM_DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.automaticImportV2.forms.dataStream.descriptionRequired',
   {
@@ -69,3 +75,32 @@ export const SELECTED_INDEX_REQUIRED = i18n.translate(
     defaultMessage: 'Please select an index',
   }
 );
+
+export const NAME_INVALID_FORMAT = i18n.translate(
+  'xpack.automaticImportV2.forms.nameInvalidFormat',
+  {
+    defaultMessage: 'Name can only contain letters, numbers, and spaces',
+  }
+);
+
+export const NAME_CANNOT_BE_PURELY_NUMERIC = i18n.translate(
+  'xpack.automaticImportV2.forms.nameCannotBePurelyNumeric',
+  {
+    defaultMessage: 'Name must contain at least one letter.',
+  }
+);
+
+export const NAME_MUST_START_WITH_LETTER = i18n.translate(
+  'xpack.automaticImportV2.forms.nameMustStartWithLetter',
+  {
+    defaultMessage: 'Name must start with a letter',
+  }
+);
+
+export const NAME_TOO_SHORT = i18n.translate('xpack.automaticImportV2.forms.nameTooShort', {
+  defaultMessage: 'Name must be at least 2 characters long',
+});
+
+export const NAME_TOO_LONG = i18n.translate('xpack.automaticImportV2.forms.nameTooLong', {
+  defaultMessage: 'Name cannot exceed 256 characters',
+});

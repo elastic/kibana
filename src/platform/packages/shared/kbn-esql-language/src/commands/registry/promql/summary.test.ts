@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '../../../..';
+import { Parser } from '@elastic/esql';
 import { summary } from './summary';
 
 const assertSummary = (query: string, { expectedNewColumns }: { expectedNewColumns: string[] }) => {

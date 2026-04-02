@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streams-plugin'
+  title: '@kbn/streams-plugin'
   description: Moon project for @kbn/streams-plugin
   channel: ''
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/streams
+  sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core-pricing-common'
@@ -57,7 +56,6 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/ai-tools'
-  - '@kbn/logging-mocks'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'
@@ -74,11 +72,20 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/console-plugin'
   - '@kbn/actions-plugin'
-  - '@kbn/apm-utils'
   - '@kbn/alerting-types'
   - '@kbn/core-http-common'
   - '@kbn/scout'
   - '@kbn/esql-language'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/search-inference-endpoints'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/datemath'
+  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod
@@ -88,22 +95,13 @@ tags:
 fileGroups:
   src:
     - common/**/*
+    - docs/**/*
     - scripts/**/*
     - server/**/*
     - public/**/*
     - types/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

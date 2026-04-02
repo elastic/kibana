@@ -13,6 +13,7 @@ describe('WiredStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'wired' as const,
         name: 'wired-stream',
         description: '',
         updated_at: new Date().toISOString(),
@@ -88,7 +89,9 @@ describe('WiredStream', () => {
         },
       },
     ])('is not valid %s', (val) => {
-      expect(() => WiredStream.Definition.asserts(val as any)).toThrow();
+      expect(() =>
+        WiredStream.Definition.asserts(val as Parameters<typeof WiredStream.Definition.asserts>[0])
+      ).toThrow();
     });
   });
 
@@ -96,6 +99,7 @@ describe('WiredStream', () => {
     it.each([
       {
         stream: {
+          type: 'wired' as const,
           name: 'wired-stream',
           description: '',
           updated_at: new Date().toISOString(),
@@ -119,12 +123,14 @@ describe('WiredStream', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         effective_lifecycle: {
           dsl: {},
           from: 'logs',
         },
         effective_settings: {},
+        data_stream_exists: true,
         inherited_fields: {},
         effective_failure_store: {
           lifecycle: { enabled: { data_retention: '30d', is_default_retention: true } },
@@ -165,12 +171,18 @@ describe('WiredStream', () => {
           text_structure: true,
           failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         dashboards: [],
+        rules: [],
         queries: [],
       },
     ])('is not valid', (val) => {
-      expect(WiredStream.GetResponse.is(val as any)).toBe(false);
+      expect(
+        WiredStream.GetResponse.is(
+          val as unknown as Parameters<typeof WiredStream.GetResponse.is>[0]
+        )
+      ).toBe(false);
     });
   });
 
@@ -178,6 +190,7 @@ describe('WiredStream', () => {
     it.each([
       {
         stream: {
+          type: 'wired' as const,
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -253,7 +266,9 @@ describe('WiredStream', () => {
         ...emptyAssets,
       },
     ])('is not valid', (val) => {
-      expect(WiredStream.UpsertRequest.is(val as any)).toBe(false);
+      expect(
+        WiredStream.UpsertRequest.is(val as Parameters<typeof WiredStream.UpsertRequest.is>[0])
+      ).toBe(false);
     });
   });
 
@@ -310,7 +325,11 @@ describe('WiredStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(WiredIngestUpsertRequest.is(val as any)).toBe(false);
+      expect(
+        WiredIngestUpsertRequest.is(
+          val as unknown as Parameters<typeof WiredIngestUpsertRequest.is>[0]
+        )
+      ).toBe(false);
     });
   });
 });

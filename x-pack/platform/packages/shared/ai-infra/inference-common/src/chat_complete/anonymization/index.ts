@@ -16,4 +16,7 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
+  AnonymizationEntityClass,
+  AnonymizationResponseMetadata,
+  DeanonymizedMessageData,
 } from './types';

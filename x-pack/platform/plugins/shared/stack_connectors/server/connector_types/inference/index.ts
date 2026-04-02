@@ -70,30 +70,22 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     const esClient = services.scopedClusterClient.asInternalUser;
 
     try {
-      const { provider, providerConfig, headers } = config ?? {};
-
-      // NOTE: This is a temporary workaround for anthropic max_tokens handling until the services endpoint is updated to reflect the correct structure.
-      // Anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
-      // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
-      if (provider === ServiceProviderKeys.anthropic && providerConfig?.max_tokens) {
-        config.taskTypeConfig = {
-          ...(config.taskTypeConfig ?? {}),
-          max_tokens: providerConfig.max_tokens,
-        };
-        // This field is unknown to the anthropic service config, so we remove it
-        delete providerConfig.max_tokens;
-      }
-
-      const taskSettings = {
-        ...(config.taskTypeConfig ? unflattenObject(config.taskTypeConfig) : {}),
-        ...(headers ? { headers } : {}),
-      };
+      const { taskTypeConfig, providerConfig } = config ?? {};
 
       const serviceSettings = {
         ...(isUpdate === false ? unflattenObject(providerConfig ?? {}) : {}),
         // Update accepts only secrets in service_settings
         ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
+
+      const adaptiveAllocations = providerConfig?.adaptive_allocations;
+      const numAllocations = providerConfig?.num_allocations;
+      let allocationSettings = {};
+      if (adaptiveAllocations) {
+        allocationSettings = { adaptive_allocations: adaptiveAllocations };
+      } else if (numAllocations) {
+        allocationSettings = { num_allocations: numAllocations };
+      }
 
       let inferenceExists = false;
       try {
@@ -105,6 +97,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       } catch (e) {
         /* throws error if inference endpoint by id does not exist */
       }
+
       if (!isUpdate && inferenceExists) {
         throw new Error(
           `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
@@ -112,14 +105,16 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
-        // test num_allocations
         await esClient?.inference.update({
           inference_id: config?.inferenceId,
           task_type: config?.taskType as InferenceTaskType,
           // @ts-ignore The InferenceInferenceEndpoint type is out of date and has 'service' as a required property but this call will error if service is included
           inference_config: {
-            service_settings: serviceSettings,
-            task_settings: taskSettings,
+            service_settings: {
+              ...serviceSettings,
+              ...allocationSettings,
+            },
+            ...(Object.keys(taskTypeConfig ?? {}).length ? { task_settings: taskTypeConfig } : {}),
           },
         });
       } else {
@@ -129,7 +124,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
           inference_config: {
             service: config!.provider,
             service_settings: serviceSettings,
-            task_settings: taskSettings,
+            ...(Object.keys(taskTypeConfig ?? {}).length ? { task_settings: taskTypeConfig } : {}),
           },
         });
       }

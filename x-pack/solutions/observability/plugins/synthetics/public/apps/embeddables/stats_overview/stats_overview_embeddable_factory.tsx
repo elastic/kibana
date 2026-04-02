@@ -31,11 +31,11 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import type {
-  MonitorFilters,
-  OverviewStatsEmbeddableState,
-} from '../../../../common/embeddables/stats_overview/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
+import {
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+  SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/stats_overview/constants';
+import type { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -46,8 +46,8 @@ const DEFAULT_FILTERS: MonitorFilters = {
   projects: [],
   tags: [],
   locations: [],
-  monitorIds: [],
-  monitorTypes: [],
+  monitor_ids: [],
+  monitor_types: [],
 };
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
@@ -71,14 +71,19 @@ export const getStatsOverviewEmbeddableFactory = (
     }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
+      // Client code uses REST API shape (snake_case) directly
+      // transformOut handles conversion from legacy camelCase if needed
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.filters);
+      const filters$ = new BehaviorSubject({
+        ...DEFAULT_FILTERS,
+        ...(initialState?.filters || {}),
+      });
 
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
-      function serializeState() {
+      function serializeState(): OverviewStatsEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
@@ -114,7 +119,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ...titleManager.api,
         ...drilldownsManager.api,
         ...unsavedChangesApi,
-        supportedTriggers: () => [],
+        supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {

@@ -51,13 +51,13 @@ function isEditingFromDashboard(
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
   isCloudEnabled,
+  showAlertingV2 = false,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
   isCloudEnabled?: boolean;
+  showAlertingV2?: boolean;
 }): AddSolutionNavigationArg => {
   return {
-    dataTestSubj: 'searchSideNav',
-    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -209,7 +209,7 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              icon: 'launch',
+              icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
             },
@@ -257,6 +257,24 @@ export const getNavigationTreeDefinition = ({
                   id: 'stack_management_home',
                   title: '',
                 },
+                ...(showAlertingV2
+                  ? [
+                      {
+                        id: 'v2_alerting_preview',
+                        title: i18n.translate(
+                          'xpack.enterpriseSearch.searchNav.management.v2AlertingPreview',
+                          {
+                            defaultMessage: 'V2 Alerting Preview',
+                          }
+                        ),
+                        renderAs: 'panelOpener' as const,
+                        children: [
+                          { link: 'management:rules' as const },
+                          { link: 'management:notification_policies' as const },
+                        ],
+                      },
+                    ]
+                  : []),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
@@ -275,7 +293,13 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:trained_models' },
                     {
-                      link: 'searchInferenceEndpoints:inferenceEndpoints',
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
+                    },
+                    {
+                      link: 'management:elastic_inference_service',
                     },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
@@ -290,6 +314,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:genAiSettings' },
+                    { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {

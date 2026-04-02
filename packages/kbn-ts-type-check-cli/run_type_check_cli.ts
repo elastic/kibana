@@ -88,12 +88,20 @@ async function createTypeCheckConfigs(
   );
 }
 
-async function detectLocalChanges(): Promise<boolean> {
-  const { stdout } = await execa('git', ['status', '--porcelain'], {
-    cwd: REPO_ROOT,
-  });
+async function detectLocalChanges(): Promise<string[]> {
+  const { stdout } = await execa(
+    'git',
+    // Some CI environments change these files dynamically, like FIPS but it shouldn't invalidate the cache
+    ['status', '--porcelain', '--', '.', ':!:config/node.options', ':!config/kibana.yml'],
+    {
+      cwd: REPO_ROOT,
+    }
+  );
 
-  return stdout.trim().length > 0;
+  return stdout
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter((line) => line.length > 0);
 }
 
 run(
@@ -163,7 +171,7 @@ run(
           ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
         ],
         env: {
-          NODE_OPTIONS: '--max-old-space-size=10240',
+          NODE_OPTIONS: '--max-old-space-size=12288',
         },
         cwd: REPO_ROOT,
         wait: true,
@@ -172,14 +180,16 @@ run(
       didTypeCheckFail = true;
     }
 
-    const hasLocalChanges = shouldUseArchive ? await detectLocalChanges() : false;
+    const localChanges = shouldUseArchive ? await detectLocalChanges() : [];
+    const hasLocalChanges = localChanges.length > 0;
 
     if (shouldUseArchive) {
       if (hasLocalChanges) {
-        const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.`;
+        const changedFiles = localChanges.join('\n');
+        const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.\nChanged files:\n${changedFiles}`;
 
         if (isCiEnvironment()) {
-          throw new Error(`Canceling TypeScript cache archive because ${message}`);
+          throw new Error(`Cancelling TypeScript cache archive because ${message}`);
         }
 
         log.info(`Skipping TypeScript cache archive because ${message}`);

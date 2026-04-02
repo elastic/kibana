@@ -4,25 +4,26 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-test-endpoints-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-test-endpoints-plugin'
+  title: '@kbn/security-test-endpoints-plugin'
   description: Moon project for @kbn/security-test-endpoints-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/test/security_functional/plugins/test_endpoints
+  sourceRoot: x-pack/platform/test/security_functional/plugins/test_endpoints
 dependsOn:
   - '@kbn/core'
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/config-schema'
   - '@kbn/security-plugin-types-server'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - prod

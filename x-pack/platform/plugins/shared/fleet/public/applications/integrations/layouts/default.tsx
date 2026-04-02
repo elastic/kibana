@@ -8,9 +8,9 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ExperimentalFeaturesService } from '../../../services';
 import { useLink, useStartServices } from '../../../hooks';
 import type { Section } from '../sections';
+import { ExperimentalFeaturesService } from '../services';
 
 import { WithHeaderLayout } from '.';
 
@@ -23,7 +23,8 @@ interface Props {
 
 export const DefaultLayout: React.FC<Props> = memo(
   ({ section, children, notificationsBySection, noSpacerInContent }) => {
-    const { automaticImport } = useStartServices();
+    const { automaticImport, automaticImportVTwo } = useStartServices();
+
     const { getHref } = useLink();
     const tabs = [
       {
@@ -82,8 +83,8 @@ export const DefaultLayout: React.FC<Props> = memo(
         }
         rightColumnGrow={false}
         rightColumn={
-          ExperimentalFeaturesService.get()
-            .newBrowseIntegrationUx ? undefined : CreateIntegrationCardButton ? (
+          ExperimentalFeaturesService.get().newBrowseIntegrationUx &&
+          Boolean(automaticImportVTwo) ? undefined : CreateIntegrationCardButton ? (
             <EuiFlexItem grow={false}>
               <CreateIntegrationCardButton />
             </EuiFlexItem>

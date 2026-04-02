@@ -71,6 +71,7 @@ const enabledActionTypes = [
   '.thehive',
   '.tines',
   '.webhook',
+  '.http',
   '.xmatters',
   '.xsoar',
   '.torq',
@@ -354,6 +355,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
+            '127.0.0.1',
             'some.non.existent.com',
             'smtp-mail.outlook.com',
             'slack.com',

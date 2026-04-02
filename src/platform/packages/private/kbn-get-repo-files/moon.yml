@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/get-repo-files'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/get-repo-files'
+  title: '@kbn/get-repo-files'
   description: Moon project for @kbn/get-repo-files
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-get-repo-files
+  sourceRoot: src/platform/packages/private/kbn-get-repo-files
 dependsOn:
   - '@kbn/repo-info'
   - '@kbn/repo-path'
@@ -33,16 +32,6 @@ fileGroups:
     - '**/*.js'
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

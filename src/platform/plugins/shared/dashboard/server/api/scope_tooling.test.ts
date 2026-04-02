@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { stripUnmappedKeys, throwOnUnmappedKeys } from './scope_tooling';
+import { stripUnmappedKeys } from './scope_tooling';
 import type { DashboardState } from './types';
 
 const mockGetTransforms = jest.fn();
@@ -25,6 +25,104 @@ beforeEach(() => {
 });
 
 describe('stripUnmappedKeys', () => {
+  it('should validate pinned panel types', () => {
+    mockGetTransforms.mockImplementation((type: string) => {
+      if (type === 'typeWithSchema' || type === 'pinnedTypeWithSchema') {
+        return {
+          schema: schema.any(),
+        };
+      }
+    });
+
+    const dashboardState = {
+      title: 'my dashboard',
+      panels: [
+        {
+          config: {
+            foo: 'some value',
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: 'typeWithSchema',
+          uid: 'panel1',
+        },
+      ],
+      pinned_panels: [
+        {
+          config: {
+            data_view_id: 'dv1',
+            field_name: 'field1',
+          },
+          grow: false,
+          uid: 'pinned1',
+          type: 'pinnedTypeWithSchema',
+          width: 'small',
+        },
+        {
+          config: {
+            data_view_id: 'dv1',
+            field_name: 'field2',
+          },
+          grow: false,
+          uid: 'pinned2',
+          type: 'pinnedTypeWithoutSchema',
+          width: 'small',
+        },
+      ],
+    };
+
+    expect(stripUnmappedKeys(dashboardState as unknown as Partial<DashboardState>))
+      .toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "panels": Array [
+            Object {
+              "config": Object {
+                "foo": "some value",
+              },
+              "grid": Object {
+                "h": 15,
+                "w": 24,
+                "x": 0,
+                "y": 0,
+              },
+              "type": "typeWithSchema",
+              "uid": "panel1",
+            },
+          ],
+          "pinned_panels": Array [
+            Object {
+              "config": Object {
+                "data_view_id": "dv1",
+                "field_name": "field1",
+              },
+              "grow": false,
+              "type": "pinnedTypeWithSchema",
+              "uid": "pinned1",
+              "width": "small",
+            },
+          ],
+          "title": "my dashboard",
+        },
+        "warnings": Array [
+          Object {
+            "message": "Panel schema not available for panel type: pinnedTypeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+            "panel_config": Object {
+              "data_view_id": "dv1",
+              "field_name": "field2",
+            },
+            "panel_type": "pinnedTypeWithoutSchema",
+            "type": "dropped_panel",
+          },
+        ],
+      }
+    `);
+  });
+
   it('should not drop mapped panel types', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
@@ -100,7 +198,14 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped panel 12345, panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+          Object {
+            "message": "Panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+            "panel_config": Object {
+              "foo": "some value",
+            },
+            "panel_type": "typeWithoutSchema",
+            "type": "dropped_panel",
+          },
         ],
       }
     `);
@@ -140,215 +245,16 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped panel 12345, panel config is not supported. Reason: Unmapped panel type.",
+          Object {
+            "message": "Unmapped panel type",
+            "panel_config": Object {
+              "foo": "some value",
+            },
+            "panel_type": "typeWithSchema",
+            "type": "dropped_panel",
+          },
         ],
       }
     `);
-  });
-
-  it('should drop panel enhancements', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            title: 'panel',
-            enhancements: {
-              dynamicActions: {
-                events: [],
-              },
-            },
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-          uid: 'panel1',
-        },
-        {
-          grid: { y: 0 },
-          panels: [
-            {
-              config: {
-                title: 'panel in section',
-                enhancements: {
-                  dynamicActions: {
-                    events: [{}],
-                  },
-                },
-              },
-              grid: {
-                h: 15,
-                w: 24,
-                x: 0,
-                y: 0,
-              },
-              type: 'typeWithSchema',
-              uid: 'panelInSection1',
-            },
-          ],
-          title: 'section 1',
-        },
-      ],
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [
-            Object {
-              "config": Object {
-                "title": "panel",
-              },
-              "grid": Object {
-                "h": 15,
-                "w": 24,
-                "x": 0,
-                "y": 0,
-              },
-              "type": "typeWithSchema",
-              "uid": "panel1",
-            },
-            Object {
-              "grid": Object {
-                "y": 0,
-              },
-              "panels": Array [
-                Object {
-                  "config": Object {
-                    "title": "panel in section",
-                  },
-                  "grid": Object {
-                    "h": 15,
-                    "w": 24,
-                    "x": 0,
-                    "y": 0,
-                  },
-                  "type": "typeWithSchema",
-                  "uid": "panelInSection1",
-                },
-              ],
-              "title": "section 1",
-            },
-          ],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
-        ],
-      }
-    `);
-  });
-
-  it('should drop pinned_panels', () => {
-    const dashboardState = {
-      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
-      title: 'my dashboard',
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped key 'pinned_panels' from dashboard",
-        ],
-      }
-    `);
-  });
-});
-
-describe('throwOnUnmappedKeys', () => {
-  it('should not throw when there are no unmapped keys', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            foo: 'some value',
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).not.toThrow();
-  });
-
-  it('should throw when dashboard contains a panel without a schema', () => {
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            foo: 'some value',
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithoutSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains a panel with enhancements', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({}),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            enhancements: {},
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains pinned_panels', () => {
-    const dashboardState = {
-      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
-      title: 'my dashboard',
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });
 });

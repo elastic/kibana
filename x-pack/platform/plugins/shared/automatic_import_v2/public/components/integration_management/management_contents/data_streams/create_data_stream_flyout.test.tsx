@@ -38,7 +38,8 @@ jest.mock('../../../../common', () => ({
   useKibana: jest.fn(() => ({
     services: {
       http: {},
-      notifications: { toasts: { addError: jest.fn() } },
+      notifications: { toasts: { addError: jest.fn(), addWarning: jest.fn() } },
+      application: { navigateToApp: jest.fn() },
     },
   })),
 }));
@@ -50,14 +51,24 @@ jest.mock('../../../../common/lib/api', () => ({
   ),
 }));
 
+const mockReportAnalyzeLogsTriggered = jest.fn();
+jest.mock('../../../telemetry_context', () => ({
+  useTelemetry: () => ({
+    reportAnalyzeLogsTriggered: mockReportAnalyzeLogsTriggered,
+  }),
+}));
+
 const mockUseFetchIndices = useFetchIndices as jest.Mock;
 const mockUseValidateIndex = useValidateIndex as jest.Mock;
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 const mockUseCreateUpdateIntegration = useCreateUpdateIntegration as jest.Mock;
+const mockRefetch = jest.fn();
 
 const mockServices = coreMock.createStart();
 
-const createWrapper = () => {
+const createWrapper = (
+  initialValue?: React.ComponentProps<typeof IntegrationFormProvider>['initialValue']
+) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -74,7 +85,9 @@ const createWrapper = () => {
           <MemoryRouter initialEntries={['/create']}>
             <Route path={['/edit/:integrationId', '/create']}>
               <UIStateProvider>
-                <IntegrationFormProvider onSubmit={jest.fn()}>{children}</IntegrationFormProvider>
+                <IntegrationFormProvider onSubmit={jest.fn()} initialValue={initialValue}>
+                  {children}
+                </IntegrationFormProvider>
               </UIStateProvider>
             </Route>
           </MemoryRouter>
@@ -108,12 +121,13 @@ describe('CreateDataStreamFlyout', () => {
       clearValidationError: mockClearValidationError,
     });
 
+    mockRefetch.mockClear();
     mockUseGetIntegrationById.mockReturnValue({
       integration: undefined,
       isLoading: false,
       isError: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: mockRefetch,
     });
 
     mockUseCreateUpdateIntegration.mockReturnValue({
@@ -139,8 +153,8 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('createDataStreamFlyout')).toBeInTheDocument();
       });
 
-      expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
-      expect(getByTestId('dataStreamDescriptionInput')).toBeInTheDocument();
+      expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
+      expect(getByTestId('dataStreamDescriptionInputV2')).toBeInTheDocument();
       expect(getByTestId('dataCollectionMethodSelect')).toBeInTheDocument();
       expect(getByTestId('logsSourceUploadCard')).toBeInTheDocument();
       expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
@@ -183,6 +197,29 @@ describe('CreateDataStreamFlyout', () => {
   describe('analyze button state', () => {
     it('should have analyze button disabled when form is empty', async () => {
       const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should keep analyze button disabled when data stream description is empty', async () => {
+      const Wrapper = createWrapper({
+        title: 'Integration',
+        description: 'Integration description',
+        connectorId: 'connector-1',
+        dataStreamTitle: 'My stream',
+        dataStreamDescription: '',
+        dataCollectionMethod: ['filestream'],
+        logSample: '2024-01-01 level=info msg=test',
+      });
       const { getByTestId } = render(
         <Wrapper>
           <CreateDataStreamFlyout onClose={mockOnClose} />
@@ -357,6 +394,133 @@ describe('CreateDataStreamFlyout', () => {
       // The combobox should show loading state
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    });
+  });
+
+  describe('refetch after creation', () => {
+    it('should get refetch function from useGetIntegrationById hook', () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      expect(mockUseGetIntegrationById).toHaveBeenCalled();
+    });
+  });
+
+  describe('duplicate data stream name validation', () => {
+    it('should disable analyze button when entering a duplicate data stream name', async () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          integrationId: 'test-integration',
+          title: 'Test Integration',
+          description: 'Test description',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing Data Stream', inputTypes: [] }],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
+      });
+
+      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
+        target: { value: 'existing data stream' },
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should disable analyze button for case-insensitive duplicate names', async () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          integrationId: 'test-integration',
+          title: 'Test Integration',
+          description: 'Test description',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'My Data Stream', inputTypes: [] }],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
+      });
+
+      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
+        target: { value: 'MY DATA STREAM' },
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should allow unique data stream names', async () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          integrationId: 'test-integration',
+          title: 'Test Integration',
+          description: 'Test description',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing Stream', inputTypes: [] }],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
+      });
+
+      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
+        target: { value: 'New Unique Stream' },
+      });
+
+      const titleInput = getByTestId('dataStreamTitleInputV2');
+      expect(titleInput.getAttribute('aria-invalid')).not.toBe('true');
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should render without telemetry errors', async () => {
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('createDataStreamFlyout')).toBeInTheDocument();
+      });
     });
   });
 });

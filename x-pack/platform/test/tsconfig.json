@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -179,7 +178,11 @@
     "@kbn/dashboard-plugin",
     "@kbn/automatic-import-v2-plugin",
     "@kbn/connector-specs",
+    "@kbn/alerting-v2-plugin",
     "@kbn/ftr-llm-proxy",
-    "@kbn/dev-cli-runner"
+    "@kbn/dev-cli-runner",
+    "@kbn/ui-actions-plugin",
+    "@kbn/product-doc-common",
+    "@kbn/lens-common"
   ]
 }

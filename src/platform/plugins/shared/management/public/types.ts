@@ -15,6 +15,7 @@ import type {
   CoreStart,
   ChromeBreadcrumb,
   CoreTheme,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
@@ -110,6 +111,7 @@ export interface CreateManagementItemArgs {
   icon?: string; // URL to image file; fallback if no `euiIconType`
   hideFromSidebar?: boolean;
   hideFromGlobalSearch?: boolean; // Hide from global search results
+  visibleIn?: AppDeepLinkLocations[]; // Controls deep link visibility; takes precedence over hideFromGlobalSearch
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
 }
@@ -127,7 +129,7 @@ export interface AppDependencies {
   chromeStyle?: ChromeStyle;
   coreStart: CoreStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
   getAutoOpsStatusHook: () => AutoOpsStatusHook;
 }
 
