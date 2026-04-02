@@ -60,7 +60,7 @@ export const getExceptionsSubFeature = (): SubFeatureConfig => ({
           name: i18n.translate(
             'securitySolutionPackages.features.featureRegistry.subFeatures.manageExceptionPrivilegeName',
             {
-              defaultMessage: 'Manage Exceptions',
+              defaultMessage: 'Manage exceptions',
             }
           ),
           savedObject: {
@@ -92,7 +92,7 @@ export const getInvestigationGuideSubFeature = (): SubFeatureConfig => ({
           name: i18n.translate(
             'securitySolutionPackages.features.featureRegistry.subFeatures.investigationGuidePrivilegeName',
             {
-              defaultMessage: 'Edit investigation guides',
+              defaultMessage: 'Manage investigation guides',
             }
           ),
           savedObject: {
@@ -124,7 +124,7 @@ export const getCustomHighlightedFieldsSubFeature = (): SubFeatureConfig => ({
           name: i18n.translate(
             'securitySolutionPackages.features.featureRegistry.subFeatures.customHighlightedFieldsPrivilegeName',
             {
-              defaultMessage: 'Edit custom highlighted fields',
+              defaultMessage: 'Manage custom highlighted fields',
             }
           ),
           savedObject: {
@@ -143,7 +143,7 @@ export const getEnableDisableRulesSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.enableDisableSubFeatureName',
     {
-      defaultMessage: 'Enable/Disable',
+      defaultMessage: 'Enable or Disable',
     }
   ),
   privilegeGroups: [
@@ -217,7 +217,7 @@ export const getRulesManagementSettingsSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.rulesManagementSettingsSubFeatureName',
     {
-      defaultMessage: 'Rules management settings',
+      defaultMessage: 'Rule management settings',
     }
   ),
   privilegeGroups: [
@@ -230,7 +230,7 @@ export const getRulesManagementSettingsSubFeature = (): SubFeatureConfig => ({
           name: i18n.translate(
             'securitySolutionPackages.features.featureRegistry.subFeatures.rulesManagementSettingsPrivilegeName',
             {
-              defaultMessage: 'Manage automated gap remediation settings',
+              defaultMessage: 'Manage rule settings',
             }
           ),
           savedObject: {
