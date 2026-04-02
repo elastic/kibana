@@ -838,6 +838,49 @@ describe('SearchSessionService', () => {
           },
         });
       });
+
+      it('works with minimal auth user (no authentication_realm access)', async () => {
+        const minimalAuthUser = new Proxy(
+          {
+            enabled: true,
+            authentication_provider: { type: 'basic', name: 'basic1' },
+          } as any,
+          {
+            get(target, prop) {
+              if (prop === 'authentication_realm') {
+                throw new Error(
+                  `Property "${String(prop)}" is not available for minimally authenticated users.`
+                );
+              }
+              return Reflect.get(target, prop);
+            },
+          }
+        );
+
+        const requestHash = faker.string.alpha(64);
+        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+        const mockUpdateSavedObject = {
+          ...mockSavedObject,
+          attributes: {},
+        };
+        savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+
+        // Should not throw - trackId passes skipUserCheck: true internally
+        await expect(
+          service.trackId({ savedObjectsClient }, minimalAuthUser, searchId, {
+            sessionId,
+            strategy: MOCK_STRATEGY,
+            requestHash,
+          })
+        ).resolves.not.toThrow();
+
+        expect(savedObjectsClient.update).toHaveBeenCalled();
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping user-sameness check')
+        );
+      });
     });
 
     describe('getId', () => {
@@ -901,6 +944,57 @@ describe('SearchSessionService', () => {
         });
 
         expect(id).toBe(searchId);
+      });
+
+      it('works with minimal auth user (no authentication_realm access)', async () => {
+        const minimalAuthUser = new Proxy(
+          {
+            enabled: true,
+            authentication_provider: { type: 'basic', name: 'basic1' },
+          } as any,
+          {
+            get(target, prop) {
+              if (prop === 'authentication_realm') {
+                throw new Error(
+                  `Property "${String(prop)}" is not available for minimally authenticated users.`
+                );
+              }
+              return Reflect.get(target, prop);
+            },
+          }
+        );
+
+        const searchRequest = { params: {} };
+        const requestHash = faker.string.alpha(64);
+        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+        const mockSession = {
+          ...mockSavedObject,
+          attributes: {
+            ...mockSavedObject.attributes,
+            idMapping: {
+              [requestHash]: {
+                id: searchId,
+              },
+            },
+          },
+        };
+        savedObjectsClient.get.mockResolvedValue(mockSession);
+
+        // Should not throw - getId passes skipUserCheck: true internally
+        const getIdPromise = service.getId({ savedObjectsClient }, minimalAuthUser, searchRequest, {
+          sessionId,
+          isStored: true,
+          isRestore: true,
+          requestHash,
+        });
+
+        await expect(getIdPromise).resolves.not.toThrow();
+
+        const id = await getIdPromise;
+        expect(id).toBe(searchId);
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping user-sameness check')
+        );
       });
     });
 
