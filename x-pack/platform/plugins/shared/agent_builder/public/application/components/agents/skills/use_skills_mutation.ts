@@ -37,7 +37,10 @@ export const useSkillsMutation = ({
 
   const updateSkillsMutation = useMutation({
     mutationFn: (newSkillIds: string[]) => {
-      return agentService.update(agentId!, {
+      if (!agentId) {
+        throw new Error('Agent id is required to update skills');
+      }
+      return agentService.update(agentId, {
         configuration: { skill_ids: newSkillIds },
       });
     },
