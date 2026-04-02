@@ -89,7 +89,7 @@ export const createDashboardSmlType = ({
 
   getSmlData: async (originId, context) => {
     try {
-      // todo: this should be passed from agent builder 
+      // todo: this should be passed from agent builder
       const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(requestHandlerContext, originId);
@@ -114,7 +114,7 @@ export const createDashboardSmlType = ({
 
   toAttachment: async (item, context) => {
     try {
-      // todo: this should be passed from agent builder 
+      // todo: this should be passed from agent builder
       const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(requestHandlerContext, item.origin_id);
