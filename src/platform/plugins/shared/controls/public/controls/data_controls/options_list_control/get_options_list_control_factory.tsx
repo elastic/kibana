@@ -22,11 +22,7 @@ import {
 } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type {
-  OptionsListSelection,
-  OptionsListControlState,
-  OptionsListDSLControlState,
-} from '@kbn/controls-schemas';
+import type { OptionsListSelection, OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
@@ -239,7 +235,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListDSLControlState {
+      function serializeState(): OptionsListControlState {
         return {
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
@@ -250,7 +246,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
         uuid,
         parentApi,
         serializeState,
