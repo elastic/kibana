@@ -19,7 +19,7 @@ const InputSchema = z.object({
 });
 
 const OutputSchema = z.object({
-  cases: z.array(RelatedCase).max(10000),
+  cases: z.array(RelatedCase).max(MAX_DOCS_PER_PAGE),
 });
 
 type GetCasesByAlertIdStepInputSchema = typeof InputSchema;
