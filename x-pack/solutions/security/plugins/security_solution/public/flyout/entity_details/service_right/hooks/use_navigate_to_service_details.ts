@@ -23,6 +23,7 @@ interface UseNavigateToServiceDetailsParams {
   isRiskScoreExist: boolean;
   identityFields: IdentityFields;
   isPreviewMode: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const useNavigateToServiceDetails = ({
@@ -33,6 +34,7 @@ export const useNavigateToServiceDetails = ({
   isRiskScoreExist,
   identityFields,
   isPreviewMode,
+  entityStoreEntityId,
 }: UseNavigateToServiceDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
@@ -51,6 +53,7 @@ export const useNavigateToServiceDetails = ({
           scopeId,
           entityId,
           serviceName,
+          entityStoreEntityId,
           path,
         },
       };
@@ -82,6 +85,7 @@ export const useNavigateToServiceDetails = ({
       serviceName,
       contextID,
       isPreviewMode,
+      entityStoreEntityId,
       telemetry,
     ]
   );

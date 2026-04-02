@@ -59,8 +59,13 @@ export const ServicePanel = ({
 }: ServicePanelProps) => {
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const serviceStoreIdentityFields = useMemo(
+    () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
+    [entityId, serviceName]
+  );
   const entityFromStoreResult = useEntityFromStore({
     entityId,
+    identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: !entityStoreV2Enabled,
   });
@@ -115,6 +120,10 @@ export const ServicePanel = ({
     setQuery,
   });
 
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? entityFromStoreResult.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToServiceDetails({
     serviceName,
     entityId,
@@ -123,18 +132,21 @@ export const ServicePanel = ({
     isRiskScoreExist,
     identityFields: documentEntityIdentifiers,
     isPreviewMode,
+    entityStoreEntityId,
   });
 
-  const hasGraphView = Boolean(entityFromStoreResult.entityRecord);
+  const defaultTab = useMemo(() => {
+    if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;
+    if (entityStoreEntityId) return EntityDetailsLeftPanelTab.RESOLUTION_GROUP;
+    return EntityDetailsLeftPanelTab.RISK_INPUTS;
+  }, [isRiskScoreExist, entityStoreEntityId]);
 
   const openPanelFirstTab = useCallback(
     () =>
       openDetailsPanel({
-        tab: isRiskScoreExist
-          ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.GRAPH_VIEW,
+        tab: defaultTab,
       }),
-    [isRiskScoreExist, openDetailsPanel]
+    [openDetailsPanel, defaultTab]
   );
 
   if (observedService.isLoading) {
@@ -144,7 +156,7 @@ export const ServicePanel = ({
   return (
     <>
       <FlyoutNavigation
-        flyoutIsExpandable={isRiskScoreExist || hasGraphView}
+        flyoutIsExpandable={isRiskScoreExist || !!entityStoreEntityId}
         expandDetails={openPanelFirstTab}
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
@@ -161,6 +173,7 @@ export const ServicePanel = ({
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
         isPreviewMode={isPreviewMode}
+        entityStoreEntityId={entityStoreEntityId}
       />
     </>
   );

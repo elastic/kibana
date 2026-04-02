@@ -15,7 +15,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AttachmentServiceStart } from '../attachments';
@@ -316,7 +315,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    *
    * 1. If `useTaskManager` is explicitly provided, honour it.
    * 2. If the request is a fakeRequest (already running on TM), run locally.
-   * 3. Otherwise, read the experimental-features UI setting.
+   * 3. Otherwise, run on task manager.
    */
   private async shouldUseTaskManager(
     request: KibanaRequest,
@@ -328,9 +327,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     if (request.isFakeRequest) {
       return false;
     }
-    const soClient = this.deps.savedObjects.getScopedClient(request);
-    const uiSettingsClient = this.deps.uiSettings.asScopedToClient(soClient);
-    return uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    return true;
   }
 
   /**
