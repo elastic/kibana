@@ -8,7 +8,13 @@
  */
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectMigration, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectMigration,
+  SavedObjectModelUnsafeTransformFn,
+  SavedObjectsModelVersionMap,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
+import { cloneDeep } from 'lodash';
 import type { ElasticsearchClientWrapperFactory } from '../src/elasticsearch_client_wrapper';
 import {
   currentVersion,
@@ -124,6 +130,82 @@ export const getCompatibleBaselineTypes = (removedTypes: string[]) =>
       return type;
     }
   });
+
+interface ComplexTypeV0 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
+
+interface ComplexTypeV1 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
+
+export const getTransformErrorBaselineTypes = (removedTypes: string[]) => {
+  const transformComplex: SavedObjectModelUnsafeTransformFn<ComplexTypeV0, ComplexTypeV1> = (
+    doc
+  ) => {
+    if (doc.attributes.value % 100 === 0) {
+      throw new Error(
+        `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
+      );
+    }
+    return { document: doc };
+  };
+  return getCompatibleBaselineTypes(removedTypes).map<SavedObjectsType>((type) => {
+    if (type.name === 'complex') {
+      const modelVersions = cloneDeep(type.modelVersions! as SavedObjectsModelVersionMap);
+      modelVersions[2]!.changes.push({
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) => typeSafeGuard(transformComplex),
+      });
+
+      return { ...type, modelVersions };
+    }
+    if (type.name === 'task') {
+      return {
+        ...type,
+        mappings: {
+          properties: {
+            ...type.mappings.properties,
+            lastRun: { type: 'date' },
+          },
+        },
+        modelVersions: {
+          ...type.modelVersions,
+          2: {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  lastRun: { type: 'date' },
+                },
+              },
+            ],
+          },
+        },
+      };
+    } else if (type.name === 'old') {
+      return {
+        ...type,
+        migrations: {
+          ...type.migrations,
+          '8.9.0': ((doc) => ({
+            ...doc,
+            attributes: {
+              ...(doc.attributes as any),
+              name: `${(doc.attributes as any).name}_8.9.0`,
+            },
+          })) as SavedObjectMigration,
+        },
+      };
+    } else {
+      return type;
+    }
+  });
+};
 
 export interface GetBaselineDocumentsParams {
   documentsPerType?: number;

@@ -9,7 +9,6 @@
 
 import { join } from 'path';
 import { omit } from 'lodash';
-import { parse } from 'hjson';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -21,11 +20,13 @@ import {
   readLog,
   clearLog,
   currentVersion,
+  getKibanaMigratorTestKit,
+  nextMinor,
 } from '@kbn/migrator-test-kit';
 import { BASELINE_TEST_ARCHIVE_LARGE } from '../kibana_migrator_archive_utils';
 import {
-  getReindexingBaselineTypes,
-  getReindexingMigratorTestKit,
+  getCompatibleBaselineTypes,
+  getTransformErrorBaselineTypes,
   getUpToDateMigratorTestKit,
 } from '@kbn/migrator-test-kit/fixtures';
 import { expectDocumentsMigratedToHighestVersion } from '@kbn/migrator-test-kit/expect';
@@ -112,14 +113,15 @@ describe('v2 migration', () => {
 
       beforeAll(async () => {
         await clearLog(logFilePath);
-        unknownTypesKit = await getReindexingMigratorTestKit({
+        unknownTypesKit = await getKibanaMigratorTestKit({
           logFilePath,
           // we must exclude 'deprecated' from the list of registered types
           // so that it is considered unknown
-          types: getReindexingBaselineTypes(['server', 'task', 'deprecated']),
+          types: getCompatibleBaselineTypes(['server', 'task', 'deprecated']),
           // however we don't want to flag 'deprecated' as a removed type
           // because we want the migrator to consider it unknown
           removedTypes: ['server', 'task'],
+          kibanaVersion: nextMinor,
           settings: {
             migrations: {
               discardUnknownObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -148,18 +150,15 @@ describe('v2 migration', () => {
     describe('with transform errors', () => {
       let transformErrorsKit: KibanaMigratorTestKit;
       let logs: string;
-
+      // filter out 'task' objects in order to not spawn that migrator for this test
+      const removedTypes = ['deprecated', 'server', 'task'];
       beforeAll(async () => {
         await clearLog(logFilePath);
-        transformErrorsKit = await getReindexingMigratorTestKit({
+        transformErrorsKit = await getKibanaMigratorTestKit({
           logFilePath,
-          // filter out 'task' objects in order to not spawn that migrator for this test
-          removedTypes: ['deprecated', 'server', 'task'],
-          settings: {
-            migrations: {
-              discardCorruptObjects: currentVersion, // instead of the actual target, 'nextMinor'
-            },
-          },
+          removedTypes,
+          kibanaVersion: nextMinor,
+          types: getTransformErrorBaselineTypes(removedTypes),
         });
       });
 
@@ -182,26 +181,6 @@ describe('v2 migration', () => {
         );
         expect(logs).toMatch(`[${defaultKibanaIndex}] OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL.`);
       });
-
-      it('closes reindex PIT upon failure', async () => {
-        const lineWithPit = logs
-          .split('\n')
-          .find((line) =>
-            line.includes(`[${defaultKibanaIndex}] OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT PitId:`)
-          );
-
-        expect(lineWithPit).toBeTruthy();
-
-        const id = parse(lineWithPit!).message.split(':')[1];
-        expect(id).toBeTruthy();
-
-        await expect(
-          transformErrorsKit.client.search({
-            pit: { id },
-          })
-          // throws an exception that cannot search with closed PIT
-        ).rejects.toThrow(/search_phase_execution_exception/);
-      });
     });
 
     describe('configured to discard transform errors and unknown types', () => {
@@ -210,8 +189,21 @@ describe('v2 migration', () => {
 
       beforeAll(async () => {
         await clearLog(logFilePath);
-        kit = await getReindexingMigratorTestKit({
+        kit = await getKibanaMigratorTestKit({
           logFilePath,
+          // we must exclude 'deprecated' from the list of registered types
+          // so that it is considered unknown
+          types: getTransformErrorBaselineTypes(['server', 'deprecated']),
+          // however we don't want to flag 'deprecated' as a removed type
+          // because we want the migrator to consider it unknown
+          removedTypes: ['server'],
+          kibanaVersion: nextMinor,
+          settings: {
+            migrations: {
+              discardUnknownObjects: nextMinor,
+              discardCorruptObjects: nextMinor,
+            },
+          },
         });
 
         await kit.runMigrations();

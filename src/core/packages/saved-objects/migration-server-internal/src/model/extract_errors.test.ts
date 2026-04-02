@@ -76,7 +76,7 @@ describe('extractTransformFailuresReason', () => {
 
     expect(errorMessageWithoutStack).toMatchInlineSnapshot(`
       "Migrations failed. Reason: 2 corrupt saved object documents were found: corrupt_1, corrupt_2
-       2 transformation errors were encountered:
+       2 transformation errors were encountered (showing the first 5 - check the logs for the full list):
       - transform_1: Error: Oops!
       - transform_2: Error: I did it again!
 
