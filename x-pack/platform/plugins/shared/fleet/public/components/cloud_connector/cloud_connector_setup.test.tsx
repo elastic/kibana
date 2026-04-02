@@ -361,6 +361,8 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
         accountType: SINGLE_ACCOUNT,
+        packageName: mockPackageInfo.name,
+        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -372,6 +374,8 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
         accountType: SINGLE_ACCOUNT,
+        packageName: mockPackageInfo.name,
+        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -383,6 +387,8 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
         accountType: ORGANIZATION_ACCOUNT,
+        packageName: mockPackageInfo.name,
+        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -539,6 +545,8 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AZURE_PROVIDER,
         accountType: SINGLE_ACCOUNT,
+        packageName: mockPackageInfo.name,
+        policyTemplate: defaultProps.templateName,
       });
     });
 
@@ -616,6 +624,8 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: AWS_PROVIDER,
         accountType: SINGLE_ACCOUNT,
+        packageName: mockPackageInfo.name,
+        policyTemplate: defaultProps.templateName,
       });
     });
 
