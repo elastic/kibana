@@ -23,7 +23,7 @@ const observabilityAIAssistantParentFeature: InferenceFeatureConfig = {
 const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID,
   parentFeatureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_FEATURE_ID,
-  featureName: 'Observability AI Assistant',
+  featureName: 'AI Assistant',
   featureDescription: 'Observability AI Assistant inference endpoint configuration',
   taskType: 'chat_completion',
   recommendedEndpoints: [],
