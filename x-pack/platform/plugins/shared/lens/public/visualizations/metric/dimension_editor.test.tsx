@@ -117,6 +117,23 @@ describe('dimension editor', () => {
       })),
     }).publicAPIMock;
 
+  const createActiveDataWithNonNumericColumn = (columnId: string) =>
+    createMockFramePublicAPI({
+      activeData: {
+        first: {
+          type: 'datatable',
+          columns: [
+            {
+              id: columnId,
+              name: columnId,
+              meta: { type: 'string' },
+            },
+          ],
+          rows: [{ [columnId]: 'foo' }],
+        },
+      },
+    });
+
   beforeEach(() => {
     props = {
       layerId: 'first',
@@ -281,6 +298,13 @@ describe('dimension editor', () => {
         await setIcon('Heart');
         expect(setState).not.toHaveBeenCalled();
       });
+    });
+    it('static color control is visible when active data reports a non-numeric primary column', () => {
+      const { getStaticColorPicker } = renderPrimaryMetricEditor({
+        state: { ...metricAccessorState, palette },
+        frame: createActiveDataWithNonNumericColumn('metric-col-id'),
+      });
+      expect(getStaticColorPicker()).toBeInTheDocument();
     });
   });
 
@@ -598,6 +622,18 @@ describe('dimension editor', () => {
           expect(getColorByValueDynamic()).toBeDisabled();
         });
 
+        it('should prevent dynamic coloring when active data reports a non-numeric secondary column', async () => {
+          const { getColorByValueDynamic } = renderSecondaryMetricEditor({
+            state: {
+              ...localState,
+              secondaryTrend: getDefaultConfigForMode('dynamic'),
+            },
+            frame: createActiveDataWithNonNumericColumn('secondary-metric-col-id'),
+          });
+
+          expect(getColorByValueDynamic()).toBeDisabled();
+        });
+
         it('should correctly select the reversed Trend color palette based on configuration', async () => {
           const { getSelectedPalette } = renderSecondaryMetricEditor({
             state: {
@@ -632,6 +668,27 @@ describe('dimension editor', () => {
                 createOperationByType(id !== accessor ? 'string' : 'number')
               ),
             }).publicAPIMock,
+          });
+
+          const baselineGroup = getBaselineGroup();
+
+          expect(baselineGroup).toBeInTheDocument();
+          expect(getByTitle(baselineGroup, 'Primary metric')).toBeDisabled();
+        });
+
+        it('should disable the "Primary metric" baseline when active data reports a non-numeric primary column', async () => {
+          const { getBaselineGroup } = renderSecondaryMetricEditor({
+            state: {
+              ...localState,
+              secondaryTrend: {
+                type: 'dynamic',
+                visuals: 'both',
+                reversed: false,
+                paletteId: 'compare_to',
+                baselineValue: 'primary',
+              },
+            },
+            frame: createActiveDataWithNonNumericColumn('metric-col-id'),
           });
 
           const baselineGroup = getBaselineGroup();
@@ -912,6 +969,14 @@ describe('dimension editor', () => {
         // now rerender with a numeric metric
         rerender({ datasource: props.datasource });
         expect(screen.getByLabelText(/collapse by/i)).toBeInTheDocument();
+      });
+
+      it('should not display the collapse function when active data reports a non-numeric primary column', () => {
+        const { container } = renderBreakdownEditorDataSection({
+          frame: createActiveDataWithNonNumericColumn('metric-col-id'),
+        });
+
+        expect(container).toBeEmptyDOMElement();
       });
 
       it.each([
@@ -1280,6 +1345,13 @@ describe('dimension editor', () => {
     it('Color mode switch is not shown when the primary metric is numeric but with array support', () => {
       const { colorModeGroup } = renderAdditionalSectionEditor({
         datasource: getNumericDatasourceWithArraySupport(),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when active data reports a non-numeric primary metric column', () => {
+      const { colorModeGroup } = renderAdditionalSectionEditor({
+        frame: createActiveDataWithNonNumericColumn('metric-col-id'),
       });
       expect(colorModeGroup).not.toBeInTheDocument();
     });

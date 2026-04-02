@@ -79,12 +79,13 @@ export class WatchlistConfigClient {
   constructor(private readonly deps: WatchlistConfigClientDeps) {}
 
   async create(
-    attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>
+    attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>,
+    options?: { id?: string }
   ): Promise<WatchlistObject> {
     const so = await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
       watchlistConfigTypeName,
       { ...attrs, managed: attrs.managed ?? false },
-      { refresh: 'wait_for' }
+      { id: options?.id, refresh: 'wait_for' }
     );
 
     await createOrUpdateIndex({
