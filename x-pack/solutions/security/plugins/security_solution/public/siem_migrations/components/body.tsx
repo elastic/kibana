@@ -35,7 +35,7 @@ const scrollToCard = (cardId: OnboardingCardId) => {
 const getCardIdFromHash = (hash: string): OnboardingCardId | null =>
   (hash.split('?')[0].replace('#', '') as OnboardingCardId) || null;
 
-export const SiemMigrationsOnboardingBody = React.memo(() => {
+export const SiemMigrationsBody = React.memo(() => {
   const bodyConfig = siemMigrationsBodyConfig;
   const history = useHistory();
   const { hash } = useLocation();
@@ -141,4 +141,4 @@ export const SiemMigrationsOnboardingBody = React.memo(() => {
   );
 });
 
-SiemMigrationsOnboardingBody.displayName = 'SiemMigrationsOnboardingBody';
+SiemMigrationsBody.displayName = 'SiemMigrationsOnboardingBody';

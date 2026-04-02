@@ -13,7 +13,7 @@ import { useSpaceId } from '../common/hooks/use_space_id';
 import { CenteredLoadingSpinner } from '../common/components/centered_loading_spinner';
 import { OnboardingContextProvider } from '../onboarding/components/onboarding_context';
 import { HeaderPage } from '../common/components/header_page';
-import { SiemMigrationsOnboardingBody } from './components/onboarding_body';
+import { SiemMigrationsBody } from './components/body';
 
 const SIEM_MIGRATIONS_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.create.pageTitle',
@@ -35,7 +35,7 @@ export const SiemMigrationsCreatePage = () => {
         <HeaderPage title={<PageTitle title={SIEM_MIGRATIONS_PAGE_TITLE} />} border />
         <EuiSpacer size="xl" />
         <EuiPageBody restrictWidth>
-          <SiemMigrationsOnboardingBody />
+          <SiemMigrationsBody />
         </EuiPageBody>
       </SecuritySolutionPageWrapper>
     </OnboardingContextProvider>
