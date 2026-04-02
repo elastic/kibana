@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Method, AxiosRequestConfig } from 'axios';
-import axios from 'axios';
+// native fetch - no axios dependency
 
 export interface CiStatsClientConfig {
   baseUrl?: string;
@@ -58,9 +57,9 @@ export interface TestGroupRunOrderResponse {
 
 interface RequestOptions {
   path: string;
-  method?: Method;
-  params?: AxiosRequestConfig['params'];
-  body?: AxiosRequestConfig['data'];
+  method?: string;
+  params?: Record<string, string>;
+  body?: unknown;
   maxAttempts?: number;
 }
 
@@ -79,7 +78,7 @@ export class CiStatsClient {
   }
 
   createBuild = async () => {
-    const resp = await this.request<CiStatsBuild>({
+    return await this.request<CiStatsBuild>({
       method: 'POST',
       path: '/v1/build',
       body: {
@@ -92,8 +91,6 @@ export class CiStatsClient {
           : [],
       },
     });
-
-    return resp.data;
   };
 
   addGitInfo = async (buildId: string) => {
@@ -139,15 +136,13 @@ export class CiStatsClient {
   };
 
   getPrReport = async (buildId: string) => {
-    const resp = await this.request<CiStatsPrReport>({
+    return await this.request<CiStatsPrReport>({
       method: 'GET',
       path: `v2/pr_report`,
       params: {
         buildId,
       },
     });
-
-    return resp.data;
   };
 
   pickTestGroupRunOrder = async (body: {
@@ -182,33 +177,67 @@ export class CiStatsClient {
     console.log('requesting test group run order from ci-stats:');
     console.log(JSON.stringify(body, null, 2));
 
-    const resp = await axios.request<TestGroupRunOrderResponse>({
+    const url = `${this.baseUrl}/v2/_pick_test_group_run_order`;
+    const resp = await fetch(url, {
       method: 'POST',
-      baseURL: this.baseUrl,
-      headers: this.defaultHeaders,
-      url: '/v2/_pick_test_group_run_order',
-      data: body,
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.defaultHeaders,
+      },
+      body: JSON.stringify(body),
     });
 
-    return resp.data;
+    if (!resp.ok) {
+      throw new Error(`CI Stats request failed with status ${resp.status}`);
+    }
+
+    return (await resp.json()) as TestGroupRunOrderResponse;
   };
 
-  private async request<T>({ method, path, params, body, maxAttempts = 3 }: RequestOptions) {
+  private async request<T>({
+    method,
+    path,
+    params,
+    body,
+    maxAttempts = 3,
+  }: RequestOptions): Promise<T> {
     let attempt = 0;
 
     while (true) {
       attempt += 1;
       try {
-        return await axios.request<T>({
-          method,
-          baseURL: this.baseUrl,
-          url: path,
-          params,
-          data: body,
-          headers: this.defaultHeaders,
-        });
+        const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
+        const url = `${this.baseUrl}/${path.replace(/^\//, '')}${queryString}`;
+
+        const fetchOptions: RequestInit = {
+          method: method ?? 'GET',
+          headers: {
+            ...this.defaultHeaders,
+            ...(body ? { 'Content-Type': 'application/json' } : {}),
+          },
+        };
+
+        if (body) {
+          fetchOptions.body = JSON.stringify(body);
+        }
+
+        const resp = await fetch(url, fetchOptions);
+
+        if (!resp.ok) {
+          const errorBody = await resp.text();
+          let errorMessage: string | undefined;
+          try {
+            errorMessage = JSON.parse(errorBody)?.message;
+          } catch {
+            // ignore parse error
+          }
+          throw new Error(errorMessage ?? `Request failed with status ${resp.status}`);
+        }
+
+        const text = await resp.text();
+        return (text ? JSON.parse(text) : undefined) as T;
       } catch (error) {
-        console.error('CI Stats request error:', error?.response?.data?.message);
+        console.error('CI Stats request error:', (error as Error).message);
 
         if (attempt < maxAttempts) {
           const sec = attempt * 3;

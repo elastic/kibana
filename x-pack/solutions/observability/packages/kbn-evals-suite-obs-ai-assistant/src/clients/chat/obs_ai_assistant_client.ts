@@ -34,7 +34,6 @@ import {
 } from 'rxjs';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { isAxiosError } from 'axios';
 import { inspect } from 'util';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common/types';
@@ -70,8 +69,8 @@ function serializeAndHandleRetryableErrors<T extends StreamingChatResponseEvent>
 
           let status: number = 0;
 
-          if (isAxiosError(error)) {
-            status = error.status ?? 0;
+          if (error instanceof Error && 'status' in error) {
+            status = (error as any).status ?? 0;
           } else if (isHttpFetchError(error)) {
             status = error.response?.status ?? 0;
           }
@@ -82,12 +81,12 @@ function serializeAndHandleRetryableErrors<T extends StreamingChatResponseEvent>
 
           log.info('Caught retryable error');
 
-          if (isAxiosError(error)) {
+          if (error instanceof Error && 'status' in error) {
             log.error(
               inspect(
                 {
                   message: error.message,
-                  status: error.status,
+                  status: (error as any).status,
                 },
                 { depth: 10 }
               )

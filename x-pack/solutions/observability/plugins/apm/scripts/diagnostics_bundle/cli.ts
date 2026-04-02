@@ -10,7 +10,6 @@
 import { URL } from 'url';
 import datemath from '@elastic/datemath';
 import { errors } from '@elastic/elasticsearch';
-import axios, { AxiosError } from 'axios';
 import yargs from 'yargs';
 import { initDiagnosticsBundle } from './diagnostics_bundle';
 
@@ -129,8 +128,8 @@ async function init() {
     })
     .catch((err) => {
       process.exitCode = 1;
-      if (err instanceof AxiosError && err.response?.data) {
-        console.error(err.response.data);
+      if (isFetchResponseError(err) && err.responseData) {
+        console.error(err.responseData);
         return;
       }
 
@@ -156,6 +155,16 @@ function convertDate(dateString: string): number {
   throw new Error(`Incorrect argument: ${dateString}`);
 }
 
+interface FetchResponseError extends Error {
+  status?: number;
+  responseData?: unknown;
+  headers?: Record<string, string>;
+}
+
+function isFetchResponseError(e: unknown): e is FetchResponseError {
+  return e instanceof Error && 'responseData' in e;
+}
+
 async function getHostnameWithBasePath(kibanaHostname?: string) {
   if (!kibanaHostname) {
     return;
@@ -164,18 +173,18 @@ async function getHostnameWithBasePath(kibanaHostname?: string) {
   const parsedHostName = parseHostName(kibanaHostname);
 
   try {
-    await axios.get(parsedHostName, {
-      maxRedirects: 0,
+    const response = await fetch(parsedHostName, {
+      redirect: 'manual',
       headers: {
         'x-elastic-internal-origin': 'Kibana',
       },
     });
-  } catch (e) {
-    if (isAxiosError(e) && e.response?.status === 302) {
-      const location = e.response?.headers?.location ?? '';
+
+    if (response.status === 302) {
+      const location = response.headers.get('location') ?? '';
       return `${parsedHostName}${location}`;
     }
-
+  } catch (e) {
     throw e;
   }
 
@@ -190,8 +199,4 @@ function parseHostName(hostname: string) {
   // extract just the hostname in case user provided a full URL
   const parsedUrl = new URL(hostname);
   return parsedUrl.origin;
-}
-
-export function isAxiosError(e: AxiosError | Error): e is AxiosError {
-  return 'isAxiosError' in e;
 }

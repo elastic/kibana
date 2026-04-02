@@ -193,6 +193,17 @@ const DEV_PATTERNS = [
 ];
 
 /** Restricted imports with suggested alternatives */
+/**
+ * axios restriction kept separate so connector-framework overrides can exclude it.
+ * Remove once ConnectorHttpClient migration (Phase 1) is complete.
+ */
+const AXIOS_RESTRICTION = {
+  name: 'axios',
+  message:
+    'axios is deprecated. Use native fetch instead. ' +
+    'For connectors framework code, this restriction will be lifted once ConnectorHttpClient is available.',
+};
+
 const RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
@@ -942,7 +953,7 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
-        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        'no-restricted-imports': ['error', AXIOS_RESTRICTION, ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
           'error',
@@ -2876,6 +2887,23 @@ module.exports = {
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
           },
         ],
+      },
+    },
+    /**
+     * Temporarily allow axios imports in the connectors framework directories.
+     * This MUST be the last override that sets no-restricted-imports so that
+     * last-match-wins removes the axios restriction for these paths.
+     * Remove once ConnectorHttpClient migration (Phase 1) is complete.
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/actions/server/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_connectors/server/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-connector-specs/src/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
       },
     },
   ],

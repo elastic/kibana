@@ -5,7 +5,6 @@
  * 2.0.
  */
 import Path from 'path';
-import axios, { type AxiosRequestConfig } from 'axios';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
@@ -24,8 +23,7 @@ import {
   eventually,
   setupTestServers,
   removeFile,
-  mockAxiosGet,
-  mockAxiosPost,
+  mockFetchPost,
   DEFAULT_GET_ROUTES,
 } from './lib/helpers';
 import {
@@ -65,16 +63,19 @@ import type { ITelemetryReceiver, TelemetryReceiver } from '../lib/telemetry/rec
 import type { TaskMetric } from '../lib/telemetry/task_metrics.types';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 
-jest.mock('axios');
-
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 const securitySolutionStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
-const mockedAxiosGet = jest.spyOn(axios, 'get');
-const mockedAxiosPost = jest.spyOn(axios, 'post');
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 const securitySolutionPlugin = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
+
+/** Returns only the POST fetch calls */
+const getPostCalls = () =>
+  mockedFetch.mock.calls.filter(([_url, init]) => {
+    return init && (init as RequestInit).method === 'POST';
+  }) as [string, RequestInit][];
 
 type Defer = () => void;
 
@@ -143,8 +144,7 @@ describe('telemetry tasks', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockAxiosPost(mockedAxiosPost);
-    mockAxiosGet(mockedAxiosGet, [
+    mockFetchPost(mockedFetch, undefined, [
       ...DEFAULT_GET_ROUTES,
       [
         /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -186,13 +186,13 @@ describe('telemetry tasks', () => {
 
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
-        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+        const found = getPostCalls().find(([url]) => {
           return url.startsWith(ENDPOINT_STAGING) && url.endsWith('security-lists-v2');
         });
 
         expect(found).not.toBeFalsy();
 
-        return JSON.parse((found ? found[1] : '{}') as string);
+        return JSON.parse((found ? (found[1] as RequestInit).body : '{}') as string);
       });
 
       expect(body).not.toBeFalsy();
@@ -221,15 +221,14 @@ describe('telemetry tasks', () => {
       requests.forEach((r) => {
         expect(r.requestConfig).not.toBeFalsy();
         if (r.requestConfig && r.requestConfig.headers) {
-          expect(r.requestConfig.headers['X-Telemetry-Sender']).not.toEqual('async');
+          const headers = r.requestConfig.headers as Record<string, string>;
+          expect(headers['X-Telemetry-Sender']).not.toEqual('async');
         }
       });
     });
 
     it('should use new sender when configured', async () => {
-      mockAxiosPost(mockedAxiosPost);
-
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchPost(mockedFetch, undefined, [
         ...DEFAULT_GET_ROUTES,
         [
           /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -246,7 +245,8 @@ describe('telemetry tasks', () => {
       requests.forEach((r) => {
         expect(r.requestConfig).not.toBeFalsy();
         if (r.requestConfig && r.requestConfig.headers) {
-          expect(r.requestConfig.headers['X-Telemetry-Sender']).toEqual('async');
+          const headers = r.requestConfig.headers as Record<string, string>;
+          expect(headers['X-Telemetry-Sender']).toEqual('async');
         }
       });
     });
@@ -254,8 +254,7 @@ describe('telemetry tasks', () => {
     it('should update sender queue config', async () => {
       const expectedConfig = fakeBufferAndSizesConfigWithQueues.sender_channels['task-metrics'];
 
-      mockAxiosPost(mockedAxiosPost);
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchPost(mockedFetch, undefined, [
         ...DEFAULT_GET_ROUTES,
         [
           /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -293,13 +292,13 @@ describe('telemetry tasks', () => {
 
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
-        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+        const found = getPostCalls().find(([url]) => {
           return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
         });
 
         expect(found).not.toBeFalsy();
 
-        return JSON.parse((found ? found[1] : '{}') as string);
+        return JSON.parse((found ? (found[1] as RequestInit).body : '{}') as string);
       });
 
       expect(body).not.toBeFalsy();
@@ -311,13 +310,13 @@ describe('telemetry tasks', () => {
 
       // wait until the events are sent to the telemetry server
       const body = await eventually(async () => {
-        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+        const found = getPostCalls().find(([url]) => {
           return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TelemetryChannel.ENDPOINT_ALERTS);
         });
 
         expect(found).not.toBeFalsy();
 
-        return JSON.parse((found ? found[1] : '{}') as string);
+        return JSON.parse((found ? (found[1] as RequestInit).body : '{}') as string);
       });
 
       expect(body).not.toBeFalsy();
@@ -755,7 +754,7 @@ describe('telemetry tasks', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function getEndpointMetaRequests(atLeast: number = 1): Promise<any[]> {
     return eventually(async () => {
-      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+      const found = getPostCalls().filter(([url]) => {
         return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_ENDPOINT_META);
       });
 
@@ -763,7 +762,7 @@ describe('telemetry tasks', () => {
       expect(found.length).toBeGreaterThanOrEqual(atLeast);
 
       return (found ?? []).flatMap((req) => {
-        const ndjson = req[1] as string;
+        const ndjson = (req[1] as RequestInit).body as string;
         return ndjson
           .split('\n')
           .filter((l) => l.trim().length > 0)
@@ -777,7 +776,7 @@ describe('telemetry tasks', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function getAlertsDetectionsRequests(atLeast: number = 1): Promise<any[]> {
     return eventually(async () => {
-      const found = mockedAxiosPost.mock.calls.filter(([url]) => {
+      const found = getPostCalls().filter(([url]) => {
         return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_DETECTION_ALERTS);
       });
 
@@ -785,7 +784,7 @@ describe('telemetry tasks', () => {
       expect(found.length).toBeGreaterThanOrEqual(atLeast);
 
       return (found ?? []).flatMap((req) => {
-        const ndjson = req[1] as string;
+        const ndjson = (req[1] as RequestInit).body as string;
         return ndjson
           .split('\n')
           .filter((l) => l.trim().length > 0)
@@ -866,14 +865,15 @@ describe('telemetry tasks', () => {
   ): Promise<
     Array<{
       taskMetric: TaskMetric;
-      requestConfig: AxiosRequestConfig<unknown> | undefined;
+      requestConfig: RequestInit | undefined;
     }>
   > {
     const taskType = getTelemetryTaskType(task);
     return eventually(async () => {
-      const calls = mockedAxiosPost.mock.calls.flatMap(([url, data, config]) => {
-        return (data as string).split('\n').map((body) => {
-          return { url, body, config };
+      const calls = getPostCalls().flatMap(([url, init]) => {
+        const reqInit = init as RequestInit;
+        return (reqInit.body as string).split('\n').map((body) => {
+          return { url, body, config: reqInit };
         });
       });
 

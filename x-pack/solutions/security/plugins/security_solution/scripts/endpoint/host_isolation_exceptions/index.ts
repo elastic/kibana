@@ -15,7 +15,6 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { KbnClient } from '@kbn/test';
-import type { AxiosError } from 'axios';
 import { HostIsolationExceptionGenerator } from '../../../common/endpoint/data_generators/host_isolation_exception_generator';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
@@ -53,15 +52,18 @@ class HostIsolationExceptionDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
+const handleThrowAxiosHttpError = (err: Error & Record<string, unknown>): never => {
   let message = err.message;
+  const response = err.response as
+    | { status?: number; data?: { message?: string }; config?: { method?: string; url?: string } }
+    | undefined;
 
-  if (err.response) {
-    message = `[${err.response.status}] ${err.response.data.message ?? err.message} [ ${String(
-      err.response.config.method
-    ).toUpperCase()} ${err.response.config.url} ]`;
+  if (response) {
+    message = `[${response.status}] ${response.data?.message ?? err.message} [ ${String(
+      response.config?.method
+    ).toUpperCase()} ${response.config?.url} ]`;
   }
-  throw new HostIsolationExceptionDataLoaderError(message, err.toJSON());
+  throw new HostIsolationExceptionDataLoaderError(message, err);
 };
 
 const createHostIsolationException: RunFn = async ({ flags, log }) => {

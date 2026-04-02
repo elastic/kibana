@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import type { RuleType, RuleTypeParams, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { DEFAULT_AAD_CONFIG, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
@@ -81,10 +80,12 @@ export const ruleType: RuleType<
     }
     const { outerSpaceCapacity, craft: craftToTriggerBy, op } = params;
 
-    const response = await axios.get<PeopleInSpace>('http://api.open-notify.org/astros.json');
-    const {
-      data: { number: peopleInSpace, people = [] },
-    } = response;
+    const response = await fetch('http://api.open-notify.org/astros.json');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch astros data: ${response.status} ${response.statusText}`);
+    }
+    const data: PeopleInSpace = await response.json();
+    const { number: peopleInSpace, people = [] } = data;
 
     const peopleInCraft = people.filter(getCraftFilter(craftToTriggerBy));
 

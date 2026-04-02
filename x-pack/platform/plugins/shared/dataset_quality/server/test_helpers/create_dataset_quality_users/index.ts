@@ -101,7 +101,6 @@ async function getIsCredentialsValid({
       elasticsearch,
       kibana,
       options: {
-        validateStatus: (status) => status >= 200 && status < 400,
         url: `/`,
       },
     });

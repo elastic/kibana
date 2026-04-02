@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import Axios from 'axios';
 import { createHash } from 'crypto';
 import { mkdir, open } from 'fs/promises';
 import { writeSync } from 'fs';
 import { dirname } from 'path';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 import { finished } from 'stream/promises';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 import type { Logger } from '@kbn/core/server';
 
 /**
@@ -25,18 +25,24 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
   await mkdir(dirname(path), { recursive: true });
   const handle = await open(path, 'w');
   try {
-    const response = await Axios.request<Readable>({
-      url,
-      method: 'GET',
-      responseType: 'stream',
-    });
+    const response = await globalThis.fetch(url, { method: 'GET' });
 
-    response.data.on('data', (chunk: Buffer) => {
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('Response body is empty');
+    }
+
+    const nodeStream = Readable.fromWeb(response.body as WebReadableStream);
+
+    nodeStream.on('data', (chunk: Buffer) => {
       writeSync(handle.fd, chunk);
       hash.update(chunk);
     });
 
-    await finished(response.data);
+    await finished(nodeStream);
     logger?.info(`Downloaded ${url}`);
   } catch (error) {
     logger?.error(error);

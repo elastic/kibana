@@ -7,11 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import axios from 'axios';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { API_BASE_PATH } from '../../common/constants';
-import { CloudConnectClient } from '../services/cloud_connect_client';
+import { CloudConnectClient, isFetchResponseError } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
 import { createStorageService } from '../lib/create_storage_service';
@@ -181,9 +180,9 @@ export const registerAuthenticateRoute = ({
       } catch (error) {
         logger.error('Failed to authenticate with Cloud Connect', { error });
 
-        if (axios.isAxiosError(error)) {
-          const status = error.response?.status;
-          const errorData = error.response?.data;
+        if (isFetchResponseError(error)) {
+          const status = error.status;
+          const errorData = error.data as Record<string, unknown> | undefined;
 
           if (status === 401) {
             return response.unauthorized({
@@ -205,7 +204,7 @@ export const registerAuthenticateRoute = ({
           if (status === 400) {
             return response.badRequest({
               body: {
-                message: errorData?.message || 'Invalid request',
+                message: (errorData?.message as string) || 'Invalid request',
               },
             });
           }

@@ -8,18 +8,20 @@
 import type { ChildProcess } from 'child_process';
 import { spawn } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import { Manager } from './resource_manager';
 import { getLatestVersion } from './artifact_manager';
 import type { AgentManagerParams } from './agent';
+
+export interface RequestOptions {
+  headers: Record<string, string>;
+}
 
 export class FleetManager extends Manager {
   private fleetProcess?: ChildProcess;
   private config: AgentManagerParams;
   private log: ToolingLog;
-  private requestOptions: AxiosRequestConfig;
-  constructor(config: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
+  private requestOptions: RequestOptions;
+  constructor(config: AgentManagerParams, log: ToolingLog, requestOptions: RequestOptions) {
     super();
     this.config = config;
     this.log = log;
@@ -29,31 +31,49 @@ export class FleetManager extends Manager {
     this.log.info('Setting fleet up');
     return new Promise(async (res, rej) => {
       try {
-        const response = await axios.post(
+        const serviceTokenResponse = await fetch(
           `${this.config.kibanaUrl}/api/fleet/service_tokens`,
-          {},
-          this.requestOptions
+          {
+            method: 'POST',
+            body: JSON.stringify({}),
+            headers: {
+              'content-type': 'application/json',
+              ...this.requestOptions.headers,
+            },
+          }
         );
-        const serviceToken = response.data.value;
+        if (!serviceTokenResponse.ok) {
+          throw new Error(
+            `Failed to create service token: ${serviceTokenResponse.status} ${serviceTokenResponse.statusText}`
+          );
+        }
+        const serviceTokenData = await serviceTokenResponse.json();
+        const serviceToken = serviceTokenData.value;
         const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestVersion()}`;
         this.log.info(artifact);
 
         // default fleet server policy no longer created by default
-        const {
-          data: {
-            item: { id: policyId },
-          },
-        } = await axios.post(
-          `${this.config.kibanaUrl}/api/fleet/agent_policies`,
-          {
+        const policyResponse = await fetch(`${this.config.kibanaUrl}/api/fleet/agent_policies`, {
+          method: 'POST',
+          body: JSON.stringify({
             name: 'Fleet Server policy',
             description: '',
             namespace: 'default',
             monitoring_enabled: [],
             has_fleet_server: true,
+          }),
+          headers: {
+            'content-type': 'application/json',
+            ...this.requestOptions.headers,
           },
-          this.requestOptions
-        );
+        });
+        if (!policyResponse.ok) {
+          throw new Error(
+            `Failed to create agent policy: ${policyResponse.status} ${policyResponse.statusText}`
+          );
+        }
+        const policyData = await policyResponse.json();
+        const policyId = policyData.item.id;
 
         const host = 'host.docker.internal';
 

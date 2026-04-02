@@ -10,11 +10,11 @@
 import { openSync, writeSync, unlinkSync, closeSync, statSync } from 'fs';
 import { dirname } from 'path';
 import { setTimeout } from 'timers/promises';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 
 import chalk from 'chalk';
 import { createHash } from 'crypto';
-import Axios from 'axios';
-import { isAxiosResponseError } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { mkdirp } from './fs';
@@ -72,11 +72,7 @@ export async function downloadToDisk({
         skipChecksumCheck ? '' : chalk.dim(shaAlgorithm)
       );
 
-      const response = await Axios.request({
-        url,
-        responseType: 'stream',
-        adapter: 'http',
-      });
+      const response = await fetch(url);
 
       if (response.status !== 200) {
         throw new Error(`Unexpected status code ${response.status} when downloading ${url}`);
@@ -85,8 +81,10 @@ export async function downloadToDisk({
       const hash = createHash(shaAlgorithm);
       let bytesWritten = 0;
 
+      const nodeStream = Readable.fromWeb(response.body! as unknown as WebReadableStream);
+
       await new Promise<void>((resolve, reject) => {
-        response.data.on('data', (chunk: Buffer) => {
+        nodeStream.on('data', (chunk: Buffer) => {
           if (!skipChecksumCheck) {
             hash.update(chunk);
           }
@@ -95,8 +93,8 @@ export async function downloadToDisk({
           bytesWritten += bytes;
         });
 
-        response.data.on('error', reject);
-        response.data.on('end', () => {
+        nodeStream.on('error', reject);
+        nodeStream.on('end', () => {
           if (bytesWritten === 0) {
             return reject(new Error(`No bytes written when downloading ${url}`));
           }
@@ -165,19 +163,28 @@ export async function downloadToString({
       attempt += 1;
       log.debug(`[${attempt}/${maxAttempts}] Attempting download to string of [${url}]`);
 
-      const resp = await Axios.request<string>({
-        url,
-        method: 'GET',
-        adapter: 'http',
-        responseType: 'text',
-        validateStatus: !expectStatus ? undefined : (status) => status === expectStatus,
-      });
+      const resp = await fetch(url);
 
+      if (expectStatus && resp.status !== expectStatus) {
+        const body = await resp.text();
+        const error = new Error(`Request failed with status code ${resp.status}`);
+        (error as any).response = { status: resp.status, statusText: resp.statusText, data: body };
+        throw error;
+      }
+
+      if (!resp.ok) {
+        const body = await resp.text();
+        const error = new Error(`Request failed with status code ${resp.status}`);
+        (error as any).response = { status: resp.status, statusText: resp.statusText, data: body };
+        throw error;
+      }
+
+      const data = await resp.text();
       log.success(`Downloaded [${url}]`);
-      return resp.data;
+      return data;
     } catch (error) {
       log.warning(`Download failed: ${error.message}`);
-      if (isAxiosResponseError(error)) {
+      if (error.response && error.response.status !== undefined) {
         log.debug(
           `[${error.response.status}/${error.response.statusText}] response: ${error.response.data}`
         );

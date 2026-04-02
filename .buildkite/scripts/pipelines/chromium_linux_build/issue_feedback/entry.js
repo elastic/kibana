@@ -12,7 +12,7 @@ const { readFileSync, createWriteStream } = require('fs');
 const assert = require('assert');
 const { execFile } = require('child_process');
 const { finished } = require('stream').promises;
-const axios = require('axios');
+const { Readable } = require('stream');
 const fg = require('fast-glob');
 const AdmZip = require('adm-zip');
 
@@ -158,9 +158,15 @@ const getSha256Hash = async (filePath) => {
 
   process.chdir('chromium');
 
-  const response = await axios.get(
+  const response = await fetch(
     'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json'
   );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch known good versions: ${response.status} ${response.statusText}`
+    );
+  }
 
   /**
    * @description list of known good versions of chromium provided by google
@@ -169,7 +175,7 @@ const getSha256Hash = async (filePath) => {
    *  versions: VersionDefinition[]
    * }}
    */
-  const { versions } = response.data;
+  const { versions } = await response.json();
 
   const chromiumVersion = await $('buildkite-agent', ['meta-data', 'get', 'chromium_version'], {
     printToScreen: true,
@@ -204,13 +210,20 @@ const getSha256Hash = async (filePath) => {
 
         const url = new URL(download.url);
 
-        const downloadResponse = await axios.get(url.toString(), { responseType: 'stream' });
+        const downloadResponse = await fetch(url.toString());
+
+        if (!downloadResponse.ok) {
+          throw new Error(
+            `Failed to download ${url}: ${downloadResponse.status} ${downloadResponse.statusText}`
+          );
+        }
 
         const downloadFileName = parse(url.pathname).base;
 
-        downloadResponse.data.pipe(createWriteStream(downloadFileName));
+        const nodeStream = Readable.fromWeb(downloadResponse.body);
+        nodeStream.pipe(createWriteStream(downloadFileName));
 
-        await finished(downloadResponse.data);
+        await finished(nodeStream);
 
         console.log(`---Extracting and computing checksum for ${downloadFileName}\n`);
 

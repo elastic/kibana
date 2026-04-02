@@ -9,8 +9,6 @@
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import type {
   APMIndices,
   APIReturnType as SourcesAPIReturnType,
@@ -19,6 +17,29 @@ import type { APIReturnType } from '../../public/services/rest/create_call_apm_a
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
+
+interface KbnClientOpts {
+  baseURL?: string;
+  auth?: { username: string; password: string };
+  headers: Record<string, string>;
+}
+
+async function kbnFetch<T>(path: string, opts: KbnClientOpts): Promise<T> {
+  const url = `${opts.baseURL ?? ''}${path}`;
+  const headers: Record<string, string> = { ...opts.headers };
+  if (opts.auth) {
+    headers.Authorization = `Basic ${Buffer.from(
+      `${opts.auth.username}:${opts.auth.password}`
+    ).toString('base64')}`;
+  }
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`Request to ${path} failed with status ${response.status}: ${errorText}`);
+  }
+  return (await response.json()) as T;
+}
 
 export async function initDiagnosticsBundle({
   esHost,
@@ -42,7 +63,7 @@ export async function initDiagnosticsBundle({
   apiKey?: string;
 }) {
   const auth = username && password ? { username, password } : undefined;
-  const apiKeyHeader = apiKey ? { Authorization: `ApiKey ${apiKey}` } : {};
+  const apiKeyHeader: Record<string, string> = apiKey ? { Authorization: `ApiKey ${apiKey}` } : {};
   const parsedCloudId = parseCloudId(cloudId);
 
   const esClient = new Client({
@@ -54,9 +75,8 @@ export async function initDiagnosticsBundle({
     requestTimeout: 30_000,
   });
 
-  const kibanaClientOpts = {
+  const kibanaClientOpts: KbnClientOpts = {
     baseURL: kbHost ?? parsedCloudId.kibanaHost,
-    allowAbsoluteUrls: false,
     auth,
     headers: {
       'kbn-xsrf': 'true',
@@ -90,28 +110,25 @@ async function saveReportToFile(combinedReport: DiagnosticsBundle) {
   console.log(`Diagnostics report written to "${filename}"`);
 }
 
-async function getApmIndices(kbnClientOpts: AxiosRequestConfig): Promise<APMIndices> {
+async function getApmIndices(kbnClientOpts: KbnClientOpts): Promise<APMIndices> {
   type Response = SourcesAPIReturnType<'GET /internal/apm-sources/settings/apm-indices'>;
-
-  const res = await axios.get<Response>(
-    '/internal/apm-sources/settings/apm-indices',
-    kbnClientOpts
-  );
-
-  return res.data;
+  return kbnFetch<Response>('/internal/apm-sources/settings/apm-indices', kbnClientOpts);
 }
 
-async function getFleetPackageInfo(kbnClientOpts: AxiosRequestConfig) {
-  const res = await axios.get('/api/fleet/epm/packages/apm', kbnClientOpts);
+async function getFleetPackageInfo(kbnClientOpts: KbnClientOpts) {
+  const data = await kbnFetch<{ item: { version: string; status: string } }>(
+    '/api/fleet/epm/packages/apm',
+    kbnClientOpts
+  );
   return {
-    version: res.data.item.version,
-    isInstalled: res.data.item.status,
+    version: data.item.version,
+    isInstalled: data.item.status === 'installed',
   };
 }
 
-async function getKibanaVersion(kbnClientOpts: AxiosRequestConfig) {
-  const res = await axios.get('/api/status', kbnClientOpts);
-  return res.data.version.number;
+async function getKibanaVersion(kbnClientOpts: KbnClientOpts) {
+  const data = await kbnFetch<{ version: { number: string } }>('/api/status', kbnClientOpts);
+  return data.version.number;
 }
 
 function parseCloudId(cloudId?: string) {

@@ -6,8 +6,7 @@
  */
 
 import type { Elasticsearch, Kibana } from '../create_apm_users';
-import { AbortError } from './call_kibana';
-import { callKibana, isAxiosError } from './call_kibana';
+import { AbortError, callKibana, isKibanaError } from './call_kibana';
 
 export async function getKibanaVersion({
   elasticsearch,
@@ -27,19 +26,19 @@ export async function getKibanaVersion({
     });
     return res.version.number;
   } catch (e) {
-    if (isAxiosError(e)) {
-      switch (e.response?.status) {
+    if (isKibanaError(e)) {
+      switch (e.status) {
         case 401:
           throw new AbortError(
-            `Could not access Kibana with the provided credentials. Username: "${e.config?.auth?.username}". Password: "${e.config?.auth?.password}"`
+            `Could not access Kibana with the provided credentials. Username: "${elasticsearch.username}". Password: "${elasticsearch.password}"`
           );
 
         case 404:
-          throw new AbortError(`Could not get version on ${e.config?.url} (Code: 404)`);
+          throw new AbortError(`Could not get version on ${kibana.hostname} (Code: 404)`);
 
         default:
           throw new AbortError(
-            `Cannot access Kibana on ${e.config?.baseURL}. Please specify Kibana with: "--kibana-url <url>"`
+            `Cannot access Kibana on ${kibana.hostname}. Please specify Kibana with: "--kibana-url <url>"`
           );
       }
     }

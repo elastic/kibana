@@ -30,8 +30,7 @@ import {
   fleetServerHostsRoutesService,
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
-import axios from 'axios';
-import * as https from 'https';
+import { Agent } from 'undici';
 import {
   CA_TRUSTED_FINGERPRINT,
   FLEET_SERVER_CERT_PATH,
@@ -745,23 +744,20 @@ export const isFleetServerRunning = async (
   const url = new URL(fleetServerUrl);
   url.pathname = '/api/status';
 
+  const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
+
   return pRetry(
     async () => {
-      return axios
-        .request({
-          method: 'GET',
-          url: url.toString(),
-          responseType: 'json',
-          // Custom agent to ensure we don't get cert errors
-          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-        })
-        .then((response) => {
-          log.debug(
-            `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
-            response.data
-          );
-        })
-        .catch(catchAxiosErrorFormatAndThrow);
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        // @ts-expect-error dispatcher is a valid undici option for fetch
+        dispatcher,
+      });
+      if (!response.ok) {
+        throw new Error(`Fleet server returned status ${response.status}`);
+      }
+      const data = await response.json();
+      log.debug(`Fleet server is up and running at [${fleetServerUrl}]. Status: `, data);
     },
     {
       maxTimeout: 10000,

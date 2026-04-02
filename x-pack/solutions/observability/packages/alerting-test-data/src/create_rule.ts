@@ -5,17 +5,30 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { HEADERS, PASSWORD, USERNAME } from './constants';
 import { getKibanaUrl } from './get_kibana_url';
 
 export const createRule = async (ruleParams: any) => {
   const RULE_CREATION_API = `${await getKibanaUrl()}/api/alerting/rule`;
-  return axios.post(RULE_CREATION_API, ruleParams, {
-    headers: HEADERS,
-    auth: {
-      username: USERNAME,
-      password: PASSWORD,
+  const basicAuth = Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64');
+
+  const response = await fetch(RULE_CREATION_API, {
+    method: 'POST',
+    body: JSON.stringify(ruleParams),
+    headers: {
+      'content-type': 'application/json',
+      ...HEADERS,
+      Authorization: `Basic ${basicAuth}`,
     },
   });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`Failed to create rule: ${response.status} ${errorText}`);
+  }
+
+  return {
+    status: response.status,
+    data: await response.json(),
+  };
 };

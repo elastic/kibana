@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import https from 'https';
-
 import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import pRetry, { type FailedAttemptError } from 'p-retry';
 import { pick } from 'lodash';
 
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import axios from 'axios';
+import { Agent } from 'undici';
 
 import apm from 'elastic-apm-node';
 
@@ -61,6 +58,24 @@ import {
 } from '../../../common/constants/agentless';
 import { agentPolicyService } from '../agent_policy';
 
+interface FetchRequestConfig {
+  url: string;
+  method: string;
+  data?: Record<string, unknown>;
+  params?: Record<string, unknown>;
+  headers?: Record<string, string | undefined>;
+  dispatcher?: Agent;
+}
+
+interface FetchResponseError extends Error {
+  response?: {
+    status: number;
+    data?: Record<string, unknown>;
+  };
+  request?: boolean;
+  code?: string;
+}
+
 interface AgentlessAgentErrorHandlingMessages {
   [key: string]: {
     [key: string]: {
@@ -79,8 +94,10 @@ export interface AgentlessAgentService {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentlessAgentPolicy: AgentPolicy
-  ): Promise<AxiosResponse<AgentlessApiDeploymentResponse> | void>;
-  deleteAgentlessAgent(agentlessPolicyId: string): Promise<AxiosResponse | void>;
+  ): Promise<{ status: number; data: AgentlessApiDeploymentResponse } | void>;
+  deleteAgentlessAgent(
+    agentlessPolicyId: string
+  ): Promise<{ status: number; data: unknown } | void>;
 }
 
 class AgentlessAgentServiceImpl implements AgentlessAgentService {
@@ -171,27 +188,29 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     );
     const policyDetails = await this.getPolicyDetails(soClient, fullPolicy);
 
-    const requestConfig: AxiosRequestConfig = {
-      url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
-      data: {
-        policy_id: agentlessAgentPolicy.id,
-        fleet_url: fleetUrl,
-        fleet_token: fleetToken,
-        resources: agentlessAgentPolicy.agentless?.resources,
-        cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
-        labels,
-        secrets,
-        policy_details: policyDetails,
-        agent_policy: fullPolicy,
-      },
-      method: 'POST',
-      ...this.getHeaders(tlsConfig, traceId),
+    const requestData: Record<string, unknown> = {
+      policy_id: agentlessAgentPolicy.id,
+      fleet_url: fleetUrl,
+      fleet_token: fleetToken,
+      resources: agentlessAgentPolicy.agentless?.resources,
+      cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
+      labels,
+      secrets,
+      policy_details: policyDetails,
+      agent_policy: fullPolicy,
     };
 
     const cloudSetup = appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
-      requestConfig.data.stack_version = appContextService.getKibanaVersion();
+      requestData.stack_version = appContextService.getKibanaVersion();
     }
+
+    const requestConfig: FetchRequestConfig = {
+      url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
+      data: requestData,
+      method: 'POST',
+      ...this.getHeaders(tlsConfig, traceId),
+    };
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
 
@@ -199,22 +218,25 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await pRetry(() => axios<AgentlessApiDeploymentResponse>(requestConfig), {
-      retries: MAXIMUM_RETRIES,
-      minTimeout: 0,
-      maxTimeout: 100,
-      onFailedAttempt: (error: FailedAttemptError) => {
-        if (!this.isErrorRetryable(error as unknown as AxiosError)) {
-          throw error;
-        }
-        if (error.retriesLeft > 0) {
-          logger.warn(
-            `[Agentless API] Retrying creating agentless agent ${agentlessAgentPolicy.id}`,
-            { error }
-          );
-        }
-      },
-    }).catch((error: Error | AxiosError) => {
+    const response = await pRetry(
+      () => this.fetchRequest<AgentlessApiDeploymentResponse>(requestConfig),
+      {
+        retries: MAXIMUM_RETRIES,
+        minTimeout: 0,
+        maxTimeout: 100,
+        onFailedAttempt: (error: FailedAttemptError) => {
+          if (!this.isErrorRetryable(error as unknown as FetchResponseError)) {
+            throw error;
+          }
+          if (error.retriesLeft > 0) {
+            logger.warn(
+              `[Agentless API] Retrying creating agentless agent ${agentlessAgentPolicy.id}`,
+              { error }
+            );
+          }
+        },
+      }
+    ).catch((error: Error | FetchResponseError) => {
       this.catchAgentlessApiError(
         'create',
         error,
@@ -236,7 +258,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
-    const requestConfig = {
+    const requestConfig: FetchRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(
         agentlessConfig,
         `/deployments/${agentlessPolicyId}`
@@ -273,7 +295,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       `[Agentless API] Deleting agentless deployment with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios(requestConfig).catch((error: AxiosError) => {
+    const response = await this.fetchRequest(requestConfig).catch((error: FetchResponseError) => {
       this.catchAgentlessApiError(
         'delete',
         error,
@@ -302,7 +324,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     logger.info(
       `[Agentless API] Call Agentless API endpoint ${urlEndpoint} to upgrade agentless deployment`
     );
-    const requestConfig = {
+    const requestConfig: FetchRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, `/deployments/${policyId}`),
       method: 'PUT',
       data: {
@@ -339,19 +361,21 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       `[Agentless API] Upgrade agentless deployment with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios(requestConfig).catch(async (error: AxiosError) => {
-      await this.handleErrorsWithRetries(
-        error,
-        requestConfig,
-        'upgrade',
-        logger,
-        MAXIMUM_RETRIES,
-        policyId,
-        requestConfigDebugStatus,
-        errorMetadata,
-        traceId
-      );
-    });
+    const response = await this.fetchRequest(requestConfig).catch(
+      async (error: FetchResponseError) => {
+        await this.handleErrorsWithRetries(
+          error,
+          requestConfig,
+          'upgrade',
+          logger,
+          MAXIMUM_RETRIES,
+          policyId,
+          requestConfigDebugStatus,
+          errorMetadata,
+          traceId
+        );
+      }
+    );
 
     return response;
   }
@@ -362,7 +386,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
-    const requestConfig: AxiosRequestConfig = {
+    const requestConfig: FetchRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       method: 'GET',
       params: {
@@ -398,7 +422,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       `[Agentless API] Listing agentless deployments with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios(requestConfig).catch((error: AxiosError) => {
+    const response = await this.fetchRequest<AgentlessApiListDeploymentResponse>(
+      requestConfig
+    ).catch((error: FetchResponseError) => {
       this.catchAgentlessApiError(
         'list',
         error,
@@ -412,6 +438,73 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     });
 
     return response.data;
+  }
+
+  private async fetchRequest<T = unknown>(
+    requestConfig: FetchRequestConfig
+  ): Promise<{ status: number; data: T }> {
+    let url = requestConfig.url;
+    if (requestConfig.params) {
+      const searchParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(requestConfig.params)) {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      }
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url = `${url}?${queryString}`;
+      }
+    }
+
+    const fetchOptions: RequestInit & { dispatcher?: Agent } = {
+      method: requestConfig.method,
+      headers: requestConfig.headers as Record<string, string>,
+    };
+
+    if (requestConfig.data && requestConfig.method !== 'GET') {
+      fetchOptions.body = JSON.stringify(requestConfig.data);
+    }
+
+    if (requestConfig.dispatcher) {
+      fetchOptions.dispatcher = requestConfig.dispatcher;
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(url, fetchOptions);
+    } catch (err) {
+      const fetchError: FetchResponseError = new Error(
+        err instanceof Error ? err.message : String(err)
+      );
+      fetchError.request = true;
+      fetchError.code = (err as NodeJS.ErrnoException)?.code;
+      if (err instanceof Error) {
+        fetchError.cause = err.cause;
+      }
+      throw fetchError;
+    }
+
+    let data: T;
+    try {
+      data = (await response.json()) as T;
+    } catch {
+      data = {} as T;
+    }
+
+    if (!response.ok) {
+      const fetchError: FetchResponseError = new Error(
+        `Request failed with status ${response.status}`
+      );
+      fetchError.response = {
+        status: response.status,
+        data: data as unknown as Record<string, unknown>,
+      };
+      fetchError.request = true;
+      throw fetchError;
+    }
+
+    return { status: response.status, data };
   }
 
   private getAgentlessSecrets() {
@@ -436,11 +529,13 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         'X-Request-ID': traceId,
         'x-elastic-internal-origin': 'Kibana',
       },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: tlsConfig.rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
+      dispatcher: new Agent({
+        connect: {
+          rejectUnauthorized: tlsConfig.rejectUnauthorized,
+          cert: tlsConfig.certificate,
+          key: tlsConfig.key,
+          ca: tlsConfig.certificateAuthorities as string | string[] | undefined,
+        },
       }),
     };
   }
@@ -517,12 +612,12 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     return { fleetUrl, fleetToken };
   }
 
-  private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
+  private createRequestConfigDebug(requestConfig: FetchRequestConfig) {
     return JSON.stringify({
       ...requestConfig,
       data: {
         ...pick(
-          requestConfig.data,
+          requestConfig.data ?? {},
           'policy_id',
           'fleet_url',
           'labels',
@@ -532,24 +627,24 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
       },
-      httpsAgent: {
-        ...requestConfig.httpsAgent,
-        options: {
-          ...requestConfig.httpsAgent.options,
-          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
-        },
-      },
+      dispatcher: requestConfig.dispatcher
+        ? {
+            options: {
+              cert: 'REDACTED',
+              key: 'REDACTED',
+              ca: 'REDACTED',
+            },
+          }
+        : undefined,
     });
   }
 
   private catchAgentlessApiError(
     action: 'create' | 'delete' | 'upgrade' | 'list',
-    error: Error | AxiosError,
+    error: Error | FetchResponseError,
     logger: Logger,
     agentlessPolicyId: string | undefined,
-    requestConfig: AxiosRequestConfig,
+    requestConfig: FetchRequestConfig,
     requestConfigDebugStatus: string,
     errorMetadata: LogMeta,
     traceId?: string
@@ -563,23 +658,25 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       },
     };
 
-    const errorLogCodeCause = (axiosError: AxiosError) =>
-      `${axiosError.code}  ${this.convertCauseErrorsToString(axiosError)}`;
+    const errorLogCodeCause = (fetchError: FetchResponseError) =>
+      `${fetchError.code}  ${this.convertCauseErrorsToString(fetchError)}`;
 
-    if (!axios.isAxiosError(error)) {
+    const fetchError = error as FetchResponseError;
+
+    if (!fetchError.response && !fetchError.request) {
       let errorLogMessage;
 
       if (action === 'create') {
-        errorLogMessage = `[Agentless API] Creating agentless failed with an error that is not an AxiosError for agentless policy`;
+        errorLogMessage = `[Agentless API] Creating agentless failed with an error that is not an HTTP response error for agentless policy`;
       }
       if (action === 'delete') {
-        errorLogMessage = `[Agentless API] Deleting agentless deployment failed with an error that is not an Axios error for agentless policy`;
+        errorLogMessage = `[Agentless API] Deleting agentless deployment failed with an error that is not an HTTP response error for agentless policy`;
       }
       if (action === 'upgrade') {
-        errorLogMessage = `[Agentless API] Upgrading agentless deployment failed with an error that is not an Axios error for agentless policy`;
+        errorLogMessage = `[Agentless API] Upgrading agentless deployment failed with an error that is not an HTTP response error for agentless policy`;
       }
       if (action === 'list') {
-        errorLogMessage = `[Agentless API] Listing agentless deployments failed with an error that is not an Axios error for agentless policy`;
+        errorLogMessage = `[Agentless API] Listing agentless deployments failed with an error that is not an HTTP response error for agentless policy`;
       }
 
       logger.error(
@@ -593,16 +690,16 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const ERROR_HANDLING_MESSAGES: AgentlessAgentErrorHandlingMessages =
       this.getErrorHandlingMessages(agentlessPolicyId);
 
-    if (error.response) {
+    if (fetchError.response) {
       // The request was made and the server responded with a status code and error data
       const responseErrorMessage =
-        error.response.status in ERROR_HANDLING_MESSAGES
-          ? ERROR_HANDLING_MESSAGES[error.response.status][action]
+        fetchError.response.status in ERROR_HANDLING_MESSAGES
+          ? ERROR_HANDLING_MESSAGES[fetchError.response.status][action]
           : ERROR_HANDLING_MESSAGES.unhandled_response[action];
 
       this.handleResponseError(
         action,
-        error.response,
+        fetchError.response,
         logger,
         errorMetadataWithRequestConfig,
         requestConfigDebugStatus,
@@ -610,11 +707,11 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         responseErrorMessage.message,
         traceId
       );
-    } else if (error.request) {
+    } else if (fetchError.request) {
       // The request was made but no response was received
       const requestErrorMessage = ERROR_HANDLING_MESSAGES.request_error[action];
       logger.error(
-        `${requestErrorMessage.log} ${errorLogCodeCause(error)} ${requestConfigDebugStatus}`,
+        `${requestErrorMessage.log} ${errorLogCodeCause(fetchError)} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
 
@@ -623,7 +720,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       // Something happened in setting up the request that triggered an Error
       logger.error(
         `[Agentless API] ${action + 'ing'} the agentless agent failed ${errorLogCodeCause(
-          error
+          fetchError
         )} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
@@ -638,7 +735,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
 
   private handleResponseError(
     action: 'create' | 'delete' | 'upgrade' | 'list',
-    response: AxiosResponse,
+    response: { status: number; data?: Record<string, unknown> },
     logger: Logger,
     errorMetadataWithRequestConfig: LogMeta,
     requestConfigDebugStatus: string,
@@ -662,15 +759,15 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     );
 
     const responseData = {
-      code: response?.data?.code,
-      error: response?.data?.error,
+      code: response?.data?.code as string | undefined,
+      error: response?.data?.error as string | undefined,
       statusCode: response?.status,
     };
 
     throw this.getAgentlessAgentError(action, userMessage, traceId, responseData);
   }
 
-  private convertCauseErrorsToString = (error: AxiosError) => {
+  private convertCauseErrorsToString = (error: FetchResponseError) => {
     if (error.cause instanceof AggregateError) {
       return error.cause.errors.map((e: Error) => e.message);
     }
@@ -886,7 +983,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     };
   }
 
-  private isErrorRetryable = (error: AxiosError): boolean => {
+  private isErrorRetryable = (error: FetchResponseError): boolean => {
     const hasRetryableStatusError = this.hasRetryableStatusError(error, RETRYABLE_HTTP_STATUSES);
     const hasRetryableCodeError = this.hasRetryableCodeError(error, RETRYABLE_SERVER_CODES);
 
@@ -894,8 +991,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   };
 
   private handleErrorsWithRetries = async (
-    error: AxiosError,
-    requestConfig: AxiosRequestConfig,
+    error: FetchResponseError,
+    requestConfig: FetchRequestConfig,
     action: 'create' | 'delete' | 'upgrade',
     logger: Logger,
     retries: number,
@@ -906,7 +1003,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   ) => {
     if (this.isErrorRetryable(error)) {
       await this.retry(
-        async () => await axios(requestConfig),
+        async () => await this.fetchRequest(requestConfig),
         action,
         requestConfigDebugStatus,
         logger,
@@ -963,14 +1060,17 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   };
 
   private hasRetryableStatusError = (
-    error: AxiosError,
+    error: FetchResponseError,
     retryableStatusErrors: number[]
   ): boolean => {
     const status = error?.response?.status;
     return !!status && retryableStatusErrors.some((errorStatus) => errorStatus === status);
   };
 
-  private hasRetryableCodeError = (error: AxiosError, retryableCodeErrors: string[]): boolean => {
+  private hasRetryableCodeError = (
+    error: FetchResponseError,
+    retryableCodeErrors: string[]
+  ): boolean => {
     const code = error?.code;
     return !!code && retryableCodeErrors.includes(code);
   };

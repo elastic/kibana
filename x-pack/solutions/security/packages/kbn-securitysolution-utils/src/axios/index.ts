@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * Checks if an error object has HTTP response-like properties (e.g. from KbnClient or axios).
+ */
+const isHttpRequestError = (
+  error: any
+): error is Error & {
+  config?: { method?: string; url?: string; data?: unknown };
+  response?: { status?: number; statusText?: string; data?: any };
+  status?: number;
+} => {
+  return error instanceof Error && ('response' in error || 'config' in error);
+};
 
 export class FormattedAxiosError extends Error {
   public readonly request: {
@@ -16,30 +29,30 @@ export class FormattedAxiosError extends Error {
   public readonly response: {
     status: number;
     statusText: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
   };
 
-  constructor(axiosError: AxiosError) {
-    const method = axiosError.config?.method ?? '';
-    const url = axiosError.config?.url ?? '';
+  constructor(httpError: Error & Record<string, any>) {
+    const method = httpError.config?.method ?? '';
+    const url = httpError.config?.url ?? '';
+    const responseData = httpError.response?.data;
 
     super(
-      `${axiosError.message}${
-        axiosError?.response?.data ? `: ${JSON.stringify(axiosError?.response?.data)}` : ''
-      }${url ? `\n(Request: ${method} ${url})` : ''}`
+      `${httpError.message}${responseData ? `: ${JSON.stringify(responseData)}` : ''}${
+        url ? `\n(Request: ${method} ${url})` : ''
+      }`
     );
 
     this.request = {
       method,
       url,
-      data: axiosError.config?.data ?? '',
+      data: httpError.config?.data ?? '',
     };
 
     this.response = {
-      status: axiosError?.response?.status ?? 0,
-      statusText: axiosError?.response?.statusText ?? '',
-      data: axiosError?.response?.data,
+      status: httpError.response?.status ?? httpError.status ?? 0,
+      statusText: httpError.response?.statusText ?? '',
+      data: responseData,
     };
 
     this.name = this.constructor.name;
@@ -59,11 +72,13 @@ export class FormattedAxiosError extends Error {
 }
 
 /**
- * Used with `promise.catch()`, it will format the Axios error to a new error and will re-throw
+ * Used with `promise.catch()`, it will format the error to a new error and will re-throw.
+ * If the error has HTTP request/response properties (e.g. from KbnClient), it will be
+ * formatted as a `FormattedAxiosError` with request and response details.
  * @param error
  */
 export const catchAxiosErrorFormatAndThrow = (error: Error): never => {
-  if (error instanceof AxiosError) {
+  if (isHttpRequestError(error)) {
     throw new FormattedAxiosError(error);
   }
 

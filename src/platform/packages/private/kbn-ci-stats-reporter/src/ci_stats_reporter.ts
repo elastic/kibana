@@ -14,8 +14,6 @@ import Path from 'path';
 import crypto from 'crypto';
 
 import execa from 'execa';
-import type { AxiosRequestConfig } from 'axios';
-import Axios from 'axios';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import type { Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import { parseConfig } from '@kbn/ci-stats-core';
@@ -112,7 +110,7 @@ interface ReqOptions {
   path: string;
   body: any;
   bodyDesc: string;
-  query?: AxiosRequestConfig['params'];
+  query?: Record<string, string | number | boolean | undefined>;
   timeout?: number;
 }
 
@@ -362,11 +360,11 @@ export class CiStatsReporter {
     let attempt = 0;
     const maxAttempts = 5;
 
-    let headers;
+    const headers: Record<string, string> = {
+      'Content-Type': typeof body === 'string' ? 'text/plain' : 'application/json',
+    };
     if (auth && this.config) {
-      headers = {
-        Authorization: `token ${this.config.apiToken}`,
-      };
+      headers.Authorization = `token ${this.config.apiToken}`;
     } else if (auth) {
       throw new Error('this.req() shouldnt be called with auth=true if this.config is not defined');
     }
@@ -375,37 +373,64 @@ export class CiStatsReporter {
       attempt += 1;
 
       try {
-        const resp = await Axios.request<T>({
-          method: 'POST',
-          url: path,
-          baseURL: BASE_URL,
-          allowAbsoluteUrls: false,
-          headers,
-          data: body,
-          params: query,
-          adapter: 'http',
+        const queryString = query
+          ? '?' +
+            new URLSearchParams(
+              Object.entries(query)
+                .filter(([, v]) => v !== undefined)
+                .map(([k, v]) => [k, String(v)])
+            ).toString()
+          : '';
+        const url = `${BASE_URL}${path}${queryString}`;
 
-          // if it can be serialized into a string, send it
-          maxBodyLength: Infinity,
-          maxContentLength: Infinity,
-          timeout,
-        });
+        const controller = new AbortController();
+        const timeoutId = globalThis.setTimeout(() => controller.abort(), timeout);
 
-        return resp.data;
-      } catch (error) {
-        if (!error?.request) {
-          // not an axios error, must be a usage error that we should notify user about
+        let resp: Response;
+        try {
+          resp = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: typeof body === 'string' ? body : JSON.stringify(body),
+            signal: controller.signal,
+          });
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        if (!resp.ok) {
+          const respBody = await resp.text().catch(() => '');
+          let parsedBody: unknown;
+          try {
+            parsedBody = JSON.parse(respBody);
+          } catch {
+            parsedBody = respBody;
+          }
+
+          if (resp.status < 500) {
+            this.log.warning(
+              `error reporting ${bodyDesc} [status=${resp.status}] [resp=${inspect(parsedBody)}]`
+            );
+            return;
+          }
+
+          const error = new Error(`Request failed with status ${resp.status}`);
+          (error as any).response = { status: resp.status, data: parsedBody };
           throw error;
         }
 
-        if (error?.response && error.response.status < 500) {
-          // error response from service was received so warn the user and move on
-          this.log.warning(
-            `error reporting ${bodyDesc} [status=${error.response.status}] [resp=${inspect(
-              error.response.data
-            )}]`
-          );
-          return;
+        const text = await resp.text();
+        try {
+          return JSON.parse(text) as T;
+        } catch {
+          return text as unknown as T;
+        }
+      } catch (error) {
+        if (error?.name === 'AbortError') {
+          // timeout - treat as network failure, fall through to retry
+        } else if (!error?.response) {
+          // not a response error, must be a usage error that we should notify user about
+          throw error;
         }
 
         if (attempt === maxAttempts) {
@@ -425,7 +450,7 @@ export class CiStatsReporter {
           `failed to reach ci-stats service, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`
         );
 
-        await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+        await new Promise((resolve) => globalThis.setTimeout(resolve, seconds * 1000));
       }
     }
   }

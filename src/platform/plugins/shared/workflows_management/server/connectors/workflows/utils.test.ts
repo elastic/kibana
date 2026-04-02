@@ -7,48 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosError } from 'axios';
 import { createServiceError } from './utils';
 
 describe('Workflows Utils', () => {
   describe('createServiceError', () => {
-    it('should create error with Axios error message', () => {
-      const axiosError = {
-        isAxiosError: true,
+    it('should create error with response error message', () => {
+      const fetchError = Object.assign(new Error('Request failed'), {
         response: {
           data: {
             message: 'API Error: Invalid request',
           },
         },
-        message: 'Request failed',
-      } as AxiosError;
+      });
 
-      const result = createServiceError(axiosError, 'Operation failed');
+      const result = createServiceError(fetchError, 'Operation failed');
 
       expect(result.message).toBe('Operation failed. Error: API Error: Invalid request');
     });
 
-    it('should use Axios error message when response data has no message', () => {
-      const axiosError = {
-        isAxiosError: true,
+    it('should use error message when response data has no message', () => {
+      const fetchError = Object.assign(new Error('Network error'), {
         response: {
           data: {},
         },
-        message: 'Network error',
-      } as AxiosError;
+      });
 
-      const result = createServiceError(axiosError, 'Operation failed');
+      const result = createServiceError(fetchError, 'Operation failed');
 
       expect(result.message).toBe('Operation failed. Error: Network error');
     });
 
-    it('should handle Axios error without response data', () => {
-      const axiosError = {
-        isAxiosError: true,
-        message: 'Connection timeout',
-      } as AxiosError;
+    it('should handle error without response data', () => {
+      const fetchError = Object.assign(new Error('Connection timeout'), {
+        response: undefined,
+      });
 
-      const result = createServiceError(axiosError, 'Operation failed');
+      const result = createServiceError(fetchError, 'Operation failed');
 
       expect(result.message).toBe('Operation failed. Error: Connection timeout');
     });

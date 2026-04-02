@@ -5,53 +5,72 @@
  * 2.0.
  */
 
-import mockFs from 'mock-fs';
-import axios from 'axios';
 import { createHash } from 'crypto';
-import { readFile } from 'fs/promises';
-import { resolve as resolvePath } from 'path';
-import { Readable } from 'stream';
+import { mkdtemp, readFile, rm } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join, resolve as resolvePath } from 'path';
 import { fetch } from './fetch';
 
-const TEMP_DIR = resolvePath(__dirname, '__tmp__');
-const TEMP_FILE = resolvePath(TEMP_DIR, 'foo/bar/download');
+const createMockResponse = (body: string, status = 200): Response => {
+  const readable = new ReadableStream({
+    start(controller) {
+      controller.enqueue(Buffer.from(body));
+      controller.close();
+    },
+  });
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: 'OK',
+    headers: new Headers({ 'Content-Type': 'application/octet-stream' }),
+    body: readable,
+    bodyUsed: false,
+    redirected: false,
+    type: 'basic',
+    url: '',
+    clone: jest.fn(),
+    json: jest.fn(),
+    text: jest.fn().mockResolvedValue(body),
+    arrayBuffer: jest.fn(),
+    blob: jest.fn(),
+    formData: jest.fn(),
+    bytes: jest.fn(),
+  } as unknown as Response;
+};
 
 describe('fetch', () => {
-  beforeEach(() => {
-    jest.spyOn(axios, 'request').mockResolvedValue({
-      data: new Readable({
-        read() {
-          this.push('foobar');
-          this.push(null);
-        },
-      }),
-    });
+  let tempDir: string;
+  let tempFile: string;
 
-    mockFs();
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'fetch-test-'));
+    tempFile = resolvePath(tempDir, 'foo/bar/download');
+
+    jest.spyOn(global, 'fetch').mockResolvedValue(createMockResponse('foobar'));
   });
 
-  afterEach(() => {
-    mockFs.restore();
-    jest.resetAllMocks();
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    await rm(tempDir, { recursive: true, force: true });
   });
 
   test('downloads the url to the path', async () => {
-    await fetch('url', TEMP_FILE);
+    await fetch('url', tempFile);
 
-    await expect(readFile(TEMP_FILE, 'utf8')).resolves.toBe('foobar');
+    await expect(readFile(tempFile, 'utf8')).resolves.toBe('foobar');
   });
 
-  test('returns the sha1 hex hash of the http body', async () => {
+  test('returns the sha256 hex hash of the http body', async () => {
     const hash = createHash('sha256').update('foobar').digest('hex');
 
-    await expect(fetch('url', TEMP_FILE)).resolves.toEqual(hash);
+    await expect(fetch('url', tempFile)).resolves.toEqual(hash);
   });
 
   test('throws if request emits an error', async () => {
-    (axios.request as jest.Mock).mockImplementationOnce(async () => {
+    (global.fetch as jest.Mock).mockImplementationOnce(async () => {
       throw new Error('foo');
     });
 
-    await expect(fetch('url', TEMP_FILE)).rejects.toThrow('foo');
+    await expect(fetch('url', tempFile)).rejects.toThrow('foo');
   });
 });

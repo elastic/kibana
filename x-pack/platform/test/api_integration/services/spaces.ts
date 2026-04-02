@@ -6,8 +6,7 @@
  */
 
 import type { Space } from '@kbn/spaces-plugin/common';
-import Axios from 'axios';
-import Https from 'https';
+import { Agent } from 'undici';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import Chance from 'chance';
@@ -30,36 +29,59 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
-  const url = formatUrl(config.get('servers.kibana'));
+  const baseUrl = formatUrl(config.get('servers.kibana'));
   // used often in fleet_api_integration tests
   const TEST_SPACE_1 = 'test1';
 
   const certificateAuthorities = config.get('servers.kibana.certificateAuthorities');
-  const httpsAgent: Https.Agent | undefined = certificateAuthorities
-    ? new Https.Agent({
-        ca: certificateAuthorities,
-        // required for self-signed certificates used for HTTPS FTR testing
-        rejectUnauthorized: false,
+  const dispatcher: Agent | undefined = certificateAuthorities
+    ? new Agent({
+        connect: {
+          ca: certificateAuthorities,
+          rejectUnauthorized: false,
+        },
       })
     : undefined;
 
-  const axios = Axios.create({
-    headers: {
-      'kbn-xsrf': 'x-pack/ftr/services/spaces/space',
-    },
-    baseURL: url,
-    allowAbsoluteUrls: false,
-    maxRedirects: 0,
-    validateStatus: () => true, // we do our own validation below and throw better error messages
-    httpsAgent,
-  });
+  const defaultHeaders: Record<string, string> = {
+    'kbn-xsrf': 'x-pack/ftr/services/spaces/space',
+    'Content-Type': 'application/json',
+  };
+
+  async function request<T>(
+    method: string,
+    path: string,
+    body?: unknown
+  ): Promise<{ data: T; status: number; statusText: string }> {
+    const resp = await fetch(`${baseUrl}${path}`, {
+      method,
+      headers: defaultHeaders,
+      body: body ? JSON.stringify(body) : undefined,
+      redirect: 'manual',
+      ...(dispatcher ? { dispatcher } : {}),
+    } as RequestInit);
+
+    const text = await resp.text();
+    let data: T;
+    try {
+      data = JSON.parse(text) as T;
+    } catch {
+      data = text as unknown as T;
+    }
+
+    return { data, status: resp.status, statusText: resp.statusText };
+  }
 
   return new (class SpacesService {
     public async create(_space?: SpaceCreate) {
       const space = { id: chance.guid(), name: 'foo', ..._space };
 
       log.debug(`creating space ${space.id}`);
-      const { data, status, statusText } = await axios.post('/api/spaces/space', space);
+      const { data, status, statusText } = await request<unknown>(
+        'POST',
+        '/api/spaces/space',
+        space
+      );
 
       if (status !== 200) {
         throw new Error(
@@ -84,7 +106,8 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       { overwrite = true }: { overwrite?: boolean } = {}
     ) {
       log.debug(`updating space ${id}`);
-      const { data, status, statusText } = await axios.put(
+      const { data, status, statusText } = await request<unknown>(
+        'PUT',
         `/api/spaces/space/${id}?overwrite=${overwrite}`,
         updatedSpace
       );
@@ -99,7 +122,10 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
     public async delete(spaceId: string) {
       log.debug(`deleting space id: ${spaceId}`);
-      const { data, status, statusText } = await axios.delete(`/api/spaces/space/${spaceId}`);
+      const { data, status, statusText } = await request<unknown>(
+        'DELETE',
+        `/api/spaces/space/${spaceId}`
+      );
 
       if (status !== 204) {
         log.debug(
@@ -111,7 +137,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
     public async get(id: string) {
       log.debug(`retrieving space ${id}`);
-      const { data, status, statusText } = await axios.get<Space>(`/api/spaces/space/${id}`);
+      const { data, status, statusText } = await request<Space>('GET', `/api/spaces/space/${id}`);
 
       if (status !== 200) {
         throw new Error(
@@ -125,7 +151,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
     public async getAll() {
       log.debug('retrieving all spaces');
-      const { data, status, statusText } = await axios.get<Space[]>('/api/spaces/space');
+      const { data, status, statusText } = await request<Space[]>('GET', '/api/spaces/space');
 
       if (status !== 200) {
         throw new Error(

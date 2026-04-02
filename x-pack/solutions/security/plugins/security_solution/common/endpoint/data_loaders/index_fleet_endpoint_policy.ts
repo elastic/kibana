@@ -6,7 +6,6 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
 import type {
   AgentPolicy,
   CreateAgentPolicyRequest,
@@ -71,11 +70,11 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       space_ids: spaceIds,
     };
 
-    let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
+    let agentPolicy: { data: CreateAgentPolicyResponse };
 
     try {
-      agentPolicy = (await kbnClient
-        .request({
+      agentPolicy = await kbnClient
+        .request<CreateAgentPolicyResponse>({
           path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
           headers: {
             'elastic-api-version': API_VERSIONS.public.v1,
@@ -83,7 +82,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
           method: 'POST',
           body: newAgentPolicyData,
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
+        .catch(wrapErrorAndRejectPromise);
     } catch (error) {
       throw new Error(`create fleet agent policy failed ${error}`);
     }
@@ -186,8 +185,8 @@ export const deleteIndexedFleetEndpointPolicies = async (
 
   if (indexData.integrationPolicies.length) {
     response.integrationPolicies = (
-      (await kbnClient
-        .request({
+      await kbnClient
+        .request<PostDeletePackagePoliciesResponse>({
           path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
           headers: {
             'elastic-api-version': API_VERSIONS.public.v1,
@@ -197,7 +196,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
+        .catch(wrapErrorAndRejectPromise)
     ).data;
   }
 
@@ -207,8 +206,8 @@ export const deleteIndexedFleetEndpointPolicies = async (
     for (const agentPolicy of indexData.agentPolicies) {
       response.agentPolicies.push(
         (
-          (await kbnClient
-            .request({
+          await kbnClient
+            .request<DeleteAgentPolicyResponse>({
               path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
               headers: {
                 'elastic-api-version': API_VERSIONS.public.v1,
@@ -218,7 +217,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
                 agentPolicyId: agentPolicy.id,
               },
             })
-            .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeleteAgentPolicyResponse>
+            .catch(wrapErrorAndRejectPromise)
         ).data
       );
     }

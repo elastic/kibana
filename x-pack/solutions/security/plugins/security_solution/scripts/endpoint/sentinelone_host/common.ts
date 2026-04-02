@@ -6,8 +6,6 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
 import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone/constants';
 import pRetry from 'p-retry';
@@ -20,7 +18,7 @@ import type {
   S1AgentPackage,
   S1AgentPackageListApiResponse,
 } from './types';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+
 import type { HostVm } from '../common/types';
 import { createConnector, fetchConnectorByType } from '../common/connectors_services';
 import { createRule, findRules } from '../common/detection_rules_services';
@@ -72,30 +70,32 @@ export class S1Client {
   protected async request<T = unknown>({
     url = '',
     params = {},
-    ...options
-  }: AxiosRequestConfig): Promise<T> {
-    const apiFullUrl = this.buildUrl(url);
-
-    const requestOptions: AxiosRequestConfig = {
-      ...options,
-      url: apiFullUrl,
-      params: {
-        APIToken: this.options.apiToken,
-        ...params,
-      },
+  }: {
+    url?: string;
+    params?: Record<string, unknown>;
+  }): Promise<T> {
+    const apiFullUrl = new URL(this.buildUrl(url));
+    const allParams = {
+      APIToken: this.options.apiToken,
+      ...params,
     };
+    for (const [key, value] of Object.entries(allParams)) {
+      if (value !== undefined) {
+        apiFullUrl.searchParams.set(key, String(value));
+      }
+    }
 
-    this.log.debug(`Request: `, requestOptions);
+    this.log.debug(`Request: `, { url: apiFullUrl.toString() });
 
     return pRetry(
       async () => {
-        return axios
-          .request<T>(requestOptions)
-          .then((response) => {
-            this.log.verbose(`Response: `, response);
-            return response.data;
-          })
-          .catch(catchAxiosErrorFormatAndThrow);
+        const response = await fetch(apiFullUrl.toString());
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = (await response.json()) as T;
+        this.log.verbose(`Response: `, data);
+        return data;
       },
       { maxTimeout: 10000 }
     );

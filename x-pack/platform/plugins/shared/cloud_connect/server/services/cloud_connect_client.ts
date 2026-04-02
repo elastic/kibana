@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type {
   CloudConnectUserResponse,
@@ -16,22 +14,59 @@ import type {
   SubscriptionResponse,
   UpdateClusterRequest,
 } from '../types';
+import { FetchResponseError, isFetchResponseError } from './fetch_response_error';
+
+export { FetchResponseError, isFetchResponseError };
+
+const DEFAULT_TIMEOUT = 30000;
 
 export class CloudConnectClient {
-  private axiosInstance: AxiosInstance;
   private logger: Logger;
   private cloudApiUrl: string;
+  private defaultHeaders: Record<string, string>;
 
   constructor(logger: Logger, cloudApiUrl: string) {
     this.logger = logger;
     this.cloudApiUrl = cloudApiUrl;
-    this.axiosInstance = axios.create({
-      baseURL: cloudApiUrl,
-      timeout: 30000,
+    this.defaultHeaders = {
+      'Content-Type': 'application/json',
+    };
+  }
+
+  private async request<T>(
+    path: string,
+    options: RequestInit & { fullUrl?: boolean } = {}
+  ): Promise<T> {
+    const { fullUrl, ...fetchOptions } = options;
+    const url = fullUrl ? path : `${this.cloudApiUrl}${path}`;
+    const response = await globalThis.fetch(url, {
+      ...fetchOptions,
       headers: {
-        'Content-Type': 'application/json',
+        ...this.defaultHeaders,
+        ...(fetchOptions.headers as Record<string, string>),
       },
+      signal: fetchOptions.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT),
     });
+
+    if (!response.ok) {
+      let errorData: unknown;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = await response.text().catch(() => '');
+      }
+      throw new FetchResponseError(
+        `Request to ${url} failed with status ${response.status}`,
+        response.status,
+        errorData
+      );
+    }
+
+    const text = await response.text();
+    if (!text) {
+      return undefined as unknown as T;
+    }
+    return JSON.parse(text) as T;
   }
 
   /**
@@ -42,17 +77,18 @@ export class CloudConnectClient {
     try {
       this.logger.debug('Validating API key scope');
 
-      const response = await axios.get<CloudConnectUserResponse>(
+      const data = await this.request<CloudConnectUserResponse>(
         `${this.cloudApiUrl}/saas/user?show_role_assignments=true`,
         {
+          fullUrl: true,
           headers: {
             Authorization: `apiKey ${apiKey}`,
           },
-          timeout: 30000,
+          signal: AbortSignal.timeout(DEFAULT_TIMEOUT),
         }
       );
 
-      const roleAssignments = response.data.user.role_assignments.cloud_connected_resource;
+      const roleAssignments = data.user.role_assignments.cloud_connected_resource;
 
       if (!roleAssignments || roleAssignments.length === 0) {
         return {
@@ -90,14 +126,12 @@ export class CloudConnectClient {
     } catch (error) {
       this.logger.error('Failed to validate API key scope', { error });
 
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          return {
-            isClusterScoped: false,
-            hasValidScope: false,
-            errorMessage: 'Invalid or expired API key',
-          };
-        }
+      if (isFetchResponseError(error) && error.status === 401) {
+        return {
+          isClusterScoped: false,
+          hasValidScope: false,
+          errorMessage: 'Invalid or expired API key',
+        };
       }
 
       return {
@@ -116,7 +150,7 @@ export class CloudConnectClient {
     try {
       this.logger.debug(`Fetching cluster details for cluster ID: ${clusterId}`);
 
-      const response = await this.axiosInstance.get<OnboardClusterResponse>(
+      const data = await this.request<OnboardClusterResponse>(
         `/cloud-connected/clusters/${clusterId}`,
         {
           headers: {
@@ -125,9 +159,9 @@ export class CloudConnectClient {
         }
       );
 
-      this.logger.debug(`Successfully fetched cluster details for: ${response.data.id}`);
+      this.logger.debug(`Successfully fetched cluster details for: ${data.id}`);
 
-      return response.data;
+      return data;
     } catch (error) {
       this.logger.error(`Failed to fetch cluster details for cluster ID: ${clusterId}`, { error });
       throw error;
@@ -146,19 +180,17 @@ export class CloudConnectClient {
     try {
       this.logger.debug('Onboarding cluster with happy path key');
 
-      const response = await this.axiosInstance.post<OnboardClusterResponse>(
-        '/cloud-connected/clusters',
-        clusterData,
-        {
-          headers: {
-            Authorization: `apiKey ${apiKey}`,
-          },
-        }
-      );
+      const data = await this.request<OnboardClusterResponse>('/cloud-connected/clusters', {
+        method: 'POST',
+        body: JSON.stringify(clusterData),
+        headers: {
+          Authorization: `apiKey ${apiKey}`,
+        },
+      });
 
-      this.logger.debug(`Cluster onboarded successfully: ${response.data.id}`);
+      this.logger.debug(`Cluster onboarded successfully: ${data.id}`);
 
-      return response.data;
+      return data;
     } catch (error) {
       this.logger.error('Failed to onboard cluster', { error });
       throw error;
@@ -176,21 +208,20 @@ export class CloudConnectClient {
     try {
       this.logger.debug('Onboarding cluster with admin key and generating new API key');
 
-      const response = await this.axiosInstance.post<OnboardClusterResponse>(
+      const data = await this.request<OnboardClusterResponse>(
         '/cloud-connected/clusters?create_api_key=true',
-        clusterData,
         {
+          method: 'POST',
+          body: JSON.stringify(clusterData),
           headers: {
             Authorization: `apiKey ${apiKey}`,
           },
         }
       );
 
-      this.logger.debug(
-        `Cluster onboarded successfully with new API key generated: ${response.data.id}`
-      );
+      this.logger.debug(`Cluster onboarded successfully with new API key generated: ${data.id}`);
 
-      return response.data;
+      return data;
     } catch (error) {
       this.logger.error('Failed to onboard cluster with key generation', { error });
       throw error;
@@ -208,19 +239,20 @@ export class CloudConnectClient {
     try {
       this.logger.debug(`Updating services for cluster ID: ${clusterId}`);
 
-      const response = await this.axiosInstance.patch<OnboardClusterResponse>(
+      const data = await this.request<OnboardClusterResponse>(
         `/cloud-connected/clusters/${clusterId}`,
-        clusterData,
         {
+          method: 'PATCH',
+          body: JSON.stringify(clusterData),
           headers: {
             Authorization: `apiKey ${apiKey}`,
           },
         }
       );
 
-      this.logger.debug(`Successfully updated services for cluster: ${response.data.id}`);
+      this.logger.debug(`Successfully updated services for cluster: ${data.id}`);
 
-      return response.data;
+      return data;
     } catch (error) {
       this.logger.error(`Failed to update services for cluster ID: ${clusterId}`, { error });
       throw error;
@@ -235,7 +267,8 @@ export class CloudConnectClient {
     try {
       this.logger.debug(`Deleting cluster from Cloud API: ${clusterId}`);
 
-      await this.axiosInstance.delete(`/cloud-connected/clusters/${clusterId}`, {
+      await this.request<void>(`/cloud-connected/clusters/${clusterId}`, {
+        method: 'DELETE',
         headers: {
           Authorization: `apiKey ${apiKey}`,
         },
@@ -259,7 +292,7 @@ export class CloudConnectClient {
     try {
       this.logger.debug(`Fetching subscription for organization ID: ${organizationId}`);
 
-      const response = await this.axiosInstance.get<SubscriptionResponse>(
+      const data = await this.request<SubscriptionResponse>(
         `/cloud-connected/organizations/${organizationId}/subscription`,
         {
           headers: {
@@ -269,10 +302,10 @@ export class CloudConnectClient {
       );
 
       this.logger.debug(
-        `Successfully fetched subscription for organization: ${organizationId}, state: ${response.data.state}`
+        `Successfully fetched subscription for organization: ${organizationId}, state: ${data.state}`
       );
 
-      return response.data;
+      return data;
     } catch (error) {
       this.logger.error(`Failed to fetch subscription for organization ID: ${organizationId}`, {
         error,
@@ -289,10 +322,11 @@ export class CloudConnectClient {
     try {
       this.logger.debug(`Rotating API key for cluster ID: ${clusterId}`);
 
-      const response = await this.axiosInstance.post<{ key: string }>(
+      const data = await this.request<{ key: string }>(
         `/cloud-connected/clusters/${clusterId}/apikey/_rotate`,
-        {},
         {
+          method: 'POST',
+          body: JSON.stringify({}),
           headers: {
             Authorization: `apiKey ${apiKey}`,
           },
@@ -301,7 +335,7 @@ export class CloudConnectClient {
 
       this.logger.debug(`Successfully rotated API key for cluster: ${clusterId}`);
 
-      return response.data;
+      return data;
     } catch (error) {
       this.logger.error(`Failed to rotate API key for cluster ID: ${clusterId}`, { error });
       throw error;
@@ -320,10 +354,11 @@ export class CloudConnectClient {
     try {
       this.logger.debug(`Rotating API key for service ${serviceKey} on cluster ID: ${clusterId}`);
 
-      const response = await this.axiosInstance.post<{ key: string }>(
+      const data = await this.request<{ key: string }>(
         `/cloud-connected/clusters/${clusterId}/apikey/${serviceKey}/_rotate`,
-        {},
         {
+          method: 'POST',
+          body: JSON.stringify({}),
           headers: {
             Authorization: `apiKey ${apiKey}`,
           },
@@ -334,7 +369,7 @@ export class CloudConnectClient {
         `Successfully rotated API key for service ${serviceKey} on cluster: ${clusterId}`
       );
 
-      return response.data;
+      return data;
     } catch (error) {
       this.logger.error(
         `Failed to rotate API key for service ${serviceKey} on cluster ID: ${clusterId}`,

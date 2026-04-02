@@ -11,8 +11,6 @@ import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-
 
 import { cloneDeep } from 'lodash';
 
-import axios from 'axios';
-
 import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { TelemetryQueue } from './queue';
@@ -177,22 +175,21 @@ export class TelemetryEventsSender {
     const ndjson = this.transformDataToNdjson(events);
 
     try {
-      const resp = await axios.post(telemetryUrl, ndjson, {
+      const resp = await fetch(telemetryUrl, {
+        method: 'POST',
+        body: ndjson,
         headers: {
           'Content-Type': 'application/x-ndjson',
           ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
           ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
           'X-Elastic-Stack-Version': clusterVersion?.number ? clusterVersion.number : '8.2.0',
         },
-        timeout: 5000,
+        signal: AbortSignal.timeout(5000),
       });
-      this.logger.debug(
-        () => `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`
-      );
+      const respData = await resp.json().catch(() => undefined);
+      this.logger.debug(() => `Events sent!. Response: ${resp.status} ${JSON.stringify(respData)}`);
     } catch (err) {
-      this.logger.debug(
-        () => `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
-      );
+      this.logger.debug(() => `Error sending events: ${err.message}`);
     }
   }
 

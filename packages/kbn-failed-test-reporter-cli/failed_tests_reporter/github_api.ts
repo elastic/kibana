@@ -9,9 +9,6 @@
 
 import Url from 'url';
 
-import type { AxiosRequestConfig, AxiosInstance, AxiosHeaderValue } from 'axios';
-import Axios, { AxiosHeaders } from 'axios';
-import { isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
@@ -35,17 +32,20 @@ export interface GithubIssueMini {
   node_id: GithubIssue['node_id'];
 }
 
-type RequestOptions = AxiosRequestConfig & {
+interface RequestOptions {
+  method?: string;
+  url?: string;
+  data?: unknown;
   safeForDryRun?: boolean;
   maxAttempts?: number;
   attempt?: number;
-};
+}
 
 export class GithubApi {
   private readonly log: ToolingLog;
   private readonly token: string | undefined;
   private readonly dryRun: boolean;
-  private readonly x: AxiosInstance;
+  private readonly defaultHeaders: Record<string, string>;
   private requestCount: number = 0;
 
   /**
@@ -65,12 +65,11 @@ export class GithubApi {
       throw new TypeError('token parameter is required');
     }
 
-    this.x = Axios.create({
-      headers: {
-        ...(this.token ? { Authorization: `token ${this.token}` } : {}),
-        'User-Agent': 'elastic/kibana#failed_test_reporter',
-      },
-    });
+    this.defaultHeaders = {
+      ...(this.token ? { Authorization: `token ${this.token}` } : {}),
+      'User-Agent': 'elastic/kibana#failed_test_reporter',
+      'Content-Type': 'application/json',
+    };
   }
 
   getRequestCount() {
@@ -132,7 +131,7 @@ export class GithubApi {
   ): Promise<{
     status: number;
     statusText: string;
-    headers: Record<string, AxiosHeaderValue | undefined>;
+    headers: Record<string, string>;
     data: T;
   }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;
@@ -147,22 +146,63 @@ export class GithubApi {
         return {
           status: 200,
           statusText: 'OK',
-          headers: new AxiosHeaders(),
+          headers: {},
           data: dryRunResponse,
         };
       }
 
       try {
         this.requestCount += 1;
-        return await this.x.request<T>(options);
-      } catch (error) {
-        const unableToReachGithub = isAxiosRequestError(error);
-        const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
-        const errorResponseLog =
-          isAxiosResponseError(error) &&
-          `[${error.config?.method} ${error.config?.url}] ${error.response.status} ${error.response.statusText} Error`;
+        const resp = await fetch(options.url!, {
+          method: options.method || 'GET',
+          headers: this.defaultHeaders,
+          body: options.data ? JSON.stringify(options.data) : undefined,
+        });
 
-        if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
+        if (!resp.ok) {
+          const respBody = await resp.text().catch(() => '');
+          let parsedBody: unknown;
+          try {
+            parsedBody = JSON.parse(respBody);
+          } catch {
+            parsedBody = respBody;
+          }
+
+          const error = new Error(
+            `[${options.method} ${options.url}] ${resp.status} ${resp.statusText} Error`
+          );
+          (error as any).response = {
+            status: resp.status,
+            statusText: resp.statusText,
+            data: parsedBody,
+          };
+          (error as any).config = { method: options.method, url: options.url };
+          throw error;
+        }
+
+        const data = (await resp.json()) as T;
+        const responseHeaders: Record<string, string> = {};
+        resp.headers.forEach((value, key) => {
+          responseHeaders[key] = value;
+        });
+
+        return {
+          status: resp.status,
+          statusText: resp.statusText,
+          headers: responseHeaders,
+          data,
+        };
+      } catch (error) {
+        const hasResponse = !!(error as any)?.response;
+        const isServerError = hasResponse && (error as any).response.status >= 500;
+        const isNetworkError = !hasResponse;
+        const errorResponseLog = hasResponse
+          ? `[${options.method} ${options.url}] ${(error as any).response.status} ${
+              (error as any).response.statusText
+            } Error`
+          : undefined;
+
+        if ((isNetworkError || isServerError) && attempt < maxAttempts) {
           const waitMs = 1000 * attempt;
 
           if (errorResponseLog) {
@@ -176,7 +216,7 @@ export class GithubApi {
         }
 
         if (errorResponseLog) {
-          throw new Error(`${errorResponseLog}: ${JSON.stringify(error.response.data)}`);
+          throw new Error(`${errorResponseLog}: ${JSON.stringify((error as any).response.data)}`);
         }
 
         throw error;

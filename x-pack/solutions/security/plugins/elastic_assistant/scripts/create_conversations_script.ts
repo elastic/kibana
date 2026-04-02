@@ -10,7 +10,6 @@ import { randomBytes } from 'node:crypto';
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
-import axios from 'axios';
 import pLimit from 'p-limit';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import type { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
@@ -53,9 +52,13 @@ export const create = async () => {
 
   try {
     logger.info(`Fetching available connectors...`);
-    const { data: connectors } = await axios.get(connectorsApiUrl, {
+    const connectorsResponse = await fetch(connectorsApiUrl, {
       headers: requestHeaders,
     });
+    if (!connectorsResponse.ok) {
+      throw new Error(`Failed to fetch connectors: ${connectorsResponse.status}`);
+    }
+    const connectors = await connectorsResponse.json();
     const aiConnectors = connectors.filter(
       ({ connector_type_id: connectorTypeId }: { connector_type_id: string }) =>
         AllowedActionTypeIds.includes(connectorTypeId)

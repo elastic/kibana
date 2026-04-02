@@ -7,27 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError, isAxiosError } from 'axios';
+export interface KbnClientResponseError {
+  status?: number;
+  message: string;
+  code?: string;
+}
 
 export class KbnClientRequesterError extends Error {
-  axiosError?: AxiosError;
+  responseError?: KbnClientResponseError;
+  /**
+   * @deprecated Use `responseError.status` instead. Kept for backward compatibility.
+   */
+  public get axiosError(): { status?: number; response?: undefined } | undefined {
+    if (!this.responseError) return undefined;
+    return { status: this.responseError.status };
+  }
   constructor(message: string, error: unknown) {
     super(message);
     this.name = 'KbnClientRequesterError';
-    if (isAxiosError(error)) this.axiosError = clean(error);
+    if (isResponseLikeError(error)) {
+      this.responseError = clean(error);
+    }
   }
 }
-function clean(error: AxiosError): AxiosError {
-  const originalStatus = error.status ?? error.response?.status;
-  const _ = AxiosError.from(error);
-  // We strip `response` to avoid keeping large bodies around, but some callers
-  // depend on `status` to branch (e.g. treating 404 as "not found").
-  if (_.status == null && originalStatus != null) {
-    _.status = originalStatus;
-  }
-  delete _.cause;
-  delete _.config;
-  delete _.request;
-  delete _.response;
-  return _;
+
+interface ResponseLikeError {
+  message?: string;
+  code?: string;
+  response?: { status?: number };
+}
+
+const isResponseLikeError = (error: unknown): error is ResponseLikeError => {
+  return (
+    error instanceof Error || (typeof error === 'object' && error !== null && 'response' in error)
+  );
+};
+
+function clean(error: ResponseLikeError): KbnClientResponseError {
+  const status = (error as any).response?.status ?? (error as any).status;
+  return {
+    status,
+    message: error.message ?? 'Unknown error',
+    code: error.code,
+  };
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import yargs from 'yargs';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -46,20 +45,22 @@ async function cli(): Promise<void> {
   const requestHeaders = {
     Authorization: `Basic ${btoa(`${USERNAME}:${PASSWORD}`)}`,
     'kbn-xsrf': 'xxx',
+    'content-type': 'application/json',
   };
 
   try {
     logger.info(`Creating role "${role}"...`);
-    await axios.put(
-      `${KIBANA_URL}/api/security/role/${role}`,
-      {
+    const roleResponse = await fetch(`${KIBANA_URL}/api/security/role/${role}`, {
+      method: 'PUT',
+      body: JSON.stringify({
         elasticsearch: selectedRoleDefinition.elasticsearch,
         kibana: selectedRoleDefinition.kibana,
-      },
-      {
-        headers: requestHeaders,
-      }
-    );
+      }),
+      headers: requestHeaders,
+    });
+    if (!roleResponse.ok) {
+      throw new Error(`Failed to create role: ${roleResponse.status} ${roleResponse.statusText}`);
+    }
 
     logger.info(`Role "${role}" has been created`);
   } catch (e) {
@@ -69,18 +70,19 @@ async function cli(): Promise<void> {
 
   try {
     logger.info(`Creating user "${userName}"...`);
-    await axios.put(
-      `${ELASTICSEARCH_URL}/_security/user/${userName}`,
-      {
+    const userResponse = await fetch(`${ELASTICSEARCH_URL}/_security/user/${userName}`, {
+      method: 'PUT',
+      body: JSON.stringify({
         password,
         roles: [role],
         full_name: role,
         email: `role@example.com`,
-      },
-      {
-        headers: requestHeaders,
-      }
-    );
+      }),
+      headers: requestHeaders,
+    });
+    if (!userResponse.ok) {
+      throw new Error(`Failed to create user: ${userResponse.status} ${userResponse.statusText}`);
+    }
 
     logger.info(`User "${userName}" has been created (password "${password}")`);
   } catch (e) {

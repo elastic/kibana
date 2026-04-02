@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerAuthenticateRoute } from './authenticate';
-import { CloudConnectClient } from '../services/cloud_connect_client';
+import { CloudConnectClient, FetchResponseError } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
 
 jest.mock('../services/cloud_connect_client');
@@ -358,15 +358,9 @@ describe('Authentication Routes', () => {
     });
 
     it('should return 401 for invalid/expired API key', async () => {
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 401,
-          data: { message: 'Unauthorized' },
-        },
-      };
+      const fetchError = new FetchResponseError('Unauthorized', 401, { message: 'Unauthorized' });
 
-      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(fetchError);
 
       mockRequest = {
         body: {
@@ -382,15 +376,9 @@ describe('Authentication Routes', () => {
     });
 
     it('should return 403 when terms and conditions not accepted', async () => {
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 403,
-          data: { message: 'Forbidden' },
-        },
-      };
+      const fetchError = new FetchResponseError('Forbidden', 403, { message: 'Forbidden' });
 
-      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(fetchError);
 
       mockRequest = {
         body: {
@@ -409,15 +397,9 @@ describe('Authentication Routes', () => {
     });
 
     it('should return 400 for bad request errors', async () => {
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 400,
-          data: { message: 'Bad request' },
-        },
-      };
+      const fetchError = new FetchResponseError('Bad request', 400, { message: 'Bad request' });
 
-      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue(fetchError);
 
       mockRequest = {
         body: {

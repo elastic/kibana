@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
-import { AxiosError } from 'axios';
 import { getSanitizedError } from './sanitize_error';
 
 describe('getSanitizedError', () => {
@@ -23,10 +21,11 @@ describe('getSanitizedError', () => {
     expect((sanitizedError as any).someConfig).toBeUndefined();
   });
 
-  it('should return an object with only safe properties when given an AxiosError object', () => {
-    const originalError = new AxiosError('Original error message', '500', undefined, undefined, {
-      status: 500,
-    } as AxiosResponse<unknown, any, {}>);
+  it('should return an object with only safe properties when given a fetch-like error with response', () => {
+    const originalError = Object.assign(new Error('Original error message'), {
+      code: '500',
+      response: { status: 500 },
+    });
     originalError.name = 'OriginalError';
     (originalError as any).someConfig = 'This should not be included';
 

@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerClustersRoute } from './clusters';
-import { CloudConnectClient } from '../services/cloud_connect_client';
+import { CloudConnectClient, FetchResponseError } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
 
 jest.mock('../services/cloud_connect_client');
@@ -195,15 +195,9 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 401,
-          data: { message: 'Unauthorized' },
-        },
-      };
+      const fetchError = new FetchResponseError('Unauthorized', 401, { message: 'Unauthorized' });
 
-      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(fetchError);
 
       mockRequest = {};
 
@@ -223,15 +217,9 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 403,
-          data: { message: 'Forbidden' },
-        },
-      };
+      const fetchError = new FetchResponseError('Forbidden', 403, { message: 'Forbidden' });
 
-      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(fetchError);
 
       mockRequest = {};
 
@@ -251,15 +239,9 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 404,
-          data: { message: 'Not found' },
-        },
-      };
+      const fetchError = new FetchResponseError('Not found', 404, { message: 'Not found' });
 
-      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(fetchError);
 
       mockRequest = {};
 
@@ -279,15 +261,9 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 400,
-          data: { message: 'Bad request' },
-        },
-      };
+      const fetchError = new FetchResponseError('Bad request', 400, { message: 'Bad request' });
 
-      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(fetchError);
 
       mockRequest = {};
 
@@ -307,22 +283,16 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 429,
-          data: {
-            errors: [
-              {
-                code: 'clusters.get_cluster.rate_limit_exceeded',
-                message: 'User-rate limit exceeded',
-              },
-            ],
+      const fetchError = new FetchResponseError('Rate limited', 429, {
+        errors: [
+          {
+            code: 'clusters.get_cluster.rate_limit_exceeded',
+            message: 'User-rate limit exceeded',
           },
-        },
-      };
+        ],
+      });
 
-      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(fetchError);
 
       mockRequest = {};
 
@@ -342,22 +312,16 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 403,
-          data: {
-            errors: [
-              {
-                code: 'clusters.get_cluster.forbidden',
-                message: 'request is not authorized',
-              },
-            ],
+      const fetchError = new FetchResponseError('Forbidden', 403, {
+        errors: [
+          {
+            code: 'clusters.get_cluster.forbidden',
+            message: 'request is not authorized',
           },
-        },
-      };
+        ],
+      });
 
-      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(fetchError);
 
       mockRequest = {};
 
@@ -518,15 +482,11 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 500,
-          data: { message: 'Internal server error' },
-        },
-      };
+      const fetchError = new FetchResponseError('Internal server error', 500, {
+        message: 'Internal server error',
+      });
 
-      mockCloudConnectInstance.deleteCluster.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.deleteCluster.mockRejectedValue(fetchError);
 
       mockRequest = {};
 
@@ -924,7 +884,7 @@ describe('Clusters Routes', () => {
       });
     });
 
-    it('should return 500 for axios errors', async () => {
+    it('should return 500 for fetch response errors', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'test-api-key-123',
         clusterId: 'cluster-uuid-456',
@@ -932,15 +892,11 @@ describe('Clusters Routes', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const axiosError = {
-        isAxiosError: true,
-        response: {
-          status: 400,
-          data: { message: 'Invalid service configuration' },
-        },
-      };
+      const fetchError = new FetchResponseError('Invalid service configuration', 400, {
+        message: 'Invalid service configuration',
+      });
 
-      mockCloudConnectInstance.updateCluster.mockRejectedValue(axiosError);
+      mockCloudConnectInstance.updateCluster.mockRejectedValue(fetchError);
 
       mockRequest = {
         body: {

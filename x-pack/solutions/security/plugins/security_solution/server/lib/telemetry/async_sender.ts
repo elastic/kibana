@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios from 'axios';
 import * as rx from 'rxjs';
 import _, { cloneDeep } from 'lodash';
 
@@ -347,41 +346,39 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
 
       const telemetryUrl = senderMetadata.telemetryUrl;
 
-      return await axios
-        .post(telemetryUrl, body, {
+      let resp: Response;
+      try {
+        resp = await fetch(telemetryUrl, {
+          method: 'POST',
+          body,
           headers: {
             ...senderMetadata.telemetryRequestHeaders(),
             'X-Telemetry-Sender': 'async',
           },
-          timeout: 10000,
-        })
-        .then((r) => {
-          this.senderUtils?.incrementCounter(
-            TelemetryCounter.HTTP_STATUS,
-            events.length,
-            channel,
-            r.status.toString()
-          );
-
-          if (r.status < 400) {
-            return { events: events.length, channel };
-          } else {
-            this.logger.warn('Unexpected response', {
-              status: r.status,
-            } as LogMeta);
-            throw newFailure(`Got ${r.status}`, channel, events.length);
-          }
-        })
-        .catch((error) => {
-          this.senderUtils?.incrementCounter(
-            TelemetryCounter.RUNTIME_ERROR,
-            events.length,
-            channel
-          );
-
-          this.logger.warn('Runtime error', withErrorMessage(error));
-          throw newFailure(`Error posting events: ${error}`, channel, events.length);
+          signal: AbortSignal.timeout(10000),
         });
+      } catch (error) {
+        this.senderUtils?.incrementCounter(TelemetryCounter.RUNTIME_ERROR, events.length, channel);
+
+        this.logger.warn('Runtime error', withErrorMessage(error));
+        throw newFailure(`Error posting events: ${error}`, channel, events.length);
+      }
+
+      this.senderUtils?.incrementCounter(
+        TelemetryCounter.HTTP_STATUS,
+        events.length,
+        channel,
+        resp.status.toString()
+      );
+
+      if (resp.status < 400) {
+        return { events: events.length, channel };
+      } else {
+        this.logger.warn('Unexpected response', {
+          status: resp.status,
+        } as LogMeta);
+        throw newFailure(`Got ${resp.status}`, channel, events.length);
+      }
     } catch (err: unknown) {
       if (isFailure(err)) {
         throw err;

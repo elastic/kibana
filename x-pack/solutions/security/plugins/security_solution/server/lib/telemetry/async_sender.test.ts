@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios from 'axios';
-
 import type { QueueConfig, IAsyncTelemetryEventsSender } from './async_sender.types';
 import {
   DEFAULT_QUEUE_CONFIG,
@@ -23,12 +21,17 @@ import {
 import { TelemetryEventsSender } from './sender';
 import type { ExperimentalFeatures } from '../../../common';
 
-jest.mock('axios');
 jest.mock('./receiver');
 
 describe('AsyncTelemetryEventsSender', () => {
-  const mockedAxiosPost = jest.spyOn(axios, 'post');
-  const mockedAxiosGet = jest.spyOn(axios, 'get');
+  const mockedFetch = jest.spyOn(global, 'fetch');
+
+  /** Returns only the POST fetch calls (excludes ping GET calls) */
+  const getPostCalls = () =>
+    mockedFetch.mock.calls.filter(([_url, init]) => {
+      return init && (init as RequestInit).method === 'POST';
+    });
+
   const telemetryPluginSetup = createMockTelemetryPluginSetup();
   const telemetryPluginStart = createMockTelemetryPluginStart();
   const receiver = createMockTelemetryReceiver();
@@ -57,10 +60,15 @@ describe('AsyncTelemetryEventsSender', () => {
   beforeEach(() => {
     service = new AsyncTelemetryEventsSender(loggingSystemMock.createLogger());
     jest.useFakeTimers({ advanceTimers: true });
-    mockedAxiosPost.mockClear();
+    mockedFetch.mockClear();
     telemetryUsageCounter.incrementCounter.mockClear();
-    mockedAxiosPost.mockResolvedValue({ status: 201 });
-    mockedAxiosGet.mockResolvedValue({ status: 200 });
+    mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+      const urlStr = typeof url === 'string' ? url : url.toString();
+      if (urlStr.endsWith('/ping')) {
+        return new Response(null, { status: 200 });
+      }
+      return new Response(null, { status: 201 });
+    });
   });
 
   afterEach(() => {
@@ -78,15 +86,14 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, events);
       await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
 
     it('does not lose data during startup', async () => {
@@ -99,21 +106,20 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       service.start(telemetryPluginStart);
 
       await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
 
     it('should not start without being configured', () => {
@@ -163,14 +169,13 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await service.stop();
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
 
       expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect(getPostCalls()).toContainEqual([
           expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
+          expect.objectContaining({ body: expectedBody }),
+        ]);
       });
     });
 
@@ -201,14 +206,13 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await service.stop();
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
+      expect(getPostCalls().length).toBe(3);
 
       expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect(getPostCalls()).toContainEqual([
           expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
+          expect.objectContaining({ body: expectedBody }),
+        ]);
       });
     });
 
@@ -229,32 +233,39 @@ describe('AsyncTelemetryEventsSender', () => {
       await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 0.2);
 
       // check that no events are sent before the buffer time span
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       // advance time by more than the buffer time span
       await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.2);
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
   });
 
   describe('error handling', () => {
     it('retries when the backend fails', async () => {
-      mockedAxiosPost
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
-        .mockReturnValue(Promise.resolve({ status: 201 }));
+      let postCallCount = 0;
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
+        postCallCount++;
+        if (postCallCount <= 2) {
+          return new Response(null, { status: 500 });
+        }
+        return new Response(null, { status: 201 });
+      });
 
       const bufferTimeSpanMillis = 3;
 
@@ -271,19 +282,27 @@ describe('AsyncTelemetryEventsSender', () => {
       );
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount);
     });
 
     it('retries runtime errors', async () => {
-      mockedAxiosPost
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
-        .mockReturnValue(Promise.resolve({ status: 201 }));
+      let postCallCount2 = 0;
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
+        postCallCount2++;
+        if (postCallCount2 <= 2) {
+          return new Response(null, { status: 500 });
+        }
+        return new Response(null, { status: 201 });
+      });
 
       const bufferTimeSpanMillis = 3;
 
@@ -300,16 +319,22 @@ describe('AsyncTelemetryEventsSender', () => {
       );
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount);
     });
 
     it('only retries `retryCount` times', async () => {
-      mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 500 }));
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
+        return new Response(null, { status: 500 });
+      });
       const bufferTimeSpanMillis = 100;
 
       service.setup(DEFAULT_RETRY_CONFIG, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
@@ -325,16 +350,20 @@ describe('AsyncTelemetryEventsSender', () => {
       );
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount + 1);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount + 1);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount + 1);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount + 1);
     });
 
     it('should catch fatal errors', async () => {
-      mockedAxiosPost.mockImplementation(() => {
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
         throw Error('fatal error');
       });
       const bufferTimeSpanMillis = 100;
@@ -352,12 +381,12 @@ describe('AsyncTelemetryEventsSender', () => {
       );
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount + 1);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount + 1);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount + 1);
+      expect(getPostCalls().length).toBe(DEFAULT_RETRY_CONFIG.retryCount + 1);
     });
   });
 
@@ -378,23 +407,22 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ['a', 'b', 'c', 'd']);
 
       // check that no events are sent before the buffer time span
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       // advance time
       await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
 
       // check that only `inflightEventsThreshold` events were sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        '"a"\n"b"\n"c"',
-        expect.anything()
-      );
+        expect.objectContaining({ body: '"a"\n"b"\n"c"' }),
+      ]);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
 
     it('do not drop events if they are processed before the next batch', async () => {
@@ -412,7 +440,7 @@ describe('AsyncTelemetryEventsSender', () => {
       service.start(telemetryPluginStart);
 
       // check that no events are sent before the buffer time span
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       for (let i = 0; i < batches; i++) {
         // send the next batch
@@ -422,22 +450,20 @@ describe('AsyncTelemetryEventsSender', () => {
         await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
       }
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(batches);
+      expect(getPostCalls().length).toBe(batches);
       for (let i = 0; i < batches; i++) {
         const expected = '"a"\n"b"\n"c"';
 
-        expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-          i + 1,
+        expect(getPostCalls()[i]).toEqual([
           expect.anything(),
-          expected,
-          expect.anything()
-        );
+          expect.objectContaining({ body: expected }),
+        ]);
       }
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(batches);
+      expect(getPostCalls().length).toBe(batches);
     });
   });
 
@@ -472,41 +498,35 @@ describe('AsyncTelemetryEventsSender', () => {
       await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis);
 
       // only high priority events should have been sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        1,
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()[0]).toEqual([
         expect.anything(),
-        ch1Events.map((e) => JSON.stringify(e)).join('\n'),
-        expect.anything()
-      );
+        expect.objectContaining({ body: ch1Events.map((e) => JSON.stringify(e)).join('\n') }),
+      ]);
 
       // wait just the medium priority queue latency
       await jest.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis);
 
       // only medium priority events should have been sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        2,
+      expect(getPostCalls().length).toBe(2);
+      expect(getPostCalls()[1]).toEqual([
         expect.anything(),
-        ch2Events.map((e) => JSON.stringify(e)).join('\n'),
-        expect.anything()
-      );
+        expect.objectContaining({ body: ch2Events.map((e) => JSON.stringify(e)).join('\n') }),
+      ]);
 
       // wait more time
       await jest.advanceTimersByTimeAsync(ch3Config.bufferTimeSpanMillis);
 
       // all events should have been sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        3,
+      expect(getPostCalls().length).toBe(3);
+      expect(getPostCalls()[2]).toEqual([
         expect.anything(),
-        ch3Events.map((e) => JSON.stringify(e)).join('\n'),
-        expect.anything()
-      );
+        expect.objectContaining({ body: ch3Events.map((e) => JSON.stringify(e)).join('\n') }),
+      ]);
 
       // no more events sent after the service was stopped
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
+      expect(getPostCalls().length).toBe(3);
     });
 
     it('discard events when inflightEventsThreshold is reached and process other queues', async () => {
@@ -530,32 +550,32 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(ch2Config.bufferTimeSpanMillis * 1.2);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
 
       await jest.advanceTimersByTimeAsync(ch3Config.bufferTimeSpanMillis * 1.2);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
 
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        1,
+      expect(getPostCalls()[0]).toEqual([
         expect.anything(),
         // gets all ch2 events
-        ch2Events.map((e) => JSON.stringify(e)).join('\n'),
-        expect.anything()
-      );
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        2,
+        expect.objectContaining({
+          body: ch2Events.map((e) => JSON.stringify(e)).join('\n'),
+        }),
+      ]);
+      expect(getPostCalls()[1]).toEqual([
         expect.anything(),
         // only got `inflightEventsThreshold` events, the remaining ch3 events were dropped
-        ch3Events
-          .slice(0, ch3Config.inflightEventsThreshold)
-          .map((e) => JSON.stringify(e))
-          .join('\n'),
-        expect.anything()
-      );
+        expect.objectContaining({
+          body: ch3Events
+            .slice(0, ch3Config.inflightEventsThreshold)
+            .map((e) => JSON.stringify(e))
+            .join('\n'),
+        }),
+      ]);
 
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
     });
 
     it('should manage queue priorities and channels', async () => {
@@ -599,31 +619,31 @@ describe('AsyncTelemetryEventsSender', () => {
         await jest.advanceTimersByTimeAsync(testCase.wait);
       }
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
+      expect(getPostCalls().length).toBe(3);
 
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        1,
+      expect(getPostCalls()[0]).toEqual([
         expect.stringMatching(`.*${ch2}.*`), // url contains the channel name
-        [...cases[1].events, ...cases[2].events].map((e) => JSON.stringify(e)).join('\n'),
-        expect.anything()
-      );
+        expect.objectContaining({
+          body: [...cases[1].events, ...cases[2].events].map((e) => JSON.stringify(e)).join('\n'),
+        }),
+      ]);
 
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        2,
+      expect(getPostCalls()[1]).toEqual([
         expect.stringMatching(`.*${ch2}.*`), // url contains the channel name
-        cases[3].events.map((e) => JSON.stringify(e)).join('\n'),
-        expect.anything()
-      );
+        expect.objectContaining({
+          body: cases[3].events.map((e) => JSON.stringify(e)).join('\n'),
+        }),
+      ]);
 
-      expect(mockedAxiosPost).toHaveBeenNthCalledWith(
-        3,
+      expect(getPostCalls()[2]).toEqual([
         expect.stringMatching(`.*${ch3}.*`), // url contains the channel name
-        [...cases[0].events, ...cases[4].events].map((e) => JSON.stringify(e)).join('\n'),
-        expect.anything()
-      );
+        expect.objectContaining({
+          body: [...cases[0].events, ...cases[4].events].map((e) => JSON.stringify(e)).join('\n'),
+        }),
+      ]);
 
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
+      expect(getPostCalls().length).toBe(3);
     });
   });
 
@@ -642,19 +662,18 @@ describe('AsyncTelemetryEventsSender', () => {
       // send data and wait the initial time span
       service.send(ch1, events);
       await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       // wait the new timespan, now we should have data
       await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
 
     it('should update buffer time config dinamically', async () => {
@@ -675,34 +694,32 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       service.updateQueueConfig(channel, detectionAlertsAfter);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
 
       service.send(channel, events);
       // the old buffer time shouldn't trigger a new buffer (we increased it)
       await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
 
       // wait more time...
       await jest.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
 
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
     });
 
     it('should update max payload size dinamically', async () => {
@@ -726,13 +743,12 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
       expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect(getPostCalls()).toContainEqual([
           expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
+          expect.objectContaining({ body: expectedBody }),
+        ]);
       });
 
       service.updateQueueConfig(channel, detectionAlertsAfter);
@@ -742,13 +758,12 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(3);
+      expect(getPostCalls().length).toBe(3);
       expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect(getPostCalls()).toContainEqual([
           expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
+          expect.objectContaining({ body: expectedBody }),
+        ]);
       });
 
       await service.stop();
@@ -766,31 +781,29 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       service.updateQueueConfig(ch1, { ...DEFAULT_QUEUE_CONFIG, bufferTimeSpanMillis });
 
       service.send(ch1, events);
 
       await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
 
       await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(2);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
     });
   });
 
@@ -808,10 +821,13 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ['a']);
       await service.stop();
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      const found = mockedAxiosPost.mock.calls.some(
-        ([_url, _body, config]) =>
-          config && config.headers && config.headers['X-Telemetry-Sender'] === 'async'
+      expect(getPostCalls().length).toBe(1);
+      const found = mockedFetch.mock.calls.some(
+        ([_url, init]) =>
+          init &&
+          (init as RequestInit).headers &&
+          ((init as RequestInit).headers as Record<string, string>)['X-Telemetry-Sender'] ===
+            'async'
       );
 
       expect(found).not.toBeFalsy();
@@ -839,7 +855,13 @@ describe('AsyncTelemetryEventsSender', () => {
     });
 
     it('should increment the counter when sending events with errors', async () => {
-      mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 500 }));
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
+        return new Response(null, { status: 500 });
+      });
 
       service.setup(
         DEFAULT_RETRY_CONFIG,
@@ -864,11 +886,18 @@ describe('AsyncTelemetryEventsSender', () => {
 
     it('should increment the counter when sending events with errors and without errors', async () => {
       // retries count is set to 3
-      mockedAxiosPost
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
-        .mockReturnValueOnce(Promise.resolve({ status: 500 }));
+      let postCallCount3 = 0;
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
+        postCallCount3++;
+        if (postCallCount3 <= 4) {
+          return new Response(null, { status: 500 });
+        }
+        return new Response(null, { status: 201 });
+      });
 
       service.setup(
         DEFAULT_RETRY_CONFIG,
@@ -920,18 +949,17 @@ describe('AsyncTelemetryEventsSender', () => {
       service.send(ch1, ['a', 'b', 'c', 'd']);
 
       // check that no events are sent before the buffer time span
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       // advance time
       await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
 
       // check that only `inflightEventsThreshold` events were sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        '"a"\n"b"\n"c"',
-        expect.anything()
-      );
+        expect.objectContaining({ body: '"a"\n"b"\n"c"' }),
+      ]);
 
       const found = telemetryUsageCounter.incrementCounter.mock.calls.some(
         ([param]) => param.counterType === TelemetryCounter.DOCS_DROPPED && param.incrementBy === 1
@@ -941,11 +969,57 @@ describe('AsyncTelemetryEventsSender', () => {
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
 
-    it('should increment runtime error counter for expected errors', async () => {
-      mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 401 }));
+    it('should increment http status counter for non-2xx responses', async () => {
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
+        return new Response(null, { status: 401 });
+      });
+
+      service.setup(
+        DEFAULT_RETRY_CONFIG,
+        DEFAULT_QUEUE_CONFIG,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
+
+      service.start(telemetryPluginStart);
+
+      service.send(ch1, ['a']);
+
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
+      await service.stop();
+
+      const foundFatal = telemetryUsageCounter.incrementCounter.mock.calls.some(
+        ([param]) => param.counterType === TelemetryCounter.FATAL_ERROR && param.incrementBy === 1
+      );
+      expect(foundFatal).toBeFalsy();
+
+      const foundRuntime = telemetryUsageCounter.incrementCounter.mock.calls.some(
+        ([param]) => param.counterType === TelemetryCounter.RUNTIME_ERROR && param.incrementBy === 1
+      );
+      expect(foundRuntime).toBeFalsy();
+
+      const foundHttpStatus = telemetryUsageCounter.incrementCounter.mock.calls.some(
+        ([param]) => param.counterType === TelemetryCounter.HTTP_STATUS && param.incrementBy === 1
+      );
+      expect(foundHttpStatus).not.toBeFalsy();
+    });
+
+    it('should increment runtime error counter when fetch throws', async () => {
+      mockedFetch.mockImplementation(async (url: string | URL | Request) => {
+        const urlStr = typeof url === 'string' ? url : url.toString();
+        if (urlStr.endsWith('/ping')) {
+          return new Response(null, { status: 200 });
+        }
+        throw Error('fatal error');
+      });
 
       service.setup(
         DEFAULT_RETRY_CONFIG,
@@ -972,37 +1046,6 @@ describe('AsyncTelemetryEventsSender', () => {
       );
       expect(foundRuntime).not.toBeFalsy();
     });
-
-    it('should increment fatal error counter when applies', async () => {
-      mockedAxiosPost.mockImplementation(() => {
-        throw Error('fatal error');
-      });
-
-      service.setup(
-        DEFAULT_RETRY_CONFIG,
-        DEFAULT_QUEUE_CONFIG,
-        receiver,
-        telemetryPluginSetup,
-        telemetryUsageCounter
-      );
-
-      service.start(telemetryPluginStart);
-
-      service.send(ch1, ['a']);
-
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
-      await service.stop();
-
-      const foundFatal = telemetryUsageCounter.incrementCounter.mock.calls.some(
-        ([param]) => param.counterType === TelemetryCounter.FATAL_ERROR && param.incrementBy === 1
-      );
-      expect(foundFatal).not.toBeFalsy();
-
-      const foundRuntime = telemetryUsageCounter.incrementCounter.mock.calls.some(
-        ([param]) => param.counterType === TelemetryCounter.RUNTIME_ERROR && param.incrementBy === 1
-      );
-      expect(foundRuntime).toBeFalsy();
-    });
   });
 
   describe('ITelemetryEventsSender integration', () => {
@@ -1024,17 +1067,16 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
       serviceV1.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
 
     it('should configure the default queue config in the async service', async () => {
@@ -1057,20 +1099,19 @@ describe('AsyncTelemetryEventsSender', () => {
       // send data and wait the initial time span
       serviceV1.sendAsync(ch1, events);
       await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       // wait the new timespan, now we should have data
       await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expect(mockedAxiosPost).toHaveBeenCalledWith(
+      expect(getPostCalls().length).toBe(1);
+      expect(getPostCalls()).toContainEqual([
         expect.anything(),
-        expectedBody,
-        expect.anything()
-      );
+        expect.objectContaining({ body: expectedBody }),
+      ]);
 
       await service.stop();
       serviceV1.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
     });
 
     it('should configure a queue config in the async service', async () => {
@@ -1100,39 +1141,37 @@ describe('AsyncTelemetryEventsSender', () => {
 
       await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
       expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect(getPostCalls()).toContainEqual([
           expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
+          expect.objectContaining({ body: expectedBody }),
+        ]);
       });
 
       serviceV1.updateQueueConfig(channel, detectionAlertsAfter);
 
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
 
       serviceV1.sendAsync(channel, ['a', 'b', 'c']);
       // the old buffer time shouldn't trigger a new buffer (we increased it)
       await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(getPostCalls().length).toBe(1);
 
       // wait more time...
       await jest.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis);
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
 
       expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect(getPostCalls()).toContainEqual([
           expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
+          expect.objectContaining({ body: expectedBody }),
+        ]);
       });
 
       await service.stop();
       serviceV1.stop();
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(getPostCalls().length).toBe(2);
     });
   });
 
@@ -1150,7 +1189,7 @@ describe('AsyncTelemetryEventsSender', () => {
       await service.stop();
 
       // no events sent to the telemetry service
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+      expect(getPostCalls().length).toBe(0);
 
       expect(result).toEqual(expectedResult);
     });

@@ -8,8 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import axios from 'axios';
-import { CloudConnectClient } from '../services/cloud_connect_client';
+import { CloudConnectClient, isFetchResponseError } from '../services/cloud_connect_client';
 import { getApiKeyData, ApiKeyNotFoundError } from '../lib/create_storage_service';
 import { enableInferenceCCM } from '../services/inference_ccm';
 
@@ -81,12 +80,13 @@ export const registerRotateApiKeyRoute = ({
           });
         }
 
-        if (axios.isAxiosError(error)) {
-          const errorData = error.response?.data;
-          const apiStatusCode = error.response?.status;
+        if (isFetchResponseError(error)) {
+          const errorData = error.data as Record<string, unknown> | undefined;
+          const apiStatusCode = error.status;
 
+          const errors = errorData?.errors as Array<{ message?: string }> | undefined;
           const errorMessage =
-            errorData?.errors?.[0]?.message || errorData?.message || 'Failed to rotate API key';
+            errors?.[0]?.message || (errorData?.message as string) || 'Failed to rotate API key';
 
           // Use 500 for 401 errors to prevent Kibana logout
           const statusCode = apiStatusCode === 401 ? 500 : apiStatusCode || 500;
@@ -168,13 +168,14 @@ export const registerRotateApiKeyRoute = ({
           });
         }
 
-        if (axios.isAxiosError(error)) {
-          const errorData = error.response?.data;
-          const apiStatusCode = error.response?.status;
+        if (isFetchResponseError(error)) {
+          const errorData = error.data as Record<string, unknown> | undefined;
+          const apiStatusCode = error.status;
 
+          const errors = errorData?.errors as Array<{ message?: string }> | undefined;
           const errorMessage =
-            errorData?.errors?.[0]?.message ||
-            errorData?.message ||
+            errors?.[0]?.message ||
+            (errorData?.message as string) ||
             'Failed to rotate service API key';
 
           // Use 500 for 401 errors to prevent Kibana logout

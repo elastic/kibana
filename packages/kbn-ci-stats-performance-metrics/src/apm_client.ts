@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getYearAgoIso } from './utils';
 
@@ -40,29 +38,39 @@ export interface MainStatisticsResponse {
   bucketSize: number;
 }
 
+interface ApmClientConfig {
+  baseURL?: string;
+  timeout?: number;
+  auth?: {
+    username: string;
+    password: string;
+  };
+}
+
 const DEFAULT_BASE_URL =
   'https://kibana-ops-e2e-perf.kb.us-central1.gcp.cloud.es.io:9243/internal/apm';
 const DEFAULT_CLIENT_TIMEOUT = 120 * 1000;
 
 export class ApmClient {
-  private readonly client: AxiosInstance;
+  private readonly _baseURL: string;
+  private readonly _timeout: number;
+  private readonly _authHeader: string | undefined;
   private readonly logger: ToolingLog;
 
-  constructor(config: AxiosRequestConfig, logger: ToolingLog) {
+  constructor(config: ApmClientConfig, logger: ToolingLog) {
     const { baseURL = DEFAULT_BASE_URL, timeout = DEFAULT_CLIENT_TIMEOUT, auth } = config;
 
-    this.client = axios.create({
-      auth,
-      baseURL,
-      timeout,
-      allowAbsoluteUrls: false,
-    });
+    this._baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+    this._timeout = timeout;
+    this._authHeader = auth
+      ? `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}`
+      : undefined;
 
     this.logger = logger || console;
   }
 
-  public get baseUrl(): string | undefined {
-    return this.client.defaults.baseURL;
+  public get baseUrl(): string {
+    return this._baseURL;
   }
 
   public async mainStatistics(queryParams: MainStatisticsRequestOptions) {
@@ -78,20 +86,36 @@ export class ApmClient {
     } = queryParams;
 
     try {
-      const responseRaw = await this.client.get<MainStatisticsResponse>(
-        `services/kibana-frontend/transactions/groups/main_statistics`,
-        {
-          params: {
-            kuery: `labels.ciBuildId:${ciBuildId}`,
-            environment,
-            start,
-            end,
-            transactionType,
-            latencyAggregationType,
-          },
-        }
-      );
-      return responseRaw.data;
+      const searchParams = new URLSearchParams({
+        kuery: `labels.ciBuildId:${ciBuildId}`,
+        environment,
+        start,
+        end,
+        transactionType,
+        latencyAggregationType,
+      });
+
+      const url = `${
+        this._baseURL
+      }/services/kibana-frontend/transactions/groups/main_statistics?${searchParams.toString()}`;
+      const headers: Record<string, string> = {};
+      if (this._authHeader) {
+        headers.Authorization = this._authHeader;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+        signal: AbortSignal.timeout(this._timeout),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `APM request failed with status ${response.status}: ${response.statusText}`
+        );
+      }
+
+      return (await response.json()) as MainStatisticsResponse;
     } catch (error) {
       this.logger.error(
         `Error fetching main statistics from APM, ci build ${ciBuildId}, error message ${error.message}`

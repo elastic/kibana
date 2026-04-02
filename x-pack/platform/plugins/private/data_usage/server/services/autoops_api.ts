@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import https from 'https';
+import { Agent } from 'undici';
 
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import apm from 'elastic-apm-node';
 
 import type { Logger } from '@kbn/logging';
-import type { AxiosError, AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import type { LogMeta } from '@kbn/core/server';
 import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
@@ -71,33 +69,42 @@ export class AutoOpsAPIService {
     const tlsConfig = this.createTlsConfig(autoopsConfig);
     const cloudSetup = appContextService.getCloud();
 
-    const requestConfig: AxiosRequestConfig = {
-      url: getAutoOpsAPIRequestUrl(autoopsConfig.api?.url, cloudSetup?.serverless.projectId),
-      data: {
-        from: momentDateParser(requestBody.from)?.toISOString(),
-        to: momentDateParser(requestBody.to)?.toISOString(),
-        size: requestBody.dataStreams.length,
-        level: 'datastream',
-        metric_types: requestBody.metricTypes,
-        allowed_indices: requestBody.dataStreams,
+    const requestUrl = getAutoOpsAPIRequestUrl(
+      autoopsConfig.api?.url,
+      cloudSetup?.serverless.projectId
+    );
+    const requestBodyData: Record<string, unknown> = {
+      from: momentDateParser(requestBody.from)?.toISOString(),
+      to: momentDateParser(requestBody.to)?.toISOString(),
+      size: requestBody.dataStreams.length,
+      level: 'datastream',
+      metric_types: requestBody.metricTypes,
+      allowed_indices: requestBody.dataStreams,
+    };
+
+    if (!cloudSetup?.isServerlessEnabled) {
+      requestBodyData.stack_version = appContextService.getKibanaVersion();
+    }
+
+    const dispatcher = new Agent({
+      connect: {
+        rejectUnauthorized: tlsConfig.rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
       },
-      signal: controller.signal,
-      method: 'POST',
+    });
+
+    const requestConfig = {
+      url: requestUrl,
+      data: requestBodyData,
+      method: 'POST' as const,
       headers: {
         'Content-type': 'application/json',
         'X-Request-ID': traceId,
         traceparent: traceId,
       },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: tlsConfig.rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-      }),
+      dispatcher,
     };
-
-    if (!cloudSetup?.isServerlessEnabled) {
-      requestConfig.data.stack_version = appContextService.getKibanaVersion();
-    }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
 
@@ -114,63 +121,67 @@ export class AutoOpsAPIService {
       },
     };
 
-    const response = await axios<UsageMetricsAutoOpsResponseSchemaBody>(requestConfig).catch(
-      (error: Error | AxiosError) => {
-        if (!axios.isAxiosError(error)) {
-          this.logger.error(
-            `${AUTO_OPS_REQUEST_FAILED_PREFIX} with an error ${error}, request config: ${requestConfigDebugStatus}`,
-            errorMetadataWithRequestConfig
-          );
-          throw new AutoOpsError(withRequestIdMessage(error.message));
-        }
+    let response: Response;
+    try {
+      response = await globalThis.fetch(requestUrl, {
+        method: 'POST',
+        headers: requestConfig.headers as Record<string, string>,
+        body: JSON.stringify(requestBodyData),
+        signal: controller.signal,
+        // @ts-expect-error -- dispatcher is a valid undici option for Node.js fetch
+        dispatcher,
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const causeMessage =
+          error.cause instanceof AggregateError
+            ? error.cause.errors.map((e: Error) => e.message)
+            : error.cause;
+        const errorLogCodeCause = `${
+          (error as Error & { code?: string }).code ?? ''
+        }  ${causeMessage}`;
 
-        const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
-
-        if (error.response) {
-          // The request was made and the server responded with a status code and error data
-          this.logger.error(
-            `${AUTO_OPS_REQUEST_FAILED_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
-              error.response.status
-            )}} ${JSON.stringify(
-              error.response.data
-            )}}, request config: ${requestConfigDebugStatus}`,
-            {
-              ...errorMetadataWithRequestConfig,
-              http: {
-                ...errorMetadataWithRequestConfig.http,
-                response: {
-                  status_code: error.response.status,
-                  body: error.response.data,
-                },
-              },
-            }
-          );
-          throw new AutoOpsError(
-            withRequestIdMessage(
-              `${AUTO_OPS_REQUEST_FAILED_PREFIX} with status code: ${error.response.status}`
-            )
-          );
-        } else if (error.request) {
-          // The request was made but no response was received
-          this.logger.error(
-            `${AUTO_OPS_REQUEST_FAILED_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause}, request config: ${requestConfigDebugStatus}`,
-            errorMetadataWithRequestConfig
-          );
-          throw new AutoOpsError(withRequestIdMessage(`no response received from the AutoOps API`));
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          this.logger.error(
-            `${AUTO_OPS_REQUEST_FAILED_PREFIX} with ${errorLogCodeCause}, request config: ${requestConfigDebugStatus}, error: ${error.toJSON()}`,
-            errorMetadataWithRequestConfig
-          );
-          throw new AutoOpsError(
-            withRequestIdMessage(`${AUTO_OPS_REQUEST_FAILED_PREFIX}, ${error.message}`)
-          );
-        }
+        this.logger.error(
+          `${AUTO_OPS_REQUEST_FAILED_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause}, request config: ${requestConfigDebugStatus}`,
+          errorMetadataWithRequestConfig
+        );
+        throw new AutoOpsError(withRequestIdMessage(`no response received from the AutoOps API`));
       }
-    );
 
-    const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(response.data);
+      this.logger.error(
+        `${AUTO_OPS_REQUEST_FAILED_PREFIX} with an error ${error}, request config: ${requestConfigDebugStatus}`,
+        errorMetadataWithRequestConfig
+      );
+      throw new AutoOpsError(withRequestIdMessage(String(error)));
+    }
+
+    if (!response.ok) {
+      const responseBody = await response.text().catch(() => '');
+      this.logger.error(
+        `${AUTO_OPS_REQUEST_FAILED_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
+          response.status
+        )}} ${JSON.stringify(responseBody)}}, request config: ${requestConfigDebugStatus}`,
+        {
+          ...errorMetadataWithRequestConfig,
+          http: {
+            ...errorMetadataWithRequestConfig.http,
+            response: {
+              status_code: response.status,
+              body: { content: responseBody },
+            },
+          },
+        }
+      );
+      throw new AutoOpsError(
+        withRequestIdMessage(
+          `${AUTO_OPS_REQUEST_FAILED_PREFIX} with status code: ${response.status}`
+        )
+      );
+    }
+
+    const responseData = (await response.json()) as UsageMetricsAutoOpsResponseSchemaBody;
+
+    const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(responseData);
 
     this.logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
     return validatedResponse;
@@ -186,30 +197,20 @@ export class AutoOpsAPIService {
     );
   }
 
-  private createRequestConfigDebug(requestConfig: AxiosRequestConfig<any>) {
+  private createRequestConfigDebug(requestConfig: {
+    data: Record<string, unknown>;
+    dispatcher: Agent;
+    [key: string]: unknown;
+  }) {
     return JSON.stringify({
       ...requestConfig,
       data: {
         ...requestConfig.data,
         fleet_token: '[REDACTED]',
       },
-      httpsAgent: {
-        ...requestConfig.httpsAgent,
-        options: {
-          ...requestConfig.httpsAgent.options,
-          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-        },
-      },
+      dispatcher: '[Agent]',
     });
   }
-
-  private convertCauseErrorsToString = (error: AxiosError) => {
-    if (error.cause instanceof AggregateError) {
-      return error.cause.errors.map((e: Error) => e.message);
-    }
-    return error.cause;
-  };
 }
 
 export const metricTypesSchema = schema.oneOf(

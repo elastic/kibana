@@ -10,8 +10,6 @@
 import Url from 'url';
 import { format } from 'util';
 
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
 import { FtrService } from './ftr_context_provider';
 
 export interface Credentials {
@@ -19,8 +17,9 @@ export interface Credentials {
   password: string;
 }
 
-function extractCookieValue(authResponse: AxiosResponse) {
-  return authResponse.headers['set-cookie']?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
+function extractCookieValue(headers: Headers) {
+  const setCookie = headers.get('set-cookie');
+  return setCookie?.toString().split(';')[0].split('sid=')[1] ?? '';
 }
 export class AuthService extends FtrService {
   private readonly config = this.ctx.getService('config');
@@ -41,15 +40,14 @@ export class AuthService extends FtrService {
     const version = await this.kibanaServer.version.get();
 
     this.log.info('fetching auth cookie from', loginUrl.href);
-    const authResponse = await axios.request({
-      url: loginUrl.href,
-      method: 'post',
-      data: {
+    const authResponse = await fetch(loginUrl.href, {
+      method: 'POST',
+      body: JSON.stringify({
         providerType: 'basic',
         providerName: provider,
         currentURL: new URL('/login?next=%2F', baseUrl).href,
         params: credentials ?? { username: this.getUsername(), password: this.getPassword() },
-      },
+      }),
       headers: {
         'content-type': 'application/json',
         'kbn-version': version,
@@ -57,8 +55,7 @@ export class AuthService extends FtrService {
         'sec-fetch-site': 'same-origin',
         'x-elastic-internal-origin': 'Kibana',
       },
-      validateStatus: () => true,
-      maxRedirects: 0,
+      redirect: 'manual',
     });
 
     if (authResponse.status !== 200) {
@@ -67,15 +64,16 @@ export class AuthService extends FtrService {
       );
     }
 
-    const cookie = extractCookieValue(authResponse);
+    const cookie = extractCookieValue(authResponse.headers);
     if (cookie) {
       this.log.info('captured auth cookie');
     } else {
+      const body = await authResponse.text();
       this.log.error(
         format('unable to determine auth cookie from response', {
           status: `${authResponse.status} ${authResponse.statusText}`,
-          body: authResponse.data,
-          headers: authResponse.headers,
+          body,
+          headers: Object.fromEntries(authResponse.headers.entries()),
         })
       );
 

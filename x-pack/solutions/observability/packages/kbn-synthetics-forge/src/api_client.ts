@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
-import axios from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ApiClientConfig, PrivateLocation, AgentPolicy, Space, Monitor } from './types';
 
@@ -15,30 +13,44 @@ const DEFAULT_RETRY_DELAY_MS = 1000;
 const BATCH_SIZE = 50;
 
 export class SyntheticsApiClient {
-  private client: AxiosInstance;
   private kibanaUrl: string;
   private maxRetries: number;
   private retryDelayMs: number;
   private log: ToolingLog;
+  private defaultHeaders: Record<string, string>;
+  private authHeader: string;
 
   constructor(config: ApiClientConfig, log: ToolingLog) {
     this.kibanaUrl = config.kibanaUrl.replace(/\/$/, '');
     this.maxRetries = DEFAULT_RETRY_COUNT;
     this.retryDelayMs = DEFAULT_RETRY_DELAY_MS;
     this.log = log;
-    this.client = axios.create({
-      baseURL: this.kibanaUrl,
-      auth: {
-        username: config.username,
-        password: config.password,
-      },
-      headers: {
-        'kbn-xsrf': 'true',
-        'x-elastic-internal-origin': 'synthetics-forge',
-        'elastic-api-version': '2023-10-31',
-      },
-      validateStatus: () => true,
+    this.authHeader = `Basic ${Buffer.from(`${config.username}:${config.password}`).toString(
+      'base64'
+    )}`;
+    this.defaultHeaders = {
+      'kbn-xsrf': 'true',
+      'x-elastic-internal-origin': 'synthetics-forge',
+      'elastic-api-version': '2023-10-31',
+      'content-type': 'application/json',
+      Authorization: this.authHeader,
+    };
+  }
+
+  private async request(
+    method: string,
+    path: string,
+    data?: unknown
+  ): Promise<{ status: number; data: any }> {
+    const url = `${this.kibanaUrl}${path}`;
+    const response = await fetch(url, {
+      method,
+      headers: this.defaultHeaders,
+      ...(data !== undefined ? { body: JSON.stringify(data) } : {}),
     });
+
+    const responseData = await response.json().catch(() => undefined);
+    return { status: response.status, data: responseData };
   }
 
   private async withRetry<T>(
@@ -75,7 +87,7 @@ export class SyntheticsApiClient {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private isSuccessResponse(response: AxiosResponse): boolean {
+  private isSuccessResponse(response: { status: number }): boolean {
     return response.status >= 200 && response.status < 300;
   }
 
@@ -85,7 +97,7 @@ export class SyntheticsApiClient {
 
   async setupFleet(): Promise<void> {
     this.log.info('Setting up Fleet...');
-    const response = await this.client.post('/api/fleet/setup');
+    const response = await this.request('POST', '/api/fleet/setup');
     if (!this.isSuccessResponse(response)) {
       throw new Error(`Fleet setup failed: ${JSON.stringify(response.data)}`);
     }
@@ -94,7 +106,7 @@ export class SyntheticsApiClient {
 
   async enableSynthetics(): Promise<void> {
     this.log.info('Enabling Synthetics...');
-    const response = await this.client.put('/internal/synthetics/service/enablement');
+    const response = await this.request('PUT', '/internal/synthetics/service/enablement');
     if (response.status !== 200 && response.status !== 409) {
       throw new Error(`Enable Synthetics failed: ${JSON.stringify(response.data)}`);
     }
@@ -104,13 +116,13 @@ export class SyntheticsApiClient {
   async createSpace(spaceId: string, name: string): Promise<Space> {
     this.log.info(`Creating space: ${spaceId}`);
 
-    const existingResponse = await this.client.get(`/api/spaces/space/${spaceId}`);
+    const existingResponse = await this.request('GET', `/api/spaces/space/${spaceId}`);
     if (existingResponse.status === 200) {
       this.log.info(`Space ${spaceId} already exists`);
       return existingResponse.data as Space;
     }
 
-    const response = await this.client.post('/api/spaces/space', {
+    const response = await this.request('POST', '/api/spaces/space', {
       id: spaceId,
       name,
       description: 'Space for Synthetics scalability testing',
@@ -133,7 +145,7 @@ export class SyntheticsApiClient {
       return found;
     }
 
-    const response = await this.client.post('/api/fleet/agent_policies?sys_monitoring=true', {
+    const response = await this.request('POST', '/api/fleet/agent_policies?sys_monitoring=true', {
       name,
       description: 'Agent policy for Synthetics scalability testing',
       namespace: 'default',
@@ -149,7 +161,7 @@ export class SyntheticsApiClient {
 
   async getPrivateLocations(spaceId?: string): Promise<PrivateLocation[]> {
     const basePath = this.getBasePath(spaceId);
-    const response = await this.client.get(`${basePath}/api/synthetics/private_locations`);
+    const response = await this.request('GET', `${basePath}/api/synthetics/private_locations`);
     if (!this.isSuccessResponse(response)) {
       return [];
     }
@@ -195,7 +207,7 @@ export class SyntheticsApiClient {
     }
 
     const basePath = this.getBasePath(spaceId);
-    const response = await this.client.post(`${basePath}/api/synthetics/private_locations`, {
+    const response = await this.request('POST', `${basePath}/api/synthetics/private_locations`, {
       label,
       agentPolicyId,
       geo: { lat: 0, lon: 0 },
@@ -219,7 +231,7 @@ export class SyntheticsApiClient {
     return this.withRetry(async () => {
       this.log.debug(`Creating HTTP monitor: ${name}`);
       const basePath = this.getBasePath(spaceId);
-      const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
+      const response = await this.request('POST', `${basePath}/api/synthetics/monitors`, {
         type: 'http',
         name,
         urls: url,
@@ -247,7 +259,7 @@ export class SyntheticsApiClient {
     return this.withRetry(async () => {
       this.log.debug(`Creating TCP monitor: ${name}`);
       const basePath = this.getBasePath(spaceId);
-      const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
+      const response = await this.request('POST', `${basePath}/api/synthetics/monitors`, {
         type: 'tcp',
         name,
         hosts: host,
@@ -275,7 +287,7 @@ export class SyntheticsApiClient {
     return this.withRetry(async () => {
       this.log.debug(`Creating ICMP monitor: ${name}`);
       const basePath = this.getBasePath(spaceId);
-      const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
+      const response = await this.request('POST', `${basePath}/api/synthetics/monitors`, {
         type: 'icmp',
         name,
         hosts: host,
@@ -304,7 +316,7 @@ export class SyntheticsApiClient {
     return this.withRetry(async () => {
       this.log.debug(`Creating Browser monitor: ${name}`);
       const basePath = this.getBasePath(spaceId);
-      const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
+      const response = await this.request('POST', `${basePath}/api/synthetics/monitors`, {
         type: 'browser',
         name,
         schedule: { number: '3', unit: 'm' },
@@ -332,7 +344,8 @@ export class SyntheticsApiClient {
     const perPage = 100;
 
     while (true) {
-      const response = await this.client.get(
+      const response = await this.request(
+        'GET',
         `${basePath}/api/synthetics/monitors?perPage=${perPage}&page=${page}`
       );
       if (!this.isSuccessResponse(response)) {
@@ -355,8 +368,8 @@ export class SyntheticsApiClient {
     if (monitorIds.length === 0) return;
 
     const basePath = this.getBasePath(spaceId);
-    const response = await this.client.delete(`${basePath}/api/synthetics/monitors`, {
-      data: { ids: monitorIds },
+    const response = await this.request('DELETE', `${basePath}/api/synthetics/monitors`, {
+      ids: monitorIds,
     });
 
     if (!this.isSuccessResponse(response)) {
@@ -366,7 +379,8 @@ export class SyntheticsApiClient {
 
   async deletePrivateLocation(locationId: string, spaceId?: string): Promise<void> {
     const basePath = this.getBasePath(spaceId);
-    const response = await this.client.delete(
+    const response = await this.request(
+      'DELETE',
       `${basePath}/api/synthetics/private_locations/${locationId}`
     );
     if (!this.isSuccessResponse(response) && response.status !== 404) {
@@ -375,7 +389,7 @@ export class SyntheticsApiClient {
   }
 
   async deleteAgentPolicy(policyId: string, force: boolean = false): Promise<void> {
-    const response = await this.client.post('/api/fleet/agent_policies/delete', {
+    const response = await this.request('POST', '/api/fleet/agent_policies/delete', {
       agentPolicyId: policyId,
       force,
     });
@@ -385,7 +399,8 @@ export class SyntheticsApiClient {
   }
 
   async getAgentsForPolicy(agentPolicyId: string): Promise<Array<{ id: string; status: string }>> {
-    const response = await this.client.get(
+    const response = await this.request(
+      'GET',
       `/api/fleet/agents?kuery=policy_id:${agentPolicyId}&perPage=1000`
     );
     if (!this.isSuccessResponse(response)) {
@@ -396,7 +411,7 @@ export class SyntheticsApiClient {
 
   async bulkUnenrollAgents(agentPolicyId: string): Promise<void> {
     // Use bulk unenroll API
-    const response = await this.client.post('/api/fleet/agents/bulk_unenroll', {
+    const response = await this.request('POST', '/api/fleet/agents/bulk_unenroll', {
       agents: `policy_id:${agentPolicyId}`,
       force: true,
       revoke: true,
@@ -410,7 +425,7 @@ export class SyntheticsApiClient {
   }
 
   async getAgentPolicies(): Promise<AgentPolicy[]> {
-    const response = await this.client.get('/api/fleet/agent_policies?perPage=1000');
+    const response = await this.request('GET', '/api/fleet/agent_policies?perPage=1000');
     if (!this.isSuccessResponse(response)) {
       return [];
     }
@@ -419,7 +434,8 @@ export class SyntheticsApiClient {
 
   async getEnrollmentToken(agentPolicyId: string): Promise<string> {
     this.log.info(`Fetching enrollment token for policy: ${agentPolicyId}`);
-    const response = await this.client.get(
+    const response = await this.request(
+      'GET',
       `/api/fleet/enrollment_api_keys?kuery=policy_id:${agentPolicyId}`
     );
 
@@ -433,7 +449,7 @@ export class SyntheticsApiClient {
   }
 
   async getKibanaVersion(): Promise<string> {
-    const response = await this.client.get('/api/status');
+    const response = await this.request('GET', '/api/status');
     if (!this.isSuccessResponse(response)) {
       throw new Error(`Failed to get Kibana version: ${JSON.stringify(response.data)}`);
     }
@@ -477,7 +493,7 @@ export class SyntheticsApiClient {
       const batch = policyIds.slice(i, i + BATCH_SIZE);
 
       try {
-        const response = await this.client.post('/api/fleet/package_policies/delete', {
+        const response = await this.request('POST', '/api/fleet/package_policies/delete', {
           packagePolicyIds: batch,
           force: true,
         });

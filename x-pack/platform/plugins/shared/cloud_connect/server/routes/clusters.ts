@@ -9,9 +9,8 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { i18n } from '@kbn/i18n';
-import axios from 'axios';
 import { API_BASE_PATH } from '../../common/constants';
-import { CloudConnectClient } from '../services/cloud_connect_client';
+import { CloudConnectClient, isFetchResponseError } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
 
@@ -106,13 +105,13 @@ export const registerClustersRoute = ({
       } catch (error) {
         logger.error('Failed to retrieve cluster details', { error });
 
-        if (axios.isAxiosError(error)) {
-          const errorData = error.response?.data;
-          const apiStatusCode = error.response?.status;
+        if (isFetchResponseError(error)) {
+          const errorData = error.data as Record<string, unknown> | undefined;
+          const apiStatusCode = error.status;
 
           // Extract error message from backend response
           const errorMessage =
-            errorData?.errors?.[0]?.message ||
+            (errorData?.errors as Array<{ message?: string }> | undefined)?.[0]?.message ||
             errorData?.message ||
             'Failed to retrieve cluster details';
 
@@ -123,7 +122,7 @@ export const registerClustersRoute = ({
           return response.customError({
             statusCode,
             body: {
-              message: errorMessage,
+              message: errorMessage as string,
             },
           });
         }
@@ -191,12 +190,12 @@ export const registerClustersRoute = ({
       } catch (error) {
         logger.error('Failed to disconnect cluster', { error });
 
-        if (axios.isAxiosError(error)) {
-          const errorData = error.response?.data;
+        if (isFetchResponseError(error)) {
+          const errorData = error.data as Record<string, unknown> | undefined;
 
           return response.customError({
             statusCode: 500,
-            body: errorData || {
+            body: (errorData as { message: string }) || {
               message: 'An error occurred while disconnecting the cluster',
             },
           });
@@ -348,12 +347,15 @@ export const registerClustersRoute = ({
       } catch (error) {
         logger.error('Failed to update cluster services', { error });
 
-        if (axios.isAxiosError(error)) {
-          const errorData = error.response?.data;
+        if (isFetchResponseError(error)) {
+          const errorData = error.data as Record<string, unknown> | undefined;
 
           // Extract error code from Cloud Connect API error format
           // API returns: { "errors": [{ "code": "...", "message": "..." }] }
-          const errorCode = errorData?.errors?.[0]?.code;
+          const errors = errorData?.errors as
+            | Array<{ code?: string; message?: string }>
+            | undefined;
+          const errorCode = errors?.[0]?.code;
 
           // Check for specific error codes and return user-friendly messages
           let errorMessage;
@@ -363,7 +365,7 @@ export const registerClustersRoute = ({
             });
           } else {
             errorMessage =
-              errorData?.errors?.[0]?.message ||
+              errors?.[0]?.message ||
               errorData?.message ||
               'An error occurred while updating cluster services';
           }
@@ -371,7 +373,7 @@ export const registerClustersRoute = ({
           return response.customError({
             statusCode: 500,
             body: {
-              message: errorMessage,
+              message: errorMessage as string,
               ...(errorCode && { code: errorCode }),
             },
           });

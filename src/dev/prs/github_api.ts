@@ -7,52 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
-import axios from 'axios';
-
 import { createFailError } from '@kbn/dev-cli-errors';
 
-interface ResponseError extends AxiosError {
-  request: any;
-  response: AxiosResponse;
+interface ResponseError extends Error {
+  status: number;
+  headers: Headers;
 }
 const isResponseError = (error: any): error is ResponseError =>
-  error && error.response && error.response.status;
+  error && typeof error.status === 'number';
 
 const isRateLimitError = (error: any) =>
   isResponseError(error) &&
-  error.response.status === 403 &&
-  `${error.response.headers['X-RateLimit-Remaining']}` === '0';
+  error.status === 403 &&
+  `${error.headers.get('X-RateLimit-Remaining')}` === '0';
 
 export class GithubApi {
-  private api: AxiosInstance;
+  private baseURL = 'https://api.github.com/';
+  private defaultHeaders: Record<string, string>;
 
   constructor(private accessToken?: string) {
-    this.api = axios.create({
-      baseURL: 'https://api.github.com/',
-      allowAbsoluteUrls: false,
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'kibana/update_prs_cli',
-        ...(this.accessToken ? { Authorization: `token ${this.accessToken} ` } : {}),
-      },
-    });
+    this.defaultHeaders = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'kibana/update_prs_cli',
+      ...(this.accessToken ? { Authorization: `token ${this.accessToken} ` } : {}),
+    };
+  }
+
+  private async request(path: string): Promise<any> {
+    const url = `${this.baseURL}${path}`;
+    const response = await fetch(url, { headers: this.defaultHeaders });
+    if (!response.ok) {
+      const err = new Error(`Request failed with status ${response.status}`) as any;
+      err.status = response.status;
+      err.headers = response.headers;
+      throw err;
+    }
+    return response.json();
   }
 
   async getPrInfo(prNumber: number) {
     try {
-      const resp = await this.api.get(`repos/elastic/kibana/pulls/${prNumber}`);
-      const targetRef: string = resp.data.base && resp.data.base.ref;
+      const data = await this.request(`repos/elastic/kibana/pulls/${prNumber}`);
+      const targetRef: string = data.base && data.base.ref;
       if (!targetRef) {
         throw new Error('unable to read base ref from pr info');
       }
 
-      const owner: string = resp.data.head && resp.data.head.user && resp.data.head.user.login;
+      const owner: string = data.head && data.head.user && data.head.user.login;
       if (!owner) {
         throw new Error('unable to read owner info from pr info');
       }
 
-      const sourceBranch: string = resp.data.head.ref;
+      const sourceBranch: string = data.head.ref;
       if (!sourceBranch) {
         throw new Error('unable to read source branch name from pr info');
       }

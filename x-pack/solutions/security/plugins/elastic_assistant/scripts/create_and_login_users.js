@@ -8,11 +8,10 @@
 /**
  * Script to create and log in multiple test users in Elasticsearch and Kibana.
  *
- * This script uses Axios to interact with Elasticsearch's security API to create users
+ * This script uses native fetch to interact with Elasticsearch's security API to create users
  * and Puppeteer to automate logging into Kibana. It generates random user data using Faker.
  */
 
-const axios = require('axios');
 const puppeteer = require('puppeteer');
 const { faker } = require('@faker-js/faker');
 const { SECURITY_FEATURE_ID } = require('../common/constants');
@@ -33,6 +32,9 @@ const elasticAuth = {
   username: 'elastic',
   password: 'changeme',
 };
+const basicAuthHeader = `Basic ${Buffer.from(
+  `${elasticAuth.username}:${elasticAuth.password}`
+).toString('base64')}`;
 
 /**
  * Creates a restricted role that denies access to the Security Assistant.
@@ -44,9 +46,12 @@ const createRestrictedRole = async (roleName) => {
 
   // First check if the role already exists
   try {
-    const checkResponse = await axios.get(url, {
-      auth: elasticAuth,
-      headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
+    const checkResponse = await fetch(url, {
+      headers: {
+        Authorization: basicAuthHeader,
+        'Content-Type': 'application/json',
+        'kbn-xsrf': 'xsrf',
+      },
     });
 
     if (checkResponse.status === 200) {
@@ -54,17 +59,19 @@ const createRestrictedRole = async (roleName) => {
       return;
     }
   } catch (err) {
-    // Role doesn't exist, continue to create it
-    if (err.response?.status !== 404) {
-      console.error(`❌ Error checking role ${roleName}:`, err.response?.data || err.message);
-      return err;
-    }
+    // Role doesn't exist or network error, continue to create it
+    console.error(`❌ Error checking role ${roleName}:`, err.message);
   }
 
   try {
-    await axios.put(
-      url,
-      {
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: basicAuthHeader,
+        'Content-Type': 'application/json',
+        'kbn-xsrf': 'xsrf',
+      },
+      body: JSON.stringify({
         description: '',
         elasticsearch: {
           cluster: [],
@@ -129,15 +136,18 @@ const createRestrictedRole = async (roleName) => {
             },
           },
         ],
-      },
-      {
-        auth: elasticAuth,
-        headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
-      }
-    );
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error(`❌ Failed to create role ${roleName}:`, errorData);
+      return new Error(errorData);
+    }
+
     console.log(`✅ Created restricted role ${roleName}`);
   } catch (err) {
-    console.error(`❌ Failed to create role ${roleName}:`, err.response?.data || err.message);
+    console.error(`❌ Failed to create role ${roleName}:`, err.message);
     return err;
   }
 };
@@ -158,30 +168,37 @@ const createUser = async (username, fullName, restricted = false) => {
 
   const url = `${elasticUrl}/_security/user/${username}`;
   try {
-    await axios.put(
-      url,
-      {
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: basicAuthHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         password: 'changeme',
         roles: restricted ? [restrictedRoleName] : ['superuser'],
         full_name: fullName,
         email: `${username}@elastic.co`,
-      },
-      {
-        auth: elasticAuth,
-        headers: { 'Content-Type': 'application/json' },
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 409) {
+        console.log(`ℹ️  User ${username} already exists`);
+      } else {
+        const errorData = await response.text();
+        console.error(`❌ Failed to create ${username}:`, errorData);
       }
-    );
+      return;
+    }
+
     console.log(
       `✅ Created user ${username} (${fullName})${
         restricted ? ' with Security Assistant restrictions' : ''
       }`
     );
   } catch (err) {
-    if (err.response?.status === 409) {
-      console.log(`ℹ️  User ${username} already exists`);
-    } else {
-      console.error(`❌ Failed to create ${username}:`, err.response?.data || err.message);
-    }
+    console.error(`❌ Failed to create ${username}:`, err.message);
   }
 };
 

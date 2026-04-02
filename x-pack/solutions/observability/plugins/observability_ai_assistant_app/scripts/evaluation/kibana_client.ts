@@ -28,10 +28,10 @@ import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
-import axios, { isAxiosError } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 import type { OperatorFunction, Observable } from 'rxjs';
 import {
   concatMap,
@@ -76,6 +76,15 @@ type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
   errors: ChatCompletionErrorEvent[];
 }>;
 
+interface FetchResponseError extends Error {
+  status?: number;
+  responseData?: unknown;
+}
+
+function isFetchError(error: unknown): error is FetchResponseError {
+  return error instanceof Error && 'status' in error;
+}
+
 export interface ChatClient {
   chat: (message: StringOrMessageList, system: string) => Promise<InnerMessage>;
   complete: CompleteFunction;
@@ -89,18 +98,18 @@ export interface ChatClient {
 }
 
 export class KibanaClient {
-  axios: AxiosInstance;
+  private readonly defaultHeaders: Record<string, string>;
+
   constructor(
     private readonly log: ToolingLog,
     private readonly url: string,
     private readonly spaceId?: string
   ) {
-    this.axios = axios.create({
-      headers: {
-        'kbn-xsrf': 'foo',
-        'x-elastic-internal-origin': 'kibana',
-      },
-    });
+    this.defaultHeaders = {
+      'kbn-xsrf': 'foo',
+      'x-elastic-internal-origin': 'kibana',
+      'Content-Type': 'application/json',
+    };
   }
 
   private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
@@ -121,34 +130,55 @@ export class KibanaClient {
     return url;
   }
 
-  callKibana<T>(
+  async callKibana<T>(
     method: string,
     props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
     data?: any,
-    axiosParams: Partial<AxiosRequestConfig> = {}
-  ) {
+    fetchParams: { headers?: Record<string, string> } = {}
+  ): Promise<{ status: number; data: T; headers: Record<string, string> }> {
     const url = this.getUrl(props);
-    return this.axios<T>({
+    const body =
+      method.toLowerCase() === 'delete' && !data ? undefined : JSON.stringify(data || {});
+
+    const resp = await fetch(url, {
       method,
-      url,
-      ...(method.toLowerCase() === 'delete' && !data ? {} : { data: data || {} }),
-      ...axiosParams,
-    }).catch((error) => {
-      if (isAxiosError(error)) {
-        const interestingPartsOfError = {
-          ...omit(error, 'request', 'response', 'config'),
-          ...pick(
-            error,
-            'response.data',
-            'response.headers',
-            'response.status',
-            'response.statusText'
-          ),
-        };
-        this.log.error(inspect(interestingPartsOfError, { depth: 10 }));
-      }
-      throw error;
+      headers: {
+        ...this.defaultHeaders,
+        ...fetchParams.headers,
+      },
+      body,
     });
+
+    if (!resp.ok) {
+      const respBody = await resp.text().catch(() => '');
+      let parsedBody: unknown;
+      try {
+        parsedBody = JSON.parse(respBody);
+      } catch {
+        parsedBody = respBody;
+      }
+
+      const error: FetchResponseError = new Error(`Request failed with status ${resp.status}`);
+      error.status = resp.status;
+      error.responseData = parsedBody;
+
+      const interestingPartsOfError = {
+        message: error.message,
+        status: error.status,
+        responseData: error.responseData,
+      };
+      this.log.error(inspect(interestingPartsOfError, { depth: 10 }));
+
+      throw error;
+    }
+
+    const responseHeaders: Record<string, string> = {};
+    resp.headers.forEach((value, key) => {
+      responseHeaders[key] = value;
+    });
+
+    const responseData = (await resp.json()) as T;
+    return { status: resp.status, data: responseData, headers: responseHeaders };
   }
 
   async installKnowledgeBase() {
@@ -194,22 +224,24 @@ export class KibanaClient {
 
     this.log.info(`Checking if space ${this.spaceId} exists`);
 
-    const spaceExistsResponse = await this.callKibana<{
-      id?: string;
-    }>('GET', {
-      pathname: `/api/spaces/space/${this.spaceId}`,
-      ignoreSpaceId: true,
-    }).catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        return {
+    let spaceExistsResponse: { status: number; data: { id?: string } };
+    try {
+      spaceExistsResponse = await this.callKibana<{ id?: string }>('GET', {
+        pathname: `/api/spaces/space/${this.spaceId}`,
+        ignoreSpaceId: true,
+      });
+    } catch (error) {
+      if (isFetchError(error) && error.status === 404) {
+        spaceExistsResponse = {
           status: 404,
           data: {
             id: undefined,
           },
         };
+      } else {
+        throw error;
       }
-      throw error;
-    });
+    }
 
     if (spaceExistsResponse.data.id) {
       this.log.success(`Space id ${this.spaceId} found`);
@@ -323,7 +355,7 @@ export class KibanaClient {
 
               that.log.info('Caught retryable error');
 
-              if (isAxiosError(error)) {
+              if (isFetchError(error)) {
                 that.log.error(
                   inspect(
                     {
@@ -387,19 +419,29 @@ export class KibanaClient {
             scopes: currentScopes,
           };
 
-        return that.axios.post(
-          that.getUrl({
-            pathname: '/internal/observability_ai_assistant/chat',
-          }),
-          params,
-          {
-            responseType: 'stream',
-            timeout: NaN,
-            headers: { 'x-elastic-internal-origin': 'Kibana' },
-          }
+        return from(
+          fetch(
+            that.getUrl({
+              pathname: '/internal/observability_ai_assistant/chat',
+            }),
+            {
+              method: 'POST',
+              headers: {
+                ...that.defaultHeaders,
+                'x-elastic-internal-origin': 'Kibana',
+              },
+              body: JSON.stringify(params),
+            }
+          )
         );
       }).pipe(
-        switchMap((response) => streamIntoObservable(response.data)),
+        switchMap((response) =>
+          streamIntoObservable(
+            Readable.fromWeb(
+              response.body! as unknown as WebReadableStream
+            ) as unknown as NodeJS.AsyncIterator<string>
+          )
+        ),
         serializeAndHandleRetryableErrors(),
         filter(
           (line): line is ChatCompletionChunkEvent =>
@@ -446,29 +488,35 @@ export class KibanaClient {
         const stream$ = defer(() => {
           that.log.info(`Calling /chat/complete API`);
           return from(
-            that.axios.post(
+            fetch(
               that.getUrl({
                 pathname: '/internal/observability_ai_assistant/chat/complete',
               }),
               {
-                screenContexts: options.screenContexts || [],
-                conversationId,
-                messages,
-                connectorId,
-                persist,
-                title: currentTitle,
-                scopes: currentScopes,
-              },
-              {
-                responseType: 'stream',
-                timeout: NaN,
-                headers: { 'x-elastic-internal-origin': 'Kibana' },
+                method: 'POST',
+                headers: {
+                  ...that.defaultHeaders,
+                  'x-elastic-internal-origin': 'Kibana',
+                },
+                body: JSON.stringify({
+                  screenContexts: options.screenContexts || [],
+                  conversationId,
+                  messages,
+                  connectorId,
+                  persist,
+                  title: currentTitle,
+                  scopes: currentScopes,
+                }),
               }
             )
           );
         }).pipe(
           switchMap((response) => {
-            return streamIntoObservable(response.data);
+            return streamIntoObservable(
+              Readable.fromWeb(
+                response.body! as unknown as WebReadableStream
+              ) as unknown as NodeJS.AsyncIterator<string>
+            );
           }),
           serializeAndHandleRetryableErrors(),
           catchError((error): Observable<ChatCompletionErrorEvent> => {
@@ -537,13 +585,13 @@ export class KibanaClient {
 
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.
-                
+
                 ### Scoring Contract
 
-                * You MUST call the function "scores" exactly once.  
-                * The "criteria" array in the arguments MUST contain **one object for EVERY criterion**.  
-                  * If a criterion cannot be satisfied, still include it with \`"score": 0\` and a short \`"reasoning"\`.  
-                * Do NOT omit, merge, or reorder indices.  
+                * You MUST call the function "scores" exactly once.
+                * The "criteria" array in the arguments MUST contain **one object for EVERY criterion**.
+                  * If a criterion cannot be satisfied, still include it with \`"score": 0\` and a short \`"reasoning"\`.
+                * Do NOT omit, merge, or reorder indices.
                 * Do NOT place the scores in normal text; only in the "scores" function call.`,
           messages: [
             {
@@ -666,23 +714,27 @@ export class KibanaClient {
   }
 
   async getConnectors() {
-    const connectors: AxiosResponse<
-      Array<{
-        id: string;
-        connector_type_id: string;
-        name: string;
-        is_preconfigured: boolean;
-        is_deprecated: boolean;
-        referenced_by_count: number;
-      }>
-    > = await axios.get(
-      this.getUrl({
-        pathname: '/api/actions/connectors',
-      })
-    );
+    const url = this.getUrl({
+      pathname: '/api/actions/connectors',
+    });
 
-    return connectors.data.filter((connector) =>
-      isSupportedConnectorType(connector.connector_type_id)
-    );
+    const resp = await fetch(url, {
+      headers: this.defaultHeaders,
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Failed to get connectors: ${resp.status} ${resp.statusText}`);
+    }
+
+    const connectors = (await resp.json()) as Array<{
+      id: string;
+      connector_type_id: string;
+      name: string;
+      is_preconfigured: boolean;
+      is_deprecated: boolean;
+      referenced_by_count: number;
+    }>;
+
+    return connectors.filter((connector) => isSupportedConnectorType(connector.connector_type_id));
   }
 }

@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
+interface FetchErrorLike extends Error {
+  code?: string;
+  response?: {
+    status?: number;
+  };
+  request?: {
+    status?: number;
+  };
+}
 
-export function getSanitizedError(error: Error | AxiosError) {
-  if (error instanceof AxiosError) {
+function isFetchError(error: Error): error is FetchErrorLike {
+  return 'response' in error || 'request' in error || 'code' in error;
+}
+
+export function getSanitizedError(error: Error) {
+  if (isFetchError(error)) {
     return {
       code: error.code,
       status: error.response?.status || error.request?.status || null,

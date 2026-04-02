@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios from 'axios';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -90,19 +89,21 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     async function createLocalOutputOnRemote() {
-      const response = await axios.post(
-        'http://localhost:5621/api/fleet/outputs',
-        {
+      const response = await fetch('http://localhost:5621/api/fleet/outputs', {
+        method: 'POST',
+        body: JSON.stringify({
           id: 'es',
           type: 'elasticsearch',
           name: 'Local ES Output',
           hosts: ['http://localhost:9221'],
+        }),
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': 'fleet-e2e',
         },
-        {
-          auth: { username: 'elastic', password: 'changeme' },
-          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },
-        }
-      );
+      });
       expect(response.status).to.be(200);
     }
 
@@ -213,9 +214,13 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       // Clean up the local output on remote
-      const response = await axios.delete('http://localhost:5621/api/fleet/outputs/es', {
-        auth: { username: 'elastic', password: 'changeme' },
-        headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },
+      const response = await fetch('http://localhost:5621/api/fleet/outputs/es', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': 'fleet-e2e',
+        },
       });
       expect(response.status).to.be(200);
 

@@ -6,7 +6,6 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { isAxiosError } from 'axios';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 
 export function createServerSideFunctionResponseError({
@@ -25,8 +24,8 @@ export function createServerSideFunctionResponseError({
   if (isElasticsearchError) {
     // remove meta key which is huge and noisy
     delete sanitizedError.meta;
-  } else if (isAxiosError(error)) {
-    sanitizedError.response = { message: error.response?.data?.message };
+  } else if ('response' in error && (error as any).response?.data?.message) {
+    sanitizedError.response = { message: (error as any).response?.data?.message };
     delete sanitizedError.config;
   }
 

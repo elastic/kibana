@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import axios from 'axios';
 import type { Observable } from 'rxjs';
 import { concat, forkJoin, from as rxjsFrom, of } from 'rxjs';
 import { catchError, tap } from 'rxjs';
@@ -14,6 +12,7 @@ import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/core/server';
 import type { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
+import { Agent } from 'undici';
 import type { SyntheticsServerSetup } from '../types';
 import type { DataStreamConfig } from './formatters/public_formatters/convert_to_data_stream';
 import { convertToDataStreamFormat } from './formatters/public_formatters/convert_to_data_stream';
@@ -55,6 +54,13 @@ export interface ServicePayload {
   cloud_id?: string;
 }
 
+interface FetchError extends Error {
+  status?: number;
+  responseData?: { reason: string; status: number };
+  requestPath?: string;
+  code?: string;
+}
+
 export class ServiceAPIClient {
   private readonly username?: string;
   private readonly authorization: string;
@@ -81,9 +87,8 @@ export class ServiceAPIClient {
     this.server = server;
   }
 
-  addVersionHeader(req: AxiosRequestConfig) {
-    req.headers = { ...req.headers, 'x-kibana-version': this.stackVersion };
-    return req;
+  getHeaders(extraHeaders?: Record<string, string>): Record<string, string> {
+    return { 'x-kibana-version': this.stackVersion, ...extraHeaders };
   }
 
   async checkAccountAccessStatus() {
@@ -98,17 +103,19 @@ export class ServiceAPIClient {
 
       /* url is required for service locations, but omitted for private locations.
       /* this.locations is only service locations */
-      const httpsAgent = this.getHttpsAgent(url);
+      const dispatcher = this.getUndiciDispatcher(url);
 
-      if (httpsAgent) {
+      if (dispatcher) {
         try {
-          const { data } = await axios(
-            this.addVersionHeader({
-              method: 'GET',
-              url: url + '/allowed',
-              httpsAgent,
-            })
-          );
+          const response = await fetch(url + '/allowed', {
+            method: 'GET',
+            headers: this.getHeaders(),
+            ...(dispatcher ? ({ dispatcher } as RequestInit) : {}),
+          });
+          if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+          }
+          const data = (await response.json()) as { allowed: boolean; signupUrl: string | null };
 
           const { allowed, signupUrl } = data;
           return { allowed, signupUrl };
@@ -131,12 +138,14 @@ export class ServiceAPIClient {
     const parsedTargetUrl = new URL(targetUrl);
 
     const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
-    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+    const baseOptions = { rejectUnauthorized };
 
     const config = this.config ?? {};
 
     // If using basic-auth, ignore certificate configs
-    if (this.authorization) return baseHttpsAgent;
+    if (this.authorization) {
+      return new https.Agent(baseOptions);
+    }
 
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
@@ -152,7 +161,38 @@ export class ServiceAPIClient {
       );
     }
 
-    return baseHttpsAgent;
+    return new https.Agent(baseOptions);
+  }
+
+  getUndiciDispatcher(targetUrl: string): Agent | undefined {
+    const parsedTargetUrl = new URL(targetUrl);
+
+    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
+
+    const config = this.config ?? {};
+
+    // If using basic-auth, ignore certificate configs
+    if (this.authorization) {
+      return new Agent({ connect: { rejectUnauthorized } });
+    }
+
+    if (config.tls && config.tls.certificate && config.tls.key) {
+      const tlsConfig = new SslConfig(config.tls);
+
+      return new Agent({
+        connect: {
+          rejectUnauthorized,
+          cert: tlsConfig.certificate as string,
+          key: tlsConfig.key as string,
+        },
+      });
+    } else if (!this.server.isDev) {
+      this.logger.warn(
+        'TLS certificate and key are not provided. Falling back to default HTTPS agent.'
+      );
+    }
+
+    return new Agent({ connect: { rejectUnauthorized } });
   }
 
   async inspect(data: ServiceData) {
@@ -227,8 +267,8 @@ export class ServiceAPIClient {
           tap((result) => {
             this.logSuccessMessage(url, method, payload.monitors.length, result);
           }),
-          catchError((err: AxiosError<{ reason: string; status: number }>) => {
-            if (err.response?.status === 413 && payload.monitors.length > 1) {
+          catchError((err: FetchError) => {
+            if (err.status === 413 && payload.monitors.length > 1) {
               // If payload is too large, split it and retry
               const mid = Math.ceil(payload.monitors.length / 2);
               const firstHalfMonitors = payload.monitors.slice(0, mid);
@@ -250,7 +290,7 @@ export class ServiceAPIClient {
               );
             }
 
-            pushErrors.push({ locationId: id, error: err.response?.data! });
+            pushErrors.push({ locationId: id, error: err.responseData! });
             this.logServiceError(err, url, method, payload.monitors.length);
 
             // Return an empty observable to prevent unhandled exceptions
@@ -289,16 +329,33 @@ export class ServiceAPIClient {
     }
 
     const authHeader = this.authorization ? { Authorization: this.authorization } : undefined;
+    const dispatcher = this.getUndiciDispatcher(baseUrl);
 
-    return axios(
-      this.addVersionHeader({
-        method,
-        url,
-        data,
-        headers: authHeader,
-        httpsAgent: this.getHttpsAgent(baseUrl),
-      })
-    );
+    const response = await fetch(url, {
+      method,
+      body: JSON.stringify(data),
+      headers: {
+        'content-type': 'application/json',
+        ...this.getHeaders(authHeader),
+      },
+      ...(dispatcher ? ({ dispatcher } as RequestInit) : {}),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => undefined);
+      const error: FetchError = new Error(`Request failed with status ${response.status}`);
+      error.status = response.status;
+      error.responseData = errorData as { reason: string; status: number };
+      error.requestPath = new URL(url).pathname;
+      throw error;
+    }
+
+    const responseData = await response.json().catch(() => undefined);
+    return {
+      status: response.status,
+      data: responseData,
+      request: { path: new URL(url).pathname },
+    };
   }
 
   getRequestData({ monitors, output, isEdit, license }: ServiceData) {
@@ -328,7 +385,7 @@ export class ServiceAPIClient {
     url: string,
     method: string,
     numMonitors: number,
-    result: AxiosResponse<unknown> | ServicePayload
+    result: { status?: number; data?: unknown; request?: { path?: string } } | ServicePayload
   ) {
     if (this.isLoggable(result)) {
       if (result.data) {
@@ -340,24 +397,19 @@ export class ServiceAPIClient {
     }
   }
 
-  logServiceError(
-    err: AxiosError<{ reason: string; status: number }>,
-    url: string,
-    method: string,
-    numMonitors: number
-  ) {
-    const reason = err.response?.data?.reason ?? '';
+  logServiceError(err: FetchError, url: string, method: string, numMonitors: number) {
+    const reason = err.responseData?.reason ?? '';
 
     err.message = `Failed to call service location ${url}${
-      err.request?.path ?? ''
+      err.requestPath ?? ''
     } with method ${method} with ${numMonitors} monitors:  ${err.message}, ${reason}`;
     this.logger.error(err);
     sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
-      reason: err.response?.data?.reason,
+      reason: err.responseData?.reason,
       message: err.message,
       type: 'syncError',
       code: err.code,
-      status: err.response?.data?.status,
+      status: err.responseData?.status,
       url,
       stackVersion: this.server.stackVersion,
     });

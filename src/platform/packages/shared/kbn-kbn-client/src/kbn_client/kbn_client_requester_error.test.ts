@@ -7,23 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 describe('KbnClientRequesterError', () => {
-  it('preserves status when cleaning axios errors (even after stripping response)', () => {
-    const original = new AxiosError('Not Found', 'ERR_BAD_REQUEST', undefined, undefined, {
-      status: 404,
-      statusText: 'Not Found',
-      headers: {},
-      config: {} as any,
-      data: { statusCode: 404 },
-    });
+  it('preserves status from response-like errors', () => {
+    const original: any = new Error('Not Found');
+    original.response = { status: 404, statusText: 'Not Found', data: { statusCode: 404 } };
+    original.config = { method: 'GET', url: 'http://localhost/api/test' };
+
+    const wrapped = new KbnClientRequesterError('wrapper message', original);
+
+    expect(wrapped.responseError).toBeDefined();
+    expect(wrapped.responseError!.status).toBe(404);
+  });
+
+  it('provides backward-compatible axiosError getter', () => {
+    const original: any = new Error('Not Found');
+    original.response = { status: 404 };
 
     const wrapped = new KbnClientRequesterError('wrapper message', original);
 
     expect(wrapped.axiosError).toBeDefined();
     expect(wrapped.axiosError!.status).toBe(404);
-    expect((wrapped.axiosError as any).response).toBeUndefined();
+    expect(wrapped.axiosError!.response).toBeUndefined();
+  });
+
+  it('handles errors without response', () => {
+    const original = new Error('Connection refused');
+
+    const wrapped = new KbnClientRequesterError('wrapper message', original);
+
+    expect(wrapped.responseError).toBeDefined();
+    expect(wrapped.responseError!.status).toBeUndefined();
+    expect(wrapped.responseError!.message).toBe('Connection refused');
+  });
+
+  it('handles non-error objects with response', () => {
+    const original = { response: { status: 500 }, message: 'Server error', code: 'ERR_SERVER' };
+
+    const wrapped = new KbnClientRequesterError('wrapper message', original);
+
+    expect(wrapped.responseError).toBeDefined();
+    expect(wrapped.responseError!.status).toBe(500);
   });
 });

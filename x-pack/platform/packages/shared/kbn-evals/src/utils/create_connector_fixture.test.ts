@@ -6,7 +6,6 @@
  */
 
 import { v5 } from 'uuid';
-import { AxiosError } from 'axios';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -173,18 +172,12 @@ describe('createConnectorFixture', () => {
   });
 
   it('swallows 404 errors on delete', async () => {
-    const axiosError = new AxiosError('Not Found', '404', undefined, undefined, {
-      status: 404,
-      data: {},
-      headers: {},
-      statusText: 'Not Found',
-      config: {} as any,
-    });
+    const notFoundError = Object.assign(new Error('Not Found'), { status: 404 });
 
     // First call (preconfigured check) succeeds, second call (setup delete) rejects with 404, rest succeed
     mockFetch
       .mockResolvedValueOnce({ is_preconfigured: false })
-      .mockRejectedValueOnce(axiosError)
+      .mockRejectedValueOnce(notFoundError)
       .mockResolvedValue(undefined);
 
     await expect(
@@ -201,13 +194,7 @@ describe('createConnectorFixture', () => {
   });
 
   it('throws non-404 errors on delete', async () => {
-    const serverError = new AxiosError('Internal Server Error', '500', undefined, undefined, {
-      status: 500,
-      data: {},
-      headers: {},
-      statusText: 'Internal Server Error',
-      config: {} as any,
-    });
+    const serverError = Object.assign(new Error('Internal Server Error'), { status: 500 });
 
     // First call (preconfigured check) succeeds, second call (setup delete) fails hard
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(serverError);

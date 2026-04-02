@@ -21,7 +21,7 @@ import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Nullable } from '../lib/telemetry/types';
 
 // not needed, but it avoids some error messages like "Error: Cross origin http://localhost forbidden"
-jest.mock('axios');
+jest.spyOn(global, 'fetch').mockResolvedValue(new Response(null, { status: 200 }));
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 

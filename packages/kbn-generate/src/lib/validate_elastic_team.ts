@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Axios from 'axios';
 import type { ValidationResult } from './ask';
 
 interface Body {
@@ -18,24 +17,36 @@ interface Body {
 export async function validateElasticTeam(owner: string): Promise<ValidationResult> {
   const slug = owner.startsWith('@') ? owner.slice(1) : owner;
 
-  const res = await Axios.get<Body>('https://ci-stats.kibana.dev/v1/_validate_kibana_team', {
-    params: {
-      slug,
-    },
-    timeout: 5000,
-  });
+  const url = new URL('https://ci-stats.kibana.dev/v1/_validate_kibana_team');
+  url.searchParams.set('slug', slug);
 
-  if (res.data.match) {
-    return `@${res.data.match}`;
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), 5000);
+
+  let res: Response;
+  try {
+    res = await fetch(url.toString(), { signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to validate team: ${res.status} ${res.statusText}`);
+  }
+
+  const data = (await res.json()) as Body;
+
+  if (data.match) {
+    return `@${data.match}`;
   }
 
   const err = `"${owner}" doesn't match any @elastic team, to override with another valid Github user pass the value with the --owner flag`;
 
-  if (!res.data.suggestions?.length) {
+  if (!data.suggestions?.length) {
     return { err };
   }
 
-  const list = res.data.suggestions.map((l) => `    @${l}`);
+  const list = data.suggestions.map((l) => `    @${l}`);
   return {
     err: `${err}\n  Did you mean one of these?\n${list.join('\n')}`,
   };

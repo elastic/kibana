@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import axios from 'axios';
 import { format } from 'url';
 import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -110,14 +108,24 @@ export function registerKibanaFunction({
       });
 
       try {
-        const response = await axios({
+        const fetchOptions: RequestInit = {
           method,
-          headers,
-          url: format(nextUrl),
-          data: body ? JSON.stringify(body) : undefined,
+          headers: headers as Record<string, string>,
           signal,
-        });
-        return { content: response.data };
+        };
+        if (body) {
+          fetchOptions.body = JSON.stringify(body);
+        }
+        const response = await fetch(format(nextUrl), fetchOptions);
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+        }
+        const contentType = response.headers.get('content-type') ?? '';
+        const data = contentType.includes('application/json')
+          ? await response.json()
+          : await response.text();
+        return { content: data };
       } catch (e) {
         logger.error(`Error calling Kibana API: ${method} ${format(nextUrl)}. Failed with ${e}`);
         throw e;

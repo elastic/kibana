@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { last } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { tmpdir } from 'os';
@@ -28,13 +27,18 @@ export async function getLatestVersion(): Promise<string> {
       timeout: 60_000,
       methodName: name,
       retryCount: 20,
-      block: () => axios('https://artifacts-api.elastic.co/v1/versions'),
+      block: async () => {
+        const response = await fetch('https://artifacts-api.elastic.co/v1/versions');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch versions: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      },
     }
   )
     .then(
-      (response) =>
-        last((response.data.versions as string[]).filter((v) => v.includes('-SNAPSHOT'))) ||
-        DEFAULT_VERSION
+      (data) =>
+        last((data.versions as string[]).filter((v) => v.includes('-SNAPSHOT'))) || DEFAULT_VERSION
     )
     .catch(() => DEFAULT_VERSION);
 }

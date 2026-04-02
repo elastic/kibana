@@ -14,7 +14,6 @@ import type { HostOptions } from '@kbn/test-saml-auth';
 import { SamlSessionManager } from '@kbn/test-saml-auth';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import axios from 'axios';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
@@ -85,22 +84,25 @@ export const samlAuthentication = async (
 
       roleDescriptor = { [role]: roleConfig };
 
-      const response = await axios.post(
-        `${kbnHost}/internal/security/api_key`,
-        {
+      const response = await fetch(`${kbnHost}/internal/security/api_key`, {
+        method: 'POST',
+        body: JSON.stringify({
           name: 'myTestApiKey',
           metadata: {},
           role_descriptors: roleDescriptor,
+        }),
+        headers: {
+          'content-type': 'application/json',
+          ...INTERNAL_REQUEST_HEADERS,
+          ...adminCookieHeader,
         },
-        {
-          headers: {
-            ...INTERNAL_REQUEST_HEADERS,
-            ...adminCookieHeader,
-          },
-        }
-      );
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to create API key: ${response.status} ${response.statusText}`);
+      }
 
-      const apiKey = response.data.encoded;
+      const data = await response.json();
+      const apiKey = data.encoded;
       return apiKey;
     },
     createServerlessCustomRole: async ({
@@ -115,34 +117,36 @@ export const samlAuthentication = async (
         elasticsearch: roleDescriptor.elasticsearch ?? [],
       };
 
-      const response = await axios.put(
-        `${kbnHost}/api/security/role/${roleName}`,
-        customRoleDescriptors,
-        {
-          headers: {
-            ...INTERNAL_REQUEST_HEADERS,
-            ...adminCookieHeader,
-          },
-        }
-      );
+      const response = await fetch(`${kbnHost}/api/security/role/${roleName}`, {
+        method: 'PUT',
+        body: JSON.stringify(customRoleDescriptors),
+        headers: {
+          'content-type': 'application/json',
+          ...INTERNAL_REQUEST_HEADERS,
+          ...adminCookieHeader,
+        },
+      });
+      const data = await response.json();
       return {
         status: response.status,
-        data: response.data,
+        data,
       };
     },
     deleteServerlessCustomRole: async (
       roleName: string
     ): Promise<{ status: number; data: unknown }> => {
-      const response = await axios.delete(`${kbnHost}/api/security/role/${roleName}`, {
+      const response = await fetch(`${kbnHost}/api/security/role/${roleName}`, {
+        method: 'DELETE',
         headers: {
           ...INTERNAL_REQUEST_HEADERS,
           ...adminCookieHeader,
         },
       });
+      const data = await response.json();
 
       return {
         status: response.status,
-        data: response.data,
+        data,
       };
     },
     getFullname: async (

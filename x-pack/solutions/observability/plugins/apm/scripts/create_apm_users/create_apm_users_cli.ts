@@ -10,7 +10,7 @@
 import { argv } from 'yargs';
 import {
   AbortError,
-  isAxiosError,
+  isKibanaError,
 } from '../../server/test_helpers/create_apm_users/helpers/call_kibana';
 import { createApmUsers } from '../../server/test_helpers/create_apm_users/create_apm_users';
 import { getKibanaVersion } from '../../server/test_helpers/create_apm_users/helpers/get_version';
@@ -73,14 +73,8 @@ async function init() {
 init().catch((e) => {
   if (e instanceof AbortError) {
     console.error(e.message);
-  } else if (isAxiosError(e)) {
-    console.error(
-      `${e.config?.method?.toUpperCase() || 'GET'} ${e.config?.url} (Code: ${e.response?.status})`
-    );
-
-    if (e.response) {
-      console.error(JSON.stringify({ request: e.config, response: e.response.data }, null, 2));
-    }
+  } else if (isKibanaError(e)) {
+    console.error(`Request failed (Code: ${e.status}): ${e.message}`);
   } else {
     console.error(e);
   }

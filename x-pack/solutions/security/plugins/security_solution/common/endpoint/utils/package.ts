@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
-
 import type { KbnClient } from '@kbn/test';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS, epmRouteService } from '@kbn/fleet-plugin/common';
@@ -17,11 +15,11 @@ export const getEndpointPackageInfo = usageTracker.track(
   async (kbnClient: KbnClient): Promise<GetInfoResponse['item']> => {
     const path = epmRouteService.getInfoPath('endpoint');
     const endpointPackage = (
-      (await kbnClient.request({
+      await kbnClient.request<GetInfoResponse>({
         path,
         headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         method: 'GET',
-      })) as AxiosResponse<GetInfoResponse>
+      })
     ).data.item;
 
     if (!endpointPackage) {

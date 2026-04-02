@@ -8,7 +8,6 @@ import type { ApiServicesFixture, KbnClient } from '@kbn/scout-oblt';
 import type { ApmFields, InfraDocument, LogDocument } from '@kbn/synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
 import { apm, infra, log, timerange } from '@kbn/synthtrace-client';
-import { AxiosError } from 'axios';
 
 export const TEST_START_DATE = '2024-01-01T00:00:00.000Z';
 export const TEST_END_DATE = '2024-01-01T01:00:00.000Z';
@@ -205,7 +204,7 @@ export const createDataView = async (
       },
     });
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.status === 409) {
+    if (error instanceof Error && (error as any).response?.status === 409) {
       return;
     }
     throw error;

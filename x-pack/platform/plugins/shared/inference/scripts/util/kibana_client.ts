@@ -6,15 +6,13 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosInstance, AxiosResponse } from 'axios';
-import axios, { isAxiosError } from 'axios';
 import type { IncomingMessage } from 'http';
-import { omit, pick } from 'lodash';
 import { from, map, switchMap, throwError } from 'rxjs';
 import type { UrlObject } from 'url';
 import { format, parse } from 'url';
 import { inspect } from 'util';
-import { isReadable } from 'stream';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 import type {
   ChatCompleteAPI,
   OutputAPI,
@@ -43,18 +41,28 @@ export interface ScriptInferenceClient {
   output: OutputAPI;
 }
 
+interface FetchResponseError extends Error {
+  status?: number;
+  responseData?: unknown;
+  responseHeaders?: Record<string, string>;
+  responseStatusText?: string;
+}
+
+function isFetchError(error: unknown): error is FetchResponseError {
+  return error instanceof Error && 'status' in error;
+}
+
 export class KibanaClient {
-  axios: AxiosInstance;
+  private readonly defaultHeaders: Record<string, string>;
+
   constructor(
     private readonly log: ToolingLog,
     private readonly url: string,
     private readonly spaceId?: string
   ) {
-    this.axios = axios.create({
-      headers: {
-        'kbn-xsrf': 'foo',
-      },
-    });
+    this.defaultHeaders = {
+      'kbn-xsrf': 'foo',
+    };
   }
 
   private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
@@ -75,36 +83,63 @@ export class KibanaClient {
     return url;
   }
 
-  callKibana<T>(
+  async callKibana<T>(
     method: string,
     props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
     data?: any
-  ) {
+  ): Promise<{ status: number; data: T; headers: Record<string, string> }> {
     const url = this.getUrl(props);
-    return this.axios<T>({
+    const resp = await fetch(url, {
       method,
-      url,
-      data: data || {},
       headers: {
+        ...this.defaultHeaders,
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'foo',
+        'Content-Type': 'application/json',
       },
+      body: data !== undefined ? JSON.stringify(data) : JSON.stringify({}),
     }).catch((error) => {
-      if (isAxiosError(error)) {
-        const interestingPartsOfError = {
-          ...omit(error, 'request', 'response', 'config'),
-          ...pick(
-            error,
-            'response.data',
-            'response.headers',
-            'response.status',
-            'response.statusText'
-          ),
-        };
-        this.log.error(inspect(interestingPartsOfError, { depth: 10 }));
-      }
       throw error;
     });
+
+    if (!resp.ok) {
+      const respBody = await resp.text().catch(() => '');
+      let parsedBody: unknown;
+      try {
+        parsedBody = JSON.parse(respBody);
+      } catch {
+        parsedBody = respBody;
+      }
+
+      const error: FetchResponseError = new Error(`Request failed with status ${resp.status}`);
+      error.status = resp.status;
+      error.responseData = parsedBody;
+      error.responseStatusText = resp.statusText;
+      const responseHeaders: Record<string, string> = {};
+      resp.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
+      error.responseHeaders = responseHeaders;
+
+      const interestingPartsOfError = {
+        message: error.message,
+        status: error.status,
+        responseData: error.responseData,
+        responseHeaders: error.responseHeaders,
+        responseStatusText: error.responseStatusText,
+      };
+      this.log.error(inspect(interestingPartsOfError, { depth: 10 }));
+
+      throw error;
+    }
+
+    const responseHeaders: Record<string, string> = {};
+    resp.headers.forEach((value, key) => {
+      responseHeaders[key] = value;
+    });
+
+    const responseData = (await resp.json()) as T;
+    return { status: resp.status, data: responseData, headers: responseHeaders };
   }
 
   async createSpaceIfNeeded() {
@@ -114,22 +149,24 @@ export class KibanaClient {
 
     this.log.debug(`Checking if space ${this.spaceId} exists`);
 
-    const spaceExistsResponse = await this.callKibana<{
-      id?: string;
-    }>('GET', {
-      pathname: `/api/spaces/space/${this.spaceId}`,
-      ignoreSpaceId: true,
-    }).catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        return {
+    let spaceExistsResponse: { status: number; data: { id?: string } };
+    try {
+      spaceExistsResponse = await this.callKibana<{ id?: string }>('GET', {
+        pathname: `/api/spaces/space/${this.spaceId}`,
+        ignoreSpaceId: true,
+      });
+    } catch (error) {
+      if (isFetchError(error) && error.status === 404) {
+        spaceExistsResponse = {
           status: 404,
           data: {
             id: undefined,
           },
         };
+      } else {
+        throw error;
       }
-      throw error;
-    });
+    }
 
     if (spaceExistsResponse.data.id) {
       this.log.debug(`Space id ${this.spaceId} found`);
@@ -160,13 +197,16 @@ export class KibanaClient {
   }
 
   createInferenceClient({ connectorId }: { connectorId: string }): ScriptInferenceClient {
-    function streamResponse(responsePromise: Promise<AxiosResponse>) {
+    function streamResponse(responsePromise: Promise<Response>) {
       return from(responsePromise).pipe(
         switchMap((response) => {
-          if (isReadable(response.data)) {
-            return eventSourceStreamIntoObservable(response.data as IncomingMessage);
+          if (response.body) {
+            const nodeStream = Readable.fromWeb(
+              response.body as unknown as WebReadableStream
+            ) as IncomingMessage;
+            return eventSourceStreamIntoObservable(nodeStream);
           }
-          return throwError(() => createInferenceInternalError('Unexpected error', response.data));
+          return throwError(() => createInferenceInternalError('Unexpected error'));
         }),
         map((line) => {
           return JSON.parse(line) as ChatCompletionEvent | InferenceTaskErrorEvent;
@@ -200,40 +240,44 @@ export class KibanaClient {
 
       if (stream) {
         return streamResponse(
-          this.axios.post(
+          fetch(
             this.getUrl({
               pathname: `/internal/inference/chat_complete/stream`,
             }),
-            body,
             {
-              responseType: 'stream',
-              timeout: 0,
+              method: 'POST',
               headers: {
+                ...this.defaultHeaders,
                 'kbn-xsrf': 'true',
                 'x-elastic-internal-origin': 'foo',
+                'Content-Type': 'application/json',
               },
+              body: JSON.stringify(body),
             }
           )
         ) as ChatCompleteAPIResponse<TOptions>;
       }
 
-      return this.axios
-        .post(
-          this.getUrl({
-            pathname: `/internal/inference/chat_complete`,
-          }),
-          body,
-          {
-            timeout: 0,
-            headers: {
-              'kbn-xsrf': 'true',
-              'x-elastic-internal-origin': 'foo',
-            },
-          }
-        )
-        .then((response) => {
-          return response.data;
-        }) as ChatCompleteAPIResponse<TOptions>;
+      return fetch(
+        this.getUrl({
+          pathname: `/internal/inference/chat_complete`,
+        }),
+        {
+          method: 'POST',
+          headers: {
+            ...this.defaultHeaders,
+            'kbn-xsrf': 'true',
+            'x-elastic-internal-origin': 'foo',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        }
+      ).then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+      }) as ChatCompleteAPIResponse<TOptions>;
     };
 
     const outputApi: OutputAPI = createOutputApi(chatCompleteApi);

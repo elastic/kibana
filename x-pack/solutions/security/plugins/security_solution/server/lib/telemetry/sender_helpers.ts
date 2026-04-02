@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios from 'axios';
-
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-import type { RawAxiosRequestHeaders } from 'axios';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
 import type {
@@ -23,7 +20,7 @@ export interface SenderMetadata {
   telemetryUrl: string;
   licenseInfo: Nullable<ESLicense>;
   clusterInfo: Nullable<ESClusterInfo>;
-  telemetryRequestHeaders: () => RawAxiosRequestHeaders;
+  telemetryRequestHeaders: () => Record<string, string>;
   isTelemetryOptedIn(): Promise<boolean>;
   isTelemetryServicesReachable(): Promise<boolean>;
 }
@@ -74,7 +71,7 @@ export class SenderUtils {
 
         try {
           const telemetryPingUrl = await this.fetchTelemetryPingUrl();
-          const resp = await axios.get(telemetryPingUrl, { timeout: 3000 });
+          const resp = await fetch(telemetryPingUrl, { signal: AbortSignal.timeout(3000) });
           if (resp.status === 200) {
             return true;
           }

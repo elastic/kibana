@@ -8,7 +8,6 @@
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { v5 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
-import { isAxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
@@ -55,7 +54,7 @@ export async function createConnectorFixture({
 
       return res?.is_preconfigured === true;
     } catch (error) {
-      const status = isAxiosError(error) ? error.status : (error as any)?.status;
+      const status = (error as any)?.status;
       if (status === 404) return false;
       throw error;
     }
@@ -94,7 +93,7 @@ export async function createConnectorFixture({
       path: `/api/actions/connector/${connectorIdAsUuid}`,
       method: 'DELETE',
     }).catch((error) => {
-      if (isAxiosError(error) && error.status === 404) {
+      if ((error as any)?.status === 404) {
         return;
       }
       throw error;

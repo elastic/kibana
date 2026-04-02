@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAxiosError } from 'axios';
+interface ErrorWithResponse extends Error {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+function isErrorWithResponse(error: Error): error is ErrorWithResponse {
+  return 'response' in error;
+}
 
 export const createServiceError = (error: Error, message: string) => {
-  if (isAxiosError(error)) {
+  if (isErrorWithResponse(error)) {
     const responseData = error.response?.data;
     const errorMessage = responseData?.message || error.message;
     return new Error(`${message}. Error: ${errorMessage}`);

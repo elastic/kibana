@@ -9,7 +9,7 @@
 
 import { difference, union } from 'lodash';
 import type { Elasticsearch, Kibana } from '..';
-import { callKibana, isAxiosError } from './call_kibana';
+import { callKibana, isFetchError } from './call_kibana';
 
 interface User {
   username: string;
@@ -124,7 +124,7 @@ async function getUser({
     });
   } catch (e) {
     // return empty if user doesn't exist
-    if (isAxiosError(e) && e.response?.status === 404) {
+    if (isFetchError(e) && e.status === 404) {
       return null;
     }
 

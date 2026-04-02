@@ -68,7 +68,6 @@ import type {
   FleetServerAgent,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
-import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
@@ -534,15 +533,15 @@ export const getAgentVersionMatchingCurrentStack = async (
 
   const agentVersions = await pRetry<string[]>(
     async () => {
-      return axios
-        .get('https://artifacts-api.elastic.co/v1/versions')
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) =>
-          map(
-            response.data.versions.filter(isValidArtifactVersion),
-            (version) => version.split('-SNAPSHOT')[0]
-          )
-        );
+      const response = await fetch('https://artifacts-api.elastic.co/v1/versions');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch versions: ${response.status}`);
+      }
+      const data = await response.json();
+      return map(
+        data.versions.filter(isValidArtifactVersion),
+        (version: string) => version.split('-SNAPSHOT')[0]
+      );
     },
     { maxTimeout: 10000 }
   );
@@ -623,12 +622,11 @@ export const getAgentDownloadUrl = async (
 
   const searchResult: ElasticArtifactSearchResponse = await pRetry(
     async () => {
-      return axios
-        .get<ElasticArtifactSearchResponse>(artifactSearchUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      const response = await fetch(artifactSearchUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch artifact: ${response.status}`);
+      }
+      return (await response.json()) as ElasticArtifactSearchResponse;
     },
     { maxTimeout: 10000 }
   );
@@ -661,12 +659,11 @@ export const getLatestAgentDownloadVersion = async (
   const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
   const artifactVersionsResponse: { versions: string[] } = await pRetry(
     async () => {
-      return axios
-        .get<{ versions: string[] }>(artifactsUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      const response = await fetch(artifactsUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch versions: ${response.status}`);
+      }
+      return (await response.json()) as { versions: string[] };
     },
     { maxTimeout: 10000 }
   );

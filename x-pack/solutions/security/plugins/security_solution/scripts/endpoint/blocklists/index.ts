@@ -9,7 +9,6 @@ import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import type { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -55,15 +54,18 @@ class BlocklistDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
+const handleThrowAxiosHttpError = (err: Error & Record<string, unknown>): never => {
   let message = err.message;
+  const response = err.response as
+    | { status?: number; data?: { message?: string }; config?: { method?: string; url?: string } }
+    | undefined;
 
-  if (err.response) {
-    message = `[${err.response.status}] ${err.response.data.message ?? err.message} [ ${String(
-      err.response.config.method
-    ).toUpperCase()} ${err.response.config.url} ]`;
+  if (response) {
+    message = `[${response.status}] ${response.data?.message ?? err.message} [ ${String(
+      response.config?.method
+    ).toUpperCase()} ${response.config?.url} ]`;
   }
-  throw new BlocklistDataLoaderError(message, err.toJSON());
+  throw new BlocklistDataLoaderError(message, err);
 };
 
 const createBlocklists: RunFn = async ({ flags, log }) => {

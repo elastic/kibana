@@ -7,7 +7,6 @@
 
 import { createVerify } from 'crypto';
 
-import axios from 'axios';
 import { cloneDeep } from 'lodash';
 import AdmZip from 'adm-zip';
 import type { ITelemetryReceiver } from './receiver';
@@ -82,7 +81,7 @@ export class Artifact implements IArtifact {
   private manifestUrl?: string;
   private cdn?: CdnConfig;
 
-  private readonly AXIOS_TIMEOUT_MS = 10_000;
+  private readonly FETCH_TIMEOUT_MS = 10_000;
   private receiver?: ITelemetryReceiver;
   private esClusterInfo?: ESClusterInfo;
   private cache: Map<string, CacheEntry> = new Map();
@@ -102,39 +101,41 @@ export class Artifact implements IArtifact {
   }
 
   public async getArtifact(name: string): Promise<Manifest> {
-    return axios
-      .get(this.getManifestUrl(), {
-        headers: this.headers(name),
-        timeout: this.AXIOS_TIMEOUT_MS,
-        validateStatus: (status) => status < 500,
-        responseType: 'arraybuffer',
-      })
-      .then(async (response) => {
-        switch (response.status) {
-          case 200:
-            const manifest = {
-              data: await this.getManifest(name, response.data),
-              notModified: false,
-            };
-            // only update etag if we got a valid manifest
-            if (response.headers && response.headers.etag) {
-              const cacheEntry = {
-                manifest: { ...manifest, notModified: true },
-                etag: response.headers?.etag ?? '',
-              };
-              this.cache.set(name, cacheEntry);
-            }
-            return cloneDeep(manifest);
-          case 304:
-            return cloneDeep(this.getCachedManifest(name));
-          case 404:
-            // just in case, remove the entry
-            this.cache.delete(name);
-            throw Error(`No manifest resource found at url: ${this.manifestUrl}`);
-          default:
-            throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    const response = await fetch(this.getManifestUrl(), {
+      headers: this.headers(name),
+      signal: AbortSignal.timeout(this.FETCH_TIMEOUT_MS),
+    });
+
+    if (response.status >= 500) {
+      throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    }
+
+    switch (response.status) {
+      case 200:
+        const data = Buffer.from(await response.arrayBuffer());
+        const manifest = {
+          data: await this.getManifest(name, data),
+          notModified: false,
+        };
+        // only update etag if we got a valid manifest
+        const etag = response.headers.get('etag');
+        if (etag) {
+          const cacheEntry = {
+            manifest: { ...manifest, notModified: true },
+            etag,
+          };
+          this.cache.set(name, cacheEntry);
         }
-      });
+        return cloneDeep(manifest);
+      case 304:
+        return cloneDeep(this.getCachedManifest(name));
+      case 404:
+        // just in case, remove the entry
+        this.cache.delete(name);
+        throw Error(`No manifest resource found at url: ${this.manifestUrl}`);
+      default:
+        throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+    }
   }
 
   public getManifestUrl() {
@@ -180,8 +181,15 @@ export class Artifact implements IArtifact {
     const relativeUrl = manifest.artifacts[name]?.relative_url;
     if (relativeUrl) {
       const url = `${this.cdn?.url}${relativeUrl}`;
-      const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
-      return artifactResponse.data;
+      const artifactResponse = await fetch(url, {
+        signal: AbortSignal.timeout(this.FETCH_TIMEOUT_MS),
+      });
+      if (!artifactResponse.ok) {
+        throw Error(
+          `Failed to download artifact, unexpected status code: ${artifactResponse.status}`
+        );
+      }
+      return artifactResponse.json();
     } else {
       throw Error(`No artifact for name ${name}`);
     }

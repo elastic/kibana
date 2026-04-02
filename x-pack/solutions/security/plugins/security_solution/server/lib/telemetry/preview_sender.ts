@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
-import axios, { AxiosHeaders } from 'axios';
 import type { EventTypeOpts, Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -18,7 +16,6 @@ import type {
 import type { ITelemetryEventsSender } from './sender';
 import { TelemetryChannel, type TelemetryEvent } from './types';
 import type { ITelemetryReceiver } from './receiver';
-import { tlog } from './helpers';
 import type { QueueConfig } from './async_sender.types';
 
 /**
@@ -29,61 +26,14 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   /** Inner composite telemetry events sender */
   private composite: ITelemetryEventsSender;
 
-  /**
-   * Axios local instance
-   * @deprecated `IAsyncTelemetryEventsSender` has a dedicated method for preview. */
-  private axiosInstance = axios.create();
-
   /** Last sent message */
   private sentMessages: string[] = [];
 
   /** Last sent EBT events */
   private ebtEventsSent: Array<{ eventType: string; eventData: object }> = [];
 
-  /** Logger for this class  */
-  private logger: Logger;
-
-  constructor(logger: Logger, composite: ITelemetryEventsSender) {
-    this.logger = logger;
+  constructor(_logger: Logger, composite: ITelemetryEventsSender) {
     this.composite = composite;
-
-    /**
-     * Intercept the last message and save it for the preview within the lastSentMessage
-     * Reject the request intentionally to stop from sending to the server
-     */
-    this.axiosInstance.interceptors.request.use((config) => {
-      tlog(
-        this.logger,
-        `Intercepting telemetry', ${JSON.stringify(
-          config.data
-        )} and not sending data to the telemetry server`
-      );
-      const data = config.data != null ? [config.data] : [];
-      this.sentMessages = [...this.sentMessages, ...data];
-      return Promise.reject(new Error('Not sending to telemetry server'));
-    });
-
-    /**
-     * Create a fake response for the preview on return within the error section.
-     * @param error The error we don't do anything with
-     * @returns The response resolved to stop the chain from continuing.
-     */
-    this.axiosInstance.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        // create a fake response for the preview as if the server had sent it back to us
-        const okResponse: AxiosResponse = {
-          data: {},
-          status: 200,
-          statusText: 'ok',
-          headers: {},
-          config: {
-            headers: new AxiosHeaders(),
-          },
-        };
-        return Promise.resolve(okResponse);
-      }
-    );
   }
 
   public getSentMessages() {
@@ -142,8 +92,8 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
     return this.composite.isTelemetryServicesReachable();
   }
 
-  public sendIfDue(axiosInstance?: AxiosInstance): Promise<void> {
-    return this.composite.sendIfDue(axiosInstance);
+  public sendIfDue(): Promise<void> {
+    return this.composite.sendIfDue();
   }
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {

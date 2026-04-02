@@ -6,8 +6,6 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import type { ChildProcess } from 'child_process';
 import { spawn } from 'child_process';
 import { getLatestVersion } from './artifact_manager';
@@ -21,12 +19,16 @@ export interface AgentManagerParams {
   esPort: string;
 }
 
+export interface RequestOptions {
+  headers: Record<string, string>;
+}
+
 export class AgentManager extends Manager {
   private params: AgentManagerParams;
   private log: ToolingLog;
   private agentProcess?: ChildProcess;
-  private requestOptions: AxiosRequestConfig;
-  constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
+  private requestOptions: RequestOptions;
+  constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: RequestOptions) {
     super();
     this.log = log;
     this.params = params;
@@ -35,19 +37,31 @@ export class AgentManager extends Manager {
 
   public async setup() {
     this.log.info('Running agent preconfig');
-    return await axios.post(
-      `${this.params.kibanaUrl}/api/fleet/agents/setup`,
-      {},
-      this.requestOptions
-    );
+    const response = await fetch(`${this.params.kibanaUrl}/api/fleet/agents/setup`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+      headers: {
+        'content-type': 'application/json',
+        ...this.requestOptions.headers,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to setup fleet agents: ${response.status} ${response.statusText}`);
+    }
+    return response.json();
   }
 
   public async startAgent() {
     this.log.info('Getting agent enrollment key');
-    const { data: apiKeys } = await axios.get(
-      this.params.kibanaUrl + '/api/fleet/enrollment_api_keys',
-      this.requestOptions
-    );
+    const apiKeysResponse = await fetch(this.params.kibanaUrl + '/api/fleet/enrollment_api_keys', {
+      headers: this.requestOptions.headers,
+    });
+    if (!apiKeysResponse.ok) {
+      throw new Error(
+        `Failed to get enrollment API keys: ${apiKeysResponse.status} ${apiKeysResponse.statusText}`
+      );
+    }
+    const apiKeys = await apiKeysResponse.json();
     const policy = apiKeys.items[1];
 
     this.log.info('Running the agent');
@@ -78,10 +92,15 @@ export class AgentManager extends Manager {
     let retries = 0;
     while (!done) {
       await new Promise((r) => setTimeout(r, 5000));
-      const { data: agents } = await axios.get(
-        `${this.params.kibanaUrl}/api/fleet/agents`,
-        this.requestOptions
-      );
+      const agentsResponse = await fetch(`${this.params.kibanaUrl}/api/fleet/agents`, {
+        headers: this.requestOptions.headers,
+      });
+      if (!agentsResponse.ok) {
+        throw new Error(
+          `Failed to get fleet agents: ${agentsResponse.status} ${agentsResponse.statusText}`
+        );
+      }
+      const agents = await agentsResponse.json();
       done = agents.items[0]?.status === 'online';
       if (++retries > 12) {
         this.log.error('Giving up on enrolling the agent after a minute');

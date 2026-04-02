@@ -8,17 +8,15 @@
 import fs from 'fs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import FormData from 'form-data';
-import type { AxiosBasicCredentials } from 'axios';
-import axios from 'axios';
 import { isError } from 'lodash';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
-import https from 'https';
+import { Agent } from 'undici';
 
 export async function installKibanaAssets(
   filePath: string,
   kibanaUrl: string,
-  userPassObject: AxiosBasicCredentials,
+  userPassObject: { username: string; password: string },
   logger: ToolingLog
 ) {
   try {
@@ -30,12 +28,13 @@ export async function installKibanaAssets(
     formData.append('file', fileStream);
 
     const isHTTPS = new URL(kibanaUrl).protocol === 'https:';
-    const httpsAgent = isHTTPS
-      ? new https.Agent({
-          ca: fs.readFileSync(KBN_CERT_PATH),
-          key: fs.readFileSync(KBN_KEY_PATH),
-          // hard-coded set to false like in packages/kbn-cli-dev-mode/src/base_path_proxy_server.ts
-          rejectUnauthorized: false,
+    const dispatcher = isHTTPS
+      ? new Agent({
+          connect: {
+            ca: fs.readFileSync(KBN_CERT_PATH).toString(),
+            key: fs.readFileSync(KBN_KEY_PATH).toString(),
+            rejectUnauthorized: false,
+          },
         })
       : undefined;
 
@@ -43,20 +42,29 @@ export async function installKibanaAssets(
     const baseUrl = kibanaUrl.endsWith('/') ? kibanaUrl.slice(0, -1) : kibanaUrl;
     const importUrl = `${baseUrl}/api/saved_objects/_import?overwrite=true`;
 
+    const { username, password } = userPassObject;
+    const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+
     // Send the saved objects to Kibana using the _import API
-    const response = await axios.post(importUrl, formData, {
+    const response = await fetch(importUrl, {
+      method: 'POST',
+      body: formData as unknown as BodyInit,
       headers: {
         ...formData.getHeaders(),
         'kbn-xsrf': 'true',
+        Authorization: authHeader,
       },
-      auth: userPassObject,
-      httpsAgent,
-    });
+      ...(dispatcher ? { dispatcher } : {}),
+    } as RequestInit);
 
-    logger.info(
-      `Imported ${response.data.successCount} saved objects from "${filePath}" into Kibana`
-    );
-    return response.data;
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    logger.info(`Imported ${data.successCount} saved objects from "${filePath}" into Kibana`);
+    return data;
   } catch (error) {
     if (isError(error)) {
       logger.error(

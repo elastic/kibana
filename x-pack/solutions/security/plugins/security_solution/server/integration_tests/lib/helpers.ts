@@ -142,33 +142,78 @@ export function updateTimestamps(data: object[]): object[] {
   });
 }
 
-export function mockAxiosPost(
-  postSpy: jest.SpyInstance,
-  routes: Array<[RegExp, unknown]> = DEFAULT_POST_ROUTES
+/**
+ * Configures the global fetch mock to return responses based on URL patterns for POST requests.
+ */
+export function mockFetchPost(
+  fetchSpy: jest.SpyInstance,
+  postRoutes: Array<[RegExp, unknown]> = DEFAULT_POST_ROUTES,
+  getRoutes: Array<[RegExp, unknown]> = DEFAULT_GET_ROUTES
 ) {
-  postSpy.mockImplementation(async (url: string) => {
-    for (const [route, returnValue] of routes) {
-      if (route.test(url)) {
-        return returnValue;
+  fetchSpy.mockImplementation(async (url: string | URL | Request, init?: RequestInit) => {
+    const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+    const method = init?.method?.toUpperCase() ?? 'GET';
+
+    if (method === 'POST') {
+      for (const [route, returnValue] of postRoutes) {
+        if (route.test(urlStr)) {
+          const rv = returnValue as { status?: number };
+          return new Response(null, { status: rv?.status ?? 200 });
+        }
+      }
+      return new Response(null, { status: 404 });
+    }
+
+    // GET requests (ping, artifacts, etc.)
+    for (const [route, returnValue] of getRoutes) {
+      if (route.test(urlStr)) {
+        const rv = returnValue as { status?: number; data?: unknown };
+        const body = rv?.data !== undefined ? rv.data : null;
+        const responseBody =
+          typeof body === 'string' ? body : body !== null ? JSON.stringify(body) : null;
+        return new Response(responseBody, { status: rv?.status ?? 200 });
       }
     }
-    return { status: 404 };
+    return new Response(null, { status: 404 });
   });
 }
 
-export function mockAxiosGet(
-  getSpy: jest.SpyInstance,
-  routes: Array<[RegExp, unknown]> = DEFAULT_GET_ROUTES
+/**
+ * Updates the GET route responses for the fetch mock.
+ */
+export function mockFetchGet(
+  fetchSpy: jest.SpyInstance,
+  getRoutes: Array<[RegExp, unknown]> = DEFAULT_GET_ROUTES
 ) {
-  getSpy.mockImplementation(async (url: string) => {
-    for (const [route, returnValue] of routes) {
-      if (route.test(url)) {
-        return returnValue;
+  const currentImpl = fetchSpy.getMockImplementation();
+  fetchSpy.mockImplementation(async (url: string | URL | Request, init?: RequestInit) => {
+    const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+    const method = init?.method?.toUpperCase() ?? 'GET';
+
+    if (method !== 'POST') {
+      for (const [route, returnValue] of getRoutes) {
+        if (route.test(urlStr)) {
+          const rv = returnValue as { status?: number; data?: unknown };
+          const body = rv?.data !== undefined ? rv.data : null;
+          const responseBody =
+            typeof body === 'string' ? body : body !== null ? JSON.stringify(body) : null;
+          return new Response(responseBody, { status: rv?.status ?? 200 });
+        }
       }
+      return new Response(null, { status: 404 });
     }
-    return { status: 404 };
+
+    // For POST, delegate to the current implementation
+    if (currentImpl) {
+      return currentImpl(url, init);
+    }
+    return new Response(null, { status: 200 });
   });
 }
+
+// Keep legacy names for backward compatibility during migration
+export const mockAxiosPost = (_postSpy: jest.SpyInstance, _routes?: Array<[RegExp, unknown]>) => {};
+export const mockAxiosGet = (_getSpy: jest.SpyInstance, _routes?: Array<[RegExp, unknown]>) => {};
 
 export function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;

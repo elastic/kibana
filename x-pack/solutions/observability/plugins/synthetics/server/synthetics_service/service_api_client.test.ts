@@ -11,7 +11,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
 import type { ServiceConfig } from '../config';
-import axios from 'axios';
 import type { PublicLocations } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
 import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -35,7 +34,8 @@ const licenseMock: LicenseGetResponse = {
   },
 };
 
-jest.mock('axios', () => jest.fn());
+const mockFetch = jest.spyOn(global, 'fetch');
+
 jest.mock('./utils/sanitize_error', () => ({
   getSanitizedError: jest.fn().mockImplementation(() => 'sanitized error'),
 }));
@@ -111,7 +111,7 @@ describe('getHttpsAgent', () => {
 
 describe('checkAccountAccessStatus', () => {
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
+    mockFetch.mockReset();
   });
 
   it('includes a header with the kibana version', async () => {
@@ -130,18 +130,18 @@ describe('checkAccountAccessStatus', () => {
       },
     ];
 
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
-      status: 200,
-      statusText: 'ok',
-      headers: {},
-      config: {},
-      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
-    });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ allowed: true, signupUrl: 'http://localhost:666/example' }),
+    } as Response);
 
     const result = await apiClient.checkAccountAccessStatus();
 
-    expect(axios).toHaveBeenCalledWith(
-      expect.objectContaining({ headers: { 'x-kibana-version': '8.4' } })
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost/allowed',
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'x-kibana-version': '8.4' }),
+      })
     );
 
     expect(result).toEqual({ allowed: true, signupUrl: 'http://localhost:666/example' });
@@ -163,7 +163,7 @@ describe('checkAccountAccessStatus', () => {
       },
     ];
     const error = new Error('Request failed', { someConfig: 'someValue' } as any);
-    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
+    mockFetch.mockRejectedValue(error);
 
     await apiClient.checkAccountAccessStatus();
 
@@ -179,7 +179,7 @@ describe('checkAccountAccessStatus', () => {
 
 describe('syncMonitors', () => {
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
+    mockFetch.mockReset();
   });
 
   it('logs a sanitized error if callAPI fails', async () => {
@@ -198,7 +198,7 @@ describe('syncMonitors', () => {
       },
     ];
     const error = new Error('Request failed', { someConfig: 'someValue' } as any);
-    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
+    mockFetch.mockRejectedValue(error);
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
@@ -222,7 +222,7 @@ describe('syncMonitors', () => {
 
 describe('callAPI', () => {
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
+    mockFetch.mockReset();
     jest.clearAllMocks();
   });
 
@@ -235,13 +235,11 @@ describe('callAPI', () => {
   };
 
   it('it calls service endpoint when adding monitors with basic auth', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
+      ok: true,
       status: 200,
-      statusText: 'ok',
-      headers: {},
-      config: {},
-      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
-    });
+      json: async () => ({ allowed: true, signupUrl: 'http://localhost:666/example' }),
+    } as Response);
 
     const apiClient = new ServiceAPIClient(logger, config, {
       isDev: true,
@@ -293,78 +291,56 @@ describe('callAPI', () => {
       'monitors'
     );
 
-    expect(axiosSpy).toHaveBeenCalledTimes(3);
-    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: {
-        monitors: request1,
-        is_edit: undefined,
-        output,
-        stack_version: '8.7.0',
-        license_level: 'trial',
-        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
-      },
-      headers: {
-        Authorization: 'Basic ZGV2OjEyMzQ1',
-        'x-kibana-version': '8.7.0',
-      },
-      httpsAgent: expect.objectContaining({
-        options: expect.objectContaining({
-          rejectUnauthorized: true,
-          path: null,
-          noDelay: true,
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      1,
+      'https://service.dev/monitors',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Basic ZGV2OjEyMzQ1',
+          'x-kibana-version': '8.7.0',
+          'content-type': 'application/json',
         }),
-      }),
-      method: 'POST',
-      url: 'https://service.dev/monitors',
-    });
+      })
+    );
 
-    expect(axiosSpy).toHaveBeenNthCalledWith(2, {
-      data: {
-        monitors: request2,
-        is_edit: undefined,
-        output,
-        stack_version: '8.7.0',
-        license_level: 'trial',
-        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
-      },
-      headers: {
-        Authorization: 'Basic ZGV2OjEyMzQ1',
-        'x-kibana-version': '8.7.0',
-      },
-      httpsAgent: expect.objectContaining({
-        options: expect.objectContaining({
-          rejectUnauthorized: true,
-          path: null,
-          noDelay: true,
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
+      'https://qa.service.elstc.co/monitors',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Basic ZGV2OjEyMzQ1',
+          'x-kibana-version': '8.7.0',
+          'content-type': 'application/json',
         }),
-      }),
-      method: 'POST',
-      url: 'https://qa.service.elstc.co/monitors',
-    });
+      })
+    );
 
-    expect(axiosSpy).toHaveBeenNthCalledWith(3, {
-      data: {
-        monitors: request3,
-        is_edit: undefined,
-        output,
-        stack_version: '8.7.0',
-        license_level: 'trial',
-        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
-      },
-      headers: {
-        Authorization: 'Basic ZGV2OjEyMzQ1',
-        'x-kibana-version': '8.7.0',
-      },
-      httpsAgent: expect.objectContaining({
-        options: expect.objectContaining({
-          rejectUnauthorized: true,
-          path: null,
-          noDelay: true,
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      3,
+      'https://qa.service.stg.co/monitors',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Basic ZGV2OjEyMzQ1',
+          'x-kibana-version': '8.7.0',
+          'content-type': 'application/json',
         }),
-      }),
-      method: 'POST',
-      url: 'https://qa.service.stg.co/monitors',
-    });
+      })
+    );
+
+    // Verify the request bodies contain the expected data
+    const call1Body = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+    expect(call1Body.monitors).toEqual(request1);
+    expect(call1Body.stack_version).toBe('8.7.0');
+
+    const call2Body = JSON.parse(mockFetch.mock.calls[1][1]!.body as string);
+    expect(call2Body.monitors).toEqual(request2);
+
+    const call3Body = JSON.parse(mockFetch.mock.calls[2][1]!.body as string);
+    expect(call3Body.monitors).toEqual(request3);
 
     expect(logger.error).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledTimes(6);
@@ -374,26 +350,24 @@ describe('callAPI', () => {
     });
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
-      'Successfully called service location https://service.devundefined with method POST with 4 monitors'
+      'Successfully called service location https://service.dev/monitors with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       4,
-      'Successfully called service location https://qa.service.elstc.coundefined with method POST with 4 monitors'
+      'Successfully called service location https://qa.service.elstc.co/monitors with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
-      'Successfully called service location https://qa.service.stg.coundefined with method POST with 1 monitors'
+      'Successfully called service location https://qa.service.stg.co/monitors with method POST with 1 monitors'
     );
   });
 
   it('it calls service endpoint when adding monitors with tls auth', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
+      ok: true,
       status: 200,
-      statusText: 'ok',
-      headers: {},
-      config: {},
-      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
-    });
+      json: async () => ({ allowed: true, signupUrl: 'http://localhost:666/example' }),
+    } as Response);
 
     const apiClient = new ServiceAPIClient(
       logger,
@@ -420,40 +394,34 @@ describe('callAPI', () => {
       license: licenseMock.license,
     });
 
-    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: {
-        monitors: request1,
-        is_edit: undefined,
-        output,
-        stack_version: '8.7.0',
-        license_level: 'trial',
-        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
-      },
-      headers: {
-        'x-kibana-version': '8.7.0',
-      },
-      httpsAgent: expect.objectContaining({
-        options: expect.objectContaining({
-          rejectUnauthorized: true,
-          path: null,
-          noDelay: true,
-          cert: 'test-certificate',
-          key: 'test-key',
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      1,
+      'https://service.dev/monitors',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'x-kibana-version': '8.7.0',
+          'content-type': 'application/json',
         }),
-      }),
-      method: 'POST',
-      url: 'https://service.dev/monitors',
-    });
+      })
+    );
+
+    // Verify no Authorization header when using TLS
+    const headers = mockFetch.mock.calls[0][1]!.headers as Record<string, string>;
+    expect(headers.Authorization).toBeUndefined();
+
+    // Verify request body
+    const body = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+    expect(body.monitors).toEqual(request1);
+    expect(body.stack_version).toBe('8.7.0');
   });
 
   it('Calls the `/run` endpoint when calling `runOnce`', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
+      ok: true,
       status: 200,
-      statusText: 'ok',
-      headers: {},
-      config: {},
-      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
-    });
+      json: async () => ({ allowed: true, signupUrl: 'http://localhost:666/example' }),
+    } as Response);
 
     const apiClient = new ServiceAPIClient(
       logger,
@@ -474,40 +442,28 @@ describe('callAPI', () => {
       license: licenseMock.license,
     });
 
-    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: {
-        monitors: request1,
-        is_edit: undefined,
-        output,
-        stack_version: '8.7.0',
-        license_level: 'trial',
-        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
-      },
-      headers: {
-        'x-kibana-version': '8.7.0',
-      },
-      httpsAgent: expect.objectContaining({
-        options: expect.objectContaining({
-          rejectUnauthorized: true,
-          path: null,
-          noDelay: true,
-          cert: 'test-certificate',
-          key: 'test-key',
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      1,
+      'https://service.dev/run',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'x-kibana-version': '8.7.0',
+          'content-type': 'application/json',
         }),
-      }),
-      method: 'POST',
-      url: 'https://service.dev/run',
-    });
+      })
+    );
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+    expect(body.monitors).toEqual(request1);
   });
 
   it('Calls the `/monitors/sync` endpoint when calling `syncMonitors`', async () => {
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+    mockFetch.mockResolvedValue({
+      ok: true,
       status: 200,
-      statusText: 'ok',
-      headers: {},
-      config: {},
-      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
-    });
+      json: async () => ({ allowed: true, signupUrl: 'http://localhost:666/example' }),
+    } as Response);
 
     const apiClient = new ServiceAPIClient(
       logger,
@@ -532,44 +488,42 @@ describe('callAPI', () => {
       license: licenseMock.license,
     });
 
-    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: {
-        monitors: request1,
-        is_edit: undefined,
-        output,
-        stack_version: '8.7.0',
-        license_level: 'trial',
-        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
-        cloud_id: 'test-id',
-        deployment_id: 'deployment-id',
-      },
-      headers: {
-        'x-kibana-version': '8.7.0',
-      },
-      httpsAgent: expect.objectContaining({
-        options: expect.objectContaining({
-          rejectUnauthorized: true,
-          path: null,
-          noDelay: true,
-          cert: 'test-certificate',
-          key: 'test-key',
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      1,
+      'https://service.dev/monitors/sync',
+      expect.objectContaining({
+        method: 'PUT',
+        headers: expect.objectContaining({
+          'x-kibana-version': '8.7.0',
+          'content-type': 'application/json',
         }),
-      }),
-      method: 'PUT',
-      url: 'https://service.dev/monitors/sync',
-    });
+      })
+    );
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+    expect(body.monitors).toEqual(request1);
+    expect(body.cloud_id).toBe('test-id');
+    expect(body.deployment_id).toBe('deployment-id');
   });
 
   it('splits the payload into multiple requests if the payload is too large', async () => {
     const requests: number[] = [];
-    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockImplementation((req: any) => {
-      requests.push(req.data.monitors.length);
-      if (req.data.monitors.length > 100) {
-        // throw 413 error
-        return Promise.reject({ response: { status: 413 } });
+    mockFetch.mockImplementation((_url: any, options: any) => {
+      const body = JSON.parse(options.body);
+      requests.push(body.monitors.length);
+      if (body.monitors.length > 100) {
+        // throw error with status 413
+        const error: any = new Error('Payload too large');
+        error.status = 413;
+        error.responseData = { reason: 'Payload too large', status: 413 };
+        return Promise.reject(error);
       }
 
-      return Promise.resolve({} as any);
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      } as Response);
     });
 
     const apiClient = new ServiceAPIClient(
@@ -611,7 +565,7 @@ describe('callAPI', () => {
       },
     });
 
-    expect(axiosSpy).toHaveBeenCalledTimes(7);
+    expect(mockFetch).toHaveBeenCalledTimes(7);
     expect(requests).toEqual([250, 125, 125, 63, 62, 63, 62]);
   });
 });

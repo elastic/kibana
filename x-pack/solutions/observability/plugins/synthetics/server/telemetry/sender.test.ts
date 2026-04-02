@@ -9,8 +9,6 @@
 
 import { URL } from 'url';
 
-import axios from 'axios';
-
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -21,11 +19,7 @@ import { TelemetryEventsSender } from './sender';
 import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Observable } from 'rxjs';
 
-jest.mock('axios', () => {
-  return {
-    post: jest.fn(),
-  };
-});
+const mockFetch = jest.spyOn(global, 'fetch');
 
 const licenseMock: LicenseGetResponse = {
   license: {
@@ -77,6 +71,8 @@ describe('TelemetryEventsSender', () => {
     await sender.start(undefined, {
       elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
     } as any);
+
+    mockFetch.mockReset();
   });
 
   describe('queueTelemetryEvents', () => {
@@ -147,31 +143,46 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['queuesPerChannel']['my-channel2']['queue'].length).toBe(1);
 
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      } as Response);
+
       await sender['sendIfDue']();
 
       expect(sender['queuesPerChannel']['my-channel']['getEvents']).toBeCalledTimes(1);
       expect(sender['queuesPerChannel']['my-channel2']['getEvents']).toBeCalledTimes(1);
-      const requestConfig = {
-        headers: {
-          'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': '1',
-          'X-Elastic-Cluster-Name': 'name',
-          'X-Elastic-Stack-Version': '8.0.0',
-        },
-        timeout: 5000,
-      };
+
       const event1 = { 'event.kind': '1', ...licenseMock };
       const event2 = { 'event.kind': '2', ...licenseMock };
       const event3 = { 'event.kind': '3', ...licenseMock };
-      expect(axios.post).toHaveBeenCalledWith(
+
+      expect(mockFetch).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel',
-        `${JSON.stringify(event1)}\n${JSON.stringify(event2)}\n`,
-        requestConfig
+        expect.objectContaining({
+          method: 'POST',
+          body: `${JSON.stringify(event1)}\n${JSON.stringify(event2)}\n`,
+          headers: expect.objectContaining({
+            'Content-Type': 'application/x-ndjson',
+            'X-Elastic-Cluster-ID': '1',
+            'X-Elastic-Cluster-Name': 'name',
+            'X-Elastic-Stack-Version': '8.0.0',
+          }),
+        })
       );
-      expect(axios.post).toHaveBeenCalledWith(
+      expect(mockFetch).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel2',
-        `${JSON.stringify(event3)}\n`,
-        requestConfig
+        expect.objectContaining({
+          method: 'POST',
+          body: `${JSON.stringify(event3)}\n`,
+          headers: expect.objectContaining({
+            'Content-Type': 'application/x-ndjson',
+            'X-Elastic-Cluster-ID': '1',
+            'X-Elastic-Cluster-Name': 'name',
+            'X-Elastic-Stack-Version': '8.0.0',
+          }),
+        })
       );
     });
   });

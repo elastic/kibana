@@ -14,7 +14,6 @@
 
 import type http from 'http';
 import getPort from 'get-port';
-import axios from 'axios';
 import type httpProxy from 'http-proxy';
 
 import expect from '@kbn/expect';
@@ -109,10 +108,12 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
   });
 
   async function waitForActionBody(url: string, id: string): Promise<string> {
-    const response = await axios.get<string[]>(url);
+    const response = await fetch(url);
     expect(response.status).to.eql(200);
 
-    for (const datum of response.data) {
+    const data: string[] = await response.json();
+
+    for (const datum of data) {
       const match = datum.match(/^(.*) - (.*)$/);
       if (match == null) continue;
 

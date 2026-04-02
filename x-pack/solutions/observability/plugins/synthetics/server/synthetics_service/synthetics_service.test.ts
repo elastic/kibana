@@ -10,8 +10,6 @@ import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
 import times from 'lodash/times';
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
@@ -20,7 +18,7 @@ import * as apiKeys from './get_api_key';
 import type { SyntheticsServerSetup } from '../types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
-jest.mock('axios', () => jest.fn());
+const mockFetch = jest.spyOn(global, 'fetch');
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
@@ -154,7 +152,7 @@ describe('SyntheticsService', () => {
   };
 
   beforeEach(() => {
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
+    mockFetch.mockReset();
     jest.clearAllMocks();
   });
 
@@ -226,16 +224,12 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       await service.addConfigs({ monitor: payload } as any, []);
 
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: locations[0].url + '/monitors',
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith(locations[0].url + '/monitors', expect.any(Object));
     });
   });
 
@@ -253,11 +247,11 @@ describe('SyntheticsService', () => {
 
       serverMock.encryptedSavedObjects = mockEncryptedSO();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
-      expect(axios).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalled();
 
       expect(serverMock.logger.error).not.toBeCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
@@ -276,7 +270,7 @@ describe('SyntheticsService', () => {
         ],
       });
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
@@ -290,52 +284,43 @@ describe('SyntheticsService', () => {
     it('includes the isEdit flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       const payload = getFakePayload([locations[0]]);
 
       await service.editConfig({ monitor: payload } as any, true, []);
 
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ is_edit: true }),
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const body1 = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+      expect(body1.is_edit).toBe(true);
     });
 
     it('includes the license level flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       const payload = getFakePayload([locations[0]]);
 
       await service.editConfig({ monitor: payload } as any, true, []);
 
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ license_level: 'platinum' }),
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const body2 = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+      expect(body2.license_level).toBe('platinum');
     });
 
     it('includes the license level flag on add config requests', async () => {
       const { service, locations } = getMockedService();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       const payload = getFakePayload([locations[0]]);
 
       await service.addConfigs({ monitor: payload } as any, []);
 
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ license_level: 'platinum' }),
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const body3 = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+      expect(body3.license_level).toBe('platinum');
     });
 
     it('includes the license level flag on push configs requests', async () => {
@@ -349,16 +334,13 @@ describe('SyntheticsService', () => {
         ],
       });
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ license_level: 'platinum' }),
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      const body4 = JSON.parse(mockFetch.mock.calls[0][1]!.body as string);
+      expect(body4.license_level).toBe('platinum');
     });
 
     it.each([
@@ -399,7 +381,7 @@ describe('SyntheticsService', () => {
           },
         });
 
-        (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+        mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
         await expect(service.pushConfigs(ALL_SPACES_ID)).rejects.toThrow(errorMessage);
       }
@@ -411,7 +393,7 @@ describe('SyntheticsService', () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getSyntheticsParams').mockRestore();
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         params: [
@@ -565,12 +547,12 @@ describe('SyntheticsService', () => {
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({ monitors: data });
 
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+      mockFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({}) } as Response);
 
       await service.pushConfigs(ALL_SPACES_ID);
 
       expect(syncSpy).toHaveBeenCalledTimes(72);
-      expect(axios).toHaveBeenCalledTimes(72);
+      expect(mockFetch).toHaveBeenCalledTimes(72);
       expect(logger.debug).toHaveBeenCalledTimes(112);
       expect(logger.info).toHaveBeenCalledTimes(0);
       expect(logger.error).toHaveBeenCalledTimes(0);

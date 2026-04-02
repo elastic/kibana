@@ -8,7 +8,6 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { PackageInfo } from '@kbn/screenshotting-server';
 import assert from 'assert';
-import axios from 'axios';
 import path from 'path';
 import { paths as chromiumArchivePaths } from '../../../utils';
 import { download } from '../../download';
@@ -41,15 +40,6 @@ const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture
 describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) => {
   // For testing, suffix the unzip folder by cpu + platform so the extracted folders do not overwrite each other in the cache
   const chromiumPath = path.resolve(__dirname, '../../../../chromium', architecture, platform);
-
-  const originalAxios = axios.defaults.adapter;
-  beforeAll(async () => {
-    axios.defaults.adapter = 'http';
-  });
-
-  afterAll(() => {
-    axios.defaults.adapter = originalAxios;
-  });
 
   // Allow package definition to be altered to check error handling
   const originalPkg = chromiumArchivePaths.packages.find(

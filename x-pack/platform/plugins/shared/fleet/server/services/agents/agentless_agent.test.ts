@@ -9,9 +9,6 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-
 import { AgentlessAgentCreateFleetUnreachableError } from '../../../common/errors';
 import {
   AgentlessAgentConfigError,
@@ -30,8 +27,6 @@ import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 
 import { agentlessAgentService } from './agentless_agent';
-
-jest.mock('axios');
 
 jest.mock('../fleet_server_host');
 jest.mock('../api_keys');
@@ -70,14 +65,26 @@ function getAgentPolicyCreateMock() {
 }
 let mockedLogger: jest.Mocked<Logger>;
 
-const mockAgentlessDeploymentResponse: Partial<AxiosResponse<AgentlessApiDeploymentResponse>> = {
-  data: {
-    code: AgentlessApiDeploymentResponseCode.Success,
-    error: null,
-  },
+const mockAgentlessDeploymentResponseData: AgentlessApiDeploymentResponse = {
+  code: AgentlessApiDeploymentResponseCode.Success,
+  error: null,
 };
 
-const AxiosError = jest.requireActual('axios').AxiosError;
+const mockAgentlessDeploymentResponse = {
+  status: 200,
+  data: mockAgentlessDeploymentResponseData,
+};
+
+const createMockFetchResponse = (data: unknown, status = 200): Response => {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: status === 200 ? 'OK' : 'Error',
+    json: jest.fn().mockResolvedValue(data),
+    text: jest.fn().mockResolvedValue(JSON.stringify(data)),
+    headers: new Headers({ 'content-type': 'application/json' }),
+  } as unknown as Response;
+};
 
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
@@ -89,24 +96,26 @@ jest.mock('@kbn/server-http-tools', () => ({
 }));
 
 describe('Agentless Agent service', () => {
+  let mockedFetch: jest.SpyInstance;
+
   beforeEach(() => {
-    axios.isAxiosError = jest.requireActual('axios').isAxiosError;
+    jest.clearAllMocks();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
-    jest.mocked(axios).mockReset();
+    mockedFetch = jest.spyOn(global, 'fetch');
     jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
       outputs: { default: {} as any },
     } as any);
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
     jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should create agentless agent for ESS', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -175,40 +184,43 @@ describe('Agentless Agent service', () => {
       } as AgentPolicy
     );
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/ess/deployments',
       expect.objectContaining({
-        data: expect.objectContaining({
-          fleet_token: 'mocked-fleet-enrollment-api-key',
-          fleet_url: 'http://fleetserver:8220',
-          policy_id: 'mocked-agentless-agent-policy-id',
-          stack_version: 'mocked-kibana-version-infinite',
-          labels: {
-            owner: {
-              org: 'elastic',
-              division: 'cloud',
-              team: 'fleet',
-            },
-          },
-          secrets: {
-            fleet_app_token: 'fleet-app-token',
-            elasticsearch_app_token: 'es-app-token',
-          },
-          policy_details: {
-            output_name: 'default',
-          },
-        }),
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'POST',
-        url: 'http://api.agentless.com/api/v1/ess/deployments',
+        headers: expect.anything(),
+        body: expect.stringContaining('"policy_id":"mocked-agentless-agent-policy-id"'),
+      })
+    );
+    const callBody = JSON.parse(mockedFetch.mock.calls[0][1].body);
+    expect(callBody).toEqual(
+      expect.objectContaining({
+        fleet_token: 'mocked-fleet-enrollment-api-key',
+        fleet_url: 'http://fleetserver:8220',
+        policy_id: 'mocked-agentless-agent-policy-id',
+        stack_version: 'mocked-kibana-version-infinite',
+        labels: {
+          owner: {
+            org: 'elastic',
+            division: 'cloud',
+            team: 'fleet',
+          },
+        },
+        secrets: {
+          fleet_app_token: 'fleet-app-token',
+          elasticsearch_app_token: 'es-app-token',
+        },
+        policy_details: {
+          output_name: 'default',
+        },
       })
     );
   });
 
   it('should create agentless agent for serverless', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -279,45 +291,44 @@ describe('Agentless Agent service', () => {
       } as AgentPolicy
     );
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/serverless/deployments',
       expect.objectContaining({
-        data: expect.objectContaining({
-          fleet_token: 'mocked-fleet-enrollment-api-key',
-          fleet_url: 'http://fleetserver:8220',
-          policy_id: 'mocked-agentless-agent-policy-id',
-          labels: {
-            owner: {
-              org: 'elastic',
-              division: 'cloud',
-              team: 'fleet',
-            },
-          },
-          secrets: {
-            fleet_app_token: 'fleet-app-token',
-            elasticsearch_app_token: 'es-app-token',
-          },
-          policy_details: {
-            output_name: 'default',
-          },
-        }),
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'POST',
-        url: 'http://api.agentless.com/api/v1/serverless/deployments',
+        headers: expect.anything(),
+      })
+    );
+    const callBody = JSON.parse(mockedFetch.mock.calls[0][1].body);
+    expect(callBody).toEqual(
+      expect.objectContaining({
+        fleet_token: 'mocked-fleet-enrollment-api-key',
+        fleet_url: 'http://fleetserver:8220',
+        policy_id: 'mocked-agentless-agent-policy-id',
+        labels: {
+          owner: {
+            org: 'elastic',
+            division: 'cloud',
+            team: 'fleet',
+          },
+        },
+        secrets: {
+          fleet_app_token: 'fleet-app-token',
+          elasticsearch_app_token: 'es-app-token',
+        },
+        policy_details: {
+          output_name: 'default',
+        },
       })
     );
   });
 
   it('should retry creating agentless agent on 500 error', async () => {
-    const axiosError = new AxiosError('Test Error');
-    axiosError.response = {
-      status: 500,
-    } as any;
-
-    jest.mocked(axios).mockRejectedValueOnce(axiosError);
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(
+      createMockFetchResponse({ message: 'Internal Server Error' }, 500)
+    );
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -388,39 +399,19 @@ describe('Agentless Agent service', () => {
       } as AgentPolicy
     );
 
-    expect(axios).toHaveBeenCalledTimes(2);
+    expect(mockedFetch).toHaveBeenCalledTimes(2);
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/serverless/deployments',
       expect.objectContaining({
-        data: expect.objectContaining({
-          fleet_token: 'mocked-fleet-enrollment-api-key',
-          fleet_url: 'http://fleetserver:8220',
-          policy_id: 'mocked-agentless-agent-policy-id',
-          labels: {
-            owner: {
-              org: 'elastic',
-              division: 'cloud',
-              team: 'fleet',
-            },
-          },
-          secrets: {
-            fleet_app_token: 'fleet-app-token',
-            elasticsearch_app_token: 'es-app-token',
-          },
-          policy_details: {
-            output_name: 'default',
-          },
-        }),
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'POST',
-        url: 'http://api.agentless.com/api/v1/serverless/deployments',
+        headers: expect.anything(),
       })
     );
   });
 
   it('should create agentless agent with resources', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -499,45 +490,47 @@ describe('Agentless Agent service', () => {
       } as AgentPolicy
     );
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/serverless/deployments',
       expect.objectContaining({
-        data: expect.objectContaining({
-          fleet_token: 'mocked-fleet-enrollment-api-key',
-          fleet_url: 'http://fleetserver:8220',
-          policy_id: 'mocked-agentless-agent-policy-id',
-          resources: {
-            requests: {
-              memory: '1Gi',
-              cpu: '500m',
-            },
-          },
-          labels: {
-            owner: {
-              org: 'elastic',
-              division: 'cloud',
-              team: 'fleet',
-            },
-          },
-          secrets: {
-            fleet_app_token: 'fleet-app-token',
-            elasticsearch_app_token: 'es-app-token',
-          },
-          policy_details: {
-            output_name: 'default',
-          },
-        }),
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'POST',
-        url: 'http://api.agentless.com/api/v1/serverless/deployments',
+        headers: expect.anything(),
+      })
+    );
+    const callBody = JSON.parse(mockedFetch.mock.calls[0][1].body);
+    expect(callBody).toEqual(
+      expect.objectContaining({
+        fleet_token: 'mocked-fleet-enrollment-api-key',
+        fleet_url: 'http://fleetserver:8220',
+        policy_id: 'mocked-agentless-agent-policy-id',
+        resources: {
+          requests: {
+            memory: '1Gi',
+            cpu: '500m',
+          },
+        },
+        labels: {
+          owner: {
+            org: 'elastic',
+            division: 'cloud',
+            team: 'fleet',
+          },
+        },
+        secrets: {
+          fleet_app_token: 'fleet-app-token',
+          elasticsearch_app_token: 'es-app-token',
+        },
+        policy_details: {
+          output_name: 'default',
+        },
       })
     );
   });
 
   it('should create agentless agent with cloud_connectors', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -620,49 +613,51 @@ describe('Agentless Agent service', () => {
       } as AgentPolicy
     );
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/serverless/deployments',
       expect.objectContaining({
-        data: expect.objectContaining({
-          fleet_token: 'mocked-fleet-enrollment-api-key',
-          fleet_url: 'http://fleetserver:8220',
-          policy_id: 'mocked-agentless-agent-policy-id',
-          resources: {
-            requests: {
-              memory: '1Gi',
-              cpu: '500m',
-            },
-          },
-          cloud_connectors: {
-            target_csp: 'aws',
-            enabled: true,
-          },
-          labels: {
-            owner: {
-              org: 'elastic',
-              division: 'cloud',
-              team: 'fleet',
-            },
-          },
-          secrets: {
-            fleet_app_token: 'fleet-app-token',
-            elasticsearch_app_token: 'es-app-token',
-          },
-          policy_details: {
-            output_name: 'default',
-          },
-        }),
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'POST',
-        url: 'http://api.agentless.com/api/v1/serverless/deployments',
+        headers: expect.anything(),
+      })
+    );
+    const callBody = JSON.parse(mockedFetch.mock.calls[0][1].body);
+    expect(callBody).toEqual(
+      expect.objectContaining({
+        fleet_token: 'mocked-fleet-enrollment-api-key',
+        fleet_url: 'http://fleetserver:8220',
+        policy_id: 'mocked-agentless-agent-policy-id',
+        resources: {
+          requests: {
+            memory: '1Gi',
+            cpu: '500m',
+          },
+        },
+        cloud_connectors: {
+          target_csp: 'aws',
+          enabled: true,
+        },
+        labels: {
+          owner: {
+            org: 'elastic',
+            division: 'cloud',
+            team: 'fleet',
+          },
+        },
+        secrets: {
+          fleet_app_token: 'fleet-app-token',
+          elasticsearch_app_token: 'es-app-token',
+        },
+        policy_details: {
+          output_name: 'default',
+        },
       })
     );
   });
 
   it('should create agentless agent when no labels are given', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -717,30 +712,33 @@ describe('Agentless Agent service', () => {
       } as AgentPolicy
     );
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/ess/deployments',
       expect.objectContaining({
-        data: expect.objectContaining({
-          fleet_token: 'mocked-fleet-enrollment-api-key',
-          fleet_url: 'http://fleetserver:8220',
-          policy_id: 'mocked-agentless-agent-policy-id',
-          stack_version: 'mocked-kibana-version-infinite',
-        }),
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'POST',
-        url: 'http://api.agentless.com/api/v1/ess/deployments',
+        headers: expect.anything(),
+      })
+    );
+    const callBody = JSON.parse(mockedFetch.mock.calls[0][1].body);
+    expect(callBody).toEqual(
+      expect.objectContaining({
+        fleet_token: 'mocked-fleet-enrollment-api-key',
+        fleet_url: 'http://fleetserver:8220',
+        policy_id: 'mocked-agentless-agent-policy-id',
+        stack_version: 'mocked-kibana-version-infinite',
       })
     );
   });
 
   it('should delete agentless agent for ESS', async () => {
     const returnValue = {
-      id: 'mocked',
+      status: 200,
+      data: { id: 'mocked' },
     };
 
-    jest.mocked(axios).mockResolvedValueOnce(returnValue);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse({ id: 'mocked' }));
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -764,20 +762,19 @@ describe('Agentless Agent service', () => {
       'mocked-agentless-agent-policy-id'
     );
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(deleteAgentlessAgentReturnValue).toEqual(returnValue);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
       expect.objectContaining({
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'DELETE',
-        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+        headers: expect.anything(),
       })
     );
   });
 
   it('should upgraded agentless agent for ESS', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -800,27 +797,28 @@ describe('Agentless Agent service', () => {
 
     await agentlessAgentService.upgradeAgentlessDeployment('mocked-agentless-agent-policy-id');
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
 
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
       expect.objectContaining({
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'PUT',
-        data: {
-          stack_version: '8.18.0',
-        },
-        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+        headers: expect.anything(),
       })
     );
+    const callBody = JSON.parse(mockedFetch.mock.calls[0][1].body);
+    expect(callBody).toEqual({
+      stack_version: '8.18.0',
+    });
   });
 
   it('should delete agentless agent for serverless', async () => {
     const returnValue = {
-      id: 'mocked',
+      status: 200,
+      data: { id: 'mocked' },
     };
 
-    jest.mocked(axios).mockResolvedValueOnce(returnValue);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse({ id: 'mocked' }));
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -846,20 +844,19 @@ describe('Agentless Agent service', () => {
       'mocked-agentless-agent-policy-id'
     );
 
-    expect(axios).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(deleteAgentlessAgentReturnValue).toEqual(returnValue);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'http://api.agentless.com/api/v1/serverless/deployments/mocked-agentless-agent-policy-id',
       expect.objectContaining({
-        headers: expect.anything(),
-        httpsAgent: expect.anything(),
         method: 'DELETE',
-        url: 'http://api.agentless.com/api/v1/serverless/deployments/mocked-agentless-agent-policy-id',
+        headers: expect.anything(),
       })
     );
   });
 
   it('should redact sensitive information from debug logs', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -922,7 +919,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should log "undefined" on debug logs when tls configuration is missing', async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -1014,9 +1011,8 @@ describe('Agentless Agent service', () => {
         },
       ],
     } as any);
-    // Force axios to throw an AxiosError to simulate an error response
-    const axiosError = new AxiosError('Test Error');
-    jest.mocked(axios).mockRejectedValueOnce(axiosError);
+    // Force fetch to throw an error to simulate an error response
+    mockedFetch.mockRejectedValueOnce(new Error('Test Error'));
 
     await expect(
       agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1037,7 +1033,7 @@ describe('Agentless Agent service', () => {
   });
 
   it(`should have x-elastic-internal-origin in the headers when the request is internal`, async () => {
-    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    mockedFetch.mockResolvedValueOnce(createMockFetchResponse(mockAgentlessDeploymentResponseData));
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1088,8 +1084,9 @@ describe('Agentless Agent service', () => {
       supports_agentless: true,
     } as AgentPolicy);
 
-    expect(axios).toHaveBeenCalledTimes(1);
-    expect(axios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledWith(
+      expect.any(String),
       expect.objectContaining({
         headers: expect.objectContaining({
           'x-elastic-internal-origin': 'Kibana',
@@ -1363,15 +1360,15 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Test Error');
-      axiosError.response = {
-        status: 999,
-        data: {
-          message: 'This is a fake error status that is never to be handled handled',
-        },
-      } as AxiosResponse;
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            message: 'This is a fake error status that is never to be handled handled',
+          },
+          999
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1425,20 +1422,20 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Test Error');
-      axiosError.response = {
-        status: 500,
-        data: {
-          message: 'Internal Server Error',
-        },
-      } as AxiosResponse;
+      // Mock fetch to return non-ok responses to simulate errors
+      const errorResponse = () =>
+        createMockFetchResponse(
+          {
+            message: 'Internal Server Error',
+          },
+          500
+        );
 
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      mockedFetch.mockResolvedValueOnce(errorResponse());
+      mockedFetch.mockResolvedValueOnce(errorResponse());
+      mockedFetch.mockResolvedValueOnce(errorResponse());
+      mockedFetch.mockResolvedValueOnce(errorResponse());
+      mockedFetch.mockResolvedValueOnce(errorResponse());
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1508,16 +1505,15 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Test Error');
-      axiosError.response = {
-        status: 429,
-        data: {
-          message: 'Limit exceeded',
-        },
-      } as AxiosResponse;
-
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            message: 'Limit exceeded',
+          },
+          429
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1571,16 +1567,15 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Test Error');
-      axiosError.response = {
-        status: 408,
-        data: {
-          message: 'Request timed out',
-        },
-      } as AxiosResponse;
-
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            message: 'Request timed out',
+          },
+          408
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1634,15 +1629,15 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Test Error');
-      axiosError.response = {
-        status: 404,
-        data: {
-          message: 'Not Found',
-        },
-      } as AxiosResponse;
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            message: 'Not Found',
+          },
+          404
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1696,16 +1691,15 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Test Error');
-      axiosError.response = {
-        status: 403,
-        data: {
-          message: 'Forbidden',
-        },
-      } as AxiosResponse;
-
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            message: 'Forbidden',
+          },
+          403
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1759,16 +1753,15 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Test Error');
-      axiosError.response = {
-        status: 401,
-        data: {
-          message: 'Unauthorized',
-        },
-      } as AxiosResponse;
-
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            message: 'Unauthorized',
+          },
+          401
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1822,16 +1815,15 @@ describe('Agentless Agent service', () => {
           },
         ],
       } as any);
-      // Force axios to throw an AxiosError to simulate an error response
-      const axiosError = new AxiosError('Bad Request');
-      axiosError.response = {
-        status: 400,
-        data: {
-          message: 'Bad Request',
-        },
-      } as AxiosResponse;
-
-      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            message: 'Bad Request',
+          },
+          400
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1886,17 +1878,16 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
 
-      const mockedError = new AxiosError('Bad Request');
-
-      mockedError.response = {
-        status: 400,
-        data: {
-          code: 'FLEET_UNREACHABLE',
-          message: 'Bad Request',
-        },
-      } as AxiosResponse;
-      // Force axios to throw an AxiosError to simulate an error response
-      jest.mocked(axios).mockRejectedValueOnce(mockedError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            code: 'FLEET_UNREACHABLE',
+            message: 'Bad Request',
+          },
+          400
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1951,17 +1942,17 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
 
-      const mockedError = new AxiosError('reached limit: 5');
-
-      mockedError.response = {
-        status: 429,
-        data: {
-          code: 'OVER_PROVISIONED',
-          message: 'reached limit: 5',
-        },
-      } as AxiosResponse;
-      // Force axios to throw an AxiosError to simulate an error response
-      jest.mocked(axios).mockRejectedValueOnce(mockedError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(
+        createMockFetchResponse(
+          {
+            code: 'OVER_PROVISIONED',
+            error: 'reached limit: 5',
+            message: 'reached limit: 5',
+          },
+          429
+        )
+      );
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -2014,14 +2005,8 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
 
-      const mockedError = new AxiosError('reached limit: 5');
-
-      mockedError.response = {
-        status: 404,
-        data: {},
-      } as AxiosResponse;
-      // Force axios to throw an AxiosError to simulate an error response
-      jest.mocked(axios).mockRejectedValueOnce(mockedError);
+      // Mock fetch to return a non-ok response to simulate an error
+      mockedFetch.mockResolvedValueOnce(createMockFetchResponse({}, 404));
 
       await expect(agentlessAgentService.listAgentlessDeployments()).rejects.toThrowError(
         AgentlessAgentListNotFoundError

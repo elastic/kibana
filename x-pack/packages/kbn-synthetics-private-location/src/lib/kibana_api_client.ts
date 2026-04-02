@@ -9,13 +9,10 @@ import { isError } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import fs from 'fs';
-import type { Agent } from 'https';
-import https from 'https';
-import axios from 'axios';
+import { Agent } from 'undici';
 
 export class KibanaAPIClient {
-  private isHTTPS: boolean;
-  private httpsAgent: Agent | undefined;
+  private dispatcher: Agent | undefined;
 
   constructor(
     private kibanaUrl: string,
@@ -23,13 +20,14 @@ export class KibanaAPIClient {
     private kibanaPassword: string,
     private logger: ToolingLog
   ) {
-    this.isHTTPS = new URL(kibanaUrl).protocol === 'https:';
-    this.httpsAgent = this.isHTTPS
-      ? new https.Agent({
-          ca: fs.readFileSync(KBN_CERT_PATH),
-          key: fs.readFileSync(KBN_KEY_PATH),
-          // hard-coded set to false like in packages/kbn-cli-dev-mode/src/base_path_proxy_server.ts
-          rejectUnauthorized: false,
+    const isHTTPS = new URL(kibanaUrl).protocol === 'https:';
+    this.dispatcher = isHTTPS
+      ? new Agent({
+          connect: {
+            ca: fs.readFileSync(KBN_CERT_PATH).toString(),
+            key: fs.readFileSync(KBN_KEY_PATH).toString(),
+            rejectUnauthorized: false,
+          },
         })
       : undefined;
   }
@@ -45,23 +43,37 @@ export class KibanaAPIClient {
     data?: Record<string, unknown>;
     headers?: Record<string, unknown>;
   }) {
+    const basicAuth = Buffer.from(`${this.kibanaUsername}:${this.kibanaPassword}`).toString(
+      'base64'
+    );
+
     try {
-      const response = await axios({
+      const response = await fetch(`${this.kibanaUrl}/${url}`, {
         method,
-        url: `${this.kibanaUrl}/${url}`,
-        data,
         headers: {
           'kbn-xsrf': 'true',
           'elastic-api-version': '2023-10-31',
-          ...headers,
+          'content-type': 'application/json',
+          ...((headers as Record<string, string>) ?? {}),
+          Authorization: `Basic ${basicAuth}`,
         },
-        auth: {
-          username: this.kibanaUsername,
-          password: this.kibanaPassword,
-        },
-        httpsAgent: this.httpsAgent,
+        ...(data !== undefined ? { body: JSON.stringify(data) } : {}),
+        ...(this.dispatcher ? ({ dispatcher: this.dispatcher } as RequestInit) : {}),
       });
-      return response;
+
+      const responseData = await response.json().catch(() => undefined);
+
+      if (!response.ok) {
+        throw new Error(
+          `Request failed with status ${response.status}: ${JSON.stringify(responseData)}`
+        );
+      }
+
+      return {
+        status: response.status,
+        data: responseData,
+        headers: response.headers,
+      };
     } catch (e) {
       if (isError(e)) {
         this.logger.error(`Error sending request to Kibana: ${e.message} ${e.stack}`);

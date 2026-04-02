@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import moment from 'moment';
 import { readKibanaConfig } from '@kbn/observability-synthetics-test-data';
 
@@ -22,9 +21,14 @@ function getAuthFromKibanaConfig() {
   return { username, password };
 }
 
+const getAuthHeader = () => {
+  const { username, password } = getAuthFromKibanaConfig();
+  return 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+};
+
 export const generateMonitors = async () => {
-  const policy = (await createTestAgentPolicy()) as { data: { item: { id: string } } };
-  const location = await createPrivateLocation(policy.data.item.id);
+  const policy = (await createTestAgentPolicy()) as { item: { id: string } };
+  const location = await createPrivateLocation(policy.item.id);
 
   // eslint-disable-next-line no-console
   console.log(`Generating ${UP_MONITORS} up monitors`);
@@ -40,18 +44,26 @@ export const generateMonitors = async () => {
 };
 
 const createMonitor = async (monitor: any) => {
-  await axios
-    .request({
-      data: monitor,
-      method: 'post',
-      url: 'http://127.0.0.1:5601/test/api/synthetics/monitors',
-      auth: getAuthFromKibanaConfig(),
-      headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
+  try {
+    const response = await fetch('http://127.0.0.1:5601/test/api/synthetics/monitors', {
+      method: 'POST',
+      body: JSON.stringify(monitor),
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+        'elastic-api-version': '2023-10-31',
+        Authorization: getAuthHeader(),
+      },
     });
+    if (!response.ok) {
+      const errorText = await response.text();
+      // eslint-disable-next-line no-console
+      console.error(`Failed to create monitor: ${response.status} ${errorText}`);
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
 };
 
 const createTestAgentPolicy = async () => {
@@ -63,18 +75,29 @@ const createTestAgentPolicy = async () => {
     inactivity_timeout: 1209600,
     is_protected: false,
   };
-  return await axios
-    .request({
-      data,
-      method: 'post',
-      url: 'http://127.0.0.1:5601/test/api/fleet/agent_policies',
-      auth: getAuthFromKibanaConfig(),
-      headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
+  try {
+    const response = await fetch('http://127.0.0.1:5601/test/api/fleet/agent_policies', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+        'elastic-api-version': '2023-10-31',
+        Authorization: getAuthHeader(),
+      },
     });
+    if (!response.ok) {
+      const errorText = await response.text();
+      // eslint-disable-next-line no-console
+      console.error(`Failed to create agent policy: ${response.status} ${errorText}`);
+      return undefined;
+    }
+    return await response.json();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return undefined;
+  }
 };
 
 const createPrivateLocation = async (policyId: string) => {
@@ -85,20 +108,29 @@ const createPrivateLocation = async (policyId: string) => {
     spaces: ['*'],
   };
 
-  return (
-    (await axios
-      .request({
-        data,
-        method: 'post',
-        url: 'http://127.0.0.1:5601/test/api/synthetics/private_locations',
-        auth: getAuthFromKibanaConfig(),
-        headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      })) as any
-  ).data;
+  try {
+    const response = await fetch('http://127.0.0.1:5601/test/api/synthetics/private_locations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+        'elastic-api-version': '2023-10-31',
+        Authorization: getAuthHeader(),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      // eslint-disable-next-line no-console
+      console.error(`Failed to create private location: ${response.status} ${errorText}`);
+      return undefined;
+    }
+    return await response.json();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return undefined;
+  }
 };
 
 const getHttpMonitor = ({

@@ -145,7 +145,7 @@ describe('downloadToDisk', () => {
         Array [
           " debg [1/2] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Request failed with status code 500",
+          " debg Download failed: Unexpected status code 500 when downloading TEST_SERVER_URL",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.1 seconds",
           " debg [2/2] Attempting download of TEST_SERVER_URL sha256",
@@ -172,7 +172,7 @@ describe('downloadToDisk', () => {
         Array [
           " debg [1/3] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Request failed with status code 500",
+          " debg Download failed: Unexpected status code 500 when downloading TEST_SERVER_URL",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.1 seconds",
           " debg [2/3] Attempting download of TEST_SERVER_URL sha256",
@@ -198,33 +198,33 @@ describe('downloadToDisk', () => {
         retryDelaySecMultiplier: 0.1,
       });
       await expect(promise).rejects.toMatchInlineSnapshot(
-        `[AxiosError: Request failed with status code 500]`
+        `[Error: Unexpected status code 500 when downloading TEST_SERVER_URL]`
       );
       expect(logWritter.messages).toMatchInlineSnapshot(`
         Array [
           " debg [1/5] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Request failed with status code 500",
+          " debg Download failed: Unexpected status code 500 when downloading TEST_SERVER_URL",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.1 seconds",
           " debg [2/5] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Request failed with status code 500",
+          " debg Download failed: Unexpected status code 500 when downloading TEST_SERVER_URL",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.2 seconds",
           " debg [3/5] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Request failed with status code 500",
+          " debg Download failed: Unexpected status code 500 when downloading TEST_SERVER_URL",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.30000000000000004 seconds",
           " debg [4/5] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Request failed with status code 500",
+          " debg Download failed: Unexpected status code 500 when downloading TEST_SERVER_URL",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.4 seconds",
           " debg [5/5] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Request failed with status code 500",
+          " debg Download failed: Unexpected status code 500 when downloading TEST_SERVER_URL",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
         ]
       `);
@@ -271,7 +271,7 @@ describe('downloadToString', () => {
       maxAttempts: 1,
     });
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[AxiosError: Request failed with status code 200]`
+      `[Error: Request failed with status code 200]`
     );
     expect(logWritter.messages).toMatchInlineSnapshot(`
       Array [

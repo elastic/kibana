@@ -9,9 +9,7 @@
 
 import { setTimeout } from 'timers/promises';
 
-import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
-import Axios from 'axios';
 
 import type { TestFailure } from './get_failures';
 import type { GithubIssueMini } from './github_api';
@@ -142,25 +140,33 @@ export class ExistingFailedTestIssues {
       attempt += 1;
 
       try {
-        const resp = await Axios.request<FindFailedTestIssuesResponse>({
+        const resp = await fetch(`${BASE_URL}/v1/find_failed_test_issues`, {
           method: 'POST',
-          baseURL: BASE_URL,
-          allowAbsoluteUrls: false,
-          url: '/v1/find_failed_test_issues',
-          data: {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             failures: failures.map((f) => ({
               classname: f.classname,
               name: f.name,
             })),
-          },
+          }),
         });
 
-        return resp.data.existingIssues;
+        if (!resp.ok) {
+          const error = new Error(`Request failed with status ${resp.status}`);
+          (error as any).response = { status: resp.status };
+          throw error;
+        }
+
+        const data = (await resp.json()) as FindFailedTestIssuesResponse;
+        return data.existingIssues;
       } catch (error: unknown) {
+        const isResponseError =
+          error instanceof Error && (error as any).response?.status !== undefined;
+        const isNetworkError = error instanceof Error && !(error as any).response;
+
         if (
           attempt < maxAttempts &&
-          ((isAxiosResponseError(error) && error.response.status >= 500) ||
-            isAxiosRequestError(error))
+          ((isResponseError && (error as any).response.status >= 500) || isNetworkError)
         ) {
           this.log.error(error);
           this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);

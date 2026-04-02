@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
 import type { KbnClient } from '@kbn/test';
 import type {
   BulkInstallPackageInfo,
@@ -43,13 +42,13 @@ export const setupFleetForEndpoint = usageTracker.track(
 
     // Setup Fleet
     try {
-      const setupResponse = (await kbnClient
-        .request({
+      const setupResponse = await kbnClient
+        .request<PostFleetSetupResponse>({
           path: SETUP_API_ROUTE,
           headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
           method: 'POST',
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
+        .catch(wrapErrorAndRejectPromise);
 
       if (!setupResponse.data.isInitialized) {
         log.error(new Error(JSON.stringify(setupResponse.data, null, 2)));
@@ -62,15 +61,15 @@ export const setupFleetForEndpoint = usageTracker.track(
 
     // Setup Agents
     try {
-      const setupResponse = (await kbnClient
-        .request({
+      const setupResponse = await kbnClient
+        .request<PostFleetSetupResponse>({
           path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
           method: 'POST',
           headers: {
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
+        .catch(wrapErrorAndRejectPromise);
 
       if (!setupResponse.data.isInitialized) {
         log.error(new Error(JSON.stringify(setupResponse, null, 2)));
@@ -103,8 +102,8 @@ export const installOrUpgradeEndpointFleetPackage = usageTracker.track(
     logger.debug(`installOrUpgradeEndpointFleetPackage(): starting`);
 
     const updatePackages = async () => {
-      const installEndpointPackageResp = (await kbnClient
-        .request({
+      const installEndpointPackageResp = await kbnClient
+        .request<BulkInstallPackagesResponse>({
           path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
           method: 'POST',
           body: {
@@ -117,7 +116,7 @@ export const installOrUpgradeEndpointFleetPackage = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
+        .catch(wrapErrorAndRejectPromise);
 
       logger.debug(`Fleet bulk install response:`, installEndpointPackageResp.data);
 

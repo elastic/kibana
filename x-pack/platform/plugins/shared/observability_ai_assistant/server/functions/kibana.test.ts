@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import { registerKibanaFunction } from './kibana';
 import type { FunctionRegistrationParameters } from '.';
 
-jest.mock('axios');
-const mockedAxios = jest.mocked(axios);
+let mockedFetch: jest.SpyInstance;
 
 function registerFunction(overrides: {
   publicBaseUrl?: string;
@@ -64,7 +61,16 @@ function registerFunction(overrides: {
 describe('kibana tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAxios.mockResolvedValue({ data: { ok: true } });
+    mockedFetch = jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+  });
+
+  afterEach(() => {
+    mockedFetch.mockRestore();
   });
 
   it('forwards requests to the configured publicBaseUrl host only', async () => {
@@ -84,11 +90,11 @@ describe('kibana tool', () => {
       },
     });
 
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.url).toBe(
+    const forwardedUrl = mockedFetch.mock.calls[0][0] as string;
+    expect(forwardedUrl).toBe(
       'https://kibana.example.com:5601/api/saved_objects/_find?type=dashboard'
     );
-    expect(forwardedRequest.url).not.toContain('malicious-host');
+    expect(forwardedUrl).not.toContain('malicious-host');
   });
 
   it('builds the forwarded url using the space from the incoming request path', async () => {
@@ -106,10 +112,10 @@ describe('kibana tool', () => {
       },
     });
 
-    expect(mockedAxios).toHaveBeenCalledWith(
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'https://kibana.example.com:5601/s/my-space/api/apm/agent_keys',
       expect.objectContaining({
-        url: 'https://kibana.example.com:5601/s/my-space/api/apm/agent_keys',
-        data: JSON.stringify({ foo: 'bar' }),
+        body: JSON.stringify({ foo: 'bar' }),
       })
     );
   });
@@ -129,9 +135,9 @@ describe('kibana tool', () => {
       },
     });
 
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.headers?.authorization).toBe('Basic dGVzdA==');
-    expect(forwardedRequest.headers).not.toHaveProperty('x-forwarded-user');
+    const forwardedHeaders = mockedFetch.mock.calls[0][1].headers as Record<string, string>;
+    expect(forwardedHeaders.authorization).toBe('Basic dGVzdA==');
+    expect(forwardedHeaders).not.toHaveProperty('x-forwarded-user');
   });
 
   it('throws when server.publicBaseUrl is not configured', async () => {

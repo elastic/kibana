@@ -5,7 +5,6 @@
  * 2.0.
  */
 import Path from 'path';
-import axios from 'axios';
 
 import { cloneDeep } from 'lodash';
 
@@ -18,9 +17,9 @@ import {
 import {
   setupTestServers,
   removeFile,
-  mockAxiosPost,
+  mockFetchPost,
+  mockFetchGet,
   DEFAULT_GET_ROUTES,
-  mockAxiosGet,
   getRandomInt,
 } from './lib/helpers';
 
@@ -32,14 +31,11 @@ import { Plugin as SecuritySolutionPlugin } from '../plugin';
 import { getTelemetryTasks, runSoonConfigTask } from './lib/telemetry_helpers';
 import type { SecurityTelemetryTask } from '../lib/telemetry/task';
 
-jest.mock('axios');
-
 const logFilePath = Path.join(__dirname, 'config.logs.log');
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 const securitySolutionStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
 
-const mockedAxiosGet = jest.spyOn(axios, 'get');
-const mockedAxiosPost = jest.spyOn(axios, 'post');
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 const securitySolutionPlugin = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
 
@@ -78,7 +74,7 @@ describe('configuration', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockAxiosPost(mockedAxiosPost);
+    mockFetchPost(mockedFetch);
   });
 
   afterEach(async () => {});
@@ -151,7 +147,7 @@ describe('configuration', () => {
         },
       };
 
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchGet(mockedFetch, [
         ...DEFAULT_GET_ROUTES,
         [/.*telemetry-buffer-and-batch-sizes-v1.*/, { status: 200, data: cloneDeep(expected) }],
       ]);
@@ -221,7 +217,7 @@ describe('configuration', () => {
         },
       };
 
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchGet(mockedFetch, [
         ...DEFAULT_GET_ROUTES,
         [
           /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -250,7 +246,7 @@ describe('configuration', () => {
         },
       };
 
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchGet(mockedFetch, [
         ...DEFAULT_GET_ROUTES,
         [
           /.*telemetry-buffer-and-batch-sizes-v1.*/,
@@ -300,7 +296,7 @@ describe('configuration', () => {
         },
       };
 
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchGet(mockedFetch, [
         ...DEFAULT_GET_ROUTES,
         [/.*telemetry-buffer-and-batch-sizes-v1.*/, { status: 200, data: cloneDeep(customConfig) }],
       ]);
@@ -364,7 +360,7 @@ describe('configuration', () => {
     });
 
     it('should handle invalid health diagnostic config gracefully', async () => {
-      mockAxiosGet(mockedAxiosGet, [
+      mockFetchGet(mockedFetch, [
         ...DEFAULT_GET_ROUTES,
         [/.*telemetry-buffer-and-batch-sizes-v1.*/, { status: 500, data: null }],
       ]);

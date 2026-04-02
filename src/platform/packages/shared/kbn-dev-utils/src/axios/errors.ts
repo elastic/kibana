@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosError, AxiosResponse } from 'axios';
-
-export interface AxiosRequestError extends AxiosError {
+export interface AxiosRequestError {
+  config: unknown;
   response: undefined;
+  message?: string;
+  code?: string;
 }
 
-export interface AxiosResponseError<T> extends AxiosError {
-  response: AxiosResponse<T>;
+export interface AxiosResponseError<T = any> {
+  config: unknown;
+  response: {
+    status: number;
+    statusText: string;
+    headers: unknown;
+    data: T;
+  };
+  message?: string;
+  code?: string;
 }
 
 export const isAxiosRequestError = (error: any): error is AxiosRequestError => {

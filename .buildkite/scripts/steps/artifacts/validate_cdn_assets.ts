@@ -8,7 +8,6 @@
  */
 
 import * as glob from 'glob';
-import axios from 'axios';
 
 const CDN_URL_PREFIX = process.argv[2];
 const CDN_ASSETS_FOLDER = process.argv[3];
@@ -48,8 +47,9 @@ async function main() {
 async function headAssetUrl(assetPath: string) {
   const testUrl = `${CDN_URL_PREFIX}/${assetPath}`;
   try {
-    const response = await axios.head(testUrl, {
-      timeout: 1000,
+    const response = await fetch(testUrl, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(1000),
     });
     return {
       status: response.status,
@@ -58,7 +58,7 @@ async function headAssetUrl(assetPath: string) {
     };
   } catch (error) {
     return {
-      status: error.response?.status || 0,
+      status: 0,
       testUrl,
       assetPath,
     };

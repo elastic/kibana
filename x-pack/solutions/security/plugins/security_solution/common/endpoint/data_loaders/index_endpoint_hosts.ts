@@ -7,7 +7,6 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { cloneDeep, merge } from 'lodash';
-import type { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { BulkRequest, DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -312,10 +311,10 @@ export const indexEndpointHostDocs = usageTracker.track(
 
 const fetchKibanaVersion = async (kbnClient: KbnClient) => {
   const version = (
-    (await kbnClient.request({
+    await kbnClient.request<{ version: { number: string } }>({
       path: '/api/status',
       method: 'GET',
-    })) as AxiosResponse
+    })
   ).data.version.number;
 
   if (!version) {

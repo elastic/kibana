@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { HEADERS, PASSWORD, USERNAME } from './constants';
 import { getKibanaUrl } from './get_kibana_url';
 
@@ -17,6 +16,8 @@ export const createDataView = async ({
   id: string;
 }) => {
   const DATA_VIEW_CREATION_API = `${await getKibanaUrl()}/api/content_management/rpc/create`;
+  const basicAuth = Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64');
+
   const dataViewParams = {
     contentTypeId: 'index-pattern',
     data: {
@@ -34,11 +35,23 @@ export const createDataView = async ({
     version: 1,
   };
 
-  return axios.post(DATA_VIEW_CREATION_API, dataViewParams, {
-    headers: HEADERS,
-    auth: {
-      username: USERNAME,
-      password: PASSWORD,
+  const response = await fetch(DATA_VIEW_CREATION_API, {
+    method: 'POST',
+    body: JSON.stringify(dataViewParams),
+    headers: {
+      'content-type': 'application/json',
+      ...HEADERS,
+      Authorization: `Basic ${basicAuth}`,
     },
   });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`Failed to create data view: ${response.status} ${errorText}`);
+  }
+
+  return {
+    status: response.status,
+    data: await response.json(),
+  };
 };

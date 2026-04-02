@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
 import type { ExecSyncOptions } from 'child_process';
 import { execFileSync, execSync } from 'child_process';
 
@@ -162,35 +160,53 @@ export interface BuildkiteWaitStep {
 }
 
 export class BuildkiteClient {
-  http: AxiosInstance;
   exec: ExecType;
   baseUrl: string;
+  private defaultHeaders: Record<string, string>;
 
   constructor(config: BuildkiteClientConfig = {}) {
     const BUILDKITE_TOKEN = config.token ?? process.env.BUILDKITE_TOKEN;
 
     this.baseUrl = config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
 
-    // const BUILDKITE_AGENT_BASE_URL =
-    //   process.env.BUILDKITE_AGENT_BASE_URL || 'https://agent.buildkite.com/v3';
-    // const BUILDKITE_AGENT_TOKEN = process.env.BUILDKITE_AGENT_TOKEN;
-
-    this.http = axios.create({
-      baseURL: this.baseUrl,
-      headers: {
-        Authorization: `Bearer ${BUILDKITE_TOKEN}`,
-      },
-      allowAbsoluteUrls: false,
-    });
+    this.defaultHeaders = {
+      Authorization: `Bearer ${BUILDKITE_TOKEN}`,
+    };
 
     this.exec = config.exec ?? execSync;
+  }
 
-    // this.agentHttp = axios.create({
-    //   baseURL: BUILDKITE_AGENT_BASE_URL,
-    //   headers: {
-    //     Authorization: `Token ${BUILDKITE_AGENT_TOKEN}`,
-    //   },
-    // });
+  private async httpGet<T = unknown>(path: string): Promise<{ data: T; headers: Headers }> {
+    const url = `${this.baseUrl}/${path.replace(/^\//, '')}`;
+    const resp = await fetch(url, {
+      headers: this.defaultHeaders,
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Buildkite API request failed: ${resp.status} ${resp.statusText}`);
+    }
+
+    const data = (await resp.json()) as T;
+    return { data, headers: resp.headers };
+  }
+
+  private async httpPost<T = unknown>(path: string, body?: unknown): Promise<{ data: T }> {
+    const url = `${this.baseUrl}/${path.replace(/^\//, '')}`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...this.defaultHeaders,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Buildkite API request failed: ${resp.status} ${resp.statusText}`);
+    }
+
+    const data = (await resp.json()) as T;
+    return { data };
   }
 
   getBuild = async (
@@ -200,8 +216,8 @@ export class BuildkiteClient {
   ): Promise<Build> => {
     // TODO properly assemble URL
     const link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
-    const resp = await this.http.get(link);
-    return resp.data as Build;
+    const resp = await this.httpGet<Build>(link);
+    return resp.data;
   };
 
   getBuildsAfterDate = async (
@@ -209,10 +225,10 @@ export class BuildkiteClient {
     date: string,
     numberOfBuilds: number
   ): Promise<Build[]> => {
-    const response = await this.http.get(
+    const response = await this.httpGet<Build[]>(
       `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?created_from=${date}&per_page=${numberOfBuilds}`
     );
-    return response.data as Build[];
+    return response.data;
   };
 
   getBuildForCommit = async (pipelineSlug: string, commit: string): Promise<Build | null> => {
@@ -220,10 +236,10 @@ export class BuildkiteClient {
       throw new Error(`Invalid commit hash: ${commit}, this endpoint works with full SHAs only`);
     }
 
-    const response = await this.http.get(
+    const response = await this.httpGet<Build[]>(
       `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?commit=${commit}`
     );
-    const builds = response.data as Build[];
+    const builds = response.data;
     if (builds.length === 0) {
       return null;
     }
@@ -328,13 +344,14 @@ export class BuildkiteClient {
         break;
       }
 
-      const resp = await this.http.get(link);
+      const resp = await this.httpGet<Artifact[]>(link);
       link = '';
 
       artifacts.push(resp.data);
 
-      if (resp.headers.link) {
-        const result = parseLinkHeader(resp.headers.link as string, this.baseUrl);
+      const linkHeader = resp.headers.get('link');
+      if (linkHeader) {
+        const result = parseLinkHeader(linkHeader, this.baseUrl);
         if (result?.next) {
           link = result.next;
         }
@@ -364,7 +381,7 @@ export class BuildkiteClient {
   ): Promise<Build> => {
     const url = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`;
 
-    return (await this.http.post(url, options)).data;
+    return (await this.httpPost<Build>(url, options)).data;
   };
 
   cancelStep = (stepIdOrKey: string): void => {

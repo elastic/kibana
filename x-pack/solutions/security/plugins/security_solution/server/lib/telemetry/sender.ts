@@ -12,8 +12,6 @@ import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import type { EventTypeOpts, Logger, LogMeta } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -64,9 +62,9 @@ export interface ITelemetryEventsSender {
   queueTelemetryEvents(events: TelemetryEvent[]): void;
   isTelemetryOptedIn(): Promise<boolean>;
   isTelemetryServicesReachable(): Promise<boolean>;
-  sendIfDue(axiosInstance?: AxiosInstance): Promise<void>;
+  sendIfDue(): Promise<void>;
   processEvents(events: TelemetryEvent[]): TelemetryEvent[];
-  sendOnDemand(channel: string, toSend: unknown[], axiosInstance?: AxiosInstance): Promise<void>;
+  sendOnDemand(channel: string, toSend: unknown[]): Promise<void>;
   getV3UrlFromV2(v2url: string, channel: string): string;
 
   // As a transition to the new sender, `IAsyncTelemetryEventsSender`, we wrap
@@ -281,7 +279,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   public async isTelemetryServicesReachable() {
     try {
       const telemetryUrl = await this.fetchTelemetryPingUrl();
-      const resp = await axios.get(telemetryUrl, { timeout: 3000 });
+      const resp = await fetch(telemetryUrl, { signal: AbortSignal.timeout(3000) });
       if (resp.status === 200) {
         this.logger.debug('Elastic telemetry services are reachable');
         return true;
@@ -295,7 +293,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     }
   }
 
-  public async sendIfDue(axiosInstance: AxiosInstance = axios) {
+  public async sendIfDue() {
     if (this.isSending) {
       return;
     }
@@ -349,8 +347,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         clusterInfo?.cluster_uuid,
         clusterInfo?.cluster_name,
         clusterInfo?.version?.number,
-        licenseInfo?.uid,
-        axiosInstance
+        licenseInfo?.uid
       );
     } catch (error) {
       this.logger.warn('Error sending telemetry events data', withErrorMessage(error));
@@ -373,11 +370,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
    * @param channel the elastic telemetry channel
    * @param toSend telemetry events
    */
-  public async sendOnDemand(
-    channel: string,
-    toSend: unknown[],
-    axiosInstance: AxiosInstance = axios
-  ) {
+  public async sendOnDemand(channel: string, toSend: unknown[]) {
     const clusterInfo = this.receiver?.getClusterInfo();
     try {
       const [telemetryUrl, licenseInfo] = await Promise.all([
@@ -396,8 +389,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         clusterInfo?.cluster_uuid,
         clusterInfo?.cluster_name,
         clusterInfo?.version?.number,
-        licenseInfo?.uid,
-        axiosInstance
+        licenseInfo?.uid
       );
     } catch (error) {
       this.logger.warn('Error sending telemetry events data', withErrorMessage(error));
@@ -469,8 +461,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     clusterUuid: string | undefined,
     clusterName: string | undefined,
     clusterVersionNumber: string | undefined,
-    licenseId: string | undefined,
-    axiosInstance: AxiosInstance = axios
+    licenseId: string | undefined
   ) {
     const ndjson = transformDataToNdjson(events);
 
@@ -479,7 +470,9 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         events: events.length,
         channel,
       } as LogMeta);
-      const resp = await axiosInstance.post(telemetryUrl, ndjson, {
+      const resp = await fetch(telemetryUrl, {
+        method: 'POST',
+        body: ndjson,
         headers: {
           'Content-Type': 'application/x-ndjson',
           ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
@@ -487,13 +480,16 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
-        timeout: 10000,
+        signal: AbortSignal.timeout(10000),
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: resp.status.toString(),
         incrementBy: 1,
       });
+      if (!resp.ok) {
+        throw new Error(`Request failed with status ${resp.status}`);
+      }
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_sent',
@@ -502,14 +498,6 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       this.logger.debug('Events sent!. Response', { status: resp.status } as LogMeta);
     } catch (error) {
       this.logger.warn('Error sending events', withErrorMessage(error));
-      const errorStatus = error?.response?.status;
-      if (errorStatus !== undefined && errorStatus !== null) {
-        this.telemetryUsageCounter?.incrementCounter({
-          counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
-          counterType: errorStatus.toString(),
-          incrementBy: 1,
-        });
-      }
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',

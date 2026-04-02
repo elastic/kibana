@@ -8,23 +8,43 @@
  */
 
 import Url from 'url';
-import Https from 'https';
 import Qs from 'querystring';
 
-import type { AxiosResponse, ResponseType } from 'axios';
-import Axios from 'axios';
-import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { Agent } from 'undici';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
 
-const isConcliftOnGetError = (error: any) => {
-  return (
-    isAxiosResponseError(error) && error.config?.method === 'GET' && error.response.status === 409
-  );
+export interface KbnClientResponse<T = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+}
+
+const headersToRecord = (headers: Headers): Record<string, string> => {
+  const result: Record<string, string> = {};
+  headers.forEach((value, key) => {
+    result[key] = value;
+  });
+  return result;
+};
+
+const isResponseError = (
+  error: any
+): error is { response: KbnClientResponse; config?: { method: string; url: string } } => {
+  return error && error.response && error.response.status !== undefined;
+};
+
+const isRequestError = (error: any): boolean => {
+  return error && error.config && error.response === undefined;
+};
+
+const isConflictOnGetError = (error: any) => {
+  return isResponseError(error) && error.config?.method === 'GET' && error.response.status === 409;
 };
 
 const isIgnorableError = (error: any, ignorableErrors: number[] = []) => {
-  return isAxiosResponseError(error) && ignorableErrors.includes(error.response.status);
+  return isResponseError(error) && ignorableErrors.includes(error.response.status);
 };
 
 /**
@@ -66,6 +86,8 @@ export const uriencode = (
 
 const DEFAULT_MAX_ATTEMPTS = 5;
 
+export type KbnClientResponseType = 'json' | 'text' | 'blob' | 'stream' | 'arraybuffer';
+
 export interface ReqOptions {
   description?: string;
   path: string;
@@ -75,7 +97,7 @@ export interface ReqOptions {
   retries?: number;
   headers?: Record<string, string>;
   ignoreErrors?: number[];
-  responseType?: ResponseType;
+  responseType?: KbnClientResponseType;
   signal?: AbortSignal;
 }
 
@@ -91,15 +113,17 @@ interface Options {
 
 export class KbnClientRequester {
   private readonly url: string;
-  private readonly httpsAgent: Https.Agent | null;
+  private readonly dispatcher: Agent | null;
 
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
-    this.httpsAgent =
+    this.dispatcher =
       Url.parse(options.url).protocol === 'https:'
-        ? new Https.Agent({
-            ca: options.certificateAuthorities,
-            rejectUnauthorized: false,
+        ? new Agent({
+            connect: {
+              ca: options.certificateAuthorities?.map((buf) => buf.toString()),
+              rejectUnauthorized: false,
+            },
           })
         : null;
   }
@@ -117,7 +141,7 @@ export class KbnClientRequester {
     return Url.resolve(baseUrl, relative);
   }
 
-  async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
+  async request<T>(options: ReqOptions): Promise<KbnClientResponse<T>> {
     const url = this.resolveUrl(options.path);
     const redacted = redactUrl(url);
     let attempt = 0;
@@ -126,7 +150,7 @@ export class KbnClientRequester {
       redacted,
       maxAttempts,
       requestedRetries: options.retries !== undefined,
-      failedToGetResponseSvc: (error: Error) => isAxiosRequestError(error),
+      failedToGetResponseSvc: (error: Error) => isRequestError(error),
       ...options,
     });
 
@@ -134,18 +158,42 @@ export class KbnClientRequester {
       attempt += 1;
       try {
         this.log.debug(`Requesting url (redacted): [${redacted}]`);
-        return await Axios.request(buildRequest(url, this.httpsAgent, options));
+        const { fetchUrl, init } = buildRequest(url, this.dispatcher, options);
+        const response = await fetch(fetchUrl, init as RequestInit);
+
+        if (!response.ok) {
+          const responseData = await parseResponseBody(response, options.responseType);
+          const error: any = new Error(
+            `Request failed with status ${response.status}: ${response.statusText}`
+          );
+          error.response = {
+            data: responseData,
+            status: response.status,
+            statusText: response.statusText,
+            headers: headersToRecord(response.headers),
+          };
+          error.config = { method: options.method, url };
+          throw error;
+        }
+
+        const data = await parseResponseBody<T>(response, options.responseType);
+        return {
+          data,
+          status: response.status,
+          statusText: response.statusText,
+          headers: headersToRecord(response.headers),
+        };
       } catch (error) {
-        const statusCode = isAxiosResponseError(error) ? error.response.status : 'N/A';
-        const errorCause = error.code || error.message || 'Unknown error';
-        const responseBody = isAxiosResponseError(error)
+        const statusCode = isResponseError(error) ? error.response.status : 'N/A';
+        const errorCause = (error as any).code || (error as Error).message || 'Unknown error';
+        const responseBody = isResponseError(error)
           ? JSON.stringify(error.response.data, null, 2)
           : 'No response body';
         const errorDetails = `Status: ${statusCode}, Cause: ${errorCause}, Response: ${responseBody}`;
 
         this.log.debug(`Request failed - ${errorDetails}, Attempt: ${attempt}/${maxAttempts}`);
 
-        if (isIgnorableError(error, options.ignoreErrors)) return error.response;
+        if (isIgnorableError(error, options.ignoreErrors)) return (error as any).response;
         if (attempt < maxAttempts) {
           await delay(1000 * attempt);
           continue;
@@ -156,6 +204,31 @@ export class KbnClientRequester {
         );
       }
     }
+  }
+}
+
+async function parseResponseBody<T>(
+  response: Response,
+  responseType?: KbnClientResponseType
+): Promise<T> {
+  if (responseType === 'text') {
+    return (await response.text()) as unknown as T;
+  }
+  if (responseType === 'blob') {
+    return (await response.blob()) as unknown as T;
+  }
+  if (responseType === 'arraybuffer') {
+    return (await response.arrayBuffer()) as unknown as T;
+  }
+  if (responseType === 'stream') {
+    return response.body as unknown as T;
+  }
+  // Default: parse as JSON, fall back to text if it fails
+  const text = await response.text();
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
   }
 }
 
@@ -174,7 +247,7 @@ export function errMsg({
   failedToGetResponseSvc: (x: Error) => boolean;
 }) {
   return function errMsgOrReThrow(attempt: number, _: any) {
-    const result = isConcliftOnGetError(_)
+    const result = isConflictOnGetError(_)
       ? `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`
       : requestedRetries || failedToGetResponseSvc(_)
       ? `[${
@@ -192,26 +265,53 @@ export function redactUrl(_: string): string {
 }
 
 export function buildRequest(
-  url: any,
-  httpsAgent: Https.Agent | null,
-  { method, body, query, headers, responseType }: any
-) {
-  return {
-    method,
-    url,
-    data: body,
-    params: query,
-    headers: {
-      ...headers,
-      'kbn-xsrf': 'kbn-client',
-      'x-elastic-internal-origin': 'kbn-client',
-    },
-    httpsAgent,
-    responseType,
-    // work around https://github.com/axios/axios/issues/2791
-    transformResponse: responseType === 'text' ? [(x: any) => x] : undefined,
-    maxContentLength: 30000000,
-    maxBodyLength: 30000000,
-    paramsSerializer: (params: any) => Qs.stringify(params),
+  url: string,
+  dispatcher: Agent | null,
+  { method, body, query, headers, responseType, signal }: ReqOptions
+): { fetchUrl: string; init: RequestInit & { dispatcher?: Agent } } {
+  const queryString = query ? Qs.stringify(query) : '';
+  const fetchUrl = queryString ? `${url}?${queryString}` : url;
+
+  let processedBody: any;
+  if (body !== undefined) {
+    // FormData instances (from form-data package) should be passed through directly
+    if (typeof body === 'object' && typeof body.getBuffer === 'function') {
+      processedBody = body.getBuffer();
+    } else if (typeof body === 'string') {
+      processedBody = body;
+    } else {
+      processedBody = JSON.stringify(body);
+    }
+  }
+
+  const mergedHeaders: Record<string, string> = {
+    ...headers,
+    'kbn-xsrf': 'kbn-client',
+    'x-elastic-internal-origin': 'kbn-client',
   };
+
+  // If the body is JSON and no content-type is set, add it
+  if (
+    body !== undefined &&
+    typeof body === 'object' &&
+    typeof body.getBuffer !== 'function' &&
+    !mergedHeaders['content-type'] &&
+    !mergedHeaders['Content-Type']
+  ) {
+    mergedHeaders['content-type'] = 'application/json';
+  }
+
+  const init: RequestInit & { dispatcher?: Agent } = {
+    method,
+    headers: mergedHeaders,
+    body: processedBody,
+    redirect: 'manual',
+    signal,
+  };
+
+  if (dispatcher) {
+    init.dispatcher = dispatcher;
+  }
+
+  return { fetchUrl, init };
 }

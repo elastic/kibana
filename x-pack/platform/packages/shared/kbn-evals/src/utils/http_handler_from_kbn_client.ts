@@ -120,7 +120,7 @@ export function httpHandlerFromKbnClient({
         return asResponse
           ? {
               fetchOptions: options,
-              request: response.request!,
+              request: (response as any).request!,
               body: undefined,
               response: new Response(response.data as BodyInit, {
                 status: response.status,
@@ -131,9 +131,9 @@ export function httpHandlerFromKbnClient({
           : (response.data as any);
       } catch (err) {
         // Keep the richest error message possible.
-        const maybeKbn = err instanceof KbnClientRequesterError ? err.axiosError ?? err : err;
-        if (err instanceof KbnClientRequesterError && err.axiosError) {
-          err.axiosError.message = err.message;
+        const maybeKbn = err instanceof KbnClientRequesterError ? err.responseError ?? err : err;
+        if (err instanceof KbnClientRequesterError && err.responseError) {
+          err.responseError.message = err.message;
         }
 
         const status = (maybeKbn as any)?.status;

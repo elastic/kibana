@@ -8,42 +8,33 @@
  */
 
 import { execSync } from 'child_process';
-import axios from 'axios';
 import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
   // BOOKMARK - List of Kibana project types
   const match =
     /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|workplaceai)(?:-(ai_soc|logs_essentials))?$/;
-  try {
-    // BOOKMARK - List of Kibana project types
-    return (
-      await Promise.all([
-        projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
-        projectRequest.get('/api/v1/serverless/projects/security'),
-        projectRequest.get('/api/v1/serverless/projects/observability'),
-        // TODO handle the new 'workplace ai' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
-      ])
-    )
-      .map((response) => response.data.items)
-      .flat()
-      .filter((project) => project.name.match(match))
-      .map((project) => {
-        const [, , prNumber, projectType] = project.name.match(match);
-        return {
-          id: project.id,
-          name: project.name,
-          prNumber,
-          type: projectType,
-        };
-      });
-  } catch (e) {
-    if (e.isAxiosError) {
-      const message = JSON.stringify(e.response.data) || 'unable to fetch projects';
-      throw new Error(message);
-    }
-    throw e;
-  }
+  // BOOKMARK - List of Kibana project types
+  return (
+    await Promise.all([
+      projectRequest('/api/v1/serverless/projects/elasticsearch'),
+      projectRequest('/api/v1/serverless/projects/security'),
+      projectRequest('/api/v1/serverless/projects/observability'),
+      // TODO handle the new 'workplace ai' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
+    ])
+  )
+    .map((response) => response.items)
+    .flat()
+    .filter((project: any) => project.name.match(match))
+    .map((project: any) => {
+      const [, , prNumber, projectType] = project.name.match(match);
+      return {
+        id: project.id,
+        name: project.name,
+        prNumber,
+        type: projectType,
+      };
+    });
 }
 
 async function deleteProject({
@@ -56,22 +47,13 @@ async function deleteProject({
   id: number;
   name: string;
 }) {
-  try {
-    // TODO handle the new 'workplaceai' project type, and ideally rename 'elasticsearch' to 'search'
-    await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
+  // TODO handle the new 'workplaceai' project type, and ideally rename 'elasticsearch' to 'search'
+  await projectRequest(`/api/v1/serverless/projects/${type}/${id}`, 'DELETE');
 
-    execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
-      cwd: getKibanaDir(),
-      stdio: 'inherit',
-    });
-  } catch (e) {
-    if (e.isAxiosError) {
-      const message =
-        JSON.stringify(e.response.data) || `unable to delete ${type} project with id ${id}`;
-      throw new Error(message);
-    }
-    throw e;
-  }
+  execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
+    cwd: getKibanaDir(),
+    stdio: 'inherit',
+  });
 }
 
 async function purgeProjects() {
@@ -127,13 +109,38 @@ if (!process.env.PROJECT_API_DOMAIN || !process.env.PROJECT_API_KEY) {
   console.error('missing project authentication');
   process.exit(1);
 }
-const projectRequest = axios.create({
-  baseURL: process.env.PROJECT_API_DOMAIN,
-  headers: {
-    Authorization: `ApiKey ${process.env.PROJECT_API_KEY}`,
-  },
-  allowAbsoluteUrls: false,
-});
+
+const PROJECT_API_BASE_URL = process.env.PROJECT_API_DOMAIN;
+const PROJECT_API_HEADERS: Record<string, string> = {
+  Authorization: `ApiKey ${process.env.PROJECT_API_KEY}`,
+};
+
+async function projectRequest(path: string, method: string = 'GET'): Promise<any> {
+  const url = `${PROJECT_API_BASE_URL}${path}`;
+  const resp = await fetch(url, {
+    method,
+    headers: PROJECT_API_HEADERS,
+  });
+
+  if (!resp.ok) {
+    let errorData: any;
+    try {
+      errorData = await resp.json();
+    } catch {
+      // ignore parse error
+    }
+    const message = errorData
+      ? JSON.stringify(errorData)
+      : `Request failed with status ${resp.status}`;
+    throw new Error(message);
+  }
+
+  if (method === 'DELETE') {
+    return;
+  }
+
+  return await resp.json();
+}
 
 purgeProjects().catch((e) => {
   console.error(e.toString());

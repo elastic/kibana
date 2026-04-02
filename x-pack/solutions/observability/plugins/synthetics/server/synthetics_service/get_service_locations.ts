@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { pick } from 'lodash';
 import pRetry from 'p-retry';
 import type { SyntheticsServerSetup } from '../types';
@@ -54,12 +53,16 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
   }
 
   try {
-    const { data } = await pRetry(
+    const data = await pRetry(
       async () => {
-        return axios.get<{
+        const response = await fetch(server.config.service!.manifestUrl!);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch locations: ${response.status} ${response.statusText}`);
+        }
+        return (await response.json()) as {
           throttling: ThrottlingOptions;
           locations: Record<string, ManifestLocation>;
-        }>(server.config.service!.manifestUrl!);
+        };
       },
       {
         retries: RETRY_COUNT,

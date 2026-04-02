@@ -8,7 +8,6 @@
 import { cargoQueue } from 'async';
 import moment from 'moment';
 import { omit } from 'lodash';
-import axios from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import type { Config, Doc } from '../types';
@@ -80,27 +79,28 @@ async function post(config: Config, docs: Doc[], logger: ToolingLog) {
   }
   try {
     const startTs = Date.now();
-    const resp = await axios.post(config.destination.url, docs, {
-      headers: config.destination.headers,
+    const response = await fetch(config.destination.url, {
+      method: 'POST',
+      body: JSON.stringify(docs),
+      headers: {
+        'content-type': 'application/json',
+        ...config.destination.headers,
+      },
     });
+    if (!response.ok) {
+      const data = await response.text();
+      throw new Error(`Failed to send documents. Status: ${response.status}, Data: ${data}`);
+    }
     logger.info(
       {
-        statusCode: resp.status,
+        statusCode: response.status,
         latency: Date.now() - startTs,
         indexed: docs.length,
       },
       `Sent ${docs.length} documents.`
     );
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      logger.error(
-        `Failed to send documents. Status: ${error.response.status}, Data: ${JSON.stringify(
-          error.response.data
-        )}`
-      );
-    } else {
-      logger.error(error);
-    }
+    logger.error(error);
     throw error;
   }
 }

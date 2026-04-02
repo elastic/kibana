@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { ALERT_ACTION_INDEX, HEADERS, PASSWORD, USERNAME } from './constants';
 import { getKibanaUrl } from './get_kibana_url';
 
 export const createIndexConnector = async () => {
   const INDEX_CONNECTOR_API = `${await getKibanaUrl()}/api/actions/connector`;
+  const basicAuth = Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64');
+
   const indexConnectorParams = {
     name: 'Test Index Connector',
     config: {
@@ -20,11 +21,23 @@ export const createIndexConnector = async () => {
     connector_type_id: '.index',
   };
 
-  return axios.post(INDEX_CONNECTOR_API, indexConnectorParams, {
-    headers: HEADERS,
-    auth: {
-      username: USERNAME,
-      password: PASSWORD,
+  const response = await fetch(INDEX_CONNECTOR_API, {
+    method: 'POST',
+    body: JSON.stringify(indexConnectorParams),
+    headers: {
+      'content-type': 'application/json',
+      ...HEADERS,
+      Authorization: `Basic ${basicAuth}`,
     },
   });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`Failed to create index connector: ${response.status} ${errorText}`);
+  }
+
+  return {
+    status: response.status,
+    data: await response.json(),
+  };
 };

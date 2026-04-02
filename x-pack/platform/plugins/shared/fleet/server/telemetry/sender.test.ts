@@ -9,8 +9,6 @@
 
 import { URL } from 'url';
 
-import axios from 'axios';
-
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -21,17 +19,17 @@ import { UpdateEventType } from '../services/upgrade_sender';
 
 import { TelemetryEventsSender } from './sender';
 
-jest.mock('axios', () => {
-  return {
-    post: jest.fn(),
-  };
-});
-
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let sender: TelemetryEventsSender;
+  let mockedFetch: jest.SpyInstance;
 
   beforeEach(async () => {
+    mockedFetch = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } })
+      );
     logger = loggingSystemMock.createLogger();
     sender = new TelemetryEventsSender(logger);
     sender['fetchClusterInfo'] = jest.fn(async () => {
@@ -46,6 +44,10 @@ describe('TelemetryEventsSender', () => {
     await sender.start(undefined, {
       elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
     } as any);
+  });
+
+  afterEach(() => {
+    mockedFetch.mockRestore();
   });
 
   describe('queueTelemetryEvents', () => {
@@ -145,23 +147,29 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['queuesPerChannel']['my-channel']['getEvents']).toBeCalledTimes(1);
       expect(sender['queuesPerChannel']['my-channel2']['getEvents']).toBeCalledTimes(1);
-      const requestConfig = {
-        headers: {
-          'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': '1',
-          'X-Elastic-Stack-Version': '8.0.0',
-        },
-        timeout: 5000,
-      };
-      expect(axios.post).toHaveBeenCalledWith(
+      expect(mockedFetch).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel',
-        '{"event.kind":"1"}\n{"event.kind":"2"}\n',
-        requestConfig
+        expect.objectContaining({
+          method: 'POST',
+          body: '{"event.kind":"1"}\n{"event.kind":"2"}\n',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/x-ndjson',
+            'X-Elastic-Cluster-ID': '1',
+            'X-Elastic-Stack-Version': '8.0.0',
+          }),
+        })
       );
-      expect(axios.post).toHaveBeenCalledWith(
+      expect(mockedFetch).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel2',
-        '{"event.kind":"3"}\n',
-        requestConfig
+        expect.objectContaining({
+          method: 'POST',
+          body: '{"event.kind":"3"}\n',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/x-ndjson',
+            'X-Elastic-Cluster-ID': '1',
+            'X-Elastic-Stack-Version': '8.0.0',
+          }),
+        })
       );
     });
   });

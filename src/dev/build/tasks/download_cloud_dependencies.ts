@@ -9,7 +9,6 @@
 
 import Path from 'path';
 import del from 'del';
-import Axios from 'axios';
 import Fsp from 'fs/promises';
 import type { Task } from '../lib';
 import { downloadToDisk, downloadToString } from '../lib';
@@ -60,18 +59,28 @@ export const DownloadCloudDependencies: Task = {
     let manifestUrl = '';
     let manifestJSON = null;
     const buildUrl = `https://${subdomain}.elastic.co/beats/latest/${config.getBuildVersion()}.json`;
-    const axiosConfigWithNoCacheHeaders = {
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
+    const noCacheHeaders = {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+      Expires: '0',
     };
     try {
-      const latest = await Axios.get(buildUrl, axiosConfigWithNoCacheHeaders);
-      buildId = latest.data.build_id;
-      manifestUrl = latest.data.manifest_url;
-      manifestJSON = (await Axios.get(manifestUrl, axiosConfigWithNoCacheHeaders)).data;
+      const latestResp = await fetch(buildUrl, { headers: noCacheHeaders });
+      if (!latestResp.ok) {
+        throw new Error(
+          `Failed to fetch ${buildUrl}: ${latestResp.status} ${latestResp.statusText}`
+        );
+      }
+      const latest = await latestResp.json();
+      buildId = latest.build_id;
+      manifestUrl = latest.manifest_url;
+      const manifestResp = await fetch(manifestUrl, { headers: noCacheHeaders });
+      if (!manifestResp.ok) {
+        throw new Error(
+          `Failed to fetch manifest: ${manifestResp.status} ${manifestResp.statusText}`
+        );
+      }
+      manifestJSON = await manifestResp.json();
       if (!(manifestUrl && manifestJSON)) throw new Error('Missing manifest.');
     } catch (e) {
       log.error(`Unable to find Beats artifacts for ${config.getBuildVersion()} at ${buildUrl}.`);

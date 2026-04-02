@@ -10,8 +10,6 @@
 import { setTimeout as delay } from 'timers/promises';
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
 import util from 'util';
 import * as cheerio from 'cheerio';
 import type { Cookie } from 'tough-cookie';
@@ -45,13 +43,13 @@ export class Session {
 const REQUEST_TIMEOUT_MS = 60_000;
 
 const cleanException = (url: string, ex: any) => {
-  if (ex.isAxiosError) {
+  if (ex.isFetchError) {
     ex.url = url;
-    if (ex.response?.data) {
-      if (ex.response.data?.message) {
-        ex.response_message = ex.response.data.message;
+    if (ex.responseData) {
+      if (ex.responseData?.message) {
+        ex.response_message = ex.responseData.message;
       } else {
-        ex.data = ex.response.data;
+        ex.data = ex.responseData;
       }
     }
     ex.config = { REDACTED: 'REDACTED' };
@@ -60,15 +58,47 @@ const cleanException = (url: string, ex: any) => {
   }
 };
 
-const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: string) => {
-  const setCookieHeader = response?.headers['set-cookie'];
+interface FetchResponse {
+  status: number;
+  headers: Headers;
+  data: any;
+}
+
+const fetchWithTimeout = async (
+  url: string,
+  options: RequestInit & { timeout?: number } = {}
+): Promise<FetchResponse> => {
+  const { timeout = REQUEST_TIMEOUT_MS, ...fetchOptions } = options;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...fetchOptions,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+  const contentType = response.headers.get('content-type') || '';
+  let data: any;
+  if (contentType.includes('application/json')) {
+    data = await response.json();
+  } else {
+    data = await response.text();
+  }
+  return { status: response.status, headers: response.headers, data };
+};
+
+const getCookieFromResponseHeaders = (response: FetchResponse, errorMessage: string) => {
+  const setCookieHeader = response?.headers.get('set-cookie');
   if (!setCookieHeader) {
     throw new Error(
       `${errorMessage}: no 'set-cookie' header, response.data: ${JSON.stringify(response?.data)}`
     );
   }
 
-  const cookie = parseCookie(setCookieHeader![0]);
+  const cookie = parseCookie(setCookieHeader);
   if (!cookie) {
     throw new Error(errorMessage);
   }
@@ -93,29 +123,24 @@ export const createCloudSession = async (
 ): Promise<string> => {
   const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
-  let sessionResponse: AxiosResponse | undefined;
-  const requestConfig = (cloudUrl: string) => {
-    return {
-      url: cloudUrl,
-      method: 'post',
-      timeout: REQUEST_TIMEOUT_MS,
-      data: {
-        email,
-        password,
-      },
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-      },
-      validateStatus: () => true,
-      maxRedirects: 0,
-    };
-  };
+  let sessionResponse: FetchResponse | undefined;
 
   let attemptsLeft = retryParams.attemptsCount;
   while (attemptsLeft > 0) {
     try {
-      sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
+      sessionResponse = await fetchWithTimeout(cloudLoginUrl, {
+        method: 'POST',
+        timeout: REQUEST_TIMEOUT_MS,
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        redirect: 'manual',
+      });
       if (sessionResponse?.status !== 200) {
         throw new Error(
           `Failed to create the new cloud session: 'POST ${cloudLoginUrl}' returned ${sessionResponse?.status}`
@@ -176,24 +201,22 @@ export const createCloudSession = async (
 };
 
 export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
-  let samlResponse: AxiosResponse;
+  let samlResponse: FetchResponse;
   const url = kbnUrl + '/internal/security/login';
   try {
-    samlResponse = await axios.request({
-      url,
-      method: 'post',
-      data: {
+    samlResponse = await fetchWithTimeout(url, {
+      method: 'POST',
+      body: JSON.stringify({
         providerType: 'saml',
         providerName: 'cloud-saml-kibana',
         currentURL: kbnUrl + '/login?next=%2F"',
-      },
+      }),
       headers: {
         'kbn-version': kbnVersion,
         'x-elastic-internal-origin': 'Kibana',
         'content-type': 'application/json',
       },
-      validateStatus: () => true,
-      maxRedirects: 0,
+      redirect: 'manual',
     });
   } catch (ex) {
     log.error('Failed to create SAML request');
@@ -220,33 +243,36 @@ export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log:
 
 export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
   const { location, ecSession, email, kbnHost, log } = params;
-  let samlResponse: AxiosResponse;
   let value: string | undefined;
   try {
-    samlResponse = await axios.get(location, {
+    const response = await fetch(location, {
       headers: {
         Cookie: `ec_session=${ecSession}`,
       },
-      maxRedirects: 0,
+      redirect: 'manual',
     });
-    const $ = cheerio.load(samlResponse.data);
-    value = $('input').attr('value');
-  } catch (err) {
-    if (err.isAxiosError) {
-      const requestId = err?.response?.headers?.['x-request-id'] || 'not found';
-      const responseStatus = err?.response?.status;
-      let logMessage = `Create SAML Response (${location}) failed with status code ${responseStatus}: ${err?.response?.data}`;
+    const html = await response.text();
+
+    if (!response.ok) {
+      const requestId = response.headers.get('x-request-id') || 'not found';
+      const responseStatus = response.status;
+      let logMessage = `Create SAML Response (${location}) failed with status code ${responseStatus}: ${html}`;
 
       // If response is 3XX, also log the Location header from response
       if (responseStatus >= 300 && responseStatus < 400) {
-        const locationHeader = err?.response?.headers?.location || 'not found';
+        const locationHeader = response.headers.get('location') || 'not found';
         logMessage += `.\nLocation: ${locationHeader}`;
       }
 
       logMessage += `.\nX-Request-ID: ${requestId}`;
-
       log.error(logMessage);
+    } else {
+      const $ = cheerio.load(html);
+      value = $('input').attr('value');
     }
+  } catch (err) {
+    // Network errors or other unexpected failures
+    log.error(`Create SAML Response (${location}) failed: ${err.message}`);
   }
 
   if (!value) {
@@ -270,23 +296,23 @@ export const finishSAMLHandshake = async ({
 }: SAMLCallbackParams) => {
   const encodedResponse = encodeURIComponent(samlResponse);
   const url = kbnHost + '/api/security/saml/callback';
-  const request = {
-    url,
-    method: 'post',
-    data: `SAMLResponse=${encodedResponse}`,
+  const requestInit: RequestInit = {
+    method: 'POST',
+    body: `SAMLResponse=${encodedResponse}`,
     headers: {
       'content-type': 'application/x-www-form-urlencoded',
       ...(sid ? { Cookie: `sid=${sid}` } : {}),
     },
-    validateStatus: () => true,
-    maxRedirects: 0,
+    redirect: 'manual',
   };
-  let authResponse: AxiosResponse;
+  let authResponse: FetchResponse;
 
   let attemptsLeft = maxRetryCount + 1;
   while (attemptsLeft > 0) {
     try {
-      authResponse = await axios.request(request);
+      const rawResponse = await fetch(url, requestInit);
+      const data = await rawResponse.text();
+      authResponse = { status: rawResponse.status, headers: rawResponse.headers, data };
       // SAML callback should return 302
       if (authResponse.status === 302) {
         return getCookieFromResponseHeaders(
@@ -315,8 +341,8 @@ export const finishSAMLHandshake = async ({
         }
       } else {
         // exit for non 5xx errors
-        // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
-        log.error(`Request sent: ${util.inspect(request)}`);
+        // Logging the `Cookie: sid=xxxx` header is safe here since it's an intermediate, non-authenticated cookie that cannot be reused if leaked.
+        log.error(`Request sent: ${util.inspect(requestInit)}`);
         throw ex;
       }
     }
@@ -335,23 +361,24 @@ export const getSecurityProfile = async ({
   cookie: Cookie;
   log: ToolingLog;
 }) => {
-  let meResponse: AxiosResponse<UserProfile>;
   const url = kbnHost + '/internal/security/me';
   try {
-    meResponse = (await axios.get(url, {
+    const response = await fetch(url, {
       headers: {
         Cookie: cookie.cookieString(),
         'x-elastic-internal-origin': 'Kibana',
         'content-type': 'application/json',
       },
-    })) as AxiosResponse<UserProfile>;
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
+    }
+    return (await response.json()) as UserProfile;
   } catch (ex) {
     log.error('Failed to fetch user profile data');
     cleanException(url, ex);
     throw ex;
   }
-
-  return meResponse.data;
 };
 
 export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => {
