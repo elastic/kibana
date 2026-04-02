@@ -8,20 +8,30 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  type SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
 import type { TimeRange } from '@kbn/es-query';
 import React from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
+import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
+import { useKibana } from '../../../../hooks/use_kibana';
 import type { TimeBounds } from '../../types';
 import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
-import { EventsChartPanelActionsMenu } from './events_chart_panel_actions_menu';
+import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
+import { getApmTracesEsqlLink } from '../../utils/discover_links/get_apm_traces_esql_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -31,6 +41,11 @@ export interface Props {
 }
 
 export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrushed }: Props) {
+  const { discover, uiSettings } = useKibana().services;
+  const {
+    data: { transaction: transactionIndex },
+  } = useFetchApmIndices();
+
   const timeRange: TimeRange = dynamicTimeRange
     ? { from: range.from.toISOString(), to: range.to.toISOString() }
     : { from: 'now-24h', to: 'now', mode: 'relative' };
@@ -43,6 +58,14 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
     objective: slo.objective,
     remoteName: slo.remote?.remoteName,
   });
+
+  const isApmSlo =
+    apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
+    apmTransactionErrorRateIndicatorSchema.is(slo.indicator);
+
+  const viewEventsHref = isApmSlo
+    ? getApmTracesEsqlLink({ slo, timeRange, discover, transactionIndex })
+    : getDiscoverLink({ slo, timeRange, discover, uiSettings });
 
   function getChartTitle() {
     switch (slo.indicator.type) {
@@ -108,7 +131,13 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
           </EuiFlexGroup>
 
           <EuiFlexItem grow={0}>
-            <EventsChartPanelActionsMenu slo={slo} timeRange={timeRange} />
+            <EuiLink color="text" href={viewEventsHref} data-test-subj="sloDetailDiscoverLink">
+              <EuiIcon type="sortRight" aria-hidden={true} css={{ marginRight: '4px' }} />
+              <FormattedMessage
+                id="xpack.slo.sloDetails.viewEventsLink"
+                defaultMessage="View events"
+              />
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
 
