@@ -166,8 +166,8 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({ r
 
       <EuiTitle size="xxs">
         <h3>
-          {i18n.translate('xpack.alertingV2.ruleDetails.baseQuery', {
-            defaultMessage: 'Base query',
+          {i18n.translate('xpack.alertingV2.ruleDetails.esqlQuery', {
+            defaultMessage: 'ES|QL query',
           })}
         </h3>
       </EuiTitle>
@@ -181,29 +181,6 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({ r
       >
         {rule.evaluation?.query?.base || EMPTY_VALUE}
       </EuiCodeBlock>
-
-      {isAlertMode && rule.evaluation?.query?.condition && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.translate('xpack.alertingV2.ruleDetails.alertCondition', {
-                defaultMessage: 'Alert condition',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiCodeBlock
-            language="esql"
-            isCopyable
-            overflowHeight={200}
-            paddingSize="m"
-            data-test-subj="alertingV2RuleDetailsAlertCondition"
-          >
-            {rule.evaluation.query.condition}
-          </EuiCodeBlock>
-        </>
-      )}
 
       <EuiSpacer size="l" />
 

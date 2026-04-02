@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useEffect, useState } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
-export interface AlertFlyoutHeaderProps {
+export interface AlertFlyoutHeaderProps extends Pick<DocViewRenderProps, 'hit'> {
   /**
    * The document record used to render the flyout header.
-   */
-  hit: DataTableRecord;
-  /**
-   * A promise that resolves to the services required to render the flyout header.
    */
   servicesPromise: Promise<StartServices>;
   /**
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
 }
 
 export const AlertFlyoutHeader = ({
   hit,
   servicesPromise,
   storePromise,
+  onAlertUpdated,
 }: AlertFlyoutHeaderProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -66,6 +68,12 @@ export const AlertFlyoutHeader = ({
   return flyoutProviders({
     services,
     store,
-    children: <Header hit={hit} />,
+    children: (
+      <Header
+        hit={hit}
+        renderCellActions={noopCellActionRenderer}
+        onAlertUpdated={onAlertUpdated}
+      />
+    ),
   });
 };
