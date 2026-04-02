@@ -16,6 +16,7 @@
     "requiredPlugins": [
       "data",
       "features",
+      "indexManagement",
       "licensing",
       "logsShared",
       "logsDataAccess",
@@ -29,7 +30,6 @@
       "customIntegrations",
       "globalSearch",
       "home",
-      "indexManagement",
       "ml",
       "security",
       "spaces",

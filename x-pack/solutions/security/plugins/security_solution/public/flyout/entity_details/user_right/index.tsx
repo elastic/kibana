@@ -77,6 +77,7 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
 
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
+export const USER_PANEL_OBSERVED_USER_QUERY_ID = 'UserPanelObservedUserQuery';
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -129,7 +130,11 @@ export const UserPanel = ({
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const observedUser = useObservedUser(userName, scopeId, entityIdProp);
+  const observedUser = useObservedUser(
+    userName,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
 
   const panelDisplayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityIdProp),
@@ -285,7 +290,8 @@ export const UserPanel = ({
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
         userName={userName}
-        entityId={entityStoreV2Enabled ? panelDisplayEntityId : undefined}
+        entityId={panelDisplayEntityId}
+        identityFields={documentEntityIdentifiers}
       />
       {noEntityInStore && (
         <EuiCallOut
