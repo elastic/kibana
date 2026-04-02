@@ -38,6 +38,7 @@ describe('OAuthAuthorizationService', () => {
         attributes: {
           secrets: {
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'secret-client-id',
             scope: 'openid email',
           },
@@ -50,6 +51,7 @@ describe('OAuthAuthorizationService', () => {
       expect(result).toEqual({
         authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
         clientId: 'secret-client-id',
         scope: 'openid email',
       });
@@ -68,6 +70,7 @@ describe('OAuthAuthorizationService', () => {
         config: {
           authType: 'oauth_authorization_code',
           authorizationUrl: 'https://config-provider.example.com/authorize',
+          tokenUrl: 'https://config-provider.example.com/token',
           clientId: 'config-client-id',
           scope: 'profile',
         },
@@ -78,6 +81,7 @@ describe('OAuthAuthorizationService', () => {
           secrets: {},
           config: {
             authorizationUrl: 'https://config-provider.example.com/authorize',
+            tokenUrl: 'https://config-provider.example.com/token',
             clientId: 'config-client-id',
             scope: 'profile',
           },
@@ -89,11 +93,11 @@ describe('OAuthAuthorizationService', () => {
       expect(result).toEqual({
         authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://config-provider.example.com/authorize',
+        tokenUrl: 'https://config-provider.example.com/token',
         clientId: 'config-client-id',
         scope: 'profile',
       });
     });
-
     it('passes namespace when provided', async () => {
       const service = createService();
       const getResult = createMockConnector({
@@ -105,6 +109,7 @@ describe('OAuthAuthorizationService', () => {
         attributes: {
           secrets: {
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'client-id',
           },
           config: {},
@@ -132,6 +137,7 @@ describe('OAuthAuthorizationService', () => {
         attributes: {
           secrets: {
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'client-id',
           },
           config: {},
@@ -143,6 +149,7 @@ describe('OAuthAuthorizationService', () => {
       expect(result).toEqual({
         authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
         clientId: 'client-id',
         scope: undefined,
       });
@@ -157,6 +164,7 @@ describe('OAuthAuthorizationService', () => {
           secrets: {
             authType: 'oauth_authorization_code',
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'client-id',
           },
           config: {},
@@ -168,6 +176,7 @@ describe('OAuthAuthorizationService', () => {
       expect(result).toEqual({
         authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
         clientId: 'client-id',
         scope: undefined,
       });
@@ -207,8 +216,21 @@ describe('OAuthAuthorizationService', () => {
     });
 
     it.each([
-      ['authorizationUrl', { clientId: 'client-id' }],
-      ['clientId', { authorizationUrl: 'https://provider.example.com/authorize' }],
+      [
+        'authorizationUrl',
+        { tokenUrl: 'https://provider.example.com/token', clientId: 'client-id' },
+      ],
+      [
+        'tokenUrl',
+        { authorizationUrl: 'https://provider.example.com/authorize', clientId: 'client-id' },
+      ],
+      [
+        'clientId',
+        {
+          authorizationUrl: 'https://provider.example.com/authorize',
+          tokenUrl: 'https://provider.example.com/token',
+        },
+      ],
     ])('throws when missing required OAuth config (%s)', async (_, secrets) => {
       const service = createService();
       const getResult = createMockConnector({
@@ -224,7 +246,7 @@ describe('OAuthAuthorizationService', () => {
       });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector missing required OAuth configuration (authorizationUrl, clientId)'
+        'Connector missing required OAuth configuration (authorizationUrl, tokenUrl, clientId)'
       );
     });
   });
