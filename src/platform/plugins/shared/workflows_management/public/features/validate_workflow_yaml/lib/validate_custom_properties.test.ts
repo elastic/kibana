@@ -33,6 +33,7 @@ jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => ({
 }));
 
 jest.mock('../../../shared/lib/custom_property_selection_cache', () => ({
+  clearCache: jest.fn(),
   getCachedOption: jest.fn(),
   getCachedSearchOption: jest.fn(),
   getCacheKeyForValue: jest.fn(),
@@ -583,5 +584,4 @@ describe('validateCustomProperties', () => {
       hoverMessage: 'Valid',
     });
   });
-
 });
