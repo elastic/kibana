@@ -9,29 +9,13 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from './types';
 import { transformDashboardOut } from './transforms';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
 import type { Warnings } from './types';
-
-export function getDashboardMeta(
-  savedObject:
-    | SavedObject<DashboardSavedObjectAttributes>
-    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>
-) {
-  return {
-    error: savedObject.error,
-    ...(savedObject.created_at && { created_at: savedObject.created_at }),
-    ...(savedObject.created_by && { created_by: savedObject.created_by }),
-    managed: savedObject.managed,
-    owner: savedObject.accessControl?.owner,
-    updated_at: savedObject.updated_at,
-    updated_by: savedObject.updated_by,
-    version: savedObject.version ?? '',
-  };
-}
 
 // CRU is Create, Read, Update
 export function getDashboardCRUResponseBody(
@@ -77,7 +61,7 @@ export function getDashboardCRUResponseBody(
         },
       }),
     },
-    meta: getDashboardMeta(savedObject),
+    meta: getMeta(savedObject),
     ...(operation === 'read' && warnings?.length && { warnings }),
   };
 }
