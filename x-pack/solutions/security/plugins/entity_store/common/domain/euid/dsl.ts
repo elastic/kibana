@@ -200,6 +200,10 @@ function buildSourceClauseDsl(
   evaluation: FieldEvaluation,
   spec: SourceMatchSpec
 ): QueryDslQueryContainer {
+  if (spec.type === 'condition') {
+    return conditionToQueryDsl(spec.condition) as QueryDslQueryContainer;
+  }
+
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
   const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
 
