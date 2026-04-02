@@ -23,7 +23,8 @@
     "@kbn/css-utils",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/core-saved-objects-api-server"
   ],
   "exclude": ["target/**/*"]
 }
