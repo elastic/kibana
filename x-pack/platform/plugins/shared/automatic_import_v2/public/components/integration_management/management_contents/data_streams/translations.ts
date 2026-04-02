@@ -14,6 +14,13 @@ export const ADD_DATA_STREAM_BUTTON = i18n.translate(
   }
 );
 
+export const ADD_DATA_STREAM_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.addDataStreamDisabledTooltip',
+  {
+    defaultMessage: 'Enter an integration name and description before adding a data stream.',
+  }
+);
+
 export const DATA_STREAMS_TITLE = i18n.translate(
   'xpack.automaticImportV2.dataStreams.dataStreamsTitle',
   {
@@ -78,6 +85,13 @@ export const LOGS_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const LOG_SAMPLE_REQUIRED_FOR_ANALYSIS = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.logSampleRequiredForAnalysis',
+  {
+    defaultMessage: 'Log sample is required for analysis',
+  }
+);
+
 export const AI_ANALYSIS_CALLOUT = i18n.translate(
   'xpack.automaticImportV2.dataStreams.aiAnalysisCallout',
   {
@@ -115,6 +129,13 @@ export const ANALYZE_LOGS_BUTTON = i18n.translate(
   'xpack.automaticImportV2.dataStreams.analyzeLogsButton',
   {
     defaultMessage: 'Analyze logs',
+  }
+);
+
+export const ANALYZE_LOGS_DISABLED_LOADING = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.analyzeLogsDisabledLoading',
+  {
+    defaultMessage: 'Please wait for the current operation to finish.',
   }
 );
 

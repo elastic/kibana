@@ -42,8 +42,7 @@ const IntegrationManagementContents: React.FC = () => {
   );
   const [isDeleteIntegrationModalVisible, setIsDeleteIntegrationModalVisible] = useState(false);
   const deleteIntegrationModalTitleId = useGeneratedHtmlId();
-  const { reportCancelButtonClicked, reportDoneButtonClicked, reportIntegrationDeleteConfirmed } =
-    useTelemetry();
+  const { reportCancelButtonClicked, reportDoneButtonClicked } = useTelemetry();
 
   const navigateToManage = useCallback(() => {
     application.navigateToApp(INTEGRATIONS_APP_ID, { path: INTEGRATIONS_MANAGE_PATH });
@@ -77,17 +76,11 @@ const IntegrationManagementContents: React.FC = () => {
     try {
       await deleteIntegrationMutation.mutateAsync({ integrationId });
       setIsDeleteIntegrationModalVisible(false);
-      reportIntegrationDeleteConfirmed();
       navigateToManage();
     } catch {
       // Error toast is shown by useDeleteIntegration
     }
-  }, [
-    deleteIntegrationMutation,
-    integrationId,
-    navigateToManage,
-    reportIntegrationDeleteConfirmed,
-  ]);
+  }, [deleteIntegrationMutation, integrationId, navigateToManage]);
 
   const handleDone = useCallback(() => {
     reportDoneButtonClicked();
