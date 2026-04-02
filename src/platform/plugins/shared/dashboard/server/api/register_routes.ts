@@ -14,6 +14,7 @@ import { registerUpdateRoute } from './update';
 import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
 import { registerReadRoute } from './read';
+import { registerSanitizeRoute } from './sanitize';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter();
@@ -28,6 +29,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   registerUpdateRoute(versionedRouter, false);
   registerDeleteRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
+  registerSanitizeRoute(versionedRouter);
 
   //
   // Dashboard application specific routes
