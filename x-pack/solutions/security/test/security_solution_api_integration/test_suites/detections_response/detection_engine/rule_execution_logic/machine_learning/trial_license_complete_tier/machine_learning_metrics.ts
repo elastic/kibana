@@ -82,6 +82,30 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('metrics collection', () => {
+      describe('matched_indices_count', () => {
+        it('does not record matched_indices_count for machine learning rules', async () => {
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getMLRuleParams({
+              ...sharedMlRuleRewrites,
+              anomaly_threshold: 30,
+              from: '1900-01-01T00:00:00.000Z',
+              enabled: true,
+            })
+          );
+          await getOpenAlerts(supertest, log, es, createdRule);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBeUndefined();
+        });
+      });
+
       describe('alerts_candidate_count', () => {
         it('records alerts_candidate_count value', async () => {
           const createdRule = await createRule(

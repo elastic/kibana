@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { withSpan } from '@kbn/apm-utils';
+import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import type {
   ExecutionContextStart,
@@ -564,7 +564,7 @@ export class TaskManagerRunner implements TaskRunner {
           TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
           TASK_MANAGER_TRANSACTION_TYPE
         );
-        apmTrans.addLabels({ entityId: this.taskType });
+        addSpanLabels({ entityId: this.taskType });
 
         const now = new Date();
         try {
