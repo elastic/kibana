@@ -128,6 +128,10 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
+  /** When true, the item was indexed with directly-provided content and
+   *  will not be overwritten by the crawler or by event-based indexing
+   *  that relies on getSmlData (unless override is set). */
+  readonly?: boolean;
 }
 
 /**
@@ -171,6 +175,17 @@ export interface SmlIndexAttachmentParams {
   attachmentType: string;
   action: SmlIndexAction;
   spaceId?: string;
+  /**
+   * When provided, this content is indexed directly without calling
+   * getSmlData. The resulting SML document is marked as readonly.
+   */
+  content?: string;
+  /**
+   * When true, allows overwriting a readonly SML item via the
+   * event-based API even when content is not provided (i.e. when
+   * getSmlData would normally be used).
+   */
+  override?: boolean;
 }
 
 /**
@@ -225,6 +240,8 @@ export interface SmlService {
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;
     request?: KibanaRequest;
+    content?: string;
+    override?: boolean;
   }) => Promise<void>;
 
   /** Fetch SML documents by their chunk IDs, scoped to a space */

@@ -14,7 +14,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SmlTypeRegistry } from './sml_type_registry';
-import type { SmlIndexAction, SmlContext } from './types';
+import type { SmlIndexAction, SmlContext, SmlDocument } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 
@@ -36,6 +36,10 @@ export interface SmlIndexer {
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
     request?: KibanaRequest;
+    /** Directly-provided content — bypasses getSmlData and marks the item readonly. */
+    content?: string;
+    /** When true, allows overwriting readonly items via getSmlData path. */
+    override?: boolean;
   }) => Promise<void>;
 }
 
@@ -61,6 +65,8 @@ class SmlIndexerImpl implements SmlIndexer {
     savedObjectsClient,
     logger: contextLogger,
     request,
+    content,
+    override,
   }: {
     originId: string;
     attachmentType: string;
@@ -70,11 +76,13 @@ class SmlIndexerImpl implements SmlIndexer {
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
     request?: KibanaRequest;
+    content?: string;
+    override?: boolean;
   }): Promise<void> {
     this.logger.info(
       `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
         ', '
-      )}]`
+      )}], directContent=${content != null}, override=${!!override}`
     );
 
     const definition = this.registry.get(attachmentType);
@@ -91,6 +99,25 @@ class SmlIndexerImpl implements SmlIndexer {
     if (action === 'delete') {
       this.logger.info(`SML indexer: deleting chunks for origin '${originId}'`);
       await this.deleteChunks({ originId, esClient });
+      return;
+    }
+
+    if (content != null) {
+      await this.indexDirectContent({
+        originId,
+        attachmentType,
+        content,
+        spaces,
+        esClient,
+      });
+      return;
+    }
+
+    const isReadonly = await this.isOriginReadonly({ originId, esClient });
+    if (isReadonly && !override) {
+      this.logger.info(
+        `SML indexer: origin '${originId}' is readonly — skipping getSmlData update (use override=true to force)`
+      );
       return;
     }
 
@@ -121,13 +148,109 @@ class SmlIndexerImpl implements SmlIndexer {
       }', content length: ${smlData.chunks[0]?.content?.length ?? 0}`
     );
 
+    await this.writeChunks({
+      originId,
+      attachmentType,
+      chunks: smlData.chunks.map((chunk) => ({
+        type: chunk.type,
+        title: chunk.title,
+        content: chunk.content,
+        permissions: chunk.permissions ?? [],
+      })),
+      spaces,
+      esClient,
+      readonly: false,
+    });
+  }
+
+  private async indexDirectContent({
+    originId,
+    attachmentType,
+    content,
+    spaces,
+    esClient,
+  }: {
+    originId: string;
+    attachmentType: string;
+    content: string;
+    spaces: string[];
+    esClient: ElasticsearchClient;
+  }): Promise<void> {
+    this.logger.info(
+      `SML indexer: indexing direct content for origin '${originId}' of type '${attachmentType}' (readonly=true)`
+    );
+
+    await this.writeChunks({
+      originId,
+      attachmentType,
+      chunks: [
+        {
+          type: attachmentType,
+          title: originId,
+          content,
+          permissions: [],
+        },
+      ],
+      spaces,
+      esClient,
+      readonly: true,
+    });
+  }
+
+  private async isOriginReadonly({
+    originId,
+    esClient,
+  }: {
+    originId: string;
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    try {
+      const response = await esClient.search<Pick<SmlDocument, 'readonly'>>({
+        index: smlIndexName,
+        size: 1,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            filter: [{ term: { origin_id: originId } }, { term: { readonly: true } }],
+          },
+        },
+        _source: ['readonly'],
+      });
+      return response.hits.hits.length > 0;
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return false;
+      }
+      this.logger.warn(
+        `SML indexer: failed to check readonly status for '${originId}': ${(error as Error).message}`
+      );
+      return false;
+    }
+  }
+
+  private async writeChunks({
+    originId,
+    attachmentType,
+    chunks,
+    spaces,
+    esClient,
+    readonly,
+  }: {
+    originId: string;
+    attachmentType: string;
+    chunks: Array<{ type: string; title: string; content: string; permissions: string[] }>;
+    spaces: string[];
+    esClient: ElasticsearchClient;
+    readonly: boolean;
+  }): Promise<void> {
     await this.deleteChunks({ originId, esClient });
 
     const storage = createSmlStorage({ logger: this.logger, esClient });
     const smlClient = storage.getClient();
 
     const now = new Date().toISOString();
-    const bulkOps = smlData.chunks.map((chunk) => {
+    const bulkOps = chunks.map((chunk) => {
       const chunkId = `${attachmentType}:${originId}:${uuidv4()}`;
       return {
         index: {
@@ -141,7 +264,8 @@ class SmlIndexerImpl implements SmlIndexer {
             created_at: now,
             updated_at: now,
             spaces,
-            permissions: chunk.permissions ?? [],
+            permissions: chunk.permissions,
+            readonly,
           },
         },
       };
@@ -149,7 +273,7 @@ class SmlIndexerImpl implements SmlIndexer {
 
     if (bulkOps.length > 0) {
       this.logger.info(
-        `SML indexer: writing ${bulkOps.length} chunk(s) to index '${smlIndexName}' for origin '${originId}'`
+        `SML indexer: writing ${bulkOps.length} chunk(s) to index '${smlIndexName}' for origin '${originId}' (readonly=${readonly})`
       );
       try {
         const response = await smlClient.bulk({
@@ -166,7 +290,7 @@ class SmlIndexerImpl implements SmlIndexer {
           );
         } else {
           this.logger.info(
-            `SML indexer: successfully indexed ${smlData.chunks.length} chunk(s) for origin '${originId}'`
+            `SML indexer: successfully indexed ${chunks.length} chunk(s) for origin '${originId}'`
           );
         }
       } catch (error) {

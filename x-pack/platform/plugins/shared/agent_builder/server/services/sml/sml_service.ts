@@ -403,6 +403,7 @@ const searchSml = async ({
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
+          readonly: source.readonly ?? false,
           score: hit._score ?? 0,
         };
       });
@@ -471,6 +472,7 @@ const getDocumentsByIds = async ({
         updated_at: source.updated_at ?? '',
         spaces: source.spaces ?? [],
         permissions: source.permissions ?? [],
+        readonly: source.readonly ?? false,
       };
       docMap.set(doc.id, doc);
     }
