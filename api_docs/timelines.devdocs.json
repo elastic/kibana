@@ -4584,7 +4584,7 @@
         "label": "TimelineEqlRequestOptionsInput",
         "description": [],
         "signature": [
-          "z.input<any>"
+          "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
         "lineNumber": 26,
@@ -4601,7 +4601,7 @@
         "label": "TimelineEventsAllOptionsInput",
         "description": [],
         "signature": [
-          "z.input<any>"
+          "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
         "lineNumber": 42,
@@ -4618,7 +4618,7 @@
         "label": "TimelineEventsDetailsRequestOptionsInput",
         "description": [],
         "signature": [
-          "z.input<any>"
+          "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
         "lineNumber": 21,
@@ -4635,7 +4635,7 @@
         "label": "TimelineEventsLastEventTimeRequestOptionsInput",
         "description": [],
         "signature": [
-          "z.input<any>"
+          "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "lineNumber": 44,
@@ -4652,7 +4652,7 @@
         "label": "TimelineKpiRequestOptionsInput",
         "description": [],
         "signature": [
-          "z.input<any>"
+          "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
         "lineNumber": 16,

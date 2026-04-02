@@ -72,7 +72,7 @@ export const useTopNavLinks = ({
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
-  onOpenInspector: () => void;
+  onOpenInspector?: () => void;
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
@@ -124,8 +124,10 @@ export const useTopNavLinks = ({
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
-    const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-    items.push(inspectAppMenuItem);
+    if (onOpenInspector) {
+      const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
+      items.push(inspectAppMenuItem);
+    }
 
     if (showCreateRuleV2) {
       const createRuleV2 = getCreateRuleMenuItem({
@@ -217,12 +219,12 @@ export const useTopNavLinks = ({
     services,
     discoverParams,
     appId,
-    onOpenInspector,
     dispatch,
     getState,
     isEsqlMode,
     currentDataView,
     currentTab,
+    onOpenInspector,
     persistedDiscoverSession,
     hasShareIntegration,
     hasUnsavedChanges,
@@ -250,7 +252,7 @@ export const useTopNavLinks = ({
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
-        iconType: 'editorCodeBlock',
+        iconType: 'code',
         color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
@@ -297,7 +299,7 @@ export const useTopNavLinks = ({
               defaultMessage: 'Save',
             }),
         testId: 'discoverSaveButton',
-        iconType: isEmbeddedEditor ? 'checkInCircleFilled' : 'save',
+        iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
         run: async () => {
           await onSaveDiscoverSession({
             services,
@@ -318,7 +320,7 @@ export const useTopNavLinks = ({
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
-          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
             defaultMessage: 'Save options',
           }),
@@ -335,7 +337,7 @@ export const useTopNavLinks = ({
                     label: i18n.translate('discover.localMenu.cancelTitle', {
                       defaultMessage: 'Cancel',
                     }),
-                    iconType: 'editorUndo',
+                    iconType: 'undo',
                     testId: 'discoverCancelButton',
                   },
                 ],
@@ -367,7 +369,7 @@ export const useTopNavLinks = ({
                     label: i18n.translate('discover.localMenu.resetChangesTitle', {
                       defaultMessage: 'Reset changes',
                     }),
-                    iconType: 'editorUndo',
+                    iconType: 'undo',
                     testId: 'revertUnsavedChangesButton',
                     disableButton: !hasUnsavedChanges,
                   },

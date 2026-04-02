@@ -8,8 +8,10 @@
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { deepFreeze } from '@kbn/std';
 import {
-  SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME_PREFIX,
-  SCRIPTS_LIBRARY_FILE_METADATA_INDEX_NAME_PREFIX,
+  SCRIPTS_LIBRARY_FILE_DATA_INDEX_TEMPLATE_NAME,
+  SCRIPTS_LIBRARY_FILE_DATA_INDEX_TEMPLATE_PATTERN,
+  SCRIPTS_LIBRARY_FILE_METADATA_INDEX_TEMPLATE_NAME,
+  SCRIPTS_LIBRARY_FILE_METADATA_INDEX_TEMPLATE_PATTERN,
 } from '../constants';
 
 /**
@@ -17,8 +19,8 @@ import {
  * to manage files associated with Elastic Defend Scripts library entries
  */
 export const ScriptsFileMetadataIndexTemplate = deepFreeze<IndicesPutIndexTemplateRequest>({
-  name: SCRIPTS_LIBRARY_FILE_METADATA_INDEX_NAME_PREFIX,
-  index_patterns: [`${SCRIPTS_LIBRARY_FILE_METADATA_INDEX_NAME_PREFIX}-*`],
+  name: SCRIPTS_LIBRARY_FILE_METADATA_INDEX_TEMPLATE_NAME,
+  index_patterns: SCRIPTS_LIBRARY_FILE_METADATA_INDEX_TEMPLATE_PATTERN,
   priority: 500,
   allow_auto_create: true,
   _meta: {
@@ -42,8 +44,8 @@ export const ScriptsFileMetadataIndexTemplate = deepFreeze<IndicesPutIndexTempla
  * to manage files associated with Elastic Defend Scripts library entries
  */
 export const ScriptsFileDataIndexTemplate = deepFreeze<IndicesPutIndexTemplateRequest>({
-  name: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME_PREFIX,
-  index_patterns: [`${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME_PREFIX}-*`],
+  name: SCRIPTS_LIBRARY_FILE_DATA_INDEX_TEMPLATE_NAME,
+  index_patterns: SCRIPTS_LIBRARY_FILE_DATA_INDEX_TEMPLATE_PATTERN,
   priority: 500,
   allow_auto_create: true,
   _meta: {

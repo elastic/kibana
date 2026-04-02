@@ -13,8 +13,12 @@ import { LoggerServiceToken } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
-import type { AlertEpisodeStatus } from '../../resources/alert_events';
-import { alertEpisodeStatus, alertEventType, type AlertEvent } from '../../resources/alert_events';
+import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
+import {
+  alertEpisodeStatus,
+  alertEventType,
+  type AlertEvent,
+} from '../../resources/datastreams/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
 import type { ExecutionContext } from '../execution_context';

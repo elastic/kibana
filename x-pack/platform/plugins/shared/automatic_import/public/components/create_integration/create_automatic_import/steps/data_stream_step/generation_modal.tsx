@@ -93,7 +93,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                       announceOnMount
                       title={i18n.GENERATION_ERROR_TITLE(progressText[progress])}
                       color="danger"
-                      iconType="alert"
+                      iconType="warning"
                       data-test-subj="generationErrorCallout"
                     >
                       <ErrorMessage error={error} />

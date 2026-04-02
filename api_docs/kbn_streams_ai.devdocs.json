@@ -45,7 +45,7 @@
         "label": "featureToKnowledgeIndicatorFeature",
         "description": [],
         "signature": [
-          "(feature: z.infer<any>) => ",
+          "(feature: any) => ",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
@@ -68,7 +68,7 @@
             "label": "feature",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators/mappers.ts",
             "lineNumber": 11,
@@ -93,7 +93,15 @@
         "signature": [
           "(options: ",
           "ComputedFeatureGeneratorOptions",
-          ") => Promise<z.infer<any>[]>"
+          ") => Promise<{ id: string; stream_name: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; subtype?: string | undefined; title?: string | undefined; evidence?: string[] | undefined; evidence_doc_ids?: string[] | undefined; tags?: string[] | undefined; filter?: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined; meta?: Record<string, unknown> | undefined; }[]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/computed/index.ts",
         "lineNumber": 81,
@@ -142,7 +150,7 @@
           },
           ".all.Definition; esClient: ",
           "ElasticsearchClient",
-          "; start: number; end: number; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<z.infer<any>[]>; inferenceClient: ",
+          "; start: number; end: number; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<any[]>; inferenceClient: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1264,7 +1272,7 @@
                 "label": "getFeatures",
                 "description": [],
                 "signature": [
-                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<z.infer<any>[]>"
+                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
                 "lineNumber": 62,
@@ -2630,7 +2638,7 @@
         "label": "identifyFeatures",
         "description": [],
         "signature": [
-          "({\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  logger,\n  signal,\n  previouslyIdentifiedFeatures = [],\n}: ",
+          "({\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  signal,\n  previouslyIdentifiedFeatures = [],\n}: ",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
@@ -2638,7 +2646,15 @@
             "section": "def-server.IdentifyFeaturesOptions",
             "text": "IdentifyFeaturesOptions"
           },
-          ") => Promise<{ features: z.infer<any>[]; ignoredFeatures: z.infer<any>[]; tokensUsed: ",
+          ") => Promise<{ features: { id: string; stream_name: string; type: string; description: string; properties: Record<string, unknown>; confidence: number; subtype?: string | undefined; title?: string | undefined; evidence?: string[] | undefined; evidence_doc_ids?: string[] | undefined; tags?: string[] | undefined; filter?: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          " | undefined; meta?: Record<string, unknown> | undefined; }[]; ignoredFeatures: { feature_id: string; feature_title: string; excluded_feature_id: string; reason: string; }[]; tokensUsed: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -2659,7 +2675,7 @@
             "id": "def-server.identifyFeatures.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  logger,\n  signal,\n  previouslyIdentifiedFeatures = [],\n}",
+            "label": "{\n  streamName,\n  sampleDocuments,\n  excludedFeatures,\n  systemPrompt,\n  inferenceClient,\n  signal,\n  previouslyIdentifiedFeatures = [],\n}",
             "description": [],
             "signature": [
               {
@@ -2715,7 +2731,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<z.infer<any>[]>; }) => Promise<",
+          "; start: number; end: number; maxSteps?: number | undefined; signal: AbortSignal; getFeatures(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined): Promise<any[]>; }) => Promise<",
           "PartitionStreamResponse",
           ">"
         ],
@@ -3875,7 +3891,7 @@
                 "label": "getFeatures",
                 "description": [],
                 "signature": [
-                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<z.infer<any>[]>"
+                  "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/partition_stream/index.ts",
                 "lineNumber": 57,
@@ -4021,7 +4037,7 @@
         "label": "searchKnowledgeIndicators",
         "description": [],
         "signature": [
-          "({\n  getStreamNames,\n  getFeatures,\n  getQueries,\n  onFeatureFetchError,\n  params,\n}: { getStreamNames(): Promise<string[]>; getFeatures(streamName: string, options: { limit?: number | undefined; }): Promise<z.infer<any>[]>; getQueries(streamNames: string[], search_text?: string | undefined): Promise<",
+          "({\n  getStreamNames,\n  getFeatures,\n  getQueries,\n  onFeatureFetchError,\n  params,\n}: { getStreamNames(): Promise<string[]>; getFeatures(streamName: string, options: { limit?: number | undefined; }): Promise<any[]>; getQueries(streamNames: string[], search_text?: string | undefined): Promise<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4092,7 +4108,7 @@
                 "label": "getFeatures",
                 "description": [],
                 "signature": [
-                  "(streamName: string, options: { limit?: number | undefined; }) => Promise<z.infer<any>[]>"
+                  "(streamName: string, options: { limit?: number | undefined; }) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators/search.ts",
                 "lineNumber": 128,
@@ -6025,7 +6041,7 @@
             "label": "feature",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators/types.ts",
             "lineNumber": 44,
@@ -6490,7 +6506,7 @@
         "label": "IgnoredFeature",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "{ feature_id: string; feature_title: string; excluded_feature_id: string; reason: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
         "lineNumber": 67,

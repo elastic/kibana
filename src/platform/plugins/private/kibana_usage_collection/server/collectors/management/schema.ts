@@ -41,7 +41,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'securitySolution:alertCloseReasons': {
+  'securitySolution:detectionsCloseReasons': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
@@ -713,6 +713,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Display the incremental id of a case in the relevant pages',
+    },
+  },
+  'cases:maxOpenCasesPerRuleRun': {
+    type: 'integer',
+    _meta: {
+      description: 'Maximum number of cases the Cases connector can open during a single rule run.',
     },
   },
   'observability:streamsEnableSignificantEvents': {

@@ -224,7 +224,7 @@ export const OverflowFieldComponent = ({
     )}
     {value.length > overflowLength && (
       <EuiToolTip content={value}>
-        <MoreRowItems type="boxesHorizontal" />
+        <MoreRowItems type="boxesVertical" />
       </EuiToolTip>
     )}
   </span>

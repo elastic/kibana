@@ -146,7 +146,9 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   };
 
   const isRootStream = isRootStreamDefinition(definition.stream);
-  const handleAddField = !isRootStream && definition.privileges.manage ? addField : undefined;
+  const isReplicated = definition.replicated === true;
+  const canEditSchema = !isRootStream && !isReplicated && definition.privileges.manage;
+  const handleAddField = canEditSchema ? addField : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
@@ -189,7 +191,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
           fieldSelection={selectedFields}
           withControls
           withFieldSimulation
-          withTableActions={!isRootStream && definition.privileges.manage}
+          withTableActions={canEditSchema}
         />
       </EuiFlexItem>
       {pendingChangesCount > 0 && (
