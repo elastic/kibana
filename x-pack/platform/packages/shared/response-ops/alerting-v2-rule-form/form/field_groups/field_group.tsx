@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiTitle,
   EuiSplitPanel,
   useGeneratedHtmlId,
@@ -94,20 +95,23 @@ export const FieldGroup = (props: FieldGroupProps) => {
       : { initialIsOpen: true };
 
     return (
-      <EuiAccordion
-        id={id}
-        buttonContent={
-          <EuiTitle size="xxs">
-            <h3>
-              <strong>{title}</strong>
-            </h3>
-          </EuiTitle>
-        }
-        paddingSize="s"
-        {...accordionProps}
-      >
-        {children}
-      </EuiAccordion>
+      <>
+        <EuiAccordion
+          id={id}
+          buttonContent={
+            <EuiTitle size="xxs">
+              <h3>
+                <strong>{title}</strong>
+              </h3>
+            </EuiTitle>
+          }
+          paddingSize="s"
+          {...accordionProps}
+        >
+          {children}
+        </EuiAccordion>
+        <EuiHorizontalRule />
+      </>
     );
   }
 
