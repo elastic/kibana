@@ -12,7 +12,7 @@ import { Request, Response } from '@kbn/core-di-server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
-import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
+import { findRulesResponseSchema, findRulesSortFieldSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -27,7 +27,7 @@ const getRulesQuerySchema = z.object({
     .optional()
     .describe('The number of rules to return per page.'),
   filter: z.string().optional().describe('The filter to apply to the rules.'),
-  sortField: z.enum(['kind', 'enabled', 'name']).optional().describe('The field to sort rules by.'),
+  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
   sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
   search: z
     .string()

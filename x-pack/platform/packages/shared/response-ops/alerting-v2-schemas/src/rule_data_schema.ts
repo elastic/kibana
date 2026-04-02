@@ -286,6 +286,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
+/** Sort field for find rules API. */
+export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
+
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z
   .object({

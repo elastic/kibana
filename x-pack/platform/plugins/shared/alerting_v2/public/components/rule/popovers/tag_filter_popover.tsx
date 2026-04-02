@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { useEuiTheme, EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,18 +33,12 @@ export const TagsFilterPopover = ({
     }));
   }, [options, value]);
 
-  const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
-  const closePopover = useCallback(() => setIsOpen(false), []);
-
-  const handleSelectionChange = useCallback(
-    (updatedOptions: EuiSelectableOption[]) => {
-      const selected = updatedOptions
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key as string);
-      onChange(selected);
-    },
-    [onChange]
-  );
+  const handleSelectionChange = (updatedOptions: EuiSelectableOption[]) => {
+    const selected = updatedOptions
+      .filter((opt) => opt.checked === 'on')
+      .map((opt) => opt.key as string);
+    onChange(selected);
+  };
 
   const activeCount = value.length;
 
@@ -54,13 +48,13 @@ export const TagsFilterPopover = ({
         defaultMessage: 'Tags filter options',
       })}
       isOpen={isOpen}
-      closePopover={closePopover}
+      closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
       repositionOnScroll
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={togglePopover}
+          onClick={() => setIsOpen((prev) => !prev)}
           isSelected={isOpen}
           hasActiveFilters={activeCount > 0}
           numActiveFilters={activeCount > 0 ? activeCount : undefined}

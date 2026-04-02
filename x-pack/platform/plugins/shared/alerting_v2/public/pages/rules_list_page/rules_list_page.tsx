@@ -21,7 +21,8 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import type { ListRulesSortField, RuleApiResponse } from '../../services/rules_api';
+import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -31,11 +32,12 @@ import type { RulesListTableSortField } from './rules_list_table';
 import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_popover';
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
+import { buildRulesListFilter } from './utils';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
 
-const SORT_FIELD_TO_TABLE_FIELD: Record<ListRulesSortField, RulesListTableSortField> = {
+const SORT_FIELD_TO_TABLE_FIELD: Record<FindRulesSortField, RulesListTableSortField> = {
   kind: 'kind',
   enabled: 'enabled',
   name: 'metadata',
@@ -43,35 +45,7 @@ const SORT_FIELD_TO_TABLE_FIELD: Record<ListRulesSortField, RulesListTableSortFi
 
 const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
   Object.entries(SORT_FIELD_TO_TABLE_FIELD).map(([api, table]) => [table, api])
-) as Partial<Record<string, ListRulesSortField>>;
-
-export const buildRulesListFilter = ({
-  enabled,
-  kind,
-  tags,
-}: {
-  enabled?: string;
-  kind?: string;
-  tags?: string[];
-}) => {
-  const enabledValue = enabled === 'true' ? true : enabled === 'false' ? false : undefined;
-  const kindValue = kind === 'alert' || kind === 'signal' ? kind : undefined;
-
-  const tagClause =
-    tags && tags.length > 0
-      ? `(${tags
-          .map((t) => `metadata.labels: "${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
-          .join(' OR ')})`
-      : undefined;
-
-  const clauses = [
-    enabledValue === undefined ? undefined : `enabled: ${enabledValue}`,
-    tagClause,
-    kindValue ? `kind: ${kindValue}` : undefined,
-  ].filter((clause): clause is string => Boolean(clause));
-
-  return clauses.length > 0 ? clauses.join(' AND ') : undefined;
-};
+) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
   const { basePath } = useService(CoreStart('http'));
@@ -84,7 +58,7 @@ export const RulesListPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [modeFilter, setModeFilter] = useState('');
-  const [sortField, setSortField] = useState<ListRulesSortField>('name');
+  const [sortField, setSortField] = useState<FindRulesSortField>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
 

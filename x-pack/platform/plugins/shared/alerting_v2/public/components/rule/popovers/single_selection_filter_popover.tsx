@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { useEuiTheme, EuiIcon, EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
@@ -69,21 +69,14 @@ export const SingleSelectionFilterPopover = ({
     [dataTestSubj, options, value]
   );
 
-  const togglePopover = useCallback(() => {
-    setIsOpen((prevIsOpen) => !prevIsOpen);
-  }, []);
-
-  const closePopover = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  const handleSelectionChange = useCallback(
-    (_options: EuiSelectableOption[], __: unknown, changedOption: EuiSelectableOption) => {
-      const nextValue = changedOption.key as string;
-      onChange(value === nextValue ? '' : nextValue);
-    },
-    [onChange, value]
-  );
+  const handleSelectionChange = (
+    _options: EuiSelectableOption[],
+    _event: unknown,
+    changedOption: EuiSelectableOption
+  ) => {
+    const nextValue = changedOption.key as string;
+    onChange(value === nextValue ? '' : nextValue);
+  };
 
   const activeCount = value ? 1 : 0;
 
@@ -91,13 +84,13 @@ export const SingleSelectionFilterPopover = ({
     <EuiPopover
       aria-label={popoverLabel}
       isOpen={isOpen}
-      closePopover={closePopover}
+      closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
       repositionOnScroll
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={togglePopover}
+          onClick={() => setIsOpen((prev) => !prev)}
           isSelected={isOpen}
           hasActiveFilters={activeCount > 0}
           numActiveFilters={activeCount > 0 ? activeCount : undefined}

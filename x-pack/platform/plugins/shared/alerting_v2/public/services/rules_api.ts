@@ -8,13 +8,16 @@
 import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  FindRulesSortField,
+  RuleResponse,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse };
-
-export type ListRulesSortField = 'kind' | 'enabled' | 'name';
 
 export interface FindRulesResponse {
   items: RuleResponse[];
@@ -28,7 +31,7 @@ export interface ListRulesParams {
   perPage?: number;
   filter?: string;
   search?: string;
-  sortField?: ListRulesSortField;
+  sortField?: FindRulesSortField;
   sortOrder?: 'asc' | 'desc';
 }
 

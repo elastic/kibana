@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  UpdateRuleData,
+  RuleResponse,
+  FindRulesSortField,
+} from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
-export type { CreateRuleData, UpdateRuleData, RuleResponse };
+export type { CreateRuleData, UpdateRuleData, RuleResponse, FindRulesSortField };
 
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
-
-export type FindRulesSortField = 'kind' | 'enabled' | 'name';
 
 export interface FindRulesParams {
   page?: number;

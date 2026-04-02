@@ -8,7 +8,8 @@
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { RulesApi, type ListRulesSortField } from '../services/rules_api';
+import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 
 export const useFetchRules = ({
@@ -23,7 +24,7 @@ export const useFetchRules = ({
   perPage: number;
   filter?: string;
   search?: string;
-  sortField?: ListRulesSortField;
+  sortField?: FindRulesSortField;
   sortOrder?: 'asc' | 'desc';
 }) => {
   const rulesApi = useService(RulesApi);
