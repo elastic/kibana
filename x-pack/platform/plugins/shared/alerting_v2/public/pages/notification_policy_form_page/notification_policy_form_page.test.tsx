@@ -29,11 +29,24 @@ jest.mock('../../components/notification_policy/form/components/matcher_input', 
   ),
 }));
 
+jest.mock('../../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => jest.fn(),
+}));
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: jest.fn((token: unknown) => {
     const tokenStr = String(token);
     if (tokenStr.includes('application')) {
-      return { navigateToUrl: mockNavigateToUrl };
+      return {
+        navigateToUrl: mockNavigateToUrl,
+        getUrlForApp: jest.fn(
+          (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path ? `/${options.path}` : ''}`
+        ),
+      };
+    }
+    if (tokenStr.includes('chrome')) {
+      return { docTitle: { change: jest.fn() } };
     }
     if (tokenStr.includes('http')) {
       return { basePath: mockBasePath };
