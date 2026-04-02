@@ -16,8 +16,8 @@ describe('Waffle Schema', () => {
       type: 'waffle',
       ignore_global_filters: false,
       sampling: 1,
-      dataset: {
-        type: 'dataView',
+      data_source: {
+        type: 'data_view_reference',
         id: 'test-data-view',
       },
     } satisfies Partial<WaffleStateNoESQL>;
@@ -450,7 +450,7 @@ describe('Waffle Schema', () => {
       type: 'waffle',
       ignore_global_filters: false,
       sampling: 1,
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | STATS count() BY category',
       },
@@ -468,7 +468,7 @@ describe('Waffle Schema', () => {
       };
 
       const validated = waffleStateSchema.validate(input);
-      expect(validated.dataset.type).toBe('esql');
+      expect(validated.data_source.type).toBe('esql');
       expect(validated.metrics[0].operation).toBe('value');
     });
 

@@ -8,12 +8,13 @@
  */
 
 import type { MetricState } from '../../schema';
+import type { MetricStateNoESQL } from '../../schema/charts/metric';
 
 export const breakdownMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Breakdown',
   description: 'Metric with breakdown',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: 'data_view_reference', id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -36,13 +37,13 @@ export const breakdownMetricAPIAttributes = {
     fields: ['extension.keyword'],
     limit: 5,
   },
-} as MetricState;
+} as MetricStateNoESQL;
 
 export const complexMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - Complex case',
   description: 'Metric with background chart and breakdown',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: 'data_view_reference', id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -90,7 +91,7 @@ export const simpleMetricAPIAttributes = {
   type: 'metric',
   title: 'Simple Metric',
   description: 'A simple metric visualization',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: 'data_view_reference', id: 'testId' },
   metrics: [
     {
       type: 'primary',
@@ -105,7 +106,7 @@ export const complexESQLMetricAPIAttributes = {
   type: 'metric',
   title: 'Metric - ESQL Complex case',
   description: 'ESQL Metric with background chart and breakdown',
-  dataset: { type: 'esql', query: 'FROM logs | STATS ...' },
+  data_source: { type: 'esql', query: 'FROM logs | STATS ...' },
   metrics: [
     {
       type: 'primary',
@@ -146,7 +147,7 @@ export const metricAPIWithTermsRankedBySecondary = {
   type: 'metric',
   title: 'Metric - Breakdown ranked by secondary',
   description: 'Metric with breakdown ranked by secondary metric',
-  dataset: { type: 'dataView', id: 'testId' },
+  data_source: { type: 'data_view_reference', id: 'testId' },
   ignore_global_filters: false,
   sampling: 1,
   metrics: [

@@ -16,8 +16,8 @@ type DatatableWithoutDefaultsConfig = Omit<DatatableState, 'sampling' | 'ignore_
 describe('Datatable Schema', () => {
   const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
     type: 'data_table',
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: 'test-data-view',
     },
   };
@@ -450,7 +450,7 @@ describe('Datatable Schema', () => {
     it('throws when using term buckets operation in an esql configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -473,7 +473,7 @@ describe('Datatable Schema', () => {
     it('throws when esql datatable has no metrics and no rows', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'metrics' | 'rows'> = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -487,7 +487,7 @@ describe('Datatable Schema', () => {
     it('throws on empty metrics array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -506,7 +506,7 @@ describe('Datatable Schema', () => {
     it('throws on empty rows array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -754,7 +754,7 @@ describe('Datatable Schema', () => {
         type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table full configuration',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -844,7 +844,7 @@ describe('Datatable Schema', () => {
         type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table without metrics',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },

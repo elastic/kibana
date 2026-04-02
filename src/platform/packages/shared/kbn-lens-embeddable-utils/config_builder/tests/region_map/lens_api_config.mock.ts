@@ -15,9 +15,9 @@ import type { RegionMapState } from '../../schema';
 export const basicRegionMapWithAdHocDataView = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: 'data_view_spec',
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -47,8 +47,8 @@ export const basicRegionMapWithAdHocDataView = {
 export const basicRegionMapWithDataView = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: 'test-id',
   },
   metric: {
@@ -83,7 +83,7 @@ export const basicRegionMapWithDataView = {
 export const basicEsqlRegionMap = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
@@ -109,9 +109,9 @@ export const basicEsqlRegionMap = {
 export const comprehensiveRegionMapWithAdHocDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: 'data_view_spec',
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -144,8 +144,8 @@ export const comprehensiveRegionMapWithAdHocDataView = {
 export const comprehensiveRegionMapWithDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: 'my-custom-data-view-id',
   },
   metric: {
@@ -178,7 +178,7 @@ export const comprehensiveRegionMapWithDataView = {
 export const comprehensiveEsqlRegionMap = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },

@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatasetTypeESQL } from '../dataset';
-import type { XYState, XYStateESQL } from './xy';
+import type { TypeOf } from '@kbn/config-schema';
+import type { DataSourceTypeESQL } from '../dataset';
+import type { xyDataLayerSharedSchema, XYState, XYStateESQL } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
 
 describe('XY', () => {
   const minimalLayer = {
-    dataset: { type: 'dataView', id: 'myDataView' as const },
-    type: 'bar' as const,
-    y: [{ operation: 'count' as const }],
+    data_source: { type: 'data_view_reference', id: 'myDataView' },
+    type: 'bar',
+    y: [{ operation: 'count' }],
   };
   const universalTypes = [
     'bar',
@@ -25,14 +26,14 @@ describe('XY', () => {
     'area_stacked',
     'bar_horizontal',
     'bar_horizontal_stacked',
-  ] as const;
+  ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[];
 
   const typesWithBreakdown = [
     'bar_percentage',
     'area_percentage',
     'bar_horizontal_percentage',
-  ] as const;
-  const anyType = [...universalTypes, ...typesWithBreakdown] as const;
+  ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[];
+  const anyType = [...universalTypes, ...typesWithBreakdown];
   describe('minimal xy charts', () => {
     it.each([
       'bar',
@@ -42,23 +43,25 @@ describe('XY', () => {
       'area_stacked',
       'bar_horizontal',
       'bar_horizontal_stacked',
-    ] as const)('should pass validation for simple %s', (type) => {
-      expect(() =>
-        xyStateSchema.validate({
+    ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[])(
+      'should pass validation for simple %s',
+      (type) => {
+        const input = {
           type: 'xy',
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: 'data_view_reference', id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
               y: [{ operation: 'count', empty_as_null: false }],
             },
           ],
-        } satisfies XYState)
-      ).not.toThrow();
-    });
+        } satisfies XYState;
+        expect(() => xyStateSchema.validate(input)).not.toThrow();
+      }
+    );
 
     it.each(anyType)('should pass validation for %s with breakdown', (type) => {
       expect(() =>
@@ -67,7 +70,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: 'data_view_reference', id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -88,7 +91,7 @@ describe('XY', () => {
             title: `${type} Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'myDataView' },
+                data_source: { type: 'data_view_reference', id: 'myDataView' },
                 type,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -115,7 +118,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              dataset: {
+              data_source: {
                 type: 'esql',
                 query:
                   'FROM kibana_simple_logs_data | STATS count = count() BY buckets = BUCKET(3 hours, order_date), product',
@@ -139,7 +142,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: 'data_view_reference', id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -158,7 +161,7 @@ describe('XY', () => {
               },
             },
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: 'data_view_reference', id: 'myDataView' },
               type: 'referenceLines',
               ignore_global_filters: false,
               sampling: 1,
@@ -184,7 +187,7 @@ describe('XY', () => {
           title: `${type} Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: 'data_view_reference', id: 'myDataView' },
               type,
               ignore_global_filters: false,
               sampling: 1,
@@ -201,8 +204,8 @@ describe('XY', () => {
             {
               type: 'annotations',
               ignore_global_filters: false,
-              dataset: {
-                type: 'dataView',
+              data_source: {
+                type: 'data_view_reference',
                 id: 'metrics-*',
               },
               events: [
@@ -237,7 +240,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: 'data_view_reference', id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -255,7 +258,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                dataset: { type: 'dataView', id: 'companyBIndex' },
+                data_source: { type: 'data_view_reference', id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -287,7 +290,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: 'data_view_reference', id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -305,7 +308,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                dataset: { type: 'dataView', id: 'companyBIndex' },
+                data_source: { type: 'data_view_reference', id: 'companyBIndex' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -323,7 +326,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
-                dataset: { type: 'dataView', id: 'myDataView' },
+                data_source: { type: 'data_view_reference', id: 'myDataView' },
                 type: 'referenceLines',
                 ignore_global_filters: false,
                 sampling: 1,
@@ -347,8 +350,8 @@ describe('XY', () => {
               {
                 type: 'annotations',
                 ignore_global_filters: false,
-                dataset: {
-                  type: 'dataView',
+                data_source: {
+                  type: 'data_view_reference',
                   id: 'metrics-*',
                 },
                 events: [
@@ -413,7 +416,7 @@ describe('XY', () => {
             title: `Mixed Chart`,
             layers: [
               {
-                dataset: { type: 'dataView', id: 'companyAIndex' },
+                data_source: { type: 'data_view_reference', id: 'companyAIndex' },
                 type: type1,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -441,7 +444,7 @@ describe('XY', () => {
                 },
               },
               {
-                dataset: { type: 'esql', query: 'FROM company_index' },
+                data_source: { type: 'esql', query: 'FROM company_index' },
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
@@ -453,7 +456,11 @@ describe('XY', () => {
                 breakdown_by: { operation: 'value', column: 'product' },
               },
               {
-                dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'companyIndex',
+                  time_field: '@timestamp',
+                },
                 type: 'referenceLines',
                 ignore_global_filters: false,
                 sampling: 1,
@@ -479,8 +486,8 @@ describe('XY', () => {
               {
                 type: 'annotations',
                 ignore_global_filters: false,
-                dataset: {
-                  type: 'dataView',
+                data_source: {
+                  type: 'data_view_reference',
                   id: 'metrics-*',
                 },
                 events: [
@@ -551,7 +558,7 @@ describe('XY', () => {
       ).toThrow();
     });
 
-    it('should not let mix esql dataset with dsl operations', () => {
+    it('should not let mix esql data_source with dsl operations', () => {
       expect(() =>
         xyStateSchema.validate({
           type: 'xy',
@@ -559,7 +566,7 @@ describe('XY', () => {
           layers: [
             // @ts-expect-error - mixing not allowed
             {
-              dataset: { type: 'esql', query: 'FROM company_index' },
+              data_source: { type: 'esql', query: 'FROM company_index' },
               type: 'bar',
               ignore_global_filters: false,
               sampling: 1,
@@ -588,7 +595,7 @@ describe('XY', () => {
           title: `Faulty Chart`,
           layers: [
             {
-              dataset: { type: 'dataView', id: 'myDataView' },
+              data_source: { type: 'data_view_reference', id: 'myDataView' },
               type: 'bar',
               ignore_global_filters: false,
               sampling: 1,
@@ -605,11 +612,11 @@ describe('XY', () => {
               type: 'annotations',
               ignore_global_filters: false,
               // @ts-expect-error - mixing not allowed
-              dataset: {
+              data_source: {
                 type: 'esql',
                 query:
                   'FROM kibana_simple_logs_data | EVAL timestamp = order_date | FILTER product == "xyz" ',
-              } satisfies DatasetTypeESQL,
+              } satisfies DataSourceTypeESQL,
               events: [
                 {
                   type: 'point',

@@ -15,8 +15,8 @@ import { gaugeStateSchema } from './gauge';
 describe('Gauge Schema', () => {
   const baseGaugeConfig = {
     type: 'gauge',
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: 'test-data-view',
     },
   } satisfies Partial<GaugeState>;
@@ -140,7 +140,7 @@ describe('Gauge Schema', () => {
   it('validates ESQL configuration', () => {
     const input = {
       type: 'gauge',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
@@ -158,7 +158,7 @@ describe('Gauge Schema', () => {
   it('validates ES|QL full configuration with bullet shape', () => {
     const input = {
       type: 'gauge',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },
@@ -203,7 +203,7 @@ describe('Gauge Schema', () => {
   it('throws on mixed DSL and ES|QL configs', () => {
     const input = {
       type: 'gauge',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | LIMIT 100',
       },

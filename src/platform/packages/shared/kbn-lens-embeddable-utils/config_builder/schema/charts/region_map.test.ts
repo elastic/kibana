@@ -22,8 +22,8 @@ interface RegionMapTermsRegionBaseConfig {
 describe('Region Map Schema', () => {
   const baseRegionMapConfig: Omit<RegionMapWithoutDefaultsConfig, 'metric' | 'region'> = {
     type: 'region_map',
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: 'test-data-view',
     },
   };
@@ -180,7 +180,7 @@ describe('Region Map Schema', () => {
     it('throw when using term buckets operation in an esql configuration', () => {
       const input: RegionMapWithoutDefaultsConfig = {
         type: 'region_map',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -228,7 +228,7 @@ describe('Region Map Schema', () => {
         type: 'region_map',
         title: 'Region map',
         description: 'Top 10 countries by average bytes',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },

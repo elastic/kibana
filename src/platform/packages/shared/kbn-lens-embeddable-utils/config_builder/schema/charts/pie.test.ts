@@ -15,8 +15,8 @@ describe('Pie Schema', () => {
     describe('Non-ES|QL Schema', () => {
       const basePieConfig = {
         type: 'pie',
-        dataset: {
-          type: 'dataView',
+        data_source: {
+          type: 'data_view_reference',
           id: 'test-data-view',
         },
         ignore_global_filters: false,
@@ -701,7 +701,7 @@ describe('Pie Schema', () => {
     describe('ES|QL Schema', () => {
       const baseESQLPieConfig = {
         type: 'pie',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | STATS count() BY category',
         },
@@ -720,7 +720,7 @@ describe('Pie Schema', () => {
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.dataset.type).toBe('esql');
+        expect(validated.data_source.type).toBe('esql');
         expect(validated.metrics[0].operation).toBe('value');
       });
 

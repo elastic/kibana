@@ -8,71 +8,77 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { datasetSchema, datasetTypeSchema, datasetEsqlTableTypeSchema } from './dataset';
+import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './dataset';
+import { dataSourceSchema, dataSourceEsqlTableTypeSchema } from './dataset';
+import { dataViewSchema } from '@kbn/as-code-data-views-schema';
 
-describe('Dataset Schema', () => {
-  describe('dataView type', () => {
+describe('DataSource Schema', () => {
+  describe('DataViewReference type', () => {
     it('validates a valid dataView configuration', () => {
       const input = {
-        type: 'dataView' as const,
+        type: 'data_view_reference',
         id: 'my-data-view',
-      };
+      } satisfies DataSourceTypeNoESQL;
 
-      const validated = datasetTypeSchema.validate(input);
+      const validated = dataViewSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
     it('throws on missing name', () => {
       const input = {
-        type: 'dataView' as const,
-      };
+        type: 'data_view_reference',
+        // @ts-expect-error
+      } satisfies DataSourceTypeNoESQL;
 
-      expect(() => datasetTypeSchema.validate(input)).toThrow(/\[0.id\]: expected value of type/);
+      expect(() => dataViewSchema.validate(input)).toThrow(
+        `[id]: expected value of type [string] but got [undefined]`
+      );
     });
   });
 
   describe('index type', () => {
     it('validates a valid index configuration', () => {
       const input = {
-        type: 'index' as const,
-        index: 'my-index-*',
+        type: 'data_view_spec',
+        index_pattern: 'my-index-*',
         time_field: '@timestamp',
-      };
+      } satisfies DataSourceTypeNoESQL;
 
-      const validated = datasetTypeSchema.validate(input);
+      const validated = dataViewSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
     it('validates index configuration with runtime fields', () => {
       const input = {
-        type: 'index' as const,
-        index: 'my-index-*',
+        type: 'data_view_spec',
+        index_pattern: 'my-index-*',
         time_field: '@timestamp',
         runtime_fields: [
           {
             type: 'keyword',
             name: 'my_runtime_field',
-            format: { id: 'string' },
+            format: { type: 'string', params: { id: 'string' } },
           },
           {
             type: 'long',
             name: 'another_field',
           },
         ],
-      };
+      } satisfies DataSourceTypeNoESQL;
 
-      const validated = datasetTypeSchema.validate(input);
+      const validated = dataViewSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
     it('throws on missing required fields', () => {
       const input = {
-        type: 'index' as const,
+        type: 'data_view_spec',
         time_field: '@timestamp',
-      };
+        // @ts-expect-error
+      } satisfies DataSourceTypeNoESQL;
 
-      expect(() => datasetTypeSchema.validate(input)).toThrow(
-        /\[1.index\]: expected value of type/
+      expect(() => dataViewSchema.validate(input)).toThrow(
+        '[index_pattern]: expected value of type [string] but got [undefined]'
       );
     });
   });
@@ -80,20 +86,21 @@ describe('Dataset Schema', () => {
   describe('esql type', () => {
     it('validates a valid esql configuration', () => {
       const input = {
-        type: 'esql' as const,
+        type: 'esql',
         query: 'FROM my-index | LIMIT 100',
-      };
+      } satisfies DataSourceTypeESQL;
 
-      const validated = datasetEsqlTableTypeSchema.validate(input);
+      const validated = dataSourceEsqlTableTypeSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
     it('throws on missing query', () => {
       const input = {
-        type: 'esql' as const,
-      };
+        type: 'esql',
+        // @ts-expect-error
+      } satisfies DataSourceTypeESQL;
 
-      expect(() => datasetEsqlTableTypeSchema.validate(input)).toThrow(
+      expect(() => dataSourceEsqlTableTypeSchema.validate(input)).toThrow(
         /\[0.query\]: expected value of type/
       );
     });
@@ -108,11 +115,11 @@ describe('Dataset Schema', () => {
       };
 
       const input = {
-        type: 'table' as const,
+        type: 'table',
         table: mockTable,
-      };
+      } satisfies DataSourceTypeESQL;
 
-      const validated = datasetEsqlTableTypeSchema.validate(input);
+      const validated = dataSourceEsqlTableTypeSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -121,70 +128,71 @@ describe('Dataset Schema', () => {
         type: 'table' as const,
       };
 
-      expect(() => datasetEsqlTableTypeSchema.validate(input)).toThrow(
+      expect(() => dataSourceEsqlTableTypeSchema.validate(input)).toThrow(
         /\[1.table\]: expected value of type/
       );
     });
   });
 
-  describe('dataset schema wrapper', () => {
-    it('validates dataset property with valid configuration', () => {
+  describe('DataSource schema wrapper', () => {
+    it('validates datasource property with valid configuration', () => {
       const input = {
-        dataset: {
-          type: 'dataView' as const,
-          id: 'my-data-view',
-        },
-      };
+        type: 'data_view_reference',
+        id: 'my-data-view',
+      } satisfies DataSourceTypeNoESQL;
 
-      const validated = datasetSchema.dataset.validate(input.dataset);
-      expect(validated).toEqual(input.dataset);
+      const validated = dataSourceSchema.data_source.validate(input);
+      expect(validated).toEqual(input);
     });
 
-    it('throws on invalid dataset type', () => {
+    it('throws on invalid datasource type', () => {
       const input = {
-        dataset: {
-          type: 'invalid' as const,
-          id: 'my-data-view',
-        },
+        type: 'invalid',
+        id: 'my-data-view',
       };
 
-      expect(() => datasetSchema.dataset.validate(input.dataset)).toThrow();
+      expect(() => dataSourceSchema.data_source.validate(input)).toThrow();
     });
   });
 
   describe('edge cases', () => {
     it('validates index configuration with empty runtime fields array', () => {
       const input = {
-        type: 'index' as const,
-        index: 'my-index-*',
+        type: 'data_view_spec',
+        index_pattern: 'my-index-*',
         time_field: '@timestamp',
         runtime_fields: [],
-      };
+      } satisfies DataSourceTypeNoESQL;
 
-      const validated = datasetTypeSchema.validate(input);
+      const validated = dataViewSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
     it('validates runtime fields with various format configurations', () => {
       const input = {
-        type: 'index' as const,
-        index: 'my-index-*',
+        type: 'data_view_spec',
+        index_pattern: 'my-index-*',
         time_field: '@timestamp',
         runtime_fields: [
           {
             type: 'date',
             name: 'date_field',
-            format: { pattern: 'YYYY-MM-DD' },
+            format: {
+              type: 'date',
+              params: {
+                pattern: 'YYYY-MM-DD',
+              },
+            },
           },
           {
-            type: 'number',
+            type: 'double',
             name: 'number_field',
-            format: { decimals: 2 },
+            format: { type: '', params: { decimals: 2 } },
           },
         ],
-      };
+      } satisfies DataSourceTypeNoESQL;
 
-      const validated = datasetTypeSchema.validate(input);
+      const validated = dataViewSchema.validate(input);
       expect(validated).toEqual(input);
     });
   });

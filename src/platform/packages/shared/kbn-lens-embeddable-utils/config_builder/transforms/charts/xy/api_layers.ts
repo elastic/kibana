@@ -37,7 +37,7 @@ import type {
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { DatasetType } from '../../../schema/dataset';
+import type { DataSourceType } from '../../../schema/dataset';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataset } from '../../../utils';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
@@ -48,7 +48,7 @@ import {
   isAPIColumnOfType,
 } from '../../columns/utils';
 import {
-  buildDatasetState,
+  buildDataSourceState,
   generateApiLayer,
   isDataViewSpec,
   isFormBasedLayer,
@@ -61,15 +61,17 @@ import { stripUndefined } from '../utils';
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'>
-): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'>;
+): Omit<DataLayerTypeNoESQL, 'type' | 'data_source'>;
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
   layer: TextBasedLayer
-): Omit<DataLayerTypeESQL, 'type' | 'dataset'>;
+): Omit<DataLayerTypeESQL, 'type' | 'data_source'>;
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'> | Omit<DataLayerTypeESQL, 'type' | 'dataset'> {
+):
+  | Omit<DataLayerTypeNoESQL, 'type' | 'data_source'>
+  | Omit<DataLayerTypeESQL, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
@@ -196,7 +198,7 @@ export function buildAPIDataLayer(
 ): DataLayerType {
   const type = convertSeriesTypeToAPIFormat(visualization.seriesType);
   if (isTextBasedLayer(layer)) {
-    const dataset = buildDatasetState(
+    const dataSource = buildDataSourceState(
       layer,
       visualization.layerId,
       adHocDataViews,
@@ -204,17 +206,17 @@ export function buildAPIDataLayer(
       adhocReferences
     );
     const baseLayer = convertDataLayerToAPI(visualization, layer);
-    if (isEsqlTableTypeDataset(dataset)) {
+    if (isEsqlTableTypeDataset(dataSource)) {
       return {
         type,
-        dataset,
+        data_source: dataSource,
         ...baseLayer,
       };
     }
     // this should be a never as schema should ensure this scenario never happens
     throw new Error('Text based layers can only be used with ESQL or Table datasets');
   }
-  const dataset = buildDatasetState(
+  const dataSource = buildDataSourceState(
     layer,
     visualization.layerId,
     adHocDataViews,
@@ -222,7 +224,7 @@ export function buildAPIDataLayer(
     adhocReferences
   );
 
-  if (isEsqlTableTypeDataset(dataset)) {
+  if (isEsqlTableTypeDataset(dataSource)) {
     // this should be a never as schema should ensure this scenario never happens
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
@@ -230,7 +232,7 @@ export function buildAPIDataLayer(
 
   return {
     type,
-    dataset,
+    data_source: dataSource,
     ...baseLayer,
   };
 }
@@ -274,15 +276,15 @@ function getLabelFromLayer(
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'>
-): Omit<ReferenceLineLayerTypeNoESQL, 'type' | 'dataset'>;
+): Omit<ReferenceLineLayerTypeNoESQL, 'type' | 'data_source'>;
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
   layer: TextBasedLayer
-): Omit<ReferenceLineLayerTypeESQL, 'type' | 'dataset'>;
+): Omit<ReferenceLineLayerTypeESQL, 'type' | 'data_source'>;
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): Omit<ReferenceLineLayerType, 'type' | 'dataset'> {
+): Omit<ReferenceLineLayerType, 'type' | 'data_source'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const thresholds = (visualization.accessors
     ?.map((accessor): ReferenceLineDef | undefined => {
@@ -329,7 +331,7 @@ export function buildAPIReferenceLinesLayer(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): ReferenceLineLayerType {
-  const dataset = buildDatasetState(
+  const dataSource = buildDataSourceState(
     layer,
     visualization.layerId,
     adHocDataViews,
@@ -337,21 +339,21 @@ export function buildAPIReferenceLinesLayer(
     adhocReferences
   );
   if (isTextBasedLayer(layer)) {
-    if (isEsqlTableTypeDataset(dataset)) {
+    if (isEsqlTableTypeDataset(dataSource)) {
       return {
         type: 'referenceLines',
-        dataset,
+        data_source: dataSource,
         ...convertReferenceLineLayerToAPI(visualization, layer),
       };
     }
     throw new Error('Text based layers can only be used with ESQL or Table datasets');
   }
-  if (isEsqlTableTypeDataset(dataset)) {
+  if (isEsqlTableTypeDataset(dataSource)) {
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
   return {
     type: 'referenceLines',
-    dataset,
+    data_source: dataSource,
     ...convertReferenceLineLayerToAPI(visualization, layer),
   };
 }
@@ -424,21 +426,21 @@ export function buildAPIAnnotationsLayer(
     layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
   const adHocDataView = adHocDataViews[layer.layerId];
   const referencedDataView = findAnnotationDataView(layer.layerId, references);
-  const dataset = (
+  const dataSource = (
     isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
       ? {
-          type: 'index',
-          index: indexPatternId,
-          time_field: adHocDataView.timeFieldName!,
+          type: 'data_view_spec',
+          index_pattern: indexPatternId,
+          time_field: adHocDataView.timeFieldName,
         }
       : {
-          type: 'dataView',
+          type: 'data_view_reference',
           id: referencedDataView ?? indexPatternId,
         }
-  ) satisfies Extract<DatasetType, { type: 'index' | 'dataView' }>;
+  ) satisfies Extract<DataSourceType, { type: 'data_view_reference' | 'data_view_spec' }>;
   return {
     type: 'annotations',
-    dataset,
+    data_source: dataSource,
     ignore_global_filters,
     events: layer.annotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {

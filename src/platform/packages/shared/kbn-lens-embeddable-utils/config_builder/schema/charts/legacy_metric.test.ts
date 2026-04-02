@@ -14,8 +14,8 @@ import { legacyMetricStateSchema } from './legacy_metric';
 describe('Legacy Metric Schema', () => {
   const baseLegacyMetricConfig = {
     type: 'legacy_metric',
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: 'test-data-view',
     },
   } satisfies Partial<LegacyMetricState>;
@@ -217,7 +217,7 @@ describe('Legacy Metric Schema', () => {
     it('validates esql configuration', () => {
       const input = {
         type: 'legacy_metric',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },

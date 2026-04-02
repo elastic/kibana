@@ -13,11 +13,11 @@ import { mosaicStateSchema } from './mosaic';
 describe('Mosaic Schema', () => {
   const baseMosaicConfig: Pick<
     MosaicStateNoESQL,
-    'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+    'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
   > = {
     type: 'mosaic',
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: 'test-data-view',
     },
     ignore_global_filters: false,
@@ -565,10 +565,10 @@ describe('Mosaic Schema', () => {
   describe('ES|QL Schema', () => {
     const baseESQLMosaicConfig: Pick<
       MosaicStateESQL,
-      'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+      'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
     > = {
       type: 'mosaic',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM blah | KEEP foo, bar',
       },

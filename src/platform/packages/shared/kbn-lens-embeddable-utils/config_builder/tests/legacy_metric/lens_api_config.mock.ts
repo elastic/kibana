@@ -15,9 +15,9 @@ import type { LegacyMetricState } from '../../schema/charts/legacy_metric';
 export const basicLegacyMetricWithAdHocDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Test Metric',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: 'data_view_spec',
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -36,8 +36,8 @@ export const basicLegacyMetricWithDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Test Metric',
   description: 'A test metric chart',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: 'test-id',
   },
   metric: {
@@ -56,7 +56,7 @@ export const esqlLegacyMetric: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
@@ -75,9 +75,9 @@ export const comprehensiveLegacyMetricWithAdHocDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'index',
-    index: 'comprehensive-index',
+  data_source: {
+    type: 'data_view_spec',
+    index_pattern: 'comprehensive-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -109,8 +109,8 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: 'my-custom-data-view-id',
   },
   metric: {
@@ -142,7 +142,7 @@ export const comprehensiveEsqlLegacyMetric: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },
@@ -174,8 +174,8 @@ export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: 'my-custom-data-view-id',
   },
   metric: {
@@ -198,8 +198,8 @@ export const legacyMetricWithColorWithoutApplyColorTo: LegacyMetricState = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: 'my-custom-data-view-id',
   },
   metric: {

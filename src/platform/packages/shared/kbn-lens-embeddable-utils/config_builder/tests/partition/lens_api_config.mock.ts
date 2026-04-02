@@ -46,8 +46,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -98,8 +98,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -151,8 +151,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -197,8 +197,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -245,8 +245,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -305,8 +305,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -370,8 +370,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -436,8 +436,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -497,8 +497,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -569,8 +569,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -646,8 +646,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -710,8 +710,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -771,8 +771,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -843,8 +843,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -953,8 +953,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1025,8 +1025,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1135,8 +1135,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1233,8 +1233,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1327,8 +1327,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1408,8 +1408,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1446,7 +1446,7 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
+    data_source: {
       type: 'esql',
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },
@@ -1484,7 +1484,7 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
+    data_source: {
       type: 'esql',
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },
@@ -1516,7 +1516,7 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
+    data_source: {
       type: 'esql',
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },
@@ -1573,8 +1573,8 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
@@ -1610,7 +1610,7 @@ export const esqlCharts: Array<PartitionConfig> = [
         },
       },
     ],
-    dataset: {
+    data_source: {
       type: 'esql',
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },

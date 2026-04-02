@@ -23,7 +23,7 @@ import type { DeepWriteable, LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
-  buildDatasetState,
+  buildDataSourceState,
   buildDatasourceStates,
   buildReferences,
   generateApiLayer,
@@ -62,7 +62,7 @@ import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/uti
 
 type MetricApiCompareType = Extract<Required<SecondaryMetricType>, { compare: any }>['compare'];
 
-type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'dataset'>>;
+type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'data_source'>>;
 
 const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -479,14 +479,20 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
+  const dataSource = buildDataSourceState(
+    layer,
+    layerId,
+    adHocDataViews,
+    references,
+    adhocReferences
+  );
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
+  if (!dataSource || dataSource.type == null) {
+    throw new Error('Unsupported DataSource type');
   }
 
   return {
-    dataset: dataset satisfies MetricState['dataset'],
+    data_source: dataSource satisfies MetricState['data_source'],
     ...(isTextBasedLayer(layer)
       ? buildFromTextBasedLayer(layer, metricAccessor, visualization)
       : buildFromFormBasedLayer(layer, metricAccessor, visualization)),

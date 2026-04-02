@@ -1120,8 +1120,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   layers: [
     {
       type: 'bar_stacked',
-      dataset: {
-        type: 'dataView',
+      data_source: {
+        type: 'data_view_reference',
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
@@ -1216,8 +1216,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   layers: [
     {
       type: 'bar_stacked',
-      dataset: {
-        type: 'dataView',
+      data_source: {
+        type: 'data_view_reference',
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
@@ -1307,8 +1307,8 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   layers: [
     {
       type: 'bar_stacked',
-      dataset: {
-        type: 'dataView',
+      data_source: {
+        type: 'data_view_reference',
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,

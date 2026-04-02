@@ -15,9 +15,9 @@ import type { DatatableState, DatatableStateNoESQL } from '../../schema';
 export const singleMetricDatatableWithAdhocDataView: DatatableState = {
   title: 'Single metric',
   type: 'data_table',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: 'data_view_spec',
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   sampling: 1,
@@ -36,9 +36,9 @@ export const singleMetricDatatableWithAdhocDataView: DatatableState = {
 export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with ad hoc dataView',
   type: 'data_table',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: 'data_view_spec',
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   sampling: 1,
@@ -112,9 +112,9 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
 export const fullConfigDatatableWithAdhocDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: 'data_view_spec',
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   sampling: 1,
@@ -277,8 +277,8 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
 export const fullConfigDatatableWithDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: 'my-custom-data-view-id',
   },
   sampling: 1,
@@ -440,8 +440,8 @@ export const fullConfigDatatableWithDataView: DatatableState = {
 export const sortedByPivotedMetricColumnDatatable: DatatableState = {
   title: 'Sorted by a pivoted metric column',
   type: 'data_table',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,
@@ -609,8 +609,8 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
 export const sortedByRowDatatable: DatatableState = {
   title: 'Sorted by row column',
   type: 'data_table',
-  dataset: {
-    type: 'dataView',
+  data_source: {
+    type: 'data_view_reference',
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,

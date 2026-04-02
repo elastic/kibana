@@ -14,8 +14,8 @@ describe('Treemap Schema', () => {
   describe('Non-ES|QL Schema', () => {
     const baseTreemapConfig = {
       type: 'treemap',
-      dataset: {
-        type: 'dataView',
+      data_source: {
+        type: 'data_view_reference',
         id: 'test-data-view',
       },
       ignore_global_filters: false,
@@ -535,7 +535,7 @@ describe('Treemap Schema', () => {
   describe('ES|QL Schema', () => {
     const baseESQLTreemapConfig = {
       type: 'treemap',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | STATS ...',
       },
@@ -555,7 +555,7 @@ describe('Treemap Schema', () => {
       };
 
       const validated = treemapStateSchema.validate(input);
-      expect(validated.dataset.type).toBe('esql');
+      expect(validated.data_source.type).toBe('esql');
       expect(validated.metrics[0].operation).toBe('value');
     });
 

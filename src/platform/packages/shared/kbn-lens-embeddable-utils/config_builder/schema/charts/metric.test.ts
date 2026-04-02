@@ -14,8 +14,8 @@ import { metricStateSchema } from './metric';
 describe('Metric Schema', () => {
   const baseMetricConfig = {
     type: 'metric',
-    dataset: {
-      type: 'dataView',
+    data_source: {
+      type: 'data_view_reference',
       id: 'test-data-view',
     },
   } satisfies Partial<MetricState>;
@@ -567,7 +567,7 @@ describe('Metric Schema', () => {
     it('validates esql configuration', () => {
       const input = {
         type: 'metric',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
