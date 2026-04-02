@@ -24,7 +24,7 @@ import {
   toggleMigrateDashboardsCard,
   uploadDashboards,
 } from '../../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../../urls/navigation';
+import { SIEM_MIGRATIONS_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 
 export const SPLUNK_TEST_DASHBOARDS = [
@@ -106,7 +106,7 @@ describe(
         },
         { interval: 500, timeout: 12000 }
       );
-      visit(GET_STARTED_URL);
+      visit(SIEM_MIGRATIONS_URL);
     });
 
     after(() => {

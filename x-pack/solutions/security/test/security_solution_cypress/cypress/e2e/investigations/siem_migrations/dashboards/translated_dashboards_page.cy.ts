@@ -23,7 +23,7 @@ import {
   reprocessDashboards,
   selectMigrationConnector,
 } from '../../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../../urls/navigation';
+import { SIEM_MIGRATIONS_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 
 let bedrockConnectorId: string | null = null;
@@ -61,7 +61,7 @@ describe.skip(
       );
 
       role.login();
-      visit(GET_STARTED_URL);
+      visit(SIEM_MIGRATIONS_URL);
       selectMigrationConnector();
       goToTranslatedDashboardsPageFromOnboarding();
     });

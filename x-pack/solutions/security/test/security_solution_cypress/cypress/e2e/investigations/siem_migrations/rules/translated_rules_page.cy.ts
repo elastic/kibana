@@ -25,7 +25,7 @@ import {
   openReprocessDialog,
   reprocessWithoutPrebuiltRulesMatching,
 } from '../../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../../urls/navigation';
+import { SIEM_MIGRATIONS_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
@@ -50,7 +50,7 @@ describe(
       createBedrockConnector();
 
       role.login();
-      visit(GET_STARTED_URL);
+      visit(SIEM_MIGRATIONS_URL);
       selectMigrationConnector();
       navigateToTranslatedRulesPage();
     });

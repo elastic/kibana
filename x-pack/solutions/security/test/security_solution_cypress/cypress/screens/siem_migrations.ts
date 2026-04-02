@@ -8,8 +8,6 @@
 import { getDataTestSubjectSelector, getDataTestSubjectSelectorStartWith } from '../helpers/common';
 import { bedrockConnectorAPIPayload } from '../tasks/api_calls/connectors';
 
-export const ONBOARDING_SIEM_MIGRATION_TOPIC = getDataTestSubjectSelector('siem_migrations');
-
 export const ONBOARDING_SIEM_MIGRATION_CARDS = {
   AI_CONNECTORS: '#ai_connectors',
   SELECT_CONNECTORS: getDataTestSubjectSelector('connector-selector'),

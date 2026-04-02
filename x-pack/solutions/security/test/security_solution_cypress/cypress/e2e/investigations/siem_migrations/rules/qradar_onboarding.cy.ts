@@ -24,7 +24,7 @@ import {
   selectQRadarMigrationSource,
   uploadQRadarRules,
 } from '../../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../../urls/navigation';
+import { SIEM_MIGRATIONS_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 import {
   QRADAR_TEST_RULES_XML,
@@ -42,19 +42,16 @@ describe(
     });
 
     beforeEach(() => {
+      cleanMigrationData();
       deleteConnectors();
       createBedrockConnector();
       role.login();
       cy.log('Creating Bedrock connector');
-      visit(GET_STARTED_URL);
+      visit(SIEM_MIGRATIONS_URL);
       selectMigrationConnector();
       openUploadRulesFlyout();
       selectQRadarMigrationSource();
       setMigrationName();
-    });
-
-    afterEach(() => {
-      cleanMigrationData();
     });
 
     after(() => {
