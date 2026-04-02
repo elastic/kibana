@@ -8,7 +8,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiText,
@@ -162,8 +161,7 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
           </EuiFlexGroup>
 
           <EuiFlexItem grow={0}>
-            <EuiLink color="text" href={viewEventsHref} data-test-subj="sloDetailDiscoverLink">
-              <EuiIcon type="sortRight" aria-hidden={true} css={{ marginRight: '4px' }} />
+            <EuiLink href={viewEventsHref} data-test-subj="sloDetailDiscoverLink">
               <FormattedMessage
                 id="xpack.slo.sloDetails.viewEventsLink"
                 defaultMessage="View events"
