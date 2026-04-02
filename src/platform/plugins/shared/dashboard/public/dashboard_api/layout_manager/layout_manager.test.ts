@@ -23,6 +23,7 @@ import type {
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '../../../common';
+import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { initializeLayoutManager } from './layout_manager';
@@ -84,6 +85,7 @@ describe('layout manager', () => {
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
     serializeState: () => titleManager.getLatestState(),
+    applySerializedState: jest.fn(),
   };
 
   const section1 = {
@@ -106,6 +108,55 @@ describe('layout manager', () => {
     );
     layoutManager.api.registerChildApi(panel1Api);
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
+  });
+
+  test('should apply incoming serialized child state during reset when supported', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    const applySerializedState = jest.fn().mockResolvedValue(undefined);
+
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      applySerializedState,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated title' });
+  });
+
+  test('should ignore child state application when child does not support it', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBeDefined();
   });
 
   test('should append incoming embeddables to existing panels', () => {
