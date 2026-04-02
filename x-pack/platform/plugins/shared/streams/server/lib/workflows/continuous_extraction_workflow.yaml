@@ -3,8 +3,8 @@
 # Runs on a schedule and orchestrates feature identification across managed streams:
 #   1. Fetches eligible streams from the _eligible API endpoint (respects
 #      interval, exclusions, concurrency).
-#   2. For each candidate: schedules a Task Manager task via the _task endpoint.
-#   3. Polls the task status endpoint until the task reaches a terminal state
+#   2. Schedules ALL candidate streams in parallel (fire-and-forget).
+#   3. Polls each stream sequentially until it reaches a terminal state
 #      (completed/failed), then captures the result.
 #
 # Values below (timeouts, intervals, defaults) must stay in sync with the
@@ -59,14 +59,13 @@ steps:
     type: if
     condition: "steps.get_eligible.output.candidates[0].streamName:*"
     steps:
-      # Iterate over each candidate stream. If one stream fails, the rest continue.
-      - name: extract_ki_features
+      # Phase 1: Schedule all candidate streams up front so they run in parallel.
+      - name: schedule_all
         type: foreach
         foreach: "${{ steps.get_eligible.output.candidates }}"
         iteration-on-failure:
           continue: true
         steps:
-          # Schedule the feature identification task for this stream.
           - name: schedule_task
             type: kibana.request
             with:
@@ -85,9 +84,13 @@ steps:
                 delay: "5s"
                 strategy: exponential
 
-          # Poll the task status endpoint until the task is no longer in_progress.
-          # On the first iteration the condition evaluates to true because
-          # check_status hasn't run yet (workflow engine treats missing refs as truthy).
+      # Phase 2: Poll each stream until it reaches a terminal state.
+      - name: collect_results
+        type: foreach
+        foreach: "${{ steps.get_eligible.output.candidates }}"
+        iteration-on-failure:
+          continue: true
+        steps:
           - name: poll_task
             type: while
             condition: "steps.check_status.output.status:in_progress"
