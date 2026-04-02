@@ -23,7 +23,10 @@ import {
 } from '../../asset_criticality';
 import { WatchlistConfigClient } from '../../watchlists/management/watchlist_config';
 import { calculateScoresWithESQL } from '../calculate_esql_risk_scores';
-import { DEFAULT_ALERTS_INDEX, DEFAULT_RISK_SCORE_PAGE_SIZE } from '../../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  DEFAULT_RISK_SCORE_PAGE_SIZE,
+} from '../../../../../common/constants';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import type { EntityRiskScoreRecord } from '../../../../../common/api/entity_analytics/common';
@@ -120,17 +123,16 @@ export const createRiskScoreMaintainer = ({
           continue;
         }
 
-        const identifierField =
-          EntityTypeToIdentifierField[entityType as EntityType] as string | undefined;
+        const identifierField = EntityTypeToIdentifierField[entityType as EntityType] as
+          | string
+          | undefined;
         if (!identifierField) {
           continue;
         }
 
         // For generic entities the identifier IS the entity.id (EUID)
         const identifierValue =
-          entityType === 'generic'
-            ? euid
-            : (get(entity, identifierField) as string | undefined);
+          entityType === 'generic' ? euid : (get(entity, identifierField) as string | undefined);
 
         if (!identifierValue) {
           continue;
@@ -226,9 +228,7 @@ export const createRiskScoreMaintainer = ({
     const totalScores = Object.values(scores).reduce((sum, arr) => sum + (arr?.length ?? 0), 0);
 
     if (totalScores === 0) {
-      logger.debug(
-        `Risk score maintainer: no risk scores calculated for namespace "${namespace}"`
-      );
+      logger.debug(`Risk score maintainer: no risk scores calculated for namespace "${namespace}"`);
       return status.state;
     }
 
