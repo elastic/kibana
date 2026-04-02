@@ -304,29 +304,20 @@ async function migrateAliasesToHidden({
       { logger }
     );
 
-    const knownIndexNames = new Set(sortedConcreteIndices.map((idx) => idx.index));
-    const externalIndices = Object.keys(allIndicesForAlias).filter(
-      (indexName) => !knownIndexNames.has(indexName)
-    );
+    const actions: IndicesUpdateAliasesAction[] = Object.entries(allIndicesForAlias)
+      .filter(([, indexInfo]) => !indexInfo.aliases[alias]?.is_hidden)
+      .map(([indexName, indexInfo]) => ({
+        add: {
+          index: indexName,
+          alias,
+          is_write_index: indexInfo.aliases[alias]?.is_write_index ?? false,
+          is_hidden: true,
+        },
+      }));
 
-    if (externalIndices.length > 0) {
-      logger.warn(
-        `Cannot set alias ${alias} to hidden: external indices [${externalIndices.join(
-          ', '
-        )}] also share this alias. All indices sharing an alias must have the same is_hidden setting.`
-      );
+    if (actions.length === 0) {
       return;
     }
-
-    const nonHiddenIndices = sortedConcreteIndices.filter((index) => !index.isHidden);
-    const actions: IndicesUpdateAliasesAction[] = nonHiddenIndices.map((index) => ({
-      add: {
-        index: index.index,
-        alias: index.alias,
-        is_write_index: index.isWriteIndex,
-        is_hidden: true,
-      },
-    }));
 
     await retryTransientEsErrors(() => esClient.indices.updateAliases({ actions }), { logger });
 
