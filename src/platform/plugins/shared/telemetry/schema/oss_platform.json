@@ -11776,7 +11776,7 @@
         "observability:streamsSigEventsIndexPatterns": {
           "type": "keyword",
           "_meta": {
-            "description": "Non-default value of setting."
+            "description": "Comma-separated index patterns used for Significant Events stream filtering and analysis."
           }
         },
         "observability:enableDiagnosticMode": {

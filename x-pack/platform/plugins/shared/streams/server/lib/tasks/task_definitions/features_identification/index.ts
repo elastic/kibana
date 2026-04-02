@@ -38,7 +38,7 @@ import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/stre
 import { parseError } from '../../../streams/errors/parse_error';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
-import { StatusError } from '../../../streams/errors/status_error';
+import { resolveConnectorForFeature } from '../../../../routes/utils/resolve_connector_for_feature';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
 import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
@@ -367,21 +367,12 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               });
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
-              if (!taskContext.server.searchInferenceEndpoints) {
-                throw new StatusError('Inference endpoints plugin is unavailable.', 503);
-              }
-              const { endpoints } =
-                await taskContext.server.searchInferenceEndpoints.endpoints.getForFeature(
-                  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-                  fakeRequest
-                );
-              if (endpoints.length === 0) {
-                throw new StatusError(
-                  'No connector configured for knowledge indicator extraction. Configure one in Stack Management > Model Settings.',
-                  400
-                );
-              }
-              const connectorId = endpoints[0].connectorId;
+              const connectorId = await resolveConnectorForFeature({
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                featureName: 'knowledge indicator extraction',
+                request: fakeRequest,
+              });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               let hasTrackedIteration = false;

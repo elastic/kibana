@@ -41,22 +41,22 @@ export function SettingsTab() {
     return managementLocator?.getRedirectUrl({ sectionId: 'ml', appId: 'model_settings' }) ?? '';
   }, [share.url.locators]);
 
-  const savedIndexPatterns = core.settings.client.get<string>(
-    OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
-    DEFAULT_INDEX_PATTERNS
+  const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
+    core.settings.client.get<string>(
+      OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+      DEFAULT_INDEX_PATTERNS
+    )
   );
-
   const [indexPatterns, setIndexPatterns] = useState<string>(savedIndexPatterns);
-  const [lastSavedIndexPatterns, setLastSavedIndexPatterns] = useState<string>(savedIndexPatterns);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
 
-  const hasChanges = indexPatterns !== lastSavedIndexPatterns;
+  const hasChanges = indexPatterns !== savedIndexPatterns;
 
   const handleCancel = useCallback(() => {
-    setIndexPatterns(lastSavedIndexPatterns);
+    setIndexPatterns(savedIndexPatterns);
     setSaveError(null);
-  }, [lastSavedIndexPatterns]);
+  }, [savedIndexPatterns]);
 
   const handleSave = useCallback(async () => {
     setSaveError(null);
@@ -66,7 +66,7 @@ export function SettingsTab() {
         OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
         indexPatterns
       );
-      setLastSavedIndexPatterns(indexPatterns);
+      setSavedIndexPatterns(indexPatterns);
     } catch (err) {
       setSaveError(err instanceof Error ? err : new Error(String(err)));
     } finally {

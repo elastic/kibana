@@ -19,7 +19,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'array',
     items: {
       type: 'keyword',
-      _meta: { description: 'Non-default value of setting.' },
+      _meta: {
+        description:
+          'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+      },
     },
   },
   'securitySolution:includedDataStreamNamespacesForRuleExecution': {

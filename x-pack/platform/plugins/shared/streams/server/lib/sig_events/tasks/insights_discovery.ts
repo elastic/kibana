@@ -21,7 +21,7 @@ import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { StatusError } from '../../streams/errors/status_error';
+import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -62,21 +62,12 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               });
 
               const taskLogger = taskContext.logger.get('insights_discovery');
-              if (!taskContext.server.searchInferenceEndpoints) {
-                throw new StatusError('Inference endpoints plugin is unavailable.', 503);
-              }
-              const { endpoints } =
-                await taskContext.server.searchInferenceEndpoints.endpoints.getForFeature(
-                  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-                  fakeRequest
-                );
-              if (endpoints.length === 0) {
-                throw new StatusError(
-                  'No connector configured for discovery. Configure one in Stack Management > Model Settings.',
-                  400
-                );
-              }
-              const connectorId = endpoints[0].connectorId;
+              const connectorId = await resolveConnectorForFeature({
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+                featureName: 'discovery',
+                request: fakeRequest,
+              });
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 

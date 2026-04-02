@@ -23,6 +23,7 @@ import { STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID } from '@kb
 import type { StreamsTaskType, TaskContext } from '.';
 import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
@@ -149,20 +150,15 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 // Get connector info for error enrichment
                 let errorMessage = parseError(error).message;
                 try {
-                  if (taskContext.server.searchInferenceEndpoints) {
-                    const { endpoints } =
-                      await taskContext.server.searchInferenceEndpoints.endpoints.getForFeature(
-                        STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-                        fakeRequest
-                      );
-                    if (endpoints.length > 0) {
-                      const connector = await inferenceClient.getConnectorById(
-                        endpoints[0].connectorId
-                      );
-                      if (isInferenceProviderError(error)) {
-                        errorMessage = formatInferenceProviderError(error, connector);
-                      }
-                    }
+                  const connectorIdForError = await resolveConnectorForFeature({
+                    searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                    featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                    featureName: 'query generation',
+                    request: fakeRequest,
+                  });
+                  const connector = await inferenceClient.getConnectorById(connectorIdForError);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
                   }
                 } catch {
                   // Use generic error message if we cannot resolve the connector
