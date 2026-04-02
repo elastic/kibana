@@ -192,7 +192,7 @@ export const AgentPolicyYamlFlyout = memo<{
               href={downloadLink}
               iconType="download"
               onClick={downloadYaml}
-              isDisabled={Boolean(isLoadingYaml || !yamlData)}
+              isDisabled={Boolean(isLoadingYaml || !yamlData || !formatters)}
             >
               <FormattedMessage
                 id="xpack.fleet.policyDetails.yamlDownloadButtonLabel"

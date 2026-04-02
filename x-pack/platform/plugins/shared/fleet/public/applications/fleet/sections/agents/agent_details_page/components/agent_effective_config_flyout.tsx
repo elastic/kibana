@@ -69,7 +69,7 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {isLoading ? (
+          {isLoading || !yaml ? (
             <EuiLoadingSpinner />
           ) : (
             <EuiCodeBlock language="yaml" isCopyable>
@@ -88,7 +88,7 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="download" onClick={downloadFile} isLoading={isLoading}>
+              <EuiButton iconType="download" onClick={downloadFile} isLoading={isLoading || !yaml}>
                 <FormattedMessage
                   id="xpack.fleet.agentDetails.effectiveConfigFlyoutDownloadButtonLabel"
                   defaultMessage="Download Configuration"

@@ -79,7 +79,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const yaml = useYaml();
   const form = useOutputForm(onClose, output, defaultOutput);
   const inputs = form.inputs;
-  const parseFn = yaml?.parse ?? (() => ({}));
+  const parseFn = yaml?.parse;
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
   const isServerless = !!cloud?.isServerlessEnabled;
@@ -468,10 +468,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   onChange={(e) => inputs.presetInput.setValue(e.target.value)}
                   disabled={
                     inputs.presetInput.props.disabled ||
-                    outputYmlIncludesReservedPerformanceKey(
-                      inputs.additionalYamlConfigInput.value,
-                      parseFn
-                    )
+                    (!!parseFn &&
+                      outputYmlIncludesReservedPerformanceKey(
+                        inputs.additionalYamlConfigInput.value,
+                        parseFn
+                      ))
                   }
                   options={[
                     { value: 'balanced', text: 'Balanced' },
@@ -525,6 +526,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </EuiFormRow>
           )}
           {supportsPresets &&
+            !!parseFn &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
               parseFn
@@ -579,7 +581,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             <YamlCodeEditorWithPlaceholder
               value={inputs.additionalYamlConfigInput.value}
               onChange={(value) => {
-                if (outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
+                if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
                   inputs.presetInput.setValue('custom');
                 }
 

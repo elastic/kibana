@@ -29,7 +29,10 @@ export const useYaml = (): YamlModule | null => {
     }
 
     if (!loadPromise) {
-      loadPromise = loadYaml();
+      loadPromise = loadYaml().catch((err) => {
+        loadPromise = null;
+        throw err;
+      });
     }
 
     loadPromise.then((mod) => {

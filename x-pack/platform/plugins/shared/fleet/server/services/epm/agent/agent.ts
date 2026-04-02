@@ -121,7 +121,7 @@ export function compileTemplate(
   // newlines (doubled by handleMultilineStringFormatter). Apply YAML double-quoted
   // folding semantics: N consecutive newlines become N-1 \n escape sequences,
   // matching the output that js-yaml.load produced from the multi-line format.
-  compiledTemplate = compiledTemplate.replace(/"[^"]*"/gs, (match) =>
+  compiledTemplate = compiledTemplate.replace(/"(?:[^"\\]|\\.)*"/gs, (match) =>
     match.includes('\n')
       ? match.replace(/\n+/g, (newlines) => '\\n'.repeat(newlines.length - 1))
       : match

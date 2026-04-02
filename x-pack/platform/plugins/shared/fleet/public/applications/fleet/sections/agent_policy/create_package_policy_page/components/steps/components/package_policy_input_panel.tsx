@@ -157,16 +157,25 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       if (yaml && !isShowingStreamsInitialized.current) {
         isShowingStreamsInitialized.current = true;
         setIsShowingStreams(
-          shouldShowStreamsByDefault(
-            yaml.parse,
-            packageInput,
-            packageInputStreams,
-            packagePolicyInput,
-            defaultDataStreamId
-          )
+          (isSingleInputAndStreams && packageInfo.type !== 'input') ||
+            shouldShowStreamsByDefault(
+              yaml.parse,
+              packageInput,
+              packageInputStreams,
+              packagePolicyInput,
+              defaultDataStreamId
+            )
         );
       }
-    }, [yaml, packageInput, packageInputStreams, packagePolicyInput, defaultDataStreamId]);
+    }, [
+      yaml,
+      packageInput,
+      packageInputStreams,
+      packagePolicyInput,
+      defaultDataStreamId,
+      isSingleInputAndStreams,
+      packageInfo.type,
+    ]);
 
     // Hide registry variables based on `hide_in_deployment_modes` value
     const hideRegistryVars = useCallback(
