@@ -53,12 +53,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       async (context, request, response) => {
         const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
-        const isInvalid = !(
-          await checkOsqueryResponseActionAuthz(coreStartServices, request, {
-            saved_query_id: request.body.saved_query_id,
-            pack_id: request.body.pack_id,
-          })
-        );
+        const isInvalid = !(await checkOsqueryResponseActionAuthz(coreStartServices, request, {
+          saved_query_id: request.body.saved_query_id,
+          pack_id: request.body.pack_id,
+        }));
 
         const client = await osqueryContext.service
           .getRuleRegistryService()
