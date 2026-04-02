@@ -47,6 +47,7 @@ const defaultProps: RulesListTableProps = {
   onBulkEnable: jest.fn(),
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
+  onNavigateToDetails: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),
@@ -361,6 +362,23 @@ describe('RulesListTable', () => {
       await waitFor(() => {
         expect(screen.getByTestId('toggleEnabledRule-rule-2')).toHaveTextContent('Enable');
       });
+    });
+  });
+
+  describe('rule name link', () => {
+    it('renders rule name as a clickable link', () => {
+      renderTable();
+
+      expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
+    });
+
+    it('calls onNavigateToDetails when rule name link is clicked', () => {
+      const onNavigateToDetails = jest.fn();
+      renderTable({ onNavigateToDetails });
+
+      fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
+
+      expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
   });
 });

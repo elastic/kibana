@@ -17,6 +17,7 @@ import type {
   InstallPluginResponse,
   DeletePluginResponse,
 } from '../../common/http_api/plugins';
+import { PLUGIN_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/plugins';
 import { publicApiPath, internalApiPath } from '../../common/constants';
 import { toPluginDefinition } from '../services/plugins';
 import { saveUploadedFile } from '../services/plugins/utils';
@@ -146,6 +147,15 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
         validate: {
           request: {
             params: pluginIdParamSchema,
+            query: schema.object({
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'If true, removes the plugin skills from agents that use them and then deletes the plugin. If false and any agent uses the plugin skills, the request returns 409 Conflict with the list of agents.',
+                },
+              }),
+            }),
           },
         },
         options: {
@@ -154,7 +164,33 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       },
       wrapHandler(async (ctx, request, response) => {
         const { pluginId } = request.params;
-        const { plugins: pluginService } = getInternalServices();
+        const { force = false } = request.query ?? {};
+        const { plugins: pluginService, agents: agentsService } = getInternalServices();
+
+        if (!force) {
+          const { agents } = await agentsService.getAgentsUsingPlugins({
+            request,
+            pluginIds: [pluginId],
+          });
+          if (agents.length > 0) {
+            return response.conflict({
+              body: {
+                message:
+                  'Plugin is used by one or more agents. Use force=true to remove it from agents and delete.',
+                attributes: {
+                  code: PLUGIN_USED_BY_AGENTS_ERROR_CODE,
+                  agents,
+                },
+              },
+            });
+          }
+        } else {
+          await agentsService.removePluginRefsFromAgents({
+            request,
+            pluginIds: [pluginId],
+          });
+        }
+
         await pluginService.deletePlugin({ request, pluginId });
         return response.ok<DeletePluginResponse>({
           body: { success: true },

@@ -3282,7 +3282,7 @@
           "\nRelationship fields available in the generic entities index.\nThese represent static/configuration-based relationships between entities.\n\nWARNING: ES|QL FORK supports a maximum of 8 branches. If more than 8 fields are added here,\nthe relationship fetching logic in fetch_entity_relationships_graph.ts will need to be updated\nto batch the FORK queries."
         ],
         "signature": [
-          "readonly [\"Accesses_frequently\", \"Communicates_with\", \"Depends_on\", \"Owns\", \"Supervises\"]"
+          "readonly [\"accesses_frequently\", \"accesses_infrequently\", \"communicates_with\", \"depends_on\", \"owns\", \"owns_inferred\", \"resolution.resolved_to\", \"supervises\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "lineNumber": 124,
@@ -3299,30 +3299,17 @@
         "label": "ENTITY_RELATIONSHIP_LABELS",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 134,
+        "lineNumber": 135,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
-            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.Accesses_frequently",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.accesses_frequently",
             "type": "string",
             "tags": [],
-            "label": "Accesses_frequently",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-            "lineNumber": 138,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-common",
-            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.Communicates_with",
-            "type": "string",
-            "tags": [],
-            "label": "Communicates_with",
+            "label": "accesses_frequently",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
             "lineNumber": 139,
@@ -3332,10 +3319,10 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
-            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.Depends_on",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.accesses_infrequently",
             "type": "string",
             "tags": [],
-            "label": "Depends_on",
+            "label": "accesses_infrequently",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
             "lineNumber": 140,
@@ -3345,10 +3332,10 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
-            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.Owns",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.communicates_with",
             "type": "string",
             "tags": [],
-            "label": "Owns",
+            "label": "communicates_with",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
             "lineNumber": 141,
@@ -3358,13 +3345,65 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
-            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.Supervises",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.depends_on",
             "type": "string",
             "tags": [],
-            "label": "Supervises",
+            "label": "depends_on",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
             "lineNumber": 142,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.owns",
+            "type": "string",
+            "tags": [],
+            "label": "owns",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.owns_inferred",
+            "type": "string",
+            "tags": [],
+            "label": "owns_inferred",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.resolution.resolved_to",
+            "type": "string",
+            "tags": [],
+            "label": "'resolution.resolved_to'",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.ENTITY_RELATIONSHIP_LABELS.supervises",
+            "type": "string",
+            "tags": [],
+            "label": "supervises",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3528,13 +3567,32 @@
         "tags": [],
         "label": "GRAPH_ACTOR_ENTITY_FIELDS",
         "description": [
-          "\nECS entity actor fields used for graph visualization.\nNOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field."
+          "\nECS entity actor fields used for graph visualization (entity store v1 / pre-populated IDs).\nNOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field."
         ],
         "signature": [
           "readonly [\"user.entity.id\", \"host.entity.id\", \"service.entity.id\", \"entity.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 150,
+        "lineNumber": 153,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GRAPH_ACTOR_EUID_SOURCE_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "GRAPH_ACTOR_EUID_SOURCE_FIELDS",
+        "description": [
+          "\nRaw source fields used to compute actor EUIDs in entity store v2.\nThese mirror the identity fields from Entity Store definitions.\nServer-side code derives these dynamically via euid.getEuidSourceFields()."
+        ],
+        "signature": [
+          "readonly [\"user.email\", \"user.id\", \"user.name\", \"host.id\", \"host.name\", \"host.hostname\", \"service.name\", \"entity.id\"]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "lineNumber": 176,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3547,13 +3605,32 @@
         "tags": [],
         "label": "GRAPH_TARGET_ENTITY_FIELDS",
         "description": [
-          "\nECS entity target fields used for graph visualization.\nNOTE: The order does NOT have meaning - all target fields are captured and aggregated together."
+          "\nECS entity target fields used for graph visualization (entity store v1 / pre-populated IDs).\nNOTE: The order does NOT have meaning - all target fields are captured and aggregated together."
         ],
         "signature": [
           "readonly [\"user.target.entity.id\", \"host.target.entity.id\", \"service.target.entity.id\", \"entity.target.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 161,
+        "lineNumber": 164,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.GRAPH_TARGET_EUID_SOURCE_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "GRAPH_TARGET_EUID_SOURCE_FIELDS",
+        "description": [
+          "\nRaw source fields used to compute target EUIDs in entity store v2.\nTarget-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS."
+        ],
+        "signature": [
+          "readonly [\"user.target.email\", \"user.target.id\", \"user.target.name\", \"host.target.id\", \"host.target.name\", \"host.target.hostname\", \"service.target.name\", \"entity.target.id\"]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "lineNumber": 195,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

@@ -71,6 +71,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={jest.fn()}
         />
       );
     });
@@ -101,6 +102,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
         />
       </Router>
     );
@@ -119,6 +121,7 @@ describe('AlertFlyoutHeader', () => {
         hit={hit}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAlertUpdated={jest.fn()}
       />
     );
 

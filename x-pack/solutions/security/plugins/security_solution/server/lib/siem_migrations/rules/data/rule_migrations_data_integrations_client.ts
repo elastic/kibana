@@ -7,12 +7,21 @@
 
 import pMap from 'p-map';
 import type { PackageList, PackageListItem } from '@kbn/fleet-plugin/common';
+import {
+  estimateTokens,
+  truncateTokens,
+} from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 const INTEGRATION_WEIGHTS = [
-  { ids: ['endpoint'], weight: 1.5 }, // Elastic Defend should be boosted
+  // Elastic Defend should be heavily boosted so that even if it is slighly relevant to the keywords, it should be available for LLM to make a correct choice. Since Defend is a general puporse integration,
+  // LLM chooses it for rules implementing broad detection logic
+  { ids: ['endpoint'], weight: 10 },
 ];
+
+const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];
+const MAX_KB_TOKENS = 80_000;
 
 /**
  * excludes Splunk, QRadar and Elastic Security integrations since automatic migrations
@@ -60,10 +69,13 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     }
 
+    const packageKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
+
     return {
       title: pkg.title,
       id: pkg.name,
       description: pkg?.description || '',
+      knowledge_base: packageKnowledgeBase,
       data_streams: logsDataStreams.map((stream) => ({
         dataset: stream.dataset,
         index_pattern: `${stream.type}-${stream.dataset}-*`,
@@ -73,9 +85,64 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         pkg.title,
         pkg.description,
         ...logsDataStreams.map((stream) => stream.title),
+        packageKnowledgeBase,
       ].join(' - '),
       fields_metadata: fieldsMetadata,
     };
+  }
+
+  private async fetchPackageKnowledgeBase(pkg: PackageListItem): Promise<string> {
+    let packageKnowledgeBase = '';
+
+    try {
+      const packageArchive = await this.dependencies.packageService?.asInternalUser.getPackage(
+        pkg.name,
+        pkg.version
+      );
+
+      const allPaths = await packageArchive?.archiveIterator.getPaths();
+      const relevantPaths = allPaths?.filter((path) =>
+        PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
+      );
+
+      let currentTokens = 0;
+      await packageArchive?.archiveIterator.traverseEntries(
+        async (entry) => {
+          if (!entry.buffer || !relevantPaths?.includes(entry.path)) {
+            return;
+          }
+          if (currentTokens >= MAX_KB_TOKENS) {
+            return;
+          }
+          const content = entry.buffer.toString('utf8');
+          const nextChunk = `\n Source : ${entry.path}\n${content}`;
+          const chunkTokens = estimateTokens(nextChunk);
+          const remainingBudget = MAX_KB_TOKENS - currentTokens;
+
+          if (chunkTokens > remainingBudget) {
+            packageKnowledgeBase += `\n Source : ${entry.path}\n${truncateTokens(
+              content,
+              remainingBudget
+            )}`;
+            currentTokens = MAX_KB_TOKENS;
+            this.logger.debug(
+              `Truncated ${entry.path} for ${pkg.name}: token limit (${MAX_KB_TOKENS}) reached`
+            );
+          } else {
+            packageKnowledgeBase += nextChunk;
+            currentTokens += chunkTokens;
+          }
+        },
+        (path) => relevantPaths?.includes(path) ?? false
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch package archive for ${pkg.name}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+    return packageKnowledgeBase;
   }
 
   /** Indexes an array of integrations to be used with ELSER semantic search queries */

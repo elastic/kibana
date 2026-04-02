@@ -108,7 +108,7 @@
         "label": "MarkdownCreateResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; created_by?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/types.ts",
         "lineNumber": 19,
@@ -142,7 +142,7 @@
         "label": "MarkdownReadResponseBody",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; created_by?: string | undefined; updated_at?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; }>; }"
+          "{ readonly id: string; readonly meta: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; } & {}>; readonly data: Readonly<{ description?: string | undefined; } & { title: string; content: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/dashboard_markdown/server/api/read/types.ts",
         "lineNumber": 13,

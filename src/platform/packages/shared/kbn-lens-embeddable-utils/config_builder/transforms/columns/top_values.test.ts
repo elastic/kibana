@@ -47,7 +47,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
@@ -62,7 +62,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status', 'region'],
-        size: 3,
+        limit: 3,
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
@@ -73,7 +73,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 10,
+        limit: 10,
         label: 'Custom Label',
       };
 
@@ -86,7 +86,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
         includes: { as_regex: true, values: ['active', 'pending'] },
         excludes: { as_regex: false, values: ['inactive'] },
       };
@@ -102,7 +102,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
         rank_by: { type: 'column', metric: 0, direction: 'desc' },
       };
 
@@ -115,7 +115,7 @@ describe('Top Values Transforms', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
-        size: 5,
+        limit: 5,
         rank_by: { type: 'column', metric: 3, direction: 'desc' },
       };
 
@@ -153,7 +153,7 @@ describe('Top Values Transforms', () => {
       const result = fromTermsLensStateToAPI(input, columns);
       expect(result.operation).toBe('terms');
       expect(result.fields).toEqual(['status']);
-      expect(result.size).toBe(5);
+      expect(result.limit).toBe(5);
       expect(result.other_bucket).toBeUndefined();
     });
 
