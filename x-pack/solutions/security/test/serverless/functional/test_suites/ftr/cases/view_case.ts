@@ -35,10 +35,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // https://github.com/elastic/kibana/pull/190690
-  // fails after missing `awaits` were added
-  // Flaky: See https://github.com/elastic/kibana/issues/253931
-  describe.skip('Case View', function () {
+  describe('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -101,7 +98,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
