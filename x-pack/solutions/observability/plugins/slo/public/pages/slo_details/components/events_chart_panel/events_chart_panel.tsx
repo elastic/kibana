@@ -28,10 +28,13 @@ import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { TimeBounds } from '../../types';
-import { GoodBadEventsChart } from './good_bad_events_chart';
+import { GoodBadEventsChart, type EventType } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
-import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
-import { getApmTracesEsqlLink } from '../../utils/discover_links/get_apm_traces_esql_link';
+import { getDiscoverLink, openInDiscover } from '../../utils/discover_links/get_discover_link';
+import {
+  getApmTracesEsqlLink,
+  navigateToApmTracesEsqlLink,
+} from '../../utils/discover_links/get_apm_traces_esql_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -66,6 +69,27 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
   const viewEventsHref = isApmSlo
     ? getApmTracesEsqlLink({ slo, timeRange, discover, transactionIndex })
     : getDiscoverLink({ slo, timeRange, discover, uiSettings });
+
+  const handleGoodBadEventsBarClick = (barTimeRange: TimeRange, eventType: EventType) => {
+    if (isApmSlo) {
+      navigateToApmTracesEsqlLink({
+        slo,
+        timeRange: barTimeRange,
+        discover,
+        transactionIndex,
+        selectedEventType: eventType,
+      });
+    } else {
+      openInDiscover({
+        slo,
+        showGood: eventType === 'Good',
+        showBad: eventType === 'Bad',
+        timeRange: barTimeRange,
+        discover,
+        uiSettings,
+      });
+    }
+  };
 
   function getChartTitle() {
     switch (slo.indicator.type) {
@@ -105,7 +129,14 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
         );
 
       default:
-        return <GoodBadEventsChart data={data?.results ?? []} slo={slo} onBrushed={onBrushed} />;
+        return (
+          <GoodBadEventsChart
+            data={data?.results ?? []}
+            slo={slo}
+            onBrushed={onBrushed}
+            onBarClick={handleGoodBadEventsBarClick}
+          />
+        );
     }
   }
 

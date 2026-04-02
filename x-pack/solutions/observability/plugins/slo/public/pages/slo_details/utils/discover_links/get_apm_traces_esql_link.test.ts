@@ -12,7 +12,7 @@ import {
   buildApmLatencyIndicator,
 } from '../../../../data/slo/indicator';
 import { buildSlo } from '../../../../data/slo/slo';
-import { getApmTracesEsqlLink } from './get_apm_traces_esql_link';
+import { getApmTracesEsqlLink, navigateToApmTracesEsqlLink } from './get_apm_traces_esql_link';
 
 const TRANSACTION_INDEX = 'traces-apm*,apm-*';
 const TIME_RANGE = { from: 'now-24h', to: 'now' };
@@ -236,5 +236,114 @@ describe('getApmTracesEsqlLink', () => {
         ?event_type == "All"`
       );
     });
+  });
+});
+
+describe('navigateToApmTracesEsqlLink', () => {
+  it('does nothing when discover is not provided', () => {
+    const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
+
+    expect(() =>
+      navigateToApmTracesEsqlLink({
+        slo,
+        timeRange: TIME_RANGE,
+        transactionIndex: TRANSACTION_INDEX,
+      })
+    ).not.toThrow();
+  });
+
+  it('does nothing when transactionIndex is empty', () => {
+    const navigate = jest.fn();
+    const discover = { locator: { navigate } } as unknown as DiscoverStart;
+    const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
+
+    navigateToApmTracesEsqlLink({ slo, timeRange: TIME_RANGE, discover, transactionIndex: '' });
+
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('calls locator.navigate with the correct time range and tab label', () => {
+    const navigate = jest.fn();
+    const discover = { locator: { navigate } } as unknown as DiscoverStart;
+    const slo = buildSlo({ indicator: buildApmLatencyIndicator(), name: 'My APM SLO' });
+
+    navigateToApmTracesEsqlLink({
+      slo,
+      timeRange: TIME_RANGE,
+      discover,
+      transactionIndex: TRANSACTION_INDEX,
+    });
+
+    expect(navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeRange: TIME_RANGE,
+        tab: { id: 'new', label: 'Good vs bad events - My APM SLO' },
+      })
+    );
+  });
+
+  it('defaults selectedEventType to All in the esql control', () => {
+    const navigate = jest.fn();
+    const discover = { locator: { navigate } } as unknown as DiscoverStart;
+    const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
+
+    navigateToApmTracesEsqlLink({
+      slo,
+      timeRange: TIME_RANGE,
+      discover,
+      transactionIndex: TRANSACTION_INDEX,
+    });
+
+    expect(navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlControls: expect.objectContaining({
+          slo_event_control: expect.objectContaining({ selected_options: ['All'] }),
+        }),
+      })
+    );
+  });
+
+  it('sets selected_options to Bad when selectedEventType is Bad', () => {
+    const navigate = jest.fn();
+    const discover = { locator: { navigate } } as unknown as DiscoverStart;
+    const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
+
+    navigateToApmTracesEsqlLink({
+      slo,
+      timeRange: TIME_RANGE,
+      discover,
+      transactionIndex: TRANSACTION_INDEX,
+      selectedEventType: 'Bad',
+    });
+
+    expect(navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlControls: expect.objectContaining({
+          slo_event_control: expect.objectContaining({ selected_options: ['Bad'] }),
+        }),
+      })
+    );
+  });
+
+  it('sets selected_options to Good when selectedEventType is Good', () => {
+    const navigate = jest.fn();
+    const discover = { locator: { navigate } } as unknown as DiscoverStart;
+    const slo = buildSlo({ indicator: buildApmAvailabilityIndicator() });
+
+    navigateToApmTracesEsqlLink({
+      slo,
+      timeRange: TIME_RANGE,
+      discover,
+      transactionIndex: TRANSACTION_INDEX,
+      selectedEventType: 'Good',
+    });
+
+    expect(navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlControls: expect.objectContaining({
+          slo_event_control: expect.objectContaining({ selected_options: ['Good'] }),
+        }),
+      })
+    );
   });
 });

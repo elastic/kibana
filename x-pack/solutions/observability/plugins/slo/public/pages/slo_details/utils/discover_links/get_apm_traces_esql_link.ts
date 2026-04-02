@@ -25,6 +25,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-types';
+import type { SloEventType } from '../../types';
 
 const SLO_EVENT_FILTER_VARIABLE = 'event_type';
 
@@ -121,14 +122,14 @@ function buildApmAvailabilityEsqlQuery(
   return query.print();
 }
 
-function buildSloEventControl() {
+function buildSloEventControl(selectedOption: SloEventType = SLO_EVENT_ALL) {
   return {
     slo_event_control: {
       type: ESQL_CONTROL,
       width: 'auto',
       grow: false,
       single_select: true,
-      selected_options: ['All'],
+      selected_options: [selectedOption],
       available_options: ['All', 'Good', 'Bad'],
       variable_type: 'values',
       variable_name: SLO_EVENT_FILTER_VARIABLE,
@@ -138,6 +139,35 @@ function buildSloEventControl() {
       esql_query: '',
       control_type: 'STATIC_VALUES',
       order: 0,
+    },
+  };
+}
+
+function buildApmTracesLocatorParams({
+  slo,
+  timeRange,
+  transactionIndex,
+  selectedEventType = SLO_EVENT_ALL,
+}: {
+  slo: SLOWithSummaryResponse;
+  timeRange: TimeRange;
+  transactionIndex: string;
+  selectedEventType?: SloEventType;
+}) {
+  const esqlQuery = apmTransactionDurationIndicatorSchema.is(slo.indicator)
+    ? buildApmLatencyEsqlQuery(slo, transactionIndex)
+    : buildApmAvailabilityEsqlQuery(slo, transactionIndex);
+
+  return {
+    timeRange,
+    query: { esql: esqlQuery },
+    esqlControls: buildSloEventControl(selectedEventType),
+    tab: {
+      id: 'new',
+      label: i18n.translate('xpack.slo.sloDetails.discoverTabLabel', {
+        defaultMessage: 'Good vs bad events - {sloName}',
+        values: { sloName: slo.name },
+      }),
     },
   };
 }
@@ -155,20 +185,34 @@ export function getApmTracesEsqlLink({
 }): string | undefined {
   if (!discover?.locator || !transactionIndex) return undefined;
 
-  const esqlQuery = apmTransactionDurationIndicatorSchema.is(slo.indicator)
-    ? buildApmLatencyEsqlQuery(slo, transactionIndex)
-    : buildApmAvailabilityEsqlQuery(slo, transactionIndex);
+  return discover.locator.getRedirectUrl(
+    buildApmTracesLocatorParams({ slo, timeRange, transactionIndex }) as Parameters<
+      typeof discover.locator.getRedirectUrl
+    >[0]
+  );
+}
 
-  return discover.locator.getRedirectUrl({
-    timeRange,
-    query: { esql: esqlQuery },
-    esqlControls: buildSloEventControl(),
-    tab: {
-      id: 'new',
-      label: i18n.translate('xpack.slo.sloDetails.discoverTabLabel', {
-        defaultMessage: 'Good vs bad events - {sloName}',
-        values: { sloName: slo.name },
-      }),
-    },
-  } as Parameters<typeof discover.locator.getRedirectUrl>[0]);
+export function navigateToApmTracesEsqlLink({
+  slo,
+  timeRange,
+  discover,
+  transactionIndex,
+  selectedEventType,
+}: {
+  slo: SLOWithSummaryResponse;
+  timeRange: TimeRange;
+  discover?: DiscoverStart;
+  transactionIndex: string;
+  selectedEventType?: SloEventType;
+}): void {
+  if (!discover?.locator || !transactionIndex) return;
+
+  discover.locator.navigate(
+    buildApmTracesLocatorParams({
+      slo,
+      timeRange,
+      transactionIndex,
+      selectedEventType,
+    }) as Parameters<typeof discover.locator.navigate>[0]
+  );
 }
