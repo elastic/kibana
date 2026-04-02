@@ -18,6 +18,7 @@ import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
+import { MetricsInfoError } from './metrics_info_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
 
@@ -48,12 +49,27 @@ export const MetricsExperienceGrid = ({
     metricItems,
     allDimensions,
     loading: isDiscoverLoading,
+    error: metricsInfoError,
   } = useFetchMetricsData({
     fetchParams,
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
   });
+
+  // WIP: Remove this
+  useEffect(() => {
+    if (metricsInfoError == null) {
+      return;
+    }
+    const isAbortError =
+      metricsInfoError instanceof Error && metricsInfoError.name === 'AbortError';
+    if (isAbortError) {
+      return;
+    }
+    // eslint-disable-next-line no-console
+    console.error('[MetricsExperience] METRICS_INFO fetch failed');
+  }, [metricsInfoError]);
 
   const { filteredMetricItems } = useMetricFieldsFilter({
     metricItems,
@@ -116,6 +132,15 @@ export const MetricsExperienceGrid = ({
 
   if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
+  }
+
+  const isMetricsInfoAbortError =
+    metricsInfoError instanceof Error && metricsInfoError.name === 'AbortError';
+  const showMetricsInfoError =
+    metricsInfoError != null && !isDiscoverLoading && !isMetricsInfoAbortError;
+
+  if (showMetricsInfoError) {
+    return <MetricsInfoError />;
   }
 
   return (
