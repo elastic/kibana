@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   APP_ID,
   EXCEPTIONS_API_READ,
@@ -63,7 +64,7 @@ export const getRulesV4BaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE_AWARE),
-        read: params.savedObjects,
+        read: [...params.savedObjects, DATA_VIEW_SAVED_OBJECT_TYPE],
       },
       alerting: {
         rule: { all: alertingFeatures },
@@ -89,7 +90,7 @@ export const getRulesV4BaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: params.savedObjects,
+        read: [...params.savedObjects, DATA_VIEW_SAVED_OBJECT_TYPE],
       },
       alerting: {
         rule: { read: alertingFeatures },
