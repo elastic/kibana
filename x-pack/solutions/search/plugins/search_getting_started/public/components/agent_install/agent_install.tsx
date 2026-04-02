@@ -60,7 +60,8 @@ export const AgentInstallSection = () => {
           defaultMessage: 'Build with AI',
         })}
         description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
-          defaultMessage: 'Get AI-powered help with building your next search application.',
+          defaultMessage:
+            'Get AI-powered help building search for products, docs, chatbots, recommenders, and more.',
         })}
       />
       <EuiSpacer size="l" />
@@ -78,7 +79,7 @@ export const AgentInstallSection = () => {
               <EuiText size="xs">
                 {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.description', {
                   defaultMessage:
-                    "Install Elastic's optimized getting started skills and start building with your preferred code agent.",
+                    'Install Elastic’s optimized getting started skills and start building with your preferred code agent.',
                 })}
               </EuiText>
               <EuiFlexItem>
@@ -130,14 +131,15 @@ export const AgentInstallSection = () => {
                 <EuiFlexGroup direction="column">
                   <EuiTitle size="xs">
                     <h5>
-                      {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.title', {
-                        defaultMessage: 'Open Elastic Agent',
+                      {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.title', {
+                        defaultMessage: 'Elastic Agent',
                       })}
                     </h5>
                   </EuiTitle>
                   <EuiText size="xs">
                     {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.description', {
-                      defaultMessage: 'Get started with the Elastic Agent in Kibana.',
+                      defaultMessage:
+                        'Let our agent guide you through getting data in, setting up your index and running queries.',
                     })}
                   </EuiText>
                   <EuiFlexItem>
