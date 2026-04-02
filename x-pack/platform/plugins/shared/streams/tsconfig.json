@@ -88,5 +88,6 @@
     "@kbn/datemath",
     "@kbn/setup-node-env",
     "@kbn/workflows-management-plugin",
+    "@kbn/workflows",
   ]
 }
