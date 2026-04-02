@@ -80,7 +80,8 @@ export const ALERTS_CREATED = i18n.translate(
 export const ALERTS_CREATED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.alertsCreatedTooltip',
   {
-    defaultMessage: 'Number of new alerts generated during this execution.',
+    defaultMessage:
+      'Number of alerts eventually indexed in Elasticsearch after de-duplication and suppression.',
   }
 );
 
@@ -229,7 +230,8 @@ export const FLYOUT_ACCORDION_ALERTS = i18n.translate(
 export const FLYOUT_TOOLTIP_ALERTS_CREATED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipAlertsCreated',
   {
-    defaultMessage: 'Number of new alerts generated during this execution.',
+    defaultMessage:
+      'Number of alerts eventually indexed in Elasticsearch after de-duplication and suppression.',
   }
 );
 
