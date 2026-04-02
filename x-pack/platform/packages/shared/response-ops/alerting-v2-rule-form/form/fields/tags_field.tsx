@@ -9,9 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
-
-const MAX_TAG_LENGTH = 64;
 
 export const TagsField = () => {
   const { control } = useFormContext<FormValues>();

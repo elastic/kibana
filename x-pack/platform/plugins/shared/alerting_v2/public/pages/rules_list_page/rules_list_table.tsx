@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -32,7 +33,22 @@ import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 
-const MAX_VISIBLE_LABELS = 1;
+const labelsContainerStyle = css`
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow: hidden;
+`;
+
+const labelBadgeStyle = css`
+  min-width: 0;
+  flex-shrink: 1;
+`;
+
+const overflowTooltipStyle = css`
+  flex-shrink: 0;
+  line-height: 0;
+`;
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -41,29 +57,6 @@ const descriptionTextStyle = css`
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
-`;
-
-const labelsContainerStyle = css`
-  overflow: hidden;
-`;
-
-const labelItemStyle = css`
-  max-width: 60%;
-  flex-shrink: 0;
-`;
-
-const overflowBadgeItemStyle = css`
-  flex-shrink: 0;
-`;
-
-const truncatedBadgeStyle = css`
-  max-width: 100%;
-  vertical-align: middle;
-  .euiBadge__text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 `;
 
 interface RuleActionsMenuProps {
@@ -326,32 +319,19 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
             );
           }
-          const visibleLabels = labels.slice(0, MAX_VISIBLE_LABELS);
-          const overflowLabels = labels.slice(MAX_VISIBLE_LABELS);
+          const overflowCount = labels.length - 1;
           return (
-            <EuiFlexGroup
+            <EuiBadgeGroup
               gutterSize="xs"
-              wrap={false}
-              responsive={false}
-              alignItems="center"
               css={labelsContainerStyle}
               data-test-subj="labelsContainer"
             >
-              {visibleLabels.map((label) => (
-                <EuiFlexItem key={label} grow={false} css={labelItemStyle}>
-                  <EuiToolTip content={label}>
-                    <EuiBadge tabIndex={0} color="hollow" css={truncatedBadgeStyle}>
-                      {label}
-                    </EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              ))}
-              {overflowLabels.length > 0 && (
-                <EuiFlexItem grow={false} css={overflowBadgeItemStyle}>
-                  <EuiToolTip
-                    content={overflowLabels.join(', ')}
-                    data-test-subj="overflowLabelsTooltip"
-                  >
+              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
+                {labels[0]}
+              </EuiBadge>
+              {overflowCount > 0 && (
+                <span css={overflowTooltipStyle}>
+                  <EuiToolTip content={labels.slice(1).join(', ')}>
                     <EuiBadge
                       tabIndex={0}
                       color="hollow"
@@ -360,13 +340,13 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                     >
                       {i18n.translate('xpack.alertingV2.rulesList.labels.overflow', {
                         defaultMessage: '+{count}',
-                        values: { count: overflowLabels.length },
+                        values: { count: overflowCount },
                       })}
                     </EuiBadge>
                   </EuiToolTip>
-                </EuiFlexItem>
+                </span>
               )}
-            </EuiFlexGroup>
+            </EuiBadgeGroup>
           );
         },
       },

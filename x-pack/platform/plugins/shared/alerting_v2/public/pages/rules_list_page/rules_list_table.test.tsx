@@ -174,7 +174,7 @@ describe('RulesListTable', () => {
       expect(screen.queryByText('rna')).not.toBeInTheDocument();
     });
 
-    it('renders long label text with CSS truncation and tooltip', () => {
+    it('renders long label text with native EuiBadge truncation', () => {
       renderTable({
         items: mockRulesWithLongLabels as any,
         totalItemCount: 1,
