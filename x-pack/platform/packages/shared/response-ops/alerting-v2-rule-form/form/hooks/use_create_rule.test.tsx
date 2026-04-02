@@ -52,6 +52,8 @@ describe('useCreateRule', () => {
       },
     },
     grouping: { fields: ['host.name'] },
+    stateTransitionAlertDelayMode: 'immediate',
+    stateTransitionRecoveryDelayMode: 'immediate',
   };
 
   // Expected API payload after mapping FormValues to CreateRuleData
@@ -200,6 +202,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'duration',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {
         pendingCount: 3,
         pendingTimeframe: '10m',
@@ -237,6 +241,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {
         pendingCount: 3,
       },
@@ -270,6 +276,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {},
     };
 
@@ -301,6 +309,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | LIMIT 10',
         },
       },
+      stateTransitionAlertDelayMode: 'breaches',
+      stateTransitionRecoveryDelayMode: 'immediate',
       stateTransition: {
         pendingCount: 5,
       },
@@ -348,6 +358,8 @@ describe('useCreateRule', () => {
         },
       },
       grouping: { fields: ['host.name', 'service.name'] },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     // Note: timeField in form is mapped to time_field in API
@@ -407,6 +419,8 @@ describe('useCreateRule', () => {
           condition: 'WHERE count <= 50',
         },
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     await act(async () => {
@@ -453,6 +467,8 @@ describe('useCreateRule', () => {
           base: 'FROM logs | STATS count() BY host | WHERE count <= 10',
         },
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     await act(async () => {
@@ -491,6 +507,8 @@ describe('useCreateRule', () => {
         query: { base: 'FROM logs | STATS count() BY host' },
       },
       recoveryPolicy: { type: 'no_breach' },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     };
 
     await act(async () => {

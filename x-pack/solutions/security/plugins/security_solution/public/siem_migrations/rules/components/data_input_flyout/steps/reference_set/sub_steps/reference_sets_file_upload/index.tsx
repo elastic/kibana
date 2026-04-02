@@ -20,11 +20,13 @@ export interface RulesFileUploadStepProps {
   migrationStats: RuleMigrationTaskStats;
   missingLookups: string[];
   addUploadedLookups: AddUploadedLookups;
+  onSkip?: () => void;
 }
 export const useReferencesFileUploadStep = ({
   status,
   migrationStats,
   addUploadedLookups,
+  onSkip,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
 
@@ -61,6 +63,7 @@ export const useReferencesFileUploadStep = ({
         isLoading={isLoading}
         apiError={error?.message}
         migrationSource={MigrationSource.QRADAR}
+        onSkip={onSkip}
       />
     ),
   };

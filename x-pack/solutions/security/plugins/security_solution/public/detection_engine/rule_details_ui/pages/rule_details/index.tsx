@@ -118,6 +118,7 @@ import {
 } from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
@@ -346,6 +347,9 @@ export const RuleDetailsPage = connector(
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+    const newExecutionResultsTableEnabled = useIsExperimentalFeatureEnabled(
+      'newExecutionResultsTableEnabled'
+    );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
     const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
@@ -928,13 +932,20 @@ export const RuleDetailsPage = connector(
                       path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}
                     >
                       <>
-                        <ExecutionLogTable
-                          ruleId={ruleId}
-                          selectAlertsTab={navigateToAlertsTab}
-                          analytics={analytics}
-                          i18n={i18nStart}
-                          theme={theme}
-                        />
+                        {newExecutionResultsTableEnabled ? (
+                          <ExecutionResultsTable
+                            ruleId={ruleId}
+                            selectAlertsTab={navigateToAlertsTab}
+                          />
+                        ) : (
+                          <ExecutionLogTable
+                            ruleId={ruleId}
+                            selectAlertsTab={navigateToAlertsTab}
+                            analytics={analytics}
+                            i18n={i18nStart}
+                            theme={theme}
+                          />
+                        )}
                         <EuiSpacer size="xl" />
                         <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
                         <EuiSpacer size="xl" />
