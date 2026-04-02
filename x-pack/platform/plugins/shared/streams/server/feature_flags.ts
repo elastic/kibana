@@ -94,10 +94,7 @@ export function registerFeatureFlags(
       }
     })
     .catch((error) => {
-      logger.error(
-        `Failed to register significant events ui settings. ` +
-          `Index patterns will fall back to default ("${DEFAULT_INDEX_PATTERNS}"): ${error}`
-      );
+      logger.error(`Failed to register significant events ui settings: ${error}`);
     });
 
   core.uiSettings.register({
