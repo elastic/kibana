@@ -62,9 +62,7 @@ describe('processStrategy', () => {
         kibana: { alert: { severity: ['high'], rule: { name: ['rule-2'] } } },
       });
 
-      expect(text).toBe(
-        'process event with process bash, created high alert rule-2.'
-      );
+      expect(text).toBe('process event with process bash, created high alert rule-2.');
     });
 
     it('renders ip without port when port is absent', () => {
