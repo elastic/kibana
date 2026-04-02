@@ -59,6 +59,6 @@ export interface SmlAttachHttpSuccessItem {
 export interface SmlAttachHttpErrorItem {
   success: false;
   chunk_id: string;
-  attachment_type: string;
+  attachment_type?: string;
   message: string;
 }

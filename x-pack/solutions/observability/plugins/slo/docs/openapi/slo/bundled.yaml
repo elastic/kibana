@@ -34,6 +34,32 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/create_slo_request'
+            examples:
+              createSloKqlExample:
+                summary: Create an SLO with a KQL indicator
+                value:
+                  name: My Service Availability
+                  description: Availability of my web service measured by successful HTTP responses
+                  indicator:
+                    type: sli.kql.custom
+                    params:
+                      index: logs-*
+                      good: 'request.status_code : "2xx"'
+                      total: 'request.status_code : *'
+                      filter: 'field.environment : "production" and service.name : "my-service"'
+                      timestampField: '@timestamp'
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
+                  budgetingMethod: occurrences
+                  objective:
+                    target: 0.99
+                  tags:
+                    - production
+                    - web-service
+                  settings:
+                    syncDelay: 5m
+                    frequency: 5m
       responses:
         '200':
           description: Successful request
@@ -41,30 +67,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/create_slo_response'
+              examples:
+                createSloResponse:
+                  summary: Create SLO response
+                  value:
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: indicator/type'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
         '409':
           description: Conflict - The SLO id already exists
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/409_response'
+              examples:
+                conflictExample:
+                  summary: Conflict
+                  value:
+                    statusCode: 409
+                    error: Conflict
+                    message: SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists
     get:
       summary: Get a paginated list of SLOs
       operationId: findSlosOp
@@ -144,30 +203,104 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/find_slo_response'
+              examples:
+                findSloResponse:
+                  summary: A paginated list of SLOs
+                  value:
+                    page: 1
+                    perPage: 25
+                    total: 42
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        name: My Service Availability
+                        description: Availability of my web service
+                        indicator:
+                          type: sli.kql.custom
+                          params:
+                            index: logs-*
+                            good: 'request.status_code : "2xx"'
+                            total: 'request.status_code : *'
+                            filter: 'field.environment : "production" and service.name : "my-service"'
+                            timestampField: '@timestamp'
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        budgetingMethod: occurrences
+                        objective:
+                          target: 0.99
+                        settings:
+                          syncDelay: 5m
+                          frequency: 5m
+                        revision: 1
+                        summary:
+                          status: HEALTHY
+                          sliValue: 0.9983
+                          errorBudget:
+                            initial: 0.01
+                            consumed: 0.17
+                            remaining: 0.83
+                            isEstimated: false
+                        enabled: true
+                        groupBy: '*'
+                        instanceId: '*'
+                        tags:
+                          - production
+                          - web-service
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        version: 2
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''invalid'' supplied to: sortBy'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
   /s/{spaceId}/api/observability/slos/{sloId}:
     get:
       summary: Get an SLO
@@ -193,30 +326,100 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/slo_with_summary_response'
+              examples:
+                getSloResponse:
+                  summary: Get SLO response
+                  value:
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    name: My Service Availability
+                    description: Availability of my web service
+                    indicator:
+                      type: sli.kql.custom
+                      params:
+                        index: logs-*
+                        good: 'request.status_code : "2xx"'
+                        total: 'request.status_code : *'
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        timestampField: '@timestamp'
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    budgetingMethod: occurrences
+                    objective:
+                      target: 0.99
+                    settings:
+                      syncDelay: 5m
+                      frequency: 5m
+                    revision: 1
+                    summary:
+                      status: HEALTHY
+                      sliValue: 0.9983
+                      errorBudget:
+                        initial: 0.01
+                        consumed: 0.17
+                        remaining: 0.83
+                        isEstimated: false
+                    enabled: true
+                    groupBy: '*'
+                    instanceId: '*'
+                    tags:
+                      - production
+                      - web-service
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    updatedAt: '2025-01-12T10:03:19.000Z'
+                    version: 2
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
     put:
       summary: Update an SLO
       operationId: updateSloOp
@@ -234,6 +437,19 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/update_slo_request'
+            examples:
+              updateSloNameExample:
+                summary: Update the SLO name and tags
+                value:
+                  name: Updated Service Availability
+                  tags:
+                    - production
+                    - updated
+              updateSloObjectiveExample:
+                summary: Update the SLO objective
+                value:
+                  objective:
+                    target: 0.995
       responses:
         '200':
           description: Successful request
@@ -241,30 +457,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/slo_definition_response'
+              examples:
+                updateSloResponse:
+                  summary: Update SLO response
+                  value:
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    name: Updated Service Availability
+                    description: Availability of my web service
+                    indicator:
+                      type: sli.kql.custom
+                      params:
+                        index: logs-*
+                        good: 'request.status_code : "2xx"'
+                        total: 'request.status_code : *'
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        timestampField: '@timestamp'
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    budgetingMethod: occurrences
+                    objective:
+                      target: 0.99
+                    settings:
+                      syncDelay: 5m
+                      frequency: 5m
+                    revision: 2
+                    enabled: true
+                    groupBy: '*'
+                    tags:
+                      - production
+                      - updated
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    version: 2
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: indicator/type'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
     delete:
       summary: Delete an SLO
       operationId: deleteSloOp
@@ -285,24 +562,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
       summary: Enable an SLO
@@ -324,24 +629,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
       summary: Disable an SLO
@@ -363,24 +696,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
   /s/{spaceId}/api/observability/slos/{sloId}/_reset:
     post:
       summary: Reset an SLO
@@ -400,30 +761,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/slo_definition_response'
+              examples:
+                resetSloResponse:
+                  summary: Reset SLO response
+                  value:
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    name: My Service Availability
+                    description: Availability of my web service
+                    indicator:
+                      type: sli.kql.custom
+                      params:
+                        index: logs-*
+                        good: 'request.status_code : "2xx"'
+                        total: 'request.status_code : *'
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        timestampField: '@timestamp'
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    budgetingMethod: occurrences
+                    objective:
+                      target: 0.99
+                    settings:
+                      syncDelay: 5m
+                      frequency: 5m
+                    revision: 2
+                    enabled: true
+                    groupBy: '*'
+                    tags:
+                      - production
+                      - web-service
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    version: 2
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    statusCode: 404
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
   /s/{spaceId}/api/observability/slos/_bulk_purge_rollup:
     post:
       summary: Batch delete rollup and summary data
@@ -441,6 +863,24 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/bulk_purge_rollup_request'
+            examples:
+              purgeByAgeExample:
+                summary: Purge rollup data older than 7 days
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                  purgePolicy:
+                    purgeType: fixed-age
+                    age: 7d
+              purgeByTimestampExample:
+                summary: Purge rollup data before a specific date
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - d077e940-1515-11ee-9c50-9d096392f520
+                  purgePolicy:
+                    purgeType: fixed-time
+                    timestamp: '2024-12-31T00:00:00.000Z'
       responses:
         '200':
           description: Successful request
@@ -448,24 +888,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/bulk_purge_rollup_response'
+              examples:
+                bulkPurgeResponse:
+                  summary: Bulk purge response with task ID
+                  value:
+                    taskId: 8853df00-ae2e-11ed-90af-09bb6422b258
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: purgePolicy/purgeType'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
   /s/{spaceId}/internal/observability/slos/_definitions:
     get:
       summary: Get the SLO definitions
@@ -533,7 +999,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/401_response'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
@@ -555,6 +1021,15 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/delete_slo_instances_request'
+            examples:
+              deleteInstancesExample:
+                summary: Delete specific SLO instances
+                value:
+                  list:
+                    - sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                      instanceId: host-abc123
+                    - sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                      instanceId: host-def456
       responses:
         '204':
           description: Successful request
@@ -564,18 +1039,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: list/0/sloId'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
   /s/{spaceId}/api/observability/slos/_bulk_delete:
     post:
       summary: Bulk delete SLO definitions and their associated summary and rollup data.
@@ -593,6 +1089,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/bulk_delete_request'
+            examples:
+              bulkDeleteRequest:
+                summary: Bulk delete two SLOs
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - d077e940-1515-11ee-9c50-9d096392f520
       responses:
         '200':
           description: Successful response
@@ -600,24 +1103,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/bulk_delete_response'
+              examples:
+                bulkDeleteResponse:
+                  summary: Bulk delete response with task ID
+                  value:
+                    taskId: d08506b7-f0e8-4f8b-a06a-a83940f4db91
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: list'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
   /s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}:
     get:
       summary: Retrieve the status of the bulk deletion
@@ -643,24 +1172,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/bulk_delete_status_response'
+              examples:
+                bulkDeleteStatusComplete:
+                  summary: Completed bulk deletion
+                  value:
+                    isDone: true
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        success: true
+                      - id: d077e940-1515-11ee-9c50-9d096392f520
+                        success: true
+                bulkDeleteStatusPartialFailure:
+                  summary: Completed with partial failure
+                  value:
+                    isDone: true
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        success: true
+                      - id: d077e940-1515-11ee-9c50-9d096392f520
+                        success: false
+                        error: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: taskId'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
         '403':
-          description: Unauthorized response
+          description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
 components:
   parameters:
     kbn_xsrf:
@@ -1619,7 +2189,7 @@ components:
           example: Bad Request
         message:
           type: string
-          example: "Invalid value 'foo' supplied to: [...]"
+          example: 'Invalid value ''foo'' supplied to: [...]'
     401_response:
       title: Unauthorized
       type: object
@@ -1638,7 +2208,7 @@ components:
           type: string
           example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
     403_response:
-      title: Unauthorized
+      title: Forbidden
       type: object
       required:
         - statusCode
@@ -1650,10 +2220,10 @@ components:
           example: 403
         error:
           type: string
-          example: Unauthorized
+          example: Forbidden
         message:
           type: string
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"
     404_response:
       title: Not found
       type: object

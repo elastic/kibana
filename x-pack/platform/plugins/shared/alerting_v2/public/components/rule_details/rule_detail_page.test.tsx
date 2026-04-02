@@ -118,7 +118,7 @@ describe('RuleDetailPage', () => {
     renderPage(baseRule);
     expect(screen.getByTestId('openEditRuleFlyoutButton')).toHaveAttribute(
       'href',
-      '/app/management/insightsAndAlerting/alerting_v2/edit/rule-1'
+      '/app/management/alertingV2/rules/edit/rule-1'
     );
   });
 
