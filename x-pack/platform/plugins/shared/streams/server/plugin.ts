@@ -222,8 +222,9 @@ export class StreamsPlugin
         logger: this.logger,
         isMemoryEnabled: async () => {
           try {
-            const soClient = this.server!.core.savedObjects.createInternalRepository();
-            const uiSettings = this.server!.core.uiSettings.asScopedToClient(soClient);
+            const [coreStart] = await core.getStartServices();
+            const soClient = coreStart.savedObjects.createInternalRepository();
+            const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
             return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
           } catch {
             return false;
