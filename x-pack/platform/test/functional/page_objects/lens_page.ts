@@ -1681,7 +1681,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         if (await hasWorkspaceContainer()) {
           if (!(await isWorkspaceRenderComplete())) {
-            return hasVisualization;
+            return false;
           }
 
           await common.sleep(250);
