@@ -51,6 +51,8 @@ export const PAGE_ROUTING_PATHS = {
   saved_query_edit: '/saved_queries/:savedQueryId',
 };
 
+import { getHistoryFilters } from '../actions/history_filter_storage';
+
 export const pagePathGetters: {
   [key in StaticPage]: () => string;
 } & {
@@ -61,7 +63,7 @@ export const pagePathGetters: {
   live_queries: () => '/live_queries',
   live_query_new: () => '/live_queries/new',
   live_query_details: ({ liveQueryId }) => `/live_queries/${liveQueryId}`,
-  history: () => '/history',
+  history: () => `/history${getHistoryFilters()}`,
   history_details: ({ liveQueryId }) => `/history/${liveQueryId}`,
   history_scheduled_details: ({ scheduleId, executionCount }) =>
     `/history/scheduled/${scheduleId}/${executionCount}`,

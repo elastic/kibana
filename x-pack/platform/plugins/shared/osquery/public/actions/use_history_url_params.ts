@@ -9,6 +9,7 @@ import { useMemo, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import type { SourceFilter } from '../../common/api/unified_history/types';
+import { saveHistoryFilters } from './history_filter_storage';
 
 export const DEFAULT_START_DATE = 'now-24h';
 export const DEFAULT_END_DATE = 'now';
@@ -115,8 +116,10 @@ export const useHistoryUrlParams = () => {
     (nextFilters: HistoryUrlFilters) => {
       const serialized = serializeHistoryUrlParams(nextFilters);
       const qs = stringify(serialized, { sort: false, skipNull: true });
+      const search = qs ? `?${qs}` : '';
+      saveHistoryFilters(search);
       const currentPathname = history.location.pathname;
-      history.replace({ pathname: currentPathname, search: qs ? `?${qs}` : '' });
+      history.replace({ pathname: currentPathname, search });
     },
     [history]
   );
