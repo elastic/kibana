@@ -120,10 +120,7 @@ describe('container_metrics_configs', () => {
 
       const filterClauseWithEventModuleFilter = {
         bool: {
-          filter: [
-            otelDatasetFilterDsl('dockerstatsreceiver.otel'),
-            { ...filterClauseDsl },
-          ],
+          filter: [otelDatasetFilterDsl('dockerstatsreceiver.otel'), { ...filterClauseDsl }],
         },
       };
 
@@ -140,10 +137,7 @@ describe('container_metrics_configs', () => {
       };
       const filterClauseWithEventModuleFilter = {
         bool: {
-          filter: [
-            otelDatasetFilterDsl('kubeletstatsreceiver.otel'),
-            { ...filterClauseDsl },
-          ],
+          filter: [otelDatasetFilterDsl('kubeletstatsreceiver.otel'), { ...filterClauseDsl }],
         },
       };
 

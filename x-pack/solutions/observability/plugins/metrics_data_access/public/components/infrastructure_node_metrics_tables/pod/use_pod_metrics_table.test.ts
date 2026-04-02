@@ -74,10 +74,7 @@ describe('usePodMetricsTable hook', () => {
 
     const filterClauseWithEventModuleFilter = {
       bool: {
-        filter: [
-          otelDatasetFilterDsl('kubeletstatsreceiver.otel'),
-          { ...filterClauseDsl },
-        ],
+        filter: [otelDatasetFilterDsl('kubeletstatsreceiver.otel'), { ...filterClauseDsl }],
       },
     };
 

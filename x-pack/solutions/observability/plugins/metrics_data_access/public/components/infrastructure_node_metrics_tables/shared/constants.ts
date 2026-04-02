@@ -77,10 +77,7 @@ export const otelDatasetFilter = (dataset: string) =>
  */
 export const otelDatasetFilterDsl = (dataset: string): QueryDslQueryContainer => ({
   bool: {
-    should: [
-      { term: { 'data_stream.dataset': dataset } },
-      { term: { 'event.dataset': dataset } },
-    ],
+    should: [{ term: { 'data_stream.dataset': dataset } }, { term: { 'event.dataset': dataset } }],
     minimum_should_match: 1,
   },
 });
