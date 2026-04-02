@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -14,10 +15,15 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
 import { AccordionButtonContent, FieldLabel, Tooltip } from '../shared';
+
+const arrowItemCss = css`
+  align-items: center;
+`;
 
 interface AlertsSectionProps {
   alertCount: number | null;
@@ -25,7 +31,12 @@ interface AlertsSectionProps {
 }
 
 export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candidateCount }) => {
-  const hasCandidateCount = candidateCount !== null;
+  const { euiTheme } = useEuiTheme();
+  const alertsItemCss = css`
+    flex-basis: 50%;
+    padding-left: ${euiTheme.size.l};
+  `;
+
   const accordionId = useGeneratedHtmlId({ prefix: 'alerts' });
 
   return (
@@ -40,14 +51,10 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
                   title: i18n.COLUMN_ALERTS_CREATED,
                   description: i18n.FLYOUT_TOOLTIP_ALERTS_CREATED,
                 },
-                ...(hasCandidateCount
-                  ? [
-                      {
-                        title: i18n.FLYOUT_CANDIDATE_ALERTS,
-                        description: i18n.FLYOUT_TOOLTIP_CANDIDATE_ALERTS,
-                      },
-                    ]
-                  : []),
+                {
+                  title: i18n.FLYOUT_CANDIDATE_ALERTS,
+                  description: i18n.FLYOUT_TOOLTIP_CANDIDATE_ALERTS,
+                },
               ]}
             />
           }
@@ -60,21 +67,17 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
       <EuiSpacer size="s" />
       <EuiPanel hasBorder paddingSize="m">
         <EuiFlexGroup alignItems="center">
-          {hasCandidateCount && (
-            <>
-              <EuiFlexItem>
-                <FieldLabel label={i18n.FLYOUT_CANDIDATE_ALERTS} />
-                <EuiSpacer size="xs" />
-                <EuiText size="s" data-test-subj="executionDetailsFlyoutCandidateCount">
-                  {candidateCount}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="sortRight" aria-hidden={true} />
-              </EuiFlexItem>
-            </>
-          )}
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FieldLabel label={i18n.FLYOUT_CANDIDATE_ALERTS} />
+            <EuiSpacer size="xs" />
+            <EuiText size="s" data-test-subj="executionDetailsFlyoutCandidateCount">
+              {candidateCount ?? '—'}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem css={arrowItemCss}>
+            <EuiIcon type="sortRight" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={alertsItemCss}>
             <FieldLabel label={i18n.COLUMN_ALERTS_CREATED} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutAlertCount">

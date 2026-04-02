@@ -51,16 +51,11 @@ export const FlyoutBody: React.FC<FlyoutBodyProps> = ({ item }) => {
       <AlertsSection alertCount={alertCount} candidateCount={candidateCount} />
       <EuiHorizontalRule margin="m" />
 
-      {(item.metrics.matched_indices_count !== null ||
-        item.metrics.frozen_indices_queried_count !== null) && (
-        <>
-          <IndicesSection
-            matchedIndicesCount={item.metrics.matched_indices_count}
-            frozenIndicesQueriedCount={item.metrics.frozen_indices_queried_count}
-          />
-          <EuiHorizontalRule margin="m" />
-        </>
-      )}
+      <IndicesSection
+        matchedIndicesCount={item.metrics.matched_indices_count}
+        frozenIndicesQueriedCount={item.metrics.frozen_indices_queried_count}
+      />
+      <EuiHorizontalRule margin="m" />
 
       <ExecutionMetricsSection
         gapSeconds={gapSeconds}

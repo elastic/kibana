@@ -27,8 +27,6 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
   matchedIndicesCount,
   frozenIndicesQueriedCount,
 }) => {
-  const hasMatchedIndicesCount = matchedIndicesCount !== null;
-  const hasFrozenIndicesQueriedCount = frozenIndicesQueriedCount !== null;
   const accordionId = useGeneratedHtmlId({ prefix: 'indices' });
 
   return (
@@ -39,22 +37,14 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
           tooltip={
             <Tooltip
               items={[
-                ...(hasMatchedIndicesCount
-                  ? [
-                      {
-                        title: i18n.FLYOUT_MATCHED_INDICES,
-                        description: i18n.FLYOUT_TOOLTIP_MATCHED_INDICES,
-                      },
-                    ]
-                  : []),
-                ...(hasFrozenIndicesQueriedCount
-                  ? [
-                      {
-                        title: i18n.FLYOUT_FROZEN_INDICES_QUERIED,
-                        description: i18n.FLYOUT_TOOLTIP_FROZEN_INDICES_QUERIED,
-                      },
-                    ]
-                  : []),
+                {
+                  title: i18n.FLYOUT_MATCHED_INDICES,
+                  description: i18n.FLYOUT_TOOLTIP_MATCHED_INDICES,
+                },
+                {
+                  title: i18n.FLYOUT_FROZEN_INDICES_QUERIED,
+                  description: i18n.FLYOUT_TOOLTIP_FROZEN_INDICES_QUERIED,
+                },
               ]}
             />
           }
@@ -67,25 +57,21 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
       <EuiSpacer size="s" />
       <EuiPanel hasBorder paddingSize="m">
         <EuiFlexGroup>
-          {hasMatchedIndicesCount && (
-            <EuiFlexItem>
-              <FieldLabel label={i18n.FLYOUT_MATCHED_INDICES} />
-              <EuiSpacer size="xs" />
-              <EuiText size="s" data-test-subj="executionDetailsFlyoutMatchedIndices">
-                {matchedIndicesCount}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          {hasMatchedIndicesCount && hasFrozenIndicesQueriedCount && <SectionSeparator />}
-          {hasFrozenIndicesQueriedCount && (
-            <EuiFlexItem>
-              <FieldLabel label={i18n.FLYOUT_FROZEN_INDICES_QUERIED} />
-              <EuiSpacer size="xs" />
-              <EuiText size="s" data-test-subj="executionDetailsFlyoutFrozenIndices">
-                {frozenIndicesQueriedCount}
-              </EuiText>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <FieldLabel label={i18n.FLYOUT_MATCHED_INDICES} />
+            <EuiSpacer size="xs" />
+            <EuiText size="s" data-test-subj="executionDetailsFlyoutMatchedIndices">
+              {matchedIndicesCount ?? '—'}
+            </EuiText>
+          </EuiFlexItem>
+          <SectionSeparator />
+          <EuiFlexItem>
+            <FieldLabel label={i18n.FLYOUT_FROZEN_INDICES_QUERIED} />
+            <EuiSpacer size="xs" />
+            <EuiText size="s" data-test-subj="executionDetailsFlyoutFrozenIndices">
+              {frozenIndicesQueriedCount ?? '—'}
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     </EuiAccordion>
