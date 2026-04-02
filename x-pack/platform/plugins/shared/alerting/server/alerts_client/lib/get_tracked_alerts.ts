@@ -103,8 +103,7 @@ export function createEmptyTrackedAlerts<
     getById(id: string) {
       return (
         Object.values(this.active).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
-        Object.values(this.recovered).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
-        Object.values(this.delayed).find((alert) => get(alert, ALERT_INSTANCE_ID) === id)
+        Object.values(this.recovered).find((alert) => get(alert, ALERT_INSTANCE_ID) === id)
       );
     },
   };

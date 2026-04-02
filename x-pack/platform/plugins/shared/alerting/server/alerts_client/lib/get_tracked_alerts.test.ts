@@ -146,37 +146,6 @@ describe('get_tracked_alerts', () => {
       tracked.active['uuid-new'] = activeAlert;
       expect(tracked.getById('id-1')).toBe(activeAlert);
     });
-
-    it('getById prefers recovered over delayed when same instance id exists in both', () => {
-      const tracked = createEmptyTrackedAlerts<{}>();
-      const delayedAlert = {
-        [ALERT_UUID]: 'uuid-delayed',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_DELAYED,
-      } as unknown as TestAlertDoc;
-      const recoveredAlert = {
-        [ALERT_UUID]: 'uuid-recovered',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-      } as unknown as TestAlertDoc;
-      tracked.all['uuid-delayed'] = delayedAlert;
-      tracked.delayed['uuid-delayed'] = delayedAlert;
-      tracked.all['uuid-recovered'] = recoveredAlert;
-      tracked.recovered['uuid-recovered'] = recoveredAlert;
-      expect(tracked.getById('id-1')).toBe(recoveredAlert);
-    });
-
-    it('getById falls back to delayed when no active or recovered match', () => {
-      const tracked = createEmptyTrackedAlerts<{}>();
-      const delayedAlert = {
-        [ALERT_UUID]: 'uuid-delayed',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_DELAYED,
-      } as unknown as TestAlertDoc;
-      tracked.all['uuid-delayed'] = delayedAlert;
-      tracked.delayed['uuid-delayed'] = delayedAlert;
-      expect(tracked.getById('id-1')).toBe(delayedAlert);
-    });
   });
 
   describe('populateTrackedAlerts', () => {
