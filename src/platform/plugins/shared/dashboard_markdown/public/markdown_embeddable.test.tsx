@@ -313,5 +313,29 @@ describe('MarkdownEmbeddable', () => {
       // Links should now open in the same tab
       expect(screen.getByRole('link', { name: /click here/i })).toHaveAttribute('target', '_self');
     });
+
+    it('per-link {target=...} overrides the global setting', async () => {
+      await renderEmbeddable({
+        initialState: {
+          content: '[opens in new tab](https://example.com){target="_blank"}',
+          settings: { open_links_in_new_tab: false },
+        },
+      });
+      const link = screen.getByRole('link', { name: /opens in new tab/i });
+      expect(link).toHaveAttribute('target', '_blank');
+    });
+
+    it('links without {target=...} use the global setting', async () => {
+      await renderEmbeddable({
+        initialState: {
+          content: '[overridden](https://a.com){target="_self"} and [default](https://b.com)',
+          settings: { open_links_in_new_tab: true },
+        },
+      });
+      const overridden = screen.getByRole('link', { name: /overridden/i });
+      const defaultLink = screen.getByRole('link', { name: /default/i });
+      expect(overridden).toHaveAttribute('target', '_self');
+      expect(defaultLink).toHaveAttribute('target', '_blank');
+    });
   });
 });

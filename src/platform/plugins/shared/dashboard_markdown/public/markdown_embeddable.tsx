@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { euiMarkdownLinkValidator, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -30,7 +31,12 @@ import type {
 } from '../server';
 import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
-import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
+import {
+  defaultLinkTargetPlugin,
+  linkAttributesParsingPlugin,
+  linkAttributesUiPlugin,
+  resolveRelativeLinksPlugin,
+} from './plugins';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
@@ -213,17 +219,20 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
             titleManager.api.hideTitle$
           );
 
+        const defaultTarget = settings?.open_links_in_new_tab ? '_blank' : '_self';
+
         const {
           parsingPlugins: parsingPluginList,
           processingPlugins: processingPluginList,
           uiPlugins,
-        } = getDefaultEuiMarkdownPlugins({
-          processingConfig: {
-            linkProps: {
-              target: settings?.open_links_in_new_tab ? '_blank' : '_self',
-            },
-          },
-        });
+        } = getDefaultEuiMarkdownPlugins();
+        // Don't apply the defaultTarget here in processingConfig.linkProps. Because of
+        // the way the default EUI processing plugin applies linkProps, it would override
+        // the props manually set using [link](url){target=value} syntax. Instead, process
+        // the default target with our own processing plugin
+
+        // TODO typecast is a workaround for https://github.com/elastic/eui/issues/9557
+        uiPlugins.push(linkAttributesUiPlugin as EuiMarkdownEditorUiPlugin);
 
         // Insert before the link validator so document relative links like
         // [discover](discover) get resolved before validation rejects them.
@@ -234,7 +243,21 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         parsingPluginList.splice(
           linkValidatorIndex !== -1 ? linkValidatorIndex : parsingPluginList.length,
           0,
-          [resolveRelativeLinksPlugin(), {}]
+          [resolveRelativeLinksPlugin(), {}],
+          [linkAttributesParsingPlugin(), {}]
+        );
+
+        // Insert a rehype plugin before rehype-react that sets the default
+        // target on <a> elements. Links with a per-link {target=...} already
+        // have target set via hProperties; this fills in the global default
+        // for the rest.
+        const rehypeReactIndex = processingPluginList.findIndex(
+          (entry) => Array.isArray(entry) && (entry[1] as Record<string, unknown>)?.components
+        );
+        processingPluginList.splice(
+          rehypeReactIndex !== -1 ? rehypeReactIndex : processingPluginList.length,
+          0,
+          [defaultLinkTargetPlugin, { defaultTarget }] as any
         );
 
         const editorContent =
