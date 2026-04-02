@@ -26,11 +26,11 @@ import { TransferAction } from '../../../../plugin_imports/embeddable_editor_ser
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard, <></>);
 
 const OBJECT_TYPE = i18n.translate('discover.saveDiscoverTable.modalTitle', {
-  defaultMessage: 'Discover session table',
+  defaultMessage: 'Discover table',
 });
 
 const BUTTON_LABEL = i18n.translate('discover.saveDiscoverTable.buttonLabel', {
-  defaultMessage: 'Add table to dashboard',
+  defaultMessage: 'Save table to dashboard',
 });
 
 export function SaveDiscoverTableButton() {
