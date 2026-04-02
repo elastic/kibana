@@ -177,6 +177,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
 
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
+export const RUN_WORKFLOWS_PANEL_WIDTH = 400;
 
 export interface UseRunAlertWorkflowPanelProps {
   /** ECS document for the selected alert row. */
@@ -223,6 +224,7 @@ export const useRunAlertWorkflowPanel = ({
         id: RUN_WORKFLOW_PANEL_ID,
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'alert-workflow-context-menu-panel',
+        width: RUN_WORKFLOWS_PANEL_WIDTH,
         content: (
           <AlertWorkflowsPanel
             alertIds={[{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }]}
