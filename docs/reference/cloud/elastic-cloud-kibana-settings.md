@@ -90,6 +90,14 @@ stack: ga 9.4+
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 9.4+ [ec_version_9_4]
+```{applies_to}
+stack: ga 9.4
+```
+
+`xpack.securitySolution.maxEndpointScriptFileSize`
+:    The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
+
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}
 stack: ga 9.3
