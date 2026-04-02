@@ -15,20 +15,23 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 const PROXY_PATH = `api/console/proxy?method=GET&path=${encodeURIComponent('/.kibana/_settings')}`;
 
 apiTest.describe(
-  'POST /api/console/proxy',
-  {
-    tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.security.complete,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.search,
-    ],
-  },
+  'POST /api/console/proxy — system indices warnings',
+  { tag: [...tags.stateful.classic] },
   () => {
     let credentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       credentials = await requestAuth.getApiKey('admin');
+    });
+
+    apiTest('returns warning header for system indices requests', async ({ apiClient }) => {
+      const response = await apiClient.post(PROXY_PATH, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+      });
+
+      expect(response.headers.warning).toBeDefined();
+      expect(response.headers.warning).toMatch(/^299/);
+      expect(response.headers.warning).toContain('system indices');
     });
 
     apiTest('does not forward x-elastic-product-origin', async ({ apiClient }) => {
@@ -41,6 +44,8 @@ apiTest.describe(
       });
 
       expect(response.headers.warning).toBeDefined();
+      expect(response.headers.warning).toMatch(/^299/);
+      expect(response.headers.warning).toContain('system indices');
     });
   }
 );
