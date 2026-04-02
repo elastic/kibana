@@ -10737,13 +10737,13 @@
               "node_modules/zod/v4/core/schemas",
               "$ZodTypeInternals<unknown, unknown>> | ",
               "node_modules/zod/v4/core/checks",
-              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly input?: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
               "$ZodTypeInternals<unknown, unknown>> | ",
               "node_modules/zod/v4/core/checks",
-              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly input?: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
@@ -10783,17 +10783,17 @@
               "node_modules/zod/v4/core/schemas",
               "$ZodTypeInternals<unknown, unknown>> | ",
               "node_modules/zod/v4/core/checks",
-              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"map\" | \"record\"; readonly issues: ",
+              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly issues: ",
               "node_modules/zod/v4/core/errors",
-              "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_key\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_key\"; readonly origin: \"map\" | \"record\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
               "$ZodTypeInternals<unknown, unknown>> | ",
               "node_modules/zod/v4/core/checks",
-              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly key: unknown; readonly origin: \"map\" | \"set\"; readonly issues: ",
+              "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly key: unknown; readonly issues: ",
               "node_modules/zod/v4/core/errors",
-              "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_element\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+              "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_element\"; readonly origin: \"map\" | \"set\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
               "node_modules/zod/v4/core/schemas",
               "$ZodType<unknown, unknown, ",
               "node_modules/zod/v4/core/schemas",
@@ -10837,13 +10837,13 @@
                   "node_modules/zod/v4/core/schemas",
                   "$ZodTypeInternals<unknown, unknown>> | ",
                   "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly input?: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodTypeInternals<unknown, unknown>> | ",
                   "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly input?: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input?: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
@@ -10883,17 +10883,17 @@
                   "node_modules/zod/v4/core/schemas",
                   "$ZodTypeInternals<unknown, unknown>> | ",
                   "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"map\" | \"record\"; readonly issues: ",
+                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly issues: ",
                   "node_modules/zod/v4/core/errors",
-                  "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_key\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_key\"; readonly origin: \"map\" | \"record\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodTypeInternals<unknown, unknown>> | ",
                   "node_modules/zod/v4/core/checks",
-                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly key: unknown; readonly origin: \"map\" | \"set\"; readonly issues: ",
+                  "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly key: unknown; readonly issues: ",
                   "node_modules/zod/v4/core/errors",
-                  "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_element\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+                  "$ZodIssue[]; readonly input?: unknown; readonly code: \"invalid_element\"; readonly origin: \"map\" | \"set\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
                   "node_modules/zod/v4/core/schemas",
                   "$ZodType<unknown, unknown, ",
                   "node_modules/zod/v4/core/schemas",
@@ -16107,6 +16107,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/create.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/timeline/model/components.gen.ts"
               },
               {
@@ -18758,19 +18762,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/common.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/common.gen.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/data_source/common.gen.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/data_source/common.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/common.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/watchlists/management/common.gen.ts"
               },
               {
                 "plugin": "entityStore",
@@ -18787,18 +18791,14 @@
               {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/routes/data_generator/register_data_generator_routes.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/common/entity_analytics/lead_generation/types.ts"
               }
             ],
             "children": [
@@ -29458,13 +29458,13 @@
           "node_modules/zod/v4/core/schemas",
           "$ZodTypeInternals<unknown, unknown>> | ",
           "node_modules/zod/v4/core/checks",
-          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly input: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input: unknown; readonly code: \"too_big\"; readonly maximum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",
           "$ZodTypeInternals<unknown, unknown>> | ",
           "node_modules/zod/v4/core/checks",
-          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly input: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly input: unknown; readonly code: \"too_small\"; readonly minimum: number | bigint; readonly origin: \"string\" | \"number\" | \"bigint\" | \"date\" | (string & {}) | \"set\" | \"int\" | \"file\" | \"array\"; readonly inclusive?: boolean | undefined; readonly exact?: boolean | undefined; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",
@@ -29504,17 +29504,17 @@
           "node_modules/zod/v4/core/schemas",
           "$ZodTypeInternals<unknown, unknown>> | ",
           "node_modules/zod/v4/core/checks",
-          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly origin: \"map\" | \"record\"; readonly issues: ",
+          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly issues: ",
           "node_modules/zod/v4/core/errors",
-          "$ZodIssue[]; readonly input: unknown; readonly code: \"invalid_key\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodIssue[]; readonly input: unknown; readonly code: \"invalid_key\"; readonly origin: \"map\" | \"record\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",
           "$ZodTypeInternals<unknown, unknown>> | ",
           "node_modules/zod/v4/core/checks",
-          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly key: unknown; readonly origin: \"map\" | \"set\"; readonly issues: ",
+          "$ZodCheck<never> | undefined; readonly continue?: boolean | undefined; } | { [x: string]: unknown; readonly key: unknown; readonly issues: ",
           "node_modules/zod/v4/core/errors",
-          "$ZodIssue[]; readonly input: unknown; readonly code: \"invalid_element\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
+          "$ZodIssue[]; readonly input: unknown; readonly code: \"invalid_element\"; readonly origin: \"map\" | \"set\"; readonly message?: string | undefined; readonly path?: PropertyKey[] | undefined; readonly inst?: ",
           "node_modules/zod/v4/core/schemas",
           "$ZodType<unknown, unknown, ",
           "node_modules/zod/v4/core/schemas",

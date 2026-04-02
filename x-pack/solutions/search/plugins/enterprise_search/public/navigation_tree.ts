@@ -51,9 +51,11 @@ function isEditingFromDashboard(
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
   isCloudEnabled,
+  showAlertingV2 = false,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
   isCloudEnabled?: boolean;
+  showAlertingV2?: boolean;
 }): AddSolutionNavigationArg => {
   return {
     icon,
@@ -255,6 +257,24 @@ export const getNavigationTreeDefinition = ({
                   id: 'stack_management_home',
                   title: '',
                 },
+                ...(showAlertingV2
+                  ? [
+                      {
+                        id: 'v2_alerting_preview',
+                        title: i18n.translate(
+                          'xpack.enterpriseSearch.searchNav.management.v2AlertingPreview',
+                          {
+                            defaultMessage: 'V2 Alerting Preview',
+                          }
+                        ),
+                        renderAs: 'panelOpener' as const,
+                        children: [
+                          { link: 'management:rules' as const },
+                          { link: 'management:notification_policies' as const },
+                        ],
+                      },
+                    ]
+                  : []),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },

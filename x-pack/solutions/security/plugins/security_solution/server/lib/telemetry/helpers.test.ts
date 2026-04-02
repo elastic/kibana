@@ -641,6 +641,9 @@ describe('test advanced policy config overlap ', () => {
 
           cloud_lookup_url: null,
         },
+        ransomware: {
+          diagnostic: null,
+        },
         memory_protection: {
           memory_scan_collect_sample: false,
           memory_scan: null,
