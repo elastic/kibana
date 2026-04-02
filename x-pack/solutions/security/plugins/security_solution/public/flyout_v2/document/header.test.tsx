@@ -48,6 +48,12 @@ jest.mock('./components/risk_score', () => ({
   ),
 }));
 
+jest.mock('./components/header_status', () => ({
+  HeaderStatus: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mockHeaderStatus" data-hit-id={hit.id} />
+  ),
+}));
+
 jest.mock('../shared/components/alert_header_block', () => ({
   AlertHeaderBlock: ({
     children,
@@ -147,21 +153,29 @@ describe('<DocumentHeader />', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
     expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
     expect(getByTestId('mockRiskScore')).toBeInTheDocument();
   });
 
-  it('should not render the risk score block for non-alert documents', () => {
-    const { queryByTestId } = renderHeader({ hit: eventHit });
-
-    expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should render the risk score block when the alert has no risk score', () => {
+  it('should render the summary blocks for alerts without a risk score', () => {
     const { getByTestId } = renderHeader({ hit: alertHitNoRiskScore });
 
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
     expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
     expect(getByTestId('mockRiskScore')).toBeInTheDocument();
+  });
+
+  it('should render the status block for alerts', () => {
+    const { getByTestId } = renderHeader({ hit: alertHit });
+
+    expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
+  });
+
+  it('should not render the summary block for non-alert documents', () => {
+    const { queryByTestId } = renderHeader({ hit: eventHit });
+
+    expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
   });
 });
