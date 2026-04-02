@@ -223,10 +223,6 @@ export class LensStorage extends SOContentStorage<LensCrud> {
     return value;
   }
 
-  /**
-   * Lens requires a custom update function because of https://github.com/elastic/kibana/issues/160116
-   * where a forced create with overwrite flag is used instead of regular update
-   */
   async update(
     ctx: StorageContext,
     id: string,
@@ -262,12 +258,10 @@ export class LensStorage extends SOContentStorage<LensCrud> {
 
     const soClient = await LensStorage.getSOClientFromRequest(ctx);
 
-    // since we use create below this call is meant to throw if SO id not found
-    await soClient.get(LENS_CONTENT_TYPE, id);
-
+    // We need to use create instead of update because of https://github.com/elastic/kibana/issues/160116
     const savedObject = await soClient.create<LensAttributes>(LENS_CONTENT_TYPE, dataToLatest, {
       id,
-      overwrite: true,
+      overwrite: true, // always upsert
       ...optionsToLatest,
     });
 

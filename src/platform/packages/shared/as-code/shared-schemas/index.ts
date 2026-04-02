@@ -8,5 +8,3 @@
  */
 
 export { asCodeIdSchema } from './src/schemas';
-
-export type { AsCodeId } from './src/schemas/types';

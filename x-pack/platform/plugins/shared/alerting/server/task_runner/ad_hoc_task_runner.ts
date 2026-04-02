@@ -11,6 +11,7 @@ import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
@@ -430,16 +431,17 @@ export class AdHocTaskRunner implements CancellableTask {
 
       if (apm.currentTransaction) {
         apm.currentTransaction.name = `Execute Backfill for Alerting Rule`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_space_id: spaceId,
-          alerting_rule_id: rule.id,
-          alerting_rule_consumer: rule.consumer,
-          alerting_rule_name: rule.name,
-          alerting_rule_tags: rule.tags.join(', '),
-          alerting_rule_type_id: rule.alertTypeId,
-          alerting_rule_params: JSON.stringify(rule.params),
-        });
       }
+
+      addSpanLabels({
+        alerting_rule_space_id: spaceId,
+        alerting_rule_id: rule.id,
+        alerting_rule_consumer: rule.consumer,
+        alerting_rule_name: rule.name,
+        alerting_rule_tags: rule.tags.join(', '),
+        alerting_rule_type_id: rule.alertTypeId,
+        alerting_rule_params: JSON.stringify(rule.params),
+      });
 
       if (startedAt) {
         // Capture how long it took for the task to start running after being claimed

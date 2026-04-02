@@ -29,6 +29,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { ReactNode } from 'react-markdown';
+import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../../../../../common/siem_migrations/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -72,7 +73,7 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
     const { data: aiConnectors = [], isLoading } = useLoadConnectors({
       http,
       toasts,
-      featureId: 'siem_migrations',
+      featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
       settings,
     });
 

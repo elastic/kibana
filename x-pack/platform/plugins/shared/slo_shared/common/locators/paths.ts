@@ -15,6 +15,8 @@ export const SLO_CREATE_PATH = '/create' as const;
 export const SLO_EDIT_PATH = '/edit/:sloId' as const;
 export const SLO_SETTINGS_PATH = '/settings' as const;
 export const SLOS_MANAGEMENT_PATH = '/management' as const;
+export const SLO_COMPOSITE_CREATE_PATH = '/composite/create' as const;
+export const SLO_COMPOSITE_EDIT_PATH = '/composite/edit/:compositeSloId' as const;
 export const SLOS_MANAGEMENT_TEMPLATES_PATH = '/management/templates' as const;
 
 export const paths = {
@@ -24,6 +26,9 @@ export const paths = {
   slosManagement: `${SLOS_BASE_PATH}${SLOS_MANAGEMENT_PATH}`,
   slosManagementTemplates: `${SLOS_BASE_PATH}${SLOS_MANAGEMENT_TEMPLATES_PATH}`,
   sloCreate: `${SLOS_BASE_PATH}${SLO_CREATE_PATH}`,
+  sloCompositeCreate: `${SLOS_BASE_PATH}${SLO_COMPOSITE_CREATE_PATH}`,
+  sloCompositeEdit: (compositeSloId: string) =>
+    `${SLOS_BASE_PATH}/composite/edit/${encodeURIComponent(compositeSloId)}`,
   sloCreateWithEncodedForm: (encodedParams: string) =>
     `${SLOS_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,
   sloCreateFromTemplate: (templateId: string) =>

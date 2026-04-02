@@ -7,30 +7,50 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
-import { AgentBuilderTourProvider } from '../../context/agent_builder_tour_context';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
-import { SendMessageProvider } from '../../context/send_message/send_message_context';
+import {
+  SendMessageProvider,
+  useSendMessage,
+} from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
+
+// Clears error state on every navigation. Rendered inside SendMessageProvider (for context access)
+// and inside the Router (for useLocation access), so it's intentionally placed in the routed view
+// only — the embeddable/sidebar context has no navigation and doesn't need this behavior.
+const LocationErrorClearer: React.FC<{}> = () => {
+  const { key: locationKey } = useLocation();
+  const { removeError } = useSendMessage();
+  useEffect(() => {
+    removeError();
+  }, [locationKey, removeError]);
+  return null;
+};
 
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
 
-  const mainStyles = css`
-    border: none;
+  const containerStyles = css`
+    display: flex;
+    flex-direction: column;
+    height: var(--kbn-application--content-height);
     ${conversationBackgroundStyles(euiTheme)}
   `;
+
   const headerStyles = css`
-    justify-content: center;
+    flex-shrink: 0;
     height: ${headerHeight}px;
+    display: flex;
+    align-items: center;
+    padding: ${euiTheme.size.m};
   `;
+
   const contentStyles = css`
     width: 100%;
-    height: 100%;
+    flex: 1;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
     display: flex;
     justify-content: center;
@@ -38,51 +58,18 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
     padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
   `;
 
-  const labels = {
-    header: i18n.translate('xpack.agentBuilder.conversationsView.header', {
-      defaultMessage: 'Conversation header',
-    }),
-    content: i18n.translate('xpack.agentBuilder.conversationsView.content', {
-      defaultMessage: 'Conversation content',
-    }),
-  };
-
   return (
     <RoutedConversationsProvider>
       <SendMessageProvider>
-        <AgentBuilderTourProvider>
-          <KibanaPageTemplate
-            offset={0}
-            restrictWidth={false}
-            data-test-subj="agentBuilderPageConversations"
-            grow={false}
-            panelled={false}
-            mainProps={{
-              css: mainStyles,
-            }}
-            responsive={[]}
-          >
-            <KibanaPageTemplate.Header
-              css={headerStyles}
-              bottomBorder={false}
-              aria-label={labels.header}
-              paddingSize="m"
-              responsive={false}
-            >
-              <ConversationHeader />
-            </KibanaPageTemplate.Header>
-            <KibanaPageTemplate.Section
-              paddingSize="none"
-              grow
-              contentProps={{
-                css: contentStyles,
-              }}
-              aria-label={labels.content}
-            >
-              <Conversation />
-            </KibanaPageTemplate.Section>
-          </KibanaPageTemplate>
-        </AgentBuilderTourProvider>
+        <LocationErrorClearer />
+        <div css={containerStyles} data-test-subj="agentBuilderPageConversations">
+          <div css={headerStyles}>
+            <ConversationHeader />
+          </div>
+          <div css={contentStyles}>
+            <Conversation />
+          </div>
+        </div>
       </SendMessageProvider>
     </RoutedConversationsProvider>
   );
