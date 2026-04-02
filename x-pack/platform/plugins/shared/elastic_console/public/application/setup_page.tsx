@@ -66,9 +66,9 @@ export const SetupPage: React.FC = () => {
         >
           <p>
             Elastic Ramen is an <strong>experimental</strong> feature under active development. It
-            may change, break, or be removed without notice. Use at your own risk — it can expose
-            AI connectors to external tools and may produce unexpected behavior. Do not rely on it
-            for production workloads.
+            may change, break, or be removed without notice. Use at your own risk — it can expose AI
+            connectors to external tools and may produce unexpected behavior. Do not rely on it for
+            production workloads.
           </p>
         </EuiCallOut>
 
