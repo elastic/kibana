@@ -425,6 +425,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
     - Bullet list of data source names.
     - Use only data sources that are clearly implied by the rule and its dependencies.
     - Pay special attention to Software Entity names as data sources. For example Cloudflare, Zcaler.
+    - Do not make up entity names such as Netflow/IPFIX unless they are explicitly mentioned in the rule.
     - Infer data sources from the rule's domains, log source types, event categories, software entities, and field references. Do not assume a particular network-flow or packet-capture pipeline unless the rule and its dependencies clearly imply it.
 
   #### Flattened Detection Logic ( including the negate attribute handling)

@@ -15,8 +15,9 @@ import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 const INTEGRATION_WEIGHTS = [
-  { ids: ['endpoint'], weight: 10 }, // Elastic Defend should be boosted
-  { ids: ['network_traffic'], weight: 10 }, // Elastic Defend should be boosted
+  // These integrations should be boosted because in many cases they are used as fallback.
+  { ids: ['endpoint'], weight: 10 },
+  { ids: ['network_traffic'], weight: 10 },
 ];
 
 const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];
@@ -194,7 +195,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       function_score: {
         query: {
           bool: {
-            must: [{ semantic: { query: semanticQuery, field: 'elser_embedding' } }],
+            must: { semantic: { query: semanticQuery, field: 'elser_embedding' } },
             must_not: { ids: { values: EXCLUDED_INTEGRATIONS } },
             filter: { exists: { field: 'data_streams' } },
           },

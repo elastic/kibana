@@ -15,7 +15,7 @@ Whenever you encounter below test conditions, it indicates conditions based on p
 ### Example of Packet Rate Tests
 
 \`\`\`
-<test group="Flow Property Tests" id="203" name="com.q1labs.semsources.cre.tests.PacketRate" requiredCapabilities="EventViewer.RULECREATION|SURVEILLANCE.RULECREATION" uid="1">
+<test name="com.q1labs.semsources.cre.tests.PacketRate">
   <text>when the source packet rate is greater than 1000 packets/second</text>
 </test>
 \`\`\`
@@ -25,7 +25,7 @@ Whenever you encounter below test conditions, it indicates conditions based on p
 Packet rate has 2 components:
 
 1. Actual packet rate (Number of packets/Total event duration in seconds)
-2. Qradar Direction of the packet flow. QRadar can have 4 values for this :
+2. Qradar Direction of the network event. QRadar can have 4 values for this :
   - source
   - destination
   - local
