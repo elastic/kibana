@@ -195,6 +195,16 @@ export const ImportExceptionListFlyout = React.memo(
       setFiles(inputFiles ?? null);
     }, []);
 
+    const handleNewListCheckboxChange = useCallback(() => {
+      setAsNewList((prev) => !prev);
+      setOverwrite(false);
+    }, []);
+
+    const handleOverwriteCheckboxChange = useCallback((): void => {
+      setOverwrite((prev) => !prev);
+      setAsNewList(false);
+    }, []);
+
     const importExceptionListFlyoutTitleId = useGeneratedHtmlId({
       prefix: 'importExceptionListFlyoutTitle',
     });
@@ -233,10 +243,7 @@ export const ImportExceptionListFlyout = React.memo(
                 label={i18n.IMPORT_EXCEPTION_LIST_OVERWRITE}
                 checked={overwrite}
                 data-test-subj="importExceptionListOverwriteExistingCheckbox"
-                onChange={(e) => {
-                  setOverwrite(!overwrite);
-                  setAsNewList(false);
-                }}
+                onChange={handleOverwriteCheckboxChange}
               />
               {isEndpointExceptionsMovedFFEnabled ? (
                 <EuiCheckbox
@@ -244,10 +251,7 @@ export const ImportExceptionListFlyout = React.memo(
                   label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
                   data-test-subj="importExceptionListCreateNewCheckbox"
                   checked={asNewList}
-                  onChange={(e) => {
-                    setAsNewList(!asNewList);
-                    setOverwrite(false);
-                  }}
+                  onChange={handleNewListCheckboxChange}
                 />
               ) : (
                 <EuiToolTip
@@ -260,10 +264,7 @@ export const ImportExceptionListFlyout = React.memo(
                     data-test-subj="importExceptionListCreateNewCheckbox"
                     checked={asNewList}
                     disabled={endpointListImporting}
-                    onChange={(e) => {
-                      setAsNewList(!asNewList);
-                      setOverwrite(false);
-                    }}
+                    onChange={handleNewListCheckboxChange}
                   />
                 </EuiToolTip>
               )}

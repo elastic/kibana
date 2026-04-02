@@ -46,12 +46,16 @@ const ArtifactImportErrorToast: React.FC<{
   errors: BulkErrorSchema[];
   onShowErrors: (errors: BulkErrorSchema[]) => void;
 }> = ({ text, buttonLabel, errors, onShowErrors }) => {
+  const handleOnClick = useCallback(() => {
+    onShowErrors(errors);
+  }, [errors, onShowErrors]);
+
   return (
     <>
       <EuiText size="s">{text}</EuiText>
 
       <EuiFlexGroup justifyContent="flexEnd" direction="row">
-        <EuiButton size="s" onClick={() => onShowErrors(errors)}>
+        <EuiButton size="s" onClick={handleOnClick}>
           {buttonLabel}
         </EuiButton>
       </EuiFlexGroup>
