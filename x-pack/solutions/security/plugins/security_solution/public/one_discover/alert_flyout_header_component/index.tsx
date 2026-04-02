@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
@@ -15,7 +15,11 @@ import { NotesDetails } from '../../flyout_v2/notes';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 
-export interface AlertFlyoutHeaderProps extends Pick<DocViewRenderProps, 'hit'> {
+export interface AlertFlyoutHeaderProps {
+  /**
+   * The document record used to render the flyout header.
+   */
+  hit: DataTableRecord;
   /**
    * The document record used to render the flyout header.
    */
@@ -49,7 +53,7 @@ export const AlertFlyoutHeader = ({
         services,
         store,
         history,
-        children: <NotesDetails hit={hit} isTimelineFlyout={false} />,
+        children: <NotesDetails hit={hit} />,
       }),
       {
         ownFocus: false,
@@ -96,7 +100,7 @@ export const AlertFlyoutHeader = ({
         hit={hit}
         renderCellActions={noopCellActionRenderer}
         onAlertUpdated={onAlertUpdated}
-        onOpenNotesTab={openNotesFlyout}
+        onShowNotes={openNotesFlyout}
       />
     ),
   });

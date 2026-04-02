@@ -15,9 +15,9 @@ import {
   type CellActionRenderer,
   noopCellActionRenderer,
 } from '../../shared/components/cell_actions';
-import { STATUS_TITLE_TEST_ID } from '../../shared/components/test_ids';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { StatusPopoverButton, type StatusPopoverButtonFieldInfo } from './status_popover_button';
+import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 const WORKFLOW_STATUS_FIELD_DATA = {
   field: ALERT_WORKFLOW_STATUS,
@@ -47,7 +47,7 @@ interface HeaderStatusProps {
  */
 export const HeaderStatus = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }: HeaderStatusProps) => {
-    const eventId = hit.raw._id ?? hit.id;
+    const eventId = hit.raw._id as string;
     const statusFieldInfo = useMemo<StatusPopoverButtonFieldInfo | null>(() => {
       const workflowStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
       const statusValue = Array.isArray(workflowStatus)

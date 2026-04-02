@@ -28,7 +28,6 @@ import type {
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import {
-  TimelineId,
   type ColumnHeaderOptions,
   type OnRowSelected,
 } from '../../../../../common/types/timeline';
@@ -131,10 +130,9 @@ const RowActionComponent = ({
             <DocumentFlyoutWrapper
               documentId={eventId}
               indexName={indexName ?? undefined}
-              onAssigneesUpdated={refetch}
               renderCellActions={cellActionRenderer}
               onAlertUpdated={handleAlertUpdated}
-              isTimelineFlyout={tableId === TimelineId.active || tableId === TimelineId.test}
+              onAssigneesUpdated={refetch}
             />
           ),
         }),

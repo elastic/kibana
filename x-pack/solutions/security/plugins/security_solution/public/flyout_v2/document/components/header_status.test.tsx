@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { HeaderStatus } from './header_status';
-import { STATUS_TITLE_TEST_ID } from '../../shared/components/test_ids';
+import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 jest.mock('./status_popover_button', () => ({
   StatusPopoverButton: ({

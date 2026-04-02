@@ -17,26 +17,26 @@ jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privil
 jest.mock('./header', () => ({
   Header: ({
     onAssigneesUpdated,
-    onOpenNotesTab,
+    onShowNotes,
   }: {
     onAssigneesUpdated?: () => void;
-    onOpenNotesTab?: () => void;
+    onShowNotes: () => void;
   }) => (
     <button
       type="button"
       data-test-subj="mock-header"
       data-has-on-assignees-updated={String(onAssigneesUpdated != null)}
-      onClick={onOpenNotesTab}
+      onClick={onShowNotes}
     />
   ),
 }));
 jest.mock('./tabs/overview_tab', () => ({
   OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
 }));
+jest.mock('./footer', () => ({ Footer: () => <div data-test-subj="mock-footer" /> }));
 jest.mock('../notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
-jest.mock('./footer', () => ({ Footer: () => <div data-test-subj="mock-footer" /> }));
 
 const createAlertHit = (): DataTableRecord =>
   ({
@@ -57,7 +57,7 @@ describe('<DocumentFlyout />', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
 
     const { getByTestId } = render(
-      <TestProviders startServices={startServices}>
+      <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
           onAlertUpdated={jest.fn()}
@@ -73,7 +73,7 @@ describe('<DocumentFlyout />', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
 
     const { getByTestId, queryByTestId } = render(
-      <TestProviders startServices={startServices}>
+      <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
           onAlertUpdated={jest.fn()}
@@ -84,34 +84,6 @@ describe('<DocumentFlyout />', () => {
 
     expect(getByTestId('document-overview-loading')).toBeInTheDocument();
     expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
-  });
-
-  it('opens notes in a system flyout when notes action is clicked', () => {
-    const openSystemFlyout = jest.fn();
-    startServices.overlays = {
-      ...startServices.overlays,
-      openSystemFlyout,
-    };
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
-
-    const { getByTestId } = render(
-      <TestProviders startServices={startServices}>
-        <DocumentFlyout hit={createAlertHit()} renderCellActions={jest.fn()} isTimelineFlyout />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('mock-header'));
-
-    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
-    expect(openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
-      })
-    );
   });
 
   it('renders the header, overview tab and footer', () => {
@@ -132,6 +104,38 @@ describe('<DocumentFlyout />', () => {
     expect(getByTestId('mock-footer')).toBeInTheDocument();
   });
 
+  it('opens notes in a system flyout when notes action is clicked', () => {
+    const openSystemFlyout = jest.fn();
+    startServices.overlays = {
+      ...startServices.overlays,
+      openSystemFlyout,
+    };
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+    const { getByTestId } = render(
+      <TestProviders startServices={startServices}>
+        <DocumentFlyout
+          hit={createAlertHit()}
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('mock-header'));
+
+    expect(openSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      })
+    );
+  });
+
   it('passes assignee updates callback to the header', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 
@@ -141,6 +145,7 @@ describe('<DocumentFlyout />', () => {
           hit={createAlertHit()}
           onAssigneesUpdated={jest.fn()}
           renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
         />
       </TestProviders>
     );

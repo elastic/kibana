@@ -41,23 +41,13 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
-  /**
-   * Whether notes should render Timeline-specific actions.
-   */
-  isTimelineFlyout?: boolean;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({
-    hit,
-    onAlertUpdated,
-    onAssigneesUpdated,
-    renderCellActions,
-    isTimelineFlyout = false,
-  }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, onAssigneesUpdated }: DocumentFlyoutProps) => {
     const { services } = useKibana();
     const store = useStore();
     const history = useHistory();
@@ -69,16 +59,13 @@ export const DocumentFlyout = memo(
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
-    if (isAlert && loading) {
-      return <FlyoutLoading data-test-subj="document-overview-loading" />;
-    }
-    const openNotesFlyout = useCallback(() => {
+    const onShowNotes = useCallback(() => {
       services.overlays?.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <NotesDetails hit={hit} isTimelineFlyout={isTimelineFlyout} />,
+          children: <NotesDetails hit={hit} />,
         }),
         {
           ownFocus: false,
@@ -87,8 +74,11 @@ export const DocumentFlyout = memo(
           type: 'overlay',
         }
       );
-    }, [history, hit, isTimelineFlyout, services, store]);
+    }, [history, hit, services, store]);
 
+    if (isAlert && loading) {
+      return <FlyoutLoading data-test-subj="document-overview-loading" />;
+    }
     if (isAlert && loading) {
       return <FlyoutLoading data-test-subj="document-overview-loading" />;
     }
@@ -103,9 +93,9 @@ export const DocumentFlyout = memo(
           <Header
             hit={hit}
             renderCellActions={renderCellActions}
-            onAssigneesUpdated={onAssigneesUpdated}
             onAlertUpdated={onAlertUpdated}
-            onOpenNotesTab={openNotesFlyout}
+            onAssigneesUpdated={onAssigneesUpdated}
+            onShowNotes={onShowNotes}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

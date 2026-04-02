@@ -11,28 +11,24 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_UUID, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { EventKind } from './constants/event_kinds';
 import { Assignees } from './components/assignees';
 import { HeaderTitle } from './components/header_title';
 import { HeaderStatus } from './components/header_status';
-import { Notes } from './components/notes';
+import { Notes } from '../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
 import { RiskScore } from './components/risk_score';
-import { AlertHeaderBlock } from '../shared/components/alert_header_block';
-import {
-  ALERT_SUMMARY_PANEL_TEST_ID,
-  RISK_SCORE_TITLE_TEST_ID,
-} from '../shared/components/test_ids';
+import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../shared/components/cell_actions';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
 
+// minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
-  minWidth: 130,
+  minWidth: 280,
 };
 
 export interface HeaderProps {
@@ -53,26 +49,34 @@ export interface HeaderProps {
    */
   onAssigneesUpdated?: () => void;
   /**
-   * Optional callback that opens the notes details view.
-   * When omitted, notes render as a read-only count.
+   * Callback that opens the notes details view.
    */
-  onOpenNotesTab?: () => void;
+  onShowNotes: () => void;
 }
 
 /**
  * Document header for the flyout_v2 document flyout.
  * Renders severity, timestamp, title (as a rule-details link for alerts),
- * and alert-only summary blocks (risk score, assignees, and notes).
+ * and alert-only summary blocks (status, risk score assignees, and notes).
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onOpenNotesTab }) => {
+  ({
+    hit,
+    renderCellActions = noopCellActionRenderer,
+    onAlertUpdated,
+    onAssigneesUpdated,
+    onShowNotes,
+  }) => {
     const { services } = useKibana();
     const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
     const ruleId = useMemo(
       () => (getFieldValue(hit, ALERT_RULE_UUID) as string | null) ?? null,
       [hit]
     );
-    const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
+    const isAlert = useMemo(
+      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
+    );
 
     const ruleDetailsHref = useMemo(() => {
       if (!ruleId) return undefined;
@@ -101,31 +105,28 @@ export const Header: FC<HeaderProps> = memo(
               data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
             >
               <EuiFlexItem css={blockStyles}>
-                <HeaderStatus
-                  hit={hit}
-                  renderCellActions={renderCellActions}
-                  onAlertUpdated={onAlertUpdated}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem css={blockStyles}>
-                <AlertHeaderBlock
-                  hasBorder
-                  title={
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.document.header.riskScoreTitle"
-                      defaultMessage="Risk score"
+                <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                  <EuiFlexItem>
+                    <HeaderStatus
+                      hit={hit}
+                      renderCellActions={renderCellActions}
+                      onAlertUpdated={onAlertUpdated}
                     />
-                  }
-                  data-test-subj={RISK_SCORE_TITLE_TEST_ID}
-                >
-                  <RiskScore hit={hit} />
-                </AlertHeaderBlock>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <RiskScore hit={hit} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem css={blockStyles}>
-                <Assignees hit={hit} />
-              </EuiFlexItem>
-              <EuiFlexItem css={blockStyles}>
-                <Notes hit={hit} onOpenNotesTab={onOpenNotesTab} />
+                <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                  <EuiFlexItem>
+                    <Assignees hit={hit} onAssigneesUpdated={onAssigneesUpdated} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <Notes documentId={hit.raw._id ?? ''} onShowNotes={onShowNotes} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

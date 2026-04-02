@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { buildDataTableRecord, type EsHitRecord, getFieldValue } from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { ALERT_RULE_UUID, ALERT_WORKFLOW_ASSIGNEE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
@@ -17,14 +17,11 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { Assignees } from '../../../../flyout_v2/document/components/assignees';
-import { Notes } from '../../../../flyout_v2/document/components/notes';
+import { Notes } from '../../../../flyout_v2/shared/components/notes';
 import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
 import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
-import {
-  ALERT_SUMMARY_PANEL_TEST_ID,
-  RISK_SCORE_TITLE_TEST_ID,
-} from '../../../../flyout_v2/shared/components/test_ids';
+import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { LeftPanelNotesTab } from '../../left';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 import { HeaderTitle } from '../../../../flyout_v2/document/components/header_title';
@@ -44,8 +41,7 @@ const urlParamOverride = { timeline: { isOpen: false } };
  * Alert details flyout right section header
  */
 export const AlertHeaderTitle = memo(() => {
-  const { eventId, scopeId, isRulePreview, refetchFlyoutData, searchHit } =
-    useDocumentDetailsContext();
+  const { scopeId, isRulePreview, refetchFlyoutData, searchHit } = useDocumentDetailsContext();
   const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
   const { closeFlyout } = useExpandableFlyoutApi();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
@@ -54,18 +50,17 @@ export const AlertHeaderTitle = memo(() => {
   const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
 
   const { refetch } = useRefetchByScope({ scopeId });
-  const alertAssignees = useMemo(
-    () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
-    [getFieldsData]
-  );
+
   const onStatusUpdated = useCallback(() => {
     refetch();
     closeFlyout();
   }, [closeFlyout, refetch]);
+
   const onAssigneesUpdated = useCallback(() => {
     refetch();
     refetchFlyoutData();
   }, [refetch, refetchFlyoutData]);
+
   const renderStatusCellActions = useCallback<CellActionRenderer>(
     ({ children, field, value }) => (
       <CellActions field={field} value={value as string | string[] | null | undefined}>
@@ -75,23 +70,6 @@ export const AlertHeaderTitle = memo(() => {
     []
   );
 
-  const riskScore = useMemo(
-    () => (
-      <AlertHeaderBlock
-        hasBorder
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
-            defaultMessage="Risk score"
-          />
-        }
-        data-test-subj={RISK_SCORE_TITLE_TEST_ID}
-      >
-        <RiskScore hit={hit} />
-      </AlertHeaderBlock>
-    ),
-    [hit]
-  );
   const status = useMemo(
     () =>
       isRulePreview ? (
@@ -135,7 +113,9 @@ export const AlertHeaderTitle = memo(() => {
         <EuiFlexItem css={blockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>{status}</EuiFlexItem>
-            <EuiFlexItem>{riskScore}</EuiFlexItem>
+            <EuiFlexItem>
+              <RiskScore hit={hit} />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={blockStyles}>
@@ -149,9 +129,8 @@ export const AlertHeaderTitle = memo(() => {
             </EuiFlexItem>
             <EuiFlexItem>
               <Notes
-                hit={hit}
-                documentId={eventId}
-                onOpenNotesTab={openNotesTab}
+                documentId={hit.raw._id ?? ''}
+                onShowNotes={openNotesTab}
                 disabled={isRulePreview}
               />
             </EuiFlexItem>

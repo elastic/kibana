@@ -10,10 +10,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
-import {
-  ALERT_SUMMARY_PANEL_TEST_ID,
-  RISK_SCORE_TITLE_TEST_ID,
-} from '../shared/components/test_ids';
+import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -54,31 +51,14 @@ jest.mock('./components/header_status', () => ({
   ),
 }));
 
-jest.mock('../shared/components/alert_header_block', () => ({
-  AlertHeaderBlock: ({
-    children,
-    title,
-    'data-test-subj': dataTestSubj,
-  }: {
-    children: React.ReactNode;
-    title: React.ReactNode;
-    'data-test-subj': string;
-  }) => (
-    <div data-test-subj={dataTestSubj}>
-      {title}
-      {children}
-    </div>
-  ),
-}));
-
 jest.mock('./components/notes', () => ({
-  Notes: ({ hit, onOpenNotesTab }: { hit: DataTableRecord; onOpenNotesTab?: () => void }) => (
+  Notes: ({ hit, onShowNotes }: { hit: DataTableRecord; onShowNotes?: () => void }) => (
     <button
       type="button"
       data-test-subj="mockNotes"
       data-hit-id={hit.id}
-      data-has-open-notes-tab={String(onOpenNotesTab != null)}
-      onClick={onOpenNotesTab}
+      data-has-open-notes-tab={String(onShowNotes != null)}
+      onClick={onShowNotes}
     />
   ),
 }));
@@ -180,11 +160,14 @@ describe('<DocumentHeader />', () => {
   it('should render the alert summary blocks for alerts', () => {
     const onOpenNotesTab = jest.fn();
     const onAssigneesUpdated = jest.fn();
-    const { getByTestId } = renderHeader({ hit: alertHit, onAssigneesUpdated, onOpenNotesTab });
+    const { getByTestId } = renderHeader({
+      hit: alertHit,
+      onAssigneesUpdated,
+      onShowNotes: onOpenNotesTab,
+    });
 
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
-    expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
     expect(getByTestId('mockRiskScore')).toBeInTheDocument();
     expect(getByTestId('mockAssignees')).toHaveAttribute('data-hit-id', '1');
     expect(getByTestId('mockAssignees')).toHaveAttribute('data-has-on-assignees-updated', 'true');
@@ -195,6 +178,7 @@ describe('<DocumentHeader />', () => {
     const { queryByTestId } = renderHeader({ hit: eventHit });
 
     expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId('mockHeaderStatus')).not.toBeInTheDocument();
     expect(queryByTestId('mockAssignees')).not.toBeInTheDocument();
     expect(queryByTestId('mockNotes')).not.toBeInTheDocument();
     expect(queryByTestId('mockRiskScore')).not.toBeInTheDocument();
@@ -205,7 +189,6 @@ describe('<DocumentHeader />', () => {
 
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId('mockHeaderStatus')).toBeInTheDocument();
-    expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
     expect(getByTestId('mockRiskScore')).toBeInTheDocument();
   });
 

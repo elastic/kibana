@@ -16,7 +16,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
@@ -73,7 +73,7 @@ export interface AssigneesProps {
 
 export const Assignees = memo(
   ({ hit, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
-    const eventId = useMemo(() => hit.raw._id ?? hit.id, [hit]);
+    const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
     const initialAssignedUserIds = useMemo(() => {
       const value = getFieldValue(hit, ALERT_WORKFLOW_ASSIGNEE_IDS) as string[] | string | null;
 

@@ -17,10 +17,10 @@ import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
-  const { onOpenNotesTab } = props as { onOpenNotesTab?: () => void };
+  const { onShowNotes } = props as { onShowNotes?: () => void };
 
   return (
-    <button type="button" onClick={onOpenNotesTab}>
+    <button type="button" onClick={onShowNotes}>
       {'MockDocumentHeader'}
     </button>
   );
@@ -169,6 +169,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
         />
       </Router>
     );
