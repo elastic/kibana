@@ -15,7 +15,6 @@ import type {
   PackageInfo,
   PackagePolicy,
   RegistryDataStream,
-  RegistryPolicyInputOnlyTemplate,
 } from '../../../types';
 import {
   DATASET_VAR_NAME,
@@ -30,7 +29,11 @@ import * as Registry from '../registry';
 
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
-import { getNormalizedDataStreams } from '../../../../common/services';
+import {
+  getNormalizedDataStreams,
+  getNormalizedInputs,
+  registryInputAllowsDynamicSignalTypes,
+} from '../../../../common/services';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
@@ -52,6 +55,9 @@ export const findDataStreamsFromDifferentPackages = async (
   dataStreamType?: string
 ) => {
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
+  if (!dataStream.type) {
+    throw new FleetError(`Expected data_stream.type to be defined for dataset "${datasetName}"`);
+  }
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
     dataset: datasetName,
@@ -88,15 +94,21 @@ export const isInputPackageDatasetUsedByMultiplePolicies = (
   return filtered.length > 1;
 };
 
+/**
+ * Returns true when any policy template in the package contains a registry input
+ * that declares dynamic signal types (dynamic_signal_types: true).
+ *
+ * Covers both:
+ *   - Input-only packages (top-level `input` key on the policy template)
+ *   - Composable integration packages (nested `inputs[]` entries)
+ */
 export const hasDynamicSignalTypes = (packageInfo?: PackageInfo): boolean => {
   if (!packageInfo) {
     return false;
   }
-  const inputOnlyTemplate = packageInfo.policy_templates?.find(
-    (template) => 'input' in template && template.input === OTEL_COLLECTOR_INPUT_TYPE
-  ) as RegistryPolicyInputOnlyTemplate | undefined;
-
-  return inputOnlyTemplate?.dynamic_signal_types === true;
+  return (packageInfo.policy_templates ?? []).some((template) =>
+    getNormalizedInputs(template).some(registryInputAllowsDynamicSignalTypes)
+  );
 };
 
 // install the assets needed for inputs type packages

@@ -29,7 +29,7 @@ jobs:
               // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/, token: 'kibana' },
               // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/, token: 'kibana' },
               { user: 'kibanamachine', branchPrefix: 'scout_metadata_update', token: 'github' },
-              // { user: 'elasticmachine', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'], token: 'kibana' },
+              { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'], token: 'kibana' },
             ];
 
             // Fetch the list of changed files in the PR

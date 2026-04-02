@@ -28,13 +28,14 @@ import type {
   MergeStep,
   ParallelStep,
   Step,
+  SwitchStep,
   WaitStep,
   WhileStep,
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
-import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
-import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
+import type { TriggerType } from '../spec/schema/triggers';
+import { TriggerTypes } from '../spec/schema/triggers';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -76,13 +77,12 @@ export function isFailedBeforeSteps(
 }
 
 export function isCancelableStatus(status: ExecutionStatus) {
-  const CancelableStatus: readonly ExecutionStatus[] = [
-    ExecutionStatus.RUNNING,
-    ExecutionStatus.WAITING,
-    ExecutionStatus.WAITING_FOR_INPUT,
-    ExecutionStatus.PENDING,
-  ];
-  return CancelableStatus.includes(status);
+  return (
+    status === ExecutionStatus.RUNNING ||
+    status === ExecutionStatus.WAITING ||
+    status === ExecutionStatus.WAITING_FOR_INPUT ||
+    status === ExecutionStatus.PENDING
+  );
 }
 
 // Type guards for steps types
@@ -95,6 +95,7 @@ export const isWhileStep = (step: Step): step is WhileStep => step.type === 'whi
 export const isIfStep = (step: Step): step is IfStep => step.type === 'if';
 export const isParallelStep = (step: Step): step is ParallelStep => step.type === 'parallel';
 export const isMergeStep = (step: Step): step is MergeStep => step.type === 'merge';
+export const isSwitchStep = (step: Step): step is SwitchStep => step.type === 'switch';
 export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
   BuiltInStepTypes.includes(type as BuiltInStepType);
 export const isTriggerType = (type: string): type is TriggerType =>

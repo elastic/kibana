@@ -33,7 +33,7 @@ export const AutomaticImportAgentState = Annotation.Root({
     reducer: lastValueReducer,
     default: () => ({}),
   }),
-  pipeline_generation_results: Annotation<estypes.IngestSimulateDocumentResult[]>({
+  pipeline_generation_results: Annotation<Array<Record<string, unknown>>>({
     reducer: lastValueReducer,
     default: () => [],
   }),
@@ -51,6 +51,17 @@ export const AutomaticImportAgentState = Annotation.Root({
       failure_details: [],
     }),
   }),
+  analysis: Annotation<string>({
+    reducer: lastValueReducer,
+    default: () => '',
+  }),
+  review: Annotation<string>({
+    reducer: lastValueReducer,
+    default: () => '',
+  }),
 });
 
 export type AutomaticImportAgentStateType = typeof AutomaticImportAgentState.State;
+
+/** Partial state updates accepted by `createAutomaticImportAgent(...).invoke()` */
+export type AutomaticImportAgentStateUpdateType = typeof AutomaticImportAgentState.Update;

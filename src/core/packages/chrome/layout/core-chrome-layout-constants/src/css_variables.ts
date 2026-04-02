@@ -19,7 +19,15 @@ export type LayoutComponent =
 export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
 export type LayoutProperty = keyof Pick<
   React.CSSProperties,
-  'top' | 'bottom' | 'left' | 'right' | 'height' | 'width' | 'marginBottom' | 'marginRight'
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'height'
+  | 'width'
+  | 'marginBottom'
+  | 'marginRight'
+  | 'marginTop'
 >;
 
 export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;

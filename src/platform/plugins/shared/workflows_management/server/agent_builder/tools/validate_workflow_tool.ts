@@ -20,8 +20,8 @@ import {
 } from './get_step_definitions_tool';
 import { workflowTools } from '../../../common/agent_builder/constants';
 import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 const extractStepTypes = (yaml: string): string[] => {
   const parsed = parseYamlToJSONWithoutValidation(yaml);

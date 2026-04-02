@@ -47,20 +47,23 @@ import { pieStateSchema } from './charts/pie';
  *  - Defining the `LensApiState` type from the schema types
  *  - Exporting this value as `Type<LensApiState>`
  */
-export const _lensApiStateSchema: any = schema.oneOf([
-  metricStateSchema,
-  legacyMetricStateSchema,
-  xyStateSchema,
-  gaugeStateSchema,
-  heatmapStateSchema,
-  tagcloudStateSchema,
-  regionMapStateSchema,
-  datatableStateSchema,
-  pieStateSchema,
-  mosaicStateSchema,
-  treemapStateSchema,
-  waffleStateSchema,
-]);
+export const _lensApiStateSchema: any = schema.oneOf(
+  [
+    metricStateSchema,
+    legacyMetricStateSchema,
+    xyStateSchema,
+    gaugeStateSchema,
+    heatmapStateSchema,
+    tagcloudStateSchema,
+    regionMapStateSchema,
+    datatableStateSchema,
+    pieStateSchema,
+    mosaicStateSchema,
+    treemapStateSchema,
+    waffleStateSchema,
+  ],
+  { meta: { id: 'lensApiState', title: 'Visualizations' } }
+);
 
 export type LensApiState =
   | MetricState

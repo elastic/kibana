@@ -8,6 +8,7 @@
 import assert from 'assert';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
+  AnalyticsServiceSetup,
   Logger,
   LoggerFactory,
   SavedObject,
@@ -135,7 +136,8 @@ export class AutomaticImportService {
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
     taskManagerSetup: TaskManagerSetupContract,
-    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
+    analytics: AnalyticsServiceSetup
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.loggerFactory = loggerFactory;
@@ -151,6 +153,7 @@ export class AutomaticImportService {
       loggerFactory,
       this.taskManagerSetup,
       core,
+      analytics,
       this.samplesIndexService
     );
   }
@@ -283,9 +286,31 @@ export class AutomaticImportService {
     dataStreamsDeleted: number;
     errors: Array<{ id: string; error: string }>;
   }> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+
+    for (const ds of dataStreams) {
+      try {
+        await this.taskManagerService.removeDataStreamCreationTask({
+          integrationId,
+          dataStreamId: ds.data_stream_id,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to remove task for data stream ${ds.data_stream_id} during integration delete: ${error}`
+        );
+      }
+
+      try {
+        await this.samplesIndexService.deleteSamplesForDataStream(integrationId, ds.data_stream_id);
+      } catch (error) {
+        this.logger.error(
+          `Failed to delete samples for data stream ${ds.data_stream_id} during integration delete: ${error}`
+        );
+      }
     }
+
     return this.savedObjectService.deleteIntegration(integrationId, options);
   }
 
@@ -328,7 +353,7 @@ export class AutomaticImportService {
       status: TASK_STATUSES.approved,
       metadata: {
         ...existing.metadata,
-        ...(categories ? { categories } : {}),
+        categories,
       },
       changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };
@@ -351,13 +376,16 @@ export class AutomaticImportService {
     request: KibanaRequest
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions } = params;
+    const { authenticatedUser, dataStreamParams, connectorId, langSmithOptions, integrationName } =
+      params;
 
     // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
       connectorId,
+      integrationName,
+      dataStreamName: dataStreamParams.title,
       ...(langSmithOptions ? { langSmithOptions } : {}),
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
@@ -428,14 +456,22 @@ export class AutomaticImportService {
       integrationId,
       TASK_STATUSES.deleting
     );
-    // Remove the data stream creation task
-    await this.taskManagerService.removeDataStreamCreationTask({
-      integrationId,
-      dataStreamId,
-    });
-    // Delete the samples from the samples index
-    await this.samplesIndexService.deleteSamplesForDataStream(integrationId, dataStreamId);
-    // Delete the data stream from the saved objects
+
+    try {
+      await this.taskManagerService.removeDataStreamCreationTask({
+        integrationId,
+        dataStreamId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to remove task for data stream ${dataStreamId}: ${error}`);
+    }
+
+    try {
+      await this.samplesIndexService.deleteSamplesForDataStream(integrationId, dataStreamId);
+    } catch (error) {
+      this.logger.error(`Failed to delete samples for data stream ${dataStreamId}: ${error}`);
+    }
+
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
   }
 
@@ -451,6 +487,12 @@ export class AutomaticImportService {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const { integrationId, dataStreamId, connectorId, langSmithOptions } = params;
 
+    // Fetch names for telemetry and existing logic
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    const dataStream = await this.savedObjectService.getDataStream(dataStreamId, integrationId);
+    const integrationName = integration.metadata.title;
+    const dataStreamName = dataStream.attributes.title;
+
     // Ensure the task is no longer running (useful for API scripts)
     await this.taskManagerService.removeDataStreamCreationTask({
       integrationId,
@@ -462,6 +504,8 @@ export class AutomaticImportService {
         integrationId,
         dataStreamId,
         connectorId,
+        integrationName,
+        dataStreamName,
         langSmithOptions,
       },
       request
@@ -474,16 +518,15 @@ export class AutomaticImportService {
       jobType: DATA_STREAM_CREATION_TASK_TYPE,
     });
 
-    const existing = await this.savedObjectService.getIntegration(integrationId);
-    if (existing.status === TASK_STATUSES.approved) {
-      const currentVersion = existing.metadata?.version || '0.1.0';
+    if (integration.status === TASK_STATUSES.approved) {
+      const currentVersion = integration.metadata?.version || '0.1.0';
       const newVersion = bumpMinorVersion(currentVersion);
 
       const updateData: IntegrationAttributes = {
-        ...existing,
+        ...integration,
         status: TASK_STATUSES.completed,
         metadata: {
-          ...existing.metadata,
+          ...integration.metadata,
           version: newVersion,
         },
       };
@@ -509,6 +552,7 @@ export class AutomaticImportService {
   ): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
+    field_mapping: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const dataStreamSO = await this.savedObjectService.getDataStream(dataStreamId, integrationId);
@@ -525,8 +569,9 @@ export class AutomaticImportService {
       `Data stream ${dataStreamId} results: ${JSON.stringify(dataStreamSO.attributes.result)}`
     );
 
-    const ingestPipelineObj = dataStreamSO.attributes.result?.ingest_pipeline;
+    const ingestPipelineObj = dataStreamSO.attributes.result?.ingest_pipeline ?? {};
     const results = dataStreamSO.attributes.result?.pipeline_docs ?? [];
+    const fieldMapping = dataStreamSO.attributes.result?.field_mapping ?? [];
 
     if (!ingestPipelineObj) {
       throw new Error(`Data stream ${dataStreamId} has no ingest pipeline results`);
@@ -535,6 +580,7 @@ export class AutomaticImportService {
     return {
       ingest_pipeline: ingestPipelineObj,
       results,
+      field_mapping: fieldMapping,
     };
   }
 
@@ -542,14 +588,15 @@ export class AutomaticImportService {
     integrationId: string;
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
-    esClient: ElasticsearchClient;
+    internalEsClient: ElasticsearchClient;
     fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
+    const { integrationId, dataStreamId, ingestPipeline, internalEsClient, fieldsMetadataClient } =
+      params;
 
     let parsedPipeline: Pipeline;
     try {
@@ -576,7 +623,7 @@ export class AutomaticImportService {
 
     let simulateResponse: estypes.IngestSimulateResponse;
     try {
-      simulateResponse = await esClient.ingest.simulate({
+      simulateResponse = await internalEsClient.ingest.simulate({
         pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
         docs: samples.map((sample) => ({
           _source: { message: sample },
@@ -602,7 +649,11 @@ export class AutomaticImportService {
       fieldsMetadataClient
     );
 
-    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
+    const validationResult = await validateFieldMappings(
+      internalEsClient,
+      fieldMapping,
+      this.logger
+    );
     if (!validationResult.valid) {
       this.logger.warn(
         `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(

@@ -13,11 +13,16 @@ import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { registerConnectorTypesFromSpecs } from './register_from_spec';
 
-// Mock the dynamic import module
+// Mock the dynamic import modules
 const mockConnectorsSpecs: Record<string, ConnectorSpec> = {};
 
 jest.mock('@kbn/connector-specs', () => ({
   connectorsSpecs: mockConnectorsSpecs,
+  authTypeSpecs: jest.requireActual('@kbn/connector-specs').authTypeSpecs,
+}));
+
+jest.mock('@kbn/response-ops-form-generator', () => ({
+  generateFormFields: jest.fn().mockReturnValue([]),
 }));
 
 const defaultConnectorSpec: ConnectorSpec = {
@@ -29,6 +34,18 @@ const defaultConnectorSpec: ConnectorSpec = {
     minimumLicense: 'basic',
   },
   actions: {},
+};
+
+const connectorSpecWithAuth: ConnectorSpec = {
+  ...defaultConnectorSpec,
+  metadata: {
+    ...defaultConnectorSpec.metadata,
+    id: '.test-connector-auth',
+    supportedFeatureIds: ['alerting', 'workflows'],
+  },
+  auth: {
+    types: ['bearer', 'basic'],
+  },
 };
 
 describe('registerConnectorTypesFromSpecs', () => {
@@ -245,49 +262,109 @@ describe('registerConnectorTypesFromSpecs', () => {
     expect(connectorTypeRegistry.register).not.toHaveBeenCalled();
   });
 
-  it('should handle workflows connector when uiSettings is not yet resolved', async () => {
-    const mockSpec: ConnectorSpec = {
-      ...defaultConnectorSpec,
-      metadata: {
-        ...defaultConnectorSpec.metadata,
-        id: '.workflows-connector',
-        displayName: 'Workflows Connector',
-        description: 'Workflows connector description',
-        supportedFeatureIds: [WorkflowsConnectorFeatureId],
-      },
+  describe('registered connector model properties', () => {
+    const getRegisteredModel = async (): Promise<ActionTypeModel> => {
+      mockConnectorsSpecs['test-connector-auth'] = connectorSpecWithAuth;
+
+      registerConnectorTypesFromSpecs({
+        connectorTypeRegistry:
+          connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
+        uiSettingsPromise,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      return connectorTypeRegistry.register.mock.calls[0][0] as ActionTypeModel;
     };
 
-    // Create a promise that resolves after a delay to simulate async uiSettings
-    const delayedUiSettingsPromise = new Promise<typeof uiSettings>((resolve) => {
-      setTimeout(() => {
-        uiSettings.get.mockReturnValue(false);
-        resolve(uiSettings);
-      }, 50);
+    describe('connectorForm.serializer', () => {
+      const baseFormData = {
+        actionTypeId: '.test-connector-auth',
+        isDeprecated: false,
+      };
+
+      it('copies secrets.authType to config.authType on save', async () => {
+        const model = await getRegisteredModel();
+        const result = model.connectorForm!.serializer!({
+          ...baseFormData,
+          config: { url: 'https://example.com' },
+          secrets: { authType: 'bearer', token: 'my-token' },
+        });
+        expect(result.config.authType).toBe('bearer');
+        expect(result.secrets.authType).toBe('bearer');
+      });
+
+      it('returns form data unchanged when secrets.authType is absent', async () => {
+        const model = await getRegisteredModel();
+        const formData = {
+          ...baseFormData,
+          config: { url: 'https://example.com' },
+          secrets: {},
+        };
+        const result = model.connectorForm!.serializer!(formData);
+        expect(result).toEqual(formData);
+      });
+
+      it('preserves authMode from form data', async () => {
+        const model = await getRegisteredModel();
+        const result = model.connectorForm!.serializer!({
+          ...baseFormData,
+          authMode: 'per-user',
+          config: { url: 'https://example.com' },
+          secrets: { authType: 'bearer', token: 'my-token' },
+        });
+        expect(result.authMode).toBe('per-user');
+      });
     });
 
-    mockConnectorsSpecs['workflows-connector'] = mockSpec;
+    describe('connectorForm.deserializer', () => {
+      it('copies config.authType to secrets.authType on load', async () => {
+        const model = await getRegisteredModel();
+        const apiData = {
+          actionTypeId: '.test-connector-auth',
+          isDeprecated: false,
+          config: { authType: 'bearer' },
+          secrets: {},
+        };
+        const result = model.connectorForm!.deserializer!(apiData);
+        expect(result.secrets.authType).toBe('bearer');
+      });
 
-    registerConnectorTypesFromSpecs({
-      connectorTypeRegistry:
-        connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
-      uiSettingsPromise: delayedUiSettingsPromise,
+      it('returns api data unchanged when config.authType is absent', async () => {
+        const model = await getRegisteredModel();
+        const apiData = {
+          actionTypeId: '.test-connector-auth',
+          isDeprecated: false,
+          config: {},
+          secrets: {},
+        };
+        const result = model.connectorForm!.deserializer!(apiData);
+        expect(result).toEqual(apiData);
+      });
+
+      it('does not overwrite existing secrets.authType', async () => {
+        const model = await getRegisteredModel();
+        const apiData = {
+          actionTypeId: '.test-connector-auth',
+          isDeprecated: false,
+          config: { authType: 'bearer' },
+          secrets: { authType: 'basic' },
+        };
+        const result = model.connectorForm!.deserializer!(apiData);
+        expect(result.secrets.authType).toBe('basic');
+      });
+
+      it('preserves authMode from the API response', async () => {
+        const model = await getRegisteredModel();
+        const apiData = {
+          actionTypeId: '.test-connector-auth',
+          isDeprecated: false,
+          authMode: 'per-user' as const,
+          config: { authType: 'bearer' },
+          secrets: {},
+        };
+        const result = model.connectorForm!.deserializer!(apiData);
+        expect(result.authMode).toBe('per-user');
+      });
     });
-
-    // Wait for the async import to complete
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(connectorTypeRegistry.register).toHaveBeenCalledTimes(1);
-    const registeredCall = connectorTypeRegistry.register.mock.calls[0][0] as ActionTypeModel;
-
-    // Before uiSettings is resolved, getHideInUi should return true (hides by default when undefined)
-    // This is because !undefined is true, and true ?? false is true
-    expect(registeredCall.getHideInUi?.([])).toBe(true);
-
-    // Wait for uiSettings to resolve
-    await delayedUiSettingsPromise;
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    // After uiSettings is resolved with false, getHideInUi should return true
-    expect(registeredCall.getHideInUi?.([])).toBe(true);
   });
 });

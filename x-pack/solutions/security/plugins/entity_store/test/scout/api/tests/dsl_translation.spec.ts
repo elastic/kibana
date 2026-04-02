@@ -14,15 +14,63 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
 } from '../../../../common/domain/euid/dsl';
+import { getEuidFromObject } from '../../../../common/domain/euid/memory';
+import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_metadata';
+import {
+  USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
+  USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT,
+  USER_TS_EXTRACTION_CASES,
+} from '../fixtures/user_ts_extraction_cases';
+
+/** Archive-backed user.ts scenarios only (excludes ingested-only rows). */
+const USER_TS_ARCHIVE_SCENARIOS = USER_TS_EXTRACTION_CASES.filter((c) => !c.ingestSource);
+
+/** Scenarios that yield a defined EUID in the static archive (for strict containsId subset checks). */
+const USER_TS_ARCHIVE_SCENARIOS_WITH_EUID = USER_TS_ARCHIVE_SCENARIOS.filter(
+  (c) => c.expectedEuid !== undefined
+);
 
 function getTotal(hits: { total?: number | { value: number } }): number {
   const total = hits.total;
   if (total === undefined) return 0;
   return typeof total === 'number' ? total : total.value;
+}
+
+async function searchWithFilter(
+  esClient: { search: (params: object) => Promise<unknown> },
+  query: object | undefined,
+  size = 100
+) {
+  return esClient.search({
+    index: UPDATES_INDEX,
+    query: query ? { ...query } : {},
+    size,
+  }) as Promise<{
+    hits: { hits: Array<{ _source?: unknown }>; total?: number | { value: number } };
+  }>;
+}
+
+interface DocSource {
+  user?: { name?: string; email?: string; id?: string };
+  host?: { id?: string; name?: string; entity?: { id?: string } };
+  entity?: { id?: string };
+  service?: { name?: string; entity?: { id?: string } };
+}
+
+function getDocSource(hit: { _source?: unknown }): DocSource | undefined {
+  return hit._source as DocSource | undefined;
+}
+
+function hasDocWith(
+  hits: Array<{ _source?: unknown }>,
+  predicate: (src: DocSource) => boolean
+): boolean {
+  return hits.some((h) => predicate(getDocSource(h) ?? {}));
 }
 
 apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
@@ -51,188 +99,120 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     );
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(
-    'generic: DSL from doc with entity.id returns exactly that document',
+    'should return exactly the document when generic DSL is built from entity.id',
     async ({ esClient }) => {
       const docSource = { entity: { id: 'generic-id' } };
       const dsl = getEuidDslFilterBasedOnDocument('generic', docSource);
       expect(dsl).toBeDefined();
 
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
+      const result = await searchWithFilter(esClient, dsl, 10);
 
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
+      expect(getTotal(result.hits)).toBe(1);
       expect(result.hits.hits).toHaveLength(1);
       expect(result.hits.hits[0]._source).toMatchObject({ entity: { id: 'generic-id' } });
     }
   );
 
   apiTest(
-    'host: DSL from doc with host.name + host.domain returns expected document(s)',
+    'should return the expected documents when host DSL is built from host.name and host.domain',
     async ({ esClient }) => {
       const docSource = { host: { name: 'server-01', domain: 'example.com' } };
       const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
       expect(dsl).toBeDefined();
 
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
+      const result = await searchWithFilter(esClient, dsl, 10);
 
-      const total = getTotal(result.hits);
-      expect(total).toBe(3);
-      const hasExpected = result.hits.hits.some((h) => {
-        const src = h._source as { host?: { name?: string; domain?: string } } | undefined;
-        return src?.host?.name === 'server-01';
-      });
-      expect(hasExpected).toBe(true);
+      expect(getTotal(result.hits)).toBe(3);
+      expect(hasDocWith(result.hits.hits, (s) => s.host?.name === 'server-01')).toBe(true);
     }
   );
 
   apiTest(
-    'host: DSL from doc with host.name only returns expected document',
+    'should return the expected document when host DSL is built from host.name only',
     async ({ esClient }) => {
-      const docSource = { host: { name: 'desktop-02' } };
-      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+      const dsl = getEuidDslFilterBasedOnDocument('host', { host: { name: 'desktop-02' } });
       expect(dsl).toBeDefined();
 
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
+      const result = await searchWithFilter(esClient, dsl, 10);
 
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        host: { name: 'desktop-02' },
-      });
+      expect(getTotal(result.hits)).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({ host: { name: 'desktop-02' } });
+    }
+  );
+
+  const userTsNoPerDocumentDslScenarios = USER_TS_ARCHIVE_SCENARIOS.filter(
+    (s) => s.expectNoPerDocumentDsl
+  );
+
+  apiTest(
+    'user.ts DSL: should return undefined when dslFilterSource fails documentsFilter or postAgg gate',
+    async ({ esClient }) => {
+      await searchWithFilter(esClient, { match_all: {} }, 1);
+      for (const scenario of userTsNoPerDocumentDslScenarios) {
+        expect(getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource)).toBeUndefined();
+      }
     }
   );
 
   apiTest(
-    'user: DSL from doc with user.name + event.module returns exactly that document',
+    'user: synthetic invalid docs should not return per-document DSL (documentsFilter or postAgg gate)',
     async ({ esClient }) => {
-      const docSource = {
-        user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
-        event: { module: 'entityanalytics_ad' },
-      };
-      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
-        event: { module: 'entityanalytics_ad' },
-      });
+      await searchWithFilter(esClient, { match_all: {} }, 1);
+      for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
+        expect(getEuidDslFilterBasedOnDocument('user', example.doc)).toBeUndefined();
+      }
     }
   );
 
-  apiTest(
-    'user: DSL from doc with user.name + event.module returns expected document',
-    async ({ esClient }) => {
-      const docSource = {
-        user: { name: 'john.doe' },
-        event: { module: 'okta' },
-      };
-      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        user: { name: 'john.doe' },
-      });
+  for (const scenario of USER_TS_ARCHIVE_SCENARIOS) {
+    if (scenario.expectNoPerDocumentDsl) {
+      continue;
     }
-  );
+
+    apiTest(
+      `user.ts DSL: should return a single matching hit for scenario "${scenario.id}"`,
+      async ({ esClient }) => {
+        const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
+        expect(dsl).toBeDefined();
+
+        const result = await searchWithFilter(esClient, dsl, 10);
+
+        expect(getTotal(result.hits)).toBe(1);
+        expect(result.hits.hits).toHaveLength(1);
+        expect(result.hits.hits[0]._source).toMatchObject(scenario.dslFilterSource);
+        expect(getEuidFromObject('user', result.hits.hits[0])).toBe(scenario.expectedEuid);
+
+        expect(scenario.expectedMeta).toBeDefined();
+        const expectedMeta = scenario.expectedMeta!;
+        expect(deriveUserEntityPreAggMetadata(result.hits.hits[0])).toStrictEqual({
+          namespace: expectedMeta.namespace,
+          confidence: expectedMeta.confidence,
+          entityName: expectedMeta.entityName,
+        });
+      }
+    );
+  }
 
   apiTest(
-    'user: DSL from doc with data_stream.dataset only returns expected document',
+    'should return exactly the mailchimp document when service DSL is built from service.name',
     async ({ esClient }) => {
-      const docSource = {
-        user: { name: 'cloudtrail.user' },
-        data_stream: { dataset: 'aws.cloudtrail' },
-      };
-      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      const dsl = getEuidDslFilterBasedOnDocument('service', { service: { name: 'mailchimp' } });
       expect(dsl).toBeDefined();
 
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
+      const result = await searchWithFilter(esClient, dsl, 10);
 
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        user: { name: 'cloudtrail.user' },
-      });
-    }
-  );
-
-  apiTest(
-    'user: DSL from doc with no event.module or data_stream.dataset (unknown fallback) returns expected document',
-    async ({ esClient }) => {
-      const docSource = { user: { name: 'no.module.user' } };
-      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        user: { name: 'no.module.user' },
-      });
-    }
-  );
-
-  apiTest(
-    'service: DSL from doc with service.name returns exactly that document',
-    async ({ esClient }) => {
-      const docSource = { service: { name: 'mailchimp' } };
-      const dsl = getEuidDslFilterBasedOnDocument('service', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
+      expect(getTotal(result.hits)).toBe(1);
       expect(result.hits.hits[0]._source).toMatchObject({
         service: { entity: { id: 'mailchimp' } },
       });
@@ -240,157 +220,189 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   );
 
   apiTest(
-    'service: DSL from doc with service.name returns expected document',
+    'should return the service-name document when service DSL is built from service.name',
     async ({ esClient }) => {
-      const docSource = { service: { name: 'service-name' } };
-      const dsl = getEuidDslFilterBasedOnDocument('service', docSource);
+      const dsl = getEuidDslFilterBasedOnDocument('service', { service: { name: 'service-name' } });
       expect(dsl).toBeDefined();
 
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 10,
-      });
+      const result = await searchWithFilter(esClient, dsl, 10);
 
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        service: { name: 'service-name' },
-      });
+      expect(getTotal(result.hits)).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({ service: { name: 'service-name' } });
     }
   );
 
   apiTest(
-    'containsIdFilter: generic filter returns only docs with entity.id',
+    'should return only documents with entity.id for generic containsId filter',
     async ({ esClient }) => {
       const dsl = getEuidDslDocumentsContainsIdFilter('generic');
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 100,
-      });
+      const result = await searchWithFilter(esClient, dsl);
 
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
+      expect(getTotal(result.hits)).toBe(1);
       expect(result.hits.hits).toHaveLength(1);
       expect(result.hits.hits[0]._source).toMatchObject({ entity: { id: 'generic-id' } });
     }
   );
 
   apiTest(
-    'containsIdFilter: service filter returns docs with service identity fields',
+    'should return documents with service identity fields for service containsId filter',
     async ({ esClient }) => {
       const dsl = getEuidDslDocumentsContainsIdFilter('service');
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 100,
-      });
+      const result = await searchWithFilter(esClient, dsl);
 
-      const total = getTotal(result.hits);
-      expect(total).toBe(2);
-
-      const hasServiceEntityId = result.hits.hits.some((h) => {
-        const src = h._source as { service?: { entity?: { id?: string } } } | undefined;
-        return src?.service?.entity?.id === 'mailchimp';
-      });
-      expect(hasServiceEntityId).toBe(true);
-
-      const hasServiceName = result.hits.hits.some((h) => {
-        const src = h._source as { service?: { name?: string } } | undefined;
-        return src?.service?.name === 'service-name';
-      });
-      expect(hasServiceName).toBe(true);
+      expect(getTotal(result.hits)).toBe(2);
+      expect(hasDocWith(result.hits.hits, (s) => s.service?.entity?.id === 'mailchimp')).toBe(true);
+      expect(hasDocWith(result.hits.hits, (s) => s.service?.name === 'service-name')).toBe(true);
     }
   );
 
   apiTest(
-    'containsIdFilter: user filter returns docs with any user identity field',
+    'should enforce exact user containsId hit count and match each archive scenario with a defined EUID',
     async ({ esClient }) => {
       const dsl = getEuidDslDocumentsContainsIdFilter('user');
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 100,
-      });
+      const result = await searchWithFilter(esClient, dsl, 100);
+      const { hits } = result.hits;
 
-      const total = getTotal(result.hits);
-      expect(total).toBeGreaterThan(0);
+      expect(getTotal(result.hits)).toBe(USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT);
+      expect(hits).toHaveLength(USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT);
 
-      const hasUserEntityId = result.hits.hits.some((h) => {
-        const src = h._source as { user?: { entity?: { id?: string } } } | undefined;
-        return src?.user?.entity?.id === 'arnlod.schmidt';
-      });
-      expect(hasUserEntityId).toBe(true);
+      for (const scenario of USER_TS_ARCHIVE_SCENARIOS_WITH_EUID) {
+        const subset = hits.filter((h) =>
+          docMatchesQuery((getDocSource(h) ?? {}) as Record<string, unknown>, scenario.query)
+        );
+        expect(subset).toHaveLength(1);
+        expect(getEuidFromObject('user', subset[0])).toBe(scenario.expectedEuid);
+        expect(scenario.expectedMeta).toBeDefined();
+        const expectedMeta = scenario.expectedMeta!;
+        expect(deriveUserEntityPreAggMetadata(subset[0])).toStrictEqual({
+          namespace: expectedMeta.namespace,
+          confidence: expectedMeta.confidence,
+          entityName: expectedMeta.entityName,
+        });
+      }
 
-      const hasUserName = result.hits.hits.some((h) => {
-        const src = h._source as { user?: { name?: string } } | undefined;
-        return src?.user?.name === 'john.doe';
-      });
-      expect(hasUserName).toBe(true);
+      expect(hasDocWith(hits, (s) => s.user?.name === 'john.doe')).toBe(true);
+      expect(
+        hasDocWith(hits, (s) => s.user?.name === 'alice.local' && s.host?.id === 'host-nonidp-001')
+      ).toBe(true);
 
-      const hasUserEmail = result.hits.hits.some((h) => {
-        const src = h._source as { user?: { email?: string } } | undefined;
-        return src?.user?.email === 'test@example.com';
-      });
-      expect(hasUserEmail).toBe(true);
+      expect(hasDocWith(hits, (s) => s.user?.email === 'invalid-idp-illegal@test.com')).toBe(false);
+      expect(hasDocWith(hits, (s) => s.user?.name === 'not-captured-no-event')).toBe(false);
+      expect(hasDocWith(hits, (s) => s.user?.name === 'ignored-outcome-failure')).toBe(false);
 
-      const hasUserId = result.hits.hits.some((h) => {
-        const src = h._source as { user?: { id?: string } } | undefined;
-        return src?.user?.id === 'user-101';
+      const bareOnlyTimestamp = hasDocWith(hits, (s) => {
+        const keys = Object.keys(s);
+        return keys.length === 1 && keys[0] === '@timestamp';
       });
-      expect(hasUserId).toBe(true);
+      expect(bareOnlyTimestamp).toBe(false);
     }
   );
 
   apiTest(
-    'containsIdFilter: host filter returns docs with any host identity field',
+    'should return documents with any host identity field for host containsId filter',
     async ({ esClient }) => {
       const dsl = getEuidDslDocumentsContainsIdFilter('host');
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 100,
-      });
+      const result = await searchWithFilter(esClient, dsl);
 
-      const total = getTotal(result.hits);
-      expect(total).toBeGreaterThan(0);
-
-      const hasHostEntityId = result.hits.hits.some((h) => {
-        const src = h._source as { host?: { entity?: { id?: string } } } | undefined;
-        return src?.host?.entity?.id === 'host-with-entity-id';
-      });
-      expect(hasHostEntityId).toBe(true);
-
-      const hasHostId = result.hits.hits.some((h) => {
-        const src = h._source as { host?: { id?: string } } | undefined;
-        return src?.host?.id === 'host-123';
-      });
-      expect(hasHostId).toBe(true);
-
-      const hasHostName = result.hits.hits.some((h) => {
-        const src = h._source as { host?: { name?: string } } | undefined;
-        return src?.host?.name === 'desktop-02';
-      });
-      expect(hasHostName).toBe(true);
+      expect(getTotal(result.hits)).toBeGreaterThan(0);
+      expect(
+        hasDocWith(result.hits.hits, (s) => s.host?.entity?.id === 'host-with-entity-id')
+      ).toBe(true);
+      expect(hasDocWith(result.hits.hits, (s) => s.host?.id === 'host-123')).toBe(true);
+      expect(hasDocWith(result.hits.hits, (s) => s.host?.name === 'desktop-02')).toBe(true);
     }
   );
 
   apiTest(
-    'containsIdFilter: does not match docs with no identity fields for the type',
+    'should not include bare documents with no user identity fields in user containsId results',
     async ({ esClient }) => {
       const dsl = getEuidDslDocumentsContainsIdFilter('user');
-      const result = await esClient.search({
-        index: UPDATES_INDEX,
-        query: { ...dsl },
-        size: 100,
-      });
+      const result = await searchWithFilter(esClient, dsl);
 
-      const bareDocMatched = result.hits.hits.some((h) => {
-        const src = h._source as Record<string, any> | undefined;
-        return !src?.user && !src?.entity?.id && Object.keys(src || {}).length <= 1;
+      const bareDocMatched = hasDocWith(result.hits.hits, (s) => {
+        const keys = Object.keys(s);
+        return !s.user && !s.entity?.id && keys.length <= 1;
       });
       expect(bareDocMatched).toBe(false);
     }
   );
 });
+
+// Reads a dotted path (e.g. user.name) on a plain object.
+// Returns the leaf value, or undefined if a segment is missing or not traversable (null / non-object).
+function getNestedField(obj: Record<string, unknown>, dottedPath: string): unknown {
+  const segments = dottedPath.split('.');
+  let current: unknown = obj;
+
+  for (const segment of segments) {
+    if (current === null || current === undefined || typeof current !== 'object') {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  return current;
+}
+
+// True if archived _source matches our fixture query subset: term, bool.must/filter (all clauses), exists.
+// Used to find the one hit per scenario locally; unknown shapes return false.
+function docMatchesQuery(src: Record<string, unknown>, query: object): boolean {
+  if (isTermQuery(query)) {
+    return sourceMatchesTermQuery(src, query.term);
+  }
+
+  if (isBoolQuery(query)) {
+    return sourceMatchesBoolQuery(src, query.bool);
+  }
+
+  if (isExistsQuery(query)) {
+    return sourceMatchesExistsQuery(src, query.exists);
+  }
+
+  return false;
+}
+
+function isTermQuery(query: object): query is { term: Record<string, unknown> } {
+  return 'term' in query && query.term !== null && typeof query.term === 'object';
+}
+
+function sourceMatchesTermQuery(
+  src: Record<string, unknown>,
+  term: Record<string, unknown>
+): boolean {
+  const entries = Object.entries(term);
+  if (entries.length !== 1) {
+    return false;
+  }
+  const [field, value] = entries[0];
+  return getNestedField(src, field) === value;
+}
+
+interface BoolQueryBody {
+  must?: object[];
+  filter?: object[];
+}
+
+function isBoolQuery(query: object): query is { bool: BoolQueryBody } {
+  return 'bool' in query && query.bool !== null && typeof query.bool === 'object';
+}
+
+function sourceMatchesBoolQuery(src: Record<string, unknown>, bool: BoolQueryBody): boolean {
+  const clauses = [...(bool.must ?? []), ...(bool.filter ?? [])];
+  if (clauses.length === 0) {
+    return false;
+  }
+  return clauses.every((clause) => docMatchesQuery(src, clause));
+}
+
+function isExistsQuery(query: object): query is { exists: { field: string } } {
+  return 'exists' in query && query.exists !== null && typeof query.exists === 'object';
+}
+
+function sourceMatchesExistsQuery(
+  src: Record<string, unknown>,
+  exists: { field: string }
+): boolean {
+  const value = getNestedField(src, exists.field);
+  return value !== undefined && value !== null && value !== '';
+}

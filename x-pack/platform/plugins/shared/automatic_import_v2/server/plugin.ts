@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreStart,
+  Plugin,
+  Logger,
+  EventTypeOpts,
+} from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
@@ -25,6 +31,7 @@ import {
   INTEGRATION_SAVED_OBJECT_TYPE,
   DATA_STREAM_SAVED_OBJECT_TYPE,
 } from './services/saved_objects/constants';
+import { telemetryEventsSchemas } from './telemetry';
 
 export class AutomaticImportV2Plugin
   implements
@@ -58,13 +65,21 @@ export class AutomaticImportV2Plugin
   ) {
     this.logger.debug('automaticImportV2: Setup');
 
+    // Register EBT telemetry event types (server-side)
+    (
+      Object.values(telemetryEventsSchemas) as Array<EventTypeOpts<Record<string, unknown>>>
+    ).forEach((eventConfig) => {
+      core.analytics.registerEventType(eventConfig);
+    });
+
     plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
 
     this.automaticImportService = new AutomaticImportService(
       this.logger,
       core.savedObjects,
       plugins.taskManager,
-      core
+      core,
+      core.analytics
     );
 
     const requestContextFactory = new RequestContextFactory({

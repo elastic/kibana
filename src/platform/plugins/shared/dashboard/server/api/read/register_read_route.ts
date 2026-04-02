@@ -50,20 +50,28 @@ export function registerReadRoute(
         response: {
           200: {
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
+            description: 'success',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          404: {
+            description: 'not found',
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(
+        const { body, resolveHeaders } = await read(
           ctx,
           getCachedDashboardStateSchema(),
           req.params.id,
           isDashboardAppRequest
         );
         return res.ok({
-          body: result,
+          body,
+          ...(isDashboardAppRequest && { headers: resolveHeaders }),
         });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
@@ -75,10 +83,10 @@ export function registerReadRoute(
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest(e.message);
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );

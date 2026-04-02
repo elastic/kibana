@@ -186,7 +186,10 @@ export function ServiceOverviewThroughputChart({
         <EuiFlexItem grow={false}>
           <OpenInDiscover
             dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
-            variant="link"
+            variant="iconButton"
+            label={i18n.translate('xpack.apm.serviceOverviewThroughputChart.openTracesInDiscover', {
+              defaultMessage: 'Open traces in Discover',
+            })}
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

@@ -28,6 +28,7 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
@@ -49,11 +50,15 @@ function getSupportedTriggers(
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return [
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
+      ];
     }
-    return [];
+    return panelTriggers;
   };
 }
 
@@ -122,7 +127,7 @@ export function initializeEditApi(
       const parentApiContext = parentApi.getAppContext();
       const currentState = getState();
       await stateTransfer.navigateToEditor(APP_ID, {
-        path: getEditPath(currentState.savedObjectId),
+        path: getEditPath(currentState.ref_id),
         state: {
           embeddableId: uuid,
           valueInput: currentState,
@@ -141,9 +146,9 @@ export function initializeEditApi(
     canEdit: () => isEditMode(viewMode$),
   });
 
-  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => {
+  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'ref_id'>) => {
     stateApi.updateAttributes(newState.attributes);
-    stateApi.updateSavedObjectId(newState.savedObjectId);
+    stateApi.updateRefId(newState.ref_id);
   };
 
   /**
@@ -217,7 +222,7 @@ export function initializeEditApi(
     }
     return (
       Boolean(capabilities.visualize_v2.save) ||
-      (!getState().savedObjectId &&
+      (!getState().ref_id &&
         Boolean(capabilities.dashboard_v2?.showWriteControls) &&
         Boolean(capabilities.visualize_v2.show))
     );
@@ -361,7 +366,7 @@ export function initializeEditApi(
         }
         const currentState = getState();
         return getEditPath(
-          currentState.savedObjectId,
+          currentState.ref_id,
           currentState.time_range,
           currentState.filters,
           data.query.timefilter.timefilter.getRefreshInterval()

@@ -29,6 +29,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 import { PLUGIN_ID } from '../../constants';
 import type { ControlsExampleStartDeps } from '../../plugin';
@@ -150,6 +151,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
             await builder.addDataControlFromField(
               initialState,
               {
+                ...DEFAULT_DATA_CONTROL_STATE,
                 data_view_id: dataView.id!,
                 title: 'Destintion country',
                 field_name: 'geo.dest',
@@ -162,6 +164,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
             await builder.addDataControlFromField(
               initialState,
               {
+                ...DEFAULT_DATA_CONTROL_STATE,
                 data_view_id: dataView.id!,
                 field_name: 'bytes',
                 width: 'medium',

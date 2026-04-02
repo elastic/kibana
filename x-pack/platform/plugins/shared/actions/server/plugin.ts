@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -77,6 +78,10 @@ import {
   initializeOAuthStateCleanupTask,
   scheduleOAuthStateCleanupTask,
 } from './lib/oauth_state_cleanup_task';
+import {
+  initializeUserConnectorTokenCleanupTask,
+  scheduleUserConnectorTokenCleanupTask,
+} from './lib/user_connector_token_cleanup_task';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -414,6 +419,7 @@ export class ActionsPlugin
     }
 
     initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    initializeUserConnectorTokenCleanupTask(this.logger, plugins.taskManager, core);
 
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
@@ -657,14 +663,23 @@ export class ActionsPlugin
       request: KibanaRequest
     ): Promise<string | undefined> => {
       try {
+        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+        if (!id) {
+          this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+          return undefined;
+        }
+
         const response = await core.elasticsearch.client
           .asScoped(request)
           .asCurrentUser.security.getApiKey({
             with_profile_uid: true,
+            id,
           });
+
         if (response.api_keys && response.api_keys.length > 0) {
           return response.api_keys[0].profile_uid;
         }
+
         logger.debug(
           `No API keys were returned from query, cannot retrieve associated profile id.`
         );
@@ -720,6 +735,7 @@ export class ActionsPlugin
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
         scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        scheduleUserConnectorTokenCleanupTask(this.logger, plugins.taskManager);
       })
       .catch(() => {});
 

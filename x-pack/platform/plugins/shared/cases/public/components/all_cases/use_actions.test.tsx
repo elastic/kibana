@@ -57,9 +57,10 @@ describe('useActions', () => {
       Object {
         "actions": Object {
           "align": "right",
+          "minWidth": "4.5em",
           "name": "Actions",
           "render": [Function],
-          "width": "100px",
+          "width": "4.5em",
         },
       }
     `);
@@ -398,6 +399,7 @@ describe('useActions', () => {
         settings: false,
         createComment: false,
         assign: false,
+        manageTemplates: false,
       };
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
@@ -436,6 +438,7 @@ describe('useActions', () => {
         settings: false,
         createComment: false,
         assign: false,
+        manageTemplates: false,
       };
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
@@ -474,6 +477,7 @@ describe('useActions', () => {
         settings: false,
         createComment: false,
         assign: false,
+        manageTemplates: false,
       };
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {

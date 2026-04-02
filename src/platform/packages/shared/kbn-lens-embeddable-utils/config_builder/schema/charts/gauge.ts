@@ -18,6 +18,7 @@ import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { builderEnums } from '../enums';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
@@ -26,7 +27,7 @@ const gaugeStateSharedOptionsSchema = {
         schema.object(
           {
             type: schema.literal('bullet'),
-            direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
+            orientation: builderEnums.simpleOrientation({
               defaultValue: 'horizontal',
             }),
           },
@@ -55,7 +56,7 @@ const gaugeStateSharedOptionsSchema = {
           }
         ),
       ],
-      { defaultValue: { type: 'bullet', direction: 'horizontal' } }
+      { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
     )
   ),
 };
@@ -95,14 +96,21 @@ const gaugeStateMetricInnerESQLOpsSchema = {
 
 const gaugeStateMetricOptionsSchema = {
   /**
-   * Title (overrides label on chart panel, but not in table)
+   * Title configuration
    */
-  title: schema.maybe(schema.string({ meta: { description: 'Title' } })),
-  /**
-   * Whether to hide the title
-   */
-  hide_title: schema.maybe(
-    schema.boolean({ meta: { description: 'Hide title' }, defaultValue: false })
+  title: schema.maybe(
+    schema.object(
+      {
+        visible: schema.maybe(
+          schema.boolean({
+            meta: { description: 'Show the title' },
+            defaultValue: true,
+          })
+        ),
+        text: schema.maybe(schema.string({ meta: { description: 'Title text' } })),
+      },
+      { meta: { description: 'Title configuration' } }
+    )
   ),
   /**
    * Sub title
@@ -116,9 +124,23 @@ const gaugeStateMetricOptionsSchema = {
    * Tick marks configuration
    */
   ticks: schema.maybe(
-    schema.oneOf([schema.literal('auto'), schema.literal('bands'), schema.literal('hidden')], {
-      defaultValue: 'auto',
-    })
+    schema.object(
+      {
+        visible: schema.maybe(
+          schema.boolean({
+            meta: { description: 'Show tick marks' },
+            defaultValue: true,
+          })
+        ),
+        mode: schema.maybe(
+          schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
+            meta: { description: 'Tick placement mode' },
+            defaultValue: 'auto',
+          })
+        ),
+      },
+      { meta: { description: 'Ticks configuration' } }
+    )
   ),
 };
 

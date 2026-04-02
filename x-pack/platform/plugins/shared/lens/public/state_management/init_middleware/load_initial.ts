@@ -48,8 +48,8 @@ export const getFromPreloaded = async ({
 
   try {
     // If we already have the attributes for a by reference visualization, avoid loading from the library
-    const docFromSavedObject = await (initialInput.savedObjectId && !initialInput.attributes
-      ? attributeService.loadFromLibrary(initialInput.savedObjectId)
+    const docFromSavedObject = await (initialInput.ref_id && !initialInput.attributes
+      ? attributeService.loadFromLibrary(initialInput.ref_id)
       : undefined);
 
     if (!docFromSavedObject) {
@@ -63,7 +63,7 @@ export const getFromPreloaded = async ({
         doc: {
           ...attributes,
           type: LENS_EMBEDDABLE_TYPE,
-          ...(initialInput.savedObjectId ? { savedObjectId: initialInput.savedObjectId } : {}),
+          savedObjectId: initialInput.ref_id,
         },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
@@ -93,7 +93,7 @@ export const getFromPreloaded = async ({
       doc: {
         ...attributes,
         type: LENS_EMBEDDABLE_TYPE,
-        savedObjectId: initialInput.savedObjectId,
+        savedObjectId: initialInput.ref_id,
       },
       sharingSavedObjectProps: {
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
@@ -423,7 +423,8 @@ export async function loadInitial(
 
   if (
     !initialInput ||
-    (initialInput.savedObjectId && initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
+    // TODO is it savedObjectId or ref_id?
+    (initialInput.ref_id && initialInput.ref_id === lens.persistedDoc?.savedObjectId)
   ) {
     const newFilters =
       initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
@@ -459,7 +460,7 @@ export async function loadInitial(
       try {
         return loadFromSavedObject(
           store,
-          initialInput.savedObjectId,
+          initialInput.ref_id,
           persisted,
           loaderSharedArgs,
           lensServices,

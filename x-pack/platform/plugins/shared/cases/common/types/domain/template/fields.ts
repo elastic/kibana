@@ -7,25 +7,89 @@
 
 import { z } from '@kbn/zod/v4';
 
+export const FieldType = {
+  INPUT_TEXT: 'INPUT_TEXT',
+  INPUT_NUMBER: 'INPUT_NUMBER',
+  SELECT_BASIC: 'SELECT_BASIC',
+  TEXTAREA: 'TEXTAREA',
+  DATE_PICKER: 'DATE_PICKER',
+} as const;
+
+export type FieldType = (typeof FieldType)[keyof typeof FieldType];
+
+export const ConditionRuleSchema = z.object({
+  field: z.string(),
+  operator: z.enum(['eq', 'neq', 'contains', 'empty', 'not_empty']),
+  value: z.union([z.string(), z.number()]).optional(),
+});
+
+export const CompoundConditionSchema = z.object({
+  combine: z.enum(['all', 'any']).default('all'),
+  rules: z.array(ConditionRuleSchema).min(1),
+});
+
+export const ConditionSchema = z.union([ConditionRuleSchema, CompoundConditionSchema]);
+
+export const DisplaySchema = z.object({
+  show_when: ConditionSchema.optional(),
+});
+
+export const ValidationSchema = z.object({
+  required: z.boolean().optional(),
+  required_when: ConditionSchema.optional(),
+  pattern: z
+    .object({
+      regex: z.string(),
+      message: z.string().optional(),
+    })
+    .optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  min_length: z.number().optional(),
+  max_length: z.number().optional(),
+});
+
+export type ConditionRule = z.infer<typeof ConditionRuleSchema>;
+export type CompoundCondition = z.infer<typeof CompoundConditionSchema>;
+export type Condition = z.infer<typeof ConditionSchema>;
+export type Display = z.infer<typeof DisplaySchema>;
+export type Validation = z.infer<typeof ValidationSchema>;
+
+/**
+ * Extra props passed to control components by the field renderer based on evaluated conditions.
+ */
+export interface ConditionRenderProps {
+  isRequired?: boolean;
+  patternValidation?: { regex: string; message?: string };
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+}
+
 const BaseFieldSchema = z.object({
   name: z.string(),
   label: z.string().optional(),
   type: z.literal('keyword'),
-
+  display: DisplaySchema.optional(),
+  validation: ValidationSchema.optional(),
   metadata: z
     .object({
-      default: z.string().optional(),
+      default: z.preprocess(
+        (val) => (val instanceof Date ? val.toISOString() : val),
+        z.string().optional()
+      ),
     })
     .catchall(z.unknown())
     .optional(),
 });
 
 export const InputTextFieldSchema = BaseFieldSchema.extend({
-  control: z.literal('INPUT_TEXT'),
+  control: z.literal(FieldType.INPUT_TEXT),
 });
 
 export const InputNumberFieldSchema = BaseFieldSchema.extend({
-  control: z.literal('INPUT_NUMBER'),
+  control: z.literal(FieldType.INPUT_NUMBER),
   type: z.union([
     z.literal('long'),
     z.literal('integer'),
@@ -46,7 +110,7 @@ export const InputNumberFieldSchema = BaseFieldSchema.extend({
 });
 
 export const SelectBasicFieldSchema = BaseFieldSchema.extend({
-  control: z.literal('SELECT_BASIC'),
+  control: z.literal(FieldType.SELECT_BASIC),
   metadata: z
     .object({
       options: z.array(z.string()),
@@ -55,7 +119,19 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
 });
 
 export const TextareaFieldSchema = BaseFieldSchema.extend({
-  control: z.literal('TEXTAREA'),
+  control: z.literal(FieldType.TEXTAREA),
+});
+
+export const DatePickerFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.DATE_PICKER),
+  type: z.literal('date'),
+  metadata: z
+    .object({
+      show_time: z.boolean().optional(),
+      timezone: z.enum(['utc', 'local']).optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
 });
 
 /**
@@ -66,4 +142,5 @@ export const FieldSchema = z.discriminatedUnion('control', [
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
   TextareaFieldSchema,
+  DatePickerFieldSchema,
 ]);

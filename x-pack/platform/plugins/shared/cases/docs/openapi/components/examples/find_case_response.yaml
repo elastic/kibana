@@ -11,6 +11,7 @@ value:
         "comments": [],
         "totalComment": 1,
         "totalAlerts": 0,
+        "totalEvents": 0,
         "title": "Case title",
         "tags": [ "tag-1" ],
         "description": "Case description",

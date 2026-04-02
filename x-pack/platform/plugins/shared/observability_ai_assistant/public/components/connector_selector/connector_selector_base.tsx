@@ -96,7 +96,7 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
           compressed
           valueOfSelected={props.selectedConnector}
           options={props.connectors.map((connector) => ({
-            value: connector.id,
+            value: connector.connectorId,
             inputDisplay: (
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>

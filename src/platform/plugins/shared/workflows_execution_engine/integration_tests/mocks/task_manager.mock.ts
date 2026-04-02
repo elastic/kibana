@@ -15,15 +15,16 @@ import type {
   ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
 } from '@kbn/task-manager-plugin/server/task';
+import { createPartialMock } from './create_partial_mock';
 
 export class TaskManagerMock implements Partial<TaskManagerStartContract> {
-  public static create(): TaskManagerMock {
-    const instance = new TaskManagerMock();
-    jest.spyOn(instance, 'schedule');
-    return instance;
+  public static create(): jest.Mocked<TaskManagerStartContract> {
+    return createPartialMock<TaskManagerStartContract>({
+      schedule: jest.fn().mockImplementation(this.schedule),
+    });
   }
 
-  public async schedule(
+  private static async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions | undefined
   ): Promise<ConcreteTaskInstance> {

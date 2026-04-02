@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useSelector } from 'react-redux';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
 import type { SecurityAppStore, State } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import type { ResolverCellActionRenderer } from '../../resolver/types';
 
 const DataViewManagerBootstrap = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -47,12 +47,17 @@ export interface AlertFlyoutOverviewTabProps {
    * A promise that resolves to a Security Solution redux store for flyout rendering.
    */
   storePromise: Promise<SecurityAppStore>;
+  /**
+   * Callback invoked after alert mutations to refresh the Discover table.
+   */
+  onAlertUpdated: () => void;
 }
 
 export const AlertFlyoutOverviewTab = ({
   hit,
   servicesPromise,
   storePromise,
+  onAlertUpdated,
 }: AlertFlyoutOverviewTabProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -81,13 +86,6 @@ export const AlertFlyoutOverviewTab = ({
     };
   }, [servicesPromise, storePromise]);
 
-  // For now we are not rendering any cell actions in the overview tab, but we need to provide a renderer to prevent errors in the resolver component.
-  // We will eventually implement the Discover cell actions.
-  const renderCellActions = useCallback<ResolverCellActionRenderer>(
-    ({ children, field, scopeId, value }) => <>{children}</>,
-    []
-  );
-
   if (!services || !store) {
     return null;
   }
@@ -98,7 +96,12 @@ export const AlertFlyoutOverviewTab = ({
     children: (
       <>
         <DataViewManagerBootstrap />
-        <OverviewTab hit={hit} renderCellActions={renderCellActions} />
+        {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
+        <OverviewTab
+          hit={hit}
+          renderCellActions={noopCellActionRenderer}
+          onAlertUpdated={onAlertUpdated}
+        />
       </>
     ),
   });

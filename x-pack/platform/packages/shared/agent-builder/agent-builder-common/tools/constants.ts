@@ -27,6 +27,7 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
+  resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
@@ -36,7 +37,7 @@ export const platformCoreTools = {
 } as const;
 
 export const platformStreamsSigEventsTools = {
-  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_knowledge_indicators`,
+  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_kis`,
 } as const;
 
 export const attachmentTools = {

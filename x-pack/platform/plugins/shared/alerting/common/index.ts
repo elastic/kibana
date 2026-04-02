@@ -179,8 +179,8 @@ export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
-export { gapStatus, gapFillStatus } from './constants';
-export type { GapStatus, GapFillStatus } from './constants';
+export { gapStatus, gapFillStatus, gapReasonType } from './constants';
+export type { GapStatus, GapFillStatus, GapReason, GapReasonType } from './constants';
 export { GAP_AUTO_FILL_STATUS } from './constants';
 export type { GapAutoFillStatus } from './constants';
 export { backfillInitiator } from './constants';

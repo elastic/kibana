@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/scout'
+  - '@kbn/as-code-shared-schemas'
 tags:
   - plugin
   - prod
@@ -44,27 +46,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

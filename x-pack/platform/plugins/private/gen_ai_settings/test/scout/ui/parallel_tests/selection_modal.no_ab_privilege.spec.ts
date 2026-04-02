@@ -6,13 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 import { AIAssistantType } from '../fixtures/constants';
 
 spaceTest.describe(
   'GenAI Settings - Selection Modal without Agent Builder Privileges',
-  { tag: [...tags.stateful.classic] },
+  { tag: ['@local-stateful-classic'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsNonAgentBuilderUser();

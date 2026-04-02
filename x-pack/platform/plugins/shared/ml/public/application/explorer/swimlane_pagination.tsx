@@ -81,7 +81,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
             <EuiButtonEmpty
               size="xs"
               color="text"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               onClick={onButtonClick}
               data-test-subj="mlSwimLanePageSizeControl"

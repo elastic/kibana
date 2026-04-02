@@ -59,7 +59,12 @@ export const SolutionViewSwitchCalloutInternal = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" fullWidth onClick={() => setIsModalOpen(true)}>
+          <EuiButton
+            data-test-subj="solutionViewSwitchCalloutLearnMoreButton"
+            size="s"
+            fullWidth
+            onClick={() => setIsModalOpen(true)}
+          >
             {i18n.translate('xpack.spaces.solutionViewSwitch.callout.learnMoreButton', {
               defaultMessage: 'Learn more',
             })}

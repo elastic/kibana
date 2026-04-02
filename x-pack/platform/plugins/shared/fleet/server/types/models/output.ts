@@ -336,10 +336,23 @@ const KafkaUpdateSchema = {
 };
 
 export const OutputSchema = schema.oneOf([
-  schema.object({ ...ElasticSearchSchema }),
-  schema.object({ ...RemoteElasticSearchSchema }),
-  schema.object({ ...LogstashSchema }),
-  schema.object({ ...KafkaSchema }),
+  schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
+  schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
+  schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
+  schema.object({ ...KafkaSchema }, { meta: { id: 'output_kafka' } }),
+]);
+
+// Separate schema for create operations: uses distinct meta IDs so OAS codegen
+// emits named $ref components instead of inline anyOf members, which the
+// Terraform provider requires to distinguish create vs read types.
+export const NewOutputSchema = schema.oneOf([
+  schema.object({ ...ElasticSearchSchema }, { meta: { id: 'new_output_elasticsearch' } }),
+  schema.object(
+    { ...RemoteElasticSearchSchema },
+    { meta: { id: 'new_output_remote_elasticsearch' } }
+  ),
+  schema.object({ ...LogstashSchema }, { meta: { id: 'new_output_logstash' } }),
+  schema.object({ ...KafkaSchema }, { meta: { id: 'new_output_kafka' } }),
 ]);
 
 export const OutputResponseSchema = schema.object({

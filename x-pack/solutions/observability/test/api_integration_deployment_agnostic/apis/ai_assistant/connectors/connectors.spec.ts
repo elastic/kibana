@@ -28,14 +28,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(status).to.be(200);
     });
 
-    it('returns an empty list of connectors', async () => {
+    it('returns only preconfigured connectors', async () => {
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
-      const connectorsExcludingPreconfiguredInference = res.body.filter(
-        (c) => c.actionTypeId !== '.inference'
-      );
+      const connectorsExcludingPreconfiguredInference = res.body.filter((c) => !c.isPreconfigured);
       expect(connectorsExcludingPreconfiguredInference.length).to.be(0);
     });
 
@@ -48,9 +46,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
-      const connectorsExcludingPreconfiguredInference = res.body.filter(
-        (c) => c.actionTypeId !== '.inference'
-      );
+      const connectorsExcludingPreconfiguredInference = res.body.filter((c) => !c.isPreconfigured);
       expect(connectorsExcludingPreconfiguredInference.length).to.be(1);
 
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
