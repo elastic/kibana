@@ -362,7 +362,7 @@ interface WorkflowsExecutionEnginePluginStart {
    * failures are logged and do not stop the rest. Pagination is not point-in-time: under
    * concurrent index updates, duplicates or gaps across pages are possible.
    */
-  bulkCancelWorkflowExecutions(params: {
+  cancelAllActiveWorkflowExecutions(params: {
     spaceId: string;
     workflowId: string;
   }): Promise<void>;
@@ -875,7 +875,7 @@ await workflowsExecutionEngine.cancelWorkflowExecution(
 ### Example 4: Bulk cancel non-terminal executions for a workflow
 
 ```typescript
-await workflowsExecutionEngine.bulkCancelWorkflowExecutions({
+await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
   workflowId: 'my-workflow-id',
   spaceId: 'default',
 });

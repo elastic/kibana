@@ -44,7 +44,7 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
-  BulkCancelWorkflowExecutions,
+  cancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
@@ -847,7 +847,7 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
-    const bulkCancelWorkflowExecutions: BulkCancelWorkflowExecutions = async ({
+    const cancelAllActiveWorkflowExecutions: cancelAllActiveWorkflowExecutions = async ({
       spaceId,
       workflowId,
     }) => {
@@ -878,7 +878,7 @@ export class WorkflowsExecutionEnginePlugin
             const message =
               outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
             this.logger.warn(
-              `bulkCancelWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
+              `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
             );
           }
         });
@@ -937,7 +937,7 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
-      bulkCancelWorkflowExecutions,
+      cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
       isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
