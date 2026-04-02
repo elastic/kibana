@@ -6,6 +6,11 @@
  */
 
 export { createLeadIndexService, type LeadIndexService } from './indices';
+export {
+  createLeadDataClient,
+  type LeadDataClient,
+  type LeadDataClientDeps,
+} from './lead_data_client';
 export { ObservationModuleRegistry, type ObservationEntity } from './observation_modules';
 export { createLeadGenerationEngine } from './engine';
 export {
@@ -13,7 +18,7 @@ export {
   createTemporalStateModule,
   createBehavioralAnalysisModule,
 } from './observation_modules';
-export { entityRecordToLeadEntity } from './entity_conversion';
+export { entityRecordToLeadEntity, fetchAllLeadEntities } from './entity_conversion';
 export { createLeadGenerationService } from './services/lead_generation_service';
 export type {
   Lead,
@@ -26,3 +31,14 @@ export type {
   ObservationSeverity,
 } from './types';
 export { DEFAULT_ENGINE_CONFIG, STALENESS_THRESHOLDS_MS, computeStaleness } from './types';
+export {
+  runLeadGenerationPipeline,
+  type RunPipelineParams,
+  type RunPipelineResult,
+} from './run_pipeline';
+export {
+  registerLeadGenerationTask,
+  startLeadGenerationTask,
+  removeLeadGenerationTask,
+  getLeadGenerationTaskId,
+} from './tasks';

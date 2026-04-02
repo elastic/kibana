@@ -14,24 +14,22 @@ import type { DashboardState } from './types';
 import { transformDashboardOut } from './transforms';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
+import type { Warnings } from './types';
 
 export function getDashboardMeta(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
-    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
-  operation: 'create' | 'read' | 'update' | 'search'
+    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>
 ) {
   return {
     error: savedObject.error,
+    ...(savedObject.created_at && { created_at: savedObject.created_at }),
+    ...(savedObject.created_by && { created_by: savedObject.created_by }),
     managed: savedObject.managed,
     owner: savedObject.accessControl?.owner,
     updated_at: savedObject.updated_at,
     updated_by: savedObject.updated_by,
     version: savedObject.version ?? '',
-    ...(['create', 'read', 'search'].includes(operation) && {
-      created_at: savedObject.created_at,
-      created_by: savedObject.created_by,
-    }),
   };
 }
 
@@ -45,19 +43,21 @@ export function getDashboardCRUResponseBody(
   isDashboardAppRequest: boolean = false
 ) {
   let sanatizedDashboardState: DashboardState;
-  let warnings: string[] = [];
+  const warnings: Warnings = [];
   try {
-    let dashboardState = transformDashboardOut(
+    // eslint-disable-next-line prefer-const
+    let { dashboardState, warnings: dashboardStateWarnings } = transformDashboardOut(
       savedObject.attributes,
       savedObject.references,
       isDashboardAppRequest
     );
+    warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {
       const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
         dashboardState as Partial<DashboardState>
       );
       dashboardState = scopedDashboardState;
-      warnings = scopeWarnings;
+      warnings.push(...scopeWarnings);
     }
 
     // Route does not apply defaults to response
@@ -77,7 +77,7 @@ export function getDashboardCRUResponseBody(
         },
       }),
     },
-    meta: getDashboardMeta(savedObject, operation),
-    ...(warnings?.length && { warnings }),
+    meta: getDashboardMeta(savedObject),
+    ...(operation === 'read' && warnings?.length && { warnings }),
   };
 }

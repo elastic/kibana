@@ -12,6 +12,7 @@ components:
       enum:
         - index
         - entity_analytics_integration
+        - store
 
     UpdateableMonitoringEntitySourceProperties:
       type: object
