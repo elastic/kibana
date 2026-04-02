@@ -107,8 +107,6 @@ dependsOn:
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/stack-connectors-plugin'
   - '@kbn/std'
-  - '@kbn/workflows-extensions'
-  - '@kbn/workflows'
   - '@kbn/inference-connectors'
   - '@kbn/streams-ai'
   - '@kbn/cps'

@@ -125,8 +125,7 @@ const eligibleStreamsRoute = createServerRoute({
     const skipped = candidates.slice(availableSlots);
 
     const now = Date.now();
-    const end = now;
-    const start = end - lookbackHours * 3_600_000;
+    const start = now - lookbackHours * 3_600_000;
 
     return {
       candidates: toSchedule,
@@ -143,7 +142,7 @@ const eligibleStreamsRoute = createServerRoute({
       connectorId,
       timeRange: {
         from: new Date(start).toISOString(),
-        to: new Date(end).toISOString(),
+        to: new Date(now).toISOString(),
       },
     };
   },

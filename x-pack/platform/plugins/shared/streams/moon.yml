@@ -87,8 +87,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/setup-node-env'
   - '@kbn/workflows-management-plugin'
-  - '@kbn/workflows-extensions'
-  - '@kbn/workflows'
 tags:
   - plugin
   - prod

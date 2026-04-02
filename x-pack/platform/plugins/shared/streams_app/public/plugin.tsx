@@ -96,10 +96,7 @@ export class StreamsAppPlugin
     this.logger = context.logger.get();
     this.version = context.env.packageInfo.version;
   }
-  setup(
-    coreSetup: CoreSetup<StreamsAppStartDependencies>,
-    plugins: StreamsAppSetupDependencies
-  ): StreamsAppPublicSetup {
+  setup(coreSetup: CoreSetup<StreamsAppStartDependencies>): StreamsAppPublicSetup {
     this.telemetry.setup(coreSetup.analytics);
     const startServicesPromise = coreSetup.getStartServices();
 
