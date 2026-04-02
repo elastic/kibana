@@ -15,6 +15,7 @@ import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
 import { registerReadRoute } from './read';
 import type { DashboardApiRequestHandlerContext } from './request_handler_context';
+import { registerSanitizeRoute } from './sanitize';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter<DashboardApiRequestHandlerContext>();
@@ -29,6 +30,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   registerUpdateRoute(versionedRouter, false);
   registerDeleteRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
+  registerSanitizeRoute(versionedRouter);
 
   //
   // Dashboard application specific routes
