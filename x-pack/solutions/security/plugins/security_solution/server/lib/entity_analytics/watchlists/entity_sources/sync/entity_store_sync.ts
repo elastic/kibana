@@ -34,7 +34,11 @@ export const addWatchlistAttributeToStore = async ({
   if (entityRefs.length === 0) return;
 
   const objects = entityRefs.map(({ euid, type, currentWatchlists }) => {
-    const watchlists = currentWatchlists ?? [];
+    const watchlists = Array.isArray(currentWatchlists)
+      ? currentWatchlists
+      : typeof currentWatchlists === 'string'
+      ? [currentWatchlists]
+      : [];
     const updated = watchlists.includes(watchlistId) ? watchlists : [...watchlists, watchlistId];
 
     return {
@@ -73,7 +77,7 @@ export const removeWatchlistAttributeFromStore = async ({
 }): Promise<void> => {
   // Only update entities whose current watchlists are known — if we don't have the current value we'd blindly write an empty array to the store.
   const knownRefs = entityRefs.filter((ref): ref is EntityRef & { currentWatchlists: string[] } =>
-    Boolean(ref.currentWatchlists)
+    Boolean(ref.currentWatchlists) && Array.isArray(ref.currentWatchlists)
   );
   if (knownRefs.length === 0) return;
 
