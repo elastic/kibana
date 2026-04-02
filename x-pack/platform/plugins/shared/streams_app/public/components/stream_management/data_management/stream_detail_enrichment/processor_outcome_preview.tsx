@@ -607,6 +607,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     () =>
       grokMode && validGrokField
         ? (document: SampleDocument, columnId: string) => {
+            // Only apply grok highlighting to the source field.
+            // For extracted fields (e.g. attributes.ad.category), return undefined
+            // to fall through to the default cell renderer which shows the simulated value.
+            if (columnId !== validGrokField) {
+              return undefined;
+            }
+
             // Use the original (pre-transformation) value for the grok field.
             // This ensures highlighting works even when grok extracts into the same field it reads from.
             const value = getGrokFieldDisplayValue(
