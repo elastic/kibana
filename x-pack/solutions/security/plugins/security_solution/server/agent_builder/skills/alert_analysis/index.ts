@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { alertAnalysisSkill } from './alert_analysis';
-export { threatHuntingSkill } from './threat_hunting';
-export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
-export { registerSkills } from './register_skills';
+export { alertAnalysisSkill } from './alert_analysis_skill';
