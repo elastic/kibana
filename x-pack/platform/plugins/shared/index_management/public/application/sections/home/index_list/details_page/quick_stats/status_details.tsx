@@ -67,7 +67,11 @@ export const StatusDetails: FunctionComponent<{
   }
 
   const badgeConfig = healthToBadgeMapping[health.toLowerCase() as NormalizedHealth];
-  const healthBadge = <EuiBadge color={badgeConfig.color}>{badgeConfig.label}</EuiBadge>;
+  const healthBadge = (
+    <EuiBadge color={badgeConfig.color} data-test-subj="indexDetailsHealthBadge">
+      {badgeConfig.label}
+    </EuiBadge>
+  );
 
   const renderDocCountFooter = () => {
     if (docCount.isLoading) {
@@ -95,7 +99,7 @@ export const StatusDetails: FunctionComponent<{
     }
 
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" data-test-subj="indexDetailsStatusDocCount">
         <EuiFlexItem grow={false}>
           <EuiIcon type="documents" color="subdued" aria-hidden={true} />
         </EuiFlexItem>
