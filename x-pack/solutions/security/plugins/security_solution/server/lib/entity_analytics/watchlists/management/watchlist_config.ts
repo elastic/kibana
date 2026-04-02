@@ -35,10 +35,7 @@ interface WatchlistConfigClientDeps {
   logger: Logger;
 }
 
-type WatchlistSavedObjectAttributes = Omit<
-  WatchlistObject,
-  'id' | 'createdAt' | 'updatedAt' | 'entityCount' | 'entitySourceIds'
->;
+type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
 
 const omitWatchlistMeta = (
@@ -48,8 +45,6 @@ const omitWatchlistMeta = (
     id: _ignoredId,
     createdAt: _ignoredCreatedAt,
     updatedAt: _ignoredUpdatedAt,
-    entityCount: _ignoredEntityCount,
-    entitySourceIds: _ignoredEntitySourceIds,
     ...attrs
   } = watchlist;
   return attrs;
@@ -130,32 +125,17 @@ export class WatchlistConfigClient {
     return this.get(id);
   }
 
-  /**
-   * List all watchlists and populate entity counts for each watchlist
-   * @returns List of watchlists with entity counts
-   */
   async list(): Promise<WatchlistObject[]> {
-    const response = await this.deps.soClient.find<WatchlistObject>({
-      type: watchlistConfigTypeName,
-      namespaces: [this.deps.namespace],
-      perPage: MAX_PER_PAGE,
-    });
+    return this.deps.soClient
+      .find<WatchlistObject>({
+        type: watchlistConfigTypeName,
+        namespaces: [this.deps.namespace],
+        perPage: MAX_PER_PAGE,
+      })
 
-    const watchlists = response.saved_objects.map(toWatchlistObject);
-
-    // Extract valid IDs to bulk-fetch entity counts
-    const watchlistIds = watchlists.map((w) => w.id).filter((id): id is string => id != null);
-
-    if (watchlistIds.length > 0) {
-      const countsMap = await this.getEntityCounts(watchlistIds);
-      for (const w of watchlists) {
-        if (w.id != null) {
-          w.entityCount = countsMap[w.id] ?? 0;
-        }
-      }
-    }
-
-    return watchlists;
+      .then((response) => {
+        return response.saved_objects.map((so) => toWatchlistObject(so));
+      });
   }
 
   async get(id: string) {
@@ -164,9 +144,7 @@ export class WatchlistConfigClient {
         watchlistConfigTypeName,
         id
       );
-      const watchlist = toWatchlistObject(so);
-      watchlist.entityCount = await this.getEntityCount(id);
-      return watchlist;
+      return toWatchlistObject(so);
     } catch (e) {
       if (e.output && e.output.statusCode === 404) {
         throw new Error(`Watchlist config '${id}' not found`);
