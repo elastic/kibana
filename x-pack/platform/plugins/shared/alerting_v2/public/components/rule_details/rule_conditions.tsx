@@ -24,7 +24,7 @@ const MODE_LABELS: Record<string, string> = {
     defaultMessage: 'Detect only',
   }),
   alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
-    defaultMessage: 'Alert',
+    defaultMessage: 'Alerting',
   }),
 };
 

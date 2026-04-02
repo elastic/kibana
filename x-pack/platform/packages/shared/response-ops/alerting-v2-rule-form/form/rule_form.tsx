@@ -30,6 +30,7 @@ import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
 import { NameField } from './fields/name_field';
+import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
@@ -193,6 +194,7 @@ const RuleFormContent = ({
 
   const formContent = (
     <>
+      <ErrorCallOut />
       {isYamlMode ? (
         includeYaml && (
           <EditModeToggle

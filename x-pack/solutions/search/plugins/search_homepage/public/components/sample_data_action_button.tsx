@@ -73,7 +73,7 @@ export const SampleDataActionButton = ({
   const navigateToDashboard = useNavigateToDashboard(dashboardId);
 
   const navigateToIndexDetails = useCallback(async () => {
-    const indexDetailsLocator = share.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID');
+    const indexDetailsLocator = share.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
     if (indexDetailsLocator && indexName) {
       await indexDetailsLocator.navigate({ indexName });
     }
