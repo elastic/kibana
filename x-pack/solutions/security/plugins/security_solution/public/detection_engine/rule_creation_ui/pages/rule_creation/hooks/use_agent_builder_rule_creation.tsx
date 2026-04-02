@@ -30,6 +30,19 @@ import {
 } from '../../../../../../common/constants';
 import { formatRule } from '../helpers';
 
+const ruleDefaultMetadataFields = {
+  references: [],
+  severity_mapping: [],
+  risk_score_mapping: [],
+  related_integrations: [],
+  required_fields: [],
+  actions: [],
+  exceptions_list: [],
+  false_positives: [],
+  author: [],
+  setup: '',
+};
+
 const SYNC_DEBOUNCE_MS = 500;
 
 interface UseAgentBuilderRuleCreationParams {
@@ -98,7 +111,7 @@ export const useAgentBuilderRuleCreation = ({
 
   const updateFormFromChat = useCallback(
     (rule: RuleResponse) => {
-      const stepsData = getStepsData({ rule });
+      const stepsData = getStepsData({ rule: { ...ruleDefaultMetadataFields, ...rule } });
 
       isAiRuleUpdateRef.current = true;
       aiRuleCreation.activateFormSync();
