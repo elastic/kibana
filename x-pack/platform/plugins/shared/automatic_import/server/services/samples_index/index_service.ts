@@ -6,12 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
-import type { AutomaticImportSamplesProperties } from './storage';
-import {
-  automaticImportSamplesIndexName,
-  createIndexAdapter,
-  type AutomaticImportSamplesIndexAdapter,
+import type {
+  AutomaticImportSamplesProperties,
+  AutomaticImportSamplesIndexAdapter,
 } from './storage';
+import { automaticImportSamplesIndexName, createIndexAdapter } from './storage';
 import type { OriginalSource } from '../../../common';
 
 export interface AddSamplesToDataStreamParams {
