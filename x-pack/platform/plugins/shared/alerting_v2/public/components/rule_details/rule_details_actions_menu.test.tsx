@@ -91,7 +91,7 @@ describe('RuleDetailsActionsMenu', () => {
     fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
     fireEvent.click(screen.getByTestId('ruleDetailsCloneButton'));
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
+      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
     );
   });
 

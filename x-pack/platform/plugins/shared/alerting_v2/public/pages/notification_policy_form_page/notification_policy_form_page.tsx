@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import { NotificationPolicyForm } from '../../components/notification_policy/form/notification_policy_form';
 import { useNotificationPolicyForm } from '../../components/notification_policy/form/use_notification_policy_form';
 import { paths } from '../../constants';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
 import { useFetchNotificationPolicy } from '../../hooks/use_fetch_notification_policy';
 import { useUpdateNotificationPolicy } from '../../hooks/use_update_notification_policy';
@@ -45,6 +46,7 @@ export const NotificationPolicyFormPage = () => {
   } = useFetchNotificationPolicy(policyId);
 
   const isEditMode = !!policyId;
+  useBreadcrumbs(isEditMode ? 'notification_policy_edit' : 'notification_policy_create');
   const isReady = !isEditMode || !!existingPolicy;
 
   const navigateToList = useCallback(() => {

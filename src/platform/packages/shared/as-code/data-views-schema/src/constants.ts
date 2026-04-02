@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { AsCodeId } from './id';
+/** `type` discriminator for as-code classic-tab `data_source`: saved Kibana data view id. */
+export const AS_CODE_DATA_VIEW_REFERENCE_TYPE = 'data_view_reference' as const;
+
+/** `type` discriminator for as-code classic-tab `data_source`: inline DataViewSpec-shaped fields. */
+export const AS_CODE_DATA_VIEW_SPEC_TYPE = 'data_view_spec' as const;
