@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { Owner, Owners, RelatedCase } from '../../bundled-types.gen';
 import * as i18n from '../translations';
+import { MAX_DOCS_PER_PAGE } from '../../constants';
 
 export const GetCasesByAlertIdStepTypeId = 'cases.getCasesByAlertId';
 

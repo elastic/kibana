@@ -7,6 +7,14 @@
 
 import { OBSERVABLE_TYPE_IPV4 } from '../../constants';
 
+const observablesFixture = [
+  {
+    id: 'cpaon3223fj2omwcpown9pv',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    value: '10.0.0.8',
+  },
+];
+
 export const createCaseRequestFixture = {
   title: 'My new case',
   description: 'A description',
@@ -80,6 +88,17 @@ export const createCaseResponseFixture = {
   totalAlerts: 0,
   totalComment: 1,
   version: 'WzQ3LDFd',
+  observables: [
+    {
+      id: 'cpaon3223fj2omwcpown9pv',
+      typeKey: OBSERVABLE_TYPE_IPV4.key,
+      value: '10.0.0.8',
+      updatedAt: '2020-02-20T15:07:57.995Z',
+      createdAt: '2020-02-20T15:02:57.995Z',
+      description: 'test description',
+    },
+  ],
+  total_observables: 1,
 };
 
 export const caseIdFixture = 'case-1';
@@ -183,7 +202,7 @@ export const addEventsInputFixture = {
 
 export const addObservablesInputFixture = {
   case_id: caseIdFixture,
-  observables: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.8' }],
+  observables: observablesFixture,
 };
 
 export const addTagInputFixture = {
