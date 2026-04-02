@@ -15,7 +15,7 @@ export interface ImpactEntry {
   method?: string;
   reason: string;
   terraformResource: string;
-  owners?: string[];
+  owners: string[];
 }
 
 interface ImpactReport {
@@ -28,7 +28,7 @@ const ALLOWLIST_PATH = 'packages/kbn-api-contracts/allowlist.json';
 const README_PATH = 'packages/kbn-api-contracts/README.md';
 
 export const buildCommentBody = (entries: ImpactEntry[]): string => {
-  const allOwners = [...new Set(entries.flatMap((e) => e.owners ?? []))];
+  const allOwners = [...new Set(entries.flatMap((e) => e.owners))];
   const ownerMentions = allOwners.length > 0 ? allOwners.join(' ') : '_unknown_';
 
   const escapeCell = (text: string): string => text.replace(/\|/g, '\\|').replace(/\n/g, ' ');
