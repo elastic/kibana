@@ -118,16 +118,76 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('7.16.0', () => {
+      // Docs seeded with pre-7.16.0 attributes so DocumentMigrator runs the 7.16.0 migrations
+      // (migrateTimelineIdToReferences / migrateSavedQueryIdToReferences) when they are created.
+      // The `siem-ui-timeline*` types are not importable via the standard SO API, so we use
+      // kibanaServer.savedObjects.create which bypasses that restriction.
+      const TIMELINE_WITH_SAVED_QUERY_ID = '8dc70950-1012-11ec-9ad3-2d7c6600c0f7';
+      const TIMELINE_WITH_NOTES_AND_PINS = '6484cc90-126e-11ec-83d2-db1096c73738';
+
+      const SEEDED_OBJECTS: Array<{
+        type: string;
+        id: string;
+        attributes: Record<string, unknown>;
+      }> = [
+        {
+          type: 'siem-ui-timeline',
+          id: TIMELINE_WITH_SAVED_QUERY_ID,
+          attributes: { title: 'Awesome Timeline', savedQueryId: "It's me" },
+        },
+        {
+          type: 'siem-ui-timeline',
+          id: TIMELINE_WITH_NOTES_AND_PINS,
+          attributes: { title: 'timeline with pinned events' },
+        },
+        {
+          type: 'siem-ui-timeline-note',
+          id: '989002c0-126e-11ec-83d2-db1096c73738',
+          attributes: {
+            eventId: 'Edo00XsBEVtyvU-8LGNe',
+            note: 'A comment on an event',
+            timelineId: TIMELINE_WITH_NOTES_AND_PINS,
+          },
+        },
+        {
+          type: 'siem-ui-timeline-note',
+          id: 'f09b5980-1271-11ec-83d2-db1096c73738',
+          attributes: { note: 'a non pin comment', timelineId: TIMELINE_WITH_NOTES_AND_PINS },
+        },
+        {
+          type: 'siem-ui-timeline-pinned-event',
+          id: '7a9a5540-126e-11ec-83d2-db1096c73738',
+          attributes: {
+            eventId: 'DNo00XsBEVtyvU-8LGNe',
+            timelineId: TIMELINE_WITH_NOTES_AND_PINS,
+          },
+        },
+        {
+          type: 'siem-ui-timeline-pinned-event',
+          id: '98d919b0-126e-11ec-83d2-db1096c73738',
+          attributes: {
+            eventId: 'Edo00XsBEVtyvU-8LGNe',
+            timelineId: TIMELINE_WITH_NOTES_AND_PINS,
+          },
+        },
+      ];
+
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0'
-        );
+        for (const { type, id, attributes } of SEEDED_OBJECTS) {
+          await kibanaServer.savedObjects.create({
+            type,
+            id,
+            attributes,
+            migrationVersion: {},
+            overwrite: true,
+          });
+        }
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0'
-        );
+        for (const { type, id } of SEEDED_OBJECTS) {
+          await kibanaServer.savedObjects.delete({ type, id });
+        }
       });
       describe('notes timelineId', () => {
         it('removes the timelineId in the saved object', async () => {

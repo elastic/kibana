@@ -12,12 +12,85 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 
 const MIGRATED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
 const MIGRATED_TASK_ID = '329798f0-b0b0-11ea-9510-fdf248d5f2a4';
+const RULE_ID_2 = '46be60d4-ae63-48ed-ab6f-f4d9b4defacf';
+const RULE_ID_3 = 'd7f3cca6-e2aa-4921-aee8-12d2ad3873ca';
+
+// Task documents to seed directly into .kibana_task_manager.
+// The `task` SO type is not importable/exportable via the standard SO API.
+const SEEDED_TASKS = [
+  {
+    id: `task:${MIGRATED_TASK_ID}`,
+    source: {
+      migrationVersion: { task: '7.16.0' },
+      type: 'task',
+      references: [],
+      updated_at: '2021-11-05T16:21:37.629Z',
+      task: {
+        attempts: 0,
+        ownerId: null,
+        params: `{"alertId":"${MIGRATED_RULE_ID}","spaceId":"default"}`,
+        retryAt: null,
+        runAt: '2021-11-05T16:21:52.148Z',
+        schedule: { interval: '1m' },
+        scheduledAt: '2021-11-05T15:28:42.055Z',
+        scope: ['alerting'],
+        startedAt: null,
+        status: 'idle',
+        taskType: 'alerting:example.always-firing',
+      },
+    },
+  },
+  {
+    id: `task:${RULE_ID_2}`,
+    source: {
+      migrationVersion: { task: '7.16.0' },
+      type: 'task',
+      references: [],
+      updated_at: '2021-11-05T16:21:37.629Z',
+      task: {
+        attempts: 0,
+        ownerId: null,
+        params: `{"alertId":"${RULE_ID_2}","spaceId":"default"}`,
+        retryAt: null,
+        runAt: '2021-11-05T16:21:52.148Z',
+        schedule: { interval: '1m' },
+        scheduledAt: '2021-11-05T15:28:42.055Z',
+        scope: ['alerting'],
+        startedAt: null,
+        status: 'idle',
+        taskType: 'sampleTaskRemovedType',
+      },
+    },
+  },
+  {
+    id: `task:${RULE_ID_3}`,
+    source: {
+      migrationVersion: { task: '7.16.0' },
+      type: 'task',
+      references: [],
+      updated_at: '2021-11-05T16:21:37.629Z',
+      task: {
+        attempts: 0,
+        ownerId: null,
+        params: `{"alertId":"${RULE_ID_3}","spaceId":"default"}`,
+        retryAt: null,
+        runAt: '2021-11-05T16:21:52.148Z',
+        schedule: { interval: '1d' },
+        scheduledAt: '2021-11-05T15:28:42.055Z',
+        scope: ['alerting'],
+        startedAt: null,
+        status: 'running',
+        taskType: 'alerting:example.always-firing',
+      },
+    },
+  },
+] as const;
 
 export default function createScheduledTaskIdTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
   describe('scheduled task id', () => {
@@ -31,24 +104,26 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
     }
 
     before(async () => {
-      // Not 100% sure why, seems the rules need to be loaded separately to avoid the task
-      // failing to load the rule during execution and deleting itself. Otherwise
-      // we have flakiness
-      await esArchiver.load(
-        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
+      // Load alert rules via SO import API.
+      // Tasks are seeded directly into .kibana_task_manager because the `task`
+      // SO type is not importable/exportable via the standard SO API.
+      await kibanaServer.importExport.load(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/rules_scheduled_task_id/rules.json'
       );
-      await esArchiver.load(
-        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
-      );
+      for (const { id, source } of SEEDED_TASKS) {
+        await es.index({ index: '.kibana_task_manager', id, body: source, refresh: true });
+      }
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
+      await kibanaServer.importExport.unload(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/rules_scheduled_task_id/rules.json'
       );
-      await esArchiver.unload(
-        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
-      );
+      for (const { id } of SEEDED_TASKS) {
+        await es
+          .delete({ index: '.kibana_task_manager', id, refresh: true })
+          .catch(() => undefined);
+      }
     });
 
     it('cannot create rule with same ID as a scheduled task ID used by another rule', async () => {

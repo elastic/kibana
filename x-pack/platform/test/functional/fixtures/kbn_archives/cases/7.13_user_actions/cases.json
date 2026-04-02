@@ -1,0 +1,637 @@
+{
+  "id": "aa8ac630-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases",
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [
+        {
+          "key": "issueType",
+          "value": "10002"
+        },
+        {
+          "key": "parent",
+          "value": null
+        },
+        {
+          "key": "priority",
+          "value": "Highest"
+        }
+      ],
+      "id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "a jira connector",
+      "type": ".jira"
+    },
+    "created_at": "2021-08-18T20:00:14.343Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "description": "a description",
+    "external_service": {
+      "connector_id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
+      "connector_name": "a jira connector",
+      "external_id": "10117",
+      "external_title": "TPN-110",
+      "external_url": "https://cases-testing.atlassian.net/browse/TPN-110",
+      "pushed_at": "2021-08-18T20:02:21.310Z",
+      "pushed_by": {
+        "email": null,
+        "full_name": "j@elastic.co",
+        "username": "1234"
+      }
+    },
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "open",
+    "tags": [
+      "super"
+    ],
+    "title": "a case",
+    "type": "individual",
+    "updated_at": "2021-08-18T20:02:21.310Z",
+    "updated_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    }
+  },
+  "references": [],
+  "migrationVersion": {
+    "cases": "7.12.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:02:21.325Z"
+}
+
+{
+  "id": "ab43b5f0-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-08-18T19:58:32.955Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "description",
+      "status",
+      "tags",
+      "title",
+      "connector",
+      "settings"
+    ],
+    "new_value": "{\"type\":\"individual\",\"title\":\"a case\",\"tags\":[\"super\"],\"description\":\"a description\",\"connector\":{\"id\":\"none\",\"name\":\"none\",\"type\":\".none\",\"fields\":null},\"settings\":{\"syncAlerts\":true}}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "aa8ac630-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T19:58:34.209Z"
+}
+
+{
+  "id": "b3094de0-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-08-18T19:58:47.229Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "comment",
+      "description",
+      "status",
+      "tags",
+      "title"
+    ],
+    "new_value": "{\"title\":\"a case\",\"tags\":[\"super\"],\"description\":\"a description\"}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "aa8ac630-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T19:58:47.432Z"
+}
+
+{
+  "id": "dd0438d0-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-configure",
+  "attributes": {
+    "closure_type": "close-by-user",
+    "connector": {
+      "fields": [],
+      "id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "a jira connector",
+      "type": ".jira"
+    },
+    "created_at": "2021-08-18T19:59:55.586Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "updated_at": null,
+    "updated_by": null
+  },
+  "references": [],
+  "migrationVersion": {
+    "cases-configure": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T19:59:57.675Z"
+}
+
+{
+  "id": "dc9e4b10-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-connector-mappings",
+  "attributes": {
+    "mappings": [
+      {
+        "action_type": "overwrite",
+        "source": "title",
+        "target": "summary"
+      },
+      {
+        "action_type": "overwrite",
+        "source": "description",
+        "target": "description"
+      },
+      {
+        "action_type": "append",
+        "source": "comments",
+        "target": "comments"
+      }
+    ]
+  },
+  "references": [
+    {
+      "id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-action",
+      "type": "action"
+    }
+  ],
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T19:59:57.016Z"
+}
+
+{
+  "id": "e9471b80-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "push-to-service",
+    "action_at": "2021-08-18T20:00:18.230Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "pushed"
+    ],
+    "new_value": "{\"pushed_at\":\"2021-08-18T20:00:18.230Z\",\"pushed_by\":{\"username\":\"1234\",\"full_name\":\"j@elastic.co\",\"email\":null},\"connector_id\":\"d92243b0-005e-11ec-91f1-6daf2ab59fb5\",\"connector_name\":\"a jira connector\",\"external_id\":\"10117\",\"external_title\":\"TPN-110\",\"external_url\":\"https://cases-testing.atlassian.net/browse/TPN-110\"}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:00:18.249Z"
+}
+
+{
+  "id": "e7882d70-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-08-18T20:00:14.343Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "description",
+      "status",
+      "tags",
+      "title",
+      "connector",
+      "settings"
+    ],
+    "new_value": "{\"type\":\"individual\",\"title\":\"a case\",\"tags\":[\"super\"],\"description\":\"a description\",\"connector\":{\"id\":\"d92243b0-005e-11ec-91f1-6daf2ab59fb5\",\"name\":\"a jira connector\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10002\",\"parent\":null,\"priority\":\"Highest\"}},\"settings\":{\"syncAlerts\":true}}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:00:15.320Z"
+}
+
+{
+  "id": "efe9de50-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-08-18T20:00:28.419Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"a comment\",\"type\":\"user\"}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "ef5f0370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:00:29.379Z"
+}
+
+{
+  "id": "16cd9e30-005f-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-08-18T20:01:33.450Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "connector"
+    ],
+    "new_value": "{\"id\":\"0a572860-005f-11ec-91f1-6daf2ab59fb5\",\"name\":\"a different jira connector\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10002\",\"parent\":null,\"priority\":\"Low\"}}",
+    "old_value": "{\"id\":\"d92243b0-005e-11ec-91f1-6daf2ab59fb5\",\"name\":\"a jira connector\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10002\",\"parent\":null,\"priority\":\"Highest\"}}"
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:01:34.622Z"
+}
+
+{
+  "id": "1ea33bb0-005f-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "push-to-service",
+    "action_at": "2021-08-18T20:01:47.755Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "pushed"
+    ],
+    "new_value": "{\"pushed_at\":\"2021-08-18T20:01:47.755Z\",\"pushed_by\":{\"username\":\"1234\",\"full_name\":\"j@elastic.co\",\"email\":null},\"connector_id\":\"0a572860-005f-11ec-91f1-6daf2ab59fb5\",\"connector_name\":\"a different jira connector\",\"external_id\":\"10118\",\"external_title\":\"TPN-111\",\"external_url\":\"https://cases-testing.atlassian.net/browse/TPN-111\"}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:01:47.767Z"
+}
+
+{
+  "id": "29c98ad0-005f-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-08-18T20:02:05.465Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"comment\":\"second comment\",\"type\":\"user\"}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "29351300-005f-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:02:06.475Z"
+}
+
+{
+  "id": "1d427330-005f-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-connector-mappings",
+  "attributes": {
+    "mappings": [
+      {
+        "action_type": "overwrite",
+        "source": "title",
+        "target": "summary"
+      },
+      {
+        "action_type": "overwrite",
+        "source": "description",
+        "target": "description"
+      },
+      {
+        "action_type": "append",
+        "source": "comments",
+        "target": "comments"
+      }
+    ]
+  },
+  "references": [
+    {
+      "id": "0a572860-005f-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-action",
+      "type": "action"
+    }
+  ],
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:01:45.466Z"
+}
+
+{
+  "id": "29351300-005f-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-comments",
+  "attributes": {
+    "associationType": "case",
+    "comment": "second comment",
+    "created_at": "2021-08-18T20:02:05.465Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "pushed_at": "2021-08-18T20:02:21.310Z",
+    "pushed_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "type": "user",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-comments": "7.12.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:02:21.323Z"
+}
+
+{
+  "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases",
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [
+        {
+          "key": "issueType",
+          "value": "10002"
+        },
+        {
+          "key": "parent",
+          "value": null
+        },
+        {
+          "key": "priority",
+          "value": "Highest"
+        }
+      ],
+      "id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "a jira connector",
+      "type": ".jira"
+    },
+    "created_at": "2021-08-18T20:00:14.343Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "description": "a description",
+    "external_service": {
+      "connector_id": "d92243b0-005e-11ec-91f1-6daf2ab59fb5",
+      "connector_name": "a jira connector",
+      "external_id": "10117",
+      "external_title": "TPN-110",
+      "external_url": "https://cases-testing.atlassian.net/browse/TPN-110",
+      "pushed_at": "2021-08-18T20:02:21.310Z",
+      "pushed_by": {
+        "email": null,
+        "full_name": "j@elastic.co",
+        "username": "1234"
+      }
+    },
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "open",
+    "tags": [
+      "super"
+    ],
+    "title": "a case",
+    "type": "individual",
+    "updated_at": "2021-08-18T20:02:21.310Z",
+    "updated_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    }
+  },
+  "references": [],
+  "migrationVersion": {
+    "cases": "7.12.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:02:21.325Z"
+}
+
+{
+  "id": "2f6e65a0-005f-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "update",
+    "action_at": "2021-08-18T20:02:14.332Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "connector"
+    ],
+    "new_value": "{\"id\":\"d92243b0-005e-11ec-91f1-6daf2ab59fb5\",\"name\":\"a jira connector\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10002\",\"parent\":null,\"priority\":\"Highest\"}}",
+    "old_value": "{\"id\":\"0a572860-005f-11ec-91f1-6daf2ab59fb5\",\"name\":\"a different jira connector\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10002\",\"parent\":null,\"priority\":\"Low\"}}"
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:02:16.034Z"
+}
+
+{
+  "id": "32a351e0-005f-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-user-actions",
+  "attributes": {
+    "action": "push-to-service",
+    "action_at": "2021-08-18T20:02:21.310Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "action_field": [
+      "pushed"
+    ],
+    "new_value": "{\"pushed_at\":\"2021-08-18T20:02:21.310Z\",\"pushed_by\":{\"username\":\"1234\",\"full_name\":\"j@elastic.co\",\"email\":null},\"connector_id\":\"d92243b0-005e-11ec-91f1-6daf2ab59fb5\",\"connector_name\":\"a jira connector\",\"external_id\":\"10117\",\"external_title\":\"TPN-110\",\"external_url\":\"https://cases-testing.atlassian.net/browse/TPN-110\"}",
+    "old_value": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:02:21.320Z"
+}
+
+{
+  "id": "ef5f0370-005e-11ec-91f1-6daf2ab59fb5",
+  "type": "cases-comments",
+  "attributes": {
+    "associationType": "case",
+    "comment": "a comment",
+    "created_at": "2021-08-18T20:00:28.419Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "pushed_at": "2021-08-18T20:01:47.755Z",
+    "pushed_by": {
+      "email": null,
+      "full_name": "j@elastic.co",
+      "username": "1234"
+    },
+    "type": "user",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "references": [
+    {
+      "id": "e6fa9370-005e-11ec-91f1-6daf2ab59fb5",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "migrationVersion": {
+    "cases-comments": "7.12.0"
+  },
+  "coreMigrationVersion": "7.13.4",
+  "updated_at": "2021-08-18T20:01:47.771Z"
+}

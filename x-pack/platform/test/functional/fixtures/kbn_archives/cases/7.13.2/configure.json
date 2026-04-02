@@ -1,0 +1,60 @@
+{
+  "id": "d95d5640-cf9d-11eb-a603-13e7747d215c",
+  "type": "cases-configure",
+  "attributes": {
+    "closure_type": "close-by-user",
+    "connector": {
+      "fields": [],
+      "id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+      "name": "Test Jira",
+      "type": ".jira"
+    },
+    "created_at": "2021-06-17T18:57:21.091Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@j.com",
+      "username": "711621466"
+    },
+    "updated_at": null,
+    "updated_by": null
+  },
+  "references": [],
+  "migrationVersion": {
+    "cases-configure": "7.10.0"
+  },
+  "coreMigrationVersion": "7.13.2",
+  "updated_at": "2021-06-17T18:57:22.870Z"
+}
+
+{
+  "id": "d903c490-cf9d-11eb-a603-13e7747d215c",
+  "type": "cases-connector-mappings",
+  "attributes": {
+    "mappings": [
+      {
+        "action_type": "overwrite",
+        "source": "title",
+        "target": "summary"
+      },
+      {
+        "action_type": "overwrite",
+        "source": "description",
+        "target": "description"
+      },
+      {
+        "action_type": "append",
+        "source": "comments",
+        "target": "comments"
+      }
+    ]
+  },
+  "references": [
+    {
+      "id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+      "name": "associated-action",
+      "type": "action"
+    }
+  ],
+  "coreMigrationVersion": "7.13.2",
+  "updated_at": "2021-06-17T18:57:22.287Z"
+}

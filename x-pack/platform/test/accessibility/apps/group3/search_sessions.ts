@@ -7,22 +7,116 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+// Minimal search-session fixtures for the accessibility test. The `search-session` SO type is
+// hidden and not importable via the standard SO API, so we use kibanaServer.savedObjects.create.
+const SEARCH_SESSIONS = [
+  {
+    id: 'f36c2cd9-97da-4b4b-a031-74f347a40d8f',
+    name: '[eCommerce] Revenue Dashboard',
+    status: 'complete',
+    appId: 'dashboards',
+  },
+  {
+    id: '4670d40a-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 2',
+    status: 'complete',
+    appId: 'discover',
+  },
+  {
+    id: 'qq333qq1-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 3',
+    status: 'in_progress',
+    appId: 'canvas',
+  },
+  {
+    id: 'qq333qq2-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 4',
+    status: 'cancelled',
+    appId: 'visualize',
+  },
+  {
+    id: 'qq333qq3-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 5',
+    status: 'expired',
+    appId: 'security',
+  },
+  {
+    id: 'qq433qq4-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 6',
+    status: 'error',
+    appId: 'graph',
+  },
+  {
+    id: 'qq533qq5-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 7',
+    status: 'complete',
+    appId: 'lens',
+  },
+  {
+    id: 'qq633qq6-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 8',
+    status: 'complete',
+    appId: 'apm',
+  },
+  {
+    id: 'qq733qq7-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 9',
+    status: 'complete',
+    appId: 'appSearch',
+  },
+  {
+    id: 'qq833qq8-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 10',
+    status: 'complete',
+    appId: 'auditbeat',
+  },
+  {
+    id: 'qq933qq9-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 11',
+    status: 'in_progress',
+    appId: 'code',
+  },
+  {
+    id: 'q1033q10-cd61-4acc-ae39-06f1a781b3c1',
+    name: '[eCommerce] Orders Test 12',
+    status: 'in_progress',
+    appId: 'console',
+  },
+];
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { searchSessionsManagement } = getPageObjects(['searchSessionsManagement']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Search sessions Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/data/search_sessions');
+      for (const { id, name, status, appId } of SEARCH_SESSIONS) {
+        await kibanaServer.savedObjects.create({
+          type: 'search-session',
+          id,
+          overwrite: true,
+          attributes: {
+            name,
+            status,
+            appId,
+            created: '2021-02-05T00:00:00.000Z',
+            expires: '2021-02-24T00:00:00.000Z',
+            idMapping: {},
+            sessionId: id,
+          },
+        });
+      }
       await searchSessionsManagement.goTo();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/data/search_sessions');
+      for (const { id } of SEARCH_SESSIONS) {
+        await kibanaServer.savedObjects.delete({ type: 'search-session', id }).catch(() => undefined);
+      }
     });
 
     it('Search sessions management page populated with search sessions meets a11y requirements', async () => {
