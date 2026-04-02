@@ -33,6 +33,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
+import { formatTimeValue } from '../../../common/util/format_time_value';
 import type { MlClient } from '../ml_client';
 import type {
   MlAnomalyDetectionAlertParams,
@@ -191,6 +192,8 @@ export function buildExplorerUrl(
 
 export interface AnomalyDetectionAlertFieldFormatters {
   numberFormatter: IFieldFormat['convert'];
+  dateFormatter?: IFieldFormat;
+  timezone?: string;
   fieldFormatters: Record<string, IFieldFormat['convert']>;
 }
 
@@ -220,6 +223,12 @@ export function alertingServiceProvider(
   const getFormatters = memoize(async (indexPattern: string) => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
     const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
+    const dateFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.DATE });
+    const formatterTimezone = dateFormatter.param('timezone');
+    const timezone =
+      typeof formatterTimezone === 'string' && formatterTimezone !== 'Browser'
+        ? formatterTimezone
+        : 'UTC';
 
     const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
@@ -234,6 +243,8 @@ export function alertingServiceProvider(
     // store formatters to pass to the executor state update
     contextFieldFormatters = {
       numberFormatter: numberFormatter.convert.bind(numberFormatter),
+      dateFormatter,
+      timezone,
       fieldFormatters,
     };
 
@@ -429,6 +440,38 @@ export function alertingServiceProvider(
     return alertInstanceKey;
   };
 
+  const isTimeFunction = (functionName: string): functionName is 'time_of_day' | 'time_of_week' => {
+    return functionName === 'time_of_day' || functionName === 'time_of_week';
+  };
+
+  const formatAlertTimeValue = (
+    value: number,
+    source: MlAnomalyRecordDoc,
+    formatters: AnomalyDetectionAlertFieldFormatters
+  ) => {
+    if (isTimeFunction(source.function) && formatters.dateFormatter) {
+      const timezone = formatters.timezone ?? 'UTC';
+      const formattedTimeValue = formatTimeValue(value, source.function, source, timezone);
+      const formattedDate = formatters.dateFormatter.convert(
+        formattedTimeValue.moment.valueOf(),
+        'text',
+        {
+          timezone,
+        }
+      );
+      const timezoneLabel =
+        timezone === 'UTC' ? 'UTC' : `UTC${formattedTimeValue.moment.format('Z')}`;
+
+      return `${formattedDate} ${timezoneLabel}`;
+    }
+
+    const fieldFormatter =
+      source.field_name !== undefined ? formatters.fieldFormatters[source.field_name] : undefined;
+    const formatter = fieldFormatter ?? formatters.numberFormatter;
+
+    return formatter(value);
+  };
+
   const getAlertMessage = (
     resultType: MlAnomalyResultType,
     source: Record<string, unknown>
@@ -613,13 +656,10 @@ export function alertingServiceProvider(
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
           const { actual, typical } = getTypicalAndActualValues(h._source);
 
-          const formatter =
-            formatters.fieldFormatters[h._source.field_name] ?? formatters.numberFormatter;
-
           return {
             ...h._source,
-            typical: typical?.map((t) => formatter(t)),
-            actual: actual?.map((a) => formatter(a)),
+            typical: typical?.map((t) => formatAlertTimeValue(t, h._source, formatters)),
+            actual: actual?.map((a) => formatAlertTimeValue(a, h._source, formatters)),
             score: Math.floor(
               h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
@@ -751,7 +791,10 @@ export function alertingServiceProvider(
     const resultsLabel = getAggResultsLabel(params.resultType);
 
     const fieldsFormatters =
-      contextFieldFormatters ?? (await getFormatters(datafeeds![0]!.indices[0]));
+      contextFieldFormatters?.dateFormatter !== undefined &&
+      contextFieldFormatters?.timezone !== undefined
+        ? contextFieldFormatters
+        : await getFormatters(datafeeds![0]!.indices[0]);
 
     const formatter = getResultsToContextFormatter(
       params.resultType,
@@ -968,7 +1011,11 @@ export function alertingServiceProvider(
     | { payload: AnomalyDetectionAlertPayload; context: AnomalyDetectionAlertContext; name: string }
     | undefined
   > => {
-    const formatters = contextFieldFormatters ?? (await getFormatters(indexPattern));
+    const formatters =
+      contextFieldFormatters?.dateFormatter !== undefined &&
+      contextFieldFormatters?.timezone !== undefined
+        ? contextFieldFormatters
+        : await getFormatters(indexPattern);
 
     const context = getResultsToContextFormatter(resultType, false, formatters)(value);
     const payload = getResultsToPayloadFormatter(resultType, false)(value);

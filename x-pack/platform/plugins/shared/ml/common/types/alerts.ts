@@ -83,8 +83,8 @@ export interface RecordAnomalyAlertDoc extends BaseAnomalyAlertDoc {
   over_field_value?: string | number;
   partition_field_name?: string;
   partition_field_value?: string | number;
-  typical: number[];
-  actual: number[];
+  typical: Array<string | number>;
+  actual: Array<string | number>;
 }
 
 export interface BucketAnomalyAlertDoc extends BaseAnomalyAlertDoc {
