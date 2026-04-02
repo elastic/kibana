@@ -435,6 +435,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           </div>
         ) : (
           <>
+            {backButtonHeaderComponent}
             {description}
             <EuiSpacer size="m" />
             {callout}
