@@ -104,9 +104,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         })
         .catch((error) => {
           // Ignore error if the index already exists
-          if (error.body?.error?.type !== 'resource_already_exists_exception') {
             throw new ScriptLibraryError(
               `Attempt to create index [${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME}] failed with: ${error.message}`,
+              500,
               error
             );
           }
