@@ -8,20 +8,8 @@
  */
 
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { MarkdownAttributes } from './markdown_saved_object';
-
-export function getMarkdownMeta(
-  savedObject: SavedObject<MarkdownAttributes> | SavedObjectsUpdateResponse<MarkdownAttributes>
-) {
-  return {
-    error: savedObject.error,
-    ...(savedObject.created_at && { created_at: savedObject.created_at }),
-    ...(savedObject.created_by && { created_by: savedObject.created_by }),
-    updated_at: savedObject.updated_at,
-    updated_by: savedObject.updated_by,
-    version: savedObject.version ?? '',
-  };
-}
+import { getMeta } from '@kbn/as-code-shared-schemas';
+import type { MarkdownAttributes } from '../markdown_saved_object';
 
 // CRU is Create, Read, Update
 export function getMarkdownCRUResponseBody(
@@ -30,6 +18,6 @@ export function getMarkdownCRUResponseBody(
   return {
     id: savedObject.id,
     data: savedObject.attributes as MarkdownAttributes,
-    meta: getMarkdownMeta(savedObject),
+    meta: getMeta(savedObject),
   };
 }

@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiPopoverTitle, useGeneratedHtmlId } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { getFieldFormat } from '../utils/get_field_format';
-import type { EnrichedFieldInfoWithValues } from '../utils/enriched_field_info';
-import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
+import type { Status } from '../../../../common/api/detection_engine';
 import {
   CHANGE_ALERT_STATUS,
   CLICK_TO_CHANGE_ALERT_STATUS,
-} from '../../../../detections/components/alerts_table/translations';
-import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import type { inputsModel } from '../../../../common/store';
-import { inputsSelectors } from '../../../../common/store';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+} from '../../../detections/components/alerts_table/translations';
+import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
+
+export interface StatusPopoverButtonFieldInfo {
+  data: {
+    field: string;
+    format?: string | SerializedFieldFormat;
+    type: string;
+  };
+  values: string[];
+  linkValue?: string;
+}
 
 interface StatusPopoverButtonProps {
   /**
@@ -33,43 +38,44 @@ interface StatusPopoverButtonProps {
   /**
    * Information used to
    */
-  enrichedFieldInfo: EnrichedFieldInfoWithValues;
+  enrichedFieldInfo: StatusPopoverButtonFieldInfo;
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * Optional callback to refresh the hosting flyout after a status mutation.
+   */
+  onStatusUpdated?: () => void;
 }
+
+const getFieldFormat = (field?: { format?: string | SerializedFieldFormat }) =>
+  typeof field?.format === 'string' ? field.format : field?.format?.id;
 
 /**
  * Renders a button and its popover to display the status of an alert and allows the user to change it.
  * It is used in the header of the document details flyout.
  */
 export const StatusPopoverButton = memo(
-  ({ eventId, contextId, enrichedFieldInfo, scopeId }: StatusPopoverButtonProps) => {
-    const { closeFlyout } = useExpandableFlyoutApi();
+  ({
+    eventId,
+    contextId,
+    enrichedFieldInfo,
+    scopeId,
+    onStatusUpdated,
+  }: StatusPopoverButtonProps) => {
+    const popoverTitleId = useGeneratedHtmlId();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+    const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-    const closeAfterAction = useCallback(() => {
-      closePopover();
-      closeFlyout();
-    }, [closeFlyout, closePopover]);
-
-    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
-
-    const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
-
-    const refetchGlobalQuery = useCallback(() => {
-      globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-    }, [globalQueries]);
 
     const { actionItems, panels: actionItemsPanels } = useAlertsActions({
-      closePopover: closeAfterAction,
+      closePopover,
       eventId,
       scopeId,
       alertStatus: enrichedFieldInfo.values[0] as Status,
-      refetch: refetchGlobalQuery,
+      refetch: onStatusUpdated,
     });
 
     const panels = useMemo(
@@ -107,13 +113,16 @@ export const StatusPopoverButton = memo(
 
     return (
       <EuiPopover
+        aria-labelledby={popoverTitleId}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
         data-test-subj="alertStatus"
       >
-        <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="m">
+          {CHANGE_ALERT_STATUS}
+        </EuiPopoverTitle>
         <EuiContextMenu
           panels={panels}
           initialPanelId={0}
