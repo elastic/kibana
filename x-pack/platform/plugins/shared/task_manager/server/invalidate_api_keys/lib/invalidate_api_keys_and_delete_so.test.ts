@@ -176,35 +176,6 @@ describe('invalidateApiKeysAndDeletePendingApiKeySavedObject', () => {
       expect(total).toEqual(1);
     });
 
-    test('should delete SO and warn when UIAM returns APIKEY_MISSING (0x28D520)', async () => {
-      invalidateUiamApiKeyFn.mockResolvedValueOnce({
-        invalidated_api_keys: [],
-        previously_invalidated_api_keys: [],
-        error_count: 1,
-        error_details: [{ type: 'exception', code: '0x28D520', reason: 'APIKEY_MISSING' }],
-      });
-
-      const total = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
-        apiKeyIdsToInvalidate: [],
-        uiamApiKeysToInvalidate: [
-          { id: 'so_1', apiKeyId: 'uiam_key_1', uiamApiKey: 'essu_cred_1' },
-        ],
-        invalidateUiamApiKeyFn,
-        logger,
-        savedObjectsClient: internalSavedObjectsRepository,
-        savedObjectType: 'api_key_pending_invalidation',
-      });
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('UIAM APIKey is already invalidated or missing')
-      );
-      expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
-        'api_key_pending_invalidation',
-        'so_1'
-      );
-      expect(total).toEqual(1);
-    });
-
     test('should delete SO and warn when UIAM returns APIKEY_REVOKED (0xD38358)', async () => {
       invalidateUiamApiKeyFn.mockResolvedValueOnce({
         invalidated_api_keys: [],

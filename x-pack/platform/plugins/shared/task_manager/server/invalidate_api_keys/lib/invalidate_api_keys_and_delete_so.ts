@@ -6,8 +6,7 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { isMissingApiKey, isRevokedApiKey } from '@kbn/core-security-server';
-
+import { isRevokedApiKey } from '@kbn/core-security-server';
 import type { ApiKeyIdAndSOId, UiamApiKeyAndSOId } from './get_api_key_ids_to_invalidate';
 import { invalidateAPIKeys, invalidateUiamAPIKeys } from './invalidate_api_keys';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
@@ -62,7 +61,7 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
       );
 
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        if (isMissingApiKey(response.result) || isRevokedApiKey(response.result)) {
+        if (isRevokedApiKey(response.result)) {
           logger.warn(
             `UIAM APIKey is already invalidated or missing, removing pending invalidation. ` +
               `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
