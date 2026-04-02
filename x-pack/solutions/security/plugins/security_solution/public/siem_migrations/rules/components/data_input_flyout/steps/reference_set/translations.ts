@@ -14,6 +14,6 @@ export const REFERENCE_SET_DATA_INPUT_TITLE = i18n.translate(
 export const REFERENCE_SET_DATA_INPUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSet.description',
   {
-    defaultMessage: `We've also found reference sets within your rules. To fully translate those rules containing these reference sets, follow the step-by-step guide to export and upload them all.`,
+    defaultMessage: `We've also found reference sets within your rules. To fully translate those rules containing these reference sets, upload them all.`,
   }
 );

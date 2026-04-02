@@ -171,6 +171,7 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/ui-actions-plugin'
   - '@kbn/product-doc-common'
+  - '@kbn/lens-common'
 tags:
   - test-helper
   - package
