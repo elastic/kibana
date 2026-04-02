@@ -18,6 +18,10 @@ export interface EdotCollectorParams {
 /**
  * Returns the EDOT Collector configuration as a plain object.
  * Useful when callers need to extend the config before serializing.
+ *
+ * @param elasticsearchEndpoint - The Elasticsearch endpoint URL
+ * @param username - Elasticsearch username
+ * @param password - Elasticsearch password
  */
 export function getEdotCollectorConfig({
   elasticsearchEndpoint,
