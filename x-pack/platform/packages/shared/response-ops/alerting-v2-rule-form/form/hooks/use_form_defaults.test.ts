@@ -56,7 +56,6 @@ describe('useFormDefaults', () => {
     const { result } = renderHook(() => useFormDefaults({ query }));
 
     expect(result.current.evaluation.query.base).toBe(query);
-    expect(result.current.evaluation.query).not.toHaveProperty('condition');
   });
 
   it('uses query as-is for base when no WHERE clause', () => {

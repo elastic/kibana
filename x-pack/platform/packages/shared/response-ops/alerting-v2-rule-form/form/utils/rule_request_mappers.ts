@@ -26,8 +26,7 @@ type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
  * Builds the `recovery_policy.query` portion of the API payload.
  *
  * Only full-query mode is supported: the user provides a standalone recovery
- * base query. The condition field is intentionally ignored because the
- * framework executor does not use it.
+ * base query.
  */
 const buildRecoveryQuery = (
   recoveryPolicy: NonNullable<FormValues['recoveryPolicy']>

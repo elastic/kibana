@@ -56,22 +56,6 @@ describe('rule_request_mappers', () => {
       expect(result).not.toHaveProperty('kind');
     });
 
-    it('never includes condition in evaluation query even if stored in form', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        evaluation: {
-          query: { base: 'FROM logs | STATS count() BY host', condition: 'WHERE count > 100' },
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.evaluation.query).toEqual({
-        base: 'FROM logs | STATS count() BY host',
-      });
-      expect(result.evaluation.query).not.toHaveProperty('condition');
-    });
-
     it('maps grouping fields when present', () => {
       const formValues: FormValues = {
         ...baseFormValues,
@@ -121,25 +105,6 @@ describe('rule_request_mappers', () => {
         type: 'query',
         query: { base: 'FROM logs | WHERE status = "ok"' },
       });
-    });
-
-    it('maps recovery_policy type query ignoring condition field', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        evaluation: { query: { base: 'FROM logs | STATS count() BY host' } },
-        recoveryPolicy: {
-          type: 'query',
-          query: { base: 'FROM other_index', condition: 'WHERE recovered = true' },
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.recovery_policy).toEqual({
-        type: 'query',
-        query: { base: 'FROM other_index' },
-      });
-      expect(result.recovery_policy!.query).not.toHaveProperty('condition');
     });
 
     it('maps state_transition for alert kind with pending count and timeframe', () => {
@@ -528,7 +493,6 @@ describe('rule_request_mappers', () => {
       evaluation: {
         query: {
           base: 'FROM logs-* | STATS count() BY host',
-          condition: 'WHERE count > 100',
         },
       },
     } as RuleResponse;
@@ -582,28 +546,12 @@ describe('rule_request_mappers', () => {
       expect(result.schedule).toEqual({ every: '10m', lookback: '1m' });
     });
 
-    it('maps evaluation query base and ignores condition from API response', () => {
+    it('maps evaluation query base', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
 
       expect(result.evaluation).toEqual({
         query: {
           base: 'FROM logs-* | STATS count() BY host',
-        },
-      });
-      expect(result.evaluation!.query).not.toHaveProperty('condition');
-    });
-
-    it('maps evaluation query without condition', () => {
-      const rule = {
-        ...baseRuleResponse,
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
-      } as RuleResponse;
-
-      const result = mapRuleResponseToFormValues(rule);
-
-      expect(result.evaluation).toEqual({
-        query: {
-          base: 'FROM logs-* | LIMIT 10',
         },
       });
     });
@@ -625,12 +573,12 @@ describe('rule_request_mappers', () => {
       expect(result).not.toHaveProperty('grouping');
     });
 
-    it('maps recovery_policy with query ignoring condition', () => {
+    it('maps recovery_policy with query', () => {
       const rule = {
         ...baseRuleResponse,
         recovery_policy: {
           type: 'query',
-          query: { base: 'FROM logs', condition: 'WHERE recovered = true' },
+          query: { base: 'FROM logs' },
         },
       } as RuleResponse;
 
@@ -782,7 +730,6 @@ describe('rule_request_mappers', () => {
       expect(createPayload.kind).toBe('alert');
       expect(createPayload.metadata.description).toBe('Roundtrip description');
       expect(createPayload.evaluation.query.base).toBe('FROM logs-* | STATS count() BY host');
-      expect(createPayload.evaluation.query).not.toHaveProperty('condition');
       expect(createPayload.grouping).toEqual({ fields: ['host.name'] });
       expect(createPayload.recovery_policy).toEqual({
         type: 'query',

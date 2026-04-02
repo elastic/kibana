@@ -184,29 +184,6 @@ describe('useRulePreview', () => {
     expect(result.current.rows[0].data).toBe('{"key":"value"}');
   });
 
-  describe('condition field is ignored', () => {
-    it('uses only the base query even when a condition value is stored', async () => {
-      const wrapper = createFormWrapper({
-        ...defaultFormValues,
-        evaluation: {
-          query: {
-            base: 'FROM logs-* | STATS count() BY host.name',
-            condition: 'WHERE count > 100',
-          },
-        },
-      });
-
-      renderHook(() => useRulePreview(), { wrapper });
-
-      await waitFor(() => {
-        expect(mockGetESQLResults).toHaveBeenCalled();
-      });
-
-      const call = mockGetESQLResults.mock.calls[0][0];
-      expect(call.esqlQuery).toBe('FROM logs-* | STATS count() BY host.name');
-    });
-  });
-
   describe('grouping fields and unique group count', () => {
     const groupingResponse = {
       response: {

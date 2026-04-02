@@ -17,11 +17,6 @@ export type { PreviewResult as RulePreviewResult, PreviewColumn } from './use_pr
  *
  * Watches the evaluation base query and delegates to the generic `usePreview`
  * hook for ES|QL execution, debouncing, and result mapping.
- *
- * The `evaluation.query.condition` field is intentionally ignored because the
- * framework executor only runs the base query. This prevents the preview from
- * showing different results than what the rule actually evaluates at runtime,
- * and guards against API-created rules that may have stored a stale condition.
  */
 export const useRulePreview = () => {
   const { control } = useFormContext<FormValues>();

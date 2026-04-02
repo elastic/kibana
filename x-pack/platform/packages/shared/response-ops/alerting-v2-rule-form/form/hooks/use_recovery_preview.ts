@@ -18,9 +18,6 @@ export type { PreviewResult as RecoveryPreviewResult } from './use_preview';
  * Watches the recovery policy form fields and uses the standalone
  * `recoveryPolicy.query.base` as the recovery query.
  *
- * The `recoveryPolicy.query.condition` field is intentionally ignored to
- * match the framework executor behavior, which only uses the base query.
- *
  * Delegates to `usePreview` for ES|QL execution and result mapping.
  * Disabled when recovery type is not `'query'`.
  */

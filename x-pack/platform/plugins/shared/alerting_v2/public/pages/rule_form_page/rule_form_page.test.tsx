@@ -265,7 +265,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Test Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'WHERE true' } },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
         },
         isLoading: false,
         isError: false,
@@ -310,7 +310,6 @@ describe('RuleFormPage', () => {
           evaluation: {
             query: {
               base: 'FROM logs-* | STATS count() BY host.name',
-              condition: 'WHERE count > 5',
             },
           },
           grouping: { fields: ['host.name'] },
@@ -339,10 +338,9 @@ describe('RuleFormPage', () => {
       expect(schedule.every).toBe('10m');
       expect(schedule.lookback).toBe('2m');
 
-      // Evaluation (condition is ignored from API response)
+      // Evaluation
       const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
       expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
-      expect(evaluation.query).not.toHaveProperty('condition');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };
@@ -464,7 +462,6 @@ describe('RuleFormPage', () => {
           evaluation: {
             query: {
               base: 'FROM logs-* | STATS count() BY host.name',
-              condition: 'WHERE count > 5',
             },
           },
           grouping: { fields: ['host.name'] },
@@ -497,7 +494,6 @@ describe('RuleFormPage', () => {
           evaluation: {
             query: {
               base: 'FROM logs-* | STATS count() BY host.name',
-              condition: 'WHERE count > 5',
             },
           },
           grouping: { fields: ['host.name'] },
@@ -523,10 +519,9 @@ describe('RuleFormPage', () => {
       expect(schedule.every).toBe('10m');
       expect(schedule.lookback).toBe('2m');
 
-      // Evaluation (condition is ignored from API response)
+      // Evaluation
       const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
       expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
-      expect(evaluation.query).not.toHaveProperty('condition');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };

@@ -63,35 +63,6 @@ describe('useRecoveryPreview', () => {
     expect(call.esqlQuery).toBe('FROM logs-* | STATS count() BY host.name | WHERE count < 5');
   });
 
-  it('ignores condition field even when stored', async () => {
-    const wrapper = createFormWrapper({
-      timeField: '@timestamp',
-      schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs-* | STATS count() BY host.name',
-          condition: 'WHERE count > 100',
-        },
-      },
-      recoveryPolicy: {
-        type: 'query' as const,
-        query: {
-          base: 'FROM logs-* | STATS count() BY host.name | WHERE count < 5',
-          condition: 'WHERE count <= 50',
-        },
-      },
-    });
-
-    renderHook(() => useRecoveryPreview(), { wrapper });
-
-    await waitFor(() => {
-      expect(mockGetESQLResults).toHaveBeenCalled();
-    });
-
-    const call = mockGetESQLResults.mock.calls[0][0];
-    expect(call.esqlQuery).toBe('FROM logs-* | STATS count() BY host.name | WHERE count < 5');
-  });
-
   it('does not execute when recovery base query is empty', async () => {
     const wrapper = createFormWrapper({
       timeField: '@timestamp',
