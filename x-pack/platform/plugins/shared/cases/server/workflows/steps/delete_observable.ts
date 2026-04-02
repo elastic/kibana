@@ -18,23 +18,14 @@ export const deleteObservableStepDefinition = (
     ...deleteObservableStepCommonDefinition,
     handler: async (context) => {
       const { case_id, observable_id } = context.input;
+      const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
+      await casesClient.cases.deleteObservable(case_id, observable_id);
 
-      try {
-        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        await casesClient.cases.deleteObservable(case_id, observable_id);
-
-        return {
-          output: {
-            case_id,
-            observable_id,
-          },
-        };
-      } catch (_error) {
-        return {
-          error: new Error(
-            `Observable "${observable_id}" could not be deleted from case "${case_id}".`
-          ),
-        };
-      }
+      return {
+        output: {
+          case_id,
+          observable_id,
+        },
+      };
     },
   });

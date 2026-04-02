@@ -17,17 +17,11 @@ export const getCasesStepDefinition = (
   createServerStepDefinition({
     ...getCasesStepCommonDefinition,
     handler: async (context) => {
-      try {
-        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        const result = await casesClient.cases.bulkGet({ ids: context.input.case_ids });
+      const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
+      const result = await casesClient.cases.bulkGet({ ids: context.input.case_ids });
 
-        const output = getCasesStepCommonDefinition.outputSchema.parse(result);
+      const output = getCasesStepCommonDefinition.outputSchema.parse(result);
 
-        return { output };
-      } catch (_error) {
-        return {
-          error: new Error(`Cases could not be retrieved for the provided IDs.`),
-        };
-      }
+      return { output };
     },
   });

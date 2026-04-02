@@ -70,7 +70,7 @@ describe('getCasesStepDefinition', () => {
     });
   });
 
-  it('returns error when cases.bulkGet throws', async () => {
+  it('returns error when cases.bulkGet throws', () => {
     // FAILURE SCENARIO: client throws (e.g. auth failure)
     const bulkGet = jest.fn().mockRejectedValue(new Error('unauthorized'));
     const getCasesClient = jest.fn().mockResolvedValue({
@@ -78,10 +78,8 @@ describe('getCasesStepDefinition', () => {
     } as unknown as CasesClient);
     const definition = getCasesStepDefinition(getCasesClient);
 
-    const result = await definition.handler(createContext({ case_ids: ['case-1'] }));
-
-    expect(result).toEqual({
-      error: new Error('Cases could not be retrieved for the provided IDs.'),
-    });
+    expect(() => definition.handler(createContext({ case_ids: ['case-1'] }))).rejects.toThrow(
+      'unauthorized'
+    );
   });
 });

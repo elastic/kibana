@@ -17,23 +17,15 @@ export const getAllAttachmentsStepDefinition = (
   createServerStepDefinition({
     ...getAllAttachmentsStepCommonDefinition,
     handler: async (context) => {
-      try {
-        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        const attachments = await casesClient.attachments.getAll({
-          caseID: context.input.case_id,
-        });
+      const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
+      const attachments = await casesClient.attachments.getAll({
+        caseID: context.input.case_id,
+      });
 
-        const output = getAllAttachmentsStepCommonDefinition.outputSchema.parse({
-          attachments,
-        });
+      const output = getAllAttachmentsStepCommonDefinition.outputSchema.parse({
+        attachments,
+      });
 
-        return { output };
-      } catch (_error) {
-        return {
-          error: new Error(
-            `Attachments could not be retrieved for case "${context.input.case_id}".`
-          ),
-        };
-      }
+      return { output };
     },
   });

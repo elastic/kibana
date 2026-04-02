@@ -17,26 +17,18 @@ export const getCasesByAlertIdStepDefinition = (
   createServerStepDefinition({
     ...getCasesByAlertIdStepCommonDefinition,
     handler: async (context) => {
-      try {
-        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-        const relatedCases = await casesClient.cases.getCasesByAlertID({
-          alertID: context.input.alert_id,
-          options: {
-            owner: context.input.owner,
-          },
-        });
+      const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
+      const relatedCases = await casesClient.cases.getCasesByAlertID({
+        alertID: context.input.alert_id,
+        options: {
+          owner: context.input.owner,
+        },
+      });
 
-        const output = getCasesByAlertIdStepCommonDefinition.outputSchema.parse({
-          cases: relatedCases,
-        });
+      const output = getCasesByAlertIdStepCommonDefinition.outputSchema.parse({
+        cases: relatedCases,
+      });
 
-        return { output };
-      } catch (_error) {
-        return {
-          error: new Error(
-            `Cases could not be retrieved for alert ID "${context.input.alert_id}".`
-          ),
-        };
-      }
+      return { output };
     },
   });

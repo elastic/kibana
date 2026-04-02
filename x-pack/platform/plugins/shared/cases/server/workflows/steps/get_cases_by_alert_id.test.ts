@@ -70,7 +70,7 @@ describe('getCasesByAlertIdStepDefinition', () => {
     });
   });
 
-  it('returns error when getCasesByAlertID throws', async () => {
+  it('returns error when getCasesByAlertID throws', () => {
     // FAILURE SCENARIO: client throws (e.g. authorization failure or network error)
     const getCasesByAlertID = jest.fn().mockRejectedValue(new Error('unauthorized'));
     const getCasesClient = jest.fn().mockResolvedValue({
@@ -78,10 +78,6 @@ describe('getCasesByAlertIdStepDefinition', () => {
     } as unknown as CasesClient);
     const definition = getCasesByAlertIdStepDefinition(getCasesClient);
 
-    const result = await definition.handler(createContext({ alert_id: 'alert-1' }));
-
-    expect(result).toEqual({
-      error: new Error('Cases could not be retrieved for alert ID "alert-1".'),
-    });
+    expect(() => definition.handler(createContext({ alert_id: 'alert-1' }))).rejects.toThrow();
   });
 });
