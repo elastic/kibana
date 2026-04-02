@@ -7,7 +7,8 @@ steps:
       zones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
     key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    # [rspack-transition] Original condition (restore when legacy optimizer is removed):
+    # if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
     retry:
       automatic:
