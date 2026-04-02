@@ -500,7 +500,7 @@ For the Elastic Observability 9.2.8 release information, refer to [Elastic Obser
 * Fixes automatic agent upgrades stopping early with “target percentage already reached” because agents upgrading in other policies were also counted [#258387]({{kib-pull}}258387).
 
 **Data management**:
-* Restores keyboard focus to the **Create a transform** button on the Transforms page [#258095]({{kib-pull}}258095).
+* Restores keyboard focus to the **Create a transform** button on the **Transforms** page [#258095]({{kib-pull}}258095).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.2.8 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -510,7 +510,7 @@ For the Elastic Security 9.2.8 release information, refer to [Elastic Security S
 
 **Elasticsearch solution**:
 * Fixes the query rules UI rejecting case variants as duplicate values [#259506]({{kib-pull}}259506).
-* Prevents only passing filtered rules to the API and deleting rules not matching the filter in the Query Rule Set editor  [#259503]({{kib-pull}}259503).
+* Prevents only passing filtered rules to the API and deleting rules not matching the filter in the Query Rule Set editor [#259503]({{kib-pull}}259503).
 
 **Machine Learning**:
 * Fixes the anomaly swim lane dashboard panel not refreshing [#259962]({{kib-pull}}259962).
