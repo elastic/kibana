@@ -38,7 +38,7 @@ import semverValid from 'semver/functions/valid';
 import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
 
 import type {
-  AutomaticImportTelemetryReporter,
+  AutomaticImportTelemetry,
   DataStreamResponse,
   DataStreamResultsFlyoutComponent,
 } from './manage_integrations_table';
@@ -229,7 +229,7 @@ export const ReviewApproveModal: React.FC<{
   }, [isApproving, onClose]);
 
   const handleCancelClick = useCallback(() => {
-    (automaticImport?.telemetry as AutomaticImportTelemetryReporter)?.reportEvent(
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_approve_modal_cancel_clicked',
       {}
     );
@@ -275,7 +275,7 @@ export const ReviewApproveModal: React.FC<{
       return;
     }
 
-    (automaticImport?.telemetry as AutomaticImportTelemetryReporter)?.reportEvent(
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_approve_modal_approve_clicked',
       {}
     );
