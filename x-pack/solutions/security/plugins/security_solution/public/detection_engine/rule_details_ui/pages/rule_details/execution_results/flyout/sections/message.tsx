@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiAccordion, EuiCodeBlock, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent } from './shared';
+import * as i18n from '../../translations';
+import { AccordionButtonContent } from '../shared';
 
 interface MessageSectionProps {
   message: string;

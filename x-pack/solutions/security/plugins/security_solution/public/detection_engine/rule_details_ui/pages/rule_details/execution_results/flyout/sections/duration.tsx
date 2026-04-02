@@ -15,9 +15,9 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
-import { humanizeDuration } from '../utils';
+import * as i18n from '../../translations';
+import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from '../shared';
+import { humanizeDuration } from '../../utils';
 
 interface DurationBreakdownSectionProps {
   totalSearchDurationMs: number | null;
