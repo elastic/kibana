@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { type ObjectType, schema } from '@kbn/config-schema';
 import {
-  createRuleBodyVariantsV1,
+  ruleParamsSchemasForCreateV1,
   createRuleParamsExamplesV1,
 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
@@ -193,7 +193,8 @@ export { createRuleParamsExamplesV1 };
 
 export const knownCreateBodySchema = schema.discriminatedUnion(
   'rule_type_id',
-  createRuleBodyVariantsV1(baseCreateBodyFields) as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ruleParamsSchemasForCreateV1(baseCreateBodyFields) as [ObjectType<any>]
 );
 
 export const fallbackCreateBodySchema = schema.object({

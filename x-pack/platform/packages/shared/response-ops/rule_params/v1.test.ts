@@ -5,86 +5,92 @@
  * 2.0.
  */
 
+import { type ObjectType, schema } from '@kbn/config-schema';
 import {
-  ruleParamsSchemaWithRuleTypeId,
+  ruleParamsSchemasForCreate,
   ruleParamsSchema,
   ruleParamsSchemaWithDefaultValue,
   ruleParamsSchemaForUpdate,
   RULE_TYPE_ID,
 } from './v1';
 
+const buildDiscriminatedUnion = (baseFields: Record<string, unknown> = {}) =>
+  schema.discriminatedUnion(
+    RULE_TYPE_ID,
+    ruleParamsSchemasForCreate(baseFields as Record<string, never>) as [ObjectType<any>]
+  );
+
 describe('rule params schemas', () => {
-  describe('ruleParamsSchemaWithRuleTypeId', () => {
-    it('validates correctly for key rule_type_id', () => {
+  describe('ruleParamsSchemasForCreate', () => {
+    it('validates correctly when rule_type_id and matching params are provided', () => {
       expect(() =>
-        ruleParamsSchemaWithRuleTypeId().validate({
+        buildDiscriminatedUnion().validate({
           [RULE_TYPE_ID]: '.es-query',
-          searchType: 'searchSource',
-          searchConfiguration: {},
-          threshold: [0],
-          thresholdComparator: '>',
-          size: 100,
-          timeWindowUnit: 'm',
-          timeWindowSize: 5,
+          params: {
+            searchType: 'searchSource',
+            searchConfiguration: {},
+            threshold: [0],
+            thresholdComparator: '>',
+            size: 100,
+            timeWindowUnit: 'm',
+            timeWindowSize: 5,
+          },
         })
       ).not.toThrow();
     });
 
-    it('throws when no key is provided', () => {
+    it('throws when rule_type_id is missing', () => {
       expect(() =>
-        ruleParamsSchemaWithRuleTypeId().validate({
-          searchType: 'searchSource',
+        buildDiscriminatedUnion().validate({
+          params: { searchType: 'searchSource' },
         })
       ).toThrowError(`"rule_type_id" property is required`);
     });
 
     it('throws when rule_type_id is unknown', () => {
       expect(() =>
-        ruleParamsSchemaWithRuleTypeId().validate({ [RULE_TYPE_ID]: 'unknown' })
+        buildDiscriminatedUnion().validate({ [RULE_TYPE_ID]: 'unknown', params: {} })
+      ).toThrowError(/expected "rule_type_id" to be one of/);
+    });
+
+    it('throws when params are missing required fields for the matched rule type', () => {
+      expect(() =>
+        buildDiscriminatedUnion().validate({
+          [RULE_TYPE_ID]: '.es-query',
+          params: {
+            searchType: 'searchSource',
+            searchConfiguration: {},
+            threshold: [0],
+            thresholdComparator: '>',
+            size: 100,
+            timeWindowUnit: 'm',
+          },
+        })
       ).toThrowError(
-        `expected \"rule_type_id\" to be one of [\"monitoring_ccr_read_exceptions\", \"monitoring_alert_cluster_health\", \"monitoring_alert_cpu_usage\", \"monitoring_alert_disk_usage\", \"monitoring_alert_elasticsearch_version_mismatch\", \"monitoring_alert_kibana_version_mismatch\", \"monitoring_alert_license_expiration\", \"monitoring_alert_logstash_version_mismatch\", \"monitoring_alert_jvm_memory_usage\", \"monitoring_alert_missing_monitoring_data\", \"monitoring_alert_nodes_changed\", \"monitoring_shard_size\", \"monitoring_alert_thread_pool_search_rejections\", \"monitoring_alert_thread_pool_write_rejections\", \"xpack.ml.anomaly_detection_alert\", \"xpack.ml.anomaly_detection_jobs_health\", \"datasetQuality.degradedDocs\", \".es-query\", \".index-threshold\", \".geo-containment\", \"transform_health\", \"apm.anomaly\", \"apm.error_rate\", \"apm.transaction_error_rate\", \"apm.transaction_duration\", \"xpack.synthetics.alerts.monitorStatus\", \"xpack.synthetics.alerts.tls\", \"xpack.uptime.alerts.monitorStatus\", \"xpack.uptime.alerts.tlsCertificate\", \"xpack.uptime.alerts.durationAnomaly\", \"metrics.alert.inventory.threshold\", \"metrics.alert.threshold\", \"observability.rules.custom_threshold\", \"logs.alert.document.count\", \"slo.rules.burnRate\"] but got [\"unknown\"]`
+        `[params.timeWindowSize]: expected value of type [number] but got [undefined]`
       );
     });
 
-    it('throws when params missing required fields', () => {
-      const payload = {
-        [RULE_TYPE_ID]: '.es-query',
-        searchType: 'searchSource',
-        searchConfiguration: {},
-        threshold: [0],
-        thresholdComparator: '>',
-        size: 100,
-        timeWindowUnit: 'm',
-      };
-
-      expect(() => ruleParamsSchemaWithRuleTypeId().validate(payload)).toThrowError(
-        `[timeWindowSize]: expected value of type [number] but got [undefined]`
-      );
-    });
-
-    it('throws error when invalid params', () => {
-      const payload = {
-        [RULE_TYPE_ID]: '.es-query',
-        searchType: 'searchSource',
-        searchConfiguration: {},
-        threshold: [0],
-        thresholdComparator: '>',
-        size: 100,
-        timeWindowUnit: 'm',
-        timeWindowSize: 5,
-        foo: 'bar',
-      };
-
-      expect(() => ruleParamsSchemaWithRuleTypeId().validate(payload)).toThrowError(
-        `[foo]: Additional properties are not allowed ('foo' was unexpected)`
-      );
+    it('throws when params contain unexpected fields for the matched rule type', () => {
+      expect(() =>
+        buildDiscriminatedUnion().validate({
+          [RULE_TYPE_ID]: '.index-threshold',
+          params: {
+            index: 'my-index',
+            timeField: '@timestamp',
+            threshold: [0],
+            thresholdComparator: '>',
+            timeWindowUnit: 'm',
+            timeWindowSize: 5,
+            foo: 'bar',
+          },
+        })
+      ).toThrowError(`Additional properties are not allowed`);
     });
 
     it('rejects params that are valid for a different rule type', () => {
-      // .es-query params (non-ObjectType: nested under params key) provided for
-      // .index-threshold (ObjectType: expects flat params including required index and timeField)
       expect(() =>
-        ruleParamsSchemaWithRuleTypeId().validate({
+        buildDiscriminatedUnion().validate({
           [RULE_TYPE_ID]: '.index-threshold',
           params: {
             searchType: 'searchSource',
@@ -95,7 +101,31 @@ describe('rule params schemas', () => {
             timeWindowSize: 5,
           },
         })
-      ).toThrowError(`[index]: expected at least one defined value but got [undefined]`);
+      ).toThrowError(`[params.index]: expected at least one defined value but got [undefined]`);
+    });
+
+    it('returns a variant for every known rule type', () => {
+      const variants = ruleParamsSchemasForCreate({});
+      const ruleTypeIds = variants.map(
+        (v) => (v.getPropSchemas()[RULE_TYPE_ID] as { expectedValue: string }).expectedValue
+      );
+
+      expect(ruleTypeIds).toContain('.es-query');
+      expect(ruleTypeIds).toContain('.index-threshold');
+      expect(ruleTypeIds).toContain('xpack.ml.anomaly_detection_alert');
+      expect(ruleTypeIds).toContain('logs.alert.document.count');
+      expect(ruleTypeIds).toContain('slo.rules.burnRate');
+    });
+
+    it('includes common base fields in every variant', () => {
+      const baseFields = { name: schema.string() };
+      const variants = ruleParamsSchemasForCreate(baseFields);
+
+      for (const variant of variants) {
+        expect(variant.getPropSchemas()).toHaveProperty('name');
+        expect(variant.getPropSchemas()).toHaveProperty(RULE_TYPE_ID);
+        expect(variant.getPropSchemas()).toHaveProperty('params');
+      }
     });
   });
 

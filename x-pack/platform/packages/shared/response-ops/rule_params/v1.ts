@@ -106,7 +106,7 @@ export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
   }
 );
 
-export const createRuleBodyVariants = (
+export const ruleParamsSchemasForCreate = (
   baseFields: Record<string, Type<unknown>>
 ): Array<ObjectType<any>> => {
   return Object.entries(ruleParamsSchemasWithRuleTypeId).map(([ruleTypeId, paramsSchema]) => {
@@ -135,3 +135,4 @@ export const createRuleParamsExamples = () =>
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleParamsWithDefaultValue = TypeOf<typeof ruleParamsSchemaWithDefaultValue>;
 export type RuleParamsForUpdate = TypeOf<typeof ruleParamsSchemaForUpdate>;
+export type RuleParamsForCreate = ReturnType<typeof ruleParamsSchemasForCreate>;
