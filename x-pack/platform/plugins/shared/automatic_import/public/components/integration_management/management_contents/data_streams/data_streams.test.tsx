@@ -41,8 +41,8 @@ jest.mock('../../../telemetry_context', () => ({
 jest.mock('./create_data_stream_flyout', () => ({
   CreateDataStreamFlyout: jest.fn(({ onClose }) => (
     <div data-test-subj="createDataStreamFlyoutMock">
-      <button data-test-subj="mockFlyoutClose" onClick={onClose}>
-        Close
+      <button type="button" data-test-subj="mockFlyoutClose" onClick={onClose}>
+        {'Close'}
       </button>
     </div>
   )),
@@ -50,7 +50,9 @@ jest.mock('./create_data_stream_flyout', () => ({
 
 jest.mock('./data_streams_table/data_steams_table', () => ({
   DataStreamsTable: jest.fn(({ items }) => (
-    <div data-test-subj="dataStreamsTableMock">{items.length} data streams</div>
+    <div data-test-subj="dataStreamsTableMock">
+      {items.length} {'data streams'}
+    </div>
   )),
 }));
 

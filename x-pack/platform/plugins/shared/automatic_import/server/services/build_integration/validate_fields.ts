@@ -65,21 +65,21 @@ const fieldMappingsToEsProperties = (
   const properties: Record<string, MappingProperty> = {};
 
   for (const field of fields) {
-    if (field.type === 'group') continue;
+    if (field.type !== 'group') {
+      const parts = field.name.split('.');
+      let current: Record<string, MappingProperty> = properties;
 
-    const parts = field.name.split('.');
-    let current: Record<string, MappingProperty> = properties;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      const part = parts[i];
-      if (!current[part]) {
-        current[part] = { type: 'object', properties: {} } as MappingProperty;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (!current[part]) {
+          current[part] = { type: 'object', properties: {} } as MappingProperty;
+        }
+        current = (current[part] as { properties: Record<string, MappingProperty> }).properties;
       }
-      current = (current[part] as { properties: Record<string, MappingProperty> }).properties;
-    }
 
-    const leafName = parts[parts.length - 1];
-    current[leafName] = { type: field.type } as MappingProperty;
+      const leafName = parts[parts.length - 1];
+      current[leafName] = { type: field.type } as MappingProperty;
+    }
   }
 
   return properties;

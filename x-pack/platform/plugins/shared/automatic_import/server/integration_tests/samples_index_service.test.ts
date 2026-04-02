@@ -7,13 +7,22 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type {
   createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
+  TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { AutomaticImportSamplesIndexService, AutomaticImportSamplesIndexName } from '../services';
 import type { AddSamplesToDataStreamParams } from '../services/samples_index/index_service';
+
+interface SamplesIndexHitSource {
+  integration_id?: string;
+  data_stream_id?: string;
+  created_by?: string;
+  log_data?: string;
+  original_source?: { source_type?: string; source_value?: string };
+  metadata?: { created_at?: string };
+}
 
 describe('AutomaticImportSamplesIndexService Integration Tests', () => {
   let manageES: TestElasticsearchUtils;
@@ -112,7 +121,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       });
 
       expect(searchResult.hits.total).toEqual({ value: 3, relation: 'eq' });
-      const docs = searchResult.hits.hits.map((hit) => hit._source) as any[];
+      const docs = searchResult.hits.hits.map((hit) => hit._source as SamplesIndexHitSource);
       expect(docs[0].integration_id).toBe('integration-multi-123');
       expect(docs[0].data_stream_id).toBe('data-stream-multi-456');
       expect(docs[0].created_by).toBe('test-user');
@@ -120,7 +129,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
         source_type: 'file',
         source_value: 'logs.txt',
       });
-      expect(docs[0].metadata.created_at).toBeDefined();
+      expect(docs[0].metadata?.created_at).toBeDefined();
 
       // Check that all three log lines are present
       const logData = docs.map((doc) => doc.log_data).sort();
@@ -153,7 +162,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       });
 
       expect(searchResult.hits.total).toEqual({ value: 1, relation: 'eq' });
-      const doc = searchResult.hits.hits[0]._source as any;
+      const doc = searchResult.hits.hits[0]._source as SamplesIndexHitSource;
       expect(doc.log_data).toBe('Sample log line 1');
     });
 
@@ -180,7 +189,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       });
 
       expect(searchResult.hits.total).toEqual({ value: 1, relation: 'eq' });
-      const doc = searchResult.hits.hits[0]._source as any;
+      const doc = searchResult.hits.hits[0]._source as SamplesIndexHitSource;
       expect(doc.created_by).toBe('admin-user');
     });
 
@@ -209,7 +218,7 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       });
 
       expect(searchResult.hits.total).toEqual({ value: 1, relation: 'eq' });
-      const doc = searchResult.hits.hits[0]._source as any;
+      const doc = searchResult.hits.hits[0]._source as SamplesIndexHitSource;
       expect(doc.log_data).toBe('Log with "quotes" and \\backslashes\\ and \nnewlines');
       expect(doc.original_source).toEqual({
         source_type: 'file',
@@ -242,10 +251,10 @@ describe('AutomaticImportSamplesIndexService Integration Tests', () => {
       });
 
       expect(searchResult.hits.total).toEqual({ value: 1, relation: 'eq' });
-      const doc = searchResult.hits.hits[0]._source as any;
-      expect(doc.metadata.created_at).toBeDefined();
-
-      const createdAt = new Date(doc.metadata.created_at);
+      const doc = searchResult.hits.hits[0]._source as SamplesIndexHitSource;
+      const createdAtRaw = doc.metadata?.created_at;
+      expect(createdAtRaw).toBeDefined();
+      const createdAt = new Date(createdAtRaw as string);
       expect(createdAt.getTime()).toBeGreaterThanOrEqual(beforeTime.getTime() - 1000); // Allow 1s tolerance
       expect(createdAt.getTime()).toBeLessThanOrEqual(afterTime.getTime() + 1000); // Allow 1s tolerance
     });

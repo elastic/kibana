@@ -78,23 +78,27 @@ const createWrapper = (
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
-    <I18nProvider>
-      <KibanaContextProvider services={mockServices}>
-        <QueryClientProvider client={queryClient}>
-          <MemoryRouter initialEntries={['/create']}>
-            <Route path={['/edit/:integrationId', '/create']}>
-              <UIStateProvider>
-                <IntegrationFormProvider onSubmit={jest.fn()} initialValue={initialValue}>
-                  {children}
-                </IntegrationFormProvider>
-              </UIStateProvider>
-            </Route>
-          </MemoryRouter>
-        </QueryClientProvider>
-      </KibanaContextProvider>
-    </I18nProvider>
-  );
+  function CreateDataStreamFlyoutTestWrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <I18nProvider>
+        <KibanaContextProvider services={mockServices}>
+          <QueryClientProvider client={queryClient}>
+            <MemoryRouter initialEntries={['/create']}>
+              <Route path={['/edit/:integrationId', '/create']}>
+                <UIStateProvider>
+                  <IntegrationFormProvider onSubmit={jest.fn()} initialValue={initialValue}>
+                    {children}
+                  </IntegrationFormProvider>
+                </UIStateProvider>
+              </Route>
+            </MemoryRouter>
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+  }
+
+  return CreateDataStreamFlyoutTestWrapper;
 };
 
 describe('CreateDataStreamFlyout', () => {

@@ -65,19 +65,17 @@ const applyOperations = (
           `${label}: negative index ${idx} is not supported; only -1 (prepend) is allowed. Skipped.`
         );
         applied.push(`${label}: skipped (unsupported negative index)`);
-        continue;
-      }
-      if (procs.length === 0) {
+      } else if (procs.length === 0) {
         applied.push(`${label}: skipped (no processors provided)`);
-        continue;
-      }
-      const existing = insertAfterMap.get(idx);
-      if (existing) {
-        existing.push(...procs);
       } else {
-        insertAfterMap.set(idx, [...procs]);
+        const existing = insertAfterMap.get(idx);
+        if (existing) {
+          existing.push(...procs);
+        } else {
+          insertAfterMap.set(idx, [...procs]);
+        }
+        applied.push(`${label}: inserted ${procs.length} processor(s) after index ${idx}`);
       }
-      applied.push(`${label}: inserted ${procs.length} processor(s) after index ${idx}`);
     }
 
     const result: unknown[] = [];
@@ -105,20 +103,19 @@ const applyOperations = (
           } are pre-seeded). Skipped.`
         );
         applied.push(`${label}: skipped (boilerplate protected)`);
-        continue;
-      }
-      if (procs.length === 0) {
+      } else if (procs.length === 0) {
         applied.push(`${label}: skipped (no processors provided)`);
-        continue;
-      }
-      if (idx < 0 || idx >= processors.length) {
+      } else if (idx < 0 || idx >= processors.length) {
         applied.push(`${label}: skipped (index ${idx} out of range)`);
-        continue;
+      } else {
+        replaceMap.set(idx, procs);
+        applied.push(`${label}: replaced with ${procs.length} processor(s)`);
       }
-      replaceMap.set(idx, procs);
-      applied.push(`${label}: replaced with ${procs.length} processor(s)`);
     }
-    const result = processors.map((p, i) => (replaceMap.has(i) ? replaceMap.get(i)! : [p])).flat();
+    const result = processors.flatMap((p, i) => {
+      const replacement = replaceMap.get(i);
+      return replacement !== undefined ? replacement : [p];
+    });
     return { processors: result, applied, warnings };
   }
 
@@ -133,14 +130,12 @@ const applyOperations = (
           } are pre-seeded). Skipped.`
         );
         applied.push(`${label}: skipped (boilerplate protected)`);
-        continue;
-      }
-      if (idx < 0 || idx >= processors.length) {
+      } else if (idx < 0 || idx >= processors.length) {
         applied.push(`${label}: skipped (index ${idx} out of range)`);
-        continue;
+      } else {
+        removeSet.add(idx);
+        applied.push(`${label}: removed`);
       }
-      removeSet.add(idx);
-      applied.push(`${label}: removed`);
     }
     const result = processors.filter((_, i) => !removeSet.has(i));
     return { processors: result, applied, warnings };

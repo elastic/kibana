@@ -115,8 +115,8 @@ const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) 
         )}
       </UseField>
       <span data-test-subj="isValid">{String(isValid)}</span>
-      <button data-test-subj="submitButton" onClick={handleSubmit}>
-        Submit
+      <button type="button" data-test-subj="submitButton" onClick={handleSubmit}>
+        {'Submit'}
       </button>
     </div>
   );

@@ -103,11 +103,16 @@ jest.mock('../../common/components/button_footer', () => ({
     isActionDisabled?: boolean;
   }) => (
     <div>
-      <button data-test-subj="doneButton" onClick={onAction} disabled={Boolean(isActionDisabled)}>
-        Done
+      <button
+        type="button"
+        data-test-subj="doneButton"
+        onClick={onAction}
+        disabled={Boolean(isActionDisabled)}
+      >
+        {'Done'}
       </button>
-      <button data-test-subj="cancelButton" onClick={onCancel}>
-        Cancel
+      <button type="button" data-test-subj="cancelButton" onClick={onCancel}>
+        {'Cancel'}
       </button>
     </div>
   ),

@@ -56,7 +56,7 @@ interface IntegrationSettings {
 
 type PackageCardPreviewProps = Partial<IntegrationSettings>;
 
-export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({}) => {
+export const PackageCardPreview = React.memo<PackageCardPreviewProps>((_props) => {
   const cardCss = useCardCss();
   const { formData } = useIntegrationForm();
 

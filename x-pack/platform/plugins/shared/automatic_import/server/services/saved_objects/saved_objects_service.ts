@@ -10,14 +10,14 @@ import type {
   Logger,
   AuthenticatedUser,
   SavedObjectsClient,
-  type SavedObjectsUpdateOptions,
-  type SavedObjectsDeleteOptions,
-  type SavedObjectsCreateOptions,
-  type SavedObject,
-  type SavedObjectsFindResponse,
-  type SavedObjectsUpdateResponse,
-  SavedObjectsErrorHelpers,
+  SavedObjectsUpdateOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsCreateOptions,
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';

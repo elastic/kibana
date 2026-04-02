@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { createAgent } from 'langchain';
 import type { StructuredTool } from '@langchain/core/tools';
 import { createTaskTool } from './sub_agents';
 import type { AutomaticImportAgentParams } from './types';
@@ -36,13 +36,12 @@ export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) =
 
   const allTools: StructuredTool[] = [taskTool];
 
-  const baseAgent = createReactAgent<typeof stateSchema, typeof AutomaticImportAgentState>({
+  const baseAgent = createAgent({
     name: 'automatic_import_agent',
-    llm: model,
-    // StructuredTool[] is not directly assignable to createReactAgent's generic tool parameter due to variance in the generic
-    tools: allTools as any,
+    model,
+    tools: allTools,
     stateSchema,
-    messageModifier: AUTOMATIC_IMPORT_AGENT_PROMPT,
+    systemPrompt: AUTOMATIC_IMPORT_AGENT_PROMPT,
   });
 
   return baseAgent.withConfig({

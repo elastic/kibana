@@ -25,16 +25,13 @@ export function normalizeLogLinesForUpload(lines: readonly string[]): NormalizeL
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (trimmed.length === 0) {
-      continue;
+    if (trimmed.length > 0) {
+      if (samples.length >= UPLOAD_SAMPLES_MAX_LINES) {
+        linesOmittedOverLimit++;
+      } else {
+        samples.push(trimmed);
+      }
     }
-
-    if (samples.length >= UPLOAD_SAMPLES_MAX_LINES) {
-      linesOmittedOverLimit++;
-      continue;
-    }
-
-    samples.push(trimmed);
   }
 
   return { samples, linesOmittedOverLimit };

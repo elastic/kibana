@@ -47,9 +47,11 @@ const createWrapper = () => {
 
   queryClient.invalidateQueries = mockInvalidateQueries;
 
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  function QueryClientTestWrapper({ children }: { children: React.ReactNode }) {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  }
+
+  return QueryClientTestWrapper;
 };
 
 describe('useDeleteIntegration', () => {

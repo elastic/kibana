@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportSamplesIndexService } from './index_service';
@@ -254,7 +255,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
   describe('deleteSamplesForDataStream', () => {
     it('should delete all samples for a data stream in a single deleteByQuery call', async () => {
-      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 3 } as any);
+      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 3 } as DeleteByQueryResponse);
 
       const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 
@@ -278,7 +279,7 @@ describe('AutomaticImportSamplesIndexService', () => {
     });
 
     it('should delete many samples in one deleteByQuery call', async () => {
-      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 1500 } as any);
+      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 1500 } as DeleteByQueryResponse);
 
       const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 
@@ -287,7 +288,7 @@ describe('AutomaticImportSamplesIndexService', () => {
     });
 
     it('should return zero deleted count when no samples exist', async () => {
-      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 0 } as any);
+      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 0 } as DeleteByQueryResponse);
 
       const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 
@@ -305,7 +306,7 @@ describe('AutomaticImportSamplesIndexService', () => {
 
     it('should use correct index name and query parameters for filtering', async () => {
       const { automaticImportSamplesIndexName } = jest.requireActual('./storage');
-      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 0 } as any);
+      mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 0 } as DeleteByQueryResponse);
 
       await service.deleteSamplesForDataStream('test-integration', 'test-datastream');
 
@@ -326,7 +327,7 @@ describe('AutomaticImportSamplesIndexService', () => {
     });
 
     it('should coerce missing deleted count to zero', async () => {
-      mockEsClient.deleteByQuery.mockResolvedValue({} as any);
+      mockEsClient.deleteByQuery.mockResolvedValue({} as DeleteByQueryResponse);
 
       const result = await service.deleteSamplesForDataStream('integration-123', 'data-stream-456');
 

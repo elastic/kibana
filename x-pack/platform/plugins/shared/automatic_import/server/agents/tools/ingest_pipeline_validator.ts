@@ -241,24 +241,24 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
         }
 
         for (const fieldPath of allFieldPaths) {
-          if (ecsFieldSet.has(fieldPath)) continue;
+          if (!ecsFieldSet.has(fieldPath)) {
+            const dotIndex = fieldPath.indexOf('.');
+            const root = dotIndex !== -1 ? fieldPath.substring(0, dotIndex) : fieldPath;
 
-          const dotIndex = fieldPath.indexOf('.');
-          const root = dotIndex !== -1 ? fieldPath.substring(0, dotIndex) : fieldPath;
-
-          if (ecsRootSet.has(root)) {
-            fieldNamingErrors.push(
-              `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
-                `Custom fields under ECS paths are not allowed. ` +
-                `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(
-                  dotIndex + 1
-                )}'.`
-            );
-          } else if (!fieldPath.startsWith(customFieldPrefix)) {
-            fieldNamingErrors.push(
-              `Field '${fieldPath}' is not an ECS field and is not properly namespaced. ` +
-                `Non-ECS fields must use the format '${customFieldPrefix}<field_name>'.`
-            );
+            if (ecsRootSet.has(root)) {
+              fieldNamingErrors.push(
+                `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
+                  `Custom fields under ECS paths are not allowed. ` +
+                  `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(
+                    dotIndex + 1
+                  )}'.`
+              );
+            } else if (!fieldPath.startsWith(customFieldPrefix)) {
+              fieldNamingErrors.push(
+                `Field '${fieldPath}' is not an ECS field and is not properly namespaced. ` +
+                  `Non-ECS fields must use the format '${customFieldPrefix}<field_name>'.`
+              );
+            }
           }
         }
       } catch (ecsError) {

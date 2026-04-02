@@ -47,7 +47,8 @@ export const InputTypesBadges = ({ inputTypes }: InputTypesBadgesProps) => {
           anchorProps={{ style: { display: 'flex' } }}
         >
           <EuiBadge color="hollow" css={{ borderRadius: '4px' }} tabIndex={0}>
-            +{additionalBadgesNumber}
+            {'+'}
+            {additionalBadgesNumber}
           </EuiBadge>
         </EuiToolTip>
       )}

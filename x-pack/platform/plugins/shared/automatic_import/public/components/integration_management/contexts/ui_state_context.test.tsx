@@ -121,11 +121,11 @@ describe('UIStateContext', () => {
           <span data-test-subj="flyoutState">
             {isCreateDataStreamFlyoutOpen ? 'open' : 'closed'}
           </span>
-          <button data-test-subj="openButton" onClick={openCreateDataStreamFlyout}>
-            Open
+          <button type="button" data-test-subj="openButton" onClick={openCreateDataStreamFlyout}>
+            {'Open'}
           </button>
-          <button data-test-subj="closeButton" onClick={closeCreateDataStreamFlyout}>
-            Close
+          <button type="button" data-test-subj="closeButton" onClick={closeCreateDataStreamFlyout}>
+            {'Close'}
           </button>
         </div>
       );

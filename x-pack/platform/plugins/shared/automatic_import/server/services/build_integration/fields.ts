@@ -38,19 +38,20 @@ const merge = (
   }
 
   for (const [key, sourceValue] of Object.entries(source)) {
-    if (isUnsafeProperty(key)) continue;
-    const targetValue = result[key];
+    if (!isUnsafeProperty(key)) {
+      const targetValue = result[key];
 
-    if (Array.isArray(sourceValue)) {
-      result[key] = [...sourceValue];
-    } else if (isObject(sourceValue)) {
-      if (!isObject(targetValue) || isEmptyValue(targetValue)) {
-        result[key] = merge(Object.create(null), sourceValue);
-      } else {
-        result[key] = merge(targetValue, sourceValue);
+      if (Array.isArray(sourceValue)) {
+        result[key] = [...sourceValue];
+      } else if (isObject(sourceValue)) {
+        if (!isObject(targetValue) || isEmptyValue(targetValue)) {
+          result[key] = merge(Object.create(null), sourceValue);
+        } else {
+          result[key] = merge(targetValue, sourceValue);
+        }
+      } else if (!(key in result) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
+        result[key] = sourceValue;
       }
-    } else if (!(key in result) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-      result[key] = sourceValue;
     }
   }
 
@@ -92,9 +93,10 @@ const collectFields = (obj: unknown, parentPath: string): RawField[] => {
 
   const fields: RawField[] = [];
   for (const [key, value] of Object.entries(obj)) {
-    if (isUnsafeProperty(key)) continue;
-    const fieldPath = parentPath ? `${parentPath}.${key}` : key;
-    fields.push(...collectFields(value, fieldPath));
+    if (!isUnsafeProperty(key)) {
+      const fieldPath = parentPath ? `${parentPath}.${key}` : key;
+      fields.push(...collectFields(value, fieldPath));
+    }
   }
   return fields;
 };
@@ -117,8 +119,9 @@ export const generateFieldMappings = async (
   const rawFields: RawField[] = [];
 
   for (const [key, value] of Object.entries(merged)) {
-    if (isUnsafeProperty(key)) continue;
-    rawFields.push(...collectFields(value, key));
+    if (!isUnsafeProperty(key)) {
+      rawFields.push(...collectFields(value, key));
+    }
   }
 
   if (rawFields.length === 0) return [];

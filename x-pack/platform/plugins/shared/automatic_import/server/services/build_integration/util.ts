@@ -108,7 +108,13 @@ const buildNestedFieldStructure = (flatFields: FieldMappingEntry[]): FieldYamlEn
       }
 
       if (!isLeaf) {
-        currentLevel = existing.fields!;
+        let children = existing.fields;
+        if (!children) {
+          existing.type = 'group';
+          children = [];
+          existing.fields = children;
+        }
+        currentLevel = children;
       }
     }
   }

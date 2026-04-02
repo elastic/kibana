@@ -6,16 +6,59 @@
  */
 
 import expect from 'expect';
+import type { ReplaySubject } from 'rxjs';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { AutomaticImportService } from './automatic_import_service';
-import type { SavedObjectsServiceSetup, SavedObjectsClient } from '@kbn/core/server';
 import type {
+  AnalyticsServiceSetup,
+  AuthenticatedUser,
+  CoreSetup,
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsServiceSetup,
+  SavedObjectsClient,
+} from '@kbn/core/server';
+import type {
+  ConcreteTaskInstance,
+  FailedRunResult,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { AutomaticImportPluginStartDependencies } from '../types';
+import type { ApproveIntegrationParams, CreateUpdateIntegrationParams } from '../routes/types';
+import type { AutomaticImportSamplesIndexService } from './samples_index/index_service';
+import type { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
+import type { TaskManagerService } from './task_manager/task_manager_service';
+
+interface AutomaticImportServicePrivate {
+  pluginStop$: ReplaySubject<void>;
+  savedObjectsServiceSetup: SavedObjectsServiceSetup;
+  savedObjectService: AutomaticImportSavedObjectService | null;
+  samplesIndexService:
+    | AutomaticImportSamplesIndexService
+    | Partial<Record<'addSamplesToDataStream' | 'deleteSamplesForDataStream', jest.Mock>>;
+  taskManagerService:
+    | TaskManagerService
+    | Partial<Record<'removeDataStreamCreationTask', jest.Mock>>;
+}
+
+type TaskManagerWithPrivate = TaskManagerService & {
+  automaticImportSavedObjectService:
+    | AutomaticImportSavedObjectService
+    | Record<string, unknown>
+    | null;
+  agentService: { invokeAutomaticImportAgent: jest.Mock };
+  runTask: (...args: unknown[]) => Promise<unknown>;
+};
+
+const asPrivate = (svc: AutomaticImportService): AutomaticImportServicePrivate =>
+  svc as unknown as AutomaticImportServicePrivate;
+
+const asTaskManagerPrivate = (tm: TaskManagerService): TaskManagerWithPrivate =>
+  tm as unknown as TaskManagerWithPrivate;
 
 // Mock the AutomaticImportSamplesIndexService
 jest.mock('./samples_index/index_service', () => {
@@ -58,13 +101,13 @@ describe('AutomaticImportSetupService', () => {
     const mockAnalytics = {
       reportEvent: jest.fn(),
       registerEventType: jest.fn(),
-    } as any;
+    } as unknown as AnalyticsServiceSetup;
 
     service = new AutomaticImportService(
       mockLoggerFactory,
       mockSavedObjectsSetup,
       mockTaskManagerSetup,
-      mockCoreSetup as any,
+      mockCoreSetup as unknown as CoreSetup<AutomaticImportPluginStartDependencies>,
       mockAnalytics
     );
   });
@@ -79,8 +122,8 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should initialize the pluginStop$ subject', () => {
-      expect((service as any).pluginStop$).toBeDefined();
-      expect((service as any).pluginStop$.subscribe).toBeDefined();
+      expect(asPrivate(service).pluginStop$).toBeDefined();
+      expect(asPrivate(service).pluginStop$.subscribe).toBeDefined();
     });
 
     it('should register saved object types during construction', () => {
@@ -94,30 +137,38 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should store the savedObjectsServiceSetup reference', () => {
-      expect((service as any).savedObjectsServiceSetup).toBe(mockSavedObjectsSetup);
+      expect(asPrivate(service).savedObjectsServiceSetup).toBe(mockSavedObjectsSetup);
     });
   });
 
   describe('initialize', () => {
-    const mockInternalEsClient = {} as any;
+    const mockInternalEsClient = {} as unknown as ElasticsearchClient;
 
     it('should initialize saved object service', async () => {
       await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, mockInternalEsClient);
 
-      expect((service as any).savedObjectService).toBeDefined();
+      expect(asPrivate(service).savedObjectService).toBeDefined();
     });
 
     it('should create savedObjectService with correct parameters', async () => {
       await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, mockInternalEsClient);
 
-      const savedObjectService = (service as any).savedObjectService;
+      const savedObjectService = asPrivate(service).savedObjectService;
       expect(savedObjectService).toBeDefined();
     });
   });
 
   describe('methods before initialization', () => {
     it('should throw error when calling createIntegration before initialize', async () => {
-      await expect(service.createUpdateIntegration({} as any)).rejects.toThrow(
+      const params: CreateUpdateIntegrationParams = {
+        integrationParams: {
+          integrationId: 'id',
+          description: '',
+          title: '',
+        },
+        authenticatedUser: { username: 'u' } as AuthenticatedUser,
+      };
+      await expect(service.createUpdateIntegration(params)).rejects.toThrow(
         'Saved Objects service not initialized.'
       );
     });
@@ -132,11 +183,10 @@ describe('AutomaticImportSetupService', () => {
       await expect(
         service.approveIntegration({
           integrationId: 'test-id',
-          dataStreams: [],
-          authenticatedUser: { username: 'test-user' } as any,
+          authenticatedUser: { username: 'test-user' } as AuthenticatedUser,
           version: '1.0.0',
           categories: ['security'],
-        } as any)
+        })
       ).rejects.toThrow('Saved Objects service not initialized.');
     });
   });
@@ -157,15 +207,15 @@ describe('AutomaticImportSetupService', () => {
         ]);
       const mockUpdateIntegration = jest.fn().mockResolvedValue({});
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await service.approveIntegration({
         integrationId: 'integration-123',
-        authenticatedUser: { username: 'approver-user' } as any,
+        authenticatedUser: { username: 'approver-user' } as AuthenticatedUser,
         version: '1.2.3',
         categories: ['observability'],
       });
@@ -213,15 +263,15 @@ describe('AutomaticImportSetupService', () => {
         .mockResolvedValue([{ job_info: { status: 'completed' } }]);
       const mockUpdateIntegration = jest.fn().mockResolvedValue({});
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await service.approveIntegration({
         integrationId: 'integration-123',
-        authenticatedUser: { username: 'approver-user' } as any,
+        authenticatedUser: { username: 'approver-user' } as AuthenticatedUser,
         version: '1.1.0',
         categories: ['security'],
       });
@@ -245,16 +295,16 @@ describe('AutomaticImportSetupService', () => {
       const mockGetAllDataStreams = jest.fn().mockResolvedValue([]);
       const mockUpdateIntegration = jest.fn().mockResolvedValue({});
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await expect(
         service.approveIntegration({
           integrationId: 'integration-empty',
-          authenticatedUser: { username: 'approver-user' } as any,
+          authenticatedUser: { username: 'approver-user' } as AuthenticatedUser,
           version: '1.2.3',
           categories: ['security'],
         })
@@ -280,16 +330,16 @@ describe('AutomaticImportSetupService', () => {
         ]);
       const mockUpdateIntegration = jest.fn();
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await expect(
         service.approveIntegration({
           integrationId: 'integration-123',
-          authenticatedUser: { username: 'approver-user' } as any,
+          authenticatedUser: { username: 'approver-user' } as AuthenticatedUser,
           version: '1.2.3',
           categories: ['security'],
         })
@@ -314,27 +364,26 @@ describe('AutomaticImportSetupService', () => {
         .fn()
         .mockRejectedValue(new Error('Failed to update integration'));
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await expect(
         service.approveIntegration({
           integrationId: 'integration-123',
-          dataStreams: [],
-          authenticatedUser: { username: 'approver-user' } as any,
+          authenticatedUser: { username: 'approver-user' } as AuthenticatedUser,
           version: '1.2.3',
           categories: ['security'],
-        } as any)
+        } as unknown as ApproveIntegrationParams)
       ).rejects.toThrow('Failed to update integration');
     });
   });
 
   describe('stop', () => {
     it('should complete the pluginStop$ subject', () => {
-      const pluginStop$ = (service as any).pluginStop$;
+      const pluginStop$ = asPrivate(service).pluginStop$;
       const nextSpy = jest.spyOn(pluginStop$, 'next');
       const completeSpy = jest.spyOn(pluginStop$, 'complete');
 
@@ -346,12 +395,12 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should emit to all subscribers before completing', (done) => {
-      const pluginStop$ = (service as any).pluginStop$;
-      let emittedValue: any;
+      const pluginStop$ = asPrivate(service).pluginStop$;
+      let emittedValue: void | undefined;
       let completed = false;
 
       pluginStop$.subscribe({
-        next: (value: any) => {
+        next: (value: void) => {
           emittedValue = value;
         },
         complete: () => {
@@ -366,7 +415,7 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should be safe to call multiple times', () => {
-      const pluginStop$ = (service as any).pluginStop$;
+      const pluginStop$ = asPrivate(service).pluginStop$;
       const nextSpy = jest.spyOn(pluginStop$, 'next');
       const completeSpy = jest.spyOn(pluginStop$, 'complete');
 
@@ -392,7 +441,7 @@ describe('AutomaticImportSetupService', () => {
       const mockResult = { items: [], errors: false };
       const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
       };
 
@@ -414,12 +463,12 @@ describe('AutomaticImportSetupService', () => {
       const mockResult = { items: [], errors: false };
       const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
       };
 
       // Service is not initialized, but this should still work
-      expect((service as any).savedObjectService).toBeNull();
+      expect(asPrivate(service).savedObjectService).toBeNull();
 
       const result = await service.addSamplesToDataStream(mockParams);
 
@@ -438,7 +487,7 @@ describe('AutomaticImportSetupService', () => {
 
       const mockAddSamples = jest.fn().mockResolvedValue({});
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
       };
 
@@ -468,7 +517,7 @@ describe('AutomaticImportSetupService', () => {
       const mockError = new Error('Failed to add samples');
       const mockAddSamples = jest.fn().mockRejectedValue(mockError);
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
       };
 
@@ -479,7 +528,7 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('deleteDataStream', () => {
-    const mockInternalEsClient = {} as any;
+    const mockInternalEsClient = {} as unknown as ElasticsearchClient;
 
     beforeEach(async () => {
       await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, mockInternalEsClient);
@@ -491,16 +540,16 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
       };
-      (service as any).taskManagerService = {
+      asPrivate(service).taskManagerService = {
         removeDataStreamCreationTask: mockRemoveTask,
       };
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
 
@@ -528,16 +577,16 @@ describe('AutomaticImportSetupService', () => {
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
       const options = { force: true };
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
       };
-      (service as any).taskManagerService = {
+      asPrivate(service).taskManagerService = {
         removeDataStreamCreationTask: mockRemoveTask,
       };
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456', options);
 
@@ -549,7 +598,7 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should throw error if saved object service is not initialized', async () => {
-      (service as any).savedObjectService = null;
+      asPrivate(service).savedObjectService = null;
 
       await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
         'Saved Objects service not initialized.'
@@ -562,16 +611,16 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
       };
-      (service as any).taskManagerService = {
+      asPrivate(service).taskManagerService = {
         removeDataStreamCreationTask: mockRemoveTask,
       };
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
 
@@ -590,16 +639,16 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
       };
-      (service as any).taskManagerService = {
+      asPrivate(service).taskManagerService = {
         removeDataStreamCreationTask: mockRemoveTask,
       };
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
 
@@ -620,16 +669,16 @@ describe('AutomaticImportSetupService', () => {
         .mockRejectedValue(new Error('Saved object deletion failed'));
       const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
       };
-      (service as any).taskManagerService = {
+      asPrivate(service).taskManagerService = {
         removeDataStreamCreationTask: mockRemoveTask,
       };
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await expect(service.deleteDataStream('integration-123', 'data-stream-456')).rejects.toThrow(
         'Saved object deletion failed'
@@ -652,16 +701,16 @@ describe('AutomaticImportSetupService', () => {
         executionOrder.push('updateStatus');
       });
 
-      (service as any).samplesIndexService = {
+      asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
       };
-      (service as any).taskManagerService = {
+      asPrivate(service).taskManagerService = {
         removeDataStreamCreationTask: mockRemoveTask,
       };
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
 
@@ -686,9 +735,9 @@ describe('AutomaticImportSetupService', () => {
         },
       });
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getDataStream: mockGetDataStream,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       const res = await service.getDataStreamResults('integration-1', 'ds-1');
       expect(res.ingest_pipeline).toEqual({ processors: [] });
@@ -703,9 +752,9 @@ describe('AutomaticImportSetupService', () => {
         },
       });
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getDataStream: mockGetDataStream,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await expect(service.getDataStreamResults('integration-1', 'ds-1')).rejects.toThrow(
         'has not completed yet'
@@ -720,9 +769,9 @@ describe('AutomaticImportSetupService', () => {
         },
       });
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getDataStream: mockGetDataStream,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await expect(service.getDataStreamResults('integration-1', 'ds-1')).rejects.toThrow(
         'failed and has no results'
@@ -737,9 +786,9 @@ describe('AutomaticImportSetupService', () => {
         },
       });
 
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         getDataStream: mockGetDataStream,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       await expect(service.getDataStreamResults('integration-1', 'ds-1')).resolves.toEqual({
         ingest_pipeline: {},
@@ -759,18 +808,22 @@ describe('AutomaticImportSetupService', () => {
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
 
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledTimes(2);
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, {} as any);
+      await service.initialize(
+        mockSavedObjectsClient,
+        mockTaskManagerStart,
+        {} as unknown as ElasticsearchClient
+      );
 
       // Stop the service
       service.stop();
 
       // Verify pluginStop$ was completed
-      expect((service as any).pluginStop$.isStopped).toBeTruthy();
+      expect(asPrivate(service).pluginStop$.isStopped).toBeTruthy();
     });
 
     it('should maintain the same pluginStop$ instance throughout lifecycle', () => {
-      const pluginStop$Before = (service as any).pluginStop$;
-      const pluginStop$After = (service as any).pluginStop$;
+      const pluginStop$Before = asPrivate(service).pluginStop$;
+      const pluginStop$After = asPrivate(service).pluginStop$;
 
       expect(pluginStop$Before).toBe(pluginStop$After);
     });
@@ -786,20 +839,28 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should complete full lifecycle: construct -> initialize -> stop', async () => {
-      expect((service as any).savedObjectService).toBeNull();
+      expect(asPrivate(service).savedObjectService).toBeNull();
 
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, {} as any);
-      expect((service as any).savedObjectService).toBeDefined();
+      await service.initialize(
+        mockSavedObjectsClient,
+        mockTaskManagerStart,
+        {} as unknown as ElasticsearchClient
+      );
+      expect(asPrivate(service).savedObjectService).toBeDefined();
 
       // Stop
       service.stop();
-      expect((service as any).pluginStop$.isStopped).toBeTruthy();
+      expect(asPrivate(service).pluginStop$.isStopped).toBeTruthy();
     });
   });
 
   describe('task manager service integration', () => {
     beforeEach(async () => {
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart, {} as any);
+      await service.initialize(
+        mockSavedObjectsClient,
+        mockTaskManagerStart,
+        {} as unknown as ElasticsearchClient
+      );
     });
 
     it('should register task definitions during construction', () => {
@@ -813,11 +874,10 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should initialize task manager service with saved object service', () => {
-      const taskManagerService = (service as any).taskManagerService;
+      const taskManagerService = asPrivate(service).taskManagerService as TaskManagerService;
       expect(taskManagerService).toBeDefined();
-      expect((taskManagerService as any).automaticImportSavedObjectService).toBe(
-        (service as any).savedObjectService
-      );
+      const tm = asTaskManagerPrivate(taskManagerService);
+      expect(tm.automaticImportSavedObjectService).toBe(asPrivate(service).savedObjectService);
     });
 
     it('should have task runner that updates SavedObjects when run', async () => {
@@ -831,16 +891,16 @@ describe('AutomaticImportSetupService', () => {
       });
 
       // Mock the saved object service methods
-      (service as any).savedObjectService = {
+      asPrivate(service).savedObjectService = {
         updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
         getDataStream: mockGetDataStream,
-      };
+      } as unknown as AutomaticImportSavedObjectService;
 
       // Re-initialize to set the mocked service
-      const taskManagerService = (service as any).taskManagerService;
-      (taskManagerService as any).automaticImportSavedObjectService = (
-        service as any
-      ).savedObjectService;
+      const taskManagerService = asPrivate(service).taskManagerService as TaskManagerService;
+      const tmForSavedObjects = asTaskManagerPrivate(taskManagerService);
+      tmForSavedObjects.automaticImportSavedObjectService = asPrivate(service)
+        .savedObjectService as AutomaticImportSavedObjectService;
 
       // Extract the task runner from registered definitions
       const registeredTasks = mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
@@ -892,30 +952,34 @@ describe('AutomaticImportSetupService', () => {
         pipeline_generation_results: [],
       });
 
-      (taskManagerService as any).agentService = {
+      const tmForAgent = asTaskManagerPrivate(taskManagerService);
+      tmForAgent.agentService = {
         invokeAutomaticImportAgent: mockInvokeAgent,
       };
 
       // Create task runner
       const taskRunner = createTaskRunner({
-        taskInstance: mockTaskInstance as any,
-        fakeRequest: {} as any,
+        taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
+        fakeRequest: {} as unknown as KibanaRequest,
         abortController: new AbortController(),
       });
 
       // Replace runTask to inject our mock core setup
-      const originalRunTask = (taskManagerService as any).runTask;
-      (taskManagerService as any).runTask = jest
+      const tmForRunTask = asTaskManagerPrivate(taskManagerService);
+      const originalRunTask = tmForRunTask.runTask;
+      tmForRunTask.runTask = jest
         .fn()
-        .mockImplementation(async (taskInstance, core, savedObjectService) => {
-          // Call the original runTask but with our mocked core setup
-          return originalRunTask.call(
-            taskManagerService,
-            taskInstance,
-            coreSetupMock,
-            savedObjectService
-          );
-        });
+        .mockImplementation(
+          async (taskInstance: unknown, core: unknown, savedObjectService: unknown) => {
+            // Call the original runTask but with our mocked core setup
+            return originalRunTask.call(
+              taskManagerService,
+              taskInstance,
+              coreSetupMock,
+              savedObjectService
+            );
+          }
+        );
 
       // Run the task
       await taskRunner.run();
@@ -947,8 +1011,10 @@ describe('AutomaticImportSetupService', () => {
         getDataStream: mockGetDataStream,
       };
 
-      const taskManagerService = (service as any).taskManagerService;
-      (taskManagerService as any).automaticImportSavedObjectService = mockSavedObjectService;
+      const taskManagerService = asPrivate(service).taskManagerService as TaskManagerService;
+      const tmFailedTest = asTaskManagerPrivate(taskManagerService);
+      tmFailedTest.automaticImportSavedObjectService =
+        mockSavedObjectService as unknown as AutomaticImportSavedObjectService;
 
       const registeredTasks = mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
       const taskDefinition = registeredTasks['autoImport-dataStream-task'];
@@ -990,29 +1056,31 @@ describe('AutomaticImportSetupService', () => {
         getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
       };
 
-      (taskManagerService as any).agentService = {
+      tmFailedTest.agentService = {
         invokeAutomaticImportAgent: jest.fn(),
       };
 
       const taskRunner = createTaskRunner({
-        taskInstance: mockTaskInstance as any,
-        fakeRequest: {} as any,
+        taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
+        fakeRequest: {} as unknown as KibanaRequest,
         abortController: new AbortController(),
       });
 
-      const originalRunTask = (taskManagerService as any).runTask;
-      (taskManagerService as any).runTask = jest
+      const originalRunTask = tmFailedTest.runTask;
+      tmFailedTest.runTask = jest
         .fn()
-        .mockImplementation(async (taskInstance, core, savedObjectService) => {
-          return originalRunTask.call(
-            taskManagerService,
-            taskInstance,
-            coreSetupMock,
-            savedObjectService
-          );
-        });
+        .mockImplementation(
+          async (taskInstance: unknown, core: unknown, savedObjectService: unknown) => {
+            return originalRunTask.call(
+              taskManagerService,
+              taskInstance,
+              coreSetupMock,
+              savedObjectService
+            );
+          }
+        );
 
-      const result = (await taskRunner.run()) as any;
+      const result = (await taskRunner.run()) as FailedRunResult;
 
       expect(mockUpdateDataStream).toHaveBeenCalledTimes(1);
       expect(mockUpdateDataStream).toHaveBeenCalledWith({
@@ -1020,7 +1088,7 @@ describe('AutomaticImportSetupService', () => {
         dataStreamId: 'test-datastream',
         status: 'failed',
       });
-      expect(result.state.task_status).toBe('failed');
+      expect(result.state).toEqual(expect.objectContaining({ task_status: 'failed' }));
       expect(result.error).toBeDefined();
     });
 
@@ -1031,8 +1099,10 @@ describe('AutomaticImportSetupService', () => {
         updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
       };
 
-      const taskManagerService = (service as any).taskManagerService;
-      (taskManagerService as any).automaticImportSavedObjectService = mockSavedObjectService;
+      const taskManagerService = asPrivate(service).taskManagerService as TaskManagerService;
+      const tmUnrecoverable = asTaskManagerPrivate(taskManagerService);
+      tmUnrecoverable.automaticImportSavedObjectService =
+        mockSavedObjectService as unknown as AutomaticImportSavedObjectService;
 
       const registeredTasks = mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
       const taskDefinition = registeredTasks['autoImport-dataStream-task'];
@@ -1079,27 +1149,29 @@ describe('AutomaticImportSetupService', () => {
         getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
       };
 
-      (taskManagerService as any).agentService = {
+      tmUnrecoverable.agentService = {
         invokeAutomaticImportAgent: jest.fn(),
       };
 
       const taskRunner = createTaskRunner({
-        taskInstance: mockTaskInstance as any,
-        fakeRequest: {} as any,
+        taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
+        fakeRequest: {} as unknown as KibanaRequest,
         abortController: new AbortController(),
       });
 
-      const originalRunTask = (taskManagerService as any).runTask;
-      (taskManagerService as any).runTask = jest
+      const originalRunTask = tmUnrecoverable.runTask;
+      tmUnrecoverable.runTask = jest
         .fn()
-        .mockImplementation(async (taskInstance, core, savedObjectService) => {
-          return originalRunTask.call(
-            taskManagerService,
-            taskInstance,
-            coreSetupMock,
-            savedObjectService
-          );
-        });
+        .mockImplementation(
+          async (taskInstance: unknown, core: unknown, savedObjectService: unknown) => {
+            return originalRunTask.call(
+              taskManagerService,
+              taskInstance,
+              coreSetupMock,
+              savedObjectService
+            );
+          }
+        );
 
       await expect(taskRunner.run()).rejects.toThrow('No connector found');
 

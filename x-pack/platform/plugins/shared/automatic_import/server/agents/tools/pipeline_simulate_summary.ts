@@ -103,12 +103,13 @@ export async function runLightweightIngestSimulateSummary(
   for (const doc of successfulDocuments) {
     const flat = flattenDoc(stripBoilerplateFields(doc as Record<string, unknown>));
     for (const [key, value] of Object.entries(flat)) {
-      if (value == null || value === '') continue;
-      const existing = mergedFields[key];
-      if (!existing) {
-        mergedFields[key] = [value];
-      } else if (existing.length < 2 && !existing.some((v) => v === value)) {
-        existing.push(value);
+      if (value != null && value !== '') {
+        const existing = mergedFields[key];
+        if (!existing) {
+          mergedFields[key] = [value];
+        } else if (existing.length < 2 && !existing.some((v) => v === value)) {
+          existing.push(value);
+        }
       }
     }
   }

@@ -30,12 +30,9 @@ export function buildSelectableIndexAndDataStreamNames(rows: IndexManagementList
     // Backing indices for data streams are often hidden; still surface the stream name.
     if (row.data_stream) {
       names.add(row.data_stream);
-      continue;
+    } else if (row.hidden !== true) {
+      names.add(row.name);
     }
-    if (row.hidden === true) {
-      continue;
-    }
-    names.add(row.name);
   }
   return [...names].sort((a, b) => a.localeCompare(b));
 }

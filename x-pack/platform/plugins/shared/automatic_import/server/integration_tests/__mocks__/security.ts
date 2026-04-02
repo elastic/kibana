@@ -29,5 +29,5 @@ export const createMockSecurity = (
         log: jest.fn(),
       },
     },
-  } as any;
+  } as unknown as jest.Mocked<SecurityServiceStart>;
 };

@@ -9,7 +9,7 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command, getCurrentTaskInput } from '@langchain/langgraph';
-import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { createAgent } from 'langchain';
 import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { TASK_TOOL_DESCRIPTION } from '../prompts';
@@ -216,14 +216,16 @@ const injectPipelineState = (
   return taskDescription;
 };
 
+type AutomaticImportSubAgent = ReturnType<typeof createAgent>;
+
 export const createTaskTool = (params: TaskToolParams) => {
   const { subagents, model, samples, recursionLimit } = params;
-  const agentsMap = new Map<string, any>();
+  const agentsMap = new Map<string, AutomaticImportSubAgent>();
   for (const subagent of subagents) {
-    const baseSubAgent = createReactAgent({
-      llm: model,
+    const baseSubAgent = createAgent({
+      model,
       tools: subagent.tools || [],
-      messageModifier: subagent.prompt,
+      systemPrompt: subagent.prompt,
       stateSchema: AutomaticImportAgentState,
     });
     const ReActSubAgent =
@@ -236,6 +238,19 @@ export const createTaskTool = (params: TaskToolParams) => {
     async (input: { description: string; subagent_name: string }, config: ToolRunnableConfig) => {
       const toolCallId = config?.toolCall?.id ?? '';
       const subAgent = agentsMap.get(input.subagent_name);
+
+      if (subAgent == null) {
+        return new Command({
+          update: {
+            messages: [
+              new ToolMessage({
+                content: `Unknown subagent: ${input.subagent_name}`,
+                tool_call_id: toolCallId,
+              }),
+            ],
+          },
+        });
+      }
 
       const taskDescription = injectPipelineState(input.description, input.subagent_name, samples);
 

@@ -103,7 +103,7 @@ describe('common attributes schemas', () => {
 
     it('requires dataStreamId', () => {
       const payload = { ...validDataStream };
-      delete (payload as any).dataStreamId;
+      Reflect.deleteProperty(payload, 'dataStreamId');
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
@@ -112,7 +112,7 @@ describe('common attributes schemas', () => {
 
     it('requires title', () => {
       const payload = { ...validDataStream };
-      delete (payload as any).title;
+      Reflect.deleteProperty(payload, 'title');
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
@@ -121,7 +121,7 @@ describe('common attributes schemas', () => {
 
     it('requires description', () => {
       const payload = { ...validDataStream };
-      delete (payload as any).description;
+      Reflect.deleteProperty(payload, 'description');
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
@@ -130,7 +130,7 @@ describe('common attributes schemas', () => {
 
     it('requires inputTypes', () => {
       const payload = { ...validDataStream };
-      delete (payload as any).inputTypes;
+      Reflect.deleteProperty(payload, 'inputTypes');
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
@@ -190,7 +190,7 @@ describe('common attributes schemas', () => {
 
     it('accepts integration without data streams (optional)', () => {
       const payload = { ...validIntegration };
-      delete (payload as any).dataStreams;
+      Reflect.deleteProperty(payload, 'dataStreams');
 
       const result = Integration.safeParse(payload);
       expectParseSuccess(result);
@@ -215,7 +215,7 @@ describe('common attributes schemas', () => {
 
     it('requires integrationId', () => {
       const payload = { ...validIntegration };
-      delete (payload as any).integrationId;
+      Reflect.deleteProperty(payload, 'integrationId');
 
       const result = Integration.safeParse(payload);
       expectParseError(result);
@@ -224,7 +224,7 @@ describe('common attributes schemas', () => {
 
     it('requires title', () => {
       const payload = { ...validIntegration };
-      delete (payload as any).title;
+      Reflect.deleteProperty(payload, 'title');
 
       const result = Integration.safeParse(payload);
       expectParseError(result);
@@ -233,7 +233,7 @@ describe('common attributes schemas', () => {
 
     it('requires description', () => {
       const payload = { ...validIntegration };
-      delete (payload as any).description;
+      Reflect.deleteProperty(payload, 'description');
 
       const result = Integration.safeParse(payload);
       expectParseError(result);
@@ -461,7 +461,7 @@ describe('common attributes schemas', () => {
 
       requiredFields.forEach((field) => {
         const payload = { ...validDataStreamResponse };
-        delete (payload as any)[field];
+        Reflect.deleteProperty(payload, field);
 
         const result = DataStreamResponse.safeParse(payload);
         expectParseError(result);
@@ -570,7 +570,7 @@ describe('common attributes schemas', () => {
 
       requiredFields.forEach((field) => {
         const payload = { ...validIntegrationResponse };
-        delete (payload as any)[field];
+        Reflect.deleteProperty(payload, field);
 
         const result = IntegrationResponse.safeParse(payload);
         expectParseError(result);
@@ -657,7 +657,7 @@ describe('common attributes schemas', () => {
 
       requiredFields.forEach((field) => {
         const payload = { ...validIntegration };
-        delete (payload as any)[field];
+        Reflect.deleteProperty(payload, field);
 
         const result = AllIntegrationsResponseIntegration.safeParse(payload);
         expectParseError(result);

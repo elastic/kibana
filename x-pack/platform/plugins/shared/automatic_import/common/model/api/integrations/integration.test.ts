@@ -6,6 +6,7 @@
  */
 
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
+import type { z } from '@kbn/zod/v4';
 
 import {
   ApproveAutoImportIntegrationRequestBody,
@@ -92,7 +93,7 @@ describe('integration schemas', () => {
 
     it('requires version', () => {
       const payload = { ...validPayload };
-      delete (payload as any).version;
+      Reflect.deleteProperty(payload, 'version');
 
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
@@ -697,7 +698,7 @@ describe('integration schemas', () => {
 
   describe('GetAllAutoImportIntegrationsResponse', () => {
     it('accepts an empty array', () => {
-      const payload: any[] = [];
+      const payload: z.infer<typeof GetAllAutoImportIntegrationsResponse> = [];
 
       const result = GetAllAutoImportIntegrationsResponse.safeParse(payload);
       expectParseSuccess(result);
@@ -1340,7 +1341,7 @@ describe('integration schemas', () => {
       });
 
       it('handles empty list when no integrations exist', () => {
-        const getAllResponse: any[] = [];
+        const getAllResponse: z.infer<typeof GetAllAutoImportIntegrationsResponse> = [];
         const getAllResponseResult = GetAllAutoImportIntegrationsResponse.safeParse(getAllResponse);
         expectParseSuccess(getAllResponseResult);
       });

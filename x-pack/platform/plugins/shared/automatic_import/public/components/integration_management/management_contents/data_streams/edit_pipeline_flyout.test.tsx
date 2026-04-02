@@ -17,6 +17,7 @@ jest.mock('@kbn/code-editor', () => ({
     <div>
       <div data-test-subj="code-editor">{value}</div>
       <button
+        type="button"
         data-test-subj="code-editor-change"
         onClick={() =>
           onChange?.(
@@ -37,14 +38,15 @@ jest.mock('@kbn/code-editor', () => ({
           )
         }
       >
-        Change editor value
+        {'Change editor value'}
       </button>
       <button
+        type="button"
         className="euiCodeBlock__copyButton"
         data-test-subj="code-editor-copy"
         aria-label="Copy"
       >
-        Copy
+        {'Copy'}
       </button>
     </div>
   )),

@@ -250,12 +250,11 @@ export class AutomaticImportService {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
-    const integrations = await this.savedObjectService.getAllIntegrations();
+    const savedObjectService = this.savedObjectService;
+    const integrations = await savedObjectService.getAllIntegrations();
     return Promise.all(
       integrations.map(async (integration) => {
-        const dataStreams = await this.savedObjectService!.getAllDataStreams(
-          integration.integration_id
-        );
+        const dataStreams = await savedObjectService.getAllDataStreams(integration.integration_id);
         const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => ({
           dataStreamId: dataStream.data_stream_id,
           title: dataStream.title,

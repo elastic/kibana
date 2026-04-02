@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerDataStreamRoutes } from './data_stream_routes';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
@@ -62,7 +63,10 @@ describe('Data stream routes - upload samples', () => {
       },
     };
 
-    registerDataStreamRoutes(mockRouter as any, loggingSystemMock.create().get());
+    registerDataStreamRoutes(
+      mockRouter as unknown as IRouter<AutomaticImportPluginRequestHandlerContext>,
+      loggingSystemMock.create().get()
+    );
     routeHandler = routeHandlers[`POST:${uploadPath}`]?.handler;
     expect(routeHandler).toBeDefined();
   });
