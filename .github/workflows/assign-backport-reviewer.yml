@@ -17,60 +17,20 @@ jobs:
       github.event.pull_request.user.login != 'kibanamachine' &&
       contains(github.event.pull_request.labels.*.name, 'backport')
     steps:
-      - name: Get affected codeowners
-        id: codeowners
-        uses: dytab/affected-codeowners@4f89e2b82e991c1dfc9f7000e8989212d8bfe086 # v1.0.0
-
       - name: Select reviewers
         id: select-reviewers
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        env:
-          OWNERS: ${{ steps.codeowners.outputs.individual-owners }}
         with:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
-            const affectedCodeowners = ${{ env.OWNERS }} || [];
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const currentPrNumber = context.payload.pull_request.number;
             const prAuthor = context.payload.pull_request.user.login;
             const normalize = (s) => s.replace(/^@/, '').trim();
             const isHumanReviewer = (login) =>
               Boolean(login) &&
               login !== 'kibanamachine' &&
               !login.endsWith('[bot]');
-
-            const codeownerTeams = new Set(
-              affectedCodeowners.map(normalize).filter((t) => t.startsWith('elastic/'))
-            );
-
-            if (codeownerTeams.size > 0) {
-              try {
-                const result = await github.graphql(
-                  `query($login: String!) {
-                    organization(login: "elastic") {
-                      teams(first: 100, userLogins: [$login]) {
-                        nodes { combinedSlug }
-                      }
-                    }
-                  }`,
-                  { login: prAuthor }
-                );
-                const authorTeams = new Set(
-                  result.organization.teams.nodes.map((t) => normalize(t.combinedSlug))
-                );
-                const matchedTeams = [...codeownerTeams.intersection(authorTeams)];
-
-                if (matchedTeams.length > 0) {
-                  core.setOutput('team_reviewers', matchedTeams.join(','));
-                  return;
-                }
-              } catch (error) {
-                core.warning(`Failed to query author's org teams: ${error.message}`);
-              }
-            } else {
-              core.info('No elastic teams found in CODEOWNERS for changed files');
-            }
 
             const title = context.payload.pull_request.title ?? '';
             const body = context.payload.pull_request.body ?? '';
@@ -90,28 +50,91 @@ jobs:
               return;
             }
 
-            const reviews = await github.paginate(github.rest.pulls.listReviews, {
-              owner,
-              repo,
-              pull_number: originalPrNumber,
-              per_page: 100,
-            });
+            const reviewHistory = await github.graphql(
+              `query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                    reviews(first: 100) {
+                      nodes {
+                        state
+                        submittedAt
+                        author {
+                          login
+                        }
+                        onBehalfOf(first: 10) {
+                          nodes {
+                            slug
+                            organization {
+                              login
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`,
+              {
+                owner,
+                repo,
+                number: originalPrNumber,
+              }
+            );
+
+            const reviews = (reviewHistory.repository.pullRequest?.reviews?.nodes ?? [])
+              .filter((review) => Boolean(review.submittedAt))
+              .sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
+
+            const reviewedTeams = [];
+            for (const review of reviews) {
+              for (const team of review.onBehalfOf.nodes ?? []) {
+                const combinedSlug = `${team.organization.login}/${team.slug}`;
+                if (!reviewedTeams.includes(combinedSlug)) {
+                  reviewedTeams.push(combinedSlug);
+                }
+              }
+            }
+
+            let matchedTeams = [];
+            try {
+              const result = await github.graphql(
+                `query($login: String!) {
+                  organization(login: "elastic") {
+                    teams(first: 100, userLogins: [$login]) {
+                      nodes { combinedSlug }
+                    }
+                  }
+                }`,
+                { login: prAuthor }
+              );
+              const authorTeams = new Set(
+                result.organization.teams.nodes.map((t) => normalize(t.combinedSlug))
+              );
+              matchedTeams = reviewedTeams.filter((team) => authorTeams.has(team));
+            } catch (error) {
+              core.warning(`Failed to query author's org teams: ${error.message}`);
+            }
+
+            if (matchedTeams.length > 0) {
+              core.setOutput('team_reviewers', matchedTeams.join(','));
+              return;
+            }
+
             const fallbackReview = reviews
               .filter((review) => {
-                const login = review.user?.login;
+                const login = review.author?.login;
                 return (
                   review.state === 'APPROVED' &&
                   isHumanReviewer(login) &&
-                  Boolean(review.submitted_at)
+                  Boolean(review.submittedAt)
                 );
-              })
-              .sort((a, b) => Date.parse(b.submitted_at) - Date.parse(a.submitted_at))[0];
+              })[0];
 
             if (!fallbackReview) {
               return;
             }
 
-            core.setOutput('reviewer', fallbackReview.user.login);
+            core.setOutput('reviewer', fallbackReview.author.login);
 
       - name: Update reviewers
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
@@ -125,8 +148,11 @@ jobs:
             const reviewer = '${{ steps.select-reviewers.outputs.reviewer }}';
 
             if (teamReviewers.length === 0 && !reviewer) {
+              core.info('No team reviewers or fallback reviewer found');
               return;
             }
+
+            core.info(`Updating reviewers: teamReviewers=${teamReviewers}, reviewer=${reviewer}`);
 
             await github.graphql(
               `mutation RequestReviewsByLogin(
