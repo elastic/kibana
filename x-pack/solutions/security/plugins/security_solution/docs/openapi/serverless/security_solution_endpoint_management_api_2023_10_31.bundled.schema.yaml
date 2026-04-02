@@ -985,9 +985,12 @@ components:
       example: endpoint
       type: string
     ApiPageSize:
-      allOf:
-        - $ref: '#/components/schemas/PageSize'
-        - maximum: 1000
+      default: 10
+      description: Number of items per page
+      example: 10
+      maximum: 1000
+      minimum: 1
+      type: integer
     ApiSortField:
       description: Determines which field is used to sort the results.
       enum:
@@ -1725,7 +1728,10 @@ components:
         type: string
       type: array
     Isolate:
-      $ref: '#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/ResponseActionDetails'
+        - description: Details of an isolate action response.
+          type: object
     IsolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -2907,7 +2913,10 @@ components:
       minLength: 1
       type: array
     Unisolate:
-      $ref: '#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '#/components/schemas/ResponseActionDetails'
+        - description: Details of an unisolate action response.
+          type: object
     UnisolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d

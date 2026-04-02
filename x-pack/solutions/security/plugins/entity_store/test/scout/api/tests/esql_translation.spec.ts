@@ -14,6 +14,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 import { getEuidEsqlFilterBasedOnDocument } from '../../../../common/domain/euid/esql';
 import { USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES } from '../fixtures/user_ts_extraction_cases';
 
@@ -44,13 +45,14 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     );
   });
 
-  apiTest.afterAll(async ({ apiClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearEntityStoreIndices(esClient);
   });
 
   apiTest(

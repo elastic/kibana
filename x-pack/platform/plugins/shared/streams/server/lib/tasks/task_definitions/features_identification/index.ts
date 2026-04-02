@@ -34,10 +34,11 @@ import {
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
+import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { parseError } from '../../../streams/errors/parse_error';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
+import { resolveConnectorIdAndCheckAllowlist } from '../../../../routes/utils/resolve_connector_id_and_check_allowlist';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
 import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
@@ -366,12 +367,15 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 request: runContext.fakeRequest,
               });
 
-              const taskLogger = taskContext.logger.get('features_identification');
+              const taskLogger = taskContext.logger.get('features_identification', streamName);
               const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
+              const connectorId = await resolveConnectorIdAndCheckAllowlist({
                 connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
                 uiSettingsClient,
                 logger: taskLogger,
+                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                request: runContext.fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
@@ -388,7 +392,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   featureClient.getExcludedFeatures(streamName),
                   new PromptsConfigService({
                     soClient,
-                    logger: taskContext.logger,
+                    logger: taskLogger,
                   }).getPrompt(),
                 ]);
 
@@ -407,7 +411,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     existingFeatures,
                     excludedFeatures,
                     inferenceClient: boundInferenceClient,
-                    logger: taskContext.logger.get('features_identification'),
+                    logger: taskLogger,
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
                     onIterationComplete: async (it, changedFeatures) => {
@@ -446,7 +450,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     start,
                     end,
                     esClient,
-                    logger: taskContext.logger.get('computed_features'),
+                    logger: taskContext.logger.get('computed_features', streamName),
                   }),
                 ]);
 
@@ -471,7 +475,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 );
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
-                  taskContext.logger.debug(
+                  taskLogger.debug(
                     () =>
                       `Stream ${streamName} was deleted before features identification task started, skipping`
                   );
@@ -489,17 +493,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  taskContext.logger.debug(
+                  taskLogger.debug(
                     () => `Task ${runContext.taskInstance.id} was canceled: ${errorMessage}`
                   );
                   trackEmptyTelemetry('canceled');
                   return getDeleteTaskRunResult();
                 }
 
-                taskContext.logger.error(
-                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
-                  { error } as LogMeta
-                );
+                taskLogger.error(`Task ${runContext.taskInstance.id} failed: ${errorMessage}`, {
+                  error,
+                } as LogMeta);
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,

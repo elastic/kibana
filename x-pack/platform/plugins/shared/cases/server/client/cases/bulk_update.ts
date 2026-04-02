@@ -431,7 +431,7 @@ export const bulkUpdate = async (
       throw Boom.conflict(
         `These cases ${conflictedCases
           .map((c) => c.id)
-          .join(', ')} has been updated. Please refresh before saving additional updates.`
+          .join(', ')} have been updated. Please refresh before saving additional updates.`
       );
     }
 

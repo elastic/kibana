@@ -91,6 +91,9 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
   - '@kbn/share-plugin'
+  - '@kbn/core-security-server'
+  - '@kbn/test'
+  - '@kbn/tooling-log'
 tags:
   - plugin
   - prod

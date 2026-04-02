@@ -304,7 +304,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="searchQueryRulesQueryRuleMetadataEditorDeleteButton"
-            iconType="minusInCircle"
+            iconType="minusCircle"
             color="danger"
             onClick={onRemove}
             aria-label={i18n.translate(

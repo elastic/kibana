@@ -256,7 +256,7 @@ export function QuickSearchVisor({
           {isNlToEsqlEnabled && (
             <>
               <EuiFlexItem grow={false} css={styles.techPreviewIcon}>
-                <EuiIconTip type="beaker" size="s" color="subdued" content={techPreviewTooltip} />
+                <EuiIconTip type="flask" size="s" color="subdued" content={techPreviewTooltip} />
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
                 <ModeSelector onModeChange={onModeChange} />

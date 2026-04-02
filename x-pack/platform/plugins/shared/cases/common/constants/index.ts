@@ -215,6 +215,7 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
 export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
+export const MANAGE_TEMPLATES_CAPABILITY = 'cases_manage_templates' as const;
 
 /**
  * Cases API Tags

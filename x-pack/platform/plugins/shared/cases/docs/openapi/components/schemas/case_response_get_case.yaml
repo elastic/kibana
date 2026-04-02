@@ -113,6 +113,10 @@ properties:
     type: integer
     description: The number of user comments on the case. Use the find case comments API to retrieve comment content.
     example: 1
+  totalEvents:
+    type: integer
+    description: The number of events attached to the case.
+    example: 0
   updated_at:
     type: string
     format: date-time

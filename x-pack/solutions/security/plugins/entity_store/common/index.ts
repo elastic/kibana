@@ -68,6 +68,12 @@ export const ENTITY_STORE_ROUTES = {
   ENTITY_MAINTAINERS_INIT: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/init`,
 } as const satisfies Record<string, string>;
 
+export {
+  EntityMaintainerTaskStatus,
+  EntityMaintainerResponseItem,
+  GetEntityMaintainersResponse,
+} from './entity_maintainers';
+
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;

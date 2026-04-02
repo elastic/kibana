@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { CaseUI } from '../../../../common';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
-import { FieldType } from '../../templates_v2/field_types/constants';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 import { TemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../../common/mock';
 
