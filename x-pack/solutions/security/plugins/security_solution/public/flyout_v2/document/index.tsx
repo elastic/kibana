@@ -28,41 +28,51 @@ export interface DocumentFlyoutProps {
    * Cell action renderer for the analyzer
    */
   renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh related flyouts.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
-export const DocumentFlyout = memo(({ hit, renderCellActions }: DocumentFlyoutProps) => {
-  const isAlert = useMemo(
-    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
-    [hit]
-  );
+export const DocumentFlyout = memo(
+  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+    const isAlert = useMemo(
+      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
+    );
 
-  const { hasAlertsRead, loading } = useAlertsPrivileges();
-  const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
+    const { hasAlertsRead, loading } = useAlertsPrivileges();
+    const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
-  if (isAlert && loading) {
-    return <FlyoutLoading data-test-subj="document-overview-loading" />;
+    if (isAlert && loading) {
+      return <FlyoutLoading data-test-subj="document-overview-loading" />;
+    }
+
+    if (missingAlertsPrivilege) {
+      return <FlyoutMissingAlertsPrivilege />;
+    }
+
+    return (
+      <>
+        <EuiFlyoutHeader>
+          <Header hit={hit} renderCellActions={renderCellActions} onAlertUpdated={onAlertUpdated} />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <OverviewTab
+            hit={hit}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <Footer hit={hit} />
+        </EuiFlyoutFooter>
+      </>
+    );
   }
-
-  if (missingAlertsPrivilege) {
-    return <FlyoutMissingAlertsPrivilege />;
-  }
-
-  return (
-    <>
-      <EuiFlyoutHeader>
-        <Header hit={hit} />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <OverviewTab hit={hit} renderCellActions={renderCellActions} />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <Footer hit={hit} />
-      </EuiFlyoutFooter>
-    </>
-  );
-});
+);
 
 DocumentFlyout.displayName = 'DocumentFlyout';
