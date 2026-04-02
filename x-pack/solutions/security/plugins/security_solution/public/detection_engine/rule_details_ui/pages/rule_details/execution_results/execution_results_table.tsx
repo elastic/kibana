@@ -40,10 +40,6 @@ import type {
   UnifiedExecutionStatus,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
-const datePickerFlexItemCss = css`
-  max-width: 582px;
-`;
-
 const RULE_STATUS_TO_UNIFIED: Partial<Record<RuleExecutionStatus, UnifiedExecutionStatus>> = {
   succeeded: 'success',
   'partial failure': 'warning',
@@ -166,15 +162,21 @@ export const ExecutionResultsTable: React.FC<ExecutionResultsTableProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem css={datePickerFlexItemCss}>
+        <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
             start={start}
             end={end}
             onTimeChange={onTimeChangeCallback}
             onRefresh={onRefreshCallback}
             isLoading={isFetching}
-            width="full"
+            width="auto"
             data-test-subj="executionResultsDatePicker"
+            css={css`
+              .euiPopover {
+                /* Make sure time value buttons don't get cut off */
+                overflow: visible;
+              }
+            `}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
