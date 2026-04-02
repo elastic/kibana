@@ -36,6 +36,7 @@ export interface StateDependencies {
   queryClient: QueryClient;
   featureClient: FeatureClient;
   isServerless: boolean;
+  isSecurityEnabled: boolean;
   isWiredStreamViewsEnabled: boolean;
   isDev: boolean;
 }

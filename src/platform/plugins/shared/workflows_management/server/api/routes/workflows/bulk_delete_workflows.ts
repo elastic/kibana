@@ -17,7 +17,8 @@ import { withLicenseCheck } from '../utils/with_license_check';
 
 const MAX_BULK_DELETE_BATCH_SIZE = 1000;
 
-export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerBulkDeleteWorkflowsRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .delete({
       path: '/api/workflows',
@@ -60,13 +61,20 @@ export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteD
         },
       },
       withLicenseCheck(async (context, request, response) => {
+        const { force } = request.query;
         try {
           const { ids } = request.body;
-          const { force } = request.query;
           const spaceId = spaces.getSpaceId(request);
           const result = await api.deleteWorkflows(ids, spaceId, request, { force });
-          return response.ok({ body: result });
+          const { successfulIds = [], ...responseBody } = result;
+          audit.logBulkWorkflowDeleteResults(request, {
+            successfulIds,
+            failures: result.failures,
+            force,
+          });
+          return response.ok({ body: responseBody });
         } catch (error) {
+          audit.logBulkWorkflowDeleteFailed(request, error, { force });
           return handleRouteError(response, error);
         }
       })

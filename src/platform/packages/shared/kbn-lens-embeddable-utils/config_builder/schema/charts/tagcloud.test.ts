@@ -43,7 +43,7 @@ describe('Tagcloud Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        tag_by: { ...input.tag_by, size: 5 },
+        tag_by: { ...input.tag_by, limit: 5 },
       });
     });
 
@@ -67,7 +67,7 @@ describe('Tagcloud Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        tag_by: { ...input.tag_by, size: 5 },
+        tag_by: { ...input.tag_by, limit: 5 },
       });
     });
 
@@ -100,7 +100,7 @@ describe('Tagcloud Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        tag_by: { ...input.tag_by, size: 5 },
+        tag_by: { ...input.tag_by, limit: 5 },
       });
     });
 
@@ -125,7 +125,7 @@ describe('Tagcloud Schema', () => {
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
@@ -149,7 +149,7 @@ describe('Tagcloud Schema', () => {
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
@@ -173,7 +173,7 @@ describe('Tagcloud Schema', () => {
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
     });
@@ -202,7 +202,7 @@ describe('Tagcloud Schema', () => {
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
@@ -227,7 +227,7 @@ describe('Tagcloud Schema', () => {
           ...defaultValues,
           ...input,
           font_size: { min: 18, max: 72 },
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
     });
@@ -333,7 +333,7 @@ describe('Tagcloud Schema', () => {
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         };
         expect(() => tagcloudStateSchema.validate(input)).toThrow();
@@ -398,7 +398,7 @@ describe('Tagcloud Schema', () => {
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
