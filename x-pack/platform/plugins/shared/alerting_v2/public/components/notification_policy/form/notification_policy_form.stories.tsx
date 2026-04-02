@@ -46,7 +46,6 @@ export const CreateMode: Story = {
     defaultValues: {
       ...DEFAULT_FORM_STATE,
       groupBy: [...DEFAULT_FORM_STATE.groupBy],
-      frequency: { ...DEFAULT_FORM_STATE.frequency },
       destinations: DEFAULT_FORM_STATE.destinations.map((destination) => ({ ...destination })),
     },
   },
@@ -58,9 +57,41 @@ export const EditMode: Story = {
       name: 'Critical production alerts',
       description: 'Routes critical production alerts to escalation workflows',
       matcher: 'data.severity : "critical" and data.env : "prod"',
+      groupingMode: 'per_field',
       groupBy: ['host.name', 'service.name'],
-      frequency: { type: 'throttle', interval: '5m' },
+      throttleStrategy: 'time_interval',
+      throttleInterval: '5m',
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
+    },
+  },
+};
+
+export const PerEpisodeWithInterval: Story = {
+  args: {
+    defaultValues: {
+      name: 'Status change with reminders',
+      description: 'Notifies on status change and repeats every hour',
+      matcher: '',
+      groupingMode: 'per_episode',
+      groupBy: [],
+      throttleStrategy: 'per_status_interval',
+      throttleInterval: '1h',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    },
+  },
+};
+
+export const DigestMode: Story = {
+  args: {
+    defaultValues: {
+      name: 'Digest summary',
+      description: 'Bundles all episodes into a single digest',
+      matcher: '',
+      groupingMode: 'all',
+      groupBy: [],
+      throttleStrategy: 'time_interval',
+      throttleInterval: '15m',
+      destinations: [{ type: 'workflow', id: 'workflow-3' }],
     },
   },
 };
