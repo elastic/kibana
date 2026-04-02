@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
-import { createAlertEvent, indexAlertEvents } from './fixtures';
+import { createAlertEvent, DISPATCHER_SYSTEM_ACTION_TYPES, indexAlertEvents } from './fixtures';
 
 const BULK_ALERT_ACTION_API_PATH = '/api/alerting/v2/alerts/action/_bulk';
 const ALERTING_EVENTS_INDEX = '.rule-events';
@@ -59,7 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: ALERTING_ACTIONS_INDEX,
         query: {
           bool: {
-            must_not: [{ terms: { action_type: ['fire', 'suppress'] } }],
+            must_not: [{ terms: { action_type: [...DISPATCHER_SYSTEM_ACTION_TYPES] } }],
             filter: [{ terms: { rule_id: ruleIds } }],
           },
         },

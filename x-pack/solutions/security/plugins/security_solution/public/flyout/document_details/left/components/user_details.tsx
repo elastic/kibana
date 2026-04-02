@@ -202,7 +202,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const observedUser = useObservedUser(userName, scopeId, entityId);
+  const observedUser = useObservedUser(
+    userName,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
 
   const filterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -229,6 +233,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             refetch: observedUser.refetchEntityStore ?? (() => {}),
             isLoading: observedUser.isLoading,
             error: null,
+            inspect: entityFromStoreResult?.inspect,
           })
         : undefined,
     [
@@ -236,6 +241,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       observedUser.entityRecord,
       observedUser.refetchEntityStore,
       observedUser.isLoading,
+      entityFromStoreResult?.inspect,
     ]
   );
 
