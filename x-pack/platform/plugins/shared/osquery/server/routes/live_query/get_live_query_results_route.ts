@@ -16,7 +16,11 @@ import type {
   GetLiveQueryResultsRequestParamsSchema,
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  DEFAULT_MAX_TABLE_QUERY_SIZE,
+  OSQUERY_INTEGRATION_NAME,
+} from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
@@ -69,6 +73,20 @@ export const getLiveQueryResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
+
+          if (page * pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+            return response.badRequest({
+              body: {
+                message: `Cannot paginate beyond ${DEFAULT_MAX_TABLE_QUERY_SIZE} results. Use Discover for full access.`,
+                attributes: {
+                  code: 'PAGINATION_LIMIT_EXCEEDED',
+                },
+              },
+            });
+          }
+
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
