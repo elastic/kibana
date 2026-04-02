@@ -6,7 +6,6 @@
  */
 
 import {
-  KI_SELECT_STREAMS_STEP_TYPE,
   COORDINATOR_INTERVAL_MINUTES,
   MAX_SCHEDULED_STREAMS,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
@@ -19,10 +18,6 @@ const assertYamlContains = (expected: string) => {
 };
 
 describe('continuous_extraction_workflow.yaml stays in sync with constants', () => {
-  it('uses the correct step type', () => {
-    assertYamlContains(KI_SELECT_STREAMS_STEP_TYPE);
-  });
-
   it('uses the correct timeout', () => {
     assertYamlContains(`timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`);
   });
@@ -49,5 +44,16 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
 
   it('uses the correct poll delay duration', () => {
     assertYamlContains(`duration: "${POLL_DELAY_SECONDS}s"`);
+  });
+
+  it('calls the eligibility endpoint with the correct query params', () => {
+    assertYamlContains('_extraction/_eligible');
+    assertYamlContains('maxScheduledStreams={{ inputs.maxScheduledStreams }}');
+    assertYamlContains('lookbackHours={{ inputs.lookbackHours }}');
+    assertYamlContains('extractionIntervalHours={{ inputs.extractionIntervalHours }}');
+  });
+
+  it('calls the task scheduling endpoint', () => {
+    assertYamlContains('features/_task');
   });
 });

@@ -39,6 +39,7 @@ import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
+import { internalEligibleStreamsRoutes } from './routes/internal/sig_events/extraction/eligible_streams_route';
 import type { RouteHandlerScopedClients } from './routes/types';
 import type {
   StreamsPluginSetupDependencies,
@@ -58,7 +59,6 @@ import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer'
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
-import { registerKiSelectStreamsStep } from './lib/workflows/ki_select_streams_step';
 import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
@@ -232,12 +232,7 @@ export class StreamsPlugin
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
-    if (plugins.workflowsExtensions && plugins.workflowsManagement) {
-      registerKiSelectStreamsStep({
-        workflowsExtensions: plugins.workflowsExtensions,
-        getScopedClients,
-        logger: this.logger,
-      });
+    if (plugins.workflowsManagement) {
       continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
         this.logger,
         plugins.workflowsManagement.management
@@ -307,6 +302,22 @@ export class StreamsPlugin
 
     registerRoutes({
       repository: streamsRouteRepository,
+      dependencies: {
+        features: featureService,
+        server: this.server,
+        telemetry: telemetryClient,
+        processorSuggestions: this.processorSuggestionsService,
+        patternExtractionService: this.patternExtractionService,
+        getScopedClients,
+        continuousKiExtractionWorkflowService,
+      },
+      core,
+      logger: this.logger,
+      runDevModeChecks: this.isDev,
+    });
+
+    registerRoutes({
+      repository: internalEligibleStreamsRoutes,
       dependencies: {
         features: featureService,
         server: this.server,

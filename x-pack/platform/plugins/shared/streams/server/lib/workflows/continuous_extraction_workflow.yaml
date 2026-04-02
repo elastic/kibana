@@ -1,10 +1,11 @@
 # Continuous KI (Knowledge Indicator) extraction workflow.
 #
 # Runs on a schedule and orchestrates feature identification across managed streams:
-#   1. select_streams: picks eligible streams (respects interval, exclusions, concurrency)
-#      and schedules a Task Manager task for each.
-#   2. foreach scheduled stream: polls the task status endpoint until the task
-#      reaches a terminal state (completed/failed), then captures the result.
+#   1. Fetches eligible streams from the _eligible API endpoint (respects
+#      interval, exclusions, concurrency).
+#   2. For each candidate: schedules a Task Manager task via the _task endpoint.
+#   3. Polls the task status endpoint until the task reaches a terminal state
+#      (completed/failed), then captures the result.
 #
 # Values below (timeouts, intervals, defaults) must stay in sync with the
 # constants in common/constants.ts — see continuous_extraction_workflow.test.ts.
@@ -38,28 +39,52 @@ inputs:
     default: 12
     description: "Min hours between extractions for a stream. Use 0 to always extract."
 steps:
-  # Step 1: Select eligible streams and schedule tasks.
-  # The custom step filters out query streams, excluded patterns, already-running
-  # and up-to-date streams, then schedules Task Manager tasks for the rest.
-  - name: select_streams
-    type: streams.ki_select_streams
+  # Step 1: Fetch eligible streams from the classification endpoint.
+  - name: get_eligible
+    type: kibana.request
     with:
-      maxScheduledStreams: "${{ inputs.maxScheduledStreams }}"
-      lookbackHours: "${{ inputs.lookbackHours }}"
-      extractionIntervalHours: "${{ inputs.extractionIntervalHours }}"
+      method: GET
+      path: "/internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours }}&extractionIntervalHours={{ inputs.extractionIntervalHours }}"
+      use_server_info: true
+      headers:
+        x-elastic-internal-origin: "kibana"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
 
-  # Step 2: Only proceed if at least one stream was scheduled.
-  - name: has_scheduled_streams
+  # Step 2: Only proceed if there are candidates to schedule.
+  - name: has_candidates
     type: if
-    condition: "steps.select_streams.output.scheduled[0].streamName:*"
+    condition: "steps.get_eligible.output.candidates[0].streamName:*"
     steps:
-      # Iterate over each scheduled stream. If one stream fails, the rest continue.
+      # Iterate over each candidate stream. If one stream fails, the rest continue.
       - name: extract_ki_features
         type: foreach
-        foreach: "${{ steps.select_streams.output.scheduled }}"
+        foreach: "${{ steps.get_eligible.output.candidates }}"
         iteration-on-failure:
           continue: true
         steps:
+          # Schedule the feature identification task for this stream.
+          - name: schedule_task
+            type: kibana.request
+            with:
+              method: POST
+              path: "/internal/streams/{{ foreach.item.streamName }}/features/_task"
+              use_server_info: true
+              headers:
+                x-elastic-internal-origin: "kibana"
+              body:
+                action: "schedule"
+                from: "${{ steps.get_eligible.output.timeRange.from }}"
+                to: "${{ steps.get_eligible.output.timeRange.to }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+
           # Poll the task status endpoint until the task is no longer in_progress.
           # On the first iteration the condition evaluates to true because
           # check_status hasn't run yet (workflow engine treats missing refs as truthy).

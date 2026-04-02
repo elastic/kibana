@@ -21,14 +21,7 @@ export {
   ATTACHMENT_SUGGESTIONS_LIMIT,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
-  KI_SELECT_STREAMS_STEP_TYPE,
 } from './constants';
-
-export {
-  streamCandidateSchema,
-  kiSelectStreamsInputSchema,
-  kiSelectStreamsOutputSchema,
-} from './continuous_extraction_schemas';
 
 export type { StreamDocsStat } from './doc_counts';
 export {

@@ -66,7 +66,6 @@ export const FAILURE_STORE_SELECTOR = '::failures';
 
 // Workflow identity
 export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
-export const KI_SELECT_STREAMS_STEP_TYPE = 'streams.ki_select_streams';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.

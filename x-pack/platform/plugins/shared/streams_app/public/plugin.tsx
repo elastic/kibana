@@ -103,14 +103,6 @@ export class StreamsAppPlugin
     this.telemetry.setup(coreSetup.analytics);
     const startServicesPromise = coreSetup.getStartServices();
 
-    if (plugins.workflowsExtensions) {
-      plugins.workflowsExtensions.registerStepDefinition(() =>
-        import('./workflows/continuous_extraction_step').then(
-          (m) => m.kiSelectStreamsPublicStepDefinition
-        )
-      );
-    }
-
     coreSetup.application.register({
       id: 'streams',
       title: i18n.translate('xpack.streams.appTitle', {
