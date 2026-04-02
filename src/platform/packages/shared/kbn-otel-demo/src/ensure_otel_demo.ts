@@ -148,7 +148,7 @@ export async function deployDemo({
   version,
   scenarioIds = [],
   forceRebuildImages = false,
-  useEdot = false,
+  useVanillaCollector = false,
 }: {
   log: ToolingLog;
   demoType?: DemoType;
@@ -157,7 +157,7 @@ export async function deployDemo({
   version?: string;
   scenarioIds?: string[];
   forceRebuildImages?: boolean;
-  useEdot?: boolean;
+  useVanillaCollector?: boolean;
 }): Promise<DeployResult> {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
@@ -280,29 +280,31 @@ export async function deployDemo({
     log.write('');
   }
 
-  // Resolve the EDOT collector image tag if needed
+  // Resolve the EDOT collector image tag (default) or use vanilla
   let collectorImage: string | undefined;
-  if (useEdot) {
+  if (!useVanillaCollector) {
     const edotImage = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
     const edotVersion = await resolveEdotCollectorVersion(log);
     collectorImage = `${edotImage}:${edotVersion}`;
     log.info(`Using EDOT Collector: ${collectorImage}`);
+  } else {
+    log.info('Using vanilla otel-collector-contrib (--vanilla flag)');
   }
 
   // Generate OTel Collector configuration
-  const collectorConfig = useEdot
-    ? getEdotK8sCollectorConfig({
-        elasticsearchEndpoint: elasticsearchHost,
-        username: kibanaCredentials.username,
-        password: kibanaCredentials.password,
-        namespace: demoConfig.namespace,
-        demoId: demoConfig.id,
-      })
-    : getFullOtelCollectorConfig({
+  const collectorConfig = useVanillaCollector
+    ? getFullOtelCollectorConfig({
         elasticsearchEndpoint: elasticsearchHost,
         username: kibanaCredentials.username,
         password: kibanaCredentials.password,
         logsIndex,
+        namespace: demoConfig.namespace,
+        demoId: demoConfig.id,
+      })
+    : getEdotK8sCollectorConfig({
+        elasticsearchEndpoint: elasticsearchHost,
+        username: kibanaCredentials.username,
+        password: kibanaCredentials.password,
         namespace: demoConfig.namespace,
         demoId: demoConfig.id,
       });
@@ -489,7 +491,7 @@ export async function ensureOtelDemo({
   teardown = false,
   scenarioIds = [],
   forceRebuildImages = false,
-  useEdot = false,
+  useVanillaCollector = false,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
@@ -500,7 +502,7 @@ export async function ensureOtelDemo({
   teardown?: boolean;
   scenarioIds?: string[];
   forceRebuildImages?: boolean;
-  useEdot?: boolean;
+  useVanillaCollector?: boolean;
 }) {
   if (teardown) {
     await teardownDemo({ log, demoType });
@@ -515,7 +517,7 @@ export async function ensureOtelDemo({
     version,
     scenarioIds,
     forceRebuildImages,
-    useEdot,
+    useVanillaCollector,
   });
 
   await streamDemoLogs({ log, namespace, signal });
