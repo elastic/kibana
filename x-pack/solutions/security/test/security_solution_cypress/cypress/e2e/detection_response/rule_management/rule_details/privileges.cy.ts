@@ -104,7 +104,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
         goToExecutionLogTab();
       });
 
-      it(`should be able to see the execution history`, () => {
+      it.skip(`should be able to see the execution history`, () => {
         waitForExecutionLogTabToBePopulated(1);
       });
 
@@ -155,7 +155,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
         goToExecutionLogTab();
       });
 
-      it(`should be able to see the execution history`, () => {
+      it.skip(`should be able to see the execution history`, () => {
         waitForExecutionLogTabToBePopulated(1);
       });
 

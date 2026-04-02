@@ -69,7 +69,6 @@ const affectedPackages = await getAffectedPackages(
   {
     strategy: 'git',       // default, can also be 'moon'
     includeDownstream: true,
-    logging: false,
     ignorePatterns: ['**/*.md', 'docs/**'],
     ignoreUncategorizedChanges: false,
   }
@@ -109,7 +108,6 @@ const filteredFiles = filterFilesByPackages(
 |------------------------------------|---------------------------------|--------------|----------------------|
 | `AFFECTED_STRATEGY`                | `git`, `moon`                   | `git`        | `git`                |
 | `AFFECTED_DOWNSTREAM`              | `true`, `false`                 | `false`      | `true`               |
-| `AFFECTED_LOGGING`                 | `true`, `false`                 | `false`      | `true`               |
 | `AFFECTED_IGNORE`                  | comma-separated globs           | —            | —                    |
 | `AFFECTED_IGNORE_UNCATEGORIZED_CHANGES` | `true`, `false`            | `false`      | `false`              |
 | `GITHUB_PR_MERGE_BASE`             | any git ref                     | `origin/main`| —                    |

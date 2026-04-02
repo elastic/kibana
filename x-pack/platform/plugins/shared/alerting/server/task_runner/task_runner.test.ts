@@ -395,9 +395,10 @@ describe('Task Runner', () => {
 
   test('passes consumer metrics to AlertingEventLogger', async () => {
     const consumerMetrics = {
+      matched_indices_count: 3,
+      frozen_indices_queried_count: 3,
       alerts_candidate_count: 42,
       alerts_suppressed_count: 7,
-      frozen_indices_queried_count: 3,
     };
     ruleType.executor.mockImplementation(async ({ services: { ruleMonitoringService } }) => {
       ruleMonitoringService?.setMetrics(consumerMetrics);

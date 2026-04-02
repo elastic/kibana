@@ -19,6 +19,7 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
 
@@ -32,6 +33,7 @@ interface ServicePanelContentProps {
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
+  entityStoreEntityId?: string;
 }
 
 export const ServicePanelContent = ({
@@ -44,6 +46,7 @@ export const ServicePanelContent = ({
   scopeId,
   openDetailsPanel,
   onAssetCriticalityChange,
+  entityStoreEntityId,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
 
@@ -60,6 +63,12 @@ export const ServicePanelContent = ({
             entityType={EntityType.service}
             entityId={entityRecord?.entity.id}
           />
+          <EuiHorizontalRule />
+        </>
+      )}
+      {entityStoreEntityId && (
+        <>
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
           <EuiHorizontalRule />
         </>
       )}
