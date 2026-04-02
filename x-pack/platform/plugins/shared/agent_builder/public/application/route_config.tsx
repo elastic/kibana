@@ -28,6 +28,7 @@ import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
+import { agentBuilderViewIds } from './agent_builder_view_ids';
 
 export type SidebarView = 'conversation' | 'manage';
 
@@ -38,6 +39,7 @@ export interface FeatureFlags {
 
 export interface RouteDefinition {
   path: string;
+  viewId: string;
   element: React.ReactNode;
   sidebarView: SidebarView;
   isExperimental?: boolean;
@@ -71,23 +73,27 @@ const navLabels = {
 export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/conversations/:conversationId',
+    viewId: agentBuilderViewIds.agentConversation,
     sidebarView: 'conversation',
     element: <AgentBuilderConversationsPage />,
   },
   {
     path: '/agents/:agentId/overview',
+    viewId: agentBuilderViewIds.agentOverview,
     sidebarView: 'conversation',
     navLabel: navLabels.overview,
     element: <AgentBuilderAgentOverviewPage />,
   },
   {
     path: '/agents/:agentId/skills',
+    viewId: agentBuilderViewIds.agentSkills,
     sidebarView: 'conversation',
     navLabel: navLabels.skills,
     element: <AgentBuilderAgentSkillsPage />,
   },
   {
     path: '/agents/:agentId/plugins',
+    viewId: agentBuilderViewIds.agentPlugins,
     sidebarView: 'conversation',
     isExperimental: true,
     navLabel: navLabels.plugins,
@@ -95,6 +101,7 @@ export const agentRoutes: RouteDefinition[] = [
   },
   {
     path: '/agents/:agentId/connectors',
+    viewId: agentBuilderViewIds.agentConnectors,
     sidebarView: 'conversation',
     navLabel: navLabels.connectors,
     isConnectors: true,
@@ -102,6 +109,7 @@ export const agentRoutes: RouteDefinition[] = [
   },
   {
     path: '/agents/:agentId/tools',
+    viewId: agentBuilderViewIds.agentTools,
     sidebarView: 'conversation',
     navLabel: navLabels.tools,
     element: <AgentBuilderAgentToolsPage />,
@@ -109,6 +117,7 @@ export const agentRoutes: RouteDefinition[] = [
   // Catch-all for agent root - must be last
   {
     path: '/agents/:agentId',
+    viewId: agentBuilderViewIds.agentRoot,
     sidebarView: 'conversation',
     element: <AgentBuilderConversationsPage />,
   },
@@ -117,38 +126,45 @@ export const agentRoutes: RouteDefinition[] = [
 export const manageRoutes: RouteDefinition[] = [
   {
     path: '/manage/agents',
+    viewId: agentBuilderViewIds.manageAgents,
     sidebarView: 'manage',
     navLabel: navLabels.agents,
     element: <AgentBuilderAgentsPage />,
   },
   {
     path: '/manage/agents/new',
+    viewId: agentBuilderViewIds.manageAgentCreate,
     sidebarView: 'manage',
     element: <AgentBuilderAgentsCreate />,
   },
   {
     path: '/manage/agents/:agentId',
+    viewId: agentBuilderViewIds.manageAgentEdit,
     sidebarView: 'manage',
     element: <AgentBuilderAgentsEdit />,
   },
   {
     path: '/manage/skills',
+    viewId: agentBuilderViewIds.manageSkills,
     sidebarView: 'manage',
     navLabel: navLabels.skills,
     element: <AgentBuilderSkillsPage />,
   },
   {
     path: '/manage/skills/new',
+    viewId: agentBuilderViewIds.manageSkillCreate,
     sidebarView: 'manage',
     element: <AgentBuilderSkillCreatePage />,
   },
   {
     path: '/manage/skills/:skillId',
+    viewId: agentBuilderViewIds.manageSkillDetails,
     sidebarView: 'manage',
     element: <AgentBuilderSkillDetailsPage />,
   },
   {
     path: '/manage/plugins',
+    viewId: agentBuilderViewIds.managePlugins,
     sidebarView: 'manage',
     isExperimental: true,
     navLabel: navLabels.plugins,
@@ -156,12 +172,14 @@ export const manageRoutes: RouteDefinition[] = [
   },
   {
     path: '/manage/plugins/:pluginId',
+    viewId: agentBuilderViewIds.managePluginDetails,
     sidebarView: 'manage',
     isExperimental: true,
     element: <AgentBuilderPluginDetailsPage />,
   },
   {
     path: '/manage/connectors',
+    viewId: agentBuilderViewIds.manageConnectors,
     sidebarView: 'manage',
     navLabel: navLabels.connectors,
     isConnectors: true,
@@ -169,22 +187,26 @@ export const manageRoutes: RouteDefinition[] = [
   },
   {
     path: '/manage/tools',
+    viewId: agentBuilderViewIds.manageTools,
     sidebarView: 'manage',
     navLabel: navLabels.tools,
     element: <AgentBuilderToolsPage />,
   },
   {
     path: '/manage/tools/new',
+    viewId: agentBuilderViewIds.manageToolCreate,
     sidebarView: 'manage',
     element: <AgentBuilderToolCreatePage />,
   },
   {
     path: '/manage/tools/bulk_import_mcp',
+    viewId: agentBuilderViewIds.manageToolBulkImportMcp,
     sidebarView: 'manage',
     element: <AgentBuilderBulkImportMcpToolsPage />,
   },
   {
     path: '/manage/tools/:toolId',
+    viewId: agentBuilderViewIds.manageToolDetails,
     sidebarView: 'manage',
     element: <AgentBuilderToolDetailsPage />,
   },
