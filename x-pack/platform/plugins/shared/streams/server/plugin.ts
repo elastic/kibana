@@ -41,7 +41,7 @@ import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import { internalEligibleStreamsRoutes } from './routes/internal/sig_events/extraction/eligible_streams_route';
 import { internalSignificantEventsSettingsRoutes } from './routes/internal/sig_events/significant_events_settings/route';
-import type { RouteHandlerScopedClients } from './routes/types';
+import type { RouteDependencies, RouteHandlerScopedClients } from './routes/types';
 import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
@@ -294,49 +294,27 @@ export class StreamsPlugin
 
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
-    registerRoutes({
-      repository: streamsRouteRepository,
-      dependencies: {
-        server: this.server,
-        telemetry: telemetryClient,
-        processorSuggestions: this.processorSuggestionsService,
-        patternExtractionService: this.patternExtractionService,
-        getScopedClients,
-        continuousKiExtractionWorkflowService,
-      },
+    const routeDependencies: RouteDependencies = {
+      server: this.server,
+      telemetry: telemetryClient,
+      processorSuggestions: this.processorSuggestionsService,
+      patternExtractionService: this.patternExtractionService,
+      getScopedClients,
+      continuousKiExtractionWorkflowService,
+    };
+
+    const routeRegistrationOptions = {
+      dependencies: routeDependencies,
       core,
       logger: this.logger,
       runDevModeChecks: this.isDev,
-    });
+    };
 
-    registerRoutes({
-      repository: internalEligibleStreamsRoutes,
-      dependencies: {
-        server: this.server,
-        telemetry: telemetryClient,
-        processorSuggestions: this.processorSuggestionsService,
-        patternExtractionService: this.patternExtractionService,
-        getScopedClients,
-        continuousKiExtractionWorkflowService,
-      },
-      core,
-      logger: this.logger,
-      runDevModeChecks: this.isDev,
-    });
-
+    registerRoutes({ repository: streamsRouteRepository, ...routeRegistrationOptions });
+    registerRoutes({ repository: internalEligibleStreamsRoutes, ...routeRegistrationOptions });
     registerRoutes({
       repository: internalSignificantEventsSettingsRoutes,
-      dependencies: {
-        server: this.server,
-        telemetry: telemetryClient,
-        processorSuggestions: this.processorSuggestionsService,
-        patternExtractionService: this.patternExtractionService,
-        getScopedClients,
-        continuousKiExtractionWorkflowService,
-      },
-      core,
-      logger: this.logger,
-      runDevModeChecks: this.isDev,
+      ...routeRegistrationOptions,
     });
 
     registerFeatureFlags(core, this.logger);

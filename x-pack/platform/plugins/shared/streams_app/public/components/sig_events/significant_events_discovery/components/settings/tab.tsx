@@ -26,18 +26,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import {
-  OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 
 export function SettingsTab() {
   const {
@@ -60,40 +56,21 @@ export function SettingsTab() {
   );
   const [indexPatterns, setIndexPatterns] = useState<string>(savedIndexPatterns);
 
-  const [savedCE, setSavedCE] = useState(() => ({
-    enabled: core.settings.globalClient.get<boolean>(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-      false
-    ),
-    intervalHours: core.settings.globalClient.get<number>(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-      DEFAULT_EXTRACTION_INTERVAL_HOURS
-    ),
-    excludedStreamPatterns: core.settings.globalClient.get<string>(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
-      ''
-    ),
-  }));
-  const [continuousKiExtraction, setContinuousKiExtraction] = useState(savedCE);
+  const ce = useContinuousExtractionSettings({
+    globalClient: core.settings.globalClient,
+    http: core.http,
+  });
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
 
-  const ceChanged = useMemo(
-    () =>
-      continuousKiExtraction.enabled !== savedCE.enabled ||
-      continuousKiExtraction.intervalHours !== savedCE.intervalHours ||
-      continuousKiExtraction.excludedStreamPatterns !== savedCE.excludedStreamPatterns,
-    [continuousKiExtraction, savedCE]
-  );
-
-  const hasChanges = indexPatterns !== savedIndexPatterns || ceChanged;
+  const hasChanges = indexPatterns !== savedIndexPatterns || ce.hasChanged;
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
-    setContinuousKiExtraction(savedCE);
+    ce.reset();
     setSaveError(null);
-  }, [savedIndexPatterns, savedCE]);
+  }, [savedIndexPatterns, ce]);
 
   const handleSave = useCallback(async () => {
     setSaveError(null);
@@ -107,18 +84,15 @@ export function SettingsTab() {
         setSavedIndexPatterns(indexPatterns);
       }
 
-      if (ceChanged) {
-        await core.http.put('/internal/streams/_significant_events/settings', {
-          body: JSON.stringify({ continuousKiExtraction }),
-        });
-        setSavedCE(continuousKiExtraction);
+      if (ce.hasChanged) {
+        await ce.save();
       }
     } catch (err) {
       setSaveError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setIsSaving(false);
     }
-  }, [core.settings.client, core.http, indexPatterns, savedIndexPatterns, continuousKiExtraction, ceChanged]);
+  }, [core.settings.client, indexPatterns, savedIndexPatterns, ce]);
 
   return (
     <>
@@ -234,7 +208,7 @@ export function SettingsTab() {
           </EuiText>
         </EuiPanel>
         <EuiPanel hasShadow={false} hasBorder={false}>
-          {savedCE.enabled && (
+          {ce.saved.enabled && (
             <>
               <EuiCallOut
                 announceOnMount
@@ -247,7 +221,7 @@ export function SettingsTab() {
                     defaultMessage:
                       'Continuous extraction is active. Knowledge indicators are extracted every {hours} hours.',
                     values: {
-                      hours: savedCE.intervalHours ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
+                      hours: ce.saved.intervalHours ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
                     },
                   }
                 )}
@@ -291,9 +265,9 @@ export function SettingsTab() {
                       'xpack.streams.significantEventsDiscovery.settings.enableContinuousExtraction',
                       { defaultMessage: 'Enable continuous KI extraction' }
                     )}
-                    checked={continuousKiExtraction.enabled}
+                    checked={ce.draft.enabled}
                     onChange={(e) =>
-                      setContinuousKiExtraction((prev) => ({ ...prev, enabled: e.target.checked }))
+                      ce.setDraft((prev) => ({ ...prev, enabled: e.target.checked }))
                     }
                   />
                 </EuiFormRow>
@@ -313,9 +287,9 @@ export function SettingsTab() {
                 >
                   <EuiFieldNumber
                     data-test-subj="streams-settings-extraction-interval"
-                    value={continuousKiExtraction.intervalHours}
+                    value={ce.draft.intervalHours}
                     onChange={(e) =>
-                      setContinuousKiExtraction((prev) => ({
+                      ce.setDraft((prev) => ({
                         ...prev,
                         intervalHours: Math.max(
                           MIN_EXTRACTION_INTERVAL_HOURS,
@@ -324,7 +298,7 @@ export function SettingsTab() {
                       }))
                     }
                     min={MIN_EXTRACTION_INTERVAL_HOURS}
-                    disabled={!continuousKiExtraction.enabled}
+                    disabled={!ce.draft.enabled}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -342,14 +316,14 @@ export function SettingsTab() {
                 >
                   <EuiTextArea
                     data-test-subj="streams-settings-excluded-streams"
-                    value={continuousKiExtraction.excludedStreamPatterns}
+                    value={ce.draft.excludedStreamPatterns}
                     onChange={(e) =>
-                      setContinuousKiExtraction((prev) => ({
+                      ce.setDraft((prev) => ({
                         ...prev,
                         excludedStreamPatterns: e.target.value,
                       }))
                     }
-                    disabled={!continuousKiExtraction.enabled}
+                    disabled={!ce.draft.enabled}
                     placeholder={i18n.translate(
                       'xpack.streams.significantEventsDiscovery.settings.excludedStreamPatternsPlaceholder',
                       { defaultMessage: 'logs.debug.*' }
