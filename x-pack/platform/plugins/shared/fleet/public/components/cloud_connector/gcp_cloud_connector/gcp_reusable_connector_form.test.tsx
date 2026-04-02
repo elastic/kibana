@@ -225,6 +225,8 @@ describe('GCPReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'gcp',
         accountType: undefined,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -234,6 +236,8 @@ describe('GCPReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'gcp',
         accountType: 'single-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -245,6 +249,8 @@ describe('GCPReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'gcp',
         accountType: 'organization-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 

@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { TaskStatus } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -31,9 +30,9 @@ import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_ins
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
-import { FeedbackButtons } from './feedback_buttons';
 import { impactBadgeColors, impactLabels } from './insight_constants';
 import { InsightFlyout } from './insight_flyout';
+import { formatGeneratedAt } from './utils';
 
 export function Summary({ count }: { count: number }) {
   const {
@@ -211,10 +210,10 @@ export function Summary({ count }: { count: number }) {
         name: i18n.translate('xpack.streams.insights.table.generatedAtColumn', {
           defaultMessage: 'Discovered',
         }),
-        width: '150px',
+        width: '180px',
         render: (generatedAt: string) => (
           <EuiText size="s" color="subdued">
-            {moment(generatedAt).fromNow()}
+            {formatGeneratedAt(generatedAt)}
           </EuiText>
         ),
       },
@@ -227,15 +226,7 @@ export function Summary({ count }: { count: number }) {
       <>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              justifyContent="flexEnd"
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <FeedbackButtons />
-              </EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"

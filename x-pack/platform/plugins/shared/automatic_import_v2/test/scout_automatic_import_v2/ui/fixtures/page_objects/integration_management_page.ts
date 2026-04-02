@@ -62,6 +62,10 @@ export class IntegrationManagementPage {
     return this.page.testSubj.locator('dataStreamTitleInputV2');
   }
 
+  getDataStreamDescriptionInput() {
+    return this.page.testSubj.locator('dataStreamDescriptionInputV2');
+  }
+
   getDataCollectionMethodSelect() {
     return this.page.testSubj.locator('dataCollectionMethodSelect');
   }

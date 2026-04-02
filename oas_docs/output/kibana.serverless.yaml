@@ -295,8 +295,19 @@ tags:
       description: Space overview
   - name: streams
     description: |
-      Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+      Streams provide a unified data management layer for ingestion, routing, and processing. There are three stream types:
+      * **Wired** streams are managed by Kibana. They route documents to child streams based on
+        field conditions and support custom field mappings and processing steps.
+
+      * **Classic** streams map to existing Elasticsearch data streams. You can add processing
+        steps to classic streams without changing their underlying index template.
+
+      * **Query** streams are virtual aggregations backed by an ES|QL expression. They aggregate
+        data from multiple streams into a single logical view without duplicating documents.
     x-displayName: Streams
+    externalDocs:
+      description: Streams documentation
+      url: https://www.elastic.co/docs/solutions/observability/streams
   - name: system
     x-displayName: System
     description: |
@@ -3823,7 +3834,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
+        Delete a user-created skill by ID. If agents still reference the skill, the request returns 409 unless force=true, which removes the skill from agents first. Built-in skills cannot be deleted.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3838,11 +3849,39 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
-      responses: {}
+        - description: If true, removes the skill from agents that use it and then deletes it. If false and any agent uses the skill, the request returns 409 Conflict with the list of agents.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSkillResponseExample:
+                  description: Example response showing that the deletion operation was successful
+                  value:
+                    success: true
+          description: Indicates a successful response
       summary: Delete a skill
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "https://${KIBANA_URL}/api/agent_builder/skills/{skillId}?force=false" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/agent_builder/skills/{skillId}
       x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3863,6 +3902,8 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
       responses: {}
       summary: Get a skill by id
@@ -3895,6 +3936,8 @@ paths:
           name: skillId
           required: true
           schema:
+            maxLength: 512
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -8713,11 +8756,9 @@ paths:
           name: search_fields
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
+            items:
+              type: string
+            type: array
         - description: Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.
           in: query
           name: sort_field
@@ -8754,11 +8795,9 @@ paths:
           name: fields
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
+            items:
+              type: string
+            type: array
         - description: 'A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.'
           in: query
           name: filter
@@ -31142,12 +31181,10 @@ paths:
           name: policyIds
           required: false
           schema:
-            anyOf:
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
-              - type: string
+            items:
+              type: string
+            maxItems: 1000
+            type: array
         - in: query
           name: kuery
           required: false
@@ -31252,12 +31289,10 @@ paths:
           name: agentsIds
           required: true
           schema:
-            anyOf:
-              - items:
-                  type: string
-                maxItems: 10000
-                type: array
-              - type: string
+            items:
+              type: string
+            maxItems: 10000
+            type: array
         - in: query
           name: pkgName
           required: false
@@ -55316,23 +55351,15 @@ paths:
           name: status
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - running
-                  - finished
-                  - upcoming
-                  - archived
-                  - disabled
-                type: string
-              - items:
-                  enum:
-                    - running
-                    - finished
-                    - upcoming
-                    - archived
-                    - disabled
-                  type: string
-                type: array
+            items:
+              enum:
+                - running
+                - finished
+                - upcoming
+                - archived
+                - disabled
+              type: string
+            type: array
         - description: The page number to return.
           in: query
           name: page
@@ -60311,7 +60338,95 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listStreams:
+                  value:
+                    streams:
+                      - description: Root logs stream
+                        ingest:
+                          failure_store:
+                            inherit: {}
+                          lifecycle:
+                            inherit: {}
+                          processing:
+                            steps: []
+                            updated_at: '2025-01-10T08:00:00.000Z'
+                          settings: {}
+                          wired:
+                            fields:
+                              '@timestamp':
+                                type: date
+                              log.level:
+                                type: keyword
+                              message:
+                                type: match_only_text
+                            routing:
+                              - destination: logs.nginx
+                                status: enabled
+                                where:
+                                  eq: nginx
+                                  field: host.name
+                        name: logs
+                        type: wired
+                        updated_at: '2025-01-10T08:00:00.000Z'
+                      - description: Web server access logs, routed by severity
+                        ingest:
+                          failure_store:
+                            inherit: {}
+                          lifecycle:
+                            inherit: {}
+                          processing:
+                            steps: []
+                            updated_at: '2025-01-15T10:30:00.000Z'
+                          settings: {}
+                          wired:
+                            fields:
+                              host.name:
+                                type: keyword
+                              http.response.status_code:
+                                type: long
+                              message:
+                                type: match_only_text
+                            routing:
+                              - destination: logs.nginx.errors
+                                status: enabled
+                                where:
+                                  field: http.response.status_code
+                                  gte: 500
+                        name: logs.nginx
+                        type: wired
+                        updated_at: '2025-01-15T10:30:00.000Z'
+                      - description: Legacy application logs
+                        ingest:
+                          classic: {}
+                          failure_store:
+                            disabled: {}
+                          lifecycle:
+                            dsl:
+                              data_retention: 30d
+                          processing:
+                            steps:
+                              - action: grok
+                                from: message
+                                ignore_missing: true
+                                patterns:
+                                  - '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}'
+                            updated_at: '2024-12-01T09:00:00.000Z'
+                          settings: {}
+                        name: logs-myapp-default
+                        type: classic
+                        updated_at: '2024-12-01T09:00:00.000Z'
+                      - description: All error-level logs across every stream
+                        name: logs.errors
+                        query:
+                          esql: FROM logs* | WHERE log.level == "error"
+                          view: logs.errors-view
+                        type: query
+                        updated_at: '2025-01-20T14:00:00.000Z'
       summary: Get stream list
       tags:
         - streams
@@ -60498,7 +60613,70 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWiredStream:
+                  value:
+                    dashboards: []
+                    data_stream_exists: true
+                    effective_failure_store:
+                      disabled: {}
+                      from: logs
+                    effective_lifecycle:
+                      dsl:
+                        data_retention: 7d
+                      from: logs
+                    effective_settings: {}
+                    inherited_fields:
+                      '@timestamp':
+                        from: logs
+                        type: date
+                      log.level:
+                        from: logs
+                        type: keyword
+                    privileges:
+                      create_snapshot_repository: false
+                      lifecycle: true
+                      manage: true
+                      manage_failure_store: true
+                      monitor: true
+                      read_failure_store: true
+                      simulate: true
+                      text_structure: true
+                      view_index_metadata: true
+                    queries: []
+                    rules: []
+                    stream:
+                      description: Web server access logs, routed by severity
+                      ingest:
+                        failure_store:
+                          inherit: {}
+                        lifecycle:
+                          inherit: {}
+                        processing:
+                          steps: []
+                          updated_at: '2025-01-15T10:30:00.000Z'
+                        settings: {}
+                        wired:
+                          fields:
+                            host.name:
+                              type: keyword
+                            http.response.status_code:
+                              type: long
+                            message:
+                              type: match_only_text
+                          routing:
+                            - destination: logs.nginx.errors
+                              status: enabled
+                              where:
+                                field: http.response.status_code
+                                gte: 500
+                      name: logs.nginx
+                      type: wired
+                      updated_at: '2025-01-15T10:30:00.000Z'
       summary: Get a stream
       tags:
         - streams
@@ -60532,6 +60710,71 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createQueryStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: All error-level logs across every stream
+                    query:
+                      esql: FROM logs* | WHERE log.level == "error"
+                      view: logs.errors-view
+                    type: query
+              createWiredStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: Web server access logs, routed by severity
+                    ingest:
+                      failure_store:
+                        inherit: {}
+                      lifecycle:
+                        inherit: {}
+                      processing:
+                        steps: []
+                      settings: {}
+                      wired:
+                        fields:
+                          host.name:
+                            type: keyword
+                          http.response.status_code:
+                            type: long
+                          message:
+                            type: match_only_text
+                        routing:
+                          - destination: logs.nginx.errors
+                            status: enabled
+                            where:
+                              field: http.response.status_code
+                              gte: 500
+                    type: wired
+              updateClassicStream:
+                value:
+                  dashboards: []
+                  queries: []
+                  rules: []
+                  stream:
+                    description: Legacy application logs managed as a classic data stream
+                    ingest:
+                      classic: {}
+                      failure_store:
+                        disabled: {}
+                      lifecycle:
+                        dsl:
+                          data_retention: 30d
+                      processing:
+                        steps:
+                          - action: grok
+                            from: message
+                            ignore_missing: true
+                            patterns:
+                              - '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}'
+                      settings: {}
+                    type: classic
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamUpsertRequest'
       responses: {}
@@ -60569,6 +60812,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              forkStream:
+                value:
+                  status: enabled
+                  stream:
+                    name: logs.nginx.errors
+                  where:
+                    eq: '500'
+                    field: http.response.status_code
             schema:
               additionalProperties: false
               type: object
@@ -60626,7 +60878,45 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWiredIngest:
+                  value:
+                    ingest:
+                      failure_store:
+                        inherit: {}
+                      lifecycle:
+                        inherit: {}
+                      processing:
+                        steps:
+                          - action: grok
+                            from: message
+                            ignore_missing: false
+                            patterns:
+                              - '%{IPORHOST:client.ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:@timestamp}\] "%{WORD:http.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}" %{NUMBER:http.response.status_code:int} (?:%{NUMBER:http.response.body.bytes:int}|-)'
+                        updated_at: '2025-01-15T10:30:00.000Z'
+                      settings: {}
+                      wired:
+                        fields:
+                          client.ip:
+                            type: ip
+                          http.method:
+                            type: keyword
+                          http.response.body.bytes:
+                            type: long
+                          http.response.status_code:
+                            type: long
+                          url.original:
+                            type: wildcard
+                        routing:
+                          - destination: logs.nginx.errors
+                            status: enabled
+                            where:
+                              field: http.response.status_code
+                              gte: 500
       summary: Get ingest stream settings
       tags:
         - streams
@@ -60660,6 +60950,40 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertWiredIngest:
+                value:
+                  ingest:
+                    failure_store:
+                      inherit: {}
+                    lifecycle:
+                      inherit: {}
+                    processing:
+                      steps:
+                        - action: grok
+                          from: message
+                          ignore_missing: false
+                          patterns:
+                            - '%{IPORHOST:client.ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:@timestamp}\] "%{WORD:http.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}" %{NUMBER:http.response.status_code:int} (?:%{NUMBER:http.response.body.bytes:int}|-)'
+                    settings: {}
+                    wired:
+                      fields:
+                        client.ip:
+                          type: ip
+                        http.method:
+                          type: keyword
+                        http.response.body.bytes:
+                          type: long
+                        http.response.status_code:
+                          type: long
+                        url.original:
+                          type: wildcard
+                      routing:
+                        - destination: logs.nginx.errors
+                          status: enabled
+                          where:
+                            eq: '500'
+                            field: http.response.status_code
             schema:
               additionalProperties: false
               type: object
@@ -60883,6 +61207,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertQueryStream:
+                value:
+                  query:
+                    esql: FROM logs* | WHERE log.level == "error" | KEEP @timestamp, message, host.name, log.level
             schema:
               additionalProperties: false
               type: object
@@ -61284,6 +61613,16 @@ paths:
           required: false
           schema:
             type: string
+        - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). Defaults to hybrid when inference is available.'
+          in: query
+          name: searchMode
+          required: false
+          schema:
+            enum:
+              - keyword
+              - semantic
+              - hybrid
+            type: string
       requestBody:
         content:
           application/json:
@@ -61465,29 +61804,21 @@ paths:
           name: attachmentTypes
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - dashboard
-                  - rule
-                  - slo
-                type: string
-              - items:
-                  enum:
-                    - dashboard
-                    - rule
-                    - slo
-                  type: string
-                type: array
+            items:
+              enum:
+                - dashboard
+                - rule
+                - slo
+              type: string
+            type: array
         - description: Filter by tags (single value or array)
           in: query
           name: tags
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                type: array
+            items:
+              type: string
+            type: array
       requestBody:
         content:
           application/json:
@@ -62677,7 +63008,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -62705,34 +63036,28 @@ paths:
           name: enabled
           required: false
           schema:
-            anyOf:
-              - type: boolean
-              - items:
-                  type: boolean
-                maxItems: 2
-                type: array
+            items:
+              type: boolean
+            maxItems: 2
+            type: array
         - description: Filter by creator.
           in: query
           name: createdBy
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
+            items:
+              type: string
+            maxItems: 1000
+            type: array
         - description: Filter by tags.
           in: query
           name: tags
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 1000
-                type: array
+            items:
+              type: string
+            maxItems: 1000
+            type: array
       responses:
         '200':
           content:
@@ -63798,7 +64123,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts, as well as execution history metrics for the last 30 days.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -63849,7 +64174,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63960,7 +64285,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64462,7 +64787,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64552,7 +64877,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -64652,60 +64977,41 @@ paths:
           name: statuses
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - pending
-                  - waiting
-                  - waiting_for_input
-                  - running
-                  - completed
-                  - failed
-                  - cancelled
-                  - timed_out
-                  - skipped
-                type: string
-              - items:
-                  enum:
-                    - pending
-                    - waiting
-                    - waiting_for_input
-                    - running
-                    - completed
-                    - failed
-                    - cancelled
-                    - timed_out
-                    - skipped
-                  type: string
-                maxItems: 9
-                type: array
+            items:
+              enum:
+                - pending
+                - waiting
+                - waiting_for_input
+                - running
+                - completed
+                - failed
+                - cancelled
+                - timed_out
+                - skipped
+              type: string
+            maxItems: 9
+            type: array
         - description: Filter by execution type.
           in: query
           name: executionTypes
           required: false
           schema:
-            anyOf:
-              - enum:
-                  - test
-                  - production
-                type: string
-              - items:
-                  enum:
-                    - test
-                    - production
-                  type: string
-                maxItems: 2
-                type: array
+            items:
+              enum:
+                - test
+                - production
+              type: string
+            maxItems: 2
+            type: array
         - description: Filter by the user who triggered the execution.
           in: query
           name: executedBy
           required: false
           schema:
-            anyOf:
-              - type: string
-              - items:
-                  type: string
-                maxItems: 100
-                type: array
+            items:
+              type: string
+            maxItems: 100
+            type: array
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns
@@ -64948,30 +65254,104 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                findSloResponse:
+                  summary: A paginated list of SLOs
+                  value:
+                    page: 1
+                    perPage: 25
+                    results:
+                      - budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        description: Availability of my web service
+                        enabled: true
+                        groupBy: '*'
+                        id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        indicator:
+                          params:
+                            filter: 'field.environment : "production" and service.name : "my-service"'
+                            good: 'request.status_code : "2xx"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'request.status_code : *'
+                          type: sli.kql.custom
+                        instanceId: '*'
+                        name: My Service Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 5m
+                          syncDelay: 5m
+                        summary:
+                          errorBudget:
+                            consumed: 0.17
+                            initial: 0.01
+                            isEstimated: false
+                            remaining: 0.83
+                          sliValue: 0.9983
+                          status: HEALTHY
+                        tags:
+                          - production
+                          - web-service
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        version: 2
+                    total: 42
               schema:
                 $ref: '#/components/schemas/SLOs_find_slo_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''invalid'' supplied to: sortBy'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -64991,6 +65371,32 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createSloKqlExample:
+                summary: Create an SLO with a KQL indicator
+                value:
+                  budgetingMethod: occurrences
+                  description: Availability of my web service measured by successful HTTP responses
+                  indicator:
+                    params:
+                      filter: 'field.environment : "production" and service.name : "my-service"'
+                      good: 'request.status_code : "2xx"'
+                      index: logs-*
+                      timestampField: '@timestamp'
+                      total: 'request.status_code : *'
+                    type: sli.kql.custom
+                  name: My Service Availability
+                  objective:
+                    target: 0.99
+                  settings:
+                    frequency: 5m
+                    syncDelay: 5m
+                  tags:
+                    - production
+                    - web-service
+                  timeWindow:
+                    duration: 30d
+                    type: rolling
             schema:
               $ref: '#/components/schemas/SLOs_create_slo_request'
         required: true
@@ -64998,30 +65404,63 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createSloResponse:
+                  summary: Create SLO response
+                  value:
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
               schema:
                 $ref: '#/components/schemas/SLOs_create_slo_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '409':
           content:
             application/json:
+              examples:
+                conflictExample:
+                  summary: Conflict
+                  value:
+                    error: Conflict
+                    message: SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists
+                    statusCode: 409
               schema:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
@@ -65042,6 +65481,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              bulkDeleteRequest:
+                summary: Bulk delete two SLOs
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - d077e940-1515-11ee-9c50-9d096392f520
             schema:
               $ref: '#/components/schemas/SLOs_bulk_delete_request'
         required: true
@@ -65049,27 +65495,53 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bulkDeleteResponse:
+                  summary: Bulk delete response with task ID
+                  value:
+                    taskId: d08506b7-f0e8-4f8b-a06a-a83940f4db91
               schema:
                 $ref: '#/components/schemas/SLOs_bulk_delete_response'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: list'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Bulk delete SLO definitions and their associated summary and rollup data.
       tags:
         - slo
@@ -65095,27 +65567,68 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bulkDeleteStatusComplete:
+                  summary: Completed bulk deletion
+                  value:
+                    isDone: true
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        success: true
+                      - id: d077e940-1515-11ee-9c50-9d096392f520
+                        success: true
+                bulkDeleteStatusPartialFailure:
+                  summary: Completed with partial failure
+                  value:
+                    isDone: true
+                    results:
+                      - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                        success: true
+                      - error: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
+                        id: d077e940-1515-11ee-9c50-9d096392f520
+                        success: false
               schema:
                 $ref: '#/components/schemas/SLOs_bulk_delete_status_response'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: taskId'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Retrieve the status of the bulk deletion
       tags:
         - slo
@@ -65133,6 +65646,24 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              purgeByAgeExample:
+                summary: Purge rollup data older than 7 days
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                  purgePolicy:
+                    age: 7d
+                    purgeType: fixed-age
+              purgeByTimestampExample:
+                summary: Purge rollup data before a specific date
+                value:
+                  list:
+                    - 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - d077e940-1515-11ee-9c50-9d096392f520
+                  purgePolicy:
+                    purgeType: fixed-time
+                    timestamp: '2024-12-31T00:00:00.000Z'
             schema:
               $ref: '#/components/schemas/SLOs_bulk_purge_rollup_request'
         required: true
@@ -65140,27 +65671,53 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bulkPurgeResponse:
+                  summary: Bulk purge response with task ID
+                  value:
+                    taskId: 8853df00-ae2e-11ed-90af-09bb6422b258
               schema:
                 $ref: '#/components/schemas/SLOs_bulk_purge_rollup_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: purgePolicy/purgeType'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Batch delete rollup and summary data
       tags:
         - slo
@@ -65178,6 +65735,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteInstancesExample:
+                summary: Delete specific SLO instances
+                value:
+                  list:
+                    - instanceId: host-abc123
+                      sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    - instanceId: host-def456
+                      sloId: 8853df00-ae2e-11ed-90af-09bb6422b258
             schema:
               $ref: '#/components/schemas/SLOs_delete_slo_instances_request'
         required: true
@@ -65187,21 +65753,42 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: list/0/sloId'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Batch delete rollup and summary data
       tags:
         - slo
@@ -65223,24 +65810,52 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65268,30 +65883,100 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getSloResponse:
+                  summary: Get SLO response
+                  value:
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    description: Availability of my web service
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    instanceId: '*'
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 1
+                    settings:
+                      frequency: 5m
+                      syncDelay: 5m
+                    summary:
+                      errorBudget:
+                        consumed: 0.17
+                        initial: 0.01
+                        isEstimated: false
+                        remaining: 0.83
+                      sliValue: 0.9983
+                      status: HEALTHY
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-01-12T10:03:19.000Z'
+                    version: 2
               schema:
                 $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_read] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65312,6 +65997,19 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateSloNameExample:
+                summary: Update the SLO name and tags
+                value:
+                  name: Updated Service Availability
+                  tags:
+                    - production
+                    - updated
+              updateSloObjectiveExample:
+                summary: Update the SLO objective
+                value:
+                  objective:
+                    target: 0.995
             schema:
               $ref: '#/components/schemas/SLOs_update_slo_request'
         required: true
@@ -65319,30 +66017,91 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                updateSloResponse:
+                  summary: Update SLO response
+                  value:
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    description: Availability of my web service
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: Updated Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 2
+                    settings:
+                      frequency: 5m
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - updated
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    version: 2
               schema:
                 $ref: '#/components/schemas/SLOs_slo_definition_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: indicator/type'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65365,30 +66124,91 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                resetSloResponse:
+                  summary: Reset SLO response
+                  value:
+                    budgetingMethod: occurrences
+                    createdAt: '2025-01-12T10:03:19.000Z'
+                    description: Availability of my web service
+                    enabled: true
+                    groupBy: '*'
+                    id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    indicator:
+                      params:
+                        filter: 'field.environment : "production" and service.name : "my-service"'
+                        good: 'request.status_code : "2xx"'
+                        index: logs-*
+                        timestampField: '@timestamp'
+                        total: 'request.status_code : *'
+                      type: sli.kql.custom
+                    name: My Service Availability
+                    objective:
+                      target: 0.99
+                    revision: 2
+                    settings:
+                      frequency: 5m
+                      syncDelay: 5m
+                    tags:
+                      - production
+                      - web-service
+                    timeWindow:
+                      duration: 30d
+                      type: rolling
+                    updatedAt: '2025-03-26T14:30:00.000Z'
+                    version: 2
               schema:
                 $ref: '#/components/schemas/SLOs_slo_definition_response'
           description: Successful request
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65413,24 +66233,52 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65455,24 +66303,52 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestExample:
+                  summary: Bad request
+                  value:
+                    error: Bad Request
+                    message: 'Invalid value ''foo'' supplied to: id'
+                    statusCode: 400
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedExample:
+                  summary: Unauthorized
+                  value:
+                    error: Unauthorized
+                    message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+                    statusCode: 401
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  summary: Forbidden
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [slo_write] is unauthorized for user'
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  summary: Not found
+                  value:
+                    error: Not Found
+                    message: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
+                    statusCode: 404
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -65550,7 +66426,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
+          description: Forbidden response
       summary: Get the SLO definitions
       tags:
         - slo
@@ -88654,14 +89530,14 @@ components:
         - error
         - message
     SLOs_403_response:
-      title: Unauthorized
+      title: Forbidden
       type: object
       properties:
         error:
-          example: Unauthorized
+          example: Forbidden
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"
           type: string
         statusCode:
           example: 403
