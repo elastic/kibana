@@ -224,7 +224,7 @@ export const UIAM_CONTAINERS = [
       `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
       '-p',
-      `127.0.0.1:${+new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1}:8080`, // UIAM OAuth HTTP port (no TLS for local dev)
+      `127.0.0.1:${+new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1}:8443`, // UIAM OAuth HTTPS port
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
@@ -297,11 +297,11 @@ export const UIAM_CONTAINERS = [
       'UIAM_SERVICE_BOUNDARY=external',
 
       '--env',
-      `uiam.oauth.base_url=http://localhost:${
+      `uiam.oauth.base_url=https://localhost:${
         +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
       }/uiam/api`,
       '--env',
-      `UIAM_OAUTH_BASE_URL=http://localhost:${
+      `UIAM_OAUTH_BASE_URL=https://localhost:${
         +new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port + 1
       }/uiam/api`,
 
@@ -309,7 +309,7 @@ export const UIAM_CONTAINERS = [
       'uiam.tokens.refresh.grace_period=PT3S',
 
       '--health-cmd',
-      'timeout 1 bash -c "</dev/tcp/localhost/8080"',
+      'timeout 1 bash -c "</dev/tcp/localhost/8443"',
     ],
     cmdParams: [],
   },
