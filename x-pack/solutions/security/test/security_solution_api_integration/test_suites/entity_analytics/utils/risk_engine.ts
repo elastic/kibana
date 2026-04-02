@@ -1011,3 +1011,55 @@ export const getRiskScoreIndexTemplate = async (
 
   return indexTemplates[0]?.index_template?.template;
 };
+
+/**
+ * Creates a logs data stream and backing index template for use in maintainer integration tests.
+ * This allows documents to be indexed into `logs-{dataset}-{namespace}` style indices.
+ */
+export const setupMaintainerLogsDataStream = async ({
+  es,
+  index,
+  template,
+}: {
+  es: Client;
+  index: string;
+  template: string;
+}): Promise<void> => {
+  await es.indices
+    .putIndexTemplate({
+      name: template,
+      body: {
+        index_patterns: [index],
+        data_stream: {},
+        priority: 500,
+        template: {
+          mappings: {
+            dynamic: true,
+          },
+        },
+      },
+    })
+    .catch(() => {
+      // ignore if already exists
+    });
+
+  await es.indices.createDataStream({ name: index }).catch(() => {
+    // ignore if already exists
+  });
+};
+
+/**
+ * Removes the logs data stream and index template created by {@link setupMaintainerLogsDataStream}.
+ */
+export const cleanupMaintainerLogsDataStream = async ({
+  es,
+  index,
+  template,
+}: {
+  es: Client;
+  index: string;
+  template: string;
+}): Promise<void> => {
+  await es.indices.deleteDataStream({ name: index }).catch(() => {});
+  await es.indices.deleteIndexTemplate({ name: template }).catch(() => {});
+};

@@ -29,13 +29,17 @@ import {
 } from './modifiers/asset_criticality';
 
 import { applyPrivmonModifier } from './modifiers/privileged_users';
+import {
+  applyEntityStoreWatchlistModifier,
+  type WatchlistModifierInfo,
+} from './modifiers/entity_store_watchlist';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { Modifier } from './modifiers/types';
 import { bayesianUpdate } from '../asset_criticality/helpers';
 interface ModifiersUpdateParams {
   now: string;
   deps: {
-    privmonUserCrudService: PrivmonUserCrudService;
+    privmonUserCrudService?: PrivmonUserCrudService;
     assetCriticalityService: AssetCriticalityService;
     logger: Logger;
   };
@@ -51,6 +55,8 @@ interface ModifiersUpdateParams {
   weights?: RiskScoreWeights;
   identifierType?: EntityType;
   experimentalFeatures: ExperimentalFeatures;
+  /** When provided, uses entity-store watchlist data instead of privmon modifier. */
+  entityStoreWatchlists?: Map<string, WatchlistModifierInfo[]>;
 }
 
 export const applyScoreModifiers = async ({
@@ -60,10 +66,29 @@ export const applyScoreModifiers = async ({
   weights,
   page,
   experimentalFeatures,
+  entityStoreWatchlists,
 }: ModifiersUpdateParams): Promise<EntityRiskScoreRecord[]> => {
   const globalWeight = identifierType
     ? getGlobalWeightForIdentifierType(identifierType, weights)
     : undefined;
+
+  const watchlistModifiersPromise: Promise<Array<Modifier<'watchlist'> | undefined>> =
+    entityStoreWatchlists
+      ? Promise.resolve(
+          applyEntityStoreWatchlistModifier({
+            page,
+            watchlistsByIdentifier: entityStoreWatchlists,
+            globalWeight,
+          })
+        )
+      : deps.privmonUserCrudService
+      ? applyPrivmonModifier({
+          page,
+          globalWeight,
+          experimentalFeatures,
+          deps: { privmonUserCrudService: deps.privmonUserCrudService, logger: deps.logger },
+        })
+      : Promise.resolve(page.buckets.map(() => undefined));
 
   const modifierPromises = [
     applyCriticalityModifier({
@@ -71,13 +96,7 @@ export const applyScoreModifiers = async ({
       globalWeight,
       deps: _.pick(deps, ['assetCriticalityService', 'logger']),
     }),
-
-    applyPrivmonModifier({
-      page,
-      globalWeight,
-      experimentalFeatures,
-      deps: _.pick(deps, ['privmonUserCrudService', 'logger']),
-    }),
+    watchlistModifiersPromise,
   ] as const;
 
   const [criticality, privmon] = await Promise.all(modifierPromises);
