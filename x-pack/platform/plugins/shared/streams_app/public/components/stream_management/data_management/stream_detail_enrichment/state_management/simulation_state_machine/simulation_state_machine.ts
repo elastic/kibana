@@ -140,6 +140,9 @@ export const simulationMachine = setup({
         })(),
       };
     }),
+    clearSimulationResults: assign({
+      simulation: undefined,
+    }),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
       docOnlyOverrides: {},
@@ -335,7 +338,10 @@ export const simulationMachine = setup({
         },
         onError: {
           target: 'idle',
-          actions: [{ type: 'notifySimulationRunFailure' }],
+          actions: [
+            { type: 'clearSimulationResults' },
+            { type: 'notifySimulationRunFailure' },
+          ],
         },
       },
     },

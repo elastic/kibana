@@ -11,9 +11,15 @@ import { isStepUnderEdit } from '../steps_state_machine';
 import type { InteractiveModeContext } from './types';
 
 /**
- * Selects the processor marked as the draft processor.
+ * Selects the processor definition from the draft step (the new step currently being edited).
+ * Returns undefined if no draft step exists.
+ *
+ * NOTE: This returns the processor *definition* directly (or undefined), NOT a wrapper object.
+ * Returning a bare value instead of `{ processor }` avoids creating a new object reference
+ * on every XState state change, which would bust React's selector memoization and cause
+ * expensive re-renders of the entire preview table on every keystroke.
  */
-export const selectDraftProcessor = (context: InteractiveModeContext) => {
+export const selectDraftProcessorDefinition = (context: InteractiveModeContext) => {
   const draft = context.stepRefs.find((stepRef) => {
     const snapshot = stepRef.getSnapshot();
     return (
@@ -23,13 +29,9 @@ export const selectDraftProcessor = (context: InteractiveModeContext) => {
 
   const snapshot = draft?.getSnapshot();
 
-  return draft && isActionBlock(snapshot?.context.step)
-    ? {
-        processor: snapshot?.context.step,
-      }
-    : {
-        processor: undefined,
-      };
+  return draft && snapshot && isActionBlock(snapshot.context.step)
+    ? snapshot.context.step
+    : undefined;
 };
 
 /**

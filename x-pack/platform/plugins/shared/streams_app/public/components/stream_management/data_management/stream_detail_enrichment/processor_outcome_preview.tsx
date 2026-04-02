@@ -19,11 +19,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useGrokExpressions, GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../../hooks/use_doc_viewer_setup';
@@ -45,7 +44,7 @@ import {
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
-import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
+import { selectDraftProcessorDefinition } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
@@ -310,35 +309,44 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const { currentProcessorSourceField, currentStepId, stepIds } = useStreamEnrichmentSelector(
-    (state) => {
-      const isInteractiveMode = selectIsInteractiveMode(state);
-      if (!isInteractiveMode || !state.context.interactiveModeRef) {
-        return { currentProcessorSourceField: undefined, currentStepId: undefined, stepIds: [] };
+  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
+    const isInteractiveMode = selectIsInteractiveMode(state);
+    if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
+    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
+    for (const stepRef of stepRefs) {
+      const snapshot = stepRef.getSnapshot();
+      const step = snapshot.context.step;
+      if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+        return getSourceField(step);
       }
-
-      const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
-      const allStepIds = stepRefs.map((ref) => ref.id);
-
-      for (const stepRef of stepRefs) {
-        const snapshot = stepRef.getSnapshot();
-        const step = snapshot.context.step;
-
-        if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
-          return {
-            currentProcessorSourceField: getSourceField(step),
-            currentStepId: stepRef.id,
-            stepIds: allStepIds,
-          };
-        }
-      }
-
-      return {
-        currentProcessorSourceField: undefined,
-        currentStepId: undefined,
-        stepIds: allStepIds,
-      };
     }
+    return undefined;
+  });
+
+  const currentStepId = useStreamEnrichmentSelector((state) => {
+    const isInteractiveMode = selectIsInteractiveMode(state);
+    if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
+    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
+    for (const stepRef of stepRefs) {
+      const snapshot = stepRef.getSnapshot();
+      if (isActionBlock(snapshot.context.step) && isStepUnderEdit(snapshot)) {
+        return stepRef.id;
+      }
+    }
+    return undefined;
+  });
+
+  // Stabilize stepIds: join into a string for selector comparison, then split back.
+  // This avoids returning a new array reference on every XState state change.
+  const stepIdsString = useStreamEnrichmentSelector((state) => {
+    const isInteractiveMode = selectIsInteractiveMode(state);
+    if (!isInteractiveMode || !state.context.interactiveModeRef) return '';
+    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
+    return stepRefs.map((ref) => ref.id).join('\0');
+  });
+  const stepIds = useMemo(
+    () => (stepIdsString ? stepIdsString.split('\0') : []),
+    [stepIdsString]
   );
 
   const processorsMetrics = useSimulatorSelector(
@@ -358,38 +366,59 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     return getAllFieldsInOrder(previewDocuments, detectedFields);
   }, [detectedFields, previewDocuments]);
 
-  const draftProcessor = useStreamEnrichmentSelector((snapshot) => {
+  // Extract only primitive/stable values from the draft processor to avoid re-renders.
+  // We select the grok source field (a string or undefined) and the patterns (joined as a string)
+  // so that the selector returns stable values when the user is typing but hasn't changed
+  // which field is being processed or the set of patterns.
+  const grokSourceField = useStreamEnrichmentSelector((snapshot) => {
     const isInteractiveMode = selectIsInteractiveMode(snapshot);
-    return isInteractiveMode && snapshot.context.interactiveModeRef
-      ? selectDraftProcessor(snapshot.context.interactiveModeRef.getSnapshot().context)
-      : {
-          processor: undefined,
-          resources: undefined,
-        };
+    if (!isInteractiveMode || !snapshot.context.interactiveModeRef) return undefined;
+    const proc = selectDraftProcessorDefinition(
+      snapshot.context.interactiveModeRef.getSnapshot().context
+    );
+    if (proc && 'action' in proc && proc.action === 'grok' && !isEmpty(proc.from)) {
+      return proc.from;
+    }
+    return undefined;
   });
 
-  // Get grok patterns from the draft processor
-  const grokPatterns =
-    draftProcessor?.processor &&
-    'action' in draftProcessor.processor &&
-    draftProcessor.processor.action === 'grok'
-      ? draftProcessor.processor.patterns
-      : [];
+  // Select grok patterns as a joined string for stable comparison.
+  // Only re-renders when the actual pattern text changes, not on unrelated state changes.
+  const grokPatternsString = useStreamEnrichmentSelector((snapshot) => {
+    const isInteractiveMode = selectIsInteractiveMode(snapshot);
+    if (!isInteractiveMode || !snapshot.context.interactiveModeRef) return '';
+    const proc = selectDraftProcessorDefinition(
+      snapshot.context.interactiveModeRef.getSnapshot().context
+    );
+    if (proc && 'action' in proc && proc.action === 'grok') {
+      return proc.patterns.join('\0');
+    }
+    return '';
+  });
 
-  // Convert patterns to DraftGrokExpression instances for field analysis
-  const grokExpressions = useGrokExpressions(grokPatterns);
+  const grokPatterns = useMemo(
+    () => (grokPatternsString ? grokPatternsString.split('\0') : []),
+    [grokPatternsString]
+  );
 
-  // Determine if the grok processor is active (has a from field)
-  const isGrokProcessorActive =
-    draftProcessor?.processor &&
-    'action' in draftProcessor.processor &&
-    draftProcessor.processor.action === 'grok' &&
-    !isEmpty(draftProcessor.processor.from);
+  const isGrokProcessorActive = grokSourceField !== undefined;
 
-  // Get the source field for the grok processor
-  const grokSourceField = isGrokProcessorActive
-    ? (draftProcessor.processor as GrokProcessor).from
-    : undefined;
+  // Debounce grok patterns before passing to useGrokExpressions.
+  // The @kbn/grok-ui updateExpression() calls resolvePattern(true) synchronously,
+  // triggering expensive Oniguruma regex resolution on every keystroke.
+  // Debouncing prevents this per-keystroke cost for highlighting.
+  const [debouncedGrokPatterns, setDebouncedGrokPatterns] = useState(grokPatterns);
+  const grokPatternsDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    clearTimeout(grokPatternsDebounceRef.current);
+    grokPatternsDebounceRef.current = setTimeout(() => {
+      setDebouncedGrokPatterns(grokPatterns);
+    }, 1000);
+    return () => clearTimeout(grokPatternsDebounceRef.current);
+  }, [grokPatterns]);
+
+  // Convert debounced patterns to DraftGrokExpression instances for highlighting
+  const grokExpressions = useGrokExpressions(debouncedGrokPatterns);
   const validGrokSourceField =
     grokSourceField && allColumns.includes(grokSourceField) ? grokSourceField : undefined;
 
@@ -432,13 +461,55 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const validGrokField = grokMode ? validGrokSourceField : undefined;
 
-  const validCurrentProcessorSourceField =
-    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
-      ? currentProcessorSourceField
-      : undefined;
+  // Always show the source field when a processor is being edited, even if it's
+  // not yet in allColumns (e.g., when simulation fails during pattern typing).
+  const validCurrentProcessorSourceField = currentProcessorSourceField;
+
+  /**
+   * In Grok mode, show the source field plus extracted field names from patterns.
+   * Uses cheap regex parsing of pattern strings (no DraftGrokExpression resolution)
+   * so columns update immediately while typing without triggering expensive work.
+   *
+   * IMPORTANT: We stabilize the output reference so that the array identity only changes
+   * when the actual extracted column names change, not on every keystroke. Without this,
+   * every keystroke produces a new array reference that busts React.memo on
+   * MemoPreviewTable, causing a full re-render of the entire data grid (hundreds of cells,
+   * Emotion CSS reprocessing, etc.).
+   */
+  const grokExtractedColumnsRef = useRef<string[] | undefined>(undefined);
+  const grokExtractedColumns = useMemo(() => {
+    if (!isGrokProcessorActive || !validGrokSourceField) {
+      grokExtractedColumnsRef.current = undefined;
+      return undefined;
+    }
+    const extractedFields: string[] = [];
+    const fieldRegex = /%\{[^:}]+:([^:}]+)(?::[^}]+)?\}/g;
+    for (const pattern of grokPatterns) {
+      let match;
+      while ((match = fieldRegex.exec(pattern)) !== null) {
+        if (match[1] && !extractedFields.includes(match[1])) {
+          extractedFields.push(match[1]);
+        }
+      }
+    }
+    const newColumns = [validGrokSourceField, ...extractedFields];
+    // Stabilize: return the previous reference if the column names haven't changed
+    const prev = grokExtractedColumnsRef.current;
+    if (
+      prev &&
+      prev.length === newColumns.length &&
+      prev.every((col, i) => col === newColumns[i])
+    ) {
+      return prev;
+    }
+    grokExtractedColumnsRef.current = newColumns;
+    return newColumns;
+  }, [isGrokProcessorActive, validGrokSourceField, grokPatterns]);
 
   // Calculate if view mode should be forced to 'columns'
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+  const isViewModeForced = Boolean(
+    grokExtractedColumns || validGrokField || validCurrentProcessorSourceField
+  );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
   const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
@@ -473,14 +544,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     validCurrentProcessorSourceField,
   ]);
 
-  /**
-   * If we are in Grok mode and the field matches an existing field,
-   * we exclude the detected fields and only use the Grok field since it is highlighting extracted values
-   */
-  const grokColumns = useMemo(
-    () => (validGrokField ? [validGrokField] : undefined),
-    [validGrokField]
-  );
+  // Use grokExtractedColumns (cheap regex-based) for column display.
+  // This replaces the old grokColumns which only showed the source field.
+  const grokColumns = grokExtractedColumns;
 
   /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
@@ -572,6 +638,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     () =>
       grokMode && validGrokField
         ? (document: SampleDocument, columnId: string) => {
+            // Only apply grok highlighting to the source field.
+            // For extracted fields (e.g. attributes.ad.category), return undefined
+            // to fall through to the default cell renderer which shows the simulated value.
+            if (columnId !== validGrokField) {
+              return undefined;
+            }
+
             // Use the original (pre-transformation) value for the grok field.
             // This ensures highlighting works even when grok extracts into the same field it reads from.
             const value = getGrokFieldDisplayValue(
@@ -659,9 +732,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     </>
   );
 
-  // Wrap with GrokExpressionsProvider when in grok mode to provide patterns to Sample components
+  // Wrap with GrokExpressionsProvider when in grok mode to provide patterns to Sample components.
+  // Use debouncedGrokPatterns to prevent the provider from re-rendering the entire tree
+  // (including all table cells and GrokSampleWithContext components) on every keystroke.
   return grokMode ? (
-    <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>
+    <GrokExpressionsProvider patterns={debouncedGrokPatterns}>{content}</GrokExpressionsProvider>
   ) : (
     content
   );
