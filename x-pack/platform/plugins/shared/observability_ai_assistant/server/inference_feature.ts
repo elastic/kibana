@@ -14,8 +14,8 @@ import {
 
 const observabilityAIAssistantParentFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_FEATURE_ID,
-  featureName: 'Observability AI Assistant',
-  featureDescription: 'Parent feature for Observability AI Assistant',
+  featureName: 'Observability',
+  featureDescription: 'Parent feature for Observability AI Settings',
   taskType: 'chat_completion',
   recommendedEndpoints: [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION],
 };
@@ -23,8 +23,9 @@ const observabilityAIAssistantParentFeature: InferenceFeatureConfig = {
 const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_SUBFEATURE_ID,
   parentFeatureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_FEATURE_ID,
-  featureName: 'AI Assistant',
-  featureDescription: 'Observability AI Assistant inference endpoint configuration',
+  featureName: 'Observability AI Settings',
+  featureDescription:
+    'Inference endpoint configuration for Observability AI Assistant + Contextual Insights / Observability Agent + AI Insights',
   taskType: 'chat_completion',
   recommendedEndpoints: [],
 };
