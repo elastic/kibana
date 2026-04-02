@@ -28,7 +28,12 @@ const getRulesQuerySchema = z.object({
     .describe('The number of rules to return per page.'),
 
   filter: z.string().optional().describe('A KQL string to filter the rules.'),
-  search: z.string().optional().describe('A text string to search across rule fields.'),
+  search: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .describe('A text string to search across rule fields.'),
 });
 
 @injectable()
