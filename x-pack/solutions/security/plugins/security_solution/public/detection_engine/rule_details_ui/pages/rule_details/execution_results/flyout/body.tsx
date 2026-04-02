@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutBody, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UnifiedExecutionResult } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import { MessageSection } from './message_section';
-import { BackfillSection } from './backfill_section';
-import { AlertsSection } from './alerts_section';
-import { IndicesSection } from './indices_section';
-import { ExecutionMetricsSection } from './execution_metrics_section';
-import { DurationBreakdownSection } from './duration_breakdown_section';
+import { MessageSection } from './sections/message';
+import { BackfillSection } from './sections/backfill';
+import { AlertsSection } from './sections/alerts';
+import { IndicesSection } from './sections/indices';
+import { ExecutionMetricsSection } from './sections/execution';
+import { DurationBreakdownSection } from './sections/duration';
 
 const flyoutBodyCss = css`
   .euiFlyoutBody__overflowContent {
@@ -37,19 +37,19 @@ export const FlyoutBody: React.FC<FlyoutBodyProps> = ({ item }) => {
       {item.outcome.message && (
         <>
           <MessageSection message={item.outcome.message} />
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="m" />
         </>
       )}
 
       {item.backfill && (
         <>
           <BackfillSection backfill={item.backfill} />
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="m" />
         </>
       )}
 
       <AlertsSection alertCount={alertCount} candidateCount={candidateCount} />
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
 
       {(item.metrics.matched_indices_count !== null ||
         item.metrics.frozen_indices_queried_count !== null) && (
@@ -58,7 +58,7 @@ export const FlyoutBody: React.FC<FlyoutBodyProps> = ({ item }) => {
             matchedIndicesCount={item.metrics.matched_indices_count}
             frozenIndicesQueriedCount={item.metrics.frozen_indices_queried_count}
           />
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="m" />
         </>
       )}
 
@@ -67,8 +67,8 @@ export const FlyoutBody: React.FC<FlyoutBodyProps> = ({ item }) => {
         scheduleDelayMs={item.schedule_delay_ms}
         executionDurationMs={item.execution_duration_ms}
       />
+      <EuiHorizontalRule margin="m" />
 
-      <EuiSpacer size="m" />
       <DurationBreakdownSection
         totalSearchDurationMs={item.metrics.total_search_duration_ms}
         totalIndexingDurationMs={item.metrics.total_indexing_duration_ms}

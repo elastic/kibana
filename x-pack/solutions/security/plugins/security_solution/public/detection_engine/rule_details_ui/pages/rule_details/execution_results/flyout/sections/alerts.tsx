@@ -16,8 +16,8 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, Tooltip } from './shared';
+import * as i18n from '../../translations';
+import { AccordionButtonContent, FieldLabel, Tooltip } from '../shared';
 
 interface AlertsSectionProps {
   alertCount: number | null;
@@ -25,6 +25,7 @@ interface AlertsSectionProps {
 }
 
 export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candidateCount }) => {
+  const hasCandidateCount = candidateCount !== null;
   const accordionId = useGeneratedHtmlId({ prefix: 'alerts' });
 
   return (
@@ -39,10 +40,14 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
                   title: i18n.COLUMN_ALERTS_CREATED,
                   description: i18n.FLYOUT_TOOLTIP_ALERTS_CREATED,
                 },
-                {
-                  title: i18n.FLYOUT_CANDIDATE_ALERTS,
-                  description: i18n.FLYOUT_TOOLTIP_CANDIDATE_ALERTS,
-                },
+                ...(hasCandidateCount
+                  ? [
+                      {
+                        title: i18n.FLYOUT_CANDIDATE_ALERTS,
+                        description: i18n.FLYOUT_TOOLTIP_CANDIDATE_ALERTS,
+                      },
+                    ]
+                  : []),
               ]}
             />
           }
@@ -55,7 +60,7 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
       <EuiSpacer size="s" />
       <EuiPanel hasBorder paddingSize="m">
         <EuiFlexGroup alignItems="center">
-          {candidateCount !== null && (
+          {hasCandidateCount && (
             <>
               <EuiFlexItem>
                 <FieldLabel label={i18n.FLYOUT_CANDIDATE_ALERTS} />

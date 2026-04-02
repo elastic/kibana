@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiFlyout, useGeneratedHtmlId } from '@elastic/eui';
-import type { UnifiedExecutionResult } from '../../../../../../common/api/detection_engine/rule_monitoring';
-import { FlyoutHeader } from './flyout/header';
-import { FlyoutBody } from './flyout/body';
+import type { UnifiedExecutionResult } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { FlyoutHeader } from './header';
+import { FlyoutBody } from './body';
 
 const EXECUTION_DETAILS_FLYOUT_WIDTH = 600;
 

@@ -15,8 +15,8 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
+import * as i18n from '../../translations';
+import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from '../shared';
 
 interface IndicesSectionProps {
   matchedIndicesCount: number | null;
@@ -27,6 +27,8 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
   matchedIndicesCount,
   frozenIndicesQueriedCount,
 }) => {
+  const hasMatchedIndicesCount = matchedIndicesCount !== null;
+  const hasFrozenIndicesQueriedCount = frozenIndicesQueriedCount !== null;
   const accordionId = useGeneratedHtmlId({ prefix: 'indices' });
 
   return (
@@ -37,14 +39,22 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
           tooltip={
             <Tooltip
               items={[
-                {
-                  title: i18n.FLYOUT_MATCHED_INDICES,
-                  description: i18n.FLYOUT_TOOLTIP_MATCHED_INDICES,
-                },
-                {
-                  title: i18n.FLYOUT_FROZEN_INDICES_QUERIED,
-                  description: i18n.FLYOUT_TOOLTIP_FROZEN_INDICES_QUERIED,
-                },
+                ...(hasMatchedIndicesCount
+                  ? [
+                      {
+                        title: i18n.FLYOUT_MATCHED_INDICES,
+                        description: i18n.FLYOUT_TOOLTIP_MATCHED_INDICES,
+                      },
+                    ]
+                  : []),
+                ...(hasFrozenIndicesQueriedCount
+                  ? [
+                      {
+                        title: i18n.FLYOUT_FROZEN_INDICES_QUERIED,
+                        description: i18n.FLYOUT_TOOLTIP_FROZEN_INDICES_QUERIED,
+                      },
+                    ]
+                  : []),
               ]}
             />
           }
@@ -57,7 +67,7 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
       <EuiSpacer size="s" />
       <EuiPanel hasBorder paddingSize="m">
         <EuiFlexGroup>
-          {matchedIndicesCount !== null && (
+          {hasMatchedIndicesCount && (
             <EuiFlexItem>
               <FieldLabel label={i18n.FLYOUT_MATCHED_INDICES} />
               <EuiSpacer size="xs" />
@@ -66,10 +76,8 @@ export const IndicesSection: React.FC<IndicesSectionProps> = ({
               </EuiText>
             </EuiFlexItem>
           )}
-          {matchedIndicesCount !== null && frozenIndicesQueriedCount !== null && (
-            <SectionSeparator />
-          )}
-          {frozenIndicesQueriedCount !== null && (
+          {hasMatchedIndicesCount && hasFrozenIndicesQueriedCount && <SectionSeparator />}
+          {hasFrozenIndicesQueriedCount && (
             <EuiFlexItem>
               <FieldLabel label={i18n.FLYOUT_FROZEN_INDICES_QUERIED} />
               <EuiSpacer size="xs" />

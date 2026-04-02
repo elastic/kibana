@@ -15,9 +15,9 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import * as i18n from '../translations';
-import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
-import { FormattedDate } from '../../../../../../common/components/formatted_date';
+import * as i18n from '../../translations';
+import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from '../shared';
+import { FormattedDate } from '../../../../../../../common/components/formatted_date';
 
 interface BackfillSectionProps {
   backfill: { from: string; to: string };

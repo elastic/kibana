@@ -25,7 +25,7 @@ import {
   ExecutionStatusFilter,
   useReadExecutionResults,
 } from '../../../../rule_monitoring';
-import { ExecutionDetailsFlyout } from './execution_details_flyout';
+import { ExecutionDetailsFlyout } from './flyout/execution_details_flyout';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {
   RUN_TYPE_FILTERS,
