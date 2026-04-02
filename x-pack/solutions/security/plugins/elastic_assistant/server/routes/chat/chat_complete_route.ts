@@ -22,7 +22,6 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { v4 as uuidv4 } from 'uuid';
-import { resolveConnectorById } from '../resolve_inference_connectors';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
@@ -125,11 +124,9 @@ export const chatCompleteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
-          const inferenceConnector = await resolveConnectorById({
-            assistantContext: ctx.elasticAssistant,
-            request,
-            connectorId,
-          });
+          const inferenceConnector = await ctx.elasticAssistant.inference
+            .getConnectorById(connectorId, request)
+            .catch(() => undefined);
           actionTypeId = inferenceConnector?.type ?? '.inference';
           const isOssModel = isOpenSourceModel(inferenceConnector);
           const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
