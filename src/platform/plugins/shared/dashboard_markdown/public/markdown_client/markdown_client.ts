@@ -39,7 +39,7 @@ export const markdownClient = {
   },
   get: async (id: string): Promise<MarkdownReadResponseBody> => {
     const result = await coreServices.http
-      .get<MarkdownReadResponseBody>(`${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`, {
+      .get<MarkdownReadResponseBody>(buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }), {
         version: MARKDOWN_API_VERSION,
       })
       .catch((e) => {
@@ -53,7 +53,7 @@ export const markdownClient = {
   },
   search: async (searchQuery: MarkdownSearchRequestQuery) => {
     const { query, ...params } = searchQuery;
-    return await coreServices.http.post<MarkdownSearchResponseBody>(`${MARKDOWN_API_PATH}`, {
+    return await coreServices.http.post<MarkdownSearchResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,
       query: {
         ...params,
@@ -63,7 +63,7 @@ export const markdownClient = {
   },
   update: async (id: string, markdownState: MarkdownAttributes) => {
     const updateResponse = await coreServices.http.put<MarkdownUpdateResponseBody>(
-      `${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`,
+      buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }),
       {
         version: MARKDOWN_API_VERSION,
         body: JSON.stringify(markdownState),
