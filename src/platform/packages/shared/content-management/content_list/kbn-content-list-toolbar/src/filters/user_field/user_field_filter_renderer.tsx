@@ -1,0 +1,131 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAvatar, type Query } from '@elastic/eui';
+import {
+  useContentListConfig,
+  useFilterFacets,
+  useUserProfileStoreContext,
+} from '@kbn/content-list-provider';
+import type { UserProfileEntry } from '@kbn/content-list-provider';
+import {
+  SelectableFilterPopover,
+  StandardFilterOption,
+  type SelectableFilterOption,
+} from '../selectable_filter_popover';
+
+/**
+ * Props for the {@link UserFieldFilterRenderer} component.
+ */
+export interface UserFieldFilterRendererProps {
+  /** The filter field name (e.g. `'createdBy'`, `'updatedBy'`). */
+  fieldName: string;
+  /** Title displayed in the popover header and button. */
+  title: string;
+  /** Query object from `EuiSearchBar`. */
+  query?: Query;
+  /** `onChange` callback from `EuiSearchBar`. */
+  onChange?: (query: Query) => void;
+  /** Message shown when no users are available. */
+  emptyMessage: string;
+  /** Message shown when search yields no matches. */
+  noMatchesMessage: string;
+  /** Optional `data-test-subj` attribute for testing. */
+  'data-test-subj'?: string;
+}
+
+/**
+ * Generic filter popover renderer for user-UID-based fields.
+ *
+ * Consumes `useFilterFacets(fieldName)` for display-ready user facets with
+ * counts, matching the same pattern used by `TagFilterRenderer`.
+ *
+ * Reusable across `createdBy`, `updatedBy`, and other user-UID fields.
+ */
+export const UserFieldFilterRenderer = ({
+  fieldName,
+  title,
+  query,
+  onChange,
+  emptyMessage,
+  noMatchesMessage,
+  'data-test-subj': dataTestSubj,
+}: UserFieldFilterRendererProps) => {
+  const { supports } = useContentListConfig();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const userProfileStore = useUserProfileStoreContext();
+
+  const facetsQuery = useFilterFacets<UserProfileEntry>(fieldName, { enabled: isPopoverOpen });
+
+  // Seed the `UserProfileStore` cache with profiles resolved by `getFacets`.
+  // This closes the timing gap where a user clicks a facet before
+  // `ensureLoaded` (triggered by the items query) has completed.
+  useEffect(() => {
+    if (!facetsQuery.data || !userProfileStore?.merge) {
+      return;
+    }
+    const entries = facetsQuery.data.map((f) => f.data).filter((e): e is UserProfileEntry => !!e);
+    if (entries.length > 0) {
+      userProfileStore.merge(entries);
+    }
+  }, [facetsQuery.data, userProfileStore]);
+
+  const options = useMemo(
+    (): Array<SelectableFilterOption<UserProfileEntry>> =>
+      (facetsQuery.data ?? []).map(({ key, label, count, data }) => ({
+        key,
+        label,
+        value: data?.email || label || key,
+        count,
+        data,
+      })),
+    [facetsQuery.data]
+  );
+
+  const renderOption = useCallback(
+    (option: SelectableFilterOption<UserProfileEntry>, state: { isActive: boolean }) => (
+      <StandardFilterOption count={option.count} isActive={state.isActive}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiAvatar
+              name={option.label}
+              size="s"
+              data-test-subj={`${fieldName}-searchbar-option-${option.key}`}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{option.label}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StandardFilterOption>
+    ),
+    [fieldName]
+  );
+
+  if (!supports.userProfiles) {
+    return null;
+  }
+
+  return (
+    <SelectableFilterPopover<UserProfileEntry>
+      fieldName={fieldName}
+      title={title}
+      query={query}
+      onChange={onChange}
+      options={options}
+      renderOption={renderOption}
+      isLoading={facetsQuery.isLoading}
+      emptyMessage={emptyMessage}
+      noMatchesMessage={noMatchesMessage}
+      onToggle={setIsPopoverOpen}
+      data-test-subj={dataTestSubj}
+    />
+  );
+};

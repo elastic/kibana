@@ -66,27 +66,6 @@ const findItems = useCallback(
 </ContentListClientProvider>
 ```
 
-### Using the Adapter Function Directly
-
-If you need more control, you can use the adapter function directly:
-
-```tsx
-import { createFindItemsFn } from '@kbn/content-list-provider-client';
-import { ContentListProvider } from '@kbn/content-list-provider';
-
-// Wrap your existing findItems.
-const findItems = createFindItemsFn(myExistingFindItems);
-
-// Use with the base provider.
-<ContentListProvider
-  id="dashboard"
-  labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-  dataSource={{ findItems }}
->
-  <MyListComponent />
-</ContentListProvider>;
-```
-
 ## Props
 
 | Prop            | Type                       | Required | Description                                                                    |
@@ -131,9 +110,6 @@ This is the same signature expected by `TableListView.findItems`.
 // Provider component.
 export { ContentListClientProvider } from './provider';
 export type { ContentListClientProviderProps } from './provider';
-
-// Adapter for direct usage.
-export { createFindItemsFn } from './strategy';
 
 // Types.
 export type {

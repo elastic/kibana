@@ -9,12 +9,45 @@
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
+  ActiveFilters,
+  IncludeExcludeFilter,
   FindItemsFn,
   FindItemsParams,
   FindItemsResult,
   ContentListItem,
 } from '@kbn/content-list-provider';
+import { TAG_FILTER_ID } from '@kbn/content-list-provider';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import type { TableListViewFindItemsFn } from './types';
+
+export const MANAGED_USER_FILTER = '__managed__';
+export const NO_CREATOR_USER_FILTER = '__no_creator__';
+
+/**
+ * Return type from {@link createClientStrategy}.
+ */
+export interface ClientStrategy {
+  /**
+   * Fetches items and applies client-side filtering, sorting, and pagination.
+   *
+   * Internally caches the server response keyed by `searchQuery`. Calls to
+   * `findItems` with the same `searchQuery` reuse the cache and only
+   * recompute the client-side transforms. A new `searchQuery` triggers a
+   * fresh server fetch.
+   *
+   * The core provider calls {@link ClientStrategy.onInvalidate} before
+   * refetching after mutations so the next call always hits the server.
+   */
+  findItems: FindItemsFn;
+  /**
+   * Called by the core provider before an explicit refetch (e.g. after a
+   * mutation) to clear the internal item cache. The next `findItems` call
+   * will fetch from the server regardless of `searchQuery`.
+   */
+  onInvalidate: () => void;
+  /** Returns the full (unfiltered) item set from the most recent server fetch. */
+  getItems: () => UserContentCommonSchema[];
+}
 
 /**
  * Safely retrieves a sortable value from an object by key.
@@ -46,7 +79,6 @@ const getUserContentFieldValue = (
   item: UserContentCommonSchema,
   field: string
 ): string | number | null => {
-  // Handle known fields.
   switch (field) {
     case 'title':
       return item.attributes?.title ?? '';
@@ -60,13 +92,11 @@ const getUserContentFieldValue = (
       break;
   }
 
-  // Check top-level item fields first (id, type, etc.).
   const topLevelValue = getSortableProperty(item, field);
   if (topLevelValue !== null) {
     return topLevelValue;
   }
 
-  // Check custom attributes (status, priority, etc.).
   return getSortableProperty(item.attributes, field);
 };
 
@@ -87,7 +117,6 @@ const sortItems = (
     const aValue = getUserContentFieldValue(a, field);
     const bValue = getUserContentFieldValue(b, field);
 
-    // Push null values to the end regardless of sort direction.
     if (aValue === null && bValue === null) {
       return 0;
     }
@@ -98,13 +127,11 @@ const sortItems = (
       return -1;
     }
 
-    // Use localeCompare for proper string sorting.
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       const comparison = aValue.localeCompare(bValue);
       return direction === 'asc' ? comparison : -comparison;
     }
 
-    // Numeric comparison.
     if (aValue < bValue) {
       return direction === 'asc' ? -1 : 1;
     }
@@ -113,6 +140,92 @@ const sortItems = (
     }
     return 0;
   });
+};
+
+/**
+ * Extract tag IDs from a `UserContentCommonSchema` references array.
+ */
+const extractTagIds = (refs?: Array<{ type: string; id: string }>): string[] | undefined => {
+  if (!refs) {
+    return undefined;
+  }
+  const tagIds = refs.filter((ref) => ref.type === 'tag').map((ref) => ref.id);
+  return tagIds.length > 0 ? tagIds : undefined;
+};
+
+/**
+ * Safely narrow an `ActiveFilters` value to an {@link IncludeExcludeFilter}.
+ */
+const asIncludeExclude = (
+  value: IncludeExcludeFilter | string | boolean | undefined
+): IncludeExcludeFilter | undefined =>
+  value && typeof value === 'object' && ('include' in value || 'exclude' in value)
+    ? (value as IncludeExcludeFilter)
+    : undefined;
+
+/**
+ * Resolve the effective creator key for an item, mapping to sentinel values
+ * for managed items and items without a creator.
+ */
+export const getCreatorKey = (item: UserContentCommonSchema): string => {
+  if (item.managed) {
+    return MANAGED_USER_FILTER;
+  }
+  return item.createdBy ?? NO_CREATOR_USER_FILTER;
+};
+
+/**
+ * Apply client-side tag and createdBy filters to the item set.
+ *
+ * Tag filters use `filters[TAG_FILTER_ID]` (include/exclude arrays of tag IDs).
+ * Creator filters use `filters.user` (include/exclude arrays of UIDs + sentinels).
+ * Starred filtering requires the set of favorite item IDs.
+ *
+ * Exported so that {@link ContentListClientProvider} facet implementations can
+ * apply the same filtering to compute faceted counts.
+ */
+export const filterItems = (
+  items: UserContentCommonSchema[],
+  filters: ActiveFilters,
+  favoriteIds?: Set<string>
+): UserContentCommonSchema[] => {
+  let result = items;
+
+  const tagFilter = asIncludeExclude(filters[TAG_FILTER_ID]);
+  if (tagFilter) {
+    const { include, exclude } = tagFilter;
+    if (include?.length) {
+      const includeSet = new Set(include);
+      result = result.filter((item) =>
+        item.references?.some((ref) => ref.type === 'tag' && includeSet.has(ref.id))
+      );
+    }
+    if (exclude?.length) {
+      const excludeSet = new Set(exclude);
+      result = result.filter(
+        (item) => !item.references?.some((ref) => ref.type === 'tag' && excludeSet.has(ref.id))
+      );
+    }
+  }
+
+  const userFilter = asIncludeExclude(filters.createdBy);
+  if (userFilter) {
+    const { include, exclude } = userFilter;
+    if (include?.length) {
+      const includeSet = new Set(include);
+      result = result.filter((item) => includeSet.has(getCreatorKey(item)));
+    }
+    if (exclude?.length) {
+      const excludeSet = new Set(exclude);
+      result = result.filter((item) => !excludeSet.has(getCreatorKey(item)));
+    }
+  }
+
+  if (filters.starredOnly && favoriteIds) {
+    result = result.filter((item) => favoriteIds.has(item.id));
+  }
+
+  return result;
 };
 
 /**
@@ -127,49 +240,74 @@ const transformItem = (item: UserContentCommonSchema): ContentListItem => ({
   description: item.attributes?.description,
   type: item.type,
   updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+  tags: extractTagIds(item.references),
+  createdBy: item.createdBy,
+  managed: item.managed,
 });
 
 /**
- * Creates a `FindItemsFn` that wraps a `TableListView`-style `findItems` function.
+ * Creates a client strategy that wraps a `TableListView`-style `findItems` function.
  *
- * This adapter:
- * - Translates between the old and new API signatures.
- * - Applies client-side sorting and pagination (matching original `TableListView` behavior).
- * - Transforms results to `ContentListItem` format (only for the returned page).
- * - Forwards the `AbortSignal` for request cancellation (consumers may optionally respect it).
+ * The strategy caches the server response keyed by `searchQuery`. When filters,
+ * sort, or page change without a new search query, the cached items are reused
+ * and only the client-side transforms are reapplied — no server fetch occurs.
  *
- * **Limitations:**
- * - Only `searchQuery` is passed to the underlying `findItems`. The `params.filters` object
- *   and `refs` (references/referencesToExclude) from the second parameter are not forwarded.
+ * The core provider calls {@link ClientStrategy.onInvalidate} before any
+ * explicit refetch (e.g. after a delete) to force the next `findItems` call
+ * to hit the server.
  *
  * @param tableListViewFindItems - The consumer's existing `findItems` function.
- * @returns A `FindItemsFn` compatible with `ContentListProvider`.
+ * @param favoritesClient - Optional favorites client for starred filtering.
+ * @returns A {@link ClientStrategy} with `findItems`, `invalidate`, and `getItems`.
  */
-export const createFindItemsFn = (
-  tableListViewFindItems: TableListViewFindItemsFn
-): FindItemsFn => {
-  return async (params: FindItemsParams): Promise<FindItemsResult> => {
-    const { searchQuery, sort, page, signal } = params;
+export const createClientStrategy = (
+  tableListViewFindItems: TableListViewFindItemsFn,
+  favoritesClient?: FavoritesClientPublic
+): ClientStrategy => {
+  let cachedItems: UserContentCommonSchema[] = [];
+  let lastSearchQuery: string | undefined;
 
-    // Fetch all items from the consumer's findItems, forwarding the abort signal.
-    const result = await tableListViewFindItems(searchQuery, undefined, signal);
-    let items = result.hits;
+  const findItemsFn: FindItemsFn = async (params: FindItemsParams): Promise<FindItemsResult> => {
+    const { searchQuery, filters, sort, page, signal } = params;
 
-    // Apply client-side sorting only if sort is specified.
-    // When sorting is disabled, items are returned in their natural order (server default).
+    if (lastSearchQuery !== searchQuery) {
+      const result = await tableListViewFindItems(searchQuery, undefined, signal);
+      if (signal?.aborted) {
+        throw new DOMException('The operation was aborted.', 'AbortError');
+      }
+      cachedItems = result.hits;
+      lastSearchQuery = searchQuery;
+    }
+
+    let favoriteIds: Set<string> | undefined;
+    if (filters.starredOnly && favoritesClient) {
+      const { favoriteIds: ids } = await favoritesClient.getFavorites();
+      favoriteIds = new Set(ids);
+    }
+
+    let items = filterItems(cachedItems, filters, favoriteIds);
+
     if (sort?.field) {
       items = sortItems(items, sort.field, sort.direction ?? 'asc');
     }
 
-    // Apply client-side pagination.
     const start = page.index * page.size;
-    const end = start + page.size;
-    const pageItems = items.slice(start, end);
+    const pageItems = items.slice(start, start + page.size);
 
-    // Transform only the paginated items to ContentListItem format.
     return {
       items: pageItems.map(transformItem),
-      total: result.total,
+      total: items.length,
     };
+  };
+
+  const onInvalidate = () => {
+    lastSearchQuery = undefined;
+    cachedItems = [];
+  };
+
+  return {
+    findItems: findItemsFn,
+    onInvalidate,
+    getItems: () => cachedItems,
   };
 };

@@ -267,5 +267,5 @@ describe('useCreatedByQueryParser', () => {
 - [ ] Preset declared with `filter.createPreset` and wired into the auto-render defaults.
 - [ ] `useXxxQueryParser` hook implementing `QueryParser`, calling the service's own `parseSearchQuery`.
 - [ ] Parser added to the `queryParsers` array in `content_list_toolbar.tsx`.
-- [ ] `filterDisplay` flag (`hasUsers`, `hasStarred`, etc.) added to `useFilterDisplay`.
+- [ ] Feature flag added to `ContentListSupports` (e.g. `userProfiles: true`).
 - [ ] `findItems` updated in the consumer (or mock datasource) to act on the new filter dimension.

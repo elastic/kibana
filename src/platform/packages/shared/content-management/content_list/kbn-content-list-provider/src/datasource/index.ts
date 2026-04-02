@@ -9,11 +9,10 @@
 
 export type {
   IncludeExcludeFilter,
-  FilterCounts,
   ActiveFilters,
   FindItemsParams,
   FindItemsResult,
   FindItemsFn,
   DataSourceConfig,
 } from './types';
-export { getIncludeExcludeFilter, TAG_FILTER_ID } from './types';
+export { getIncludeExcludeFilter, TAG_FILTER_ID, CREATED_BY_FILTER_ID } from './types';

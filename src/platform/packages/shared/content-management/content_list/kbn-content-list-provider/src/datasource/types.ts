@@ -22,6 +22,9 @@ export interface IncludeExcludeFilter {
 /** Filter dimension key for tag-based filtering. Matches the `fieldName` used in tag filter popovers. */
 export const TAG_FILTER_ID = 'tag';
 
+/** Filter dimension key for created-by user filtering. */
+export const CREATED_BY_FILTER_ID = 'createdBy';
+
 /**
  * Active filters applied to the content list.
  *
@@ -49,11 +52,6 @@ export interface ActiveFilters {
 export const getIncludeExcludeFilter = (
   value: IncludeExcludeFilter | string | boolean | undefined
 ): IncludeExcludeFilter | undefined => (value && typeof value === 'object' ? value : undefined);
-
-/**
- * Per-value counts for a single filter dimension.
- */
-export type FilterCounts = Record<string, number>;
 
 /**
  * Parameters for the `findItems` function.
@@ -104,19 +102,6 @@ export interface FindItemsResult {
 
   /** Total matching items for pagination. */
   total: number;
-
-  /**
-   * Optional per-filter counts, indexed by filter identifier.
-   *
-   * Each key (e.g. `tag`, `type`, `lastResponse`) maps to a `Record<string, number>` of
-   * value → count for the full result set (not just the current page). When present for a
-   * filter, the corresponding filter popover displays counts next to each option.
-   *
-   * Client-side data sources that iterate the full item set before paginating can compute
-   * this cheaply. Server-side data sources should omit entries unless they can retrieve
-   * counts via an aggregation query.
-   */
-  counts?: Record<string, FilterCounts>;
 }
 
 /**
@@ -130,6 +115,17 @@ export type FindItemsFn = (params: FindItemsParams) => Promise<FindItemsResult>;
 export interface DataSourceConfig {
   /** Fetches items from the data source. */
   findItems: FindItemsFn;
+
+  /**
+   * Called automatically before every explicit `refetch()` (e.g. after a
+   * delete or create) so the next `findItems` call hits the server instead
+   * of returning stale cached data.
+   *
+   * Client-side providers that cache the server response between calls
+   * should set this to clear that cache. Server-based providers that
+   * always call through can omit it.
+   */
+  onInvalidate?: () => void;
 
   /** Called after successful fetch. */
   onFetchSuccess?: (result: FindItemsResult) => void;

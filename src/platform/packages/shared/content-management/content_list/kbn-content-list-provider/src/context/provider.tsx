@@ -13,6 +13,7 @@ import { FavoritesContextProvider } from '@kbn/content-management-favorites-publ
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
+import { UserProfileStoreProvider } from '../services';
 import { ContentListStateProvider } from '../state';
 import { QueryClientProvider, contentListQueryClient } from '../query';
 
@@ -65,14 +66,15 @@ export type ContentListProviderProps = ContentListConfig & {
  * `features.search` is read once at mount; use a `key` prop to remount if you need to change
  * initial state dynamically.
  *
- * When `services.tags` is provided (and `features.tags` is not `false`), the provider
- * automatically wraps children with the tags service context, enabling tag display
- * and filtering in child components. The tags service's `parseSearchQuery` (if present)
- * is passed through to support extracting tag filters from the search bar query text.
+ * Service-dependent features wrap children with the appropriate context provider:
  *
- * When `services.favorites` is provided (and `features.starred` is not `false`), the provider
- * wraps children with `FavoritesContextProvider`, enabling star buttons and starred
- * filtering in child components.
+ * - **Tags** (`services.tags`): wraps with `ContentManagementTagsProvider`, enabling tag
+ *   display and filtering. The service's `parseSearchQuery` (if present) is passed through
+ *   to support extracting tag filters from the search bar query text.
+ * - **Favorites** (`services.favorites`): wraps with `FavoritesContextProvider`, enabling
+ *   star buttons and starred filtering.
+ * - **User profiles** (`services.userProfiles`): wraps with `UserProfileStoreProvider`,
+ *   providing a shared synchronous cache for user profile resolution.
  */
 export const ContentListProvider = ({
   children,
@@ -89,11 +91,16 @@ export const ContentListProvider = ({
   // At least one of id or queryKeyScope is guaranteed by ContentListIdentity type.
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
 
-  const { tags: tagsService, favorites: favoritesService } = services ?? {};
+  const {
+    tags: tagsService,
+    favorites: favoritesService,
+    userProfiles: userProfilesService,
+  } = services ?? {};
 
   // Service-dependent features: enabled by default when service exists, unless explicitly disabled.
   const supportsTags = features.tags !== false && !!tagsService;
   const supportsStarred = features.starred !== false && !!favoritesService;
+  const supportsUserProfiles = features.userProfiles !== false && !!userProfilesService;
 
   // Resolve feature support flags.
   // Selection is disabled when explicitly set to `false` or when the list is read-only.
@@ -105,6 +112,7 @@ export const ContentListProvider = ({
       selection: features.selection !== false && !isReadOnly,
       tags: supportsTags,
       starred: supportsStarred,
+      userProfiles: supportsUserProfiles,
     }),
     [
       features.sorting,
@@ -114,10 +122,10 @@ export const ContentListProvider = ({
       isReadOnly,
       supportsTags,
       supportsStarred,
+      supportsUserProfiles,
     ]
   );
 
-  // Create context value.
   const value: ContentListProviderContextValue = useMemo(
     () => ({
       labels,
@@ -133,11 +141,21 @@ export const ContentListProvider = ({
     [labels, item, isReadOnly, id, queryKeyScope, dataSource, features, supports, services]
   );
 
-  // Build provider tree conditionally based on service availability.
+  // Build the provider tree bottom-up (innermost → outermost).
   let content: React.ReactNode = (
     <ContentListContext.Provider value={value}>
       <ContentListStateProvider>{children}</ContentListStateProvider>
     </ContentListContext.Provider>
+  );
+
+  // User profile store requires QueryClientProvider; wraps inside QueryClientProvider below.
+  content = (
+    <UserProfileStoreProvider
+      service={supportsUserProfiles ? userProfilesService : undefined}
+      queryKeyScope={queryKeyScope}
+    >
+      {content}
+    </UserProfileStoreProvider>
   );
 
   // Wrap with tags provider when tags service is available.

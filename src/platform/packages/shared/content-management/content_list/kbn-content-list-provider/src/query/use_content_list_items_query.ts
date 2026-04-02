@@ -7,62 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ContentListClientState, ContentListQueryData } from '../state/types';
 import { useContentListConfig } from '../context';
+import { useUserProfileStoreContext } from '../services';
+import { useQueryModel, toFindItemsFilters } from '../query_model';
 import { contentListKeys } from './keys';
+import { useResolveQueryDisplayValues } from './use_resolve_query_display_values';
 
-/**
- * Default page configuration.
- */
 const DEFAULT_PAGE = { index: 0, size: 20 };
+
+const USER_UID_FIELDS = ['createdBy'] as const;
 
 /**
  * React Query hook for fetching content list items.
  *
- * This hook:
- * - Fetches items using the configured `findItems` function.
- * - Returns query data directly (items, loading, error) without dispatching.
+ * Derives {@link ActiveFilters} from `queryText` via {@link useQueryModel}.
  *
- * Note: Items are expected to already be in `ContentListItem` format.
- * Transformation should happen in the `findItems` implementation.
- *
- * @param clientState - Client-controlled state (search, filters, sort).
- * @returns Query data and refetch function.
+ * When the data source provides an `invalidate` callback, the returned
+ * `refetch` function calls it before re-executing the query so that any
+ * internal cache (e.g. in a client-side strategy) is cleared first.
  */
 export const useContentListItemsQuery = (
   clientState: ContentListClientState
-): ContentListQueryData & { refetch: () => void } => {
+): ContentListQueryData & { refetch: () => Promise<void> } => {
   const { dataSource, queryKeyScope, supports } = useContentListConfig();
+  const userProfileStore = useUserProfileStoreContext();
 
-  // Build query parameters from client state.
-  // Only include sort if sorting is supported; otherwise, let the data source use its natural order.
-  // Only include page if pagination is supported; otherwise, use a sensible default.
+  const model = useQueryModel(clientState.queryText);
+  const activeFilters = useMemo(() => toFindItemsFilters(model), [model]);
+
   const queryParams = useMemo(
     () => ({
-      searchQuery: clientState.filters.search ?? '',
-      filters: clientState.filters,
+      searchQuery: activeFilters.search ?? '',
+      filters: activeFilters,
       sort: supports.sorting ? clientState.sort : undefined,
       page: supports.pagination ? clientState.page : DEFAULT_PAGE,
     }),
-    [clientState.filters, clientState.sort, clientState.page, supports.sorting, supports.pagination]
+    [activeFilters, clientState.sort, clientState.page, supports.sorting, supports.pagination]
   );
 
-  // React Query for data fetching.
-  // `keepPreviousData` retains the previous results while a new query loads,
-  // preventing the table from flashing empty when page, filters, or search text change.
   const query = useQuery({
     queryKey: contentListKeys.items(queryKeyScope, queryParams),
     keepPreviousData: true,
     queryFn: async ({ signal }) => {
       const result = await dataSource.findItems({ ...queryParams, signal });
 
-      // Invoke success callback if provided.
-      // Note: Errors from `onFetchSuccess` are caught and logged to prevent them from
-      // breaking the query. In production, errors are logged but not surfaced to the UI.
-      // If you need to handle callback failures, consider adding error handling within
-      // your `onFetchSuccess` implementation.
       if (dataSource.onFetchSuccess) {
         try {
           dataSource.onFetchSuccess(result);
@@ -76,7 +67,37 @@ export const useContentListItemsQuery = (
     },
   });
 
-  // Derive error (normalize to Error type).
+  // Seed user profile cache with UIDs from fetched items.
+  const items = query.data?.items;
+  const prevDataUpdatedAtRef = useRef(query.dataUpdatedAt);
+  useEffect(() => {
+    if (!userProfileStore || !items || prevDataUpdatedAtRef.current === query.dataUpdatedAt) {
+      return;
+    }
+    prevDataUpdatedAtRef.current = query.dataUpdatedAt;
+
+    const uids = new Set<string>();
+    for (const item of items) {
+      for (const field of USER_UID_FIELDS) {
+        const uid = item[field];
+        if (typeof uid === 'string') {
+          uids.add(uid);
+        }
+      }
+    }
+    if (uids.size > 0) {
+      userProfileStore.ensureLoaded(Array.from(uids));
+    }
+  }, [items, query.dataUpdatedAt, userProfileStore]);
+
+  useResolveQueryDisplayValues(clientState.queryText);
+
+  // Clear any data-source-level cache before re-executing the query.
+  const refetch = useCallback(async () => {
+    dataSource.onInvalidate?.();
+    await query.refetch();
+  }, [dataSource, query]);
+
   const error = useMemo(() => {
     if (!query.error) {
       return undefined;
@@ -87,10 +108,9 @@ export const useContentListItemsQuery = (
   return {
     items: query.data?.items ?? [],
     totalItems: query.data?.total ?? 0,
-    counts: query.data?.counts,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error,
-    refetch: query.refetch,
+    refetch,
   };
 };

@@ -8,15 +8,52 @@
  */
 
 import React, { useMemo, useState, type ReactNode } from 'react';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
   ContentListCoreConfig,
   ContentListFeatures,
+  ContentListServices,
   DataSourceConfig,
+  FilterFacetConfig,
+  UserProfileEntry,
 } from '@kbn/content-list-provider';
 import { ContentListProvider, isPaginationConfig } from '@kbn/content-list-provider';
 import { SAVED_OBJECTS_PER_PAGE_ID } from '@kbn/management-settings-ids';
+import type { Tag } from '@kbn/content-management-tags';
 import type { TableListViewFindItemsFn, ContentListClientServices } from './types';
-import { createFindItemsFn } from './strategy';
+import {
+  createClientStrategy,
+  filterItems,
+  getCreatorKey,
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+} from './strategy';
+
+/**
+ * Compute per-key item counts from the full item set.
+ *
+ * @param items - The item set to count.
+ * @param keyFn - Extracts zero or more keys from a single item.
+ */
+const computeCounts = (
+  items: UserContentCommonSchema[],
+  keyFn: (item: UserContentCommonSchema) => string[]
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  for (const item of items) {
+    for (const key of keyFn(item)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+};
+
+/** Extract tag IDs from an item's references. */
+const tagKeys = (item: UserContentCommonSchema): string[] =>
+  item.references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id) ?? [];
+
+/** Extract the creator key for an item, aligned with {@link getCreatorKey} in `strategy.ts`. */
+const createdByKeys = (item: UserContentCommonSchema): string[] => [getCreatorKey(item)];
 
 /**
  * Props for the Client provider.
@@ -26,13 +63,9 @@ import { createFindItemsFn } from './strategy';
  */
 export type ContentListClientProviderProps = ContentListCoreConfig & {
   children?: ReactNode;
-  /**
-   * The consumer's existing `findItems` function (same signature as `TableListView`).
-   */
+  /** The consumer's existing `findItems` function (same signature as `TableListView`). */
   findItems: TableListViewFindItemsFn;
-  /**
-   * Feature configuration for enabling/customizing capabilities.
-   */
+  /** Feature configuration for enabling/customizing capabilities. */
   features?: ContentListFeatures;
   /**
    * Services required by the client provider.
@@ -47,7 +80,13 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
  *
  * Wraps an existing `TableListView`-style `findItems` function and provides
  * client-side sorting, filtering, and pagination. The strategy handles transformation
- * of `UserContentCommonSchema` items to `ContentListItem` format.
+ * of `UserContentCommonSchema` items to `ContentListItem` format and caches the
+ * full item set for use by `getFacets` implementations.
+ *
+ * When `services.tags` is provided, it constructs a `FilterFacetConfig<Tag>`
+ * for `features.tags` that computes tag facets from the cached item set.
+ * When `services.userProfiles` is provided, it constructs a
+ * `FilterFacetConfig<UserProfileEntry>` for `features.userProfiles` the same way.
  *
  * The `services.uiSettings` is read once at mount to determine the default page size
  * from the `savedObjects:perPage` user setting. An explicit
@@ -68,18 +107,130 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
 export const ContentListClientProvider = ({
   children,
   findItems: tableListViewFindItems,
-  features,
+  features: featuresProp = {},
   services,
   ...rest
 }: ContentListClientProviderProps): JSX.Element => {
-  // Create the adapted findItems function (includes transformation).
-  const findItems = useMemo(
-    () => createFindItemsFn(tableListViewFindItems),
-    [tableListViewFindItems]
+  const favoritesClient = services?.favorites;
+
+  const { findItems, onInvalidate, getItems } = useMemo(
+    () => createClientStrategy(tableListViewFindItems, favoritesClient),
+    [tableListViewFindItems, favoritesClient]
   );
 
-  // Build the dataSource config. No transform needed - strategy handles it.
-  const dataSource: DataSourceConfig = useMemo(() => ({ findItems }), [findItems]);
+  const dataSource: DataSourceConfig = useMemo(
+    () => ({ findItems, onInvalidate }),
+    [findItems, onInvalidate]
+  );
+
+  const tagsService = services?.tags;
+  const userProfilesService = services?.userProfiles;
+
+  // Build `FilterFacetConfig<Tag>` for tags when the tags service is available
+  // and the feature isn't explicitly disabled or already configured.
+  const tagsFeature = useMemo((): ContentListFeatures['tags'] => {
+    if (featuresProp.tags === false) {
+      return false;
+    }
+    if (typeof featuresProp.tags === 'object') {
+      return featuresProp.tags;
+    }
+    if (!tagsService?.getTagList) {
+      return featuresProp.tags;
+    }
+
+    const { getTagList } = tagsService;
+    const config: FilterFacetConfig<Tag> = {
+      getFacets: async ({ filters }) => {
+        let favoriteIds: Set<string> | undefined;
+        if (filters.starredOnly && favoritesClient) {
+          const { favoriteIds: ids } = await favoritesClient.getFavorites();
+          favoriteIds = new Set(ids);
+        }
+        const narrowed = filterItems(getItems(), filters, favoriteIds);
+        const tagCounts = computeCounts(narrowed, tagKeys);
+        const tags = getTagList();
+        return tags.map((tag) => ({
+          key: tag.id ?? tag.name,
+          label: tag.name,
+          count: tagCounts[tag.id ?? tag.name] ?? 0,
+          data: tag,
+        }));
+      },
+    };
+    return config;
+  }, [featuresProp.tags, tagsService, getItems, favoritesClient]);
+
+  // Build `FilterFacetConfig<UserProfileEntry>` for user profiles when the
+  // service is available and the feature isn't explicitly disabled or already
+  // configured. Mirrors the tags pattern: scans the cached item set for unique
+  // UIDs, bulk-resolves any not yet in the profile cache, and returns facets.
+  const userProfilesFeature = useMemo((): ContentListFeatures['userProfiles'] => {
+    if (featuresProp.userProfiles === false) {
+      return false;
+    }
+    if (typeof featuresProp.userProfiles === 'object') {
+      return featuresProp.userProfiles;
+    }
+    if (!userProfilesService) {
+      return featuresProp.userProfiles;
+    }
+
+    const { bulkResolve } = userProfilesService;
+    const sentinelKeys = new Set([MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER]);
+    const config: FilterFacetConfig<UserProfileEntry> = {
+      getFacets: async ({ filters }) => {
+        let favoriteIds: Set<string> | undefined;
+        if (filters.starredOnly && favoritesClient) {
+          const { favoriteIds: ids } = await favoritesClient.getFavorites();
+          favoriteIds = new Set(ids);
+        }
+        const narrowed = filterItems(getItems(), filters, favoriteIds);
+        const userCounts = computeCounts(narrowed, createdByKeys);
+        const allKeys = Object.keys(userCounts);
+        if (allKeys.length === 0) {
+          return [];
+        }
+
+        // Only resolve real UIDs; sentinels get static labels.
+        const realUids = allKeys.filter((k) => !sentinelKeys.has(k));
+        const profiles = realUids.length > 0 ? await bulkResolve(realUids) : [];
+        const profilesByUid = new Map(profiles.map((p) => [p.uid, p]));
+
+        const facets = allKeys
+          .filter((key) => key !== NO_CREATOR_USER_FILTER)
+          .map((key) => {
+            if (key === MANAGED_USER_FILTER) {
+              return {
+                key,
+                label: 'Managed',
+                count: userCounts[key] ?? 0,
+                data: undefined,
+              };
+            }
+            const profile = profilesByUid.get(key);
+            return {
+              key,
+              label: profile?.fullName ?? key,
+              count: userCounts[key] ?? 0,
+              data: profile,
+            };
+          });
+
+        return facets;
+      },
+    };
+    return config;
+  }, [featuresProp.userProfiles, userProfilesService, getItems, favoritesClient]);
+
+  const features: ContentListFeatures = useMemo(
+    () => ({
+      ...featuresProp,
+      tags: tagsFeature,
+      userProfiles: userProfilesFeature,
+    }),
+    [featuresProp, tagsFeature, userProfilesFeature]
+  );
 
   // Read page size from uiSettings once at mount. Not reactive — page size
   // setting changes during a session are not expected to take effect until reload.
