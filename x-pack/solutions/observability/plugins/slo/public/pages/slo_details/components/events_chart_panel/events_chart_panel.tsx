@@ -27,8 +27,8 @@ import React from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { TimeBounds } from '../../types';
-import { GoodBadEventsChart, type EventType } from './good_bad_events_chart';
+import type { SloEventType, TimeBounds } from '../../types';
+import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
 import { getDiscoverLink, openInDiscover } from '../../utils/discover_links/get_discover_link';
 import {
@@ -70,7 +70,7 @@ export function EventsChartPanel({ slo, range, dynamicTimeRange = false, onBrush
     ? getApmTracesEsqlLink({ slo, timeRange, discover, transactionIndex })
     : getDiscoverLink({ slo, timeRange, discover, uiSettings });
 
-  const handleGoodBadEventsBarClick = (barTimeRange: TimeRange, eventType: EventType) => {
+  const handleGoodBadEventsBarClick = (barTimeRange: TimeRange, eventType: SloEventType) => {
     if (isApmSlo) {
       navigateToApmTracesEsqlLink({
         slo,

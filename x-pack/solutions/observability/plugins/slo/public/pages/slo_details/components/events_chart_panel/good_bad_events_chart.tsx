@@ -17,17 +17,14 @@ import moment from 'moment';
 import React, { useRef } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
-import type { TimeBounds } from '../../types';
-import type { SloEventType } from '../../types';
+import type { SloEventType, TimeBounds } from '../../types';
 import type { GetPreviewDataResponseResults } from './types';
-
-export type { SloEventType as EventType };
 
 export interface Props {
   data: GetPreviewDataResponseResults;
   slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
-  onBarClick?: (timeRange: TimeRange, eventType: EventType) => void;
+  onBarClick?: (timeRange: TimeRange, eventType: SloEventType) => void;
 }
 
 const DEFAULT_INTERVAL = 10 * 60 * 1_000; // 10 minutes in milliseconds
@@ -67,7 +64,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed, onBarClick }: Props) 
       to: moment(datum.x).add(intervalInMilliseconds, 'ms').startOf('minute').toISOString(),
       mode: 'absolute' as const,
     };
-    const eventType: EventType = isGoodEventClicked ? 'Good' : isBadEventClicked ? 'Bad' : 'All';
+    const eventType: SloEventType = isGoodEventClicked ? 'Good' : isBadEventClicked ? 'Bad' : 'All';
     onBarClick?.(timeRange, eventType);
   };
 
