@@ -230,6 +230,11 @@ export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | '
    * Adds a separator line above or below the item in the popover menu.
    */
   separator?: 'above' | 'below';
+  /**
+   * Optional badge text displayed after the label (e.g. "New").
+   * Rendered as an inline EuiBadge next to the item name.
+   */
+  labelBadgeText?: string;
 };
 
 type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
