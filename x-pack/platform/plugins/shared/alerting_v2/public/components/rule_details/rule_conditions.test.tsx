@@ -45,13 +45,12 @@ const alertRule: RuleApiResponse = {
   evaluation: {
     query: {
       base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
-      condition: 'WHERE cpu > 0.9',
     },
   },
   grouping: { fields: ['host.name', 'service.name'] },
   recovery_policy: {
     type: 'query',
-    query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name', condition: 'WHERE cpu < 0.5' },
+    query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
   },
   state_transition: { pending_count: 3, pending_timeframe: '5m' },
   no_data: { behavior: 'no_data', timeframe: '15m' },
@@ -70,11 +69,6 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).toHaveTextContent(
       'FROM logs-* | STATS count() BY host.name'
     );
-  });
-
-  it('does not render alert condition even when condition is present in data', () => {
-    renderConditions(alertRule);
-    expect(screen.queryByTestId('alertingV2RuleDetailsAlertCondition')).not.toBeInTheDocument();
   });
 
   it('renders summary fields for alert rule', () => {
