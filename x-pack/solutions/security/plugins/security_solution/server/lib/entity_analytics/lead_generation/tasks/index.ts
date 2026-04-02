@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-//
-// Do not change constant value - part of public REST APIs
-//
-export const SLO_ALERTS_EMBEDDABLE_ID = 'slo_alerts';
-
-export const ADD_SLO_ALERTS_ACTION_ID = 'CREATE_SLO_ALERTS_EMBEDDABLE';
+export {
+  registerLeadGenerationTask,
+  startLeadGenerationTask,
+  removeLeadGenerationTask,
+  getLeadGenerationTaskId,
+} from './lead_generation_task';
