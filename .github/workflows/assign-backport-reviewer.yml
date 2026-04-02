@@ -24,10 +24,12 @@ jobs:
       - name: Select reviewers
         id: select-reviewers
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          OWNERS: ${{ steps.codeowners.outputs.individual-owners }}
         with:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
-            const affectedCodeowners = ${{ steps.codeowners.outputs.individual-owners }};
+            const affectedCodeowners = ${{ env.OWNERS }} || [];
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const currentPrNumber = context.payload.pull_request.number;
