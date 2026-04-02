@@ -11,7 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NewChat } from '@kbn/elastic-assistant';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { SecurityAgentBuilderAttachments, SECURITY_RULE_ATTACHMENT_ID } from '../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
