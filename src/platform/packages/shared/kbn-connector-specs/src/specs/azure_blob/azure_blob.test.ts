@@ -119,25 +119,6 @@ describe('AzureBlob', () => {
       expect(result.contentLength).toBe(5);
     });
 
-    it('should use narrow no-break space before AM in default macOS screenshot names', async () => {
-      const stream = Readable.from(Buffer.from('x'));
-      mockClient.get.mockResolvedValue({
-        data: stream,
-        headers: { 'content-type': 'image/png', 'content-length': '1' },
-      });
-
-      await AzureBlob.actions.getBlob.handler(mockContext, {
-        container: 'mycontainer',
-        blobName: 'Screenshot 2026-04-01 at 9.56.48 AM.png',
-      });
-
-      // macOS writes U+202F before AM/PM; agents often pass a regular space (U+0020).
-      expect(mockClient.get).toHaveBeenCalledWith(
-        `${baseUrl}/mycontainer/Screenshot%202026-04-01%20at%209.56.48%E2%80%AFAM.png`,
-        expect.objectContaining({ responseType: 'stream' })
-      );
-    });
-
     it('should return tooLarge when Content-Length exceeds 128KB', async () => {
       const stream = new Readable({ read() {} });
       mockClient.get.mockResolvedValue({

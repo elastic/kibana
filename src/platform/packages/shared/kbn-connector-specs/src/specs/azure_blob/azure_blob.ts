@@ -31,25 +31,6 @@ import getBlobWorkflow from './workflows/get_blob.yaml';
 const AZURE_BLOB_API_VERSION = '2021-06-08';
 const MAX_BLOB_DOWNLOAD_SIZE_BYTES = 131072; // 128 KB
 
-/** Narrow no-break space: macOS uses this before AM/PM in default screenshot filenames, not U+0020. */
-const NNBS = '\u202F';
-
-/**
- * If the blob name looks like a default macOS screenshot but uses a regular space before AM/PM,
- * rewrite that space to U+202F so the path matches what macOS actually wrote when uploading.
- * @see https://core.trac.wordpress.org/ticket/62995
- */
-function applyMacOsScreenshotMeridiemSpace(blobName: string): string {
-  if (!blobName.startsWith('Screenshot ')) {
-    return blobName;
-  }
-  // Screenshot 2026-04-01 at 9.56.48 AM.png → space before AM/PM should be NNBS on macOS
-  return blobName.replace(
-    /^(Screenshot \d{4}-\d{2}-\d{2} at \d{1,2}\.\d{2}\.\d{2}) (AM|PM)(?=\.|$)/i,
-    (_, prefix, meridiem) => `${prefix}${NNBS}${meridiem}`
-  );
-}
-
 function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
 }
@@ -204,10 +185,11 @@ export const AzureBlob: ConnectorSpec = {
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
         const container = encodePathSegment(input.container);
-        const blobName = encodePathSegment(applyMacOsScreenshotMeridiemSpace(input.blobName));
-        const response = await ctx.client.get(`${baseUrl}/${container}/${blobName}`, {
-          responseType: 'stream',
-        });
+
+        const response = await ctx.client.get(
+          `${baseUrl}/${container}/${encodePathSegment(input.blobName)}`,
+          { responseType: 'stream' }
+        );
         const stream = response.data as Readable;
         const contentType = response.headers['content-type'] as string | undefined;
         const rawLength = response.headers['content-length'];
@@ -255,10 +237,12 @@ export const AzureBlob: ConnectorSpec = {
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
         const container = encodePathSegment(input.container);
-        const blobName = encodePathSegment(applyMacOsScreenshotMeridiemSpace(input.blobName));
+
         let response;
         try {
-          response = await ctx.client.head(`${baseUrl}/${container}/${blobName}`);
+          response = await ctx.client.head(
+            `${baseUrl}/${container}/${encodePathSegment(input.blobName)}`
+          );
         } catch (err) {
           const status = (err as { response?: { status?: number } })?.response?.status;
           if (status === 404) {
