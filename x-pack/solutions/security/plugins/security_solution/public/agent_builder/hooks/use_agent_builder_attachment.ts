@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
+import { useSecurityAgentId } from './use_security_agent_id';
 
 export interface UseAgentBuilderAttachmentParams {
   /**
@@ -42,32 +42,38 @@ export const useAgentBuilderAttachment = ({
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
+  const agentId = useSecurityAgentId();
+  const hasWarned = useRef(false);
 
   const openAgentBuilderFlyout = useCallback(() => {
     if (!agentBuilder?.openChat) {
+      if (!hasWarned.current) {
+        window.console.warn(
+          'useAgentBuilderAttachment: agentBuilder service or openChat method is not available. ' +
+            'Ensure the agentBuilder plugin is enabled.'
+        );
+        hasWarned.current = true;
+      }
       return;
     }
 
-    // Create a unique ID for the attachment
     const attachmentId = `${attachmentType}-${Date.now()}`;
 
-    // Create the UiAttachment object
     const attachment: AttachmentInput = {
       id: attachmentId,
       type: attachmentType,
       data: attachmentData,
     };
 
-    // Open the chat with attachment and prefilled message
     agentBuilder.openChat({
       autoSendInitialMessage: false,
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
-      agentId: THREAT_HUNTING_AGENT_ID,
+      ...(agentId ? { agentId } : {}),
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder, agentId]);
 
   return {
     openAgentBuilderFlyout,
