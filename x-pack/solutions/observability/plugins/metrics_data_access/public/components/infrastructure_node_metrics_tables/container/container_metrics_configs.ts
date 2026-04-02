@@ -96,11 +96,7 @@ export const unpackMetricSemconvK8s = makeUnpackMetric(metricByFieldSemconvK8s);
 /** @deprecated Use metricByFieldEcs for ECS; use unpack from getUnpackMetricsForSchema for transform */
 export const metricByField = metricByFieldEcs;
 
-export function getOptionsForSchema(
-  isOtel: boolean,
-  isK8sContainer?: boolean,
-  kuery?: string
-) {
+export function getOptionsForSchema(isOtel: boolean, isK8sContainer?: boolean, kuery?: string) {
   if (isOtel) {
     return isK8sContainer
       ? metricsToApiOptions(containerMetricsQueryConfigSemconvK8s, kuery)
