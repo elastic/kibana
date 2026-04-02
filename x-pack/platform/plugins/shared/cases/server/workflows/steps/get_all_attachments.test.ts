@@ -71,7 +71,7 @@ describe('getAllAttachmentsStepDefinition', () => {
     } as unknown as CasesClient);
     const definition = getAllAttachmentsStepDefinition(getCasesClient);
 
-    expect(() => definition.handler(createContext({ case_id: 'case-1' }))).rejects.toThrow(
+    await expect(definition.handler(createContext({ case_id: 'case-1' }))).rejects.toThrow(
       'not found'
     );
   });

@@ -44,7 +44,7 @@ describe('deleteObservableStepDefinition', () => {
     });
   });
 
-  it('returns error when cases.deleteObservable throws', () => {
+  it('returns error when cases.deleteObservable throws', async () => {
     // FAILURE SCENARIO: client throws (e.g. observable not found or auth failure)
     const deleteObservable = jest.fn().mockRejectedValue(new Error('observable not found'));
     const getCasesClient = jest.fn().mockResolvedValue({
@@ -52,7 +52,7 @@ describe('deleteObservableStepDefinition', () => {
     } as unknown as CasesClient);
     const definition = deleteObservableStepDefinition(getCasesClient);
 
-    expect(() =>
+    await expect(
       definition.handler(createContext({ case_id: 'case-1', observable_id: 'obs-1' }))
     ).rejects.toThrow('observable not found');
   });
