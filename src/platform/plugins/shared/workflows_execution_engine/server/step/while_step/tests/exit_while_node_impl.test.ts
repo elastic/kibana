@@ -262,6 +262,19 @@ describe('ExitWhileNodeImpl', () => {
       expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalled();
     });
 
+    it('should evict stale loop outputs before throwing on max-iterations with on-limit fail', () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        iteration: 1,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'fail';
+
+      expect(() => underTest.run()).toThrow();
+      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
+        new Set(['inner_step'])
+      );
+    });
+
     it('should not evict stale loop outputs when looping back', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 0,

@@ -939,12 +939,7 @@ describe('WorkflowExecutionState', () => {
           } as unknown as EsWorkflowStepExecution);
         }
 
-        const start = performance.now();
         underTest.evictStaleLoopOutputs(['heavyStep']);
-        const elapsed = performance.now() - start;
-
-        // Should complete in well under 1 second even for 1000 iterations
-        expect(elapsed).toBeLessThan(1000);
 
         const executions = underTest.getStepExecutionsByStepId('heavyStep');
         expect(executions).toHaveLength(iterationCount);

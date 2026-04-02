@@ -200,6 +200,20 @@ describe('ExitForeachNodeImpl', () => {
       expect(wfExecutionRuntimeManager.navigateToNode).not.toHaveBeenCalled();
     });
 
+    it('should evict stale loop outputs before throwing on max-iterations with on-limit fail', () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'fail';
+
+      expect(() => underTest.run()).toThrow();
+      expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
+        new Set(['innerStep'])
+      );
+    });
+
     it('should evict stale loop outputs when loop completes', async () => {
       await underTest.run();
 
