@@ -33,8 +33,8 @@ export const elasticAiAssistantInferenceFeature: InferenceFeatureConfig = {
   featureDescription: ELASTIC_AI_ASSISTANT_FEATURE_DESCRIPTION,
   taskType: 'chat_completion',
   recommendedEndpoints: [
-    defaultInferenceEndpoints.OPENAI_GPT_5_2,
     defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
+    defaultInferenceEndpoints.OPENAI_GPT_5_2,
     defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
   ],
 };
