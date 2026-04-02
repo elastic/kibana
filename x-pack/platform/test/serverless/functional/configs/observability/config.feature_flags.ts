@@ -7,8 +7,12 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 
+/**
+ * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments.
+ * These tests most likely will fail on default MKI project.
+ */
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseTestConfig = await readConfigFile(require.resolve('../../config.search.base.ts'));
+  const baseTestConfig = await readConfigFile(require.resolve('../../config.oblt.base.ts'));
   const kbnTestServer = baseTestConfig.get('kbnTestServer');
 
   return {
@@ -22,7 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     testFiles: [require.resolve('../../test_suites/discover/esql')],
     junit: {
-      reportName: 'Serverless Search Functional Tests - Common Group 21',
+      reportName: 'Serverless Observability Feature Flags Functional Tests',
     },
   };
 }
