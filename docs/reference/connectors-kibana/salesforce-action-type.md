@@ -111,9 +111,16 @@ https://<your-kibana-host>/api/actions/connector/_oauth_callback
 6. Under **Available Scopes**, select at least:
    - **Manage user data via APIs (api)**
    - **Perform requests at any time (refresh_token, offline_access)**
-7. Under **Flow Enablement**, select the options your Salesforce release shows for the **client credentials**
-   grant—often **Enable Client Credentials Flow** and/or **Enable Authorization Code and Credentials Flow** for External
-   Client Apps.
+7. Under **Flow Enablement**, enable the Salesforce option that matches the **authentication type** you choose when you
+   create or edit this Salesforce connector in {{kib}}:
+   - **OAuth 2.0 Client Credentials** — turn on **Enable Client Credentials Flow**. {{kib}} uses the OAuth 2.0 client
+     credentials grant (`grant_type=client_credentials`) against your Token URL; no browser visit to the Authorization
+     URL is required for this mode.
+   - **OAuth 2.0 authorization code** — turn on **Enable Authorization Code and Credentials Flow** (or the equivalent
+     label your Salesforce release uses for the authorization-code flow that uses `/services/oauth2/authorize` and your
+     callback URL). {{kib}} drives the browser authorization step and exchanges the code at the Token URL.
+   - To use **both** auth types with the **same** External Client App over time, enable **both** of the above options in
+     Salesforce.
 8. Under **Security**, ensure these options are selected (labels can vary slightly by release):
    - **Require secret for Web Server Flow**
    - **Request secret for Refresh Token Flow** (or **Require Secret for Refresh Token Flow**)
