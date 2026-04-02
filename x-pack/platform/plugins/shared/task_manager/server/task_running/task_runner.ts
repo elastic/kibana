@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { withSpan } from '@kbn/apm-utils';
+import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import type {
   ExecutionContextStart,
@@ -64,7 +64,7 @@ import type {
   TaskDefinition,
   TaskEventLogger,
 } from '../task';
-import { isFailedRunResult, TaskStatus } from '../task';
+import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
@@ -88,6 +88,8 @@ export interface TaskRunner {
   expiration: Date;
   startedAt: Date | null;
   definition: TaskDefinition | undefined;
+  /** Effective cost for this task (instance override, then definition, then Normal). */
+  cost: number;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
@@ -285,6 +287,14 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get definition(): TaskDefinition | undefined {
     return this.definitions.get(this.taskType);
+  }
+
+  /**
+   *  Effective cost for this task (instance override, then definition, then Normal).
+   */
+  public get cost(): number {
+    const instanceCost = getTaskCostFromInstance(this.instance.task.cost);
+    return instanceCost ?? this.definition?.cost ?? TaskCost.Normal;
   }
 
   /**
@@ -554,7 +564,7 @@ export class TaskManagerRunner implements TaskRunner {
           TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
           TASK_MANAGER_TRANSACTION_TYPE
         );
-        apmTrans.addLabels({ entityId: this.taskType });
+        addSpanLabels({ entityId: this.taskType });
 
         const now = new Date();
         try {

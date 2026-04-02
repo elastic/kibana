@@ -15,13 +15,13 @@ import type {
   TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { HEATMAP_GRID_NAME, LENS_HEATMAP_ID } from '@kbn/lens-common';
-import type { LegendSize } from '@kbn/chart-expressions-common';
 import type {
   HeatmapGridConfigResult,
   HeatmapLegendConfigResult,
 } from '@kbn/lens-common/visualizations/heatmap/types';
 
 import { DEFAULT_LAYER_ID } from '../../../constants';
+import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueAPIToLensState } from '../../coloring';
@@ -37,6 +37,7 @@ import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
+import { axisLabelOrientationCompat } from '../common';
 
 const ACCESSOR = 'heatmap_value_accessor';
 
@@ -44,16 +45,11 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
 }
 
-function getRotationFromOrientation(orientation?: 'angled' | 'vertical' | 'horizontal') {
-  if (!orientation) return;
-  return orientation === 'angled' ? -45 : orientation === 'vertical' ? -90 : 0;
-}
-
 function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
   const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
-  const xAxisLabelRotation = getRotationFromOrientation(layer.axes?.x?.labels?.orientation);
+  const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axes?.x?.labels?.orientation);
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -78,12 +74,12 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       }),
     },
     legend: {
-      isVisible: layer.legend?.visible ?? true,
-      position: layer.legend?.position ?? 'right',
+      isVisible: layer.legend?.visibility !== 'hidden',
       type: 'heatmap_legend',
+      position: 'right',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
-        legendSize: layer.legend?.size as LegendSize,
+        legendSize: legendSizeCompat.toState(layer.legend?.size),
         shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
     },
@@ -144,8 +140,7 @@ type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> 
 };
 
 export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as HeatmapStateNoESQL);
+  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapStateNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
