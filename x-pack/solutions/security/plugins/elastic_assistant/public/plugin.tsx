@@ -85,6 +85,16 @@ export class ElasticAssistantPublicPlugin
       },
     });
 
+    // TODO: Chrome-Next hack — dual registration needed because Chrome Next doesn't render
+    // HeaderNavControls (registerRight mount points). Remove the registerRight call once
+    // Chrome Next is the only chrome. See https://github.com/elastic/kibana/issues/260010
+    coreStart.chrome.next.aiButton.register({
+      content: (target: HTMLDivElement) => {
+        const startService = startServices();
+        return this.mountAIAssistantButton(target, coreStart, startService);
+      },
+    });
+
     return {};
   }
 

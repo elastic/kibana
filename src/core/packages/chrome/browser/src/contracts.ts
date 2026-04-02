@@ -10,8 +10,7 @@
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { ChromeNextHeaderConfig } from './next_header';
-import type { ChromeNextGlobalSearchConfig } from './next_global_search';
+import type { ChromeNext } from './chrome_next/chrome_next';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -324,38 +323,8 @@ export interface ChromeStart {
    */
   getActiveSolutionNavId(): SolutionId | null;
 
-  /**
-   * Chrome-Next APIs: header configuration, AI button slot, and future slots.
-   */
-  next: {
-    header: {
-      /**
-       * Set the Chrome-Next header configuration for the current page.
-       * Chrome renders the title, metadata, global actions, and app menu.
-       *
-       * Pass `undefined` to clear (e.g. on unmount or route change).
-       * Automatically cleared on app change.
-       */
-      set(config?: ChromeNextHeaderConfig): void;
-    };
-    aiButton: {
-      /**
-       * Set the AI button component for the Chrome-Next header.
-       * The plugin owns the full component (rendering, state, tooltips, shortcuts).
-       * Chrome renders it in a fixed slot at the far right of the header.
-       * Pass `undefined` to remove. Global — persists across app changes.
-       */
-      set(node?: ReactNode): void;
-    };
-    globalSearch: {
-      /**
-       * Set the global search configuration for the Chrome-Next sidenav.
-       * Chrome renders a search icon button in the sidenav header items; clicking it fires `onClick`.
-       * Pass `undefined` to remove the button. Global — persists across app changes.
-       */
-      set(config?: ChromeNextGlobalSearchConfig): void;
-    };
-  };
+  /** {@inheritdoc ChromeNext} */
+  next: ChromeNext;
 
   /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers

@@ -8,20 +8,23 @@
  */
 
 import React from 'react';
-import { useAiButton } from './hooks';
+import { HeaderExtension } from '../shared/header_extension';
+import { useAiButtons } from './hooks';
 
-/**
- * Renders the AI button in the Chrome-Next project header.
- * The plugin owns the component; Chrome just places it in the slot.
- */
 export const AiButtonSlot = React.memo(() => {
-  const node = useAiButton();
+  const buttons = useAiButtons();
 
-  if (!node) {
+  if (buttons.length === 0) {
     return null;
   }
 
-  return <>{node}</>;
+  return (
+    <>
+      {buttons.map((button, index) => (
+        <HeaderExtension key={index} extension={button.content} />
+      ))}
+    </>
+  );
 });
 
 AiButtonSlot.displayName = 'AiButtonSlot';

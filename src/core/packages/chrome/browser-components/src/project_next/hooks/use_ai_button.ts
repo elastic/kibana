@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import { useMemo } from 'react';
+import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 
-/**
- * Returns the AI button ReactNode set via `chrome.next.aiButton.set()`,
- * or `undefined` if not set. Used by the Chrome-Next header.
- */
-export function useAiButton(): ReactNode | undefined {
+const EMPTY: ChromeNextAiButton[] = [];
+
+export function useAiButtons(): ChromeNextAiButton[] {
   const chrome = useChromeService();
-  const node$ = useMemo(() => chrome.next.aiButton.get$(), [chrome]);
-  return useObservable(node$, undefined);
+  const buttons$ = useMemo(() => chrome.next.aiButton.get$(), [chrome]);
+  return useObservable(buttons$, EMPTY);
 }

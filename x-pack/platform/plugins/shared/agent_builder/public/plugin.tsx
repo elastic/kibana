@@ -284,13 +284,18 @@ export class AgentBuilderPlugin
         order: 1001,
       });
 
-      core.chrome.next.aiButton.set(
-        <AgentBuilderNavControlInitiator
-          coreStart={core}
-          pluginsStart={startDependencies}
-          agentBuilderService={agentBuilderService}
-        />
-      );
+      // TODO: Chrome-Next hack — dual registration needed because Chrome Next doesn't render
+      // HeaderNavControls (registerRight mount points). Remove the registerRight call once
+      // Chrome Next is the only chrome. See https://github.com/elastic/kibana/issues/260010
+      core.chrome.next.aiButton.register({
+        content: (
+          <AgentBuilderNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            agentBuilderService={agentBuilderService}
+          />
+        ),
+      });
     }
 
     return agentBuilderService;

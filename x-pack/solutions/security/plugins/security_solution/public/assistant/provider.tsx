@@ -56,11 +56,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   }, [elasticAssistantSharedState.promptContexts, promptContext, promptContexts]);
 
   if (!assistantContextValue) {
-    // TODO: Chrome-Next quick mitigation — was `return null` which blocked the entire route tree.
-    // With Chrome Next, the elastic_assistant nav control never mounts (no HeaderNavControls),
-    // so setAssistantContextValue is never called and this stays undefined.
-    // See https://github.com/elastic/kibana/issues/260010
-    return <>{children}</>;
+    return null;
   }
 
   return (

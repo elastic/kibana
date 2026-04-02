@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useAiButtons } from './use_ai_button';
-export { useProjectNextAppMenu } from './use_project_next_app_menu';
-export { useBackButton } from './use_back_button';
-export { useReportTopBarHeight } from './use_report_top_bar_height';
-export { useTitle } from './use_title';
+import type { ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
+
+/** @public */
+export interface ChromeNextAiButton {
+  content: ChromeExtensionContent;
+}

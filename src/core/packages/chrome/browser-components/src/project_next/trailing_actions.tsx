@@ -13,7 +13,7 @@ import React, { useMemo } from 'react';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 import { AiButtonSlot } from './ai_button_slot';
 import { ProjectNextAppMenu } from './app_menu';
-import { useAiButton, useProjectNextAppMenu } from './hooks';
+import { useAiButtons, useProjectNextAppMenu } from './hooks';
 
 const useTrailingStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -38,10 +38,10 @@ const useTrailingStyles = () => {
 export const ProjectNextTrailingActions = React.memo(() => {
   const appMenuConfig = useProjectNextAppMenu();
   const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const aiButton = useAiButton();
+  const aiButtons = useAiButtons();
   const styles = useTrailingStyles();
 
-  const hasTrailingContent = !!appMenuConfig || hasLegacyActionMenu || !!aiButton;
+  const hasTrailingContent = !!appMenuConfig || hasLegacyActionMenu || aiButtons.length > 0;
 
   if (!hasTrailingContent) {
     return null;

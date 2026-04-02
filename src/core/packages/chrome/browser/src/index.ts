@@ -61,13 +61,14 @@ export type {
 } from './sidebar';
 
 export type {
+  ChromeNext,
+  ChromeNextAiButton,
+  ChromeNextGlobalSearchConfig,
   ChromeNextHeaderBack,
   ChromeNextHeaderBadge,
-  ChromeNextHeaderConfig,
-  ChromeNextHeaderMetadataSlotItem,
-  ChromeNextHeaderGlobalActions,
-  ChromeNextHeaderTab,
   ChromeNextHeaderCallout,
-} from './next_header';
-
-export type { ChromeNextGlobalSearchConfig } from './next_global_search';
+  ChromeNextHeaderConfig,
+  ChromeNextHeaderGlobalActions,
+  ChromeNextHeaderMetadataSlotItem,
+  ChromeNextHeaderTab,
+} from './chrome_next';

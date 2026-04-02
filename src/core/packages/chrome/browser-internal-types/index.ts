@@ -15,6 +15,8 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeNext,
+  ChromeNextAiButton,
   ChromeNextHeaderConfig,
   ChromeNextGlobalSearchConfig,
   ChromeProjectNavigationNode,
@@ -108,15 +110,18 @@ export interface InternalChromeStart extends ChromeStart {
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */
-  next: ChromeStart['next'] & {
-    header: ChromeStart['next']['header'] & {
-      get$(): Observable<ChromeNextHeaderConfig | undefined>;
-    };
-    aiButton: ChromeStart['next']['aiButton'] & {
-      get$(): Observable<ReactNode | undefined>;
-    };
-    globalSearch: ChromeStart['next']['globalSearch'] & {
-      get$(): Observable<ChromeNextGlobalSearchConfig | undefined>;
-    };
+  next: InternalChromeNext;
+}
+
+/** @internal */
+export interface InternalChromeNext extends ChromeNext {
+  header: ChromeNext['header'] & {
+    get$(): Observable<ChromeNextHeaderConfig | undefined>;
+  };
+  aiButton: ChromeNext['aiButton'] & {
+    get$(): Observable<ChromeNextAiButton[]>;
+  };
+  globalSearch: ChromeNext['globalSearch'] & {
+    get$(): Observable<ChromeNextGlobalSearchConfig | undefined>;
   };
 }

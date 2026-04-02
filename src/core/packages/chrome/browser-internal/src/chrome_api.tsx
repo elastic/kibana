@@ -9,6 +9,7 @@
 
 import React, { type ReactNode } from 'react';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
+import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -176,8 +177,17 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
         set: services.nextHeader.set,
       },
       aiButton: {
-        get$: () => state.aiButton.$,
-        set: state.aiButton.set,
+        get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
+        register: (button: ChromeNextAiButton) => {
+          state.aiButton.update((prev) => new Set([...prev, button]));
+          return () => {
+            state.aiButton.update((prev) => {
+              const next = new Set(prev);
+              next.delete(button);
+              return next;
+            });
+          };
+        },
       },
       globalSearch: {
         get$: () => state.globalSearch.$,
