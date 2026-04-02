@@ -6,9 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
+} from '@kbn/management-settings-ids';
+import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import {
   STREAMS_API_PRIVILEGES,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
@@ -72,26 +78,37 @@ const eligibleStreamsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EligibleStreamsResponse> => {
-    const { streamsClient, taskClient, modelSettingsClient, uiSettingsClient, licensing } =
+    const { streamsClient, taskClient, globalUiSettingsClient, uiSettingsClient, licensing } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const settings = await modelSettingsClient.getSettings();
+    const enabled = await globalUiSettingsClient.get<boolean>(
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+    );
 
-    if (!settings.continuousKiExtraction?.enabled) {
+    if (!enabled) {
       throw new StatusError('Continuous KI extraction is disabled', 400);
     }
 
-    const { continuousKiExtraction } = settings;
+    const [intervalHoursSetting, excludedStreamPatterns] = await Promise.all([
+      globalUiSettingsClient.get<number>(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
+      ),
+      globalUiSettingsClient.get<string>(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS
+      ),
+    ]);
+
     const maxStreams = params.query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = params.query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
     const [connectorId, sortedTasks, allStreams] = await Promise.all([
-      resolveConnectorId({
-        connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
-        uiSettingsClient,
-        logger: server.logger,
+      resolveConnectorForFeature({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+        featureName: 'knowledge indicator extraction',
+        request,
       }),
       taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
         sort: [
@@ -109,14 +126,14 @@ const eligibleStreamsRoute = createServerRoute({
 
     const intervalHours =
       params.query.extractionIntervalHours ??
-      continuousKiExtraction.intervalHours ??
+      intervalHoursSetting ??
       DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
     const { alreadyRunning, candidates, upToDate, excluded, unsupported, excludePatterns } =
       classifyStreams({
         allStreams,
         sortedTasks,
-        excludedStreamPatterns: continuousKiExtraction.excludedStreamPatterns ?? '',
+        excludedStreamPatterns: excludedStreamPatterns ?? '',
         intervalHours,
       });
 
@@ -135,8 +152,8 @@ const eligibleStreamsRoute = createServerRoute({
       unsupported,
       skipped,
       settings: {
-        enabled: continuousKiExtraction.enabled ?? false,
-        intervalHours: continuousKiExtraction.intervalHours ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
+        enabled,
+        intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
         excludePatterns,
       },
       connectorId,

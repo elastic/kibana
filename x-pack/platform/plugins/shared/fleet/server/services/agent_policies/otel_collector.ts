@@ -8,6 +8,7 @@
 import type { Output, TemplateAgentPolicyInput } from '../../types';
 import type {
   FullAgentPolicyInput,
+  FullAgentPolicyInputStream,
   OTelCollectorComponentID,
   OTelCollectorConfig,
   OTelCollectorPipeline,
@@ -23,7 +24,7 @@ import {
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
-import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
+import { hasDynamicSignalTypes } from '../../../common/services';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
@@ -47,16 +48,16 @@ export function generateOtelcolConfig(
         packageInfo = packageInfoCache.get(pkgKey) ?? defaultPackageInfo;
       }
 
-      // Check dynamic signal types for this specific input (not the whole package),
-      // using the policy_template from meta to narrow to the exact registry input definition.
+      // Per-input dynamic signal types (policy_template + inputType); if policy_template is unset,
+      // hasDynamicSignalTypes does not filter by template name (see otelcol_helpers).
       const policyTemplateName =
         'meta' in input
           ? (input as FullAgentPolicyInput).meta?.package?.policy_template
           : undefined;
       const inputDynamicSignalTypes = packageInfo
-        ? packagePolicyInputAllowsUndefinedDataStreamType(packageInfo, {
-            type: input.type,
-            policy_template: policyTemplateName,
+        ? hasDynamicSignalTypes(packageInfo, {
+            policyTemplateName,
+            inputType: input.type,
           })
         : false;
 
@@ -100,7 +101,10 @@ export function generateOtelcolConfig(
                     addSuffixToOtelcolComponentsConfig(
                       'pipelines',
                       suffix,
-                      addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)
+                      addSuffixToOtelcolPipelinesComponents(
+                        alignPipelineSignalType(stream, inputDynamicSignalTypes),
+                        suffix
+                      )
                     ).pipelines ?? {},
                     shouldAddAPMConfig,
                     namespace
@@ -306,6 +310,28 @@ function conditionallyAddApmToPipelines(
     }
   );
   return result;
+}
+
+/**
+ * Adjust the signal type of the pipeline to the data stream type.
+ * This is needed when the data stream type is changed by configuration and the pipeline is not dynamic.
+ */
+function alignPipelineSignalType(
+  stream: FullAgentPolicyInputStream,
+  inputDynamicSignalTypes: boolean
+): Record<OTelCollectorPipelineID, any> {
+  const pipelines = stream.service?.pipelines ?? {};
+  const dataStreamType = stream.data_stream.type;
+  if (!dataStreamType || inputDynamicSignalTypes || Object.keys(pipelines).length !== 1) {
+    return pipelines;
+  }
+  const [[pipelineID, pipeline]] = Object.entries(pipelines);
+  const [signalType, ...rest] = pipelineID.split('/');
+  if (signalType === dataStreamType) {
+    return pipelines;
+  }
+  const newKey = [dataStreamType, ...rest].join('/') as OTelCollectorPipelineID;
+  return { [newKey]: pipeline };
 }
 
 function addSuffixToOtelcolPipelinesComponents(

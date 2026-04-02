@@ -763,6 +763,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the Streams management Overview tab',
     },
   },
+  'observability:streamsSigEventsIndexPatterns': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
