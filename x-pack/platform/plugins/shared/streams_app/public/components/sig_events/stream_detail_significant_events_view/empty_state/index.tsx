@@ -104,7 +104,7 @@ export function EmptyState({
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiButton                    
+                  <EuiButton
                     size="m"
                     color="primary"
                     isLoading={isGenerating}
