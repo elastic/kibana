@@ -14,7 +14,10 @@ export interface AutomaticImportPageObjects extends PageObjects {
   integrationManagement: IntegrationManagementPage;
 }
 
-export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): AutomaticImportPageObjects {
+export function extendPageObjects(
+  pageObjects: PageObjects,
+  page: ScoutPage
+): AutomaticImportPageObjects {
   return {
     ...pageObjects,
     integrationManagement: createLazyPageObject(IntegrationManagementPage, page),

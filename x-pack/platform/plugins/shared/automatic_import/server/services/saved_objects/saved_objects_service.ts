@@ -10,8 +10,6 @@ import type {
   Logger,
   AuthenticatedUser,
   SavedObjectsClient,
-} from '@kbn/core/server';
-import {
   type SavedObjectsUpdateOptions,
   type SavedObjectsDeleteOptions,
   type SavedObjectsCreateOptions,

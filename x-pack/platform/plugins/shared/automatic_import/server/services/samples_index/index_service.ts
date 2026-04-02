@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
-import type { AutomaticImportSamplesProperties } from './storage';
-import {
+import type {
+  AutomaticImportSamplesProperties,
   automaticImportSamplesIndexName,
   createIndexAdapter,
   type AutomaticImportSamplesIndexAdapter,

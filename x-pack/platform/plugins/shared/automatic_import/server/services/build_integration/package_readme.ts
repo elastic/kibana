@@ -92,5 +92,5 @@ export const buildReadme = (
     dataStreamSections.push(buildDataStreamSection(dataStream, fieldMappings));
   }
 
-  return [...headerLines, ...dataStreamSections].join('\n').trimEnd() + '\n';
+  return `${[...headerLines, ...dataStreamSections].join('\n').trimEnd()}\n`;
 };

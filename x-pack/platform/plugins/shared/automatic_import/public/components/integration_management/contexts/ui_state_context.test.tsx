@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { renderHook, act } from '@testing-library/react';
+import { render, fireEvent, renderHook, act } from '@testing-library/react';
 import { UIStateProvider, useUIState } from './ui_state_context';
 
 describe('UIStateContext', () => {
