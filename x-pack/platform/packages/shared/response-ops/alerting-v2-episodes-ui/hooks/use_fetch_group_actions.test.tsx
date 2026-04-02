@@ -65,7 +65,7 @@ describe('useFetchGroupActions', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.groupActionsMap.get('gh-1')).toEqual({
+    expect(result.current.data!.get('gh-1')).toEqual({
       groupHash: 'gh-1',
       ruleId: 'rule-1',
       lastDeactivateAction: 'deactivate',
@@ -98,8 +98,8 @@ describe('useFetchGroupActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.groupActionsMap.has('gh-2')).toBe(true));
-    expect(result.current.groupActionsMap.get('gh-2')?.tags).toEqual(['solo']);
+    await waitFor(() => expect(result.current.data!.has('gh-2')).toBe(true));
+    expect(result.current.data!.get('gh-2')?.tags).toEqual(['solo']);
   });
 
   it('converts tags to empty array when row tags are null', async () => {
@@ -125,8 +125,8 @@ describe('useFetchGroupActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.groupActionsMap.has('gh-3')).toBe(true));
-    expect(result.current.groupActionsMap.get('gh-3')?.tags).toEqual([]);
+    await waitFor(() => expect(result.current.data!.has('gh-3')).toBe(true));
+    expect(result.current.data!.get('gh-3')?.tags).toEqual([]);
   });
 
   it('keeps the last row when duplicate group hashes are returned', async () => {
@@ -160,6 +160,6 @@ describe('useFetchGroupActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.groupActionsMap.get('dup')?.ruleId).toBe('r2'));
+    await waitFor(() => expect(result.current.data!.get('dup')?.ruleId).toBe('r2'));
   });
 });

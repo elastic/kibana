@@ -33,19 +33,20 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { AlertEpisodeStatusCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/status/alert_episode_status_cell';
-import { AlertEpisodeActionsCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_actions_cell';
-import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_tags';
+import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
+import { AlertEpisodeActions } from '@kbn/alerting-v2-episodes-ui/components/actions/actions';
+import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
 import type {
   EpisodesFilterState,
   EpisodesSortState,
-} from '@kbn/alerting-v2-episodes-ui/utils/build_episodes_esql_query';
+} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import useObservable from 'react-use/lib/useObservable';
 import type { InputTimeRange } from '@kbn/data-plugin/public/query';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 
@@ -206,7 +207,7 @@ export function AlertsV2Page() {
     episodeIds: episodeIds ?? [],
     services,
   });
-  const { groupActionsMap } = useFetchGroupActions({ groupHashes, services });
+  const { data: groupActionsMap } = useFetchGroupActions({ groupHashes, services });
 
   const onSetColumns = useCallback((cols: string[], _hideTimeCol: boolean) => {
     setColumns(cols);
@@ -310,10 +311,10 @@ export function AlertsV2Page() {
                     const groupHash = props.row.flattened.group_hash as string;
 
                     return (
-                      <AlertEpisodeStatusCell
+                      <AlertEpisodeStatusBadges
                         status={status}
                         episodeAction={episodeActionsMap?.get(episodeId)}
-                        groupAction={groupActionsMap.get(groupHash)}
+                        groupAction={groupActionsMap?.get(groupHash)}
                       />
                     );
                   },
@@ -322,18 +323,25 @@ export function AlertsV2Page() {
                     const groupHash = props.row.flattened.group_hash as string;
 
                     return (
-                      <AlertEpisodeActionsCell
+                      <AlertEpisodeActions
                         episodeId={episodeId}
                         groupHash={groupHash}
                         episodeAction={episodeActionsMap?.get(episodeId)}
-                        groupAction={groupActionsMap.get(groupHash)}
+                        groupAction={groupActionsMap?.get(groupHash)}
                         http={services.http}
+                        viewDetailsHref={
+                          episodeId
+                            ? services.http.basePath.prepend(
+                                paths.observability.alertingV2EpisodeDetails(episodeId)
+                              )
+                            : undefined
+                        }
                       />
                     );
                   },
                   tags: (props) => {
                     const groupHash = props.row.flattened.group_hash as string;
-                    const groupAction = groupActionsMap.get(groupHash);
+                    const groupAction = groupActionsMap?.get(groupHash);
 
                     return <AlertEpisodeTags tags={groupAction?.tags ?? []} />;
                   },

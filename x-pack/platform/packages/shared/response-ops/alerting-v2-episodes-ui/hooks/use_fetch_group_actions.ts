@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { GroupAction } from '../types/action';
+import type { AlertEpisodeGroupAction } from '../types/action';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { queryKeys } from '../query_keys';
-import { buildGroupActionsQuery } from '../utils/queries/build_group_actions_query';
+import { buildGroupActionsQuery } from '../queries/group_actions_query';
 
 const tagsFromRow = (value: unknown): string[] => {
   if (value == null) {
@@ -31,43 +30,32 @@ export interface UseFetchGroupActionsOptions {
   services: { expressions: ExpressionsStart };
 }
 
-export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) => {
-  const { data, isLoading } = useQuery({
+export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) =>
+  useQuery({
     queryKey: queryKeys.groupActions(groupHashes),
     queryFn: async ({ signal }) => {
-      const query = buildGroupActionsQuery(groupHashes);
-      const result = await executeEsqlQuery({
+      return executeEsqlQuery({
         expressions: services.expressions,
-        query,
+        query: buildGroupActionsQuery(groupHashes).print('basic'),
         input: null,
         abortSignal: signal,
         noCache: true,
       });
-
-      return result.rows.map(
-        (row): GroupAction => ({
+    },
+    enabled: groupHashes.length > 0,
+    keepPreviousData: true,
+    select: (result) => {
+      const map = new Map<string, AlertEpisodeGroupAction>();
+      for (const row of result.rows) {
+        map.set(row.groupHash, {
           groupHash: row.group_hash as string,
           ruleId: (row.rule_id as string) ?? null,
           lastDeactivateAction: (row.last_deactivate_action as string) ?? null,
           lastSnoozeAction: (row.last_snooze_action as string) ?? null,
           snoozeExpiry: (row.snooze_expiry as string) ?? null,
           tags: tagsFromRow(row.tags),
-        })
-      );
-    },
-    enabled: groupHashes.length > 0,
-    keepPreviousData: true,
-  });
-
-  const groupActionsMap = useMemo(() => {
-    const map = new Map<string, GroupAction>();
-    if (data) {
-      for (const action of data) {
-        map.set(action.groupHash, action);
+        });
       }
-    }
-    return map;
-  }, [data]);
-
-  return { groupActionsMap, isLoading };
-};
+      return map;
+    },
+  });

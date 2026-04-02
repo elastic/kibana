@@ -13,7 +13,7 @@ import {
   buildEpisodesQuery,
   type EpisodesFilterState,
   type EpisodesSortState,
-} from '../utils/build_episodes_esql_query';
+} from '../queries/episodes_query';
 import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 

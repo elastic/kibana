@@ -11,6 +11,7 @@ export const LANDING_PATH = '/landing' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERTING_V2_PATH = '/alerts-v2' as const;
+export const ALERTING_V2_EPISODE_DETAIL_PATH = '/alerts-v2/episodes/:episodeId' as const;
 export const ALERT_DETAIL_PATH = '/alerts/:alertId' as const;
 export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been moved to its own app. Keeping around for redirecting purposes.
 export const RULES_PATH = '/alerts/rules' as const;
@@ -34,6 +35,10 @@ export const SLO_DETAIL_PATH = '/:sloId' as const;
 
 const RULES_APP_BASE_PATH = '/app/rules';
 
+function getAlertingV2EpisodeDetailRelativePath(episodeId: string): string {
+  return ALERTING_V2_EPISODE_DETAIL_PATH.replace(':episodeId', encodeURIComponent(episodeId));
+}
+
 export const paths = {
   observability: {
     alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}`,
@@ -47,6 +52,9 @@ export const paths = {
     createRuleFromTemplate: (templateId: string) =>
       `${RULES_APP_BASE_PATH}/create/template/${encodeURIComponent(templateId)}`,
     editRule: (id: string) => `${RULES_APP_BASE_PATH}/edit/${encodeURIComponent(id)}`,
+    alertingV2: `${OBSERVABILITY_BASE_PATH}${ALERTING_V2_PATH}`,
+    alertingV2EpisodeDetails: (episodeId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${getAlertingV2EpisodeDetailRelativePath(episodeId)}`,
   },
 };
 

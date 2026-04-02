@@ -8,7 +8,7 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { buildEpisodesQuery } from '../utils/build_episodes_esql_query';
+import { buildEpisodesQuery } from '../queries/episodes_query';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
 
 jest.mock('../utils/execute_esql_query');

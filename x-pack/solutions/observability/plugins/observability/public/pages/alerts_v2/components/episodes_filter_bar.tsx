@@ -14,10 +14,10 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/utils/build_episodes_esql_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
-import { StatusFilter } from '@kbn/alerting-v2-episodes-ui/components/status_filter';
-import { RuleFilter } from '@kbn/alerting-v2-episodes-ui/components/rule_filter';
+import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
+import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -99,13 +99,13 @@ export function EpisodesFilterBar({
       {/* Filters: Status, Rule */}
       <EuiFlexItem grow={false}>
         <EuiFilterGroup compressed>
-          <StatusFilter
+          <AlertEpisodesStatusFilter
             selectedStatus={filterState.status}
             onStatusChange={onStatusChange}
             data-test-subj="episodesFilterBar-status"
           />
 
-          <RuleFilter
+          <AlertEpisodesRuleFilter
             selectedRuleId={filterState.ruleId}
             onRuleChange={onRuleChange}
             ruleOptions={ruleOptions}

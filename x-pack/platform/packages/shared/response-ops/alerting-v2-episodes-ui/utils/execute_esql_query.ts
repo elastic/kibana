@@ -7,6 +7,7 @@
 
 import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { lastValueFrom, map } from 'rxjs';
+import { TIME_FIELD } from '../constants';
 
 export interface ExecuteEsqlQueryOptions<Input> {
   expressions: ExpressionsStart;
@@ -16,9 +17,6 @@ export interface ExecuteEsqlQueryOptions<Input> {
   /** When true, passes `allowCache: false` to `expressions.execute` to bypass expression-layer caching. */
   noCache?: boolean;
 }
-
-/** Time field used for the time range filter (must match the expression's timeField argument). */
-const ESQL_TIME_FIELD = '@timestamp';
 
 /**
  * Executes an ES|QL query through the expressions plugin, using Discover's `esql` function,
@@ -32,7 +30,7 @@ export const executeEsqlQuery = <Input = unknown>({
   abortSignal,
   noCache,
 }: ExecuteEsqlQueryOptions<Input>) => {
-  const expression = `esql '${query.replace(/'/g, "\\'")}' timeField='${ESQL_TIME_FIELD}'`;
+  const expression = `esql '${query.replace(/'/g, "\\'")}' timeField='${TIME_FIELD}'`;
   const options = noCache ? { allowCache: false } : undefined;
   const executionContract = expressions.execute<Input, Datatable>(expression, input, options);
   abortSignal?.addEventListener('abort', (e) => {
