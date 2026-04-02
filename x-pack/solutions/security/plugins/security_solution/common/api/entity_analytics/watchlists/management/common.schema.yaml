@@ -42,10 +42,7 @@ components:
           type: array
           items:
             type: string
-          description: List of entity source IDs associated with the watchlist
-        entityCount:
-          type: number
-          description: Number of entities in the watchlist
+          description: List of entity source IDs associated with the watchlist       
         createdAt:
           type: string
           format: date-time
