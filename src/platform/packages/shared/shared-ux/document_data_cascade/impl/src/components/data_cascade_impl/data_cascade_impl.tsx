@@ -29,6 +29,7 @@ import {
   VirtualizedCascadeRowList,
   calculateActiveStickyIndex,
   type VirtualizedCascadeListProps,
+  type CascadeRootVirtualizerReturnValue,
 } from '../../lib/core/virtualizer';
 import { useExposePublicApi } from '../../lib/core/api';
 import {
@@ -122,7 +123,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             key: props.row.id,
             size,
             // getVirtualizer will not return undefined here as it is set immediately after the first render
-            getVirtualizer: getVirtualizer as () => ReturnType<typeof useCascadeVirtualizer>,
+            getVirtualizer: getVirtualizer as () => CascadeRootVirtualizerReturnValue,
           }}
         />
       );
@@ -192,7 +193,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
           innerRef: virtualizerInstance.current!.measureElement,
           activeStickyRenderSlotRef,
           // getVirtualizer will not return undefined here as it is set immediately after the first render
-          getVirtualizer: getVirtualizer as () => ReturnType<typeof useCascadeVirtualizer>,
+          getVirtualizer: getVirtualizer as () => CascadeRootVirtualizerReturnValue,
           ...rowElement.props,
         }}
       />
