@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiSplitPanel,
   useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useRuleFormMeta } from '../contexts';
@@ -110,7 +111,8 @@ export const FieldGroup = (props: FieldGroupProps) => {
         >
           {children}
         </EuiAccordion>
-        <EuiHorizontalRule />
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="xs" />
       </>
     );
   }
