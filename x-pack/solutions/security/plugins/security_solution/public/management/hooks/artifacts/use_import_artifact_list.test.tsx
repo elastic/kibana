@@ -69,13 +69,14 @@ describe('Import artifact list hook', () => {
         headers: { 'Content-Type': undefined },
         body: expect.any(FormData),
         query: {
-          overwrite: true,
+          overwrite: false,
+          as_new_list: false,
         },
       })
     );
   });
 
-  it('should throw when importing an artifact list', async () => {
+  it('should throw when server responds with error', async () => {
     const expectedError = {
       response: {
         status: 500,
