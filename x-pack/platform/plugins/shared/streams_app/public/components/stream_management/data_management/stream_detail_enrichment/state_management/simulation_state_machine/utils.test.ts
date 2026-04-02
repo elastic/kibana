@@ -201,8 +201,8 @@ describe('Simulation utils', () => {
       expect(getSourceField({ action: 'concat', to: 'full_name' } as any)).toBe('full_name');
     });
 
-    it('returns from for enrich processor', () => {
-      expect(getSourceField({ action: 'enrich', from: 'ip_address' } as any)).toBe('ip_address');
+    it('returns undefined for enrich processor (no from field)', () => {
+      expect(getSourceField({ action: 'enrich', policy_name: 'my_policy' } as any)).toBeUndefined();
     });
 
     it('returns first element of from for join processor', () => {
@@ -291,6 +291,18 @@ describe('Simulation utils', () => {
       expect(
         getTargetField({ action: 'convert', from: 'status', to: '' } as any)
       ).toBeUndefined();
+    });
+
+    it('returns to for enrich processor', () => {
+      expect(
+        getTargetField({ action: 'enrich', policy_name: 'my_policy', to: 'enriched_field' } as any)
+      ).toBe('enriched_field');
+    });
+
+    it('returns to for join processor', () => {
+      expect(
+        getTargetField({ action: 'join', from: ['field_a', 'field_b'], to: 'joined' } as any)
+      ).toBe('joined');
     });
 
     it('returns undefined when to equals from (no extra column needed)', () => {

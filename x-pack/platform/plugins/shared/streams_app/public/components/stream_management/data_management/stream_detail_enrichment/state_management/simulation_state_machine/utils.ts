@@ -57,12 +57,15 @@ export function getSourceField(
       case 'sort':
       case 'remove':
       case 'remove_by_prefix':
-      case 'enrich':
         return processor.from;
       case 'join':
         return processor.from?.[0];
+      // network_direction: uses source_ip/destination_ip (non-standard field names, no single source)
+      // json_extract: uses field + multiple extractions[].target_field (complex, no single target)
+      // enrich: has no `from` field; source is implicit via policy_name
       case 'network_direction':
       case 'json_extract':
+      case 'enrich':
       case 'manual_ingest_pipeline':
       case 'drop_document':
         return undefined;
@@ -92,8 +95,12 @@ export function getTargetField(
         return processor.to;
       // Processors where `to` is always a distinct target
       case 'rename':
+      case 'join':
+      case 'enrich':
         return processor.to;
       // Processors without a meaningful target field to auto-show
+      // network_direction: uses source_ip/destination_ip (non-standard field names, no single target)
+      // json_extract: uses field + multiple extractions[].target_field (complex, no single target)
       // (grok/dissect: target fields are defined by patterns and discovered via simulation)
       // (set/append/math/concat: `to` IS the source field shown by getSourceField)
       // (remove/remove_by_prefix/drop_document: no output field)
