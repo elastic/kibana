@@ -10,6 +10,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  LoggerFactory,
   EventTypeOpts,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
@@ -42,6 +43,7 @@ export class AutomaticImportPlugin
       AutomaticImportPluginStartDependencies
     >
 {
+  private readonly loggerFactory: LoggerFactory;
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -50,6 +52,7 @@ export class AutomaticImportPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
+    this.loggerFactory = initializerContext.logger;
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
@@ -76,7 +79,7 @@ export class AutomaticImportPlugin
     plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
 
     this.automaticImportService = new AutomaticImportService(
-      this.logger,
+      this.loggerFactory,
       core.savedObjects,
       plugins.taskManager,
       core,
