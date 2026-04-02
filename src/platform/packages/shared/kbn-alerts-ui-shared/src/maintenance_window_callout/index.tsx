@@ -36,7 +36,10 @@ export function MaintenanceWindowCallout({
     http,
     licensing,
   } = kibanaServices;
-  const license = useObservable<ILicense | null>(licensing?.license$ ?? new Observable<ILicense>(), null);
+  const license = useObservable<ILicense | null>(
+    licensing?.license$ ?? new Observable<ILicense>(),
+    null
+  );
 
   const isMaintenanceWindowDisabled =
     !capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.show &&
