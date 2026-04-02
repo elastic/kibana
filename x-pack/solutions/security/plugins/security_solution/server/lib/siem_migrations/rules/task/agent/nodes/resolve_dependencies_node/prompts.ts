@@ -115,6 +115,77 @@ Event or Flow Payload tests check for certain strings, patterns within the compl
 
 It is extremely important to be clear and precise, and mention that string or pattern needs to be searched in complete event payload and not in particular field. There is no single field exists for event/flow/source payload. You must add special note to mention the same.
 
+### ICMP Type Tests (com.q1labs.semsources.cre.tests.IcmpType)
+
+ICMP type codes identify the purpose of an ICMP message (e.g. Echo Request, Echo Reply,
+Destination Unreachable). In Elastic, the ICMP type code is stored as a numeric integer
+in a dedicated ICMP-specific field — it is completely separate from the network layer
+type field which holds string values like "ipv4" or "ipv6".
+
+#### How to identify ICMP Type test conditions:
+- Test class name: \`com.q1labs.semsources.cre.tests.IcmpType\`
+
+
+#### ICMP Type numeric reference (complete IANA list):
+
+> Deprecated types are marked with †.
+
+| Numeric | Name | Notes |
+|---------|------|-------|
+| 0 | Echo Reply | - |
+| 1 | Unassigned | — |
+| 2 | Unassigned | — |
+| 3 | Destination Unreachable | - |
+| 4 | Source Quench | † Deprecated (RFC 6633) |
+| 5 | Redirect | — |
+| 6 | Alternate Host Address | † Deprecated |
+| 7 | Unassigned | — |
+| 8 | Echo (Ping Request) | - |
+| 9 | Router Advertisement | — |
+| 10 | Router Solicitation | — |
+| 11 | Time Exceeded | - |
+| 12 | Parameter Problem | — |
+| 13 | Timestamp | — |
+| 14 | Timestamp Reply | — |
+| 15 | Information Request | † Deprecated |
+| 16 | Information Reply | † Deprecated |
+| 17 | Address Mask Request | † Deprecated |
+| 18 | Address Mask Reply | † Deprecated |
+| 19 | Reserved (Security) | — |
+| 20–29 | Reserved (Robustness Experiment) | — |
+| 30 | Traceroute | † Deprecated |
+| 31 | Datagram Conversion Error | † Deprecated |
+| 32 | Mobile Host Redirect | † Deprecated |
+| 33 | IPv6 Where-Are-You | † Deprecated |
+| 34 | IPv6 I-Am-Here | † Deprecated |
+| 35 | Mobile Registration Request | † Deprecated |
+| 36 | Mobile Registration Reply | † Deprecated |
+| 37 | Domain Name Request | † Deprecated |
+| 38 | Domain Name Reply | † Deprecated |
+| 39 | SKIP | † Deprecated |
+| 40 | Photuris | — |
+| 41 | ICMP for Seamoby | — |
+| 42 | Extended Echo Request | RFC 8335 |
+| 43 | Extended Echo Reply | RFC 8335 |
+| 44–252 | Unassigned | — |
+| 253 | RFC3692-style Experiment 1 | — |
+| 254 | RFC3692-style Experiment 2 | — |
+| 255 | Reserved | — |
+
+#### How to resolve ICMP Type test conditions:
+- Non-negated test: "Check if the ICMP type code (the numeric message type, NOT the
+  network layer type which holds values like 'ipv4' or 'ipv6') is any of
+  [code1 (Name1), code2 (Name2), ...]"
+
+- Negated test (negate="true"): "Check if the ICMP type code (the numeric message type,
+  NOT the network layer type which holds values like 'ipv4' or 'ipv6') is NOT any of
+  [code1 (Name1), code2 (Name2), ...]"
+
+**Example — "when the icmp type is any of Echo Reply, Echo, Destination Unreachable,
+Time Exceeded" with negate="true":**
+"Check if the ICMP type code (the numeric message type, not the network layer type field)
+is NOT any of: 0 (Echo Reply), 8 (Echo), 3 (Destination Unreachable), 11 (Time Exceeded)."
+
 ### Flow Type Tests (com.q1labs.semsources.cre.tests.FlowType)
 
 Flow Type tests check whether a flow matches Standard, Superflow A, Superflow B, Superflow C, or Overflow. Flow type is not a stored field—it is derived from aggregation and thresholds. Describe it according to the definition below for each Flow type.

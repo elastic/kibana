@@ -11,7 +11,7 @@ import { EuiText, EuiTextBlockTruncate } from '@elastic/eui';
 import * as i18n from './translations';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { RuleDurationFormat } from '../execution_log_table/rule_duration_format';
+import { humanizeDuration } from './utils';
 import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import {
   RULE_EXECUTION_TYPE_BACKFILL,
@@ -101,7 +101,7 @@ export const getColumns = ({
     ),
     render: (value: number | null) => (
       <span data-test-subj="executionResultsTableCellDuration">
-        {value != null ? <RuleDurationFormat duration={value} /> : '—'}
+        {value !== null ? humanizeDuration(value) : '—'}
       </span>
     ),
     sortable: true,

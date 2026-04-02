@@ -157,7 +157,7 @@ pageLoadAssetSize:
   searchHomepage: 9005
   searchIndices: 9991
   searchInferenceEndpoints: 9400
-  searchNavigation: 8308
+  searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
   searchprofiler: 6509
