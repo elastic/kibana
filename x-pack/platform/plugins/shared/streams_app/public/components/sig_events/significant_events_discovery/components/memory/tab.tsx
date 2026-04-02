@@ -493,8 +493,7 @@ function EntryFlyout({
           buttonColor="danger"
         >
           {i18n.translate('xpack.streams.memory.discardConfirmBody', {
-            defaultMessage:
-              'You have unsaved changes. Are you sure you want to discard them?',
+            defaultMessage: 'You have unsaved changes. Are you sure you want to discard them?',
           })}
         </EuiConfirmModal>
       )}

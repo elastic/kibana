@@ -31,8 +31,7 @@ export const useMemoryTree = () => {
   const { core } = useKibana();
   return useQuery({
     queryKey: memoryKeys.categories,
-    queryFn: () =>
-      core.http.get<{ tree: MemoryCategoryNode[] }>(`${MEMORY_BASE}/categories`),
+    queryFn: () => core.http.get<{ tree: MemoryCategoryNode[] }>(`${MEMORY_BASE}/categories`),
   });
 };
 
@@ -152,12 +151,15 @@ const useMemoryTaskAction = (
       );
     },
     onError: (error) => {
-      core.notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
-        title: i18n.translate('xpack.streams.memory.taskError', {
-          defaultMessage: '{actionName} failed.',
-          values: { actionName },
-        }),
-      });
+      core.notifications.toasts.addError(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          title: i18n.translate('xpack.streams.memory.taskError', {
+            defaultMessage: '{actionName} failed.',
+            values: { actionName },
+          }),
+        }
+      );
     },
   });
 };
