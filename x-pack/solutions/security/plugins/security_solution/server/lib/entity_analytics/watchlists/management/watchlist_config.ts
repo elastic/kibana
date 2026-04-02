@@ -19,6 +19,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import { validateWatchlistUpdate } from './validation';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
@@ -34,7 +35,10 @@ interface WatchlistConfigClientDeps {
   logger: Logger;
 }
 
-type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
+type WatchlistSavedObjectAttributes = Omit<
+  WatchlistObject,
+  'id' | 'createdAt' | 'updatedAt' | 'entityCount' | 'entitySourceIds'
+>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
 
 const omitWatchlistMeta = (
@@ -44,6 +48,8 @@ const omitWatchlistMeta = (
     id: _ignoredId,
     createdAt: _ignoredCreatedAt,
     updatedAt: _ignoredUpdatedAt,
+    entityCount: _ignoredEntityCount,
+    entitySourceIds: _ignoredEntitySourceIds,
     ...attrs
   } = watchlist;
   return attrs;
@@ -106,6 +112,9 @@ export class WatchlistConfigClient {
 
   async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
+
+    validateWatchlistUpdate(id, attrs, existing);
+
     const existingAttrs = omitWatchlistMeta(existing);
     const attrsNoMeta = omitWatchlistMeta(attrs);
     const update: Partial<WatchlistSavedObjectAttributes> = {

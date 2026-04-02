@@ -11,6 +11,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { WatchlistConfigClient } from './watchlist_config';
+import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
 import { getIndexForWatchlist } from '../entities/utils';
 
 jest.mock('../entities/utils', () => ({
@@ -196,6 +197,115 @@ describe('WatchlistConfigClient', () => {
 
       expect(result).toEqual([]);
       expect(client.getEntityCounts).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    it('should allow updating allowed fields for unmanaged watchlists', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: 'wl-1',
+        type: watchlistConfigTypeName,
+        references: [],
+        attributes: { name: 'Old Name', description: 'Old Desc', managed: false },
+      });
+
+      jest.spyOn(client, 'getEntityCount').mockResolvedValue(0);
+
+      await client.update('wl-1', { name: 'New Name' });
+
+      expect(soClientMock.update).toHaveBeenCalledWith(
+        watchlistConfigTypeName,
+        'wl-1',
+        { name: 'New Name', description: 'Old Desc', managed: false },
+        { refresh: 'wait_for' }
+      );
+    });
+
+    it('should throw an error if attempting to modify the name of a managed watchlist', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: 'wl-1',
+        type: watchlistConfigTypeName,
+        references: [],
+        attributes: { name: 'Old Name', description: 'Old Desc', managed: true },
+      });
+
+      jest.spyOn(client, 'getEntityCount').mockResolvedValue(0);
+
+      await expect(client.update('wl-1', { name: 'New Name' })).rejects.toThrow(
+        "Cannot modify name of managed watchlist 'wl-1'"
+      );
+    });
+
+    it('should throw an error if attempting to modify the description of a managed watchlist', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: 'wl-1',
+        type: watchlistConfigTypeName,
+        references: [],
+        attributes: { name: 'Old Name', description: 'Old Desc', managed: true },
+      });
+
+      jest.spyOn(client, 'getEntityCount').mockResolvedValue(0);
+
+      await expect(client.update('wl-1', { description: 'New Desc' })).rejects.toThrow(
+        "Cannot modify description of managed watchlist 'wl-1'"
+      );
+    });
+
+    it('should not throw an error if a locked field is sent but its value has not changed', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: 'wl-1',
+        type: watchlistConfigTypeName,
+        references: [],
+        attributes: { name: 'Old Name', description: 'Old Desc', managed: true, riskModifier: 1 },
+      });
+
+      jest.spyOn(client, 'getEntityCount').mockResolvedValue(0);
+
+      // Sending the exact same name should not trigger a validation error,
+      // allowing the riskModifier change to go through successfully.
+      await client.update('wl-1', { name: 'Old Name', riskModifier: 2 });
+
+      expect(soClientMock.update).toHaveBeenCalledWith(
+        watchlistConfigTypeName,
+        'wl-1',
+        { name: 'Old Name', description: 'Old Desc', managed: true, riskModifier: 2 },
+        { refresh: 'wait_for' }
+      );
+    });
+
+    it('should throw an error with concatenated fields if attempting to modify multiple locked fields of a managed watchlist', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: 'wl-1',
+        type: watchlistConfigTypeName,
+        references: [],
+        attributes: { name: 'Old Name', description: 'Old Desc', managed: true },
+      });
+
+      jest.spyOn(client, 'getEntityCount').mockResolvedValue(0);
+
+      await expect(
+        client.update('wl-1', { name: 'New Name', description: 'New Desc' })
+      ).rejects.toThrow("Cannot modify name and description of managed watchlist 'wl-1'");
+    });
+
+    it('should allow updating riskModifier on a managed watchlist', async () => {
+      soClientMock.get.mockResolvedValue({
+        id: 'wl-1',
+        type: watchlistConfigTypeName,
+        references: [],
+        attributes: { name: 'Old Name', description: 'Old Desc', managed: true, riskModifier: 1 },
+      });
+
+      jest.spyOn(client, 'getEntityCount').mockResolvedValue(0);
+
+      await client.update('wl-1', { riskModifier: 2 });
+
+      expect(soClientMock.update).toHaveBeenCalledWith(
+        watchlistConfigTypeName,
+        'wl-1',
+        { name: 'Old Name', description: 'Old Desc', managed: true, riskModifier: 2 },
+        { refresh: 'wait_for' }
+      );
     });
   });
 
