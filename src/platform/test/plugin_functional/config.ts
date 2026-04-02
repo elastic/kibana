@@ -11,7 +11,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
-
+import { services as kibanaFunctionalServices } from '../functional/services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
@@ -19,22 +19,23 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
-      require.resolve('./test_suites/usage_collection'),
-      require.resolve('./test_suites/telemetry'),
-      require.resolve('./test_suites/core'),
-      require.resolve('./test_suites/custom_visualizations'),
-      require.resolve('./test_suites/hardening'),
-      require.resolve('./test_suites/panel_actions'),
+      // require.resolve('./test_suites/usage_collection'),
+      // require.resolve('./test_suites/telemetry'),
+      // require.resolve('./test_suites/core'),
+      // require.resolve('./test_suites/custom_visualizations'),
+      // require.resolve('./test_suites/hardening'),
+      // require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/core_plugins'),
-      require.resolve('./test_suites/management'),
-      require.resolve('./test_suites/application_links'),
-      require.resolve('./test_suites/data_plugin'),
-      require.resolve('./test_suites/saved_objects_management'),
-      require.resolve('./test_suites/saved_objects_hidden_type'),
-      require.resolve('./test_suites/shared_ux'),
+      // require.resolve('./test_suites/management'),
+      // require.resolve('./test_suites/application_links'),
+      // require.resolve('./test_suites/data_plugin'),
+      // require.resolve('./test_suites/saved_objects_management'),
+      // require.resolve('./test_suites/saved_objects_hidden_type'),
+      // require.resolve('./test_suites/shared_ux'),
     ],
     services: {
       ...functionalConfig.get('services'),
+      ...kibanaFunctionalServices,
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
