@@ -13,32 +13,38 @@ import { z } from '@kbn/zod/v4';
 import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
+const ruleIdSchema = z.string().trim().min(1).describe('A rule identifier.');
+
 const getRulesBulkQuerySchema = z.object({
-  ids: z
-    .array(z.string().describe('A rule identifier.'))
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe('A list of rule identifiers to retrieve.'),
+  ids: z.union([
+    ruleIdSchema,
+    z
+      .array(ruleIdSchema)
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe('A list of rule identifiers to retrieve.'),
+  ]),
 });
 
 @injectable()
 export class BulkGetRulesRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
   static options = {
-    access: 'internal',
+    access: 'public',
     summary: 'Get rules in bulk',
     tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {
@@ -67,7 +73,8 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const ids = this.request.query.ids ?? [];
+    const idsParam = this.request.query.ids ?? [];
+    const ids = Array.isArray(idsParam) ? idsParam : [idsParam];
     const items = await this.rulesClient.getRules(ids);
     return this.ctx.response.ok({
       body: {

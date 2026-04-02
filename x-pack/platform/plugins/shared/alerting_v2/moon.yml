@@ -81,6 +81,8 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/object-utils'
+  - '@kbn/alerting-v2-constants'
 tags:
   - plugin
   - prod

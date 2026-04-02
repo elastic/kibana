@@ -13,7 +13,7 @@ import type { z } from '@kbn/zod/v4';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
@@ -21,16 +21,17 @@ import { ruleIdParamsSchema } from './route_schemas';
 @injectable()
 export class DeleteRuleRoute extends BaseAlertingRoute {
   static method = 'delete' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/{id}`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
   static options = {
-    access: 'internal',
+    access: 'public',
     summary: 'Delete a rule',
     tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

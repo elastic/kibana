@@ -140,7 +140,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -43,7 +43,7 @@ export const createSmlSearchTool = ({
     'Search the Semantic Metadata Layer (SML) for saved visualizations and other Kibana assets. ' +
     'Provide a natural-language query string; titles and types are matched using Elasticsearch text analysis (bool_prefix on search_as_you_type fields). ' +
     'Each result includes a title, content snippet, attachment_id, attachment_type, and chunk_id. ' +
-    'To bring a result into the conversation as an attachment, pass its chunk_id, attachment_id, and attachment_type to sml_attach.',
+    'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
   availability: {

@@ -20,6 +20,8 @@ import {
 } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
 import {
+  legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
@@ -139,11 +141,13 @@ const sharedAxisSchema = {
          * - 'vertical': Labels aligned vertically
          * - 'angled': Labels at an angle
          */
-        orientation: builderEnums.orientation({
-          meta: {
-            description: 'Orientation of the axis labels',
-          },
-        }),
+        orientation: schema.maybe(
+          builderEnums.orientation({
+            meta: {
+              description: 'Orientation of the axis labels',
+            },
+          })
+        ),
       },
       { meta: { description: 'Label configuration' } }
     )
@@ -187,10 +191,7 @@ const xyDataLayerSharedSchema = {
  * Common legend configuration properties for positioning and statistics
  */
 const sharedLegendSchema = {
-  visibility: schema.oneOf(
-    [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
-    { meta: { description: 'Show the legend' } }
-  ),
+  visibility: legendVisibilitySchemaWithAuto,
   statistics: schema.maybe(
     schema.arrayOf(statisticsSchema, {
       meta: { description: 'Statistics to display in legend' },
@@ -315,14 +316,7 @@ const xySharedSettings = {
             placement: schema.maybe(schema.literal('outside')),
             layout: schema.maybe(gridLayout),
             position: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
-            size: schema.maybe(
-              schema.oneOf([
-                schema.literal('small'),
-                schema.literal('medium'),
-                schema.literal('large'),
-                schema.literal('xlarge'),
-              ])
-            ),
+            size: legendSizeSchema,
           },
           {
             meta: {

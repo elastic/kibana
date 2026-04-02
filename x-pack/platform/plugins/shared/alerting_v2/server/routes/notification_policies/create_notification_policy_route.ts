@@ -17,7 +17,7 @@ import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const createNotificationPolicyParamsSchema = z.object({
@@ -27,13 +27,19 @@ const createNotificationPolicyParamsSchema = z.object({
 @injectable()
 export class CreateNotificationPolicyRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id?}`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id?}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'public',
+    summary: 'Create a notification policy',
+    description: 'Create a new notification policy with an optional custom identifier.',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(createNotificationPolicyDataSchema),
