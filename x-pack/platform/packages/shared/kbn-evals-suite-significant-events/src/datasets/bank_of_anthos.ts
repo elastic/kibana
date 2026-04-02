@@ -120,52 +120,48 @@ export const bankOfAnthosDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'ledger-db-disconnect',
-        log_query_filter: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'resource.attributes.app': [
-                    'ledgerwriter',
-                    'balancereader',
-                    'transactionhistory',
-                    'frontend',
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'Failed to retrieve account balance' } },
-                    { match_phrase: { 'body.text': 'The connection attempt failed' } },
-                    { match_phrase: { 'body.text': 'getBalance | Cache error' } },
-                    { match_phrase: { 'body.text': 'getTransactions | Cache error' } },
-                    { match_phrase: { 'body.text': 'SQLState: 08001' } },
-                    {
-                      match_phrase: {
-                        'body.text':
-                          "Error submitting payment: HTTPConnectionPool(host='ledgerwriter', port=8080): Read timed out",
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        'body.text':
-                          "Error getting transaction_list: HTTPConnectionPool(host='transactionhistory', port=8080): Read timed out",
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        'body.text':
-                          "Error getting balance: HTTPConnectionPool(host='balancereader', port=8080): Read timed out",
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+        log_query_filter: [
+          {
+            terms: {
+              'resource.attributes.app': [
+                'ledgerwriter',
+                'balancereader',
+                'transactionhistory',
+                'frontend',
+              ],
+            },
           },
-        },
+          {
+            bool: {
+              should: [
+                { match_phrase: { 'body.text': 'Failed to retrieve account balance' } },
+                { match_phrase: { 'body.text': 'The connection attempt failed' } },
+                { match_phrase: { 'body.text': 'getBalance | Cache error' } },
+                { match_phrase: { 'body.text': 'getTransactions | Cache error' } },
+                { match_phrase: { 'body.text': 'SQLState: 08001' } },
+                {
+                  match_phrase: {
+                    'body.text':
+                      "Error submitting payment: HTTPConnectionPool(host='ledgerwriter', port=8080): Read timed out",
+                  },
+                },
+                {
+                  match_phrase: {
+                    'body.text':
+                      "Error getting transaction_list: HTTPConnectionPool(host='transactionhistory', port=8080): Read timed out",
+                  },
+                },
+                {
+                  match_phrase: {
+                    'body.text':
+                      "Error getting balance: HTTPConnectionPool(host='balancereader', port=8080): Read timed out",
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
       },
       output: {
         criteria: [

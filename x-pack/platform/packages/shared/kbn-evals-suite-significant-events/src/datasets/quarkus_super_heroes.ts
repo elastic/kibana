@@ -150,33 +150,29 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'kafka-disconnect',
-        log_query_filter: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'resource.attributes.app': ['rest-fights', 'event-statistics'],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'SRMSG18206' } },
-                    { match_phrase: { 'body.text': 'SRMSG18212' } },
-                    { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
-                    { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
-                    {
-                      match_phrase: {
-                        'body.text': 'org.apache.kafka.common.errors.TimeoutException',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+        log_query_filter: [
+          {
+            terms: {
+              'resource.attributes.app': ['rest-fights', 'event-statistics'],
+            },
           },
-        },
+          {
+            bool: {
+              should: [
+                { match_phrase: { 'body.text': 'SRMSG18206' } },
+                { match_phrase: { 'body.text': 'SRMSG18212' } },
+                { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
+                { match_phrase: { 'body.text': 'Unable to write to Kafka' } },
+                {
+                  match_phrase: {
+                    'body.text': 'org.apache.kafka.common.errors.TimeoutException',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
       },
       output: {
         criteria: [
@@ -227,28 +223,24 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'fights-db-disconnect',
-        log_query_filter: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'resource.attributes.app': ['rest-fights'],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'MongoTimeoutException' } },
-                    { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
-                    { match_phrase: { 'body.text': 'Timed out while waiting for a server' } },
-                    { match_phrase: { 'body.text': 'HTTP Request to /api/fights failed' } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+        log_query_filter: [
+          {
+            terms: {
+              'resource.attributes.app': ['rest-fights'],
+            },
           },
-        },
+          {
+            bool: {
+              should: [
+                { match_phrase: { 'body.text': 'MongoTimeoutException' } },
+                { match_phrase: { 'body.text': 'MongoSocketOpenException' } },
+                { match_phrase: { 'body.text': 'Timed out while waiting for a server' } },
+                { match_phrase: { 'body.text': 'HTTP Request to /api/fights failed' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
       },
       output: {
         criteria: [
@@ -289,26 +281,22 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'heroes-service-unreachable',
-        log_query_filter: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'resource.attributes.app': ['rest-fights'],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
-                    { match_phrase: { 'body.text': 'Fallback hero' } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+        log_query_filter: [
+          {
+            terms: {
+              'resource.attributes.app': ['rest-fights'],
+            },
           },
-        },
+          {
+            bool: {
+              should: [
+                { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                { match_phrase: { 'body.text': 'Fallback hero' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
       },
       output: {
         criteria: [
@@ -349,28 +337,24 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'heroes-db-disconnect',
-        log_query_filter: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'resource.attributes.app': ['rest-heroes', 'rest-fights'],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { match_phrase: { 'body.text': 'NoStackTraceThrowable' } },
-                    { match_phrase: { 'body.text': 'HR000021' } },
-                    { match_phrase: { 'body.text': 'Falling back on Hero' } },
-                    { match_phrase: { 'body.text': 'Fallback hero' } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+        log_query_filter: [
+          {
+            terms: {
+              'resource.attributes.app': ['rest-heroes', 'rest-fights'],
+            },
           },
-        },
+          {
+            bool: {
+              should: [
+                { match_phrase: { 'body.text': 'NoStackTraceThrowable' } },
+                { match_phrase: { 'body.text': 'HR000021' } },
+                { match_phrase: { 'body.text': 'Falling back on Hero' } },
+                { match_phrase: { 'body.text': 'Fallback hero' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
       },
       output: {
         criteria: [
