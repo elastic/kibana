@@ -28,6 +28,7 @@ import {
   BOILERPLATE_PIPELINE,
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import type { AutomaticImportAgentStateUpdateType } from '../../agents/state';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
 import type { LangSmithOptions } from '../../routes/types';
 
@@ -137,15 +138,17 @@ ${ecsRootFieldsSummary}
           })
         : [];
 
+    const invokeInput: AutomaticImportAgentStateUpdateType = {
+      messages: [
+        new HumanMessage({
+          content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
+        }),
+      ],
+      current_pipeline: BOILERPLATE_PIPELINE,
+    };
+
     const result = await automaticImportAgent.invoke(
-      {
-        messages: [
-          new HumanMessage({
-            content: `You are tasked with generating an Elasticsearch ingest pipeline for the integration \`${integrationId}\` and data stream \`${dataStreamId}\`.`,
-          }),
-        ],
-        current_pipeline: BOILERPLATE_PIPELINE,
-      },
+      invokeInput as Parameters<typeof automaticImportAgent.invoke>[0],
       {
         callbacks: [...langSmithTracers],
         runName: 'automatic_import_agent',

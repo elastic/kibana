@@ -149,6 +149,8 @@ describe('RuleFormPage', () => {
       mockUseFetchRule.mockReturnValue({
         data: undefined,
         isLoading: true,
+        isFetching: true,
+        isFetchedAfterMount: false,
         isError: false,
         error: null,
       });
@@ -156,6 +158,85 @@ describe('RuleFormPage', () => {
       renderEditPage();
 
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('shows loading spinner when stale cached data exists but fresh fetch has not completed yet', () => {
+      // Simulates React Query stale-while-revalidate: there is a cached rule
+      // (isLoading=false) but a background refetch is in progress and we have
+      // not yet received a confirmed-fresh response (isFetchedAfterMount=false).
+      // Without this guard the form would mount with the stale initial values
+      // and never reinitialise when the fresh data arrives.
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Stale Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isFetching: true,
+        isFetchedAfterMount: false,
+        isError: false,
+        error: null,
+      });
+
+      renderEditPage();
+
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockStandaloneRuleForm')).not.toBeInTheDocument();
+    });
+
+    it('renders the form once the first post-mount fetch completes', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Fresh Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isFetching: false,
+        isFetchedAfterMount: true,
+        isError: false,
+        error: null,
+      });
+
+      renderEditPage();
+
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockStandaloneRuleForm')).toBeInTheDocument();
+    });
+
+    it('does not re-show spinner during background refetches after initial load', () => {
+      // Simulates a window-focus or interval refetch: isFetchedAfterMount is
+      // already true from the initial fetch, so we must not remount the form.
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Test Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isFetching: true,
+        isFetchedAfterMount: true,
+        isError: false,
+        error: null,
+      });
+
+      renderEditPage();
+
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockStandaloneRuleForm')).toBeInTheDocument();
     });
 
     it('shows error state when rule fetch fails', () => {
@@ -272,6 +353,8 @@ describe('RuleFormPage', () => {
       const stateTransition = initialValues.stateTransition as Record<string, unknown>;
       expect(stateTransition.pendingCount).toBe(3);
       expect(stateTransition.pendingTimeframe).toBe('5m');
+      expect(initialValues.stateTransitionAlertDelayMode).toBe('duration');
+      expect(initialValues.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
     it('passes the base query from the fetched rule as the query prop', () => {
@@ -454,6 +537,8 @@ describe('RuleFormPage', () => {
       const stateTransition = initialValues.stateTransition as Record<string, unknown>;
       expect(stateTransition.pendingCount).toBe(3);
       expect(stateTransition.pendingTimeframe).toBe('5m');
+      expect(initialValues.stateTransitionAlertDelayMode).toBe('duration');
+      expect(initialValues.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
     it('passes the base query from the source rule as the query prop', () => {
