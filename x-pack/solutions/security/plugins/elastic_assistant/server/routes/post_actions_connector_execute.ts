@@ -138,9 +138,10 @@ export const postActionsConnectorExecuteRoute = (
               inferenceId: defaultInferenceEndpoints.ELSER,
             })) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
-          const inferenceConnector = await inference
-            .getConnectorById(connectorId, request)
-            .catch(() => undefined);
+          const inferenceConnector = await getInferenceConnectorById(
+            inference,
+            request
+          )(connectorId).catch(() => undefined);
           const isOssModel = isOpenSourceModel(inferenceConnector);
 
           const conversationsDataClient =
