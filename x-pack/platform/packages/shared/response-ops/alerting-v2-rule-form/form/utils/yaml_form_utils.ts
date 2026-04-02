@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
-import type { FormValues } from '../types';
+import type { FormValues, StateTransition } from '../types';
+import {
+  deriveAlertDelayModeFromStateTransition,
+  deriveRecoveryDelayModeFromStateTransition,
+} from './rule_request_mappers';
 
 export interface YamlParseResult {
   values: FormValues | null;
@@ -92,6 +96,27 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const evalQuery = evaluation?.query as Record<string, unknown> | undefined;
   const grouping = obj.grouping as Record<string, unknown> | undefined;
   const artifacts = parseArtifacts(obj.artifacts);
+  const stateTransitionObj = obj.state_transition as Record<string, unknown> | undefined;
+  const stateTransition: StateTransition | undefined = stateTransitionObj
+    ? {
+        pendingCount:
+          typeof stateTransitionObj.pending_count === 'number'
+            ? stateTransitionObj.pending_count
+            : null,
+        pendingTimeframe:
+          typeof stateTransitionObj.pending_timeframe === 'string'
+            ? stateTransitionObj.pending_timeframe
+            : null,
+        recoveringCount:
+          typeof stateTransitionObj.recovering_count === 'number'
+            ? stateTransitionObj.recovering_count
+            : null,
+        recoveringTimeframe:
+          typeof stateTransitionObj.recovering_timeframe === 'string'
+            ? stateTransitionObj.recovering_timeframe
+            : null,
+      }
+    : undefined;
 
   // Validate kind
   const kind = obj.kind;
@@ -158,6 +183,9 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         ? { fields: grouping.fields as string[] }
         : undefined,
       artifacts,
+      stateTransition,
+      stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
+      stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
     },
     error: null,
   };

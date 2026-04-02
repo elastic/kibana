@@ -19,7 +19,7 @@ const KIND_LABELS: Record<string, string> = {
     defaultMessage: 'Detect only',
   }),
   alert: i18n.translate('xpack.alertingV2.ruleDetails.kindAlert', {
-    defaultMessage: 'Alert',
+    defaultMessage: 'Alerting',
   }),
 };
 
@@ -57,7 +57,7 @@ export const RuleTitleWithBadges: React.FC<RuleHeaderDescriptionProps> = ({ rule
         <span data-test-subj="ruleName">{rule.metadata.name}</span>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued" aria-hidden={true}>
+        <EuiText size="s" color="text" aria-hidden={true}>
           |
         </EuiText>
       </EuiFlexItem>
@@ -73,19 +73,19 @@ export const RuleTitleWithBadges: React.FC<RuleHeaderDescriptionProps> = ({ rule
             <EuiIcon
               type={KIND_ICONS[rule.kind] ?? 'dot'}
               size="m"
-              color="subdued"
+              color="text"
               aria-hidden={true}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
+            <EuiText size="s" color="text">
               {KIND_LABELS[rule.kind] ?? rule.kind}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued" aria-hidden={true}>
+        <EuiText size="s" color="text" aria-hidden={true}>
           |
         </EuiText>
       </EuiFlexItem>
