@@ -88,6 +88,20 @@ export const createContinuousKiExtractionWorkflowService = (
 
   return {
     async ensureWorkflow({ enabled, request, taskClient }) {
+      const existing = await managementApi.getWorkflow(
+        CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+        DEFAULT_SPACE_ID
+      );
+
+      const currentlyEnabled = existing?.enabled ?? false;
+
+      if (enabled === currentlyEnabled) {
+        log.debug(
+          `Workflow already ${enabled ? 'enabled' : 'disabled'}, skipping lifecycle change`
+        );
+        return;
+      }
+
       await hardDeleteIfExists(request);
 
       if (!enabled) {
