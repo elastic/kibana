@@ -540,7 +540,7 @@ export const MAX_NOTES_PER_DOCUMENT = 100;
 /**
  * Cases attachment IDs
  */
-export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'security.endpoint' as const;
 export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**

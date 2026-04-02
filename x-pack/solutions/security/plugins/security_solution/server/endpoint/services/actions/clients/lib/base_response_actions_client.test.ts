@@ -241,7 +241,7 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
         attachments: [
           {
-            type: 'endpoint',
+            type: 'security.endpoint',
             attachmentId: 'action-123',
             metadata: {
               command: 'isolate',

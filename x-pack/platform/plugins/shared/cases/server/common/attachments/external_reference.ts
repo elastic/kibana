@@ -19,45 +19,72 @@ import type {
 } from '../types/attachments_v2';
 import type { AttachmentTypeTransformer } from './base';
 import { extractCommonAttributes } from './base';
+import {
+  EXTERNAL_REFERENCE_TYPE_MAP,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
+} from '../../../common/constants/attachments';
 
-const ENDPOINT_ATTACHMENT_TYPE_ID = 'endpoint';
-
-function isLegacyEndpointAttachment(attributes: unknown): boolean {
-  if (typeof attributes !== 'object' || attributes === null) return false;
-  const attrs = attributes as Record<string, unknown>;
-  return (
-    attrs.type === AttachmentType.externalReference &&
-    attrs.externalReferenceAttachmentTypeId === ENDPOINT_ATTACHMENT_TYPE_ID
-  );
-}
-
-function isUnifiedEndpointAttachment(attributes: unknown): boolean {
-  if (typeof attributes !== 'object' || attributes === null) return false;
-  const attrs = attributes as Record<string, unknown>;
-  return attrs.type === ENDPOINT_ATTACHMENT_TYPE_ID && 'attachmentId' in attrs;
+/**
+ * Resolves a legacy externalReferenceAttachmentTypeId to its unified type name.
+ * Returns undefined if the subtype is not mapped (not yet migrated).
+ */
+function resolveUnifiedType(externalReferenceAttachmentTypeId: string): string | undefined {
+  return EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId];
 }
 
 /**
- * Transformer for endpoint attachments (legacy externalReference schema <-> unified schema).
+ * Resolves a unified type name back to the legacy externalReferenceAttachmentTypeId.
+ */
+function resolveLegacyTypeId(unifiedType: string): string | undefined {
+  return UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP[unifiedType];
+}
+
+function isLegacyExternalReferenceAttachment(attributes: unknown): boolean {
+  if (typeof attributes !== 'object' || attributes === null) return false;
+  const attrs = attributes as Record<string, unknown>;
+  if (attrs.type !== AttachmentType.externalReference) return false;
+  const typeId = attrs.externalReferenceAttachmentTypeId;
+  return typeof typeId === 'string' && resolveUnifiedType(typeId) != null;
+}
+
+function isUnifiedExternalReferenceAttachment(attributes: unknown): boolean {
+  if (typeof attributes !== 'object' || attributes === null) return false;
+  const attrs = attributes as Record<string, unknown>;
+  return (
+    typeof attrs.type === 'string' &&
+    resolveLegacyTypeId(attrs.type) != null &&
+    'attachmentId' in attrs
+  );
+}
+
+/**
+ * Generic transformer for external reference attachments (legacy externalReference schema <-> unified schema).
  *
  * Legacy: { type: 'externalReference', externalReferenceId, externalReferenceStorage,
- *           externalReferenceAttachmentTypeId: 'endpoint', externalReferenceMetadata: { targets, command, comment } }
- * Unified: { type: 'endpoint', attachmentId, metadata: { targets, command, comment } }
+ *           externalReferenceAttachmentTypeId, externalReferenceMetadata }
+ * Unified: { type: '<solution>.<subtype>', attachmentId, metadata }
+ *
+ * The mapping from externalReferenceAttachmentTypeId to unified type name is driven by
+ * EXTERNAL_REFERENCE_TYPE_MAP in common/constants/attachments.ts. Add new entries there
+ * as more external reference subtypes are migrated.
  */
-export const endpointAttachmentTransformer: AttachmentTypeTransformer<
+export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes
 > = {
   toUnifiedSchema(attributes: unknown): UnifiedAttachmentAttributes {
-    if (isUnifiedEndpointAttachment(attributes)) {
+    if (isUnifiedExternalReferenceAttachment(attributes)) {
       return attributes as UnifiedAttachmentAttributes;
     }
 
-    if (isLegacyEndpointAttachment(attributes)) {
+    if (isLegacyExternalReferenceAttachment(attributes)) {
       const legacyAttrs = attributes as AttachmentPersistedAttributes &
         ExternalReferenceNoSOAttachmentPayload;
+      const unifiedType =
+        resolveUnifiedType(legacyAttrs.externalReferenceAttachmentTypeId) ??
+        legacyAttrs.externalReferenceAttachmentTypeId;
       return {
-        type: ENDPOINT_ATTACHMENT_TYPE_ID,
+        type: unifiedType,
         attachmentId: legacyAttrs.externalReferenceId,
         metadata: legacyAttrs.externalReferenceMetadata as Record<string, unknown> | undefined,
         owner: legacyAttrs.owner,
@@ -69,20 +96,21 @@ export const endpointAttachmentTransformer: AttachmentTypeTransformer<
   },
 
   toLegacySchema(attributes: unknown): AttachmentPersistedAttributes {
-    if (isLegacyEndpointAttachment(attributes)) {
+    if (isLegacyExternalReferenceAttachment(attributes)) {
       return attributes as AttachmentPersistedAttributes;
     }
 
-    if (isUnifiedEndpointAttachment(attributes)) {
+    if (isUnifiedExternalReferenceAttachment(attributes)) {
       const unifiedAttrs = attributes as UnifiedAttachmentAttributes &
         UnifiedReferenceAttachmentPayload;
+      const legacyTypeId = resolveLegacyTypeId(unifiedAttrs.type) ?? unifiedAttrs.type;
       return {
         type: AttachmentType.externalReference,
         externalReferenceId: unifiedAttrs.attachmentId,
         externalReferenceStorage: {
           type: ExternalReferenceStorageType.elasticSearchDoc,
         },
-        externalReferenceAttachmentTypeId: ENDPOINT_ATTACHMENT_TYPE_ID,
+        externalReferenceAttachmentTypeId: legacyTypeId,
         externalReferenceMetadata: unifiedAttrs.metadata as Record<string, unknown> | null,
         owner: unifiedAttrs.owner,
         ...extractCommonAttributes(unifiedAttrs as unknown as AttachmentAttributesV2),
@@ -93,32 +121,38 @@ export const endpointAttachmentTransformer: AttachmentTypeTransformer<
   },
 
   isType(attributes: AttachmentAttributesV2): boolean {
-    return isLegacyEndpointAttachment(attributes) || isUnifiedEndpointAttachment(attributes);
+    return (
+      isLegacyExternalReferenceAttachment(attributes) ||
+      isUnifiedExternalReferenceAttachment(attributes)
+    );
   },
 
   isUnifiedType(attributes: unknown): boolean {
-    return isUnifiedEndpointAttachment(attributes);
+    return isUnifiedExternalReferenceAttachment(attributes);
   },
 
   isLegacyType(attributes: unknown): boolean {
-    return isLegacyEndpointAttachment(attributes);
+    return isLegacyExternalReferenceAttachment(attributes);
   },
 
   isLegacyPayload(attachment: AttachmentRequestV2): boolean {
-    return isLegacyEndpointAttachment(attachment);
+    return isLegacyExternalReferenceAttachment(attachment);
   },
 
   isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
-    return isUnifiedEndpointAttachment(attachment);
+    return isUnifiedExternalReferenceAttachment(attachment);
   },
 
   toUnifiedPayload(attachment: AttachmentRequestV2): UnifiedAttachmentPayload {
-    if (!isLegacyEndpointAttachment(attachment)) {
-      throw new Error('Expected legacy endpoint attachment payload');
+    if (!isLegacyExternalReferenceAttachment(attachment)) {
+      throw new Error('Expected legacy external reference attachment payload');
     }
     const legacyAttachment = attachment as ExternalReferenceNoSOAttachmentPayload;
+    const unifiedType =
+      resolveUnifiedType(legacyAttachment.externalReferenceAttachmentTypeId) ??
+      legacyAttachment.externalReferenceAttachmentTypeId;
     return {
-      type: ENDPOINT_ATTACHMENT_TYPE_ID,
+      type: unifiedType,
       attachmentId: legacyAttachment.externalReferenceId,
       metadata: legacyAttachment.externalReferenceMetadata,
       owner: legacyAttachment.owner,
@@ -126,17 +160,18 @@ export const endpointAttachmentTransformer: AttachmentTypeTransformer<
   },
 
   toLegacyPayload(attachment: AttachmentRequestV2): AttachmentRequest {
-    if (!isUnifiedEndpointAttachment(attachment)) {
-      throw new Error('Expected unified endpoint attachment payload');
+    if (!isUnifiedExternalReferenceAttachment(attachment)) {
+      throw new Error('Expected unified external reference attachment payload');
     }
     const unifiedAttachment = attachment as UnifiedReferenceAttachmentPayload;
+    const legacyTypeId = resolveLegacyTypeId(unifiedAttachment.type) ?? unifiedAttachment.type;
     return {
       type: AttachmentType.externalReference,
       externalReferenceId: unifiedAttachment.attachmentId,
       externalReferenceStorage: {
         type: ExternalReferenceStorageType.elasticSearchDoc,
       },
-      externalReferenceAttachmentTypeId: ENDPOINT_ATTACHMENT_TYPE_ID,
+      externalReferenceAttachmentTypeId: legacyTypeId,
       externalReferenceMetadata: unifiedAttachment.metadata ?? null,
       owner: unifiedAttachment.owner,
     } as ExternalReferenceNoSOAttachmentPayload;

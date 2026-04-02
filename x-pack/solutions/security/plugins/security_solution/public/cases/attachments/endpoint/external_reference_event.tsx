@@ -10,22 +10,25 @@ import { useNavigation } from '@kbn/security-solution-navigation/src/navigation'
 import React, { useCallback, useMemo } from 'react';
 
 import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '../../pages/translations';
-import type { IExternalReferenceMetaDataProps } from './types';
+import type { EndpointAttachmentProps } from './types';
+import { getEndpointMetadata } from './types';
 import { getEndpointDetailsPath } from '../../../management/common/routing';
 
-const AttachmentContentEvent = ({
-  externalReferenceMetadata: { command, targets },
-}: IExternalReferenceMetaDataProps) => {
+const AttachmentContentEvent = (props: EndpointAttachmentProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
+
+  const metadata = getEndpointMetadata(props);
+  const command = metadata?.command ?? '';
+  const targets = useMemo(() => metadata?.targets ?? [], [metadata?.targets]);
 
   const endpointDetailsHref = getAppUrl({
     path: getEndpointDetailsPath({
       name: 'endpointActivityLog',
-      selected_endpoint: targets[0].endpointId,
+      selected_endpoint: targets[0]?.endpointId,
     }),
   });
   const hostsDetailsHref = getAppUrl({
-    path: `/hosts/name/${targets[0].hostname}`,
+    path: `/hosts/name/${targets[0]?.hostname}`,
   });
 
   const actionText = useMemo(() => {
@@ -33,7 +36,7 @@ const AttachmentContentEvent = ({
   }, [command]);
 
   const linkHref = useMemo(
-    () => (targets[0].agentType === 'endpoint' ? endpointDetailsHref : hostsDetailsHref),
+    () => (targets[0]?.agentType === 'endpoint' ? endpointDetailsHref : hostsDetailsHref),
     [endpointDetailsHref, hostsDetailsHref, targets]
   );
 
@@ -44,6 +47,10 @@ const AttachmentContentEvent = ({
     },
     [navigateTo, linkHref]
   );
+
+  if (!targets.length) {
+    return null;
+  }
 
   return (
     <>

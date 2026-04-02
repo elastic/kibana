@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  EXTERNAL_REFERENCE_TYPE_MAP,
+} from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import { AttachmentType } from '../../../common/types/domain';
 import type {
@@ -14,9 +17,7 @@ import type {
 } from '../types/attachments_v2';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
-import { endpointAttachmentTransformer } from './endpoint';
-
-const ENDPOINT_ATTACHMENT_TYPE_ID = 'endpoint';
+import { externalReferenceAttachmentTransformer } from './external_reference';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
 export {
@@ -26,8 +27,8 @@ export {
 
 /**
  * Returns the attachment type string from attributes (unified or legacy shape).
- * For legacy external references, returns the more specific `externalReferenceAttachmentTypeId`
- * so transformer routing can correctly identify the attachment subtype.
+ * For legacy external references with a migrated subtype, resolves to the unified type name
+ * (e.g., externalReference + typeId 'endpoint' → 'security.endpoint').
  * @throws Error if attributes is null or not an object
  */
 export function getAttachmentTypeFromAttributes(attributes: unknown): string {
@@ -38,21 +39,22 @@ export function getAttachmentTypeFromAttributes(attributes: unknown): string {
   if (typeof type !== 'string') {
     throw new Error('Invalid attributes: missing attachment type');
   }
-  // For legacy external references, use the specific type ID for transformer routing
+  // For legacy external references, resolve to unified type if the subtype is migrated
   if (
     type === AttachmentType.externalReference &&
     typeof externalReferenceAttachmentTypeId === 'string'
   ) {
-    return externalReferenceAttachmentTypeId;
+    return EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId] ?? type;
   }
   return type;
 }
 
+/** Set of all unified type names that map to external references */
+const UNIFIED_EXTERNAL_REFERENCE_TYPES = new Set(Object.values(EXTERNAL_REFERENCE_TYPE_MAP));
+
 /**
  * Returns the persisted transformer for the given attachment type.
  * Use getAttachmentTypeFromAttributes(attributes) to derive type from decoded attributes.
- * For comment/user types returns the comment transformer; for endpoint types returns
- * the endpoint transformer; for all other types returns a pass-through transformer.
  */
 export function getAttachmentTypeTransformers(
   type: string
@@ -62,8 +64,8 @@ export function getAttachmentTypeTransformers(
   if (normalizedType === COMMENT_ATTACHMENT_TYPE) {
     return commentAttachmentTransformer;
   }
-  if (normalizedType === ENDPOINT_ATTACHMENT_TYPE_ID) {
-    return endpointAttachmentTransformer;
+  if (UNIFIED_EXTERNAL_REFERENCE_TYPES.has(normalizedType)) {
+    return externalReferenceAttachmentTransformer;
   }
   return passThroughTransformer;
 }

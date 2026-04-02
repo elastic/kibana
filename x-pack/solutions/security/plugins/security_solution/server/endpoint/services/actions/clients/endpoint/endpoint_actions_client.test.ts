@@ -271,7 +271,7 @@ describe('EndpointActionsClient', () => {
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
       attachments: [
         {
-          type: 'endpoint',
+          type: 'security.endpoint',
           attachmentId: expect.any(String),
           metadata: {
             command: 'isolate',
@@ -299,7 +299,7 @@ describe('EndpointActionsClient', () => {
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
       attachments: [
         {
-          type: 'endpoint',
+          type: 'security.endpoint',
           attachmentId: expect.any(String),
           metadata: {
             command: 'isolate',

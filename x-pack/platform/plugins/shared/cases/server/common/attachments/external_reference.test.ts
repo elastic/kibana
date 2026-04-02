@@ -6,7 +6,7 @@
  */
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
-import { endpointAttachmentTransformer } from './endpoint';
+import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const baseLegacyAttributes = {
   created_at: '2024-01-01T00:00:00.000Z',
@@ -22,7 +22,7 @@ const baseLegacyAttributes = {
   updated_by: null,
 };
 
-const legacyAttributes = {
+const legacyEndpointAttributes = {
   ...baseLegacyAttributes,
   type: AttachmentType.externalReference as const,
   externalReferenceId: 'action-123',
@@ -38,9 +38,9 @@ const legacyAttributes = {
   owner: 'securitySolution',
 };
 
-const unifiedAttributes = {
+const unifiedEndpointAttributes = {
   ...baseLegacyAttributes,
-  type: 'endpoint',
+  type: 'security.endpoint',
   attachmentId: 'action-123',
   metadata: {
     command: 'isolate',
@@ -50,29 +50,32 @@ const unifiedAttributes = {
   owner: 'securitySolution',
 };
 
-describe('endpointAttachmentTransformer', () => {
+describe('externalReferenceAttachmentTransformer', () => {
   describe('toUnifiedSchema', () => {
     it('converts legacy external reference to unified format', () => {
-      const result = endpointAttachmentTransformer.toUnifiedSchema(legacyAttributes);
+      const result =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyEndpointAttributes);
       expect(result).toEqual(
         expect.objectContaining({
-          type: 'endpoint',
+          type: 'security.endpoint',
           attachmentId: 'action-123',
-          metadata: legacyAttributes.externalReferenceMetadata,
+          metadata: legacyEndpointAttributes.externalReferenceMetadata,
           owner: 'securitySolution',
         })
       );
     });
 
     it('passes through already-unified attributes', () => {
-      const result = endpointAttachmentTransformer.toUnifiedSchema(unifiedAttributes);
-      expect(result).toEqual(unifiedAttributes);
+      const result =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(unifiedEndpointAttributes);
+      expect(result).toEqual(unifiedEndpointAttributes);
     });
   });
 
   describe('toLegacySchema', () => {
     it('converts unified format to legacy external reference', () => {
-      const result = endpointAttachmentTransformer.toLegacySchema(unifiedAttributes);
+      const result =
+        externalReferenceAttachmentTransformer.toLegacySchema(unifiedEndpointAttributes);
       expect(result).toEqual(
         expect.objectContaining({
           type: AttachmentType.externalReference,
@@ -81,35 +84,56 @@ describe('endpointAttachmentTransformer', () => {
             type: ExternalReferenceStorageType.elasticSearchDoc,
           },
           externalReferenceAttachmentTypeId: 'endpoint',
-          externalReferenceMetadata: unifiedAttributes.metadata,
+          externalReferenceMetadata: unifiedEndpointAttributes.metadata,
           owner: 'securitySolution',
         })
       );
     });
 
     it('passes through already-legacy attributes', () => {
-      const result = endpointAttachmentTransformer.toLegacySchema(legacyAttributes);
-      expect(result).toEqual(legacyAttributes);
+      const result =
+        externalReferenceAttachmentTransformer.toLegacySchema(legacyEndpointAttributes);
+      expect(result).toEqual(legacyEndpointAttributes);
     });
   });
 
   describe('type guards', () => {
     it('isType detects both legacy and unified', () => {
-      expect(endpointAttachmentTransformer.isType(legacyAttributes as never)).toBe(true);
-      expect(endpointAttachmentTransformer.isType(unifiedAttributes as never)).toBe(true);
-      expect(endpointAttachmentTransformer.isType({ type: AttachmentType.alert } as never)).toBe(
+      expect(externalReferenceAttachmentTransformer.isType(legacyEndpointAttributes as never)).toBe(
+        true
+      );
+      expect(
+        externalReferenceAttachmentTransformer.isType(unifiedEndpointAttributes as never)
+      ).toBe(true);
+      expect(
+        externalReferenceAttachmentTransformer.isType({ type: AttachmentType.alert } as never)
+      ).toBe(false);
+    });
+
+    it('does not match unmigrated external reference subtypes', () => {
+      const unmigrated = {
+        ...legacyEndpointAttributes,
+        externalReferenceAttachmentTypeId: 'some-unknown-type',
+      };
+      expect(externalReferenceAttachmentTransformer.isType(unmigrated as never)).toBe(false);
+    });
+
+    it('isUnifiedType detects only unified', () => {
+      expect(externalReferenceAttachmentTransformer.isUnifiedType(unifiedEndpointAttributes)).toBe(
+        true
+      );
+      expect(externalReferenceAttachmentTransformer.isUnifiedType(legacyEndpointAttributes)).toBe(
         false
       );
     });
 
-    it('isUnifiedType detects only unified', () => {
-      expect(endpointAttachmentTransformer.isUnifiedType(unifiedAttributes)).toBe(true);
-      expect(endpointAttachmentTransformer.isUnifiedType(legacyAttributes)).toBe(false);
-    });
-
     it('isLegacyType detects only legacy', () => {
-      expect(endpointAttachmentTransformer.isLegacyType(legacyAttributes)).toBe(true);
-      expect(endpointAttachmentTransformer.isLegacyType(unifiedAttributes)).toBe(false);
+      expect(externalReferenceAttachmentTransformer.isLegacyType(legacyEndpointAttributes)).toBe(
+        true
+      );
+      expect(externalReferenceAttachmentTransformer.isLegacyType(unifiedEndpointAttributes)).toBe(
+        false
+      );
     });
   });
 
@@ -130,7 +154,7 @@ describe('endpointAttachmentTransformer', () => {
     };
 
     const unifiedPayload = {
-      type: 'endpoint',
+      type: 'security.endpoint',
       attachmentId: 'action-456',
       metadata: {
         command: 'unisolate',
@@ -141,35 +165,35 @@ describe('endpointAttachmentTransformer', () => {
     };
 
     it('toUnifiedPayload converts legacy payload', () => {
-      const result = endpointAttachmentTransformer.toUnifiedPayload(legacyPayload);
+      const result = externalReferenceAttachmentTransformer.toUnifiedPayload(legacyPayload);
       expect(result).toEqual(unifiedPayload);
     });
 
     it('toUnifiedPayload throws for non-legacy payload', () => {
-      expect(() => endpointAttachmentTransformer.toUnifiedPayload(unifiedPayload)).toThrow(
-        'Expected legacy endpoint attachment payload'
+      expect(() => externalReferenceAttachmentTransformer.toUnifiedPayload(unifiedPayload)).toThrow(
+        'Expected legacy external reference attachment payload'
       );
     });
 
     it('toLegacyPayload converts unified payload', () => {
-      const result = endpointAttachmentTransformer.toLegacyPayload(unifiedPayload);
+      const result = externalReferenceAttachmentTransformer.toLegacyPayload(unifiedPayload);
       expect(result).toEqual(legacyPayload);
     });
 
     it('toLegacyPayload throws for non-unified payload', () => {
-      expect(() => endpointAttachmentTransformer.toLegacyPayload(legacyPayload)).toThrow(
-        'Expected unified endpoint attachment payload'
+      expect(() => externalReferenceAttachmentTransformer.toLegacyPayload(legacyPayload)).toThrow(
+        'Expected unified external reference attachment payload'
       );
     });
 
     it('isLegacyPayload detects legacy payloads', () => {
-      expect(endpointAttachmentTransformer.isLegacyPayload(legacyPayload)).toBe(true);
-      expect(endpointAttachmentTransformer.isLegacyPayload(unifiedPayload)).toBe(false);
+      expect(externalReferenceAttachmentTransformer.isLegacyPayload(legacyPayload)).toBe(true);
+      expect(externalReferenceAttachmentTransformer.isLegacyPayload(unifiedPayload)).toBe(false);
     });
 
     it('isUnifiedPayload detects unified payloads', () => {
-      expect(endpointAttachmentTransformer.isUnifiedPayload(unifiedPayload)).toBe(true);
-      expect(endpointAttachmentTransformer.isUnifiedPayload(legacyPayload)).toBe(false);
+      expect(externalReferenceAttachmentTransformer.isUnifiedPayload(unifiedPayload)).toBe(true);
+      expect(externalReferenceAttachmentTransformer.isUnifiedPayload(legacyPayload)).toBe(false);
     });
   });
 });

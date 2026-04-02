@@ -482,9 +482,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    plugins.cases.attachmentFramework.registerExternalReference({
-      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-    });
     plugins.cases.attachmentFramework.registerUnified({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
       schemaValidator: validateEndpointAttachmentMetadata,

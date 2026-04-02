@@ -59,6 +59,7 @@ export {
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
   MANAGE_TEMPLATES_CAPABILITY,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
