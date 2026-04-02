@@ -60,3 +60,5 @@ export enum ROUTE_VERSIONS {
 }
 
 export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
+
+export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';

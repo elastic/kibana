@@ -15,7 +15,8 @@
     "scripts/**/*",
     "package.json",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_automatic_import_v2/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
