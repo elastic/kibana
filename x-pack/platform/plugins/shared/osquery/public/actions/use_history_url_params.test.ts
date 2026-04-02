@@ -273,6 +273,14 @@ describe('useHistoryUrlParams', () => {
     expect(stored).toContain('sources=live');
   });
 
+  it('URL wins over stale sessionStorage on mount', () => {
+    sessionStorage.setItem('osquery:historyFilters', '?q=stale');
+    const { result } = renderWithRouter('/history?q=fromUrl');
+
+    expect(result.current.filters.q).toBe('fromUrl');
+    expect(getHistoryFilters()).toContain('q=fromUrl');
+  });
+
   it('stores empty string when all filters are at defaults', () => {
     const { result } = renderWithRouter('/history?q=test');
 

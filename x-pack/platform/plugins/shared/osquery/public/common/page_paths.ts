@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getHistoryFilters } from '../actions/history_filter_storage';
+
 export type StaticPage =
   | 'base'
   | 'overview'
@@ -51,8 +53,6 @@ export const PAGE_ROUTING_PATHS = {
   saved_query_edit: '/saved_queries/:savedQueryId',
 };
 
-import { getHistoryFilters } from '../actions/history_filter_storage';
-
 export const pagePathGetters: {
   [key in StaticPage]: () => string;
 } & {
@@ -63,6 +63,7 @@ export const pagePathGetters: {
   live_queries: () => '/live_queries',
   live_query_new: () => '/live_queries/new',
   live_query_details: ({ liveQueryId }) => `/live_queries/${liveQueryId}`,
+  // Note: unlike other getters, history() reads sessionStorage to restore persisted filters.
   history: () => `/history${getHistoryFilters()}`,
   history_details: ({ liveQueryId }) => `/history/${liveQueryId}`,
   history_scheduled_details: ({ scheduleId, executionCount }) =>

@@ -123,6 +123,8 @@ export const useHistoryUrlParams = () => {
       const serialized = serializeHistoryUrlParams(nextFilters);
       const qs = stringify(serialized, { sort: false, skipNull: true });
       const search = qs ? `?${qs}` : '';
+      // Eager save — the useEffect above will also fire after history.replace,
+      // but writing here avoids a brief window where sessionStorage is stale.
       saveHistoryFilters(search);
       const currentPathname = history.location.pathname;
       history.replace({ pathname: currentPathname, search });
