@@ -48,7 +48,7 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
             <Tooltip
               items={[
                 {
-                  title: i18n.COLUMN_ALERTS_CREATED,
+                  title: i18n.ALERTS_CREATED,
                   description: i18n.FLYOUT_TOOLTIP_ALERTS_CREATED,
                 },
                 {
@@ -78,7 +78,7 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
             <EuiIcon type="sortRight" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={alertsItemCss}>
-            <FieldLabel label={i18n.COLUMN_ALERTS_CREATED} />
+            <FieldLabel label={i18n.ALERTS_CREATED} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutAlertCount">
               {alertCount ?? '—'}

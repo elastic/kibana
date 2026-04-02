@@ -46,7 +46,7 @@ export const TimingSection: React.FC<TimingSectionProps> = ({
                   description: i18n.FLYOUT_TOOLTIP_SCHEDULING_DELAY,
                 },
                 {
-                  title: i18n.COLUMN_DURATION,
+                  title: i18n.DURATION,
                   description: i18n.FLYOUT_TOOLTIP_EXECUTION_DURATION,
                 },
               ]}
@@ -78,7 +78,7 @@ export const TimingSection: React.FC<TimingSectionProps> = ({
           </EuiFlexItem>
           <SectionSeparator />
           <EuiFlexItem>
-            <FieldLabel label={i18n.COLUMN_DURATION} />
+            <FieldLabel label={i18n.DURATION} />
             <EuiSpacer size="xs" />
             <EuiText size="s" data-test-subj="executionDetailsFlyoutExecutionDuration">
               {executionDurationMs !== null ? humanizeDuration(executionDurationMs) : '—'}
