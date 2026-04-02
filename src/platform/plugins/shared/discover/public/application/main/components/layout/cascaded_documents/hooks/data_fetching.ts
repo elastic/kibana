@@ -8,7 +8,7 @@
  */
 
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { type ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import { GROUP_NOT_SET_VALUE, type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { useMemo, useState } from 'react';
 import {
   type DataCascadeRowProps,
@@ -57,15 +57,10 @@ export const useGroupedCascadeData = ({
         }
 
         const rowsGroupedByValue = Object.groupBy(rows ?? [], (row) =>
-          String(row.flattened[resolvedGroupColumn])
+          String(row.flattened[resolvedGroupColumn] ?? GROUP_NOT_SET_VALUE)
         );
 
         Object.entries(rowsGroupedByValue).forEach(([groupValue, groupRows = []]) => {
-          // skip undefined and null values
-          if (groupValue === 'undefined' || groupValue === 'null') {
-            return;
-          }
-
           const groupNode: ESQLDataGroupNode = {
             id: uuidv5(`${groupColumn}-${groupValue}`, NODE_ID_NAMESPACE),
             // While we use explicit properties for better typing, the document_data_cascade package

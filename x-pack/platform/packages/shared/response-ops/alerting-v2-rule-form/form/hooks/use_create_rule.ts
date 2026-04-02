@@ -8,6 +8,7 @@
 import { useMutation } from '@kbn/react-query';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { mapFormValuesToCreateRequest } from '../utils/rule_request_mappers';
 
@@ -19,7 +20,7 @@ interface UseCreateRuleProps {
 export const useCreateRule = ({ http, notifications }: UseCreateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
-      return http.post<RuleResponse>('/internal/alerting/v2/rule', {
+      return http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
         body: JSON.stringify(mapFormValuesToCreateRequest(formValues)),
       });
     },

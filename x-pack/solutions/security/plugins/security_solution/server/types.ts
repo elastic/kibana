@@ -71,6 +71,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAuditLogger: () => AuditLogger | undefined;
   getLogger: () => Logger;
   getDataViewsService: () => DataViewsService;
+  getInternalDataViewsService: () => Promise<DataViewsService>;
   getEntityStoreApiKeyManager: () => EntityStoreApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
