@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   type LegacyStoredTimeSliderExplicitInput,
   type TimeSliderControlState,
@@ -54,10 +54,16 @@ export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup)
         return {
           ...(typeof is_anchored === 'boolean' && { is_anchored }),
           ...(typeof startPercentage === 'number' && {
-            start_percentage_of_time_range: Math.max(startPercentage, 0),
+            start_percentage_of_time_range: Math.max(
+              startPercentage,
+              DEFAULT_TIME_SLIDER_STATE.start_percentage_of_time_range
+            ),
           }),
           ...(typeof endPercentage === 'number' && {
-            end_percentage_of_time_range: Math.min(endPercentage, 1),
+            end_percentage_of_time_range: Math.min(
+              endPercentage,
+              DEFAULT_TIME_SLIDER_STATE.end_percentage_of_time_range
+            ),
           }),
         };
       },
