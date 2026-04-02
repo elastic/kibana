@@ -193,7 +193,14 @@ export class WorkflowExecutionState {
    * - All data.set step outputs (needed by getVariables which reads all executions)
    * - All metadata fields (needed by telemetry at terminal state)
    *
+   * Note: eviction uses global-latest-wins semantics — it keeps the absolute latest
+   * execution per stepId across all loop iterations, not scoped to a specific loop scope.
+   * This means that after outer-loop eviction, only the latest execution from the last
+   * outer iteration retains its output. This is correct because getLatestStepExecution
+   * always returns the absolute latest execution.
+   *
    * Does NOT touch ES-persisted documents — this is in-memory only.
+   * On resume, ES documents still hold the original outputs.
    */
   public evictStaleLoopOutputs(innerStepIds: Iterable<string>): void {
     for (const stepId of innerStepIds) {
@@ -203,11 +210,8 @@ export class WorkflowExecutionState {
         for (const execId of staleIds) {
           const stepExec = this.stepExecutions.get(execId);
           if (stepExec && stepExec.stepType !== 'data.set') {
-            this.stepExecutions.set(execId, {
-              ...stepExec,
-              output: undefined,
-              input: undefined,
-            });
+            stepExec.output = undefined;
+            stepExec.input = undefined;
           }
         }
       }

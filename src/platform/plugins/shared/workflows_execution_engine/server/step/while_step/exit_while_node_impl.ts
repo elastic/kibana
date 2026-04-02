@@ -64,6 +64,10 @@ export class ExitWhileNodeImpl implements NodeImplementation {
     }
 
     if (maxReached && this.node.onLimit === 'fail') {
+      // Evict before throwing — high-iteration loops that fail at the limit
+      // are precisely the scenario most likely to cause memory pressure.
+      const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.stepId);
+      this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
       throw new Error(
         `While step "${this.node.stepId}" exceeded max-iterations limit of ${this.node.maxIterations}. ` +
           `Completed ${nextIteration} iterations.`

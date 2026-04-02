@@ -45,6 +45,10 @@ export class ExitForeachNodeImpl implements NodeImplementation {
     }
 
     if (maxReached && hasMoreItems && this.node.onLimit === 'fail') {
+      // Evict before throwing — high-iteration loops that fail at the limit
+      // are precisely the scenario most likely to cause memory pressure.
+      const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.stepId);
+      this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
       throw new Error(
         `Foreach step "${this.node.stepId}" exceeded max-iterations limit of ${this.node.maxIterations}. ` +
           `Processed ${nextIndex} of ${foreachState.total} items.`

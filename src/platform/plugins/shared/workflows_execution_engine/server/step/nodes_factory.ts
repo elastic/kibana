@@ -230,7 +230,9 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory
+          this.stepExecutionRuntimeFactory,
+          this.workflowExecutionState,
+          this.workflowGraph
         );
       case 'enter-retry':
         return new EnterRetryNodeImpl(
