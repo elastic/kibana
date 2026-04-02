@@ -158,11 +158,23 @@ export const serializeState = ({
     return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByRef(stored) : stored;
   }
 
+  const { title, description, ...titleOptions } = serializeTitles() ?? {};
+
+  const serializedTitles = {
+    title: title || initialState.savedObjectTitle,
+    description: description || initialState.savedObjectDescription,
+  };
+
   const stored: StoredSearchEmbeddableByValueState = {
-    ...serializeTitles(),
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
-    attributes: savedSearchAttributes,
+    ...serializedTitles,
+    ...titleOptions,
+    attributes: {
+      ...savedSearchAttributes,
+      ...(serializedTitles.title && { title: serializedTitles.title }),
+      ...(serializedTitles.description && { description: serializedTitles.description }),
+    },
   };
   return embeddableTransformsEnabled ? fromStoredSearchEmbeddableByValue(stored, []) : stored;
 };
