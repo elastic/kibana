@@ -21,7 +21,11 @@ const droppedPanelWarningSchema = schema.object(
         unknowns: 'allow',
       }
     ),
-    panel_references: schema.maybe(schema.arrayOf(referenceSchema)),
+    panel_references: schema.maybe(
+      schema.arrayOf(referenceSchema, {
+        maxSize: 100,
+      })
+    ),
   },
   {
     meta: {
@@ -30,4 +34,6 @@ const droppedPanelWarningSchema = schema.object(
   }
 );
 
-export const warningsSchema = schema.arrayOf(droppedPanelWarningSchema);
+export const warningsSchema = schema.arrayOf(droppedPanelWarningSchema, {
+  maxSize: 100,
+});
