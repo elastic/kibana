@@ -51,7 +51,7 @@ import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
 import { checkOsqueryResponseActionAuthz } from './lib/check_response_action_authz';
-import { CustomHttpRequestError } from '../common/error';
+import { CustomHttpRequestError } from './common/error';
 import { SchemaService } from './lib/schema_service';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
