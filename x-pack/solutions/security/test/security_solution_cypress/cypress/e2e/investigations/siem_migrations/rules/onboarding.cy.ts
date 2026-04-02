@@ -24,7 +24,7 @@ import {
   saveDefaultMigrationName,
   renameMigration,
 } from '../../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../../urls/navigation';
+import { SIEM_MIGRATIONS_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 
 export const SPLUNK_TEST_RULES = [
@@ -93,7 +93,7 @@ describe(
 
       role.login();
       createBedrockConnector();
-      visit(GET_STARTED_URL);
+      visit(SIEM_MIGRATIONS_URL);
     });
 
     after(() => {

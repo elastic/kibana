@@ -11,6 +11,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import type { ExperimentalFeatures } from '../../common';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import {
+  SIEM_MIGRATIONS_CREATE_PATH,
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
@@ -21,6 +22,7 @@ import { MigrationRulesPage } from './rules/pages';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { MigrationsLandingPage } from './landing';
+import { SiemMigrationsCreatePage } from './create';
 
 const SiemMigrationsLandingRoutes = () => {
   return (
@@ -28,6 +30,18 @@ const SiemMigrationsLandingRoutes = () => {
       <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsLanding}>
         <Routes>
           <Route path={SIEM_MIGRATIONS_LANDING_PATH} component={MigrationsLandingPage} />
+        </Routes>
+      </SecurityRoutePageWrapper>
+    </PluginTemplateWrapper>
+  );
+};
+
+const SiemMigrationsCreateRoutes = () => {
+  return (
+    <PluginTemplateWrapper>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsCreate}>
+        <Routes>
+          <Route path={'*'} component={SiemMigrationsCreatePage} />
         </Routes>
       </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>
@@ -72,6 +86,10 @@ export const getSiemMigrationsRoutes = (
   return [
     ...(isSiemMigrationsEnabled
       ? [
+          {
+            path: SIEM_MIGRATIONS_CREATE_PATH,
+            component: SiemMigrationsCreateRoutes,
+          },
           {
             path: SIEM_MIGRATIONS_LANDING_PATH,
             component: SiemMigrationsLandingRoutes,

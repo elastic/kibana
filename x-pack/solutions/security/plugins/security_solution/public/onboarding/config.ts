@@ -15,7 +15,6 @@ import { OnboardingTopicId } from './constants';
 import {
   defaultBodyConfig,
   defaultExternalDetectionsBodyConfig,
-  siemMigrationsBodyConfig,
 } from './components/onboarding_body/body_config';
 import type { TopicConfig } from './types';
 
@@ -36,14 +35,5 @@ export const onboardingConfig: TopicConfig[] = [
     }),
     capabilitiesRequired: RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
     body: defaultExternalDetectionsBodyConfig,
-  },
-  {
-    id: OnboardingTopicId.siemMigrations,
-    title: i18n.translate('xpack.securitySolution.onboarding.topic.automaticMigration', {
-      defaultMessage: 'Automatic migration',
-    }),
-    body: siemMigrationsBodyConfig,
-    disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
-    capabilitiesRequired: [[`dashboard_v2.show`], [RULES_UI_DETECTIONS_PRIVILEGE]],
   },
 ];

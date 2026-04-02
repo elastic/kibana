@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { ONBOARDING_PATH } from '../../../common/constants';
+import { ONBOARDING_PATH, SIEM_MIGRATIONS_CREATE_PATH } from '../../../common/constants';
 import type { OnboardingRouteParams } from '../types';
 import { OnboardingTopicId } from '../constants';
 import { getCardIdFromHash, useSyncUrlDetails } from './hooks/use_url_detail';
@@ -35,6 +35,12 @@ export const OnboardingRouter = React.memo(() => {
 
   return (
     <Routes>
+      <Route
+        path={`${ONBOARDING_PATH}/siem_migrations`}
+        render={({ location }) => (
+          <Redirect to={{ pathname: SIEM_MIGRATIONS_CREATE_PATH, hash: location.hash }} />
+        )}
+      />
       <Route path={`${ONBOARDING_PATH}${topicPathParam}`} exact component={OnboardingRoute} />
       <Route path={`${ONBOARDING_PATH}/*`} render={() => <Redirect to={ONBOARDING_PATH} />} />
     </Routes>

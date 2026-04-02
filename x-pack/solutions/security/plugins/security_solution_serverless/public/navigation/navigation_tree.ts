@@ -115,6 +115,10 @@ export const createNavigationTree = async (
           title: i18nStrings.launchPad.migrations.title,
           children: [
             {
+              id: SecurityPageName.siemMigrationsCreate,
+              link: securityLink(SecurityPageName.siemMigrationsCreate),
+            },
+            {
               id: SecurityPageName.siemMigrationsRules,
               link: securityLink(SecurityPageName.siemMigrationsRules),
             },

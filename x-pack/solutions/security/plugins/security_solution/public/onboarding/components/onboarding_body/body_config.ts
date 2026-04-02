@@ -12,12 +12,8 @@ import { dashboardsCardConfig } from './cards/dashboards';
 import { rulesCardConfig } from './cards/rules';
 import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
-import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
-import { siemMigrationIntegrationsCardConfig } from './cards/siem_migrations/integrations';
 import { integrationsExternalDetectionsCardConfig } from './cards/integrations_external_detections';
 import { knowledgeSourceCardConfig } from './cards/knowledge_source';
-import { startRuleMigrationCardConfig } from './cards/siem_migrations/start_migration/rules';
-import { startDashboardMigrationCardConfig } from './cards/siem_migrations/start_migration/dashboards';
 
 export const defaultBodyConfig: OnboardingGroupConfig[] = [
   {
@@ -56,24 +52,5 @@ export const defaultExternalDetectionsBodyConfig: OnboardingGroupConfig[] = [
       }
     ),
     cards: [assistantCardConfig],
-  },
-];
-
-export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
-  {
-    title: i18n.translate('xpack.securitySolution.onboarding.configure.title', {
-      defaultMessage: 'Configure',
-    }),
-    cards: [aiConnectorCardConfig],
-  },
-  {
-    title: i18n.translate('xpack.securitySolution.onboarding.migrate.title', {
-      defaultMessage: 'Migrate rules & dashboards',
-    }),
-    cards: [
-      startRuleMigrationCardConfig,
-      siemMigrationIntegrationsCardConfig,
-      startDashboardMigrationCardConfig,
-    ],
   },
 ];
