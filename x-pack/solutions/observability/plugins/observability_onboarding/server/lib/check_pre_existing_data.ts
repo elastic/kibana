@@ -8,11 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { estypes } from '@elastic/elasticsearch';
 
-const PRE_CHECK_WINDOW_MS = 60_000;
+const PRE_CHECK_WINDOW_MS = 300_000;
 
 /**
  * Checks whether data was actively flowing into the given indices
- * in the 60 seconds before `start`. If it was, time-range-based
+ * in the 5 minutes before `start`. If it was, time-range-based
  * has-data detection is likely to produce false positives.
  *
  * Returns `false` on any error so it never blocks the main flow.

@@ -31,7 +31,7 @@ describe('checkPreExistingData', () => {
     expect(await checkPreExistingData(client, indices, start)).toBe(false);
   });
 
-  it('queries the 60-second window before start', async () => {
+  it('queries the 5-minute window before start', async () => {
     const client = createMockEsClient(hitsResponse(0));
     await checkPreExistingData(client, indices, start);
 
@@ -46,7 +46,7 @@ describe('checkPreExistingData', () => {
               {
                 range: {
                   '@timestamp': {
-                    gte: '2026-03-31T09:59:00.000Z',
+                    gte: '2026-03-31T09:55:00.000Z',
                     lt: start,
                   },
                 },

@@ -26,6 +26,7 @@ interface Props {
   integration: string;
   actionLinks: ActionLink[];
   onDataReceived?: () => void;
+  respectPreExistingData?: boolean;
 }
 
 const FETCH_INTERVAL = 2000;
@@ -38,6 +39,7 @@ export function DataIngestStatus({
   integration,
   actionLinks,
   onDataReceived,
+  respectPreExistingData = true,
 }: Props) {
   const [checkDataStartTime] = useState(Date.now());
   const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
@@ -60,7 +62,7 @@ export function DataIngestStatus({
   const hasData = data?.hasData ?? false;
   const hasLogs = data?.hasLogs ?? hasData;
   const hasMetrics = data?.hasMetrics ?? hasData;
-  const hasPreExistingData = data?.hasPreExistingData ?? false;
+  const hasPreExistingData = respectPreExistingData ? data?.hasPreExistingData ?? false : false;
 
   const needsMetrics = actionLinks.some((actionLink) => actionLink.requires === 'metrics');
   const isReady = needsMetrics ? hasMetrics : hasData;

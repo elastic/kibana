@@ -93,6 +93,7 @@ export const OtelKubernetesPanel: React.FC = () => {
   const hasPreExistingDataEarly = usePreExistingDataCheck({
     flow: 'kubernetes',
     onboardingId: data?.onboardingId,
+    enabled: useWiredStreams,
   });
 
   const windowBlurred = useWindowBlurDataMonitoringTrigger({
@@ -522,6 +523,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                 integration="kubernetes_otel"
                 actionLinks={otelKubernetesActionLinks}
                 onDataReceived={() => setDataReceived(true)}
+                respectPreExistingData={useWiredStreams}
               />
             ),
           },

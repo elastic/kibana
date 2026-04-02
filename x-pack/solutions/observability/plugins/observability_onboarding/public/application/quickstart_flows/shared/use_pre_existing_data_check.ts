@@ -18,9 +18,11 @@ type PreExistingDataFlow = keyof typeof FLOW_ENDPOINTS;
 export function usePreExistingDataCheck({
   flow,
   onboardingId,
+  enabled = true,
 }: {
   flow: PreExistingDataFlow;
   onboardingId?: string;
+  enabled?: boolean;
 }): boolean {
   const endpoint = FLOW_ENDPOINTS[flow];
   const needsOnboardingId = flow === 'kubernetes';
@@ -28,6 +30,7 @@ export function usePreExistingDataCheck({
 
   const { data } = useFetcher(
     (callApi): Promise<{ hasPreExistingData?: boolean }> | undefined => {
+      if (!enabled) return;
       if (needsOnboardingId && !onboardingId) return;
       return callApi(`GET ${endpoint}` as Parameters<typeof callApi>[0], {
         params: {
@@ -36,7 +39,7 @@ export function usePreExistingDataCheck({
         },
       });
     },
-    [endpoint, start, onboardingId, needsOnboardingId],
+    [endpoint, start, onboardingId, needsOnboardingId, enabled],
     { showToastOnError: false }
   );
 
