@@ -61,6 +61,7 @@ import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visua
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
+import { resolveEntityIdentifiers } from '../../../../common/utils/resolve_entity_identifiers_for_alerts';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
@@ -78,29 +79,6 @@ interface AlertsByStatusProps {
   entityFilter?: Filter;
   signalIndexName: string | null;
 }
-
-/**
- * Normalizes identityFields or legacy entityFilter into a single Record for queries and UI.
- * Prefers identityFields when both are provided.
- */
-const resolveEntityIdentifiers = (
-  identityFields?: Record<string, string> | null,
-  entityFilter?: Filter | null
-): Record<string, string> | undefined => {
-  if (identityFields != null && Object.keys(identityFields).length > 0) {
-    return identityFields;
-  }
-  if (entityFilter != null) {
-    const value =
-      typeof entityFilter.value === 'string'
-        ? entityFilter.value
-        : Array.isArray(entityFilter.value)
-        ? entityFilter.value[0]
-        : '';
-    return { [entityFilter.field]: String(value) };
-  }
-  return undefined;
-};
 
 const getChartConfigs = (euiTheme: EuiThemeComputed) => {
   const palette = getRiskSeverityColors(euiTheme);
