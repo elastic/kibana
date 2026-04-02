@@ -50,7 +50,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.blocklist.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Only blocklist entries can be imported on this page.',
+      defaultMessage: 'You can only import blocklist entries here.',
     }
   ),
   getShowingCountLabel: (total) =>

@@ -99,13 +99,13 @@ export const artifactListPageLabels = Object.freeze({
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.artifactListPage.importOnlyCurrentArtifactCanBeImportedToastMessage',
     {
-      defaultMessage: 'Only the current artifact type can be imported on this page.',
+      defaultMessage: 'You can only import the current artifact type here.',
     }
   ),
   importFlyoutDetails: i18n.translate(
     'xpack.securitySolution.artifactListPage.importFlyoutDetails',
     {
-      defaultMessage: 'You can import artifacts to your artifact list.',
+      defaultMessage: 'Import artifacts to your artifact list.',
     }
   ),
   importFlyoutImportSubmitButtonLabel: i18n.translate(

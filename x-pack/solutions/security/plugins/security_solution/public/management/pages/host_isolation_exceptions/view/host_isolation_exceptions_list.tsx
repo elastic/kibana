@@ -56,7 +56,7 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageLabels = Object.freeze({
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Only host isolation exceptions can be imported on this page.',
+      defaultMessage: 'You can only import host isolation exceptions here.',
     }
   ),
   getShowingCountLabel: (total) =>

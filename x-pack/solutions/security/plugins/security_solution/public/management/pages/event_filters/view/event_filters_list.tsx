@@ -88,7 +88,7 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.eventFilters.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Only event filters can be imported on this page.',
+      defaultMessage: 'You can only import event filters here.',
     }
   ),
   getShowingCountLabel: (total) =>

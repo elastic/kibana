@@ -49,7 +49,7 @@ export const ArtifactImportConfirmModal: React.FC<ArtifactImportConfirmModalProp
           <p>
             {i18n.translate('xpack.securitySolution.artifactListPage.importConfirmModal.info', {
               defaultMessage:
-                'This will add new artifacts to your list. If an imported artifact already exists, the current version will be kept and the duplicate will be skipped.',
+                "This will add new artifacts to your list. If an artifact you're importing already exists, the existing version will be kept, and the import of that artifact will be skipped.",
             })}
           </p>
         </EuiText>

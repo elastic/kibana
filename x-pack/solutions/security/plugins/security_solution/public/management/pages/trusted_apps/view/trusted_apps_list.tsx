@@ -63,7 +63,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageLabels = {
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.trustedApps.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Only trusted applications can be imported on this page.',
+      defaultMessage: 'You can only import trusted applications here.',
     }
   ),
   getShowingCountLabel: (total) =>

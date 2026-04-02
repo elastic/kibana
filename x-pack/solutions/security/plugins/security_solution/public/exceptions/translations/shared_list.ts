@@ -217,7 +217,7 @@ export const IMPORT_ENDPOINT_ARTIFACTS_ERROR_TEXT = i18n.translate(
   'xpack.securitySolution.exceptionsTable.importEndpointArtifactsErrorText',
   {
     defaultMessage:
-      'On this page only shared exception lists can be imported, but at least one file contains Endpoint artifacts. Endpoint artifacts can be imported on their respective pages.',
+      'You can only import shared exception lists here, but at least one of the imported files contains endpoint artifacts. Import endpoint artifacts from their dedicated pages instead.',
   }
 );
 

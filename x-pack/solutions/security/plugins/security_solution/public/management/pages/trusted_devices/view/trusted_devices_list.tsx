@@ -69,7 +69,7 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
   pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.pageImportOnlyCurrentArtifactCanBeImportedError',
     {
-      defaultMessage: 'Only trusted devices can be imported on this page.',
+      defaultMessage: 'You can only import trusted devices here.',
     }
   ),
   getShowingCountLabel: (total) =>
