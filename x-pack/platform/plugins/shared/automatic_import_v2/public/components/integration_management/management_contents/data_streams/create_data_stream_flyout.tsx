@@ -33,9 +33,10 @@ import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
 import {
   normalizeLogSamplesFromFileContent,
-  UPLOAD_SAMPLES_MAX_LINES,
+  MAX_LOG_SAMPLES,
   type DataStream,
   type InputType,
+  type ParseErrorType,
 } from '../../../../../common';
 import { PLUGIN_ID } from '../../../../../common/constants';
 import type { LogsSourceOption } from '../../forms/types';
@@ -53,6 +54,24 @@ import {
   useKibana,
 } from '../../../../common';
 import { useTelemetry } from '../../../telemetry_context';
+
+/**
+ * Convert a parse error type to a user-friendly error message.
+ */
+const getParseErrorMessage = (error: ParseErrorType): string => {
+  switch (error) {
+    case 'EMPTY':
+      return i18n.LOG_FILE_ERROR.EMPTY;
+    case 'NOT_ARRAY':
+      return i18n.LOG_FILE_ERROR.NOT_ARRAY;
+    case 'NOT_OBJECT':
+      return i18n.LOG_FILE_ERROR.NOT_OBJECT;
+    case 'TOO_LARGE_TO_PARSE':
+      return i18n.LOG_FILE_ERROR.TOO_LARGE_TO_PARSE;
+    default:
+      return i18n.LOG_FILE_ERROR.CAN_NOT_READ;
+  }
+};
 
 interface CreateDataStreamFlyoutProps {
   onClose: () => void;
@@ -189,6 +208,16 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         const file = files[0];
         setUploadedFileName(file.name);
         const content = await readFileAsText(file);
+
+        const { error: parseError } = normalizeLogSamplesFromFileContent(content);
+        if (parseError) {
+          const errorMessage = getParseErrorMessage(parseError);
+          setFileError(errorMessage);
+          setUploadedFileName(undefined);
+          form.setFieldValue('logSample', undefined);
+          return;
+        }
+
         form.setFieldValue('logSample', content);
       } catch (error) {
         setFileError(error instanceof Error ? error.message : i18n.LOG_FILE_ERROR.CAN_NOT_READ);
@@ -359,14 +388,26 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
 
     try {
       if (logsSourceOption === 'file' && logSample) {
-        const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent(logSample);
+        const {
+          samples,
+          samplesOmittedOverLimit,
+          error: parseError,
+        } = normalizeLogSamplesFromFileContent(logSample);
 
-        if (linesOmittedOverLimit > 0) {
+        if (parseError) {
+          const errorMessage = getParseErrorMessage(parseError);
+          notifications.toasts.addError(new Error(errorMessage), {
+            title: i18n.LOG_FILE_ERROR.CAN_NOT_READ,
+          });
+          return;
+        }
+
+        if (samplesOmittedOverLimit > 0) {
           notifications.toasts.addWarning({
             title: i18n.SAMPLES_NORMALIZED_WARNING_TITLE,
             text: i18n.SAMPLES_NORMALIZED_WARNING_LINES_OMITTED(
-              linesOmittedOverLimit,
-              UPLOAD_SAMPLES_MAX_LINES
+              samplesOmittedOverLimit,
+              MAX_LOG_SAMPLES
             ),
           });
         }

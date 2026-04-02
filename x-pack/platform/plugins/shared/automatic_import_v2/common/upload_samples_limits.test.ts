@@ -5,23 +5,40 @@
  * 2.0.
  */
 
-import {
-  normalizeLogLinesForUpload,
-  normalizeLogSamplesFromFileContent,
-  UPLOAD_SAMPLES_MAX_LINES,
-} from './upload_samples_limits';
+import { normalizeLogSamplesFromFileContent, MAX_LOG_SAMPLES } from './upload_samples_limits';
 
 describe('normalizeLogSamplesFromFileContent', () => {
-  it('splits on newlines and drops empty lines', () => {
-    const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent('a\n\n b \nc');
-    expect(samples).toEqual(['a', 'b', 'c']);
-    expect(linesOmittedOverLimit).toBe(0);
+  it('parses line-based content and drops empty lines', () => {
+    const result = normalizeLogSamplesFromFileContent('a\n\n b \nc');
+    expect(result.samples).toEqual(['a', 'b', 'c']);
+    expect(result.samplesOmittedOverLimit).toBe(0);
+    expect(result.detectedFormat).toBe('line_based');
   });
 
-  it('caps at UPLOAD_SAMPLES_MAX_LINES non-empty lines', () => {
-    const lines = Array.from({ length: UPLOAD_SAMPLES_MAX_LINES + 5 }, (_, i) => `L${i}`);
-    const { samples, linesOmittedOverLimit } = normalizeLogLinesForUpload(lines);
-    expect(samples).toHaveLength(UPLOAD_SAMPLES_MAX_LINES);
-    expect(linesOmittedOverLimit).toBe(5);
+  it('caps at MAX_LOG_SAMPLES', () => {
+    const lines = Array.from({ length: MAX_LOG_SAMPLES + 5 }, (_, i) => `L${i}`).join('\n');
+    const result = normalizeLogSamplesFromFileContent(lines);
+    expect(result.samples).toHaveLength(MAX_LOG_SAMPLES);
+    expect(result.samplesOmittedOverLimit).toBe(5);
+  });
+
+  it('returns EMPTY error for empty content', () => {
+    const result = normalizeLogSamplesFromFileContent('');
+    expect(result.samples).toHaveLength(0);
+    expect(result.error).toBe('EMPTY');
+  });
+
+  it('parses NDJSON format', () => {
+    const content = '{"a":1}\n{"b":2}';
+    const result = normalizeLogSamplesFromFileContent(content);
+    expect(result.detectedFormat).toBe('ndjson');
+    expect(result.samples).toHaveLength(2);
+  });
+
+  it('parses JSON array format', () => {
+    const content = '[{"a":1},{"b":2}]';
+    const result = normalizeLogSamplesFromFileContent(content);
+    expect(result.detectedFormat).toBe('json_array');
+    expect(result.samples).toHaveLength(2);
   });
 });

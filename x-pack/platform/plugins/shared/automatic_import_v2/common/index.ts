@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-export {
-  UPLOAD_SAMPLES_MAX_LINES,
-  normalizeLogSamplesFromFileContent,
-  normalizeLogLinesForUpload,
-} from './upload_samples_limits';
+export { MAX_LOG_SAMPLES, normalizeLogSamplesFromFileContent } from './upload_samples_limits';
 
-export type { NormalizeLogSamplesResult } from './upload_samples_limits';
+export { parseLogSamples, parseNDJSON, parseJSONArray, getFormatDescription } from './file_parser';
+
+export type { DetectedLogFormat, ParseLogSamplesResult, ParseErrorType } from './file_parser';
 
 export type {
   ApproveIntegrationRequest,

@@ -175,6 +175,15 @@ export const LOG_FILE_ERROR = {
       defaultMessage: 'This log file is too large to parse',
     }
   ),
+  EMPTY: i18n.translate('xpack.automaticImportV2.dataStreams.logFileError.empty', {
+    defaultMessage: 'The log file is empty',
+  }),
+  NOT_ARRAY: i18n.translate('xpack.automaticImportV2.dataStreams.logFileError.notArray', {
+    defaultMessage: 'The log file is not an array',
+  }),
+  NOT_OBJECT: i18n.translate('xpack.automaticImportV2.dataStreams.logFileError.notObject', {
+    defaultMessage: 'The log file contains non-object entries',
+  }),
 };
 
 export const SELECT_PLACEHOLDER = i18n.translate(
@@ -396,3 +405,11 @@ export const ARIA_LABELS = Object.freeze({
     defaultMessage: 'Select an index',
   }),
 });
+
+// Log parsing messages
+export const LOG_PARSING_WARNING_TITLE = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.logParsingWarningTitle',
+  {
+    defaultMessage: 'Log parsing note',
+  }
+);

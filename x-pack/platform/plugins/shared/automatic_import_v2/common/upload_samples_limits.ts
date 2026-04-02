@@ -5,37 +5,23 @@
  * 2.0.
  */
 
+import { parseLogSamples, type ParseLogSamplesResult } from './file_parser';
+
 /**
- * Maximum number of log lines in a single upload request.
+ * Maximum number of log samples in a single upload request.
  */
-export const UPLOAD_SAMPLES_MAX_LINES = 1000;
+export const MAX_LOG_SAMPLES = 1000;
 
-export interface NormalizeLogSamplesResult {
-  samples: string[];
-  linesOmittedOverLimit: number;
-}
-
-export function normalizeLogSamplesFromFileContent(content: string): NormalizeLogSamplesResult {
-  return normalizeLogLinesForUpload(content.split('\n'));
-}
-
-export function normalizeLogLinesForUpload(lines: readonly string[]): NormalizeLogSamplesResult {
-  const samples: string[] = [];
-  let linesOmittedOverLimit = 0;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.length === 0) {
-      continue;
-    }
-
-    if (samples.length >= UPLOAD_SAMPLES_MAX_LINES) {
-      linesOmittedOverLimit++;
-      continue;
-    }
-
-    samples.push(trimmed);
-  }
-
-  return { samples, linesOmittedOverLimit };
+/**
+ * Normalize log samples from file content using smart format detection.
+ *
+ * This function automatically detects the log format (NDJSON, JSON array, multiline JSON,
+ * or line-based) and parses the content appropriately. This ensures that each sample
+ * represents a complete log event, not just a line.
+ *
+ * @param content The raw file content
+ * @returns Parsed samples with format detection metadata and any errors
+ */
+export function normalizeLogSamplesFromFileContent(content: string): ParseLogSamplesResult {
+  return parseLogSamples(content);
 }
