@@ -361,7 +361,7 @@ describe('partitionStream', () => {
       });
     });
 
-    it('should filter out invalid conditions (always: {})', async () => {
+    it('should keep all valid conditions including always: {}', async () => {
       const definition = createMockDefinition();
 
       mockClusterLogs.mockResolvedValueOnce([
@@ -400,8 +400,9 @@ describe('partitionStream', () => {
         definition,
       });
 
-      expect(result.partitions).toHaveLength(1);
-      expect(result.partitions[0].name).toBe('logs.test.api-logs');
+      expect(result.partitions).toHaveLength(2);
+      expect(result.partitions[0].name).toBe('logs.test.all-logs');
+      expect(result.partitions[1].name).toBe('logs.test.api-logs');
     });
 
     it('should sanitize partition names', async () => {
