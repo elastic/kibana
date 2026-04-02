@@ -97,7 +97,6 @@ export const useAttackDetails = ({
         attackDiscoveryAlertDocument: source as AttackDiscoveryAlertDocument,
         enableFieldRendering: true,
         id: searchHit._id ?? attackId,
-        index: searchHit._index,
         withReplacements: true,
       });
       return transformAttackDiscoveryAlertFromApi(apiAlert);
