@@ -15,6 +15,7 @@ import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants'
 import type { TaskClient } from '../tasks/task_client';
 import { FEATURES_IDENTIFICATION_TASK_TYPE } from '../tasks/task_definitions/features_identification';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
+import { pollUntil } from './poll_until';
 
 export interface ContinuousKiExtractionWorkflowService {
   ensureWorkflow(params: {
@@ -23,20 +24,6 @@ export interface ContinuousKiExtractionWorkflowService {
     taskClient: TaskClient<string>;
   }): Promise<void>;
 }
-
-const pollUntil = async (
-  predicate: () => Promise<boolean>,
-  { intervalMs, maxMs }: { intervalMs: number; maxMs: number }
-): Promise<boolean> => {
-  const deadline = Date.now() + maxMs;
-  while (Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
-    if (await predicate()) {
-      return true;
-    }
-  }
-  return false;
-};
 
 export const createContinuousKiExtractionWorkflowService = (
   logger: Logger,
@@ -62,20 +49,16 @@ export const createContinuousKiExtractionWorkflowService = (
       return;
     }
 
-    const executionId = results[0].id;
-    log.info(`Cancelling execution ${executionId}`);
-    await managementApi.cancelWorkflowExecution(executionId, DEFAULT_SPACE_ID);
+    await Promise.all(
+      results.map((result) => managementApi.cancelWorkflowExecution(result.id, DEFAULT_SPACE_ID))
+    );
 
-    const terminated = await pollUntil(async () => (await getNonTerminalExecutions()).total === 0, {
-      intervalMs: 1000,
-      maxMs: 30_000,
-    });
+    log.debug(() => `Requested cancellation for ${results.length} running workflow execution(s)`);
 
-    if (terminated) {
-      log.debug(`Execution ${executionId} reached terminal state`);
-    } else {
-      log.warn(`Execution ${executionId} still running after 30s, proceeding anyway`);
-    }
+    await pollUntil(
+      () => getNonTerminalExecutions(),
+      ({ total }) => total === 0
+    );
   };
 
   const cancelRunningTasks = async (taskClient: TaskClient<string>) => {
@@ -84,31 +67,19 @@ export const createContinuousKiExtractionWorkflowService = (
       return;
     }
 
-    log.info(`Requested cancellation for ${canceledIds.length} running task(s), awaiting…`);
+    log.debug(() => `Requested cancellation for ${canceledIds.length} running task(s)`);
 
-    const allTerminated = await pollUntil(
-      async () => {
-        const tasks = await Promise.all(canceledIds.map((id) => taskClient.get(id)));
-        return tasks.every(
-          (t) => t.status !== TaskStatus.InProgress && t.status !== TaskStatus.BeingCanceled
-        );
-      },
-      { intervalMs: 1000, maxMs: 30_000 }
+    await pollUntil(
+      () => Promise.all(canceledIds.map((id) => taskClient.get(id))),
+      (tasks) => tasks.every(
+        ({ status }) => status !== TaskStatus.InProgress && status !== TaskStatus.BeingCanceled
+      )
     );
-
-    if (allTerminated) {
-      log.debug('All feature-identification tasks reached terminal state');
-    } else {
-      log.warn('Some tasks did not terminate within 30s, proceeding anyway');
-    }
   };
 
   const hardDelete = async (request: KibanaRequest) => {
-    try {
-      await cancelAndAwaitTermination();
-    } catch (error) {
-      log.warn(`Best-effort cancellation failed, proceeding with delete: ${error}`);
-    }
+    await cancelAndAwaitTermination()
+      .catch(err => log.warn(`Failed to cancel running workflow executions: ${err}`));
 
     const { deleted, failures } = await managementApi.deleteWorkflows(
       [CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID],
@@ -136,12 +107,13 @@ export const createContinuousKiExtractionWorkflowService = (
       const currentlyEnabled = existing?.enabled ?? false;
 
       if (enabled === currentlyEnabled) {
-        log.debug(`Workflow already ${enabled ? 'enabled' : 'disabled'}, no-op`);
+        log.debug(() => `Workflow already ${enabled ? 'enabled' : 'disabled'}, no-op`);
         return;
       }
 
       if (existing) {
-        await cancelRunningTasks(taskClient);
+        await cancelRunningTasks(taskClient)
+          .catch(err => log.warn(`Failed to cancel running tasks: ${err}`));
         await hardDelete(request);
       }
 
