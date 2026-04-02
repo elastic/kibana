@@ -31,6 +31,8 @@ describe('useFormDefaults', () => {
       recoveryPolicy: {
         type: 'no_breach',
       },
+      stateTransitionAlertDelayMode: 'immediate',
+      stateTransitionRecoveryDelayMode: 'immediate',
     });
   });
 

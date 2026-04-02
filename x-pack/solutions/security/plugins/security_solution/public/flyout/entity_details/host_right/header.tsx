@@ -22,18 +22,25 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 interface HostPanelHeaderProps {
   hostName: string;
   lastSeen: FirstLastSeenData;
   entityId?: string;
+  identityFields?: IdentityFields;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ hostName, lastSeen, entityId }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({
+  hostName,
+  lastSeen,
+  entityId,
+  identityFields,
+}: HostPanelHeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
   const lastSeenDateFormatted = useMemo(
@@ -67,7 +74,14 @@ export const HostPanelHeader = ({ hostName, lastSeen, entityId }: HostPanelHeade
             <EuiFlexItem grow={false}>
               <SecuritySolutionLinkAnchor
                 deepLinkId={SecurityPageName.hosts}
-                path={getHostDetailsUrl(hostName)}
+                path={getHostDetailsUrl(
+                  hostName,
+                  undefined,
+                  entityId,
+                  identityFields && Object.keys(identityFields).length > 0
+                    ? identityFields
+                    : undefined
+                )}
                 target={'_blank'}
                 external={false}
                 css={linkTitleCSS}

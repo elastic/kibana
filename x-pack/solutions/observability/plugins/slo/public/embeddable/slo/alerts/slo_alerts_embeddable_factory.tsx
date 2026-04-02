@@ -83,7 +83,7 @@ export function getAlertsEmbeddableFactory({
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
-      function serializeState() {
+      function serializeState(): SloAlertsEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
@@ -91,7 +91,7 @@ export function getAlertsEmbeddableFactory({
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<SloAlertsEmbeddableState>({
         uuid,
         parentApi,
         serializeState,
