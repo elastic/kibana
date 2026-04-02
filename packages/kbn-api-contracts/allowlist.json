@@ -56,6 +56,13 @@
       "method": "put",
       "reason": "Optional package policy stream data_stream.type in 200 responses for OTel inputs with dynamic_signal_types (composable integrations).",
       "approvedBy": "elastic/fleet"
+    },
+    {
+      "path": "/api/spaces/space",
+      "method": "get",
+      "reason": "Replace schema.conditional with schema.maybe(schema.boolean()) for include_authorized_purposes query param. Runtime behavior is identical — the custom validate function still rejects include_authorized_purposes=true when purpose is set. The OAS type widens from conditional literal(false)/boolean to always boolean. TF provider codegen simplifies from union type to plain *bool, but the endpoint is unused in provider code.",
+      "approvedBy": "@elastic/kibana-security",
+      "prUrl": "https://github.com/elastic/kibana/pull/260831"
     }
   ]
 }
