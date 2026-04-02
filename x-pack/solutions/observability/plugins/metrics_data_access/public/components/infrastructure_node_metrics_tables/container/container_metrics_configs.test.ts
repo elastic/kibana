@@ -11,8 +11,8 @@ import {
   otelDatasetFilter,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
   SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
-  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
-  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_CONTAINER_CPU_USAGE,
+  SEMCONV_CONTAINER_MEMORY_WORKING_SET,
 } from '../shared/constants';
 import { getOptionsForSchema } from './container_metrics_configs';
 
@@ -67,8 +67,8 @@ describe('container_metrics_configs', () => {
       expect(options.kuery).toBe(otelDatasetFilter('kubeletstatsreceiver.otel'));
       expect(options.metrics).toEqual(
         expect.arrayContaining([
-          { field: SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION, aggregation: 'avg' },
-          { field: SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION, aggregation: 'avg' },
+          { field: SEMCONV_CONTAINER_CPU_USAGE, aggregation: 'avg' },
+          { field: SEMCONV_CONTAINER_MEMORY_WORKING_SET, aggregation: 'avg' },
         ])
       );
       expect(options.metrics).toHaveLength(2);

@@ -23,7 +23,8 @@ import {
   otelDatasetFilter,
   SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
   SEMCONV_SYSTEM_CPU_UTILIZATION,
-  SEMCONV_SYSTEM_MEMORY_LIMIT,
+  SEMCONV_SYSTEM_MEMORY_TOTAL,
+  SEMCONV_SYSTEM_MEMORY_USAGE,
   SEMCONV_SYSTEM_MEMORY_UTILIZATION,
   SYSTEM_CPU_CORES,
   SYSTEM_CPU_TOTAL_NORM_PCT,
@@ -57,7 +58,7 @@ const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
 type HostMetricsFieldsOtel =
   | typeof SEMCONV_SYSTEM_CPU_LOGICAL_COUNT
   | typeof SEMCONV_SYSTEM_CPU_UTILIZATION
-  | typeof SEMCONV_SYSTEM_MEMORY_LIMIT
+  | typeof SEMCONV_SYSTEM_MEMORY_TOTAL
   | typeof SEMCONV_SYSTEM_MEMORY_UTILIZATION;
 
 const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
@@ -72,9 +73,14 @@ const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = 
       aggregation: 'avg',
       field: SEMCONV_SYSTEM_CPU_UTILIZATION,
     },
-    [SEMCONV_SYSTEM_MEMORY_LIMIT]: {
-      aggregation: 'max',
-      field: SEMCONV_SYSTEM_MEMORY_LIMIT,
+    [SEMCONV_SYSTEM_MEMORY_TOTAL]: {
+      aggregation: 'custom',
+      field: SEMCONV_SYSTEM_MEMORY_TOTAL,
+      custom_metrics: [
+        { name: 'A', aggregation: 'avg', field: SEMCONV_SYSTEM_MEMORY_USAGE },
+        { name: 'B', aggregation: 'avg', field: SEMCONV_SYSTEM_MEMORY_UTILIZATION },
+      ],
+      equation: 'A / B',
     },
     [SEMCONV_SYSTEM_MEMORY_UTILIZATION]: {
       aggregation: 'avg',
@@ -247,7 +253,7 @@ function unpackMetrics(
     return {
       cpuCount: unpackMetricOtel(row, SEMCONV_SYSTEM_CPU_LOGICAL_COUNT),
       averageCpuUsagePercent: unpackMetricOtel(row, SEMCONV_SYSTEM_CPU_UTILIZATION),
-      totalMemoryMegabytes: unpackMetricOtel(row, SEMCONV_SYSTEM_MEMORY_LIMIT),
+      totalMemoryMegabytes: unpackMetricOtel(row, SEMCONV_SYSTEM_MEMORY_TOTAL),
       averageMemoryUsagePercent: unpackMetricOtel(row, SEMCONV_SYSTEM_MEMORY_UTILIZATION),
     };
   }
