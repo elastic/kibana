@@ -92,7 +92,7 @@ export const AgentInstallSection = () => {
                     data-test-subj="agentInstallLaunchBtn"
                     color="text"
                   >
-                    {i18n.translate('xpack.gettingStarted.agentInstall.launchButton', {
+                    {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.cta', {
                       defaultMessage: 'Install Elastic skills',
                     })}
                   </EuiButton>
@@ -138,7 +138,7 @@ export const AgentInstallSection = () => {
                     </h5>
                   </EuiTitle>
                   <EuiText size="xs">
-                    {i18n.translate('xpack.gettingStarted.agentInstall.userLLM.description', {
+                    {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.description', {
                       defaultMessage:
                         'Let our agent guide you through getting data in, setting up your index and running queries.',
                     })}
@@ -151,7 +151,7 @@ export const AgentInstallSection = () => {
                         onClick={handleOpenInAgentBuilder}
                         data-test-subj="agentInstallOpenInAgentBuilder"
                       >
-                        {i18n.translate('xpack.gettingStarted.agentInstall.menuAgentBuilder', {
+                        {i18n.translate('xpack.gettingStarted.agentInstall.elasticAgent.cta', {
                           defaultMessage: 'Open Elastic Agent',
                         })}
                       </AiButton>
