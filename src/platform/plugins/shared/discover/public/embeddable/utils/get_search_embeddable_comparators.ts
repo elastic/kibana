@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { StateComparators } from '@kbn/presentation-publishing';
+import type {
+  EditableSavedSearchAttributes,
+  SearchEmbeddableBaseState,
+  SearchEmbeddableByReferenceState,
+  SearchEmbeddableByValueState,
+} from '../../../common/embeddable/types';
+import type {
+  DiscoverSessionEmbeddableByReferenceProps,
+  DiscoverSessionEmbeddableByValueProps,
+} from '../../../server';
+
+type SearchEmbeddableStateAttrs = EditableSavedSearchAttributes &
+  (
+    | Omit<SearchEmbeddableByValueState, keyof SearchEmbeddableBaseState>
+    | Omit<SearchEmbeddableByReferenceState, keyof SearchEmbeddableBaseState>
+  );
+
+export function getSearchEmbeddableComparators(
+  isByValue: boolean,
+  shouldSkipTabComparators: boolean
+): StateComparators<SearchEmbeddableStateAttrs> {
+  return {
+    sort: 'deepEquality',
+    columns: 'deepEquality',
+    rowHeight: 'referenceEquality',
+    sampleSize: 'referenceEquality',
+    rowsPerPage: 'referenceEquality',
+    headerRowHeight: 'referenceEquality',
+    density: 'referenceEquality',
+    grid: 'deepEquality',
+    ...(isByValue
+      ? { attributes: 'skip' }
+      : {
+          // While the selected tab is missing or inline editing is in progress,
+          // skip tab-dependent comparators so unsaved-changes badges don't appear
+          // until the user explicitly applies a tab change.
+          selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
+          savedObjectId: 'skip',
+        }),
+  };
+}
+
+export function getDiscoverSessionEmbeddableComparators(
+  isByValue: boolean,
+  shouldSkipTabComparators: boolean
+): StateComparators<
+  DiscoverSessionEmbeddableByValueProps | DiscoverSessionEmbeddableByReferenceProps
+> {
+  return isByValue
+    ? {
+        tabs: 'deepEquality',
+      }
+    : {
+        // While the selected tab is missing or inline editing is in progress,
+        // skip tab-dependent comparators so unsaved-changes badges don't appear
+        // until the user explicitly applies a tab change.
+        selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
+        discover_session_id: 'skip',
+        overrides: 'deepEquality',
+      };
+}
