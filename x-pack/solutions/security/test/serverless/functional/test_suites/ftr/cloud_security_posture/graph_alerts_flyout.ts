@@ -87,6 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'entity.name': { type: 'keyword' },
             'entity.type': { type: 'keyword' },
             'entity.sub_type': { type: 'keyword' },
+            'entity.EngineMetadata.Type': { type: 'keyword' },
             'host.ip': { type: 'ip' },
           },
         },
