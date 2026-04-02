@@ -142,18 +142,7 @@ export function createNavigationTree({
         children: [
           {
             children: [
-              {
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return (
-                    pathNameSerialized.startsWith(
-                      prepend('/app/elasticsearch/index_management/indices')
-                    ) ||
-                    pathNameSerialized.startsWith(prepend('/app/management/data/index_management'))
-                  );
-                },
-                link: 'management:index_management',
-                breadcrumbStatus: 'hidden',
-              },
+              { link: 'management:index_management', breadcrumbStatus: 'hidden' },
               { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
               { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
               { link: 'management:transform', breadcrumbStatus: 'hidden' },
