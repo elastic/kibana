@@ -26,5 +26,9 @@ export const elasticAiAssistantInferenceFeature: InferenceFeatureConfig = {
   featureName: 'AI Assistant for Security',
   featureDescription: 'AI Assistant for Security inference endpoint configuration',
   taskType: 'chat_completion',
-  recommendedEndpoints: [],
+  recommendedEndpoints: [
+    defaultInferenceEndpoints.OPENAI_GPT_5_2,
+    defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
+    defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+  ],
 };
