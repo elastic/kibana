@@ -249,7 +249,7 @@ describe('DispatcherService', () => {
       const fireActions = docs.filter((d: any) => d.action_type === 'fire');
       const notifiedActions = docs.filter((d: any) => d.action_type === 'notified');
       expect(fireActions).toHaveLength(alertEpisodes.length);
-      expect(notifiedActions).toHaveLength(0);
+      expect(notifiedActions).toHaveLength(alertEpisodes.length);
 
       expect(docs).toEqual(
         expect.arrayContaining([
