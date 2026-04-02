@@ -20,7 +20,7 @@ export const AUTOMATIC_IMPORT_API_PRIVILEGES = {
 
 export const AUTOMATIC_IMPORT_FEATURE: KibanaFeatureConfig = {
   id: 'automatic_import',
-  name: i18n.translate('xpack.automatic_import.featureRegistry.automaticImportFeatureName', {
+  name: i18n.translate('xpack.automaticImport.featureRegistry.automaticImportFeatureName', {
     defaultMessage: 'Automatic Import',
   }),
   category: DEFAULT_APP_CATEGORIES.management,

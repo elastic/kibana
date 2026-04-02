@@ -36,6 +36,7 @@ export class AutomaticImportPlugin
     this.telemetry.setup(core.analytics);
 
     const telemetry = this.telemetry;
+    const renderUpselling$ = this.renderUpselling$;
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -48,7 +49,7 @@ export class AutomaticImportPlugin
           plugins,
           params,
           telemetryService: telemetry.start(),
-          renderUpselling$: this.renderUpselling$.asObservable(),
+          renderUpselling$: renderUpselling$.asObservable(),
         });
       },
     });
