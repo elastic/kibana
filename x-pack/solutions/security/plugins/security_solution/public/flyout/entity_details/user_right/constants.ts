@@ -6,3 +6,4 @@
  */
 
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
+export const USER_PANEL_OBSERVED_USER_QUERY_ID = 'UserPanelObservedUserQuery';

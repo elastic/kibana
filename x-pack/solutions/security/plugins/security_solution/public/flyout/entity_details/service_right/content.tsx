@@ -51,8 +51,6 @@ export const ServicePanelContent = ({
   onAssetCriticalityChange,
   entityStoreEntityId,
 }: ServicePanelContentProps) => {
-  const entityId = entityRecord?.entity.id;
-
   const observedFields = useObservedServiceItems(observedService);
 
   return (
@@ -81,10 +79,10 @@ export const ServicePanelContent = ({
         entity={{ name: serviceName, type: EntityType.service }}
         onChange={onAssetCriticalityChange}
       />
-      {entityId && (
+      {entityStoreEntityId && (
         <>
           <VisualizationsSection
-            entityId={entityId}
+            entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
