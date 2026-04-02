@@ -6,6 +6,8 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
 import type {
   DashboardPanel,
@@ -59,6 +61,19 @@ const toDashboardSearchContent = (state: DashboardState): string => {
   return contentParts.filter(Boolean).join('\n');
 };
 
+const createRequestHandlerContext = (
+  savedObjectsClient: SavedObjectsClientContract
+): RequestHandlerContext =>
+  ({
+    resolve: async () => ({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    }),
+  } as unknown as RequestHandlerContext);
+
 export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
@@ -88,12 +103,9 @@ export const createDashboardSmlType = ({
 
   getSmlData: async (originId, context) => {
     try {
-      if (!context.requestHandlerContext) {
-        return undefined;
-      }
-
+      const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.requestHandlerContext, originId);
+      const dashboard = await dashboardClient.read(requestHandlerContext, originId);
 
       return {
         chunks: [
@@ -115,12 +127,9 @@ export const createDashboardSmlType = ({
 
   toAttachment: async (item, context) => {
     try {
-      if (!context.requestHandlerContext) {
-        throw new Error('Missing requestHandlerContext');
-      }
-
+      const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.requestHandlerContext, item.origin_id);
+      const dashboard = await dashboardClient.read(requestHandlerContext, item.origin_id);
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,

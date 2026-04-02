@@ -346,7 +346,6 @@ export class AgentBuilderPlugin
             savedObjectsClient: soClient,
             logger: this.logger.get('services.sml'),
             request: params.request,
-            requestHandlerContext: params.requestHandlerContext,
           });
         },
       },

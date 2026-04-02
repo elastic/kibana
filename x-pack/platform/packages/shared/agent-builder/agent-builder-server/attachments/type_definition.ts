@@ -96,9 +96,8 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
   /**
    * The request handler context for the current request.
    * Provides access to core services and plugin contexts.
-   * Optional to keep the core attachment contract generic and allow non-Kibana environments.
    */
-  requestHandlerContext?: RequestHandlerContext;
+  requestHandlerContext: RequestHandlerContext;
 }
 
 /**

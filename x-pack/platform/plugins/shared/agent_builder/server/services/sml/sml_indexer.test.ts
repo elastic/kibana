@@ -139,7 +139,6 @@ describe('createSmlIndexer', () => {
         savedObjectsClient: {},
         logger: contextLogger,
         request: undefined,
-        requestHandlerContext: undefined,
       });
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.deleteByQuery).toHaveBeenCalledWith({

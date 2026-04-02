@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
 import type { DashboardAttachment, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
@@ -104,8 +102,7 @@ const createLogger = (): Logger =>
     warn: jest.fn(),
   } as unknown as Logger);
 
-const createRequestHandlerContext = (): RequestHandlerContext =>
-  coreMock.createRequestHandlerContext() as unknown as RequestHandlerContext;
+const createSavedObjectsClient = () => ({} as never);
 
 describe('dashboardSmlType', () => {
   it('lists dashboards across all spaces', async () => {
@@ -160,15 +157,16 @@ describe('dashboardSmlType', () => {
   });
 
   it('indexes one chunk per dashboard with deep metadata', async () => {
-    const requestHandlerContext = createRequestHandlerContext();
+    const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
     const dashboardSmlType = createDashboardSmlType({
-      getDashboardClient: async () => createDashboardClient(),
+      getDashboardClient: async () => dashboardClient,
     });
 
     const result = await dashboardSmlType.getSmlData('dashboard-1', {
       esClient: {} as never,
       logger: createLogger(),
-      requestHandlerContext,
+      savedObjectsClient,
     } as never);
 
     expect(result).toEqual({
@@ -186,12 +184,21 @@ describe('dashboardSmlType', () => {
     expect(result?.chunks[0].content).toContain('Operations');
     expect(result?.chunks[0].content).toContain('2 panels');
     expect(result?.chunks[0].content).toContain('1 sections');
+    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
+    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 
   it('converts saved dashboards into dashboard attachments with origin', async () => {
-    const requestHandlerContext = createRequestHandlerContext();
+    const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
     const dashboardSmlType = createDashboardSmlType({
-      getDashboardClient: async () => createDashboardClient(),
+      getDashboardClient: async () => dashboardClient,
     });
 
     const result = await dashboardSmlType.toAttachment(
@@ -209,7 +216,7 @@ describe('dashboardSmlType', () => {
       {
         request: {} as never,
         spaceId: 'default',
-        requestHandlerContext,
+        savedObjectsClient,
       } as never
     );
 
@@ -239,10 +246,18 @@ describe('dashboardSmlType', () => {
         }),
       ])
     );
+    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
+    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 
   it('falls back to generic panel storage when a lens panel is already in API format', async () => {
-    const requestHandlerContext = createRequestHandlerContext();
+    const savedObjectsClient = createSavedObjectsClient();
     const dashboardSmlType = createDashboardSmlType({
       getDashboardClient: async () =>
         createDashboardClient({
@@ -266,7 +281,7 @@ describe('dashboardSmlType', () => {
       {
         request: {} as never,
         spaceId: 'default',
-        requestHandlerContext,
+        savedObjectsClient,
       } as never
     );
 
@@ -292,16 +307,31 @@ describe('dashboardSmlType', () => {
     ]);
   });
 
-  it('returns undefined for SML reads without request handler context', async () => {
+  it('creates requestHandlerContext from savedObjectsClient for SML reads', async () => {
+    const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
     const dashboardSmlType = createDashboardSmlType({
-      getDashboardClient: async () => createDashboardClient(),
+      getDashboardClient: async () => dashboardClient,
     });
 
     const result = await dashboardSmlType.getSmlData('dashboard-1', {
       esClient: {} as never,
       logger: createLogger(),
+      savedObjectsClient,
     } as never);
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual(
+      expect.objectContaining({
+        chunks: [expect.objectContaining({ type: 'dashboard', title: 'System Overview' })],
+      })
+    );
+    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
+    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 });

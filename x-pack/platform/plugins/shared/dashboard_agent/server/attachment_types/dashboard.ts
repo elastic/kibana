@@ -41,12 +41,6 @@ export const createDashboardAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<Awaited<ReturnType<DashboardPluginStart['client']['read']>> | undefined> => {
     const { requestHandlerContext } = context;
-
-    if (!requestHandlerContext) {
-      logger.debug(`Cannot fetch dashboard "${origin}": missing requestHandlerContext`);
-      return undefined;
-    }
-
     const dashboardClient = await getDashboardClient();
     return dashboardClient.read(requestHandlerContext, origin);
   };

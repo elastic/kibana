@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 
 /**
@@ -45,8 +44,6 @@ export interface SmlContext {
   logger: Logger;
   /** The current user's request, when available. Absent during background crawler runs. */
   request?: KibanaRequest;
-  /** The current request handler context, when available. Absent during background crawler runs. */
-  requestHandlerContext?: RequestHandlerContext;
 }
 
 /**
@@ -56,7 +53,6 @@ export interface SmlToAttachmentContext {
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
   spaceId: string;
-  requestHandlerContext?: RequestHandlerContext;
 }
 
 /**
@@ -175,7 +171,6 @@ export interface SmlIndexAttachmentParams {
   attachmentType: string;
   action: SmlIndexAction;
   spaceId?: string;
-  requestHandlerContext?: RequestHandlerContext;
 }
 
 /**
@@ -230,7 +225,6 @@ export interface SmlService {
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;
     request?: KibanaRequest;
-    requestHandlerContext?: RequestHandlerContext;
   }) => Promise<void>;
 
   /** Fetch SML documents by their chunk IDs, scoped to a space */

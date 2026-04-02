@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SmlService } from './types';
 
@@ -41,7 +40,6 @@ export const resolveSmlAttachItems = async ({
   sml,
   esClient,
   request,
-  requestHandlerContext,
   spaceId,
   savedObjectsClient,
   logger,
@@ -50,7 +48,6 @@ export const resolveSmlAttachItems = async ({
   sml: SmlService;
   esClient: ElasticsearchClient;
   request: KibanaRequest;
-  requestHandlerContext?: RequestHandlerContext;
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -103,7 +100,6 @@ export const resolveSmlAttachItems = async ({
           request,
           savedObjectsClient,
           spaceId,
-          requestHandlerContext,
         });
 
         if (!convertedAttachment) {
