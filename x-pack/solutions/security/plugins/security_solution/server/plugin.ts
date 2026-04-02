@@ -1070,6 +1070,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
         telemetryConfigProvider: this.telemetryConfigProvider,
+        packageService,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {

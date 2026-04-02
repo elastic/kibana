@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
   getEsqlRuleParams,
@@ -21,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const { indexListOfDocuments: indexListOfSourceDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-1',
+    index: 'test-data-1',
     log,
   });
 
@@ -31,29 +32,115 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
 
       await es.indices.delete({
-        index: 'logs-1',
+        index: 'test-data-1,test-data-2',
         ignore_unavailable: true,
       });
-      await es.indices.create({
-        index: 'logs-1',
-        mappings: {
-          properties: {
-            '@timestamp': {
-              type: 'date',
-            },
-            host: {
-              properties: {
-                name: {
-                  type: 'keyword',
-                },
+
+      const mappings: MappingTypeMapping = {
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          host: {
+            properties: {
+              name: {
+                type: 'keyword',
               },
             },
           },
         },
+      };
+      await es.indices.create({
+        index: 'test-data-1',
+        mappings,
+      });
+      await es.indices.create({
+        index: 'test-data-2',
+        mappings,
       });
     });
 
     describe('metrics collection', () => {
+      describe('matched_indices_count', () => {
+        it('records matched_indices_count for one source index in the ES|QL query', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getEsqlRuleParams({
+            query: 'from test-data-1 metadata _id, _index, _version',
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(1);
+        });
+
+        it('records matched_indices_count for a single index pattern with wildcard in the ES|QL query', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getEsqlRuleParams({
+            query: 'from test-data-* metadata _id, _index, _version',
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+
+        it('records matched_indices_count for multiple source indices in the ES|QL query', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getEsqlRuleParams({
+            query: 'from test-da*, test-data-1, test-data-2 metadata _id, _index, _version',
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+      });
+
       describe('alerts_candidate_count', () => {
         it('records alerts_candidate_count value', async () => {
           const timestamp = new Date().toISOString();
@@ -62,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getEsqlRuleParams({
-            query: 'from logs-1 metadata _id, _index, _version',
+            query: 'from test-data-1 metadata _id, _index, _version',
             from: 'now-35m',
             interval: '30m',
             enabled: true,
@@ -85,7 +172,7 @@ export default ({ getService }: FtrProviderContext) => {
             host: { name: 'test-1' },
           };
           const rule = getEsqlRuleParams({
-            query: 'from logs-1 metadata _id, _index, _version',
+            query: 'from test-data-1 metadata _id, _index, _version',
             alert_suppression: {
               group_by: ['host.name'],
               duration: {
