@@ -19,10 +19,9 @@ import { calibrateSamplingStrategy } from '../../services/sampling_strategy';
 const runExplorationBodySchema = z.object({
   include_sample_data: z.boolean().optional().default(true),
   connector_id: z.string().optional(),
-  use_agent_orchestration: z.boolean().optional().default(false),
 });
 
-export function registerRunExplorationRoute({ router, logger }: AESOPRouteDependencies) {
+export function registerRunExplorationRoute({ router, logger, skillOnlineEvalService }: AESOPRouteDependencies) {
   router.versioned
     .post({
       path: '/internal/aesop/exploration/run',
@@ -94,12 +93,7 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
           const indexCatalog = await discoverIndices(esClient, logger);
 
           if (indexCatalog.indices.length === 0) {
-            return response.badRequest({
-              body: {
-                message:
-                  'No security-relevant indices found. Please ensure your cluster has data in alert, log, or metric indices.',
-              },
-            });
+            logger.info('[AESOP] No indices discovered — exploration will rely on conversation analysis only');
           }
 
           // Phase 2: Infer analyst role from event log
@@ -165,7 +159,7 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
 
           // Eagerly create skill registry while request is still active
           let skillRegistry: any;
-          const agentBuilderStart = evalsContext.getAgentBuilderStart();
+          const agentBuilderStart = await evalsContext.getAgentBuilderStart();
           if (agentBuilderStart) {
             try {
               skillRegistry = await agentBuilderStart.skills.getRegistry({ request });
@@ -191,9 +185,10 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
               connectorId,
               actionsClient,
               getSkillRegistry: async () => skillRegistry,
-              useAgentOrchestration: request.body.use_agent_orchestration,
               getAgentBuilderStart: () => agentBuilderStart,
               request,
+              datasetService: evalsContext.datasetService,
+              evaluatorRegistry: skillOnlineEvalService?.evaluatorRegistry,
             }
           );
           executor.execute().catch((err) => {

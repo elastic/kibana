@@ -23,10 +23,15 @@ import { registerImproveSkillRoute } from './improve_skill';
 import { registerUnrejectSkillRoute } from './unreject_skill';
 import { registerRedeploySkillRoute } from './redeploy_skill';
 import { registerGetSkillDetailRoute } from './get_skill_detail';
+import { registerGenerateEvalDatasetRoute } from './generate_eval_dataset';
+import { registerRunOnlineEvalRoute } from './run_online_eval';
+import { registerProposeEvaluatorsRoute } from './propose_evaluators';
+import type { SkillOnlineEvalService } from '../../lib/aesop/skill_online_eval_service';
 
 export interface AESOPRouteDependencies {
   router: IRouter<EvalsRequestHandlerContext>;
   logger: Logger;
+  skillOnlineEvalService?: SkillOnlineEvalService;
 }
 
 /**
@@ -50,8 +55,9 @@ export interface AESOPRouteDependencies {
  * - Real-time progress tracking (2-second polling)
  * - APM instrumentation (custom metrics)
  */
-export function registerAESOPRoutes({ router, logger }: AESOPRouteDependencies) {
-  registerRunExplorationRoute({ router, logger });
+export function registerAESOPRoutes(deps: AESOPRouteDependencies) {
+  const { router, logger } = deps;
+  registerRunExplorationRoute(deps);
   registerGetExplorationHistoryRoute({ router, logger });
   registerGetExplorationProgressRoute({ router, logger });
   registerGetExecutionDetailRoute({ router, logger });
@@ -66,4 +72,7 @@ export function registerAESOPRoutes({ router, logger }: AESOPRouteDependencies) 
   registerGetSkillDetailRoute({ router, logger });
   registerDeployMonitoringDashboardRoute({ router, logger });
   registerDeployAlertingRulesRoute({ router, logger });
+  registerGenerateEvalDatasetRoute({ router, logger });
+  registerRunOnlineEvalRoute(deps);
+  registerProposeEvaluatorsRoute(deps);
 }

@@ -31,6 +31,8 @@ import {
   EuiProgress,
   EuiFieldText,
   EuiToolTip,
+  EuiCheckbox,
+  EuiSteps,
 } from '@elastic/eui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEvalsApi } from '../../../hooks/use_evals_api';
@@ -238,6 +240,197 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
     },
   });
 
+  // Proposed evaluators state — initialized from cached data on the skill doc
+  const [proposedEvaluators, setProposedEvaluators] = useState<any[] | null>(
+    () => (skill as any).proposed_evaluators_cache ?? null
+  );
+  const [expandedEvaluator, setExpandedEvaluator] = useState<string | null>(null);
+
+  // Dataset selection state
+  const [selectedDatasetId, setSelectedDatasetId] = useState<string>('_generate');
+  const skillDatasetName = `aesop-skill-eval:${skill.id}`;
+  const { data: datasetsData } = useQuery({
+    queryKey: ['evals', 'datasets', 'list'],
+    queryFn: async () => {
+      const result = await api.http.get('/internal/evals/datasets', {
+        query: { page: 1, per_page: 100 },
+        version: '1',
+      });
+      return result as { datasets: Array<{ id: string; name: string; description?: string }> };
+    },
+  });
+  // Auto-select the skill's dataset if it exists
+  React.useEffect(() => {
+    if (datasetsData?.datasets && selectedDatasetId === '_generate') {
+      const match = datasetsData.datasets.find((ds) => ds.name === skillDatasetName);
+      if (match) setSelectedDatasetId(match.id);
+    }
+  }, [datasetsData, skillDatasetName, selectedDatasetId]);
+  const datasetOptions = [
+    { value: '_generate', inputDisplay: 'Auto-generate for this skill', dropdownDisplay: 'Auto-generate for this skill' },
+    ...(datasetsData?.datasets ?? []).map((ds) => ({
+      value: ds.id,
+      inputDisplay: ds.name,
+      dropdownDisplay: (
+        <>
+          <strong>{ds.name}</strong>
+          {ds.description && <EuiText size="xs" color="subdued"><p>{ds.description}</p></EuiText>}
+        </>
+      ),
+    })),
+  ];
+
+  // Catalog evaluators — always fetched to check "new" vs existing
+  const [showCatalogPicker, setShowCatalogPicker] = useState(false);
+  const { data: catalogEvaluatorsData } = useQuery({
+    queryKey: ['evals', 'evaluators', 'catalog'],
+    queryFn: async () => {
+      const result = await api.http.get('/internal/evals/evaluators', {
+        version: '1',
+      });
+      return result as { evaluators: Array<{ name: string; kind: string; type: string; description: string; source: string }> };
+    },
+  });
+  const catalogEvaluatorNames = new Set(catalogEvaluatorsData?.evaluators?.map((e) => e.name) ?? []);
+
+  const addCatalogEvaluator = (catalogEval: any) => {
+    setProposedEvaluators((prev) => {
+      const existing = prev ?? [];
+      if (existing.some((e) => e.name === catalogEval.name)) return existing;
+      return [
+        ...existing,
+        {
+          name: catalogEval.name,
+          description: catalogEval.description,
+          kind: catalogEval.kind,
+          type: catalogEval.type,
+          source: catalogEval.source || 'prebuilt',
+          selected: true,
+          rationale: 'Added from evaluator catalog',
+        },
+      ];
+    });
+  };
+
+  const toggleEvaluator = (name: string) => {
+    setProposedEvaluators((prev) =>
+      prev?.map((e) => (e.name === name ? { ...e, selected: !e.selected } : e)) ?? null
+    );
+  };
+
+  // Propose evaluators mutation
+  const proposeEvaluatorsMutation = useMutation({
+    mutationFn: async () =>
+      api.http.post(`/internal/aesop/skills/${skill.id}/propose-evaluators`, {
+        body: JSON.stringify({ connector_id: selectedConnectorId }),
+        version: '1',
+      }),
+    onSuccess: (result: any) => {
+      setProposedEvaluators(result.proposed_evaluators);
+      api.notifications.toasts.addSuccess(
+        `${result.selected_count} evaluators proposed for "${skill.name}"`
+      );
+    },
+    onError: (err: Error) =>
+      api.notifications.toasts.addDanger(`Failed to propose evaluators: ${err.message}`),
+  });
+
+  // Save auto-generated evaluator to catalog
+  const saveEvaluatorMutation = useMutation({
+    mutationFn: async (evaluator: any) =>
+      api.http.post('/internal/evals/evaluators/custom', {
+        body: JSON.stringify({
+          name: evaluator.name,
+          description: evaluator.description,
+          type: 'llm-judge',
+          config: {
+            prompt_template: evaluator.config.prompt_template,
+            scoring_mode: evaluator.config.scoring_mode || 'continuous',
+            feedback_key: evaluator.config.feedback_key || 'explanation',
+          },
+        }),
+        version: '1',
+      }),
+    onSuccess: (_result: any, evaluator: any) => {
+      api.notifications.toasts.addSuccess(`Evaluator "${evaluator.name}" saved to catalog`);
+      // Refresh catalog so "new" badge becomes "saved"
+      queryClient.invalidateQueries({ queryKey: ['evals', 'evaluators', 'catalog'] });
+    },
+    onError: (err: Error) =>
+      api.notifications.toasts.addDanger(`Failed to save evaluator: ${err.message}`),
+  });
+
+  // Generate eval dataset mutation
+  const generateDatasetMutation = useMutation({
+    mutationFn: async () =>
+      api.http.post(`/internal/aesop/skills/${skill.id}/generate-eval-dataset`, {
+        body: JSON.stringify({ connector_id: selectedConnectorId, count: 10 }),
+        version: '1',
+      }),
+    onSuccess: (result: any) => {
+      api.notifications.toasts.addSuccess(`Dataset generated: ${result.added} test cases`);
+      if (result.dataset_id) setSelectedDatasetId(result.dataset_id);
+      queryClient.invalidateQueries({ queryKey: ['aesop'] });
+      queryClient.invalidateQueries({ queryKey: ['evals', 'datasets', 'list'] });
+    },
+    onError: (err: Error) =>
+      api.notifications.toasts.addDanger(`Failed to generate dataset: ${err.message}`),
+  });
+
+  // Run online eval mutation — passes selected evaluator names if available
+  const runEvalMutation = useMutation({
+    mutationFn: async () => {
+      const selectedEvals = proposedEvaluators?.filter((e) => e.selected) ?? [];
+
+      // Auto-save any unsaved auto-generated evaluators before running
+      const unsaved = selectedEvals.filter(
+        (e: any) => e.source === 'auto-generated' && e.config && !catalogEvaluatorNames.has(e.name)
+      );
+      for (const evaluator of unsaved) {
+        try {
+          await api.http.post('/internal/evals/evaluators/custom', {
+            body: JSON.stringify({
+              name: evaluator.name,
+              description: evaluator.description,
+              type: 'llm-judge',
+              config: {
+                prompt_template: evaluator.config.prompt_template,
+                scoring_mode: evaluator.config.scoring_mode || 'continuous',
+                feedback_key: evaluator.config.feedback_key || 'explanation',
+              },
+            }),
+            version: '1',
+          });
+        } catch {
+          // Already exists or save failed — evaluator may still be in registry from a previous save
+        }
+      }
+      if (unsaved.length > 0) {
+        queryClient.invalidateQueries({ queryKey: ['evals', 'evaluators', 'catalog'] });
+      }
+
+      const selectedEvalNames = selectedEvals.map((e: any) => e.name);
+      return api.http.post(`/internal/aesop/skills/${skill.id}/run-online-eval`, {
+        body: JSON.stringify({
+          connector_id: selectedConnectorId,
+          ...(selectedEvalNames?.length ? { evaluator_names: selectedEvalNames } : {}),
+        }),
+        version: '1',
+      });
+    },
+    onSuccess: (result: any) => {
+      api.notifications.toasts.addSuccess(
+        `Evaluation started with ${result.evaluators?.length ?? 0} evaluators. Results will appear in the Runs tab.`
+      );
+      // Poll for skill updates to detect when eval completes
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'skill-detail', initialSkill.id] });
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
+      queryClient.invalidateQueries({ queryKey: ['evals', 'runs'] });
+    },
+    onError: (err: Error) =>
+      api.notifications.toasts.addDanger(`Eval failed: ${err.message}`),
+  });
+
   const canApprove = skill.validation?.status === 'passed';
   const isReviewable = skill.review?.status === 'pending_review';
   const connectorOptions = (connectors || []).map((c) => ({
@@ -255,7 +448,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
 
   return (
     <>
-      <EuiFlyout onClose={onClose} size="l" ownFocus>
+      <EuiFlyout onClose={onClose} size="l" ownFocus outsideClickCloses={false}>
         <EuiFlyoutHeader>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
             <EuiFlexItem>
@@ -285,6 +478,37 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          {/* Top-level review workflow progress */}
+          {isReviewable && (
+            <>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                {[
+                  { step: 1, label: 'Review Content', done: true },
+                  { step: 2, label: 'Validate', done: skill.validation?.status === 'passed' || skill.validation?.status === 'failed' },
+                  { step: 3, label: 'Evaluate', done: !!skill.eval_run },
+                  { step: 4, label: 'Decide', done: skill.review?.status !== 'pending_review' },
+                ].map(({ step, label, done }) => (
+                  <EuiFlexItem key={step}>
+                    <EuiPanel
+                      paddingSize="xs"
+                      color={done ? 'success' : 'subdued'}
+                      hasBorder={false}
+                      style={{ textAlign: 'center' }}
+                    >
+                      <EuiText size="xs">
+                        <strong>
+                          {done ? '\u2713' : step}. {label}
+                        </strong>
+                      </EuiText>
+                    </EuiPanel>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </>
+          )}
+
+          {/* ── Section 1: Skill Overview ───────────────────────────── */}
           {/* Skill Improvement info */}
           {skill.base_skill && (
             <>
@@ -372,6 +596,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
               <EuiSpacer />
             </>
           )}
+          {/* ── Section 2: Content Validation ────────────────────────── */}
           {isReviewable && skill.validation?.status !== 'validating' && !isValidating && (
             <>
               {!canApprove ? (
@@ -427,6 +652,208 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
             </>
           )}
 
+          {/* ── Section 3: Performance Evaluation ─────────────────────── */}
+          {isReviewable && (
+            <>
+              <EuiTitle size="xs"><h3>Performance Evaluation</h3></EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiSteps
+                steps={[
+                  {
+                    title: `Select Evaluators${proposedEvaluators?.length ? ` (${proposedEvaluators.filter((e: any) => e.selected).length} selected)` : ''}`,
+                    status: proposedEvaluators?.length ? 'complete' : proposeEvaluatorsMutation.isPending ? 'loading' : 'incomplete',
+                    children: (
+                      <>
+                        {proposedEvaluators && proposedEvaluators.length > 0 ? (
+                          <>
+                            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                              {proposedEvaluators.map((evaluator: any) => (
+                                <EuiPanel
+                                  key={evaluator.name}
+                                  paddingSize="s"
+                                  hasBorder
+                                  style={{ marginBottom: 6 }}
+                                  color={evaluator.selected ? 'plain' : 'subdued'}
+                                >
+                                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                                    <EuiFlexItem grow={false}>
+                                      <EuiCheckbox
+                                        id={`eval-${evaluator.name}`}
+                                        checked={evaluator.selected}
+                                        onChange={() => toggleEvaluator(evaluator.name)}
+                                        compressed
+                                      />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem grow={false}>
+                                      <EuiBadge color={evaluator.source === 'auto-generated' && !catalogEvaluatorNames.has(evaluator.name) ? 'accent' : 'hollow'}>
+                                        {evaluator.kind}
+                                      </EuiBadge>
+                                    </EuiFlexItem>
+                                    <EuiFlexItem>
+                                      <EuiText size="xs">
+                                        <strong>{evaluator.name}</strong>
+                                        {evaluator.source === 'auto-generated' && !catalogEvaluatorNames.has(evaluator.name) && (
+                                          <EuiBadge color="accent" style={{ marginLeft: 4 }}>new</EuiBadge>
+                                        )}
+                                        {catalogEvaluatorNames.has(evaluator.name) && evaluator.source === 'auto-generated' && (
+                                          <EuiBadge color="success" style={{ marginLeft: 4 }}>saved</EuiBadge>
+                                        )}
+                                      </EuiText>
+                                    </EuiFlexItem>
+                                    {evaluator.source === 'auto-generated' && evaluator.config && !catalogEvaluatorNames.has(evaluator.name) && (
+                                      <EuiFlexItem grow={false}>
+                                        <EuiFlexGroup gutterSize="xs" responsive={false}>
+                                          <EuiFlexItem grow={false}>
+                                            <EuiButtonEmpty size="xs" iconType="save" onClick={() => saveEvaluatorMutation.mutate(evaluator)}>
+                                              Save
+                                            </EuiButtonEmpty>
+                                          </EuiFlexItem>
+                                          <EuiFlexItem grow={false}>
+                                            <EuiButtonEmpty
+                                              size="xs"
+                                              iconType={expandedEvaluator === evaluator.name ? 'arrowUp' : 'eye'}
+                                              onClick={() => setExpandedEvaluator(
+                                                expandedEvaluator === evaluator.name ? null : evaluator.name
+                                              )}
+                                            >
+                                              {expandedEvaluator === evaluator.name ? 'Hide' : 'Preview'}
+                                            </EuiButtonEmpty>
+                                          </EuiFlexItem>
+                                        </EuiFlexGroup>
+                                      </EuiFlexItem>
+                                    )}
+                                  </EuiFlexGroup>
+                                  {evaluator.description && (
+                                    <EuiText size="xs" color="subdued" style={{ marginTop: 2, paddingLeft: 28 }}>
+                                      {evaluator.description}
+                                    </EuiText>
+                                  )}
+                                  {evaluator.rationale && evaluator.rationale !== evaluator.description && (
+                                    <EuiText size="xs" color="subdued" style={{ marginTop: 2, paddingLeft: 28, fontStyle: 'italic' }}>
+                                      {evaluator.rationale}
+                                    </EuiText>
+                                  )}
+                                  {expandedEvaluator === evaluator.name && evaluator.config?.prompt_template && (
+                                    <>
+                                      <EuiSpacer size="xs" />
+                                      <EuiCodeBlock
+                                        language="markdown"
+                                        paddingSize="s"
+                                        fontSize="s"
+                                        overflowHeight={200}
+                                        isCopyable
+                                      >
+                                        {evaluator.config.prompt_template}
+                                      </EuiCodeBlock>
+                                    </>
+                                  )}
+                                </EuiPanel>
+                              ))}
+                            </div>
+                            <EuiButtonEmpty
+                              size="xs"
+                              iconType={showCatalogPicker ? 'arrowUp' : 'plusInCircle'}
+                              onClick={() => setShowCatalogPicker(!showCatalogPicker)}
+                            >
+                              {showCatalogPicker ? 'Hide catalog' : 'Add from catalog'}
+                            </EuiButtonEmpty>
+                            {showCatalogPicker && catalogEvaluatorsData?.evaluators && (
+                              <div style={{ maxHeight: 140, overflowY: 'auto', marginTop: 4 }}>
+                                {catalogEvaluatorsData.evaluators
+                                  .filter((ce) => !proposedEvaluators?.some((pe) => pe.name === ce.name))
+                                  .map((catalogEval) => (
+                                    <EuiFlexGroup key={catalogEval.name} gutterSize="s" alignItems="center" responsive={false} style={{ marginBottom: 4 }}>
+                                      <EuiFlexItem grow={false}>
+                                        <EuiBadge color="hollow">{catalogEval.kind}</EuiBadge>
+                                      </EuiFlexItem>
+                                      <EuiFlexItem>
+                                        <EuiToolTip content={catalogEval.description}>
+                                          <EuiText size="xs">{catalogEval.name}</EuiText>
+                                        </EuiToolTip>
+                                      </EuiFlexItem>
+                                      <EuiFlexItem grow={false}>
+                                        <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={() => addCatalogEvaluator(catalogEval)}>
+                                          Add
+                                        </EuiButtonEmpty>
+                                      </EuiFlexItem>
+                                    </EuiFlexGroup>
+                                  ))}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <EuiButton
+                            size="s"
+                            onClick={() => proposeEvaluatorsMutation.mutate()}
+                            isLoading={proposeEvaluatorsMutation.isPending}
+                            disabled={!selectedConnectorId}
+                            iconType="inspect"
+                          >
+                            Propose Evaluators
+                          </EuiButton>
+                        )}
+                      </>
+                    ),
+                  },
+                  {
+                    title: 'Choose Dataset',
+                    status: selectedDatasetId !== '_generate' || generateDatasetMutation.isSuccess ? 'complete' : generateDatasetMutation.isPending ? 'loading' : 'incomplete',
+                    children: (
+                      <EuiFlexGroup gutterSize="s" alignItems="center">
+                        <EuiFlexItem>
+                          <EuiSuperSelect
+                            options={datasetOptions}
+                            valueOfSelected={selectedDatasetId}
+                            onChange={setSelectedDatasetId}
+                            compressed
+                            aria-label="Select evaluation dataset"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            onClick={() => generateDatasetMutation.mutate()}
+                            isLoading={generateDatasetMutation.isPending}
+                            disabled={!selectedConnectorId}
+                            iconType="sparkles"
+                          >
+                            Generate
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ),
+                  },
+                  {
+                    title: `Run Evaluation${(skill as any).eval_run?.status === 'completed' ? ` — ${((skill as any).eval_run.mean_score * 100).toFixed(0)}% mean score` : (skill as any).eval_run?.status === 'running' ? ' — running...' : ''}`,
+                    status: (skill as any).eval_run?.status === 'completed' || runEvalMutation.isSuccess
+                      ? 'complete'
+                      : (skill as any).eval_run?.status === 'running' || runEvalMutation.isPending
+                        ? 'loading'
+                        : (skill as any).eval_run?.status === 'failed'
+                          ? 'danger' as any
+                          : 'incomplete',
+                    children: (
+                      <EuiButton
+                        size="s"
+                        fill
+                        onClick={() => runEvalMutation.mutate()}
+                        isLoading={runEvalMutation.isPending}
+                        disabled={!selectedConnectorId || (!proposedEvaluators?.length && selectedDatasetId === '_generate')}
+                        iconType="play"
+                      >
+                        Run Eval{proposedEvaluators?.filter((e: any) => e.selected).length
+                          ? ` with ${proposedEvaluators.filter((e: any) => e.selected).length} evaluators`
+                          : ''}
+                      </EuiButton>
+                    ),
+                  },
+                ]}
+              />
+              <EuiSpacer />
+            </>
+          )}
+
+          {/* ── Section 4: Results ────────────────────────────────────── */}
           {/* Evaluation Score + LLM Feedback — hidden during re-validation or improvement */}
           {skill.validation?.final_score != null && !isValidating && !isImproving && skill.validation?.status !== 'validating' && (
             <>
@@ -473,26 +900,48 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
               </EuiPanel>
               <EuiSpacer size="s" />
 
-              {/* Criteria Breakdown */}
+              {/* Criteria Breakdown — with evaluator descriptions */}
               {skill.validation.criteria && (
                 <>
                   <EuiPanel>
                     <EuiTitle size="xs"><h4>Evaluation Criteria</h4></EuiTitle>
                     <EuiSpacer size="s" />
-                    <EuiFlexGroup gutterSize="s" wrap>
-                      {Object.entries(skill.validation.criteria as Record<string, number>).map(
-                        ([criterion, score]) => (
-                          <EuiFlexItem key={criterion} grow={false} style={{ minWidth: 120 }}>
-                            <EuiStat
-                              title={`${(score * 100).toFixed(0)}%`}
-                              description={criterion.charAt(0).toUpperCase() + criterion.slice(1)}
-                              titleSize="xs"
-                              titleColor={score >= 0.85 ? 'success' : score >= 0.6 ? 'default' : 'danger'}
-                            />
-                          </EuiFlexItem>
-                        )
-                      )}
-                    </EuiFlexGroup>
+                    {Object.entries(skill.validation.criteria as Record<string, number>).map(
+                      ([criterion, score]) => {
+                        const evalDescriptions: Record<string, string> = {
+                          safety: 'Detects destructive patterns (DELETE, DROP, _delete_by_query) and unsafe operations',
+                          accuracy: 'Validates ES|QL syntax, ECS field names, and index pattern correctness',
+                          completeness: 'Checks for step-by-step instructions, ES|QL examples, data sources, and error handling',
+                          specificity: 'Evaluates whether a junior analyst can follow the skill step-by-step',
+                          relevance: 'Assesses utility for SOC/security analyst workflows',
+                        };
+                        return (
+                          <EuiFlexGroup
+                            key={criterion}
+                            gutterSize="s"
+                            alignItems="center"
+                            responsive={false}
+                            style={{ marginBottom: 8 }}
+                          >
+                            <EuiFlexItem grow={false} style={{ minWidth: 70 }}>
+                              <EuiBadge
+                                color={score >= 0.85 ? 'success' : score >= 0.6 ? 'warning' : 'danger'}
+                              >
+                                {(score * 100).toFixed(0)}%
+                              </EuiBadge>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <EuiText size="s">
+                                <strong>{criterion.charAt(0).toUpperCase() + criterion.slice(1)}</strong>
+                              </EuiText>
+                              <EuiText size="xs" color="subdued">
+                                {evalDescriptions[criterion.toLowerCase()] || `Evaluates skill ${criterion}`}
+                              </EuiText>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        );
+                      }
+                    )}
                   </EuiPanel>
                   <EuiSpacer size="s" />
                 </>
@@ -563,6 +1012,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
             </>
           )}
 
+          {/* ── Section 5: Skill Content ──────────────────────────────── */}
           {/* Skill Content — view or edit */}
           <EuiPanel>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -772,6 +1222,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
             </>
           )}
 
+          {/* ── Section 6: Review Decision ──────────────────────────── */}
           {/* Review Notes — only for pending skills */}
           {isReviewable && (
             <EuiFormRow
@@ -786,6 +1237,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
               />
             </EuiFormRow>
           )}
+          {/* Evaluator preview removed — now inline in evaluator cards */}
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>

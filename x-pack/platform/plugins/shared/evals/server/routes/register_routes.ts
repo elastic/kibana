@@ -7,6 +7,9 @@
 
 import type { Logger } from '@kbn/logging';
 import type { EvalsRouter } from '../types';
+import type { EvaluatorRegistry } from '../lib/evaluation_engine';
+import type { SkillMonitoringService } from '../lib/monitoring/skill_monitoring_service';
+import type { SkillValidationService } from '../lib/aesop';
 import { registerGetRunsRoute } from './runs/get_runs';
 import { registerGetRunRoute } from './runs/get_run';
 import { registerGetRunScoresRoute } from './runs/get_run_scores';
@@ -22,13 +25,33 @@ import { registerAddExamplesRoute } from './datasets/add_examples';
 import { registerUpdateExampleRoute } from './datasets/update_example';
 import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
+import { registerVersionDatasetRoute } from './datasets/version_dataset';
+import { registerGetDatasetVersionsRoute } from './datasets/get_dataset_versions';
+import { registerGetDatasetStatsRoute } from './datasets/get_dataset_stats';
+import { registerUpdateExampleSplitsRoute } from './datasets/update_example_splits';
+import { registerImportExamplesRoute } from './datasets/import_examples';
+import { registerEvaluationRoutes } from './evaluation';
+import { registerEvaluatorRoutes } from './evaluators';
+import { registerMonitoringRoutes } from './monitoring';
+import { registerAesopRoutes } from './aesop';
+import { registerSkillRoutes } from './skills';
+import { registerSuiteRoutes } from './suites';
 
 export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
 }
 
-export const registerRoutes = (dependencies: RouteDependencies) => {
+interface AllRouteDependencies extends RouteDependencies {
+  evaluatorRegistry: EvaluatorRegistry;
+  monitoringService: SkillMonitoringService;
+  skillValidationService: SkillValidationService;
+  skillOnlineEvalService?: import('../lib/aesop/skill_online_eval_service').SkillOnlineEvalService;
+  suiteRunner?: import('../lib/suite_runner').SuiteRunner;
+  repoRoot?: string;
+}
+
+export const registerRoutes = (dependencies: AllRouteDependencies) => {
   registerGetRunsRoute(dependencies);
   registerGetRunRoute(dependencies);
   registerGetRunScoresRoute(dependencies);
@@ -44,4 +67,24 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpdateExampleRoute(dependencies);
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);
+  registerVersionDatasetRoute(dependencies);
+  registerGetDatasetVersionsRoute(dependencies);
+  registerGetDatasetStatsRoute(dependencies);
+  registerUpdateExampleSplitsRoute(dependencies);
+  registerImportExamplesRoute(dependencies);
+
+  registerEvaluationRoutes(dependencies);
+  registerEvaluatorRoutes(dependencies);
+  registerMonitoringRoutes(dependencies);
+  registerAesopRoutes(dependencies);
+  registerSkillRoutes(dependencies);
+
+  if (dependencies.repoRoot) {
+    registerSuiteRoutes({
+      router: dependencies.router,
+      logger: dependencies.logger,
+      suiteRunner: dependencies.suiteRunner,
+      repoRoot: dependencies.repoRoot,
+    });
+  }
 };

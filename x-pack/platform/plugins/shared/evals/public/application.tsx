@@ -19,6 +19,10 @@ import { ProposedSkillsList } from './pages/aesop/proposed_skills_list';
 import { ExplorationDashboard } from './pages/aesop/exploration_dashboard';
 import { ExecutionDetailPage } from './pages/aesop/execution_detail';
 import { AesopErrorBoundary } from './pages/aesop/components/aesop_error_boundary';
+import { EvaluatorCatalogPage } from './pages/evaluators';
+import { ComparisonDashboard } from './pages/comparison';
+import { SkillPerformanceDashboard } from './pages/monitoring';
+import { SuitesListPage } from './pages/suites_list';
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
@@ -34,6 +38,22 @@ const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
 
 const aesopTabLabel = i18n.translate('xpack.evals.navigation.aesop', {
   defaultMessage: 'AESOP',
+});
+
+const evaluatorsTabLabel = i18n.translate('xpack.evals.navigation.evaluators', {
+  defaultMessage: 'Evaluators',
+});
+
+const comparisonTabLabel = i18n.translate('xpack.evals.navigation.comparison', {
+  defaultMessage: 'Comparison',
+});
+
+const monitoringTabLabel = i18n.translate('xpack.evals.navigation.monitoring', {
+  defaultMessage: 'Monitoring',
+});
+
+const suitesTabLabel = i18n.translate('xpack.evals.navigation.suites', {
+  defaultMessage: 'Suites',
 });
 
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
@@ -52,8 +72,27 @@ const aesopExplorationBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.
   defaultMessage: 'Exploration Dashboard',
 });
 
-const aesopExecutionDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.aesopExecutionDetail', {
-  defaultMessage: 'Execution Detail',
+const aesopExecutionDetailBreadcrumbLabel = i18n.translate(
+  'xpack.evals.breadcrumbs.aesopExecutionDetail',
+  {
+    defaultMessage: 'Execution Detail',
+  }
+);
+
+const evaluatorsBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.evaluators', {
+  defaultMessage: 'Evaluators',
+});
+
+const comparisonBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.comparison', {
+  defaultMessage: 'Comparison',
+});
+
+const monitoringBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.monitoring', {
+  defaultMessage: 'Monitoring',
+});
+
+const suitesBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.suites', {
+  defaultMessage: 'Suites',
 });
 
 const EvalsHeader: React.FC = () => {
@@ -90,7 +129,6 @@ const getBreadcrumbs = ({
 
   // AESOP routes
   if (pathname.startsWith('/aesop/exploration/') && pathname.split('/').length > 3) {
-    // Execution detail page
     return [
       { text: aesopTabLabel, href: aesopSkillsHref },
       { text: aesopExplorationBreadcrumbLabel, href: aesopExplorationHref },
@@ -99,7 +137,10 @@ const getBreadcrumbs = ({
   }
 
   if (pathname.startsWith('/aesop/exploration')) {
-    return [{ text: aesopTabLabel, href: aesopSkillsHref }, { text: aesopExplorationBreadcrumbLabel }];
+    return [
+      { text: aesopTabLabel, href: aesopSkillsHref },
+      { text: aesopExplorationBreadcrumbLabel },
+    ];
   }
 
   if (pathname.startsWith('/aesop')) {
@@ -120,6 +161,22 @@ const getBreadcrumbs = ({
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
   }
 
+  if (pathname === '/evaluators') {
+    return [{ text: evaluatorsBreadcrumbLabel }];
+  }
+
+  if (pathname.startsWith('/comparison/')) {
+    return [{ text: comparisonBreadcrumbLabel }];
+  }
+
+  if (pathname.startsWith('/monitoring/')) {
+    return [{ text: monitoringBreadcrumbLabel }];
+  }
+
+  if (pathname === '/suites') {
+    return [{ text: suitesBreadcrumbLabel }];
+  }
+
   return [{ text: runsTabLabel }];
 };
 
@@ -128,11 +185,22 @@ const EvalsNavigation: React.FC = () => {
   const { pathname } = useLocation();
   const isDatasetsSelected = pathname.startsWith('/datasets');
   const isAESOPSelected = pathname.startsWith('/aesop');
+  const isEvaluatorsSelected = pathname === '/evaluators';
+  const isComparisonSelected = pathname.startsWith('/comparison');
+  const isMonitoringSelected = pathname.startsWith('/monitoring');
+  const isSuitesSelected = pathname === '/suites';
+  const isRunsSelected =
+    !isDatasetsSelected &&
+    !isAESOPSelected &&
+    !isEvaluatorsSelected &&
+    !isComparisonSelected &&
+    !isMonitoringSelected &&
+    !isSuitesSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
       <EuiTabs size="s">
-        <EuiTab isSelected={!isDatasetsSelected && !isAESOPSelected} onClick={() => history.push('/')}>
+        <EuiTab isSelected={isRunsSelected} onClick={() => history.push('/')}>
           {runsTabLabel}
         </EuiTab>
         <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push('/datasets')}>
@@ -140,6 +208,18 @@ const EvalsNavigation: React.FC = () => {
         </EuiTab>
         <EuiTab isSelected={isAESOPSelected} onClick={() => history.push('/aesop/skills/proposed')}>
           {aesopTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isEvaluatorsSelected} onClick={() => history.push('/evaluators')}>
+          {evaluatorsTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isComparisonSelected} onClick={() => history.push('/comparison')}>
+          {comparisonTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isMonitoringSelected} onClick={() => history.push('/monitoring')}>
+          {monitoringTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isSuitesSelected} onClick={() => history.push('/suites')}>
+          {suitesTabLabel}
         </EuiTab>
       </EuiTabs>
     </div>
@@ -198,6 +278,12 @@ export const EvalsApp: React.FC<{
                 <ExecutionDetailPage />
               </AesopErrorBoundary>
             </Route>
+            <Route exact path="/evaluators" component={EvaluatorCatalogPage} />
+            <Route exact path="/comparison" component={ComparisonDashboard} />
+            <Route path="/comparison/:id" component={ComparisonDashboard} />
+            <Route exact path="/monitoring" component={SkillPerformanceDashboard} />
+            <Route path="/monitoring/:skillId" component={SkillPerformanceDashboard} />
+            <Route exact path="/suites" component={SuitesListPage} />
           </Routes>
         </div>
       </div>

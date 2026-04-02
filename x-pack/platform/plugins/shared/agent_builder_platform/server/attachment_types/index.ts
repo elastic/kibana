@@ -13,6 +13,8 @@ import { createScreenContextAttachmentType } from './screen_context';
 import { createVisualizationAttachmentType } from './visualization';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
+import { createSkillContextAttachmentType } from './skill_context';
+import { createEvalResultsAttachmentType } from './eval_results';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -35,6 +37,8 @@ export const registerAttachmentTypes = ({
     createVisualizationAttachmentType(),
     createGraphAttachmentType(),
     createConnectorAttachmentType(),
+    createSkillContextAttachmentType(),
+    createEvalResultsAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

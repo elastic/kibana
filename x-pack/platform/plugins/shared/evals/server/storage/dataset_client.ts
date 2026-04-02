@@ -15,7 +15,7 @@ import type {
 } from '@kbn/storage-adapter';
 import { isResponseError } from '@kbn/es-errors';
 import { DATASET_UUID_NAMESPACE, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
-import type { DatasetStorageProperties } from './datasets_storage';
+import type { DatasetStorageProperties, DatasetVersionEntry } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
 import type { datasetsStorageSettings } from './datasets_storage';
@@ -249,6 +249,7 @@ export class DatasetClient {
       document: {
         name: existing.name,
         description: updates.description,
+        versions: existing.versions,
         created_at: existing.created_at,
         updated_at: updatedAt,
       },
@@ -472,6 +473,7 @@ export class DatasetClient {
             document: {
               name: existing.name,
               description,
+              versions: existing.versions,
               created_at: existing.created_at,
               updated_at: new Date().toISOString(),
             },
@@ -489,6 +491,24 @@ export class DatasetClient {
       removed: toDelete.length,
       unchanged,
     };
+  }
+
+  async updateVersions(datasetId: string, versions: DatasetVersionEntry[]): Promise<void> {
+    const dataset = await this.getDatasetById(datasetId);
+    if (!dataset) {
+      throw new Error(`Dataset not found: ${datasetId}`);
+    }
+
+    await this.datasetsStorage.index({
+      id: datasetId,
+      document: {
+        name: dataset.name,
+        description: dataset.description,
+        versions,
+        created_at: dataset.created_at,
+        updated_at: new Date().toISOString(),
+      },
+    });
   }
 
   private async getDatasetById(datasetId: string): Promise<DatasetDocument | undefined> {
@@ -619,6 +639,7 @@ export class DatasetClient {
       document: {
         name: dataset.name,
         description: dataset.description,
+        versions: dataset.versions,
         created_at: dataset.created_at,
         updated_at: new Date().toISOString(),
       },

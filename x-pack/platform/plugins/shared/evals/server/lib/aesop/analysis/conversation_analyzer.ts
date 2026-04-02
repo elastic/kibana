@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-const CONVERSATIONS_INDEX = '.kibana-agent-builder-conversations';
+const CONVERSATIONS_INDEX = '.chat-conversations';
 
 export interface ConversationInsights {
   toolUsage: Array<{ tool: string; count: number }>;
@@ -18,6 +18,7 @@ export interface ConversationInsights {
   totalMessages: number;
 }
 
+// Internal normalized message format used by extractors
 interface ConversationMessage {
   role: string;
   content?: string;
@@ -29,8 +30,19 @@ interface ConversationMessage {
   }>;
 }
 
-interface ConversationDoc {
-  messages: ConversationMessage[];
+// Agent Builder .chat-conversations document shape
+interface ChatConversationDoc {
+  created_at?: string;
+  updated_at?: string;
+  conversation_rounds?: Array<{
+    input?: { message?: string };
+    steps?: Array<{
+      type?: string;
+      tool_id?: string;
+      results?: string;
+    }>;
+    response?: { message?: string };
+  }>;
 }
 
 const EMPTY_INSIGHTS: ConversationInsights = {
@@ -41,6 +53,51 @@ const EMPTY_INSIGHTS: ConversationInsights = {
   totalConversations: 0,
   totalMessages: 0,
 };
+
+/**
+ * Convert an Agent Builder conversation_rounds document into the
+ * normalized ConversationMessage[] format used by the extractors.
+ */
+function toMessages(doc: ChatConversationDoc): ConversationMessage[] {
+  const messages: ConversationMessage[] = [];
+  const rounds = doc.conversation_rounds;
+  if (!Array.isArray(rounds)) return messages;
+
+  for (const round of rounds) {
+    // User input
+    if (round.input?.message) {
+      messages.push({ role: 'user', content: round.input.message });
+    }
+
+    // Tool call steps
+    const toolCalls: Array<{ function: { name: string } }> = [];
+    if (Array.isArray(round.steps)) {
+      for (const step of round.steps) {
+        if (step.type === 'tool_call' && step.tool_id) {
+          toolCalls.push({ function: { name: step.tool_id } });
+          // Tool result
+          if (step.results) {
+            const resultStr = typeof step.results === 'string' ? step.results : JSON.stringify(step.results);
+            messages.push({ role: 'tool', name: step.tool_id, content: resultStr });
+          }
+        }
+      }
+    }
+
+    // Assistant response (with tool_calls if any were made in this round)
+    if (round.response?.message) {
+      messages.push({
+        role: 'assistant',
+        content: round.response.message,
+        ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
+      });
+    } else if (toolCalls.length > 0) {
+      messages.push({ role: 'assistant', tool_calls: toolCalls });
+    }
+  }
+
+  return messages;
+}
 
 export class ConversationAnalyzer {
   /**
@@ -120,12 +177,9 @@ export class ConversationAnalyzer {
   static extractRecurringFlows(
     conversations: Array<{ messages: ConversationMessage[] }>
   ): Array<{ steps: string[]; frequency: number }> {
-    // Build bigram counts across conversations, but only count each bigram
-    // once per conversation to measure cross-conversation recurrence.
     const globalBigramCounts = new Map<string, number>();
 
     for (const conv of conversations) {
-      // Extract ordered tool call sequence for this conversation
       const toolSequence: string[] = [];
       for (const msg of conv.messages) {
         if (!msg.tool_calls) continue;
@@ -137,7 +191,6 @@ export class ConversationAnalyzer {
         }
       }
 
-      // Extract unique bigrams from this conversation
       const seenInConversation = new Set<string>();
       for (let i = 0; i < toolSequence.length - 1; i++) {
         const bigram = `${toolSequence[i]}::${toolSequence[i + 1]}`;
@@ -149,7 +202,6 @@ export class ConversationAnalyzer {
       }
     }
 
-    // Only return bigrams that appear in 2+ conversations
     return Array.from(globalBigramCounts.entries())
       .filter(([, count]) => count >= 2)
       .map(([key, frequency]) => ({
@@ -160,26 +212,25 @@ export class ConversationAnalyzer {
   }
 
   /**
-   * Orchestrator: queries ES for recent Agent Builder conversations,
-   * runs all extractors, returns combined ConversationInsights.
-   * Handles missing index (404) and all other ES errors gracefully.
+   * Queries ES for recent Agent Builder conversations from .chat-conversations,
+   * normalizes the conversation_rounds format to messages, runs all extractors.
    */
   static async analyze(
     esClient: ElasticsearchClient,
     logger: Logger
   ): Promise<ConversationInsights> {
     try {
-      const result = await esClient.search<ConversationDoc>({
+      const result = await esClient.search<ChatConversationDoc>({
         index: CONVERSATIONS_INDEX,
         size: 100,
         query: {
           range: {
-            '@timestamp': {
+            updated_at: {
               gte: 'now-30d',
             },
           },
         },
-        sort: [{ '@timestamp': { order: 'desc' } }],
+        sort: [{ updated_at: { order: 'desc' } }],
       });
 
       const hits = result.hits.hits;
@@ -192,9 +243,11 @@ export class ConversationAnalyzer {
 
       for (const hit of hits) {
         const doc = hit._source;
-        if (!doc?.messages || !Array.isArray(doc.messages)) continue;
-        conversations.push({ messages: doc.messages });
-        allMessages.push(...doc.messages);
+        if (!doc) continue;
+        const messages = toMessages(doc);
+        if (messages.length === 0) continue;
+        conversations.push({ messages });
+        allMessages.push(...messages);
       }
 
       return {

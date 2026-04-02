@@ -11,6 +11,10 @@ export const PAGE_TITLE = i18n.translate('xpack.evals.datasetsList.pageTitle', {
   defaultMessage: 'Datasets',
 });
 
+export const IMPORT_BUTTON = i18n.translate('xpack.evals.datasetsList.importButton', {
+  defaultMessage: 'Import examples',
+});
+
 export const CREATE_DATASET_BUTTON = i18n.translate(
   'xpack.evals.datasetsList.createDatasetButton',
   {

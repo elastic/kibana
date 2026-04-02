@@ -78,5 +78,14 @@ export interface ExtensionConfig {
  * - export { reviewQueue } from './src/human_review/workflow/review_workflow';
  */
 
+// Skill evaluation preset — prompt templates and factory
+export { SKILL_RELEVANCE_PROMPT } from './src/evaluators/skill_preset/relevance';
+export { SKILL_COMPLETENESS_PROMPT } from './src/evaluators/skill_preset/completeness';
+export { SKILL_ACCURACY_PROMPT } from './src/evaluators/skill_preset/accuracy';
+export { SKILL_SPECIFICITY_PROMPT } from './src/evaluators/skill_preset/specificity';
+export { SKILL_SAFETY_PROMPT } from './src/evaluators/skill_preset/safety';
+export { createSkillEvaluatorPreset } from './src/evaluators/skill_preset';
+export type { SkillPresetConfig } from './src/evaluators/skill_preset';
+
 // Placeholder export to ensure package builds
 export const EVALS_EXTENSIONS_VERSION = '1.0.0';

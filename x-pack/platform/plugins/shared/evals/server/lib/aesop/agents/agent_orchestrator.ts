@@ -101,32 +101,40 @@ export class AgentOrchestrator {
   async runDiscoveryPipeline(context: {
     indexNames: string[];
     analystRole: string;
+    conversationContext?: string;
   }): Promise<any[]> {
     const { logger } = this.config;
 
     const progress = this.config.onProgress || (async () => {});
+    const hasIndices = context.indexNames.length > 0;
 
-    // Phase 1-2: Schema Explorer
-    await progress('Schema Discovery', 1, 3, 'Agent exploring index schemas with tools...');
-    const schemaResponse = await this.executeAgent(
-      'aesop.schema-explorer',
-      `Explore and profile these indices: ${context.indexNames.join(', ')}. Focus on security-relevant data for a ${context.analystRole}.`
-    );
+    let schemaResponse = '';
+    let patternResponse = '';
 
-    if (!schemaResponse) {
-      logger.warn('[AESOP] Schema explorer returned empty');
-      return [];
+    if (hasIndices) {
+      // Phase 1-2: Schema Explorer
+      await progress('Schema Discovery', 1, 3, 'Agent exploring index schemas with tools...');
+      schemaResponse = await this.executeAgent(
+        'aesop.schema-explorer',
+        `Explore and profile these indices: ${context.indexNames.join(', ')}. Focus on security-relevant data for a ${context.analystRole}.`
+      ) || '';
+
+      // Phase 3-4: Pattern Miner
+      await progress('Pattern Mining', 2, 3, 'Agent mining patterns with ES|QL queries...');
+      patternResponse = await this.executeAgent(
+        'aesop.pattern-miner',
+        `Find automation-worthy patterns in this data. Schema context:\n${schemaResponse}`
+      ) || '';
     }
 
-    // Phase 3-4: Pattern Miner
-    await progress('Pattern Mining', 2, 3, 'Agent mining patterns with ES|QL queries...');
-    const patternResponse = await this.executeAgent(
-      'aesop.pattern-miner',
-      `Find automation-worthy patterns in this data. Schema context:\n${schemaResponse}`
-    );
+    // Build combined context for skill generation
+    const contextParts: string[] = [];
+    if (schemaResponse) contextParts.push(`## Index Schemas\n${schemaResponse}`);
+    if (patternResponse) contextParts.push(`## Discovered Patterns\n${patternResponse}`);
+    if (context.conversationContext) contextParts.push(`## Agent Builder Conversation Analysis\n${context.conversationContext}`);
 
-    if (!patternResponse) {
-      logger.warn('[AESOP] Pattern miner returned empty');
+    if (contextParts.length === 0) {
+      logger.warn('[AESOP] No context available for skill generation (no indices, no conversations)');
       return [];
     }
 
@@ -134,7 +142,7 @@ export class AgentOrchestrator {
     await progress('Skill Generation', 3, 3, 'Agent generating skills from discovered patterns...');
     const skillResponse = await this.executeAgent(
       'aesop.skill-generator',
-      `Generate Agent Builder skills from these patterns and schemas.\n\nSchemas:\n${schemaResponse}\n\nPatterns:\n${patternResponse}`
+      `Generate Agent Builder skills based on the following discovery context. Each skill should be a reusable automation that a security analyst would benefit from.\n\n${contextParts.join('\n\n')}`
     );
 
     if (!skillResponse) {

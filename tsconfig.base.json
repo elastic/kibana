@@ -1512,6 +1512,8 @@
       "@kbn/lint-ts-projects-cli/*": ["packages/kbn-lint-ts-projects-cli/*"],
       "@kbn/lists-plugin": ["x-pack/solutions/security/plugins/lists"],
       "@kbn/lists-plugin/*": ["x-pack/solutions/security/plugins/lists/*"],
+      "@kbn/llm-batch-processing": ["x-pack/platform/packages/shared/kbn-llm-batch-processing"],
+      "@kbn/llm-batch-processing/*": ["x-pack/platform/packages/shared/kbn-llm-batch-processing/*"],
       "@kbn/llm-tasks-plugin": ["x-pack/platform/plugins/shared/ai_infra/llm_tasks"],
       "@kbn/llm-tasks-plugin/*": ["x-pack/platform/plugins/shared/ai_infra/llm_tasks/*"],
       "@kbn/locator-examples-plugin": ["examples/locator_examples"],

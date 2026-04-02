@@ -135,7 +135,7 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
 
           // 6. Create or update skill in Agent Builder via SkillRegistry
           const evalsContext = await context.evals;
-          const agentBuilderStart = evalsContext.getAgentBuilderStart();
+          const agentBuilderStart = await evalsContext.getAgentBuilderStart();
           if (!agentBuilderStart) {
             throw new Error('Agent Builder plugin not available — cannot deploy skills');
           }

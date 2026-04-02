@@ -94,7 +94,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
 
           // Try agent-based validation if requested and available
           if (useAgent) {
-            const agentBuilderStart = evalsContext.getAgentBuilderStart();
+            const agentBuilderStart = await evalsContext.getAgentBuilderStart();
             if (agentBuilderStart) {
               try {
                 const { AgentOrchestrator } = await import(

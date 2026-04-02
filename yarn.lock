@@ -7567,6 +7567,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/llm-batch-processing@link:x-pack/platform/packages/shared/kbn-llm-batch-processing":
+  version "0.0.0"
+  uid ""
+
 "@kbn/llm-tasks-plugin@link:x-pack/platform/plugins/shared/ai_infra/llm_tasks":
   version "0.0.0"
   uid ""

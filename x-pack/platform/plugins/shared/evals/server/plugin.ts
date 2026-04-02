@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import path from 'path';
+import { resolve } from 'path';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -19,9 +19,20 @@ import type {
   EvalsStartDependencies,
 } from './types';
 import { registerRoutes } from './routes/register_routes';
-import { registerAESOPRoutes } from './routes/aesop/register_aesop_routes';
 import { DatasetService } from './storage/dataset_service';
 import { ensureAesopILMPolicy } from './lib/aesop/storage/index_lifecycle';
+import { EvaluatorRegistry, getPrebuiltEvaluators } from './lib/evaluation_engine';
+import { SkillMonitoringService } from './lib/monitoring/skill_monitoring_service';
+import { evaluatorSavedObjectType, EVALUATOR_SAVED_OBJECT_TYPE } from './storage/evaluator_storage';
+import type { CustomEvaluatorAttributes } from './storage/evaluator_storage';
+import { buildCustomEvaluator } from './routes/evaluators/build_custom_evaluator';
+import {
+  proposedSkillSavedObjectType,
+  PROPOSED_SKILL_SAVED_OBJECT_TYPE,
+} from './storage/skill_storage';
+import { SkillValidationService } from './lib/aesop';
+import { SkillOnlineEvalService } from './lib/aesop/skill_online_eval_service';
+import { SuiteRunner } from './lib/suite_runner';
 
 export class EvalsPlugin
   implements
@@ -31,8 +42,11 @@ export class EvalsPlugin
   private readonly config: EvalsConfig;
   private datasetService?: DatasetService;
   private actionsStart?: EvalsStartDependencies['actions'];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private agentBuilderStart?: any;
+  private evaluatorRegistry?: EvaluatorRegistry;
+  private monitoringService?: SkillMonitoringService;
+  private skillValidationService?: SkillValidationService;
+  private skillOnlineEvalService?: SkillOnlineEvalService;
+  private suiteRunner?: SuiteRunner;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -41,15 +55,56 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
-    { features, workflows }: EvalsSetupDependencies
+    { features }: EvalsSetupDependencies
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
-      return {};
+      return {
+        registerEvaluator: () => {},
+      };
     }
 
     this.logger.info('Setting up Evals plugin');
     this.datasetService = new DatasetService(this.logger);
+
+    this.evaluatorRegistry = new EvaluatorRegistry(this.logger);
+
+    // Register prebuilt skill evaluators (LLM-judge backed)
+    for (const evaluator of getPrebuiltEvaluators()) {
+      this.evaluatorRegistry.register(evaluator);
+    }
+
+    this.monitoringService = new SkillMonitoringService(this.logger);
+
+    coreSetup.savedObjects.registerType(evaluatorSavedObjectType);
+    coreSetup.savedObjects.registerType(proposedSkillSavedObjectType);
+
+    this.skillValidationService = new SkillValidationService(this.evaluatorRegistry, this.logger);
+    this.skillOnlineEvalService = new SkillOnlineEvalService(
+      this.evaluatorRegistry,
+      this.datasetService!,
+      this.logger
+    );
+
+    // Resolve repo root from plugin location for suite runner
+    // Plugin is at: x-pack/platform/plugins/shared/evals/server/plugin.ts
+    // __dirname = .../evals/server → 6 hops: server → evals → shared → plugins → platform → x-pack → root
+    const repoRoot = resolve(__dirname, '..', '..', '..', '..', '..', '..');
+    const { hostname, port, protocol } = coreSetup.http.getServerInfo();
+    const kibanaUrl = `${protocol}://${hostname}:${port}`;
+
+    // Extract ES URL from CLI args (--elasticsearch.hosts=http://...) since
+    // coreSetup doesn't expose the raw elasticsearch config URL.
+    const esArg = process.argv.find((arg) => arg.startsWith('--elasticsearch.hosts='));
+    const elasticsearchUrl = esArg?.split('=')[1] ?? 'http://localhost:9200';
+
+    this.suiteRunner = new SuiteRunner(repoRoot, this.logger, { kibanaUrl, elasticsearchUrl });
+
+    // Resolve agentBuilder via runtimePluginDependencies to avoid circular dep
+    // (agentBuilder optionally depends on evals)
+    const agentBuilderStartPromise = coreSetup.plugins
+      .onStart<{ agentBuilder: any }>('agentBuilder')
+      .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined));
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
@@ -61,7 +116,7 @@ export class EvalsPlugin
         return {
           datasetService: this.datasetService,
           getActionsStart: () => this.actionsStart,
-          getAgentBuilderStart: () => this.agentBuilderStart,
+          getAgentBuilderStart: () => agentBuilderStartPromise,
         };
       }
     );
@@ -79,7 +134,7 @@ export class EvalsPlugin
           api: [PLUGIN_ID],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
-            all: [],
+            all: [EVALUATOR_SAVED_OBJECT_TYPE, PROPOSED_SKILL_SAVED_OBJECT_TYPE],
             read: [],
           },
           ui: ['show'],
@@ -90,7 +145,7 @@ export class EvalsPlugin
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
-            read: [],
+            read: [EVALUATOR_SAVED_OBJECT_TYPE, PROPOSED_SKILL_SAVED_OBJECT_TYPE],
           },
           ui: ['show'],
         },
@@ -98,36 +153,66 @@ export class EvalsPlugin
     });
 
     const router = coreSetup.http.createRouter<EvalsRequestHandlerContext>();
-    registerRoutes({ router, logger: this.logger });
+    registerRoutes({
+      router,
+      logger: this.logger,
+      evaluatorRegistry: this.evaluatorRegistry,
+      monitoringService: this.monitoringService,
+      skillValidationService: this.skillValidationService,
+      skillOnlineEvalService: this.skillOnlineEvalService,
+      suiteRunner: this.suiteRunner,
+      repoRoot,
+    });
 
-    // ═══════════════════════════════════════════════════════════════
-    // AESOP Integration (Agent-driven Exploration for Security Ops)
-    // ═══════════════════════════════════════════════════════════════
-    this.logger.info('Registering AESOP routes for self-directed skill acquisition');
-    registerAESOPRoutes({ router, logger: this.logger });
-
-    // Register AESOP workflows (if Workflows plugin available)
-    if (workflows) {
-      try {
-        const workflowsPath = path.join(__dirname, 'workflows', 'aesop');
-        this.logger.info(`Registering AESOP workflows from ${workflowsPath}`);
-        // Note: Actual workflow registration API depends on Workflows plugin interface
-        // This is a placeholder - update when Workflows plugin API is finalized
-        // workflows.registerWorkflowsFromDirectory(workflowsPath);
-        this.logger.debug('AESOP workflow registration skipped (Workflows API not yet available)');
-      } catch (error) {
-        this.logger.warn(`Failed to register AESOP workflows: ${error instanceof Error ? error.message : String(error)}`);
-      }
-    } else {
-      this.logger.debug('Workflows plugin not available - AESOP workflows can be triggered via API only');
-    }
-
-    return {};
+    return {
+      registerEvaluator: (evaluator) => {
+        if (!this.evaluatorRegistry) {
+          throw new Error('EvaluatorRegistry has not been initialized');
+        }
+        this.evaluatorRegistry.register(evaluator);
+      },
+    };
   }
 
   async start(core: CoreStart, plugins: EvalsStartDependencies): Promise<EvalsPluginStart> {
     this.actionsStart = plugins.actions;
-    this.agentBuilderStart = plugins.agentBuilder;
+
+    // Load custom evaluators from saved objects asynchronously (fire-and-forget).
+    if (this.evaluatorRegistry && this.config.enabled) {
+      const registry = this.evaluatorRegistry;
+      const logger = this.logger;
+
+      const loadCustomEvaluators = async () => {
+        try {
+          const soClient = core.savedObjects.createInternalRepository([
+            EVALUATOR_SAVED_OBJECT_TYPE,
+          ]);
+          const findResult = await soClient.find<CustomEvaluatorAttributes>({
+            type: EVALUATOR_SAVED_OBJECT_TYPE,
+            perPage: 1000,
+          });
+
+          for (const so of findResult.saved_objects) {
+            const { name, description, type, config } = so.attributes;
+            const evaluator = buildCustomEvaluator(
+              name,
+              description,
+              type,
+              config as Record<string, unknown>
+            );
+            registry.register(evaluator);
+          }
+
+          logger.info(
+            `Loaded ${findResult.saved_objects.length} custom evaluator(s) from saved objects`
+          );
+        } catch (error) {
+          logger.error(`Failed to load custom evaluators from saved objects: ${error}`);
+        }
+      };
+
+      loadCustomEvaluators();
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // AESOP: Ensure ILM policy exists for all .aesop-* indices

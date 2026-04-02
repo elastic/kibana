@@ -75,7 +75,7 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
 
           // Try agent-based improvement if requested
           if (useAgent) {
-            const agentBuilderStart = evalsContext.getAgentBuilderStart();
+            const agentBuilderStart = await evalsContext.getAgentBuilderStart();
             if (agentBuilderStart) {
               try {
                 const { AgentOrchestrator } = await import(

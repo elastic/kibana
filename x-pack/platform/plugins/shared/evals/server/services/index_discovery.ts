@@ -157,7 +157,7 @@ function calculateRelevanceScore(name: string, docCount: number, type: IndexInfo
 
   if (name.includes('security') || name.includes('endpoint')) score += 10;
   if (name.includes('threat') || name.includes('malware')) score += 15;
-  if (name.includes('agent-builder-conversations')) score += 20;
+  if (name.includes('chat-conversations')) score += 20;
   if (name.includes('detection') || name.includes('rule')) score += 10;
 
   if (docCount === 0) score -= 50;
@@ -171,7 +171,7 @@ function calculateRelevanceScore(name: string, docCount: number, type: IndexInfo
 function prioritizeIndices(names: string[]): string[] {
   const securityPatterns = [
     'alert', 'detection', 'threat', 'security', 'endpoint', 'malware', 'intrusion',
-    'agent-builder-conversations',
+    'chat-conversations',
   ];
 
   const isSecurity = (name: string) =>
@@ -193,7 +193,7 @@ function isSystemIndex(name: string): boolean {
 
   // Include Agent Builder conversations — AESOP analyzes conversation patterns
   // to discover skills from how analysts actually use the AI assistant
-  if (name.startsWith('.kibana-agent-builder-conversations')) return false;
+  if (name.startsWith('.chat-conversations')) return false;
 
   // Exclude system and Kibana internal indices
   return name.startsWith('.') || name.startsWith('_');

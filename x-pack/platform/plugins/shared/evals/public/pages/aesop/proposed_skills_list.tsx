@@ -26,7 +26,6 @@ import {
   EuiStat,
   EuiCallOut,
   EuiSuperSelect,
-  EuiSwitch,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useHistory } from 'react-router-dom';
@@ -78,7 +77,6 @@ export const ProposedSkillsList = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending_review'>('pending_review');
   const [derivedFromFilter, setDerivedFromFilter] = useState<string>('all');
   const [discoveryConnectorId, setDiscoveryConnectorId] = useState<string>('');
-  const [useAgentOrchestration, setUseAgentOrchestration] = useState(false);
   const { data: connectors } = useLLMConnectors();
 
   // Auto-select first .gen-ai connector once
@@ -121,29 +119,38 @@ export const ProposedSkillsList = () => {
   const lastExploration = explorationHistory?.explorations?.[0];
 
   // Trigger new exploration
+  const [optimisticRunning, setOptimisticRunning] = useState(false);
   const runExplorationMutation = useMutation({
     mutationFn: async () => {
+      setOptimisticRunning(true);
       return await api.http.post('/internal/aesop/exploration/run', {
         body: JSON.stringify({
           connector_id: discoveryConnectorId || undefined,
-          use_agent_orchestration: useAgentOrchestration,
         }),
         version: '1',
       });
     },
     onSuccess: () => {
-      // Immediately refetch history to pick up the new "running" execution
       queryClient.invalidateQueries({ queryKey: ['aesop', 'exploration-history'] });
       api.notifications.toasts.addSuccess(
         'Skill discovery started — skills will appear when exploration completes'
       );
     },
     onError: (err: Error) => {
+      setOptimisticRunning(false);
       api.notifications.toasts.addDanger(`Failed to start exploration: ${err.message}`);
     },
   });
 
-  const isDiscoveryRunning = lastExploration?.status === 'running' || runExplorationMutation.isPending;
+  // Clear optimistic state once the history query confirms the run
+  const isHistoryRunning = lastExploration?.status === 'running';
+  React.useEffect(() => {
+    if (optimisticRunning && lastExploration?.status && lastExploration.status !== 'running') {
+      setOptimisticRunning(false);
+    }
+  }, [optimisticRunning, lastExploration?.status]);
+
+  const isDiscoveryRunning = isHistoryRunning || optimisticRunning;
 
   const columns = [
     {
@@ -367,15 +374,6 @@ export const ProposedSkillsList = () => {
                       prepend="LLM"
                       disabled={isDiscoveryRunning}
                       aria-label="Select LLM connector for skill discovery"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      label="Use Agents"
-                      checked={useAgentOrchestration}
-                      onChange={(e) => setUseAgentOrchestration(e.target.checked)}
-                      compressed
-                      disabled={isDiscoveryRunning}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

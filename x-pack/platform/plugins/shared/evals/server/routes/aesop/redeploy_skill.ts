@@ -89,7 +89,7 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
 
           // Get Agent Builder SkillRegistry
           const evalsContext = await context.evals;
-          const agentBuilderStart = evalsContext.getAgentBuilderStart();
+          const agentBuilderStart = await evalsContext.getAgentBuilderStart();
           if (!agentBuilderStart) {
             throw new Error('Agent Builder plugin not available — cannot redeploy skills');
           }

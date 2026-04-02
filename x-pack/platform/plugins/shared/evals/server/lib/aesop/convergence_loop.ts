@@ -1,0 +1,215 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/logging';
+import { computeCompositeScore, evaluateCiGates } from '@kbn/evals-extensions';
+import type { CompositeScoreConfig, CiGateResult } from '@kbn/evals-extensions';
+import type {
+  ProposedSkillDocument,
+  ConvergenceConfig,
+  ConvergenceIteration,
+  SkillEvaluatorResult,
+} from './types';
+import type { EvaluatorRegistry, ServerEvaluatorResult } from '../evaluation_engine';
+import { createEvaluationRunner } from '../evaluation_engine';
+
+export interface ConvergenceResult {
+  finalScore: number;
+  converged: boolean;
+  reason: 'passed' | 'plateau' | 'max_iterations' | 'error';
+  iterations: ConvergenceIteration[];
+  totalDurationMs: number;
+  gateResult: CiGateResult;
+}
+
+const SKILL_PRESET_EVALUATOR_NAMES = [
+  'skill-relevance',
+  'skill-completeness',
+  'skill-accuracy',
+  'skill-specificity',
+  'skill-safety',
+  'backing-index-validator',
+  'esql-pattern',
+  'skill-pii',
+];
+
+const DEFAULT_COMPOSITE_CONFIG: CompositeScoreConfig = {
+  weights: {
+    safety: 0.25,
+    accuracy: 0.2,
+    completeness: 0.2,
+    relevance: 0.2,
+    specificity: 0.15,
+  },
+  dimensions: {
+    safety: ['skill-safety'],
+    accuracy: ['skill-accuracy'],
+    completeness: ['skill-completeness'],
+    relevance: ['skill-relevance'],
+    specificity: ['skill-specificity'],
+  },
+};
+
+export const resolveEvaluatorNames = (names: string[], registry: EvaluatorRegistry): string[] => {
+  const resolved: string[] = [];
+  for (const name of names) {
+    if (name === 'skill-preset') {
+      for (const presetName of SKILL_PRESET_EVALUATOR_NAMES) {
+        if (registry.has(presetName)) {
+          resolved.push(presetName);
+        }
+      }
+    } else {
+      resolved.push(name);
+    }
+  }
+  return resolved;
+};
+
+export const getDefaultCompositeConfig = (): CompositeScoreConfig => DEFAULT_COMPOSITE_CONFIG;
+
+const mapServerResultToSkillResult = (r: ServerEvaluatorResult): SkillEvaluatorResult => ({
+  evaluator: r.evaluator,
+  kind: r.kind,
+  score: r.score,
+  pass: r.score !== null && r.score > 0,
+  explanation: r.explanation,
+  trace_id: r.traceId,
+});
+
+export const runConvergenceLoop = async (
+  skill: ProposedSkillDocument,
+  config: ConvergenceConfig,
+  dependencies: {
+    evaluatorRegistry: EvaluatorRegistry;
+    logger: Logger;
+    improveSkill: (
+      currentSkill: ProposedSkillDocument,
+      feedback: SkillEvaluatorResult[]
+    ) => Promise<ProposedSkillDocument>;
+  }
+): Promise<ConvergenceResult> => {
+  const { threshold, maxIterations, convergenceDelta } = config;
+  const { evaluatorRegistry, logger, improveSkill } = dependencies;
+  const iterations: ConvergenceIteration[] = [];
+  const startTime = Date.now();
+  let currentSkill = skill;
+  let previousScore = -1;
+  let plateauCount = 0;
+
+  const evaluatorNames = resolveEvaluatorNames(
+    config.evaluators ?? ['skill-preset'],
+    evaluatorRegistry
+  );
+  const runner = createEvaluationRunner(evaluatorRegistry, logger);
+
+  for (let i = 1; i <= maxIterations; i++) {
+    const runResult = await runner.run({
+      items: [
+        {
+          input: { name: currentSkill.name, description: currentSkill.description },
+          output: currentSkill.markdown,
+        },
+      ],
+      evaluatorNames,
+      connectorId: config.connectorId,
+      requiredPass: config.requiredPass,
+    });
+
+    const serverResults = runResult.results[0]?.evaluatorResults ?? [];
+    const evaluatorResults = serverResults.map(mapServerResultToSkillResult);
+
+    const compositeResult = computeCompositeScore(
+      evaluatorResults.map((r) => ({ evaluator: r.evaluator, score: r.score })),
+      getDefaultCompositeConfig()
+    );
+
+    const currentScore = compositeResult.compositeScore;
+    const improved = i > 1 && currentScore > previousScore;
+
+    const gateResult = evaluateCiGates(
+      evaluatorResults.map((r) => ({ evaluator: r.evaluator, score: r.score })),
+      currentScore,
+      { requiredPass: config.requiredPass, compositeThreshold: threshold }
+    );
+
+    iterations.push({
+      iteration: i,
+      score: currentScore,
+      evaluator_results: evaluatorResults,
+      improved,
+      timestamp: new Date().toISOString(),
+    });
+
+    logger.info(
+      `Convergence iteration ${i}: score=${currentScore.toFixed(3)}, gate=${
+        gateResult.passed ? 'PASS' : 'FAIL'
+      }`
+    );
+
+    if (gateResult.passed && currentScore >= threshold) {
+      return {
+        finalScore: currentScore,
+        converged: true,
+        reason: 'passed',
+        iterations,
+        totalDurationMs: Date.now() - startTime,
+        gateResult,
+      };
+    }
+
+    if (Math.abs(currentScore - previousScore) < convergenceDelta) {
+      plateauCount++;
+      if (plateauCount >= 2) {
+        return {
+          finalScore: currentScore,
+          converged: false,
+          reason: 'plateau',
+          iterations,
+          totalDurationMs: Date.now() - startTime,
+          gateResult,
+        };
+      }
+    } else {
+      plateauCount = 0;
+    }
+
+    previousScore = currentScore;
+
+    if (i < maxIterations) {
+      try {
+        currentSkill = await improveSkill(currentSkill, evaluatorResults);
+      } catch (error) {
+        logger.error(`Improvement failed at iteration ${i}: ${error}`);
+        return {
+          finalScore: currentScore,
+          converged: false,
+          reason: 'error',
+          iterations,
+          totalDurationMs: Date.now() - startTime,
+          gateResult,
+        };
+      }
+    }
+  }
+
+  const lastIteration = iterations[iterations.length - 1];
+  const lastGateResult = evaluateCiGates(
+    lastIteration?.evaluator_results.map((r) => ({ evaluator: r.evaluator, score: r.score })) ?? [],
+    lastIteration?.score ?? 0,
+    { requiredPass: config.requiredPass, compositeThreshold: threshold }
+  );
+
+  return {
+    finalScore: lastIteration?.score ?? 0,
+    converged: false,
+    reason: 'max_iterations',
+    iterations,
+    totalDurationMs: Date.now() - startTime,
+    gateResult: lastGateResult,
+  };
+};

@@ -776,6 +776,7 @@
     "@kbn/licensing-types": "link:src/platform/packages/shared/kbn-licensing-types",
     "@kbn/links-plugin": "link:src/platform/plugins/private/links",
     "@kbn/lists-plugin": "link:x-pack/solutions/security/plugins/lists",
+    "@kbn/llm-batch-processing": "link:x-pack/platform/packages/shared/kbn-llm-batch-processing",
     "@kbn/llm-tasks-plugin": "link:x-pack/platform/plugins/shared/ai_infra/llm_tasks",
     "@kbn/locator-examples-plugin": "link:examples/locator_examples",
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
