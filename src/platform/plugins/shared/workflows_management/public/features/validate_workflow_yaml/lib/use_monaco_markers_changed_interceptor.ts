@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod/v4';
@@ -18,6 +18,7 @@ import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/uti
 import {
   BATCHED_CUSTOM_MARKER_OWNER,
   isYamlValidationMarkerOwner,
+  validationResultFingerprint,
   type YamlValidationResult,
 } from '../model/types';
 
@@ -45,6 +46,7 @@ export function useMonacoMarkersChangedInterceptor({
   workflowYamlSchema,
 }: UseMonacoMarkersChangedInterceptorProps): UseMonacoMarkersChangedInterceptorResult {
   const [validationErrors, setValidationErrors] = useState<YamlValidationResult[]>([]);
+  const lastFingerprintRef = useRef<string>('');
 
   const transformMonacoMarkers = useCallback(
     (
@@ -75,15 +77,13 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      if (!isYamlValidationMarkerOwner(owner)) {
+      const isBatched = owner === BATCHED_CUSTOM_MARKER_OWNER;
+      if (!isBatched && !isYamlValidationMarkerOwner(owner)) {
         return;
       }
 
       const errors: YamlValidationResult[] = markers.map((marker) => {
-        // When markers are batched under BATCHED_CUSTOM_MARKER_OWNER, each
-        // marker's `.source` carries the original validation source name.
-        const effectiveOwner =
-          owner === BATCHED_CUSTOM_MARKER_OWNER && marker.source ? marker.source : owner;
+        const effectiveOwner = isBatched && marker.source ? marker.source : owner;
 
         return {
           message: marker.message,
@@ -99,16 +99,23 @@ export function useMonacoMarkersChangedInterceptor({
         } as YamlValidationResult;
       });
 
-      const errorsUpdater = (prevErrors: YamlValidationResult[] | null) => {
-        if (owner === BATCHED_CUSTOM_MARKER_OWNER) {
-          // Replace all custom validation errors at once
+      setValidationErrors((prevErrors) => {
+        let nextErrors: YamlValidationResult[];
+        if (isBatched) {
           const prevYamlOnly = prevErrors?.filter((e) => e.owner === 'yaml');
-          return [...(prevYamlOnly ?? []), ...errors];
+          nextErrors = [...(prevYamlOnly ?? []), ...errors];
+        } else {
+          const prevOtherOwners = prevErrors?.filter((e) => e.owner !== owner);
+          nextErrors = [...(prevOtherOwners ?? []), ...errors];
         }
-        const prevOtherOwners = prevErrors?.filter((e) => e.owner !== owner);
-        return [...(prevOtherOwners ?? []), ...errors];
-      };
-      setValidationErrors(errorsUpdater);
+
+        const fingerprint = nextErrors.map(validationResultFingerprint).sort().join('\n');
+        if (fingerprint === lastFingerprintRef.current) {
+          return prevErrors;
+        }
+        lastFingerprintRef.current = fingerprint;
+        return nextErrors;
+      });
     },
     // the yamlDocumentRef is not needed here because it's a ref object and not a dependency
     // eslint-disable-next-line react-hooks/exhaustive-deps
