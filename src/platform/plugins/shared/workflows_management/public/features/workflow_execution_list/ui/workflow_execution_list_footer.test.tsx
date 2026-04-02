@@ -122,4 +122,20 @@ describe('WorkflowExecutionListFooter', () => {
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
   });
+
+  it('shows the loaded non-terminal count in the modal title (plural when multiple)', async () => {
+    const secondRunning: WorkflowExecutionListItemDto = {
+      ...runningExecution,
+      id: 'exec-running-2',
+    };
+    renderFooter({
+      loadedExecutions: [runningExecution, secondRunning, terminalExecution],
+    });
+
+    fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
+    const modal = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
+
+    expect(modal).toHaveTextContent('2');
+    expect(modal).toHaveTextContent('active executions');
+  });
 });

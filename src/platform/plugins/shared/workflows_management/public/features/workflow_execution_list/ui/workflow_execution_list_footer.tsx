@@ -38,16 +38,18 @@ export const WorkflowExecutionListFooter = ({
   const [isFooterCancelModalVisible, setIsFooterCancelModalVisible] = useState(false);
   const footerCancelModalTitleId = useGeneratedHtmlId();
 
-  const isCancelActiveEnabled = useMemo(
-    () => loadedExecutions.some((e) => !isTerminalStatus(e.status)),
+  const activeNonTerminalLoadedCount = useMemo(
+    () => loadedExecutions.filter((e) => !isTerminalStatus(e.status)).length,
     [loadedExecutions]
   );
 
+  const hasActiveNonTerminalLoaded = activeNonTerminalLoadedCount > 0;
+
   const openFooterCancelModal = useCallback(() => {
-    if (isCancelActiveEnabled) {
+    if (hasActiveNonTerminalLoaded) {
       setIsFooterCancelModalVisible(true);
     }
-  }, [isCancelActiveEnabled]);
+  }, [hasActiveNonTerminalLoaded]);
 
   const closeFooterCancelModal = useCallback(() => {
     if (!isCancelLoadedNonTerminalInProgress) {
@@ -72,7 +74,7 @@ export const WorkflowExecutionListFooter = ({
             {
               defaultMessage:
                 'Cancel {count, plural, one {# active execution} other {# active executions}}?',
-              values: { count: isCancelActiveEnabled },
+              values: { count: activeNonTerminalLoadedCount },
             }
           )}
           titleProps={{ id: footerCancelModalTitleId }}
@@ -112,7 +114,7 @@ export const WorkflowExecutionListFooter = ({
           size="s"
           fullWidth
           disabled={
-            !isCancelActiveEnabled ||
+            !hasActiveNonTerminalLoaded ||
             !canCancelLoadedNonTerminal ||
             isCancelLoadedNonTerminalInProgress
           }

@@ -748,6 +748,23 @@ describe('WorkflowExecutionRepository', () => {
       });
     });
 
+    it('should cap size at 10000 for ES max_result_window', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.findNonTerminalExecutionIdsByWorkflowIdPage({
+        spaceId: 'default',
+        workflowId: 'wf-1',
+        size: 50_000,
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        ...baseSearchExpectation,
+        size: 10000,
+      });
+    });
+
     it('should pass search_after when continuing pagination', async () => {
       esClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },

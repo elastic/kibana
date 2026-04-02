@@ -173,7 +173,7 @@ describe('WorkflowExecutionList (stateful)', () => {
     expect(mockSetSelectedExecution).toHaveBeenCalledWith('exec-1');
   });
 
-  it('footer cancel calls the bulk cancel API', async () => {
+  it('footer cancel calls the bulk cancel API and refetches executions', async () => {
     mockUseWorkflowExecutions.mockReturnValue({
       data: mockWorkflowExecutionsWithRunning,
       isInitialLoading: false,
@@ -187,5 +187,6 @@ describe('WorkflowExecutionList (stateful)', () => {
     const dialog = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel all' }));
     await waitFor(() => expect(mockCancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1'));
+    await waitFor(() => expect(mockRefetch).toHaveBeenCalled());
   });
 });

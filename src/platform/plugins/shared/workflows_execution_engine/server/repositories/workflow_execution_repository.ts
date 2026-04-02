@@ -361,6 +361,8 @@ export class WorkflowExecutionRepository {
       },
     ];
 
+    const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
+
     const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
       index: this.indexName,
       query: {
@@ -370,7 +372,7 @@ export class WorkflowExecutionRepository {
       },
       _source: ['id'],
       sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
-      size,
+      size: pageSize,
       track_total_hits: true,
       ...(searchAfter?.length ? { search_after: searchAfter } : {}),
     });
@@ -384,7 +386,7 @@ export class WorkflowExecutionRepository {
     const total = typeof rawTotal === 'number' ? rawTotal : rawTotal?.value ?? 0;
 
     let nextSearchAfter: estypes.SortResults | undefined;
-    if (results.length === size && hits.length > 0) {
+    if (results.length === pageSize && hits.length > 0) {
       const lastSort = hits[hits.length - 1]?.sort;
       if (lastSort) {
         nextSearchAfter = lastSort;

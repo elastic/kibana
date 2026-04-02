@@ -121,6 +121,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
           }
         ),
       });
+      await refetch();
     } catch (cancelError) {
       const err = cancelError instanceof Error ? cancelError : new Error(String(cancelError));
       telemetry.reportWorkflowExecutionsCancelled({
@@ -139,7 +140,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     } finally {
       setIsCancelLoadedNonTerminalInProgress(false);
     }
-  }, [api, notifications, telemetry, workflowId]);
+  }, [api, notifications, refetch, telemetry, workflowId]);
 
   return (
     <WorkflowExecutionListComponent
