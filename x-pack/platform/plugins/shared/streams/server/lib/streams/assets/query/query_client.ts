@@ -726,6 +726,7 @@ export class QueryClient {
     const nextQueriesToCreate: QueryLink[] = [];
     const nextQueriesUpdatedWithBreakingChange: QueryLink[] = [];
     const nextQueriesUpdatedWithoutBreakingChange: QueryLink[] = [];
+    const demotedToStats: QueryLink[] = [];
     const allNextQueryLinks: QueryLink[] = [];
 
     for (const query of queries) {
@@ -739,6 +740,9 @@ export class QueryClient {
         // them in storage with updated content but skip rule create/update.
         // STATS queries always land here regardless of stored rule_backed to
         // prevent a stale rule_backed=true from sending them to installQueries.
+        if (currentLink.rule_backed && query.type === QUERY_TYPE_STATS) {
+          demotedToStats.push(currentLink);
+        }
         allNextQueryLinks.push({ ...currentLink, query, rule_backed: false });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
@@ -759,7 +763,11 @@ export class QueryClient {
       nextQueriesUpdatedWithBreakingChange.some((updated) => updated.query.id === link.query.id)
     );
 
-    await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
+    await this.uninstallQueries([
+      ...currentQueriesToDelete,
+      ...currentQueriesToDeleteBeforeUpdate,
+      ...demotedToStats,
+    ]);
     const isRuleBacked = (link: QueryLink) => link.rule_backed;
     await this.installQueries(
       [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].filter(isRuleBacked),
