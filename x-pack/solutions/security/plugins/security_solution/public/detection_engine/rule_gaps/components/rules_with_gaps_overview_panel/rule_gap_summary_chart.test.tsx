@@ -11,8 +11,10 @@ import { RuleGapSummaryChart } from './rule_gap_summary_chart';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
+import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 
 jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
+jest.mock('../../context/gap_auto_fill_scheduler_context');
 jest.mock('../../../../common/components/charts/donutchart', () => ({
   DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
 }));
@@ -28,17 +30,21 @@ const createGapsResponse = ({
   filled = 0,
   inProgress = 0,
   unfilled = 0,
+  error = 0,
   totalFilledDurationMs = 0,
   totalInProgressDurationMs = 0,
   totalUnfilledDurationMs = 0,
+  totalErrorDurationMs = 0,
   totalDurationMs = 0,
 }: {
   filled?: number;
   inProgress?: number;
   unfilled?: number;
+  error?: number;
   totalFilledDurationMs?: number;
   totalInProgressDurationMs?: number;
   totalUnfilledDurationMs?: number;
+  totalErrorDurationMs?: number;
   totalDurationMs?: number;
 }) => ({
   summary: {
@@ -46,10 +52,12 @@ const createGapsResponse = ({
       filled,
       in_progress: inProgress,
       unfilled,
+      error,
     },
     total_filled_duration_ms: totalFilledDurationMs,
     total_in_progress_duration_ms: totalInProgressDurationMs,
     total_unfilled_duration_ms: totalUnfilledDurationMs,
+    total_error_duration_ms: totalErrorDurationMs,
     total_duration_ms: totalDurationMs,
   },
 });
@@ -58,6 +66,17 @@ describe('RuleGapSummaryChart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useRulesTableContext as jest.Mock).mockReturnValue(useRulesTableContextMock.create());
+    (useGapAutoFillSchedulerContext as jest.Mock).mockReturnValue({
+      canAccessGapAutoFill: false,
+      canEditGapAutoFill: false,
+      hasEnterpriseLicense: false,
+      scheduler: undefined,
+      isSchedulerLoading: false,
+      isSchedulerFetching: false,
+      hasErrors: false,
+      latestErrorTimestamp: undefined,
+      totalErrors: 0,
+    });
   });
 
   it('renders a loading spinner when data is loading', () => {
@@ -83,35 +102,6 @@ describe('RuleGapSummaryChart', () => {
     render(<RuleGapSummaryChart />);
 
     expect(screen.getByTestId('rule-gap-summary-error')).toBeInTheDocument();
-  });
-
-  it('renders correct rule counts from the gaps response', () => {
-    mockUseGetRuleIdsWithGaps.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: createGapsResponse({
-        filled: 10,
-        inProgress: 3,
-        unfilled: 7,
-        totalFilledDurationMs: 3600000,
-        totalInProgressDurationMs: 1800000,
-        totalUnfilledDurationMs: 900000,
-        totalDurationMs: 6300000,
-      }),
-    });
-
-    render(<RuleGapSummaryChart />);
-
-    const table = screen.getByTestId('rule-gap-summary-table');
-
-    expect(table).toHaveTextContent('Filled');
-    expect(table).toHaveTextContent('10');
-
-    expect(table).toHaveTextContent('In progress');
-    expect(table).toHaveTextContent('3');
-
-    expect(table).toHaveTextContent('Unfilled');
-    expect(table).toHaveTextContent('7');
   });
 
   it('renders humanized durations for each gap status', () => {

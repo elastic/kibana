@@ -42,7 +42,6 @@ export interface ESQLDataCascadeProps
     | 'showTimeCol'
     | 'dataView'
     | 'showKeyboardShortcuts'
-    | 'renderDocumentView'
     | 'externalCustomRenderers'
     | 'onUpdateDataGridDensity'
   > {
@@ -117,7 +116,7 @@ const ESQLDataCascade = React.memo(
     return (
       <DataCascade<ESQLDataGroupNode>
         size="s"
-        overscan={25}
+        overscan={2}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
