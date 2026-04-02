@@ -17,6 +17,10 @@ import { useRuleFormServices } from '../contexts';
 
 const PREFERRED_TIME_FIELD = '@timestamp';
 
+const REQUIRED_MESSAGE = i18n.translate('xpack.alertingV2.ruleForm.timeFieldRequired', {
+  defaultMessage: 'A time field is required.',
+});
+
 export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
   const { control, setValue, getValues } = useFormContext<FormValues>();
@@ -59,6 +63,9 @@ export const TimeFieldSelect = () => {
     <Controller
       name="timeField"
       control={control}
+      rules={{
+        required: REQUIRED_MESSAGE,
+      }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => {
         const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
           onChange(e.target.value);
