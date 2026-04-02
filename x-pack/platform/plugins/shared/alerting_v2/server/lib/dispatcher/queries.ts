@@ -9,31 +9,35 @@ import { esql, type EsqlRequest } from '@elastic/esql';
 import {
   ALERT_ACTIONS_BACKING_INDEX,
   ALERT_ACTIONS_DATA_STREAM,
-} from '../../resources/alert_actions';
+} from '../../resources/datastreams/alert_actions';
 import {
   ALERT_EVENTS_BACKING_INDEX,
   ALERT_EVENTS_DATA_STREAM,
   type AlertEventType,
-} from '../../resources/alert_events';
+} from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, NotificationGroupId } from './types';
 
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
 
-  return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _index
+  return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _index, _source
       | WHERE (_index LIKE ${ALERT_ACTIONS_BACKING_INDEX}) OR (_index LIKE ${ALERT_EVENTS_BACKING_INDEX} and type == ${alertEventType})
-      | EVAL 
+      | EVAL
           rule_id = COALESCE(rule.id, rule_id),
           episode_id = COALESCE(episode.id, episode_id),
-          episode_status = episode.status
+          episode_status = episode.status,
+          data_json = CASE(_index LIKE ${ALERT_EVENTS_BACKING_INDEX}, JSON_EXTRACT(_source, "$.data"), NULL)
       | DROP episode.id, rule.id, episode.status
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE _index LIKE ${ALERT_ACTIONS_BACKING_INDEX} AND (action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched") BY rule_id, group_hash
       | WHERE (last_fired IS NULL OR last_fired < @timestamp) or (_index LIKE ${ALERT_ACTIONS_BACKING_INDEX})
       | STATS
-          last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX}
-          BY rule_id, group_hash, episode_id, episode_status
+          last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX},
+          last_episode_status = LAST(episode_status, @timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX},
+          data_json = LAST(data_json, @timestamp) WHERE _index LIKE ${ALERT_EVENTS_BACKING_INDEX}
+          BY rule_id, group_hash, episode_id
       | WHERE last_event_timestamp IS NOT NULL
-      | KEEP last_event_timestamp, rule_id, group_hash, episode_id, episode_status
+      | KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json
+      | RENAME last_episode_status AS episode_status
       | SORT last_event_timestamp asc
       | LIMIT 10000`.toRequest();
 };
@@ -85,9 +89,9 @@ export const getLastNotifiedTimestampsQuery = (
   const values = notificationGroupIds.map((id) => esql.str(id));
   const whereClause = esql.exp`action_type == "notified" AND notification_group_id IN (${values})`;
 
-  return esql`FROM ${ALERT_ACTIONS_DATA_STREAM} 
+  return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
     | WHERE ${whereClause}
-    | STATS last_notified = MAX(@timestamp) BY notification_group_id
-    | KEEP notification_group_id, last_notified
+    | STATS last_notified = MAX(@timestamp), episode_status = LAST(episode_status, @timestamp) BY notification_group_id
+    | KEEP notification_group_id, last_notified, episode_status
     `.toRequest();
 };

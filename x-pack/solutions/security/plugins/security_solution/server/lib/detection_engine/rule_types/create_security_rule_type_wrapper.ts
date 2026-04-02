@@ -9,6 +9,7 @@ import { partition, sum } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -69,7 +70,7 @@ Object.entries(aadFieldConversion).forEach(([key, value]) => {
 });
 
 const addApmLabelsFromParams = (params: RuleParams) => {
-  agent.addLabels(
+  addSpanLabels(
     {
       [SECURITY_FROM]: params.from,
       [SECURITY_IMMUTABLE]: params.immutable,
@@ -77,7 +78,7 @@ const addApmLabelsFromParams = (params: RuleParams) => {
       [SECURITY_RULE_ID]: params.ruleId,
       [SECURITY_TO]: params.to,
     },
-    false
+    { isString: false }
   );
 };
 
@@ -108,6 +109,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService,
+    endpointAppContextService,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -343,7 +345,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               client: exceptionsClient,
               lists: params.exceptionsList,
               shouldFilterOutEndpointExceptions:
-                experimentalFeatures.endpointExceptionsMovedUnderManagement,
+                await endpointAppContextService.isEndpointExceptionsPerPolicyEnabled(),
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -427,6 +429,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
+                  alertsCandidateCount: runResult.alertsCandidateCount,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
                   totalEventsFound:
                     (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
@@ -476,6 +479,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ? Math.round(sum(result.enrichmentTimes.map(Number)))
                   : undefined,
               frozen_indices_queried_count: frozenIndicesQueriedCount,
+              alerts_candidate_count: result.alertsCandidateCount,
               alerts_suppressed_count: suppressedAlertsCount,
               gap_duration_s:
                 gap && remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,

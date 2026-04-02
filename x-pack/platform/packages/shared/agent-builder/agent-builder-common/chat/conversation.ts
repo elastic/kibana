@@ -9,8 +9,8 @@ import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
 import type {
   Attachment,
-  AttachmentInput,
   VersionedAttachment,
+  AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
@@ -46,6 +46,7 @@ export interface ConverseInput {
   message?: string;
   /**
    * Optional attachments to provide to the agent.
+   * Use `origin` without `data` for by-reference types that implement `resolve`.
    * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: AttachmentInput[];

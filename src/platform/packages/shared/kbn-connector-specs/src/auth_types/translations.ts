@@ -219,3 +219,7 @@ export const AWS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
     defaultMessage: 'Secret Access Key is required',
   }
 );
+
+export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
+  defaultMessage: 'OAuth 2.0 via Elastic-owned apps',
+});
