@@ -71,18 +71,12 @@ export const useDiscoverTopNavWithInspector = ({
   onOpenSaveModal,
   onOpenSaveAsModal,
   persistedDiscoverSession,
-  onOpenSaveModal,
-  onOpenSaveAsModal,
 }: {
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
   persistedDiscoverSession: DiscoverSession | undefined;
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
 }) => {
   const shared = useDiscoverTopNavShared({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
     persistedDiscoverSession,
   });
   const onOpenInspector = useInspector({ inspector: shared.services.inspector });
@@ -111,16 +105,12 @@ export const useDiscoverTopNavWithoutInspector = ({
   onOpenSaveModal,
   onOpenSaveAsModal,
   persistedDiscoverSession,
-  onOpenSaveModal,
-  onOpenSaveAsModal,
 }: {
   persistedDiscoverSession: DiscoverSession | undefined;
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
 }) => {
   const shared = useDiscoverTopNavShared({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
     persistedDiscoverSession,
   });
 
@@ -135,8 +125,6 @@ export const useDiscoverTopNavWithoutInspector = ({
     onOpenSaveModal,
     onOpenSaveAsModal,
     persistedDiscoverSession,
-    onOpenSaveModal,
-    onOpenSaveAsModal,
   });
 
   return {

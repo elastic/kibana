@@ -122,8 +122,10 @@ export const useTopNavLinks = ({
     const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
     services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-      ...attributes,
-      references,
+      state: {
+        ...attributes,
+        references,
+      },
     });
   }, [getState, runtimeStateManager, services]);
 
