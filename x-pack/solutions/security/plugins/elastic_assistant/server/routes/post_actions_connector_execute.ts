@@ -26,6 +26,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getPrompt, getInferenceConnectorById } from '../lib/prompt';
+import { resolveConnectorById } from './resolve_inference_connectors';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
@@ -138,10 +139,11 @@ export const postActionsConnectorExecuteRoute = (
               inferenceId: defaultInferenceEndpoints.ELSER,
             })) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
-          const inferenceConnector = await getInferenceConnectorById(
-            inference,
-            request
-          )(connectorId).catch(() => undefined);
+          const inferenceConnector = await resolveConnectorById({
+            assistantContext: ctx.elasticAssistant,
+            request,
+            connectorId,
+          });
           const isOssModel = isOpenSourceModel(inferenceConnector);
 
           const conversationsDataClient =
