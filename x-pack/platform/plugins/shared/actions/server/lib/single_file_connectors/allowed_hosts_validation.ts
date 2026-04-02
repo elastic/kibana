@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
+import type { z, ZodType } from '@kbn/zod/v4';
 import { getMeta } from '@kbn/connector-specs/src/lib';
 
 import type { ActionsConfigurationUtilities } from '../../actions_config';
@@ -13,7 +13,7 @@ import type { ActionsConfigurationUtilities } from '../../actions_config';
 export const getAllowedHostsKeysFromShape = (shape: z.ZodRawShape): string[] => {
   const keys: string[] = [];
   for (const [key, fieldSchema] of Object.entries(shape)) {
-    const meta = getMeta(fieldSchema);
+    const meta = getMeta(fieldSchema as ZodType);
     if (meta?.validate?.allowedHosts === true) {
       keys.push(key);
     }
