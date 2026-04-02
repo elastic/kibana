@@ -9,11 +9,11 @@ import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
 import { useAssistant } from './use_assistant';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockDataFormattedForFieldBrowser } from '../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
-jest.mock('../../../../assistant/use_assistant_availability');
+jest.mock('../../../assistant/use_assistant_availability');
 jest.mock('@kbn/elastic-assistant');
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;

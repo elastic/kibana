@@ -12,6 +12,12 @@ import { useSecurityAgentId } from './use_security_agent_id';
 
 export interface UseAgentBuilderAttachmentParams {
   /**
+   * Optional stable ID for the attachment. When provided, the platform will
+   * replace any existing attachment with the same ID instead of creating a new one.
+   * Falls back to `${attachmentType}-${Date.now()}` when omitted.
+   */
+  attachmentId?: string;
+  /**
    * Type of attachment (e.g., 'alert', 'attack_discovery')
    */
   attachmentType: string;
@@ -37,6 +43,7 @@ export interface UseAgentBuilderAttachmentResult {
  * Opens a conversation flyout with attachments and prefilled conversation.
  */
 export const useAgentBuilderAttachment = ({
+  attachmentId,
   attachmentType,
   attachmentData,
   attachmentPrompt,
@@ -57,10 +64,8 @@ export const useAgentBuilderAttachment = ({
       return;
     }
 
-    const attachmentId = `${attachmentType}-${Date.now()}`;
-
     const attachment: AttachmentInput = {
-      id: attachmentId,
+      id: attachmentId ?? `${attachmentType}-${Date.now()}`,
       type: attachmentType,
       data: attachmentData,
     };
@@ -73,7 +78,7 @@ export const useAgentBuilderAttachment = ({
       sessionTag: 'security',
       ...(agentId ? { agentId } : {}),
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder, agentId]);
+  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder, agentId]);
 
   return {
     openAgentBuilderFlyout,

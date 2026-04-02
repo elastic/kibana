@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { AiRuleCreationPage } from './ai_rule_creation_page';
+export { ScriptLibraryFilters } from './script_library_filters';
+export type { FilterName } from './hooks';
