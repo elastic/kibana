@@ -25,9 +25,9 @@ import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/interna
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import {
   Streams,
+  type RootStreamName,
   LOGS_ROOT_STREAM_NAME,
-  LOGS_ECS_STREAM_NAME,
-  LOGS_OTEL_STREAM_NAME,
+  ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
@@ -442,8 +442,7 @@ export function StreamsTreeTable({
                     />
                   )}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
-                  {(item.stream.name === LOGS_ECS_STREAM_NAME ||
-                    item.stream.name === LOGS_OTEL_STREAM_NAME) && (
+                  {ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) && (
                     <EuiBetaBadge
                       tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
                         defaultMessage:

@@ -18,14 +18,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, ROOT_STREAM_NAMES, type RootStreamName } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import {
-  LOGS_ECS_STREAM_NAME,
-  LOGS_OTEL_STREAM_NAME,
-} from '@kbn/streams-schema/src/shared/hierarchy';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
@@ -145,10 +141,7 @@ export function Wrapper({
     streamBadges.push({ key: 'classic', node: <ClassicStreamBadge /> });
   }
   if (Streams.WiredStream.GetResponse.is(definition)) {
-    if (
-      definition.stream.name === LOGS_ECS_STREAM_NAME ||
-      definition.stream.name === LOGS_OTEL_STREAM_NAME
-    ) {
+    if (ROOT_STREAM_NAMES.includes(definition.stream.name as RootStreamName)) {
       streamBadges.push({
         key: 'technicalPreview',
         node: (
