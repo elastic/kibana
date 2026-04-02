@@ -474,6 +474,30 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   // getSourceField() already trims and validates the field name.
   const validCurrentProcessorSourceField = currentProcessorSourceField;
 
+  /**
+   * In Grok mode, show the source field plus all fields extracted by the grok patterns.
+   * As the user types patterns (e.g. %{DATA:attributes.ad.category}), the extracted field
+   * names are parsed from the expressions and auto-activated as preview columns.
+   *
+   * Note: column extraction (getFields) is cheap. The expensive part is grok highlighting
+   * (GrokSampleWithContext), which is debounced via grokMode above. Columns always use
+   * the grok source field even when highlighting is debounced, so the source field stays
+   * visible while typing.
+   */
+  const grokColumns = useMemo(() => {
+    if (!isGrokProcessorActive || !validGrokSourceField) return undefined;
+    const extractedFields: string[] = [];
+    grokExpressions.forEach((expr) => {
+      const fieldsMap = expr.getFields();
+      fieldsMap.forEach((fieldDef) => {
+        if (fieldDef.name && !extractedFields.includes(fieldDef.name)) {
+          extractedFields.push(fieldDef.name);
+        }
+      });
+    });
+    return [validGrokSourceField, ...extractedFields];
+  }, [isGrokProcessorActive, validGrokSourceField, grokExpressions]);
+
   // Calculate if view mode should be forced to 'columns'
   // Use grokColumns (not validGrokField) so columns mode is forced even while
   // grok highlighting is debounced — the user sees columns immediately.
@@ -520,30 +544,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     previewDocsFilter,
     validCurrentProcessorSourceField,
   ]);
-
-  /**
-   * In Grok mode, show the source field plus all fields extracted by the grok patterns.
-   * As the user types patterns (e.g. %{DATA:attributes.ad.category}), the extracted field
-   * names are parsed from the expressions and auto-activated as preview columns.
-   *
-   * Note: column extraction (getFields) is cheap. The expensive part is grok highlighting
-   * (GrokSampleWithContext), which is debounced via grokMode above. Columns always use
-   * the grok source field even when highlighting is debounced, so the source field stays
-   * visible while typing.
-   */
-  const grokColumns = useMemo(() => {
-    if (!isGrokProcessorActive || !validGrokSourceField) return undefined;
-    const extractedFields: string[] = [];
-    grokExpressions.forEach((expr) => {
-      const fieldsMap = expr.getFields();
-      fieldsMap.forEach((fieldDef) => {
-        if (fieldDef.name && !extractedFields.includes(fieldDef.name)) {
-          extractedFields.push(fieldDef.name);
-        }
-      });
-    });
-    return [validGrokSourceField, ...extractedFields];
-  }, [isGrokProcessorActive, validGrokSourceField, grokExpressions]);
 
   /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
