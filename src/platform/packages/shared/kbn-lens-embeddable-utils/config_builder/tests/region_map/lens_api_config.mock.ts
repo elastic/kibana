@@ -27,7 +27,7 @@ export const basicRegionMapWithAdHocDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -59,7 +59,7 @@ export const basicRegionMapWithDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },

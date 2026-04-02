@@ -15,6 +15,7 @@ import {
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
 import type { RouteDependencies } from '../types';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
@@ -28,6 +29,17 @@ describe('Execution Routes', () => {
         isActive: true,
         hasAtLeast: jest.fn().mockReturnValue(true),
         type: 'enterprise',
+      },
+    }),
+    core: Promise.resolve({
+      security: {
+        audit: {
+          logger: {
+            enabled: false,
+            log: jest.fn(),
+            includeSavedObjectNames: false,
+          },
+        },
       },
     }),
   };
@@ -109,6 +121,7 @@ describe('Execution Routes', () => {
       api: mockApi as any,
       logger: loggingSystemMock.createLogger(),
       spaces: mockSpaces as any,
+      audit: new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined }),
     } as unknown as RouteDependencies);
   });
 

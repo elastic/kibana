@@ -14,8 +14,6 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   kbnServerArgs: [
     '--xpack.actions.preconfigured',
     '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
-    // Composite SLO API routes are gated behind this experimental flag (see xpack.slo plugin)
-    '--xpack.slo.experimental.compositeSlo.enabled=true',
   ],
   testFiles: [require.resolve('./oblt.index.ts')],
   junit: {

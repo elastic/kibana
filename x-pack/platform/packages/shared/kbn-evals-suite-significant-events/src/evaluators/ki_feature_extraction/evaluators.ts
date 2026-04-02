@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { getFlattenedObject } from '@kbn/std';
 import { partition } from 'lodash';
 import { selectEvaluators } from '@kbn/evals';
 import { type BaseFeature } from '@kbn/streams-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { flattenObject } from '@kbn/object-utils';
 import { createScenarioCriteriaLlmEvaluator } from '../scenario_criteria/evaluators';
 import { isEvidenceGrounded } from './is_evidence_grounded';
 
@@ -61,11 +61,15 @@ type KIFeatureExtractionEvaluator = Evaluator<
   KIFeatureExtractionOutput
 >;
 
-const getFeaturesFromOutput = (output: KIFeatureExtractionOutput | undefined): BaseFeature[] => {
+export const getFeaturesFromOutput = (output: unknown): BaseFeature[] => {
   if (!output) {
     return [];
   }
-  return Array.isArray(output) ? output : output.features ?? [];
+  if (Array.isArray(output)) {
+    return output;
+  }
+  const record = output as Record<string, unknown>;
+  return (record.features as BaseFeature[]) ?? [];
 };
 
 /**
@@ -125,17 +129,18 @@ const evidenceGroundingEvaluator = {
     const rawDocs: Array<Record<string, unknown>> = input.sample_documents.map((hit) => ({
       _id: hit._id,
       _source: hit._source,
+      fields: hit.fields,
     }));
 
     const docsById = new Map<string, Record<string, unknown>>();
     const documents = rawDocs.map((doc) => {
       const id = typeof doc._id === 'string' ? doc._id : undefined;
-      const source =
-        doc._source != null && typeof doc._source === 'object'
-          ? (doc._source as Record<string, unknown>)
-          : undefined;
+
       // flatten the object so we can lookup evidence keys by dotted path
-      const resolved = flattenObject(source ?? doc);
+      const resolved = {
+        ...(doc.fields ?? {}),
+        ...getFlattenedObject(doc._source ?? {}),
+      };
       if (id) {
         docsById.set(id, resolved);
       }
