@@ -35,10 +35,6 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
         onDismiss={onDismiss}
         data-test-subj={dataTestSubj}
       >
-        <EuiText size="s" data-test-subj="deprecated-rule-callout-description">
-          <p>{description}</p>
-        </EuiText>
-        <EuiSpacer size="s" />
         {reason && (
           <>
             <EuiText size="s" data-test-subj="deprecated-rule-reason">
@@ -49,6 +45,10 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
             <EuiSpacer size="s" />
           </>
         )}
+        <EuiText size="s" data-test-subj="deprecated-rule-callout-description">
+          <p>{description}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           {buttons.map((button, index) => (
             <EuiFlexItem grow={false} key={index}>

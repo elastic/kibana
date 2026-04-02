@@ -26,7 +26,6 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
-import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
 import { DeleteDeprecatedRulesConfirmModal } from './delete_deprecated_rules_confirm_modal';
 import { RuleLink } from '../../../rule_management_ui/components/rules_table/use_columns';
 import type { DeprecatedRuleForReview } from '../../../../../common/api/detection_engine/prebuilt_rules';
@@ -46,7 +45,6 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [isConfirmVisible, showConfirm, hideConfirm] = useBoolState();
   const { executeBulkAction } = useExecuteBulkAction();
-  const invalidateDeprecationReview = useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
 
   const handleDeleteAll = useCallback(async () => {
     hideConfirm();
@@ -54,9 +52,8 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
       type: BulkActionTypeEnum.delete,
       ids: rules.map((rule) => rule.id),
     });
-    invalidateDeprecationReview();
     onClose();
-  }, [executeBulkAction, rules, invalidateDeprecationReview, onClose, hideConfirm]);
+  }, [executeBulkAction, rules, onClose, hideConfirm]);
 
   const deprecatedRules: EuiListGroupItemProps[] = useMemo(
     () =>

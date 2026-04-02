@@ -13,7 +13,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useTimedDismissal } from '../../../../common/hooks/use_timed_dismissal';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
-import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
 import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
 import { DeleteDeprecatedRulesConfirmModal } from './delete_deprecated_rules_confirm_modal';
 import { DeprecatedRulesCallout } from './deprecated_rules_callout';
@@ -32,7 +31,6 @@ export const useDeprecatedRulesTableCallout = () => {
     enabled: isFeatureEnabled,
   });
   const { executeBulkAction } = useExecuteBulkAction();
-  const invalidateDeprecationReview = useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
 
   const handleDeleteAll = useCallback(async () => {
     if (!data?.rules.length) {
@@ -43,8 +41,7 @@ export const useDeprecatedRulesTableCallout = () => {
       type: BulkActionTypeEnum.delete,
       ids: data.rules.map((rule) => rule.id),
     });
-    invalidateDeprecationReview();
-  }, [data?.rules, executeBulkAction, invalidateDeprecationReview, hideConfirm]);
+  }, [data?.rules, executeBulkAction, hideConfirm]);
 
   if (!isFeatureEnabled || isDismissed || isLoading || !data || data.rules.length === 0) {
     return null;
