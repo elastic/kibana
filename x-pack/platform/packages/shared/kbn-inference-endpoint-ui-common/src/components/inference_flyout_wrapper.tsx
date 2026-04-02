@@ -174,7 +174,9 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
     >
       <EuiFlyoutHeader hasBorder data-test-subj="inference-flyout-header">
         <EuiTitle size="m">
-          <h2 id={inferenceCreationFlyoutId}>{LABELS.ENDPOINT_TITLE}</h2>
+          <h2 id={inferenceCreationFlyoutId}>
+            {isEdit ? LABELS.EDIT_ENDPOINT_TITLE : LABELS.ADD_ENDPOINT_TITLE}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
