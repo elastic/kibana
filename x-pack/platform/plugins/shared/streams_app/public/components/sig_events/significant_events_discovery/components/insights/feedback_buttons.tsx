@@ -7,15 +7,30 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 export function FeedbackButtons() {
   const [hasReacted, setHasReacted] = React.useState(false);
 
-  if (hasReacted) return null;
+  if (hasReacted) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.streams.significantEventsSummary.thankYouLabel', {
+          defaultMessage: 'Thank you!',
+        })}
+      </EuiText>
+    );
+  }
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.streams.significantEventsSummary.shareYourFeedbackLabel', {
+            defaultMessage: 'Share your feedback:',
+          })}
+        </EuiText>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="thumbUp"

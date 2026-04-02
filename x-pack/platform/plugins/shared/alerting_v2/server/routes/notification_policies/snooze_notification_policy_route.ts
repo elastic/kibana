@@ -19,7 +19,7 @@ import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const snoozeNotificationPolicyParamsSchema = z.object({
@@ -29,13 +29,19 @@ const snoozeNotificationPolicyParamsSchema = z.object({
 @injectable()
 export class SnoozeNotificationPolicyRoute implements RouteHandler {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}/_snooze`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}/_snooze`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'public',
+    summary: 'Snooze a notification policy',
+    description: 'Snooze a notification policy until a specified time.',
+    tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
+  } as const;
   static validate = {
     request: {
       params: buildRouteValidationWithZod(snoozeNotificationPolicyParamsSchema),

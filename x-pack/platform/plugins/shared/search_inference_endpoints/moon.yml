@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/features-plugin'
   - '@kbn/ui-theme'
-  - '@kbn/deeplinks-search'
   - '@kbn/deeplinks-management'
   - '@kbn/management-plugin'
   - '@kbn/serverless'
@@ -53,6 +52,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

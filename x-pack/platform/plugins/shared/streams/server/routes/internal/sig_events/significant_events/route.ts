@@ -13,6 +13,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { searchModeSchema } from '../../../utils/search_mode';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
@@ -159,6 +160,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         .union([z.string().transform((val) => [val]), z.array(z.string())])
         .optional()
         .describe('Stream names to filter significant events'),
+      searchMode: searchModeSchema,
     }),
   }),
   options: {
@@ -183,7 +185,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames } = params.query;
+    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -192,6 +194,7 @@ const readAllSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );

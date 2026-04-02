@@ -289,7 +289,9 @@
     "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
+    "@kbn/shared-ux-ai-components",
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
+    "@kbn/shared-ux-column-presets",
   ]
 }
