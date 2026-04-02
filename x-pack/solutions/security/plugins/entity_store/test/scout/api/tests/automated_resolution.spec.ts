@@ -12,6 +12,7 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
+  LATEST_INDEX,
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
@@ -38,7 +39,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
     });
 
     await esClient.indices.delete({
-      index: [LATEST_ALIAS, UPDATES_INDEX],
+      index: [LATEST_INDEX, UPDATES_INDEX],
       ignore_unavailable: true,
     });
 
