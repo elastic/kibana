@@ -16,11 +16,10 @@ import type { ServerError } from '../types';
  *   which can cause a 409 on a concurrent PATCH even though no human changed the case.
  * - `version`: the ES-level optimistic-concurrency token — always differs between stale and latest.
  * - `updatedAt`: updated by the server on every write, including the background task.
- * - `comments`: fetched separately; not part of the PATCH payload checked for conflicts.
  * These fields are excluded from conflict detection so only genuine user-driven changes
  * cause a retry to be rejected.
  */
-const SYSTEM_MANAGED_CASE_FIELDS = ['comments', 'incrementalId', 'updatedAt', 'version'] as const;
+const SYSTEM_MANAGED_CASE_FIELDS = ['incrementalId', 'updatedAt', 'version'] as const;
 
 export type CaseWithOptionalComments = Omit<CaseUI, 'comments'> & {
   comments?: CaseUI['comments'];
