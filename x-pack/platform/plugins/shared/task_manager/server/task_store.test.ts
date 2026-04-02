@@ -39,7 +39,6 @@ import type {
   EncryptedSavedObjectsClientOptions,
 } from '@kbn/encrypted-saved-objects-shared';
 import { TaskValidator } from './task_validator';
-import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
 import { EsApiKeyStrategy } from './api_key_strategy';
 
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
@@ -48,12 +47,6 @@ let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
 jest.mock('./lib/api_key_utils', () => ({
   getApiKeyAndUserScope: jest.fn(),
 }));
-
-jest.mock('./lib/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
-
-(bulkMarkApiKeysForInvalidation as jest.Mock).mockResolvedValue(void 0);
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
@@ -1977,7 +1970,7 @@ describe('TaskStore', () => {
         excludedExtensions: ['security', 'spaces'],
       });
 
-      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [
           {
@@ -2085,7 +2078,7 @@ describe('TaskStore', () => {
         excludedExtensions: ['security', 'spaces'],
       });
 
-      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [
           {
@@ -2149,7 +2142,7 @@ describe('TaskStore', () => {
 
       expect(mockGetScopedClient).not.toHaveBeenCalled();
 
-      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
       expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
