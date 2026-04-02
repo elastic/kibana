@@ -13,7 +13,7 @@ describe('enterpriseLicenseMiddleware', () => {
   };
   let mockReq: unknown;
   let mockRes: {
-    customError: jest.Mock;
+    forbidden: jest.Mock;
   };
   let hasAtLeast: jest.Mock;
 
@@ -26,8 +26,8 @@ describe('enterpriseLicenseMiddleware', () => {
     };
     mockReq = {};
     mockRes = {
-      customError: jest.fn(({ statusCode, body }) => ({
-        status: statusCode,
+      forbidden: jest.fn(({ body }) => ({
+        status: 403,
         payload: body,
       })),
     };
@@ -42,7 +42,7 @@ describe('enterpriseLicenseMiddleware', () => {
     );
     expect(hasAtLeast).toHaveBeenCalledWith('enterprise');
     expect(result).toBeUndefined();
-    expect(mockRes.customError).not.toHaveBeenCalled();
+    expect(mockRes.forbidden).not.toHaveBeenCalled();
   });
 
   it('returns undefined for trial license (trial satisfies enterprise)', async () => {
@@ -54,7 +54,7 @@ describe('enterpriseLicenseMiddleware', () => {
     );
     expect(hasAtLeast).toHaveBeenCalledWith('enterprise');
     expect(result).toBeUndefined();
-    expect(mockRes.customError).not.toHaveBeenCalled();
+    expect(mockRes.forbidden).not.toHaveBeenCalled();
   });
 
   it.each(['platinum', 'gold', 'basic'] as const)(
@@ -68,8 +68,7 @@ describe('enterpriseLicenseMiddleware', () => {
       );
 
       expect(hasAtLeast).toHaveBeenCalledWith('enterprise');
-      expect(mockRes.customError).toHaveBeenCalledWith({
-        statusCode: 403,
+      expect(mockRes.forbidden).toHaveBeenCalledWith({
         body: {
           message: 'Entity Resolution requires an Enterprise license',
         },

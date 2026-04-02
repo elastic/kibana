@@ -13,8 +13,7 @@ export const enterpriseLicenseMiddleware: Middleware = async (ctx, _req, res) =>
   const { license } = await ctx.licensing;
 
   if (!license.hasAtLeast('enterprise')) {
-    return res.customError({
-      statusCode: 403,
+    return res.forbidden({
       body: {
         message: ENTITY_RESOLUTION_LICENSE_MESSAGE,
       },
