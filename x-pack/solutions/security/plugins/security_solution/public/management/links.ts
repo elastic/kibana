@@ -35,10 +35,7 @@ import {
   SCRIPT_LIBRARY,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
-import {
-  allowedExperimentalValues,
-  type ExperimentalFeatures,
-} from '../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { links as notesLink } from '../notes/links';
@@ -246,17 +243,13 @@ export const getFirstAllowedArtifactPath = (
   return getTrustedAppsListPath();
 };
 
-export interface GetManagementFilteredLinksParams {
-  experimentalFeatures?: Pick<
-    ExperimentalFeatures,
-    'endpointExceptionsMovedUnderManagement' | 'trustedDevices'
-  >;
-}
-
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins,
-  params?: GetManagementFilteredLinksParams
+  experimentalFeatures: Pick<
+    ExperimentalFeatures,
+    'endpointExceptionsMovedUnderManagement' | 'trustedDevices'
+  >
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
@@ -317,11 +310,6 @@ export const getManagementFilteredLinks = async (
   }
 
   const filtered = excludeLinks(linksToExclude);
-  const experimentalFeatures = params?.experimentalFeatures ?? {
-    endpointExceptionsMovedUnderManagement:
-      allowedExperimentalValues.endpointExceptionsMovedUnderManagement,
-    trustedDevices: allowedExperimentalValues.trustedDevices,
-  };
 
   const artifactsPath = canReadAnyArtifact
     ? getFirstAllowedArtifactPath(

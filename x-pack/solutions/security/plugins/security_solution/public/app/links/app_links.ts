@@ -52,18 +52,12 @@ export const appLinks: AppLinkItems = Object.freeze([
   aiValueLinks,
 ]);
 
-export interface GetFilteredLinksParams {
-  experimentalFeatures?: ExperimentalFeatures;
-}
-
 export const getFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins,
-  params?: GetFilteredLinksParams
+  experimentalFeatures: ExperimentalFeatures
 ): Promise<AppLinkItems> => {
-  const managementFilteredLinks = await getManagementFilteredLinks(core, plugins, {
-    experimentalFeatures: params?.experimentalFeatures,
-  });
+  const managementFilteredLinks = await getManagementFilteredLinks(core, plugins, experimentalFeatures);
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
