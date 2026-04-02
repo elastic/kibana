@@ -583,5 +583,4 @@ describe('validateCustomProperties', () => {
       hoverMessage: 'Valid',
     });
   });
-
 });
