@@ -38,7 +38,7 @@ import type {
   LensESQLDataset,
 } from './types';
 import type { LensApiState } from './schema';
-import type { DataSourceType } from './schema/dataset';
+import type { DataSourceType } from './schema/data_source';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)

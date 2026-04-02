@@ -8,8 +8,8 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './dataset';
-import { dataSourceSchema, dataSourceEsqlTableTypeSchema } from './dataset';
+import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './data_source';
+import { dataSourceSchema, dataSourceEsqlTableTypeSchema } from './data_source';
 import { dataViewSchema } from '@kbn/as-code-data-views-schema';
 
 describe('DataSource Schema', () => {

@@ -19,7 +19,7 @@ import {
   esqlColumnWithFormatSchema,
 } from '../metric_ops';
 import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
-import { dataSourceSchema, dataSourceEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   layerSettingsSchema,

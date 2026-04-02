@@ -18,7 +18,7 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { dataSourceEsqlTableSchema, dataSourceSchema } from '../dataset';
+import { dataSourceEsqlTableSchema, dataSourceSchema } from '../data_source';
 import {
   legendSizeSchema,
   legendVisibilitySchemaWithAuto,

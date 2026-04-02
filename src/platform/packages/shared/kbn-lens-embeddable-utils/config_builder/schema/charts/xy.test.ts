@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { DataSourceTypeESQL } from '../dataset';
+import type { DataSourceTypeESQL } from '../data_source';
 import type { xyDataLayerSharedSchema, XYState, XYStateESQL } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
 

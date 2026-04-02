@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-import { dataSourceSchema, dataSourceEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { colorByValueSchema } from '../color';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {

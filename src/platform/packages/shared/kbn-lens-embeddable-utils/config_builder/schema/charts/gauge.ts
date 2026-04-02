@@ -15,7 +15,7 @@ import {
   metricOperationDefinitionSchema,
 } from '../metric_ops';
 import { colorByValueSchema } from '../color';
-import { dataSourceSchema, dataSourceEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';

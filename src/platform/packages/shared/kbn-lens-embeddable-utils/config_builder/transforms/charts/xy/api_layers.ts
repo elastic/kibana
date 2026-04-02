@@ -37,7 +37,7 @@ import type {
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { DataSourceType } from '../../../schema/dataset';
+import type { DataSourceType } from '../../../schema/data_source';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataset } from '../../../utils';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';

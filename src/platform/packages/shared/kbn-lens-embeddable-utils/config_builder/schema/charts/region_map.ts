@@ -14,7 +14,7 @@ import {
   esqlColumnSchema,
   esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { dataSourceSchema, dataSourceEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
 

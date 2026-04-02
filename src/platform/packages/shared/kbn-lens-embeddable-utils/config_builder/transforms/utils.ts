@@ -44,7 +44,7 @@ import type {
   DataSourceType,
   DataSourceTypeESQL,
   DataSourceTypeNoESQL,
-} from '../schema/dataset';
+} from '../schema/data_source';
 import type { LayerTypeESQL } from '../schema/charts/xy';
 import type { XScaleSchemaType } from '../schema/charts/shared';
 
