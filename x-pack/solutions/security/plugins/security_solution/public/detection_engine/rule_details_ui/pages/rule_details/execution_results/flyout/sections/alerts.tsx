@@ -48,12 +48,12 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({ alertCount, candid
             <Tooltip
               items={[
                 {
-                  title: i18n.ALERTS_CREATED,
-                  description: i18n.FLYOUT_TOOLTIP_ALERTS_CREATED,
-                },
-                {
                   title: i18n.FLYOUT_CANDIDATE_ALERTS,
                   description: i18n.FLYOUT_TOOLTIP_CANDIDATE_ALERTS,
+                },
+                {
+                  title: i18n.ALERTS_CREATED,
+                  description: i18n.FLYOUT_TOOLTIP_ALERTS_CREATED,
                 },
               ]}
             />

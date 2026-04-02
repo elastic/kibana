@@ -236,8 +236,7 @@ export const FLYOUT_TOOLTIP_ALERTS_CREATED = i18n.translate(
 export const FLYOUT_TOOLTIP_CANDIDATE_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipCandidateAlerts',
   {
-    defaultMessage:
-      'Number of events that matched the rule query before deduplication and filtering.',
+    defaultMessage: 'Number of detected alerts before applying de-duplication and suppression.',
   }
 );
 
@@ -258,14 +257,14 @@ export const FLYOUT_ACCORDION_DURATION_BREAKDOWN = i18n.translate(
 export const FLYOUT_TOOLTIP_SEARCH_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipSearchDuration',
   {
-    defaultMessage: 'The length of time it took to search for alerts.',
+    defaultMessage: 'Time spent on Elasticsearch search requests in total during rule execution.',
   }
 );
 
 export const FLYOUT_TOOLTIP_INDEXING_TOTAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipIndexingTotal',
   {
-    defaultMessage: 'The length of time it took to index detected alerts.',
+    defaultMessage: 'Time spent on indexing detected alerts.',
   }
 );
 
@@ -343,7 +342,7 @@ export const FLYOUT_ACCORDION_INDICES = i18n.translate(
 export const FLYOUT_TOOLTIP_MATCHED_INDICES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResults.flyoutTooltipMatchedIndices',
   {
-    defaultMessage: 'Number of indices that contained matching source events.',
+    defaultMessage: `Number of indices matching rule's index patterns`,
   }
 );
 
