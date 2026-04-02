@@ -84,5 +84,5 @@ export function InsightsTab() {
     );
   }
 
-  return <Summary count={totalEvents} />;
+  return <Summary count={totalEvents ?? 0} />;
 }
