@@ -11,7 +11,6 @@ import {
   MAX_SCHEDULED_STREAMS,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   POLL_DELAY_SECONDS,
-  MAX_POLL_ITERATIONS,
 } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
@@ -46,10 +45,6 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     assertYamlContains(
       `name: extractionIntervalHours\n    type: number\n    default: ${DEFAULT_EXTRACTION_INTERVAL_HOURS}`
     );
-  });
-
-  it('uses the correct max poll iterations', () => {
-    assertYamlContains(`max-iterations: ${MAX_POLL_ITERATIONS}`);
   });
 
   it('uses the correct poll delay duration', () => {

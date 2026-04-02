@@ -65,7 +65,6 @@ steps:
           # check_status hasn't run yet (workflow engine treats missing refs as truthy).
           - name: poll_task
             type: while
-            max-iterations: 108
             condition: "steps.check_status.output.status:in_progress"
             steps:
               - name: check_status

@@ -26,6 +26,7 @@ export const kiSelectStreamsOutputSchema = z.object({
   skipped: z.array(streamCandidateSchema),
   upToDate: z.array(streamCandidateSchema),
   excluded: z.array(z.string()),
+  unsupported: z.array(z.string()),
   settings: z.object({
     enabled: z.boolean(),
     intervalHours: z.number(),

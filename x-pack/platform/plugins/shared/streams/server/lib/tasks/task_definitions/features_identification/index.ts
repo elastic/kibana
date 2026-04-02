@@ -10,7 +10,6 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   isInferenceProviderError,
-  isToolValidationError,
   type BoundInferenceClient,
   type ChatCompletionTokenCount,
 } from '@kbn/inference-common';
@@ -243,13 +242,14 @@ export async function identifyStreamFeatures({
     try {
       result = await identifyFeatures(identifyFeaturesArgs);
     } catch (error) {
-      if (error instanceof Error && isToolValidationError(error)) {
-        logger.warn(`Iteration ${i + 1}: LLM returned invalid tool call arguments, skipping`);
-        failureCount++;
-        await emitFailedIteration(iterationStart);
-        continue;
+      if (signal.aborted) {
+        throw error;
       }
-      throw error;
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      logger.warn(`Iteration ${i + 1} failed (${errorMsg}), continuing`);
+      failureCount++;
+      await emitFailedIteration(iterationStart);
+      continue;
     }
 
     successCount++;

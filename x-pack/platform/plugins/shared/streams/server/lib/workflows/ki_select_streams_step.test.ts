@@ -34,9 +34,13 @@ const makeTask = (
   } as TaskForTest;
 };
 
-const makeStream = (name: string, opts?: { query: boolean }) => ({
+const makeStream = (name: string, opts?: { query?: boolean; classic?: boolean }) => ({
   name,
-  ...(opts?.query ? { query: { view: `$.${name}` } } : {}),
+  ...(opts?.query
+    ? { query: { view: `$.${name}` } }
+    : opts?.classic
+    ? { ingest: { classic: {} } }
+    : { ingest: { wired: {} } }),
 });
 
 const scheduledNames = (output: Record<string, unknown>) =>
@@ -104,7 +108,7 @@ describe('kiSelectStreamsStep handler', () => {
     await expect(handler(makeContext())).rejects.toThrow('Continuous KI extraction is disabled');
   });
 
-  it('skips query streams', async () => {
+  it('skips unsupported stream types and reports them', async () => {
     mockStreamsClient.listStreams.mockResolvedValue([
       makeStream('logs'),
       makeStream('my-query', { query: true }),
@@ -114,6 +118,7 @@ describe('kiSelectStreamsStep handler', () => {
 
     expect(mockTaskClient.schedule).toHaveBeenCalledTimes(1);
     expect(scheduledNames(output)).toEqual(['logs']);
+    expect(output.unsupported).toEqual(['my-query']);
   });
 
   it('excludes streams matching exclude patterns', async () => {

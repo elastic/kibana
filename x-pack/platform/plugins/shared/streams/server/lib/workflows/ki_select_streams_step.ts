@@ -52,6 +52,7 @@ interface StreamSelectionResult {
   candidates: StreamCandidate[];
   upToDate: StreamCandidate[];
   excluded: string[];
+  unsupported: string[];
   excludePatterns: string[];
   eligibleNames: Set<string>;
 }
@@ -75,9 +76,16 @@ const classifyStreams = ({
   const excludePatterns = parseExcludePatterns(excludedStreamPatterns);
 
   const excluded: string[] = [];
+  const unsupported: string[] = [];
   const eligibleNames = new Set<string>();
   for (const stream of allStreams) {
-    if (Streams.QueryStream.Definition.is(stream)) continue;
+    if (
+      !Streams.WiredStream.Definition.is(stream) &&
+      !Streams.ClassicStream.Definition.is(stream)
+    ) {
+      unsupported.push(stream.name);
+      continue;
+    }
     if (matchesExcludePatterns(stream.name, excludePatterns)) {
       excluded.push(stream.name);
     } else {
@@ -125,6 +133,7 @@ const classifyStreams = ({
     candidates: allCandidates,
     upToDate,
     excluded,
+    unsupported,
     excludePatterns,
     eligibleNames,
   };
@@ -245,12 +254,13 @@ export const registerKiSelectStreamsStep = ({
         continuousKiExtraction.intervalHours ??
         DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-      const { alreadyRunning, candidates, upToDate, excluded, excludePatterns } = classifyStreams({
-        allStreams,
-        sortedTasks,
-        excludedStreamPatterns: continuousKiExtraction.excludedStreamPatterns ?? '',
-        intervalHours,
-      });
+      const { alreadyRunning, candidates, upToDate, excluded, unsupported, excludePatterns } =
+        classifyStreams({
+          allStreams,
+          sortedTasks,
+          excludedStreamPatterns: continuousKiExtraction.excludedStreamPatterns ?? '',
+          intervalHours,
+        });
 
       const availableSlots = Math.max(0, maxScheduledStreams - alreadyRunning.length);
       const toSchedule = candidates.slice(0, availableSlots);
@@ -282,6 +292,7 @@ export const registerKiSelectStreamsStep = ({
           skipped,
           upToDate,
           excluded,
+          unsupported,
           settings: {
             enabled: continuousKiExtraction.enabled ?? false,
             intervalHours:

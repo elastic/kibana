@@ -77,9 +77,4 @@ export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
 export const MIN_EXTRACTION_INTERVAL_HOURS = 1;
 export const MAX_SCHEDULED_STREAMS = 5;
 
-// Task polling: the workflow polls each task's status endpoint every
-// POLL_DELAY_SECONDS. MAX_POLL_ITERATIONS is derived so the polling
-// loop fits within the workflow timeout.
 export const POLL_DELAY_SECONDS = 5;
-export const WORKFLOW_TIMEOUT_SECONDS = (COORDINATOR_INTERVAL_MINUTES - 1) * 60;
-export const MAX_POLL_ITERATIONS = Math.floor(WORKFLOW_TIMEOUT_SECONDS / POLL_DELAY_SECONDS);
