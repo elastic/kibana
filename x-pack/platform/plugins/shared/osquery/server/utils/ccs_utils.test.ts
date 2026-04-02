@@ -6,9 +6,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from './ccs_utils';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs, resetCcsCache } from './ccs_utils';
 
 describe('hasConnectedRemoteClusters', () => {
+  beforeEach(() => {
+    resetCcsCache();
+  });
+
   const mockEsClient = (remoteInfo: Record<string, { connected: boolean }>) =>
     ({
       cluster: {
@@ -34,6 +38,13 @@ describe('hasConnectedRemoteClusters', () => {
   it('returns false when there are no remote clusters', async () => {
     const esClient = mockEsClient({});
     expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
+  });
+
+  it('returns cached result without calling remoteInfo again within TTL', async () => {
+    const esClient = mockEsClient({ cluster_a: { connected: true } });
+    await hasConnectedRemoteClusters(esClient);
+    await hasConnectedRemoteClusters(esClient);
+    expect(esClient.cluster.remoteInfo).toHaveBeenCalledTimes(1);
   });
 });
 

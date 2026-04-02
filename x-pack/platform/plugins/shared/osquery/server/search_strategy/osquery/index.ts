@@ -44,7 +44,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           allow_no_indices: false,
           expand_wildcards: 'all',
         }),
-        ccsEnabled: from(hasConnectedRemoteClusters(esClient.asInternalUser)),
+        ccsEnabled: hasConnectedRemoteClusters(esClient.asInternalUser),
       }).pipe(
         mergeMap(({ actionsIndexExists, newDataStreamIndexExists, ccsEnabled }) => {
           const strictRequest = {

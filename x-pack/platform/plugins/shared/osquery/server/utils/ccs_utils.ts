@@ -7,21 +7,34 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+const CCS_CACHE_TTL_MS = 60 * 1000;
+
+interface CcsCache {
+  value: boolean;
+  timestamp: number;
+}
+
+let ccsCache: CcsCache | null = null;
+
+export const resetCcsCache = (): void => {
+  ccsCache = null;
+};
+
 export const hasConnectedRemoteClusters = async (
   esClient: ElasticsearchClient
 ): Promise<boolean> => {
-  const response = await esClient.cluster.remoteInfo();
-  for (const remoteName in response) {
-    if (!Object.hasOwn(response, remoteName)) {
-      continue;
-    }
+  const now = Date.now();
 
-    if (response[remoteName].connected) {
-      return true;
-    }
+  if (ccsCache !== null && now - ccsCache.timestamp < CCS_CACHE_TTL_MS) {
+    return ccsCache.value;
   }
 
-  return false;
+  const response = await esClient.cluster.remoteInfo();
+  const connected = Object.values(response).some((r) => r.connected);
+
+  ccsCache = { value: connected, timestamp: now };
+
+  return connected;
 };
 
 export const prefixIndexPatternsWithCcs = (indexPattern: string, ccsEnabled: boolean): string => {
