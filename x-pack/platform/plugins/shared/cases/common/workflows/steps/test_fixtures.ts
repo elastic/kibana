@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { OBSERVABLE_TYPE_IPV4 } from '../../constants';
+
 export const createCaseRequestFixture = {
   title: 'My new case',
   description: 'A description',
@@ -181,7 +183,7 @@ export const addEventsInputFixture = {
 
 export const addObservablesInputFixture = {
   case_id: caseIdFixture,
-  observables: [{ typeKey: 'ip', value: '10.0.0.8' }],
+  observables: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.8' }],
 };
 
 export const addTagInputFixture = {

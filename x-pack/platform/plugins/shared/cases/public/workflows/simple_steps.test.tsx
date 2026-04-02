@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OBSERVABLE_TYPE_IPV4 } from '../../common/constants';
 import {
   addAlertsStepDefinition,
   addCommentStepDefinition,
@@ -58,5 +59,21 @@ describe('new cases public step definitions', () => {
     expect(definition.id.startsWith('cases.')).toBe(true);
     expect(definition.category).toBe('kibana');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
+  });
+
+  it('uses the shared addObservables built-in typeKey schema', () => {
+    expect(
+      addObservablesStepDefinition.inputSchema.safeParse({
+        case_id: 'case-1',
+        observables: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.8' }],
+      }).success
+    ).toBe(true);
+
+    expect(
+      addObservablesStepDefinition.inputSchema.safeParse({
+        case_id: 'case-1',
+        observables: [{ typeKey: 'ip', value: '10.0.0.8' }],
+      }).success
+    ).toBe(false);
   });
 });

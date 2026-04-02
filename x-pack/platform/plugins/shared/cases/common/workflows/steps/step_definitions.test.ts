@@ -199,4 +199,13 @@ describe('cases common step definitions', () => {
   it.each(stepDefinitions)('accepts valid output payload for $typeId', ({ definition, output }) => {
     expect(definition.outputSchema.safeParse(output).success).toBe(true);
   });
+
+  it('rejects non built-in observable type keys for addObservables', () => {
+    expect(
+      addObservablesStepCommonDefinition.inputSchema.safeParse({
+        ...addObservablesInputFixture,
+        observables: [{ typeKey: 'ip', value: '10.0.0.8' }],
+      }).success
+    ).toBe(false);
+  });
 });

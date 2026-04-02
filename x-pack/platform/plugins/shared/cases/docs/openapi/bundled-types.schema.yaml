@@ -2237,6 +2237,46 @@ components:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
           nullable: true
+    case_observable:
+      title: Case observable
+      description: A single observable attached to a case.
+      type: object
+      required:
+        - id
+        - typeKey
+        - value
+        - description
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: The observable identifier.
+          example: df927ab8-54ed-47d6-be07-9948c255c097
+        typeKey:
+          type: string
+          description: The observable type key.
+          example: observable-type-ipv4
+        value:
+          type: string
+          description: The observable value.
+          example: 10.0.0.8
+        description:
+          type: string
+          nullable: true
+          description: An optional description for the observable.
+          example: Source IP
+        createdAt:
+          type: string
+          format: date-time
+          description: When the observable was created.
+          example: '2024-11-14T10:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the observable was last updated.
+          example: '2024-11-14T10:00:00.000Z'
     case_status:
       type: string
       description: The status of the case.
@@ -2258,6 +2298,7 @@ components:
         - duration
         - external_service
         - id
+        - observables
         - owner
         - settings
         - severity
@@ -2266,6 +2307,7 @@ components:
         - title
         - totalAlerts
         - totalComment
+        - total_observables
         - updated_at
         - updated_by
         - version
@@ -2366,6 +2408,11 @@ components:
         id:
           type: string
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        observables:
+          type: array
+          description: Observables attached to the case.
+          items:
+            $ref: '#/components/schemas/case_observable'
         owner:
           $ref: '#/components/schemas/owner'
         settings:
@@ -2388,6 +2435,11 @@ components:
           example: 0
         totalComment:
           type: integer
+          example: 0
+        total_observables:
+          type: integer
+          nullable: true
+          description: The number of observables attached to the case.
           example: 0
         totalEvents:
           type: integer
@@ -2844,6 +2896,7 @@ components:
         - duration
         - external_service
         - id
+        - observables
         - owner
         - settings
         - severity
@@ -2852,6 +2905,7 @@ components:
         - title
         - totalAlerts
         - totalComment
+        - total_observables
         - updated_at
         - updated_by
         - version
@@ -2934,6 +2988,11 @@ components:
         id:
           type: string
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        observables:
+          type: array
+          description: Observables attached to the case.
+          items:
+            $ref: '#/components/schemas/case_observable'
         owner:
           $ref: '#/components/schemas/owner'
         settings:
@@ -2958,6 +3017,11 @@ components:
           type: integer
           description: The number of user comments on the case. Use the find case comments API to retrieve comment content.
           example: 1
+        total_observables:
+          type: integer
+          nullable: true
+          description: The number of observables attached to the case.
+          example: 0
         totalEvents:
           type: integer
           description: The number of events attached to the case.
@@ -3586,8 +3650,10 @@ components:
       summary: The create case API returns a JSON object that contains details about the case.
       value:
         comments: []
+        observables: []
         totalAlerts: 0
         totalEvents: 0
+        total_observables: 0
         id: 66b9aa00-94fa-11ea-9f74-e7e108796192
         version: WzUzMiwxXQ==
         totalComment: 0
@@ -3662,9 +3728,11 @@ components:
         - id: 66b9aa00-94fa-11ea-9f74-e7e108796192
           version: WzU0OCwxXQ==
           comments: []
+          observables: []
           totalComment: 0
           totalAlerts: 0
           totalEvents: 0
+          total_observables: 0
           title: Case title 1
           tags:
             - tag-1
@@ -3728,9 +3796,11 @@ components:
           - id: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
             version: WzExMCwxXQ==
             comments: []
+            observables: []
             totalComment: 1
             totalAlerts: 0
             totalEvents: 0
+            total_observables: 0
             title: Case title
             tags:
               - tag-1
@@ -4013,6 +4083,7 @@ components:
         totalComment: 1
         totalAlerts: 1
         totalEvents: 0
+        total_observables: 0
         title: Case title 1
         tags:
           - tag 1
@@ -4028,6 +4099,7 @@ components:
           - key: fcc6840d-eb14-42df-8aaf-232201a705ec
             type: toggle
             value: null
+        observables: []
         description: A case description
         duration: null
         severity: low
@@ -4068,6 +4140,7 @@ components:
         title: Observability case title 1
         category: null
         customFields: []
+        observables: []
         assignees:
           - uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
         connector:
@@ -4097,6 +4170,7 @@ components:
         totalComment: 1
         totalAlerts: 1
         totalEvents: 0
+        total_observables: 0
     get_case_alerts_response:
       summary: Retrieves all alerts attached to a case
       value:
@@ -4123,8 +4197,10 @@ components:
               username: elastic
               email: null
               full_name: null
+        observables: []
         totalAlerts: 0
         totalEvents: 0
+        total_observables: 0
         id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
         version: WzIzMzgsMV0=
         totalComment: 1
@@ -4288,9 +4364,11 @@ components:
         id: b917f300-0ed9-11ed-bd18-65557fe66949
         version: WzE3NjgsM10=
         comments: []
+        observables: []
         totalComment: 0
         totalAlerts: 0
         totalEvents: 0
+        total_observables: 0
         description: A case description.
         title: Case title 1
         tags:

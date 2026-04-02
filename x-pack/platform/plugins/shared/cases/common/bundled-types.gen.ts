@@ -547,6 +547,37 @@ export const ExternalService = z
   .nullable();
 
 /**
+ * A single observable attached to a case.
+ */
+export type CaseObservable = z.infer<typeof CaseObservable>;
+export const CaseObservable = z.object({
+  /**
+   * The observable identifier.
+   */
+  id: z.string(),
+  /**
+   * The observable type key.
+   */
+  typeKey: z.string(),
+  /**
+   * The observable value.
+   */
+  value: z.string(),
+  /**
+   * An optional description for the observable.
+   */
+  description: z.string().nullable(),
+  /**
+   * When the observable was created.
+   */
+  createdAt: z.string().datetime(),
+  /**
+   * When the observable was last updated.
+   */
+  updatedAt: z.string().datetime().nullable(),
+});
+
+/**
  * The status of the case.
  */
 export type CaseStatus = z.infer<typeof CaseStatus>;
@@ -619,6 +650,10 @@ export const CaseResponseProperties = z.object({
   duration: z.number().int().nullable(),
   external_service: ExternalService,
   id: z.string(),
+  /**
+   * Observables attached to the case.
+   */
+  observables: z.array(CaseObservable),
   owner: Owner,
   settings: Settings,
   severity: CaseSeverity,
@@ -627,6 +662,10 @@ export const CaseResponseProperties = z.object({
   title: z.string(),
   totalAlerts: z.number().int(),
   totalComment: z.number().int(),
+  /**
+   * The number of observables attached to the case.
+   */
+  total_observables: z.number().int().nullable(),
   /**
    * The number of events attached to the case.
    */
@@ -1067,6 +1106,10 @@ export const CaseResponseGetCase = z.object({
   duration: z.number().int().nullable(),
   external_service: ExternalService,
   id: z.string(),
+  /**
+   * Observables attached to the case.
+   */
+  observables: z.array(CaseObservable),
   owner: Owner,
   settings: Settings,
   severity: CaseSeverity,
@@ -1078,6 +1121,10 @@ export const CaseResponseGetCase = z.object({
    * The number of user comments on the case. Use the find case comments API to retrieve comment content.
    */
   totalComment: z.number().int(),
+  /**
+   * The number of observables attached to the case.
+   */
+  total_observables: z.number().int().nullable(),
   /**
    * The number of events attached to the case.
    */
