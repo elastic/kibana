@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react';
 
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
-jest.mock('../cases_context/use_cases_context');
+jest.mock('../../common/use_cases_features');
 
-const mockUseCasesContext = useCasesContext as jest.Mock;
+const mockUseCasesFeatures = useCasesFeatures as jest.Mock;
 
 describe('useCanSyncCloseReasonToAlerts', () => {
   beforeEach(() => {
@@ -20,8 +20,8 @@ describe('useCanSyncCloseReasonToAlerts', () => {
   });
 
   it('returns false when alert sync feature is disabled', () => {
-    mockUseCasesContext.mockReturnValue({
-      features: { alerts: { sync: false } },
+    mockUseCasesFeatures.mockReturnValue({
+      isSyncAlertsEnabled: false,
     });
 
     const { result } = renderHook(() =>
@@ -56,8 +56,8 @@ describe('useCanSyncCloseReasonToAlerts', () => {
   ])(
     'returns $expected for single case when $description',
     ({ totalAlerts, syncAlertsEnabled, expected }) => {
-      mockUseCasesContext.mockReturnValue({
-        features: { alerts: { sync: true } },
+      mockUseCasesFeatures.mockReturnValue({
+        isSyncAlertsEnabled: true,
       });
 
       const { result } = renderHook(() =>
@@ -89,8 +89,8 @@ describe('useCanSyncCloseReasonToAlerts', () => {
       expected: true,
     },
   ])('returns $expected for bulk actions when $description', ({ selectedCases, expected }) => {
-    mockUseCasesContext.mockReturnValue({
-      features: { alerts: { sync: true } },
+    mockUseCasesFeatures.mockReturnValue({
+      isSyncAlertsEnabled: true,
     });
 
     const { result } = renderHook(() =>

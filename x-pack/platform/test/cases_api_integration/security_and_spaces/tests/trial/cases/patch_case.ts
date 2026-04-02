@@ -430,19 +430,55 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           }
 
-          // Close the case while simultaneously enabling syncAlerts. This triggers
-          // the casesWithSyncSettingChangedToOn path which only updates open alerts,
-          // leaving already-closed alerts untouched.
-          const updatedCases = await updateCase({
+          // Enable syncAlerts before closing so the close-reason validator accepts the
+          // request (it requires syncAlerts to be on). Enabling sync on an open case
+          // moves all attached alerts to "open" — we restore the mixed statuses below.
+          const [syncEnabledCase] = await updateCase({
             supertest,
             params: {
               cases: [
                 {
                   id: currentCase.id,
                   version: currentCase.version,
+                  settings: { syncAlerts: true, extractObservables: false },
+                },
+              ],
+            },
+          });
+
+          // Restore the mixed alert statuses that the sync-on transition overwrote.
+          await Promise.all([
+            es.index({
+              index: testAlertIndex,
+              id: closedAlert.id,
+              document: {
+                '@timestamp': new Date().toISOString(),
+                [ALERT_WORKFLOW_STATUS]: 'closed',
+              },
+            }),
+            es.index({
+              index: testAlertIndex,
+              id: closedWithReasonAlert.id,
+              document: {
+                '@timestamp': new Date().toISOString(),
+                [ALERT_WORKFLOW_STATUS]: 'closed',
+                [ALERT_WORKFLOW_REASON]: closedWithReasonAlert.initialReason,
+              },
+            }),
+          ]);
+          await es.indices.refresh({ index: testAlertIndex });
+
+          // Close the case with a close reason. syncAlerts is already on, so the
+          // validator passes and only the open alert gets synced to closed.
+          const updatedCases = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: syncEnabledCase.id,
+                  version: syncEnabledCase.version,
                   status: CaseStatuses.closed,
                   closeReason: 'duplicate',
-                  settings: { syncAlerts: true, extractObservables: false },
                 },
               ],
             },

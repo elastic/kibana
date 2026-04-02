@@ -522,8 +522,9 @@ export const bulkUpdate = async (
           return;
         }
 
-        // The UX only allows a close reason to be provided when syncAlerts is on
-        if (!originalCase.attributes.settings.syncAlerts) {
+        const syncAlertsAfterUpdate =
+          updateReq.settings?.syncAlerts ?? originalCase.attributes.settings.syncAlerts;
+        if (!syncAlertsAfterUpdate) {
           throw Boom.badRequest(
             `Cannot provide a close reason for case ${updateReq.id} when sync alerts is disabled.`
           );
