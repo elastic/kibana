@@ -715,6 +715,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Display the incremental id of a case in the relevant pages',
     },
   },
+  'cases:maxOpenCasesPerRuleRun': {
+    type: 'integer',
+    _meta: {
+      description: 'Maximum number of cases the Cases connector can open during a single rule run.',
+    },
+  },
   'observability:streamsEnableSignificantEvents': {
     type: 'boolean',
     _meta: {
