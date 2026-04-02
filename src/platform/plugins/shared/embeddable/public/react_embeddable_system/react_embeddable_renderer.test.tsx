@@ -26,6 +26,7 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
         name: initialState.name,
         bork: initialState.bork,
       }),
+      applySerializedState: jest.fn(),
     });
     return {
       Component: () => (
@@ -157,6 +158,7 @@ describe('embeddable renderer', () => {
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
         lockHoverActions: expect.any(Function),
+        applySerializedState: expect.any(Function),
         isCustomizable: true,
         isDuplicable: true,
         isExpandable: true,
@@ -332,6 +334,7 @@ describe('reactEmbeddable phase events', () => {
             name: initialState.name,
             bork: initialState.bork,
           }),
+          applySerializedState: jest.fn(),
           dataLoading$,
         });
         return {
