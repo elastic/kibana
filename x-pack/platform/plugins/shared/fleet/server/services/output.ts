@@ -693,11 +693,11 @@ class OutputService {
       }
       // Clear fields that are only valid for specific auth_type values
       if (output.auth_type !== kafkaAuthType.None) {
-        data.connection_type = null;
+        data.connection_type = undefined;
       }
       if (output.auth_type !== kafkaAuthType.Userpass) {
-        data.username = null;
-        data.password = null;
+        data.username = undefined;
+        data.password = undefined;
       }
     }
 
