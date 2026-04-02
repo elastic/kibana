@@ -153,25 +153,17 @@ export function parseLogSamples(fileContent: string): ParseLogSamplesResult {
       return finalizeResult(arrayEntries, 'json_array', maxSamples, [], warnings);
     }
 
+    if (parsedContent.length > 0 && !validateObjectEntries(parsedContent)) {
+      return {
+        samples: [],
+        detectedFormat: 'ndjson',
+        samplesOmittedOverLimit: 0,
+        warnings: [],
+        error: 'NOT_OBJECT',
+      };
+    }
+
     if (parsedContent.length > 0) {
-      if (!validateObjectEntries(parsedContent)) {
-        return {
-          samples: [],
-          detectedFormat: 'ndjson',
-          samplesOmittedOverLimit: 0,
-          warnings: [],
-          error: 'NOT_OBJECT',
-        };
-      }
-      if (parsedContent.length === 0) {
-        return {
-          samples: [],
-          detectedFormat: 'ndjson',
-          samplesOmittedOverLimit: 0,
-          warnings: [],
-          error: 'EMPTY',
-        };
-      }
       return finalizeResult(parsedContent, 'ndjson', maxSamples, undefined, warnings);
     }
   } catch (ndjsonError) {
