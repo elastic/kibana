@@ -138,11 +138,7 @@ export function useGenAIConnectorsWithoutContext(
     connectors,
     loading,
     error,
-    selectedConnector:
-      isConnectorSelectionRestricted ||
-      (selectedConnector && connectors?.some((c) => c.connectorId === selectedConnector))
-        ? selectedConnector
-        : connectors?.[0]?.connectorId,
+    selectedConnector: selectedConnector || connectors?.[0]?.connectorId,
     selectConnector: (id: string) => {
       setLastUsedConnector(id);
     },
