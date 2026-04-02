@@ -135,7 +135,8 @@ export const ConsoleTutorialsGroup = () => {
         description: i18n.translate(
           'xpack.searchGettingStarted.consoleTutorials.vectorSearchDescription',
           {
-            defaultMessage: 'Learn how to use vector DB',
+            defaultMessage:
+              'Learn to use Elastic as a vector datastore for chatbots, RAG, and recommenders. Generate embeddings or bring your own.',
           }
         ),
         request: consoleTutorials.vectorDatabase,
