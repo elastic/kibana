@@ -26,7 +26,10 @@ import { API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from '../fixtures';
  *   active   --[recovered]--> recovering
  *   recovering --[recovered]--> inactive
  */
-apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.classic }, () => {
+apiTest.describe(
+  'Episode lifecycle for alert rules',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
   const SOURCE_INDEX = 'test-alerting-v2-e2e-source';
   const SCHEDULE_INTERVAL = '5s';
   const LOOKBACK_WINDOW = '1m';
@@ -490,4 +493,5 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
       expect(new Set(episodeIds).size).toBe(1);
     }
   );
-});
+  }
+);

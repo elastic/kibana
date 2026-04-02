@@ -7,7 +7,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
@@ -21,7 +23,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
@@ -35,7 +39,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
@@ -49,12 +55,174 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
         "line": 432,
         "column": 10
+      }
+    },
+    {
+      "id": "episode-actions-ack",
+      "title": "Episode actions for alert rules should acknowledge an episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 199,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-unack",
+      "title": "Episode actions for alert rules should unacknowledge an episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 222,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-snooze-expiry",
+      "title": "Episode actions for alert rules should snooze a group with expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 243,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-snooze-no-expiry",
+      "title": "Episode actions for alert rules should snooze a group without expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 268,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-unsnooze",
+      "title": "Episode actions for alert rules should unsnooze a group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 291,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-deactivate",
+      "title": "Episode actions for alert rules should deactivate a group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 312,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-activate",
+      "title": "Episode actions for alert rules should activate a group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 335,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-tag",
+      "title": "Episode actions for alert rules should tag a group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 358,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-unknown-group",
+      "title": "Episode actions for alert rules should return error for unknown group_hash",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 381,
+        "column": 3
+      }
+    },
+    {
+      "id": "episode-actions-reject-action-type",
+      "title": "Episode actions for alert rules should reject body with action_type field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_actions.spec.ts",
+        "line": 395,
+        "column": 3
       }
     }
   ]
