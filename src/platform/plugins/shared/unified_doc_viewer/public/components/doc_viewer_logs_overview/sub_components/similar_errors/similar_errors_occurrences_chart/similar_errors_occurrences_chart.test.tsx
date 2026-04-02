@@ -122,7 +122,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
       expect(screen.getByTestId('lensEmbeddableSimilarErrorsChart')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Lens Chart (type: lens)')).toBeInTheDocument();
+    expect(screen.getByText('Lens Chart (type: vis)')).toBeInTheDocument();
   });
 
   it('shows error message when build fails', async () => {
