@@ -75,6 +75,48 @@ export function getSourceField(
   return trimmedSourceField && trimmedSourceField.length > 0 ? trimmedSourceField : undefined;
 }
 
+export function getTargetField(
+  processor: StreamlangProcessorDefinitionWithUIAttributes
+): string | undefined {
+  const processorTargetField = (() => {
+    switch (processor.action) {
+      // Processors with an optional `to` that is a different field from `from`
+      case 'convert':
+      case 'date':
+      case 'split':
+      case 'replace':
+      case 'uppercase':
+      case 'lowercase':
+      case 'trim':
+      case 'sort':
+        return processor.to;
+      // Processors where `to` is always a distinct target
+      case 'rename':
+        return processor.to;
+      // Processors without a meaningful target field to auto-show
+      // (grok/dissect: target fields are defined by patterns and discovered via simulation)
+      // (set/append/math/concat: `to` IS the source field shown by getSourceField)
+      // (remove/remove_by_prefix/drop_document: no output field)
+      // (redact: modifies in-place)
+      default:
+        return undefined;
+    }
+  })();
+
+  const trimmedField = processorTargetField?.trim();
+  if (!trimmedField || trimmedField.length === 0) {
+    return undefined;
+  }
+
+  // Don't return target if it's the same as source — no extra column needed
+  const sourceField = getSourceField(processor);
+  if (trimmedField === sourceField) {
+    return undefined;
+  }
+
+  return trimmedField;
+}
+
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
 }

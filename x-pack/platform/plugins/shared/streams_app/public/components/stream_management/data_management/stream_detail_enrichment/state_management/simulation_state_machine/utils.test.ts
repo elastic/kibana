@@ -14,6 +14,7 @@ import {
   collectDocumentsAffectedByProcessors,
   getOriginalSampleDocument,
   getSourceField,
+  getTargetField,
 } from './utils';
 
 const makeAction = (
@@ -225,6 +226,76 @@ describe('Simulation utils', () => {
 
     it('returns undefined when from is whitespace only', () => {
       expect(getSourceField({ action: 'grok', from: '   ' } as any)).toBeUndefined();
+    });
+  });
+
+  describe('getTargetField', () => {
+    it('returns to for convert with explicit to', () => {
+      expect(
+        getTargetField({ action: 'convert', from: 'status', to: 'status_int' } as any)
+      ).toBe('status_int');
+    });
+
+    it('returns undefined for convert without to', () => {
+      expect(getTargetField({ action: 'convert', from: 'status' } as any)).toBeUndefined();
+    });
+
+    it('returns to for split with explicit to', () => {
+      expect(
+        getTargetField({ action: 'split', from: 'tags', to: 'tags_array' } as any)
+      ).toBe('tags_array');
+    });
+
+    it('returns to for rename', () => {
+      expect(
+        getTargetField({ action: 'rename', from: 'old_name', to: 'new_name' } as any)
+      ).toBe('new_name');
+    });
+
+    it('returns to for date with explicit to', () => {
+      expect(
+        getTargetField({ action: 'date', from: 'raw_date', to: '@timestamp' } as any)
+      ).toBe('@timestamp');
+    });
+
+    it('returns to for replace with explicit to', () => {
+      expect(
+        getTargetField({ action: 'replace', from: 'message', to: 'clean_message' } as any)
+      ).toBe('clean_message');
+    });
+
+    it('returns to for uppercase with explicit to', () => {
+      expect(
+        getTargetField({ action: 'uppercase', from: 'name', to: 'name_upper' } as any)
+      ).toBe('name_upper');
+    });
+
+    it('returns undefined for grok (pattern-defined outputs)', () => {
+      expect(
+        getTargetField({ action: 'grok', from: 'message', patterns: ['%{GREEDYDATA:data}'] } as any)
+      ).toBeUndefined();
+    });
+
+    it('returns undefined for dissect', () => {
+      expect(
+        getTargetField({ action: 'dissect', from: 'message', pattern: '%{data}' } as any)
+      ).toBeUndefined();
+    });
+
+    it('returns undefined for remove (no target)', () => {
+      expect(getTargetField({ action: 'remove', from: 'unwanted' } as any)).toBeUndefined();
+    });
+
+    it('returns undefined when to is empty string', () => {
+      expect(
+        getTargetField({ action: 'convert', from: 'status', to: '' } as any)
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when to equals from (no extra column needed)', () => {
+      expect(
+        getTargetField({ action: 'convert', from: 'status', to: 'status' } as any)
+      ).toBeUndefined();
     });
   });
 });
