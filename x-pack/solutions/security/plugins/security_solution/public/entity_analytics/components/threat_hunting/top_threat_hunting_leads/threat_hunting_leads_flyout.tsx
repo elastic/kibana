@@ -133,7 +133,7 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
 
             <EuiSpacer size="m" />
             <EuiTablePagination
-              pageCount={Math.ceil(totalCount / pageSize)}
+              pageCount={Math.ceil((searchQuery ? filteredLeads.length : totalCount) / pageSize)}
               activePage={pageIndex}
               onChangePage={handlePageChange}
               itemsPerPage={pageSize}
@@ -211,7 +211,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
           <EuiFlexItem grow={false}>
             <EuiIcon
               type="iInCircle"
-              aria-hidden={true}
+              aria-label={i18n.VIEW_LEAD_DETAILS}
               onClick={handleInfoClick}
               style={{ cursor: 'pointer' }}
               data-test-subj={`leadListInfoButton-${lead.id}`}
