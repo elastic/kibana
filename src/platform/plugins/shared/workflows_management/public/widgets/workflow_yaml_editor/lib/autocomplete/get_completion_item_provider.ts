@@ -51,7 +51,6 @@ const TEMPLATE_EXPRESSION_MATCH_TYPES = new Set([
   'foreach-variable',
   'liquid-filter',
   'liquid-block-filter',
-  'liquid-block-keyword',
   'liquid-syntax',
 ]);
 
@@ -138,9 +137,10 @@ export function getCompletionItemProvider(
         autocompleteContext.focusedStepInfo
       );
 
-      const isInTemplateExpression = TEMPLATE_EXPRESSION_MATCH_TYPES.has(
-        autocompleteContext.lineParseResult?.matchType ?? ''
-      );
+      const matchType = autocompleteContext.lineParseResult?.matchType ?? '';
+      const isInTemplateExpression =
+        TEMPLATE_EXPRESSION_MATCH_TYPES.has(matchType) ||
+        (matchType === 'liquid-block-keyword' && autocompleteContext.isInLiquidBlock);
 
       let isIncomplete = false;
 

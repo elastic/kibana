@@ -18,6 +18,7 @@ export {
   getDummyWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
+  getRootLevelAutocompleteYaml,
   getManualTriggerEventAutocompleteYaml,
   getAlertTriggerEventAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
