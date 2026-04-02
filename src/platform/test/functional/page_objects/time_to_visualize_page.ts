@@ -111,7 +111,9 @@ export class TimeToVisualizePageObject extends FtrService {
       }
     }
 
-    const hasSaveToLibrary = await this.testSubjects.exists('add-to-library-checkbox');
+    const hasSaveToLibrary = await this.testSubjects.exists('add-to-library-checkbox', {
+      allowHidden: true,
+    });
     if (hasSaveToLibrary && saveToLibrary !== undefined) {
       const libraryCheckbox = await this.find.byCssSelector('#add-to-library-checkbox');
       const isChecked = await libraryCheckbox.isSelected();
