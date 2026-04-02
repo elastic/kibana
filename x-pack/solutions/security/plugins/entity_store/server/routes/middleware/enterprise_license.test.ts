@@ -40,6 +40,7 @@ describe('enterpriseLicenseMiddleware', () => {
       mockReq as never,
       mockRes as never
     );
+    expect(hasAtLeast).toHaveBeenCalledWith('enterprise');
     expect(result).toBeUndefined();
     expect(mockRes.customError).not.toHaveBeenCalled();
   });
@@ -51,6 +52,7 @@ describe('enterpriseLicenseMiddleware', () => {
       mockReq as never,
       mockRes as never
     );
+    expect(hasAtLeast).toHaveBeenCalledWith('enterprise');
     expect(result).toBeUndefined();
     expect(mockRes.customError).not.toHaveBeenCalled();
   });
