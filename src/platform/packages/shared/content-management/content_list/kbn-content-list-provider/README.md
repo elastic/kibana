@@ -174,4 +174,14 @@ Manages runtime data using a reducer pattern with React Query for data fetching.
 |------|---------|---------|
 | `useContentListItems()` | `{ items, totalItems, isLoading, error, refetch }` | Access loaded items and loading state. |
 | `useContentListSort()` | `{ field, direction, setSort, isSupported }` | Read/update sort configuration. |
+| `useContentListSearch()` | `{ queryText, setQueryFromEuiQuery, isSupported, fieldNames }` | Read/update the search bar query text. |
+| `useContentListPagination()` | `{ page, setPage, isSupported }` | Read/update pagination state. |
+| `useContentListSelection()` | `{ selected, setSelected, isSupported }` | Read/update row selection state. |
+| `useContentListFilters()` | `{ filters, clearFilters }` | Read derived `ActiveFilters` from `queryText` and clear all filters. |
+| `useFilterToggle(fieldName)` | `(id: string, type?: 'include' \| 'exclude') => void` | Toggle a value in any field filter via EUI Query mutations. |
+| `useTagFilterToggle()` | `(value: string) => void` | Convenience wrapper around `useFilterToggle` for the `tag` field. |
+| `useCreatedByFilterToggle()` | `(value: string) => void` | Convenience wrapper around `useFilterToggle` for the `createdBy` field. |
+| `useFilterFacets(filterId, opts?)` | `UseQueryResult<FilterFacet[]>` | Fetch display-ready `FilterFacet[]` for a filter popover (lazy, via React Query). Pass `{ enabled: isOpen }` to fire on popover open. |
+| `useDeleteConfirmation(options)` | `{ showConfirmation, DeleteModal }` | Manage delete confirmation modal state. |
+| `useUserProfileStoreContext()` | `UserProfileStore` | Access the shared user profile cache from `UserProfileStoreProvider`. |
 

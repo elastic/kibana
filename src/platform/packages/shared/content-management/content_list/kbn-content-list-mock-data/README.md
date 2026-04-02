@@ -67,8 +67,8 @@ import {
 const result = await mockFindDashboards({
   searchQuery: 'revenue',
   filters: {
-    tags: { include: ['tag-production'] },
-    favoritesOnly: false,
+    tag: { include: ['tag-production'] },
+    starredOnly: false,
   },
   sort: { field: 'updatedAt', direction: 'desc' },
   page: { index: 0, size: 10 },
@@ -125,16 +125,19 @@ Mock user profile services for stories that display creator/updater information:
 
 ```typescript
 import {
-  mockUserProfileServices,
+  mockContentListUserProfilesServices,
   MOCK_USER_PROFILES,
   MOCK_USER_PROFILES_MAP,
 } from '@kbn/content-list-mock-data';
 
-// Use the mock services in your story context
-const { bulkGetUserProfiles } = mockUserProfileServices;
+// Pass directly as `services.userProfiles` to the provider.
+<ContentListClientProvider
+  services={{ userProfiles: mockContentListUserProfilesServices }}
+  // ...
+/>
 
-// Bulk fetch profiles
-const profiles = await bulkGetUserProfiles(['u_jane_doe', 'u_john_smith']);
+// Or use individual profiles for test assertions.
+const profile = MOCK_USER_PROFILES_MAP['u_jane_doe'];
 ```
 
 ## API
@@ -167,7 +170,7 @@ const profiles = await bulkGetUserProfiles(['u_jane_doe', 'u_john_smith']);
 
 | Export | Description |
 |--------|-------------|
-| `mockUserProfileServices` | Object containing `bulkGetUserProfiles` mock implementation. |
+| `mockContentListUserProfilesServices` | `ContentListUserProfilesServices` with `bulkResolve` and `suggest` backed by static mock data. |
 
 ### Types
 
