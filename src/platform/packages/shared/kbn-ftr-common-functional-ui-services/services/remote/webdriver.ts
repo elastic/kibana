@@ -264,7 +264,7 @@ async function attemptToCreateCommand(
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
             .setEdgeOptions(edgeOptions)
-            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath)) // .setEnvironment(driverEnv))
+            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath).setEnvironment(driverEnv))
             .build();
           return {
             session,
