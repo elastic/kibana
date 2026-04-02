@@ -172,7 +172,7 @@ describe('searchEmbeddableTransforms', () => {
       };
       const result = getSearchEmbeddableTransforms(
         mockDrilldownTransforms,
-        whenEnabled
+        whenDisabled
       ).transformOut?.(state, [
         {
           id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
