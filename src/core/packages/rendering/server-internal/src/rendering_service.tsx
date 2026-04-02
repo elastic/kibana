@@ -82,6 +82,7 @@ function parseBrowserLocale(acceptLanguage: string | string[] | undefined): stri
 
     // Language-only match (e.g. "fr" matches "fr-FR")
     const langPrefix = lang.split('-')[0].toLowerCase();
+    if (!langPrefix) continue;
     const prefixMatch = SUPPORTED_LOCALES.find((supported) =>
       supported.toLowerCase().startsWith(langPrefix)
     );
