@@ -198,7 +198,7 @@ export class TaskManagerService {
         task_status: task.state?.task_status,
       };
     } catch (error: unknown) {
-      this.logger.error(`Failed to get task status for ${taskId}:`, error);
+      this.logger.error(`Failed to get task status for ${taskId}: ${error}`);
       throw new Error(`Task ${taskId} not found or inaccessible`);
     }
   }

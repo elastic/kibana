@@ -24,7 +24,7 @@ interface ReportDataStreamCreationCompleteParams {
   errorMessage?: string;
 }
 
-interface TaskManagerServiceWithPrivateTelemetry extends TaskManagerService {
+interface TaskManagerServiceWithPrivateTelemetry {
   reportDataStreamCreationComplete: (params: ReportDataStreamCreationCompleteParams) => void;
 }
 
