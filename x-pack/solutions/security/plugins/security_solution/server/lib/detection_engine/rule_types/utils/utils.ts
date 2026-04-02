@@ -7,12 +7,13 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge } from 'lodash';
+import { get, invert, isArray, isEmpty, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -306,7 +307,7 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
-  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  addSpanLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, { isString: false });
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
 };
@@ -627,6 +628,7 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
+    alertsCandidateCount: searchResult.hits.hits.length,
   });
 };
 
@@ -636,6 +638,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
+  alertsCandidateCount,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -648,6 +651,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
+  alertsCandidateCount?: number | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -661,6 +665,7 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
+    alertsCandidateCount,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -701,6 +706,7 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
+      alertsCandidateCount: existingAlertsCandidateCount,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -715,6 +721,7 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
+      alertsCandidateCount: newAlertsCandidateCount,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -729,6 +736,7 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      alertsCandidateCount: sum([existingAlertsCandidateCount, newAlertsCandidateCount]),
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],

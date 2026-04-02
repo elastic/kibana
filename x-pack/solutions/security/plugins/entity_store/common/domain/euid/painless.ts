@@ -127,8 +127,9 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
 
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
-  if (identityField.fieldEvaluations?.length) {
-    const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const result = buildFieldEvaluationsPreamble(fieldEvaluations);
     preamble = result.preamble + ' ';
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
@@ -299,6 +300,10 @@ function escapePainlessString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function toPainlessNullableStringLiteral(value: string | null): string {
+  return value === null ? 'null' : `"${escapePainlessString(value)}"`;
+}
+
 function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
 }
@@ -337,8 +342,12 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
       stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
       first = false;
     }
-    stmts.push(`  else { ${varName} = _src; }`);
-    stmts.push(`} else { ${varName} = "${escapePainlessString(ev.fallbackValue)}"; }`);
+    if (first) {
+      stmts.push(`  ${varName} = _src;`);
+    } else {
+      stmts.push(`  else { ${varName} = _src; }`);
+    }
+    stmts.push(`} else { ${varName} = ${toPainlessNullableStringLiteral(ev.fallbackValue)}; }`);
     parts.push(stmts.join(' '));
   }
   const preamble = parts.join(' ');

@@ -17,6 +17,9 @@ import type {
   optionsSchema,
   panelGridSchema,
 } from './dashboard_state_schemas';
+import type { warningsSchema } from './warnings_schema';
+
+export type Warnings = TypeOf<typeof warningsSchema>;
 
 /** A filter stored in a dashboard. */
 export type DashboardFilter = TypeOf<typeof storedFilterSchema>;

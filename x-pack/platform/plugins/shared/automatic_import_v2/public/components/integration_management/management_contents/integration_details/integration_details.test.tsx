@@ -21,6 +21,7 @@ jest.mock('../../../../common/lib/api', () => ({
       items: mockExistingPackageNames.map((id) => ({ id })),
     })
   ),
+  getAllIntegrations: jest.fn(() => Promise.resolve([])),
 }));
 
 const mockServices = coreMock.createStart();

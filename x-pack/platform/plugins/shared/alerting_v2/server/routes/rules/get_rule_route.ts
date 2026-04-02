@@ -16,22 +16,23 @@ import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { ruleIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class GetRuleRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/{id}`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
   static options = {
-    access: 'internal',
+    access: 'public',
     summary: 'Get a rule',
     tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

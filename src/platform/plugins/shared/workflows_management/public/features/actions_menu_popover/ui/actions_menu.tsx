@@ -275,7 +275,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 ) : (
                   <EuiButtonEmpty
                     onClick={handleBack}
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     size="xs"
                     aria-label={i18n.translate('workflows.actionsMenu.back', {
                       defaultMessage: 'Back',

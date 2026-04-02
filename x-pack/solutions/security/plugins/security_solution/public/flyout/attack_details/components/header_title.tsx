@@ -15,7 +15,7 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { Status } from './status';
 import { Assignees } from './assignees';
 import { Notes } from './notes';
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
   HEADER_ASSIGNEES_BLOCK_TEST_ID,
