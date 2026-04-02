@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import {
   hashContent,
   type VersionedAttachmentWithOrigin,
@@ -17,6 +16,7 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { createDashboardAttachmentType } from './dashboard';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
@@ -71,8 +71,8 @@ const createLogger = (): Logger =>
     warn: jest.fn(),
   } as unknown as Logger);
 
-const createRequestHandlerContext = (): RequestHandlerContext =>
-  coreMock.createRequestHandlerContext() as unknown as RequestHandlerContext;
+const createSavedObjectsClient = (): SavedObjectsClientContract =>
+  ({} as SavedObjectsClientContract);
 
 const createAttachment = (
   data: DashboardAttachmentData
@@ -97,7 +97,7 @@ const createAttachment = (
 describe('createDashboardAttachmentType', () => {
   it('resolves dashboard attachments with dashboard client.read', async () => {
     const dashboardClient = createDashboardClient();
-    const requestHandlerContext = createRequestHandlerContext();
+    const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
       logger: createLogger(),
       getDashboardClient: async () => dashboardClient,
@@ -106,10 +106,20 @@ describe('createDashboardAttachmentType', () => {
     const result = await definition.resolve?.('dashboard-1', {
       request: {} as never,
       spaceId: 'default',
-      requestHandlerContext,
+      savedObjectsClient,
     });
 
-    expect(dashboardClient.read).toHaveBeenCalledWith(requestHandlerContext, 'dashboard-1');
+    expect(dashboardClient.read).toHaveBeenCalledWith(
+      expect.objectContaining({ resolve: expect.any(Function) }),
+      'dashboard-1'
+    );
+    await expect(dashboardClient.read.mock.calls[0][0].resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
     expect(result).toEqual(
       expect.objectContaining({
         title: 'System Overview',
@@ -121,6 +131,7 @@ describe('createDashboardAttachmentType', () => {
 
   it('returns true when the saved dashboard changed after the snapshot', async () => {
     const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
       logger: createLogger(),
       getDashboardClient: async () => dashboardClient,
@@ -135,16 +146,27 @@ describe('createDashboardAttachmentType', () => {
       {
         request: {} as never,
         spaceId: 'default',
-        requestHandlerContext: createRequestHandlerContext(),
+        savedObjectsClient,
       }
     );
 
     expect(isStale).toBe(true);
+    expect(dashboardClient.read).toHaveBeenCalledWith(
+      expect.objectContaining({ resolve: expect.any(Function) }),
+      'dashboard-1'
+    );
+    await expect(dashboardClient.read.mock.calls[0][0].resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 
   it('returns false when the saved dashboard content matches the attachment', async () => {
     const dashboardClient = createDashboardClient();
-    const requestHandlerContext = createRequestHandlerContext();
+    const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
       logger: createLogger(),
       getDashboardClient: async () => dashboardClient,
@@ -152,15 +174,26 @@ describe('createDashboardAttachmentType', () => {
     const resolvedData = await definition.resolve?.('dashboard-1', {
       request: {} as never,
       spaceId: 'default',
-      requestHandlerContext,
+      savedObjectsClient,
     });
 
     const isStale = await definition.isStale?.(createAttachment(resolvedData!), {
       request: {} as never,
       spaceId: 'default',
-      requestHandlerContext,
+      savedObjectsClient,
     });
 
     expect(isStale).toBe(false);
+    expect(dashboardClient.read).toHaveBeenLastCalledWith(
+      expect.objectContaining({ resolve: expect.any(Function) }),
+      'dashboard-1'
+    );
+    await expect(dashboardClient.read.mock.calls[1][0].resolve(['core'])).resolves.toEqual({
+      core: {
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    });
   });
 });

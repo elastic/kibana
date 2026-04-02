@@ -193,7 +193,6 @@ export function registerAttachmentRoutes({
           request,
           spaceId,
           savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
-          requestHandlerContext: ctx,
         };
 
         const staleResults = await stateManager.evaluateStalenessForActiveAttachments(
@@ -318,7 +317,6 @@ export function registerAttachmentRoutes({
             request,
             spaceId,
             savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
-            requestHandlerContext: ctx,
           };
 
           attachment = await stateManager.add(

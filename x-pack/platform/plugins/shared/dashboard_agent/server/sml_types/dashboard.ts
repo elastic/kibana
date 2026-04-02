@@ -6,8 +6,6 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
 import type {
   DashboardPanel,
@@ -15,6 +13,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
+import { createRequestHandlerContext } from '../create_request_handler_context';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
 
@@ -61,19 +60,6 @@ const toDashboardSearchContent = (state: DashboardState): string => {
   return contentParts.filter(Boolean).join('\n');
 };
 
-const createRequestHandlerContext = (
-  savedObjectsClient: SavedObjectsClientContract
-): RequestHandlerContext =>
-  ({
-    resolve: async () => ({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    }),
-  } as unknown as RequestHandlerContext);
-
 export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
@@ -103,6 +89,7 @@ export const createDashboardSmlType = ({
 
   getSmlData: async (originId, context) => {
     try {
+      // todo: this should be passed from agent builder 
       const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(requestHandlerContext, originId);
@@ -127,6 +114,7 @@ export const createDashboardSmlType = ({
 
   toAttachment: async (item, context) => {
     try {
+      // todo: this should be passed from agent builder 
       const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(requestHandlerContext, item.origin_id);

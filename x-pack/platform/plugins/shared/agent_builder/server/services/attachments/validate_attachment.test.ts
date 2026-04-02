@@ -6,7 +6,6 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { validateAttachment } from './validate_attachment';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
@@ -28,7 +27,6 @@ describe('validateAttachment', () => {
     request,
     spaceId: 'default',
     savedObjectsClient: {} as AttachmentResolveContext['savedObjectsClient'],
-    requestHandlerContext: coreMock.createRequestHandlerContext(),
   };
 
   describe('Converse attachment input scenarios (structural + resolution)', () => {

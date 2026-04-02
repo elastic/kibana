@@ -11,7 +11,6 @@ import type {
   VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
 
@@ -93,11 +92,6 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
    * Optional to keep the core attachment contract generic and allow non-Kibana environments.
    */
   savedObjectsClient?: SavedObjectsClientContract;
-  /**
-   * The request handler context for the current request.
-   * Provides access to core services and plugin contexts.
-   */
-  requestHandlerContext: RequestHandlerContext;
 }
 
 /**
