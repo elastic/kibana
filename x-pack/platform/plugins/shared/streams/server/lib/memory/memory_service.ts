@@ -175,9 +175,9 @@ export class MemoryServiceImpl implements MemoryService {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
 
-    // Check if target name already exists
+    // Check if target name already exists (but not self)
     const existing = await this._getByName(newName);
-    if (existing) {
+    if (existing && existing._source.id !== id) {
       throw badRequest(`Memory entry with name '${newName}' already exists`);
     }
 

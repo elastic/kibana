@@ -69,6 +69,7 @@ export const createWriteMemoryPageCallback = ({
         title,
         categories,
         references,
+        tags,
         user,
         changeSummary,
       });

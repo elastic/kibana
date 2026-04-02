@@ -87,6 +87,7 @@ export const createMemorySearchTool = ({
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
             data: {
+              query,
               total: results.length,
               items: results.map((r) => ({
                 id: r.id,

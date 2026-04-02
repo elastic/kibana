@@ -45,21 +45,25 @@ export const createMemoryDeleteTool = ({
     }
 
     try {
-      let entryId = id;
-      let entryName = name;
+      let entry;
 
-      if (!entryId) {
-        const entry = await memoryService.getByName({ name: name! });
-        if (!entry) {
-          return {
-            results: [createErrorResult({ message: `Memory page not found with name: ${name}` })],
-          };
-        }
-        entryId = entry.id;
-        entryName = entry.name;
+      if (id) {
+        entry = await memoryService.get({ id });
+      } else {
+        entry = await memoryService.getByName({ name: name! });
       }
 
-      await memoryService.delete({ id: entryId!, user });
+      if (!entry) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Memory page not found: ${name ?? id}`,
+            }),
+          ],
+        };
+      }
+
+      await memoryService.delete({ id: entry.id, user });
 
       return {
         results: [
@@ -68,7 +72,7 @@ export const createMemoryDeleteTool = ({
             type: ToolResultType.other,
             data: {
               deleted: true,
-              name: entryName,
+              name: entry.name,
             },
           },
         ],

@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskResult } from '@kbn/streams-schema';
+import { notFound } from '@hapi/boom';
 import type { GetScopedClients } from '../../types';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -127,7 +128,7 @@ const getEntryByNameRoute = createServerRoute({
 
     const entry = await memory.getByName({ name: params.query.name });
     if (!entry) {
-      throw new Error(`Page not found with name: ${params.query.name}`);
+      throw notFound(`Page not found with name: ${params.query.name}`);
     }
     return entry;
   },

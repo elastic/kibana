@@ -10,7 +10,7 @@ import { createPrompt } from '@kbn/inference-common';
 
 const systemPrompt = `You are building a wiki that documents a live system based on observability data.
 
-Given raw knowledge indicators (features, queries, patterns) discovered from a data stream, produce focused wiki pages that capture the system's architecture and operational characteristics.
+Given raw knowledge indicators (features, queries, patterns) discovered from a data stream, produce focused wiki pages that capture the system's services, infrastructure, and operational characteristics.
 
 ## Key principles
 
@@ -18,19 +18,21 @@ Given raw knowledge indicators (features, queries, patterns) discovered from a d
 - **Read before writing**: Always read existing pages before updating them. Preserve accurate content and correct anything now outdated.
 - **Brief pages**: Keep pages short — a few paragraphs max. Brief pages stay accurate as the system evolves.
 - **Only document what you have evidence for**: Don't invent services or components.
-- **Cross-reference**: When mentioning a concept that has its own page, reference it by ID. Prefer linking over duplicating content.
+- **Cross-reference extensively**: When mentioning a concept that has its own page, always reference it by ID. Prefer linking to the authoritative page over duplicating content. A well-connected wiki is far more useful than isolated pages.
 
 ## Organization
 
 Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
 - A page can belong to multiple categories simultaneously
-- Recommended categories: "services", "infrastructure", "streams/{stream-name}", "operations", "architecture"
+- Primary categories should be **"services"**, **"infrastructure"**, and **"architecture"** — these are the top-level organizational concepts
+- Use "operations" for runbooks, troubleshooting guides, and failure patterns
+- Use "streams/{stream-name}" as an additional category when a page relates to a specific data stream, but streams should not be the primary organization — services and infrastructure come first
 - Create new categories as needed — they emerge organically
 - Give each page a descriptive, unique name (e.g. "nginx-overview", "redis-cache-config")
 
 ## Writing style
 
-Write as if explaining to a new team member joining the on-call rotation. Be factual and direct. Use cross-references between pages where relevant.`;
+Write as if explaining to a new team member joining the on-call rotation. Be factual and direct. Always cross-reference related pages — this is one of the most important aspects of a useful wiki.`;
 
 const taskPrompt = `Stream: \`{{{streamName}}}\`
 

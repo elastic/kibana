@@ -45,11 +45,11 @@ export const createSigEventsMemorySkill = (options: MemoryToolsOptions) =>
     - A page can belong to **multiple categories** simultaneously
     - Categories can be nested using "/" (e.g. "streams/logs-otel")
     - The LLM decides the best categories — here are recommended top-level categories:
-      - "services" — individual services (nginx, postgres, redis, etc.)
-      - "infrastructure" — infrastructure components (us-east-1, k8s-cluster, etc.)
-      - "streams" — data streams, with sub-categories per stream (e.g. "streams/logs-otel")
+      - "services" — individual services (nginx, postgres, redis, etc.) — **primary organizational concept**
+      - "infrastructure" — infrastructure components (us-east-1, k8s-cluster, etc.) — **primary organizational concept**
+      - "architecture" — high-level system architecture overviews — **primary organizational concept**
       - "operations" — runbooks, troubleshooting guides, failure patterns
-      - "architecture" — high-level system architecture overviews
+      - "streams" — data streams, with sub-categories per stream (e.g. "streams/logs-otel") — use as an **additional** category, not the primary one
     - Categories emerge organically — create new ones as needed
     - When in doubt, assign a page to multiple categories rather than forcing it into one
     </organization>

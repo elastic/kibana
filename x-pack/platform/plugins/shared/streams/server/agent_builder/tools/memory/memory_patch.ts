@@ -216,6 +216,10 @@ export const createMemoryPatchTool = ({
           } else {
             errors.push(result.error!);
           }
+        } else {
+          errors.push(
+            'Unrecognized operation: must provide old_text, heading+content, or append'
+          );
         }
       }
 
