@@ -22,6 +22,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { searchModeSchema } from '../../../utils/search_mode';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -100,6 +101,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         .string()
         .optional()
         .describe('Query string to filter significant events on metadata fields'),
+      searchMode: searchModeSchema,
     }),
   }),
 
@@ -131,7 +133,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize, query } = params.query;
+    const { from, to, bucketSize, query, searchMode } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -140,6 +142,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         to,
         bucketSize,
         query,
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );

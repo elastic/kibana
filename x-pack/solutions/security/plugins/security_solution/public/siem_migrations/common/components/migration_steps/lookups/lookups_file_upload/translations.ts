@@ -26,3 +26,13 @@ export const REFERENCE_SETS_DATA_INPUT_FILE_UPLOAD_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.referenceSetsFileUpload.label',
   { defaultMessage: 'Upload reference set files' }
 );
+
+export const SKIP_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.skipButton',
+  { defaultMessage: 'Skip' }
+);
+
+export const SKIP_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.skipButtonAriaLabel',
+  { defaultMessage: 'Skip this step and continue without uploading all the items' }
+);

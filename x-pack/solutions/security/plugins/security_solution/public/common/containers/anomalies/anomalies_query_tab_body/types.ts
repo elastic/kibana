@@ -15,6 +15,7 @@ import type { UsersType } from '../../../../explore/users/store/model';
 interface QueryTabBodyProps {
   type: HostsType | NetworkType | UsersType;
   filterQuery?: string | ESTermQuery;
+  identityFields?: Record<string, string>;
 }
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
