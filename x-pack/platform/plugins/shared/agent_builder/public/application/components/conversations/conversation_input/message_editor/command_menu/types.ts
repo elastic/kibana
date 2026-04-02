@@ -54,6 +54,8 @@ export interface CommandDefinition {
   readonly menuComponent: React.ForwardRefExoticComponent<
     CommandMenuComponentProps & React.RefAttributes<CommandMenuHandle>
   >;
+  /** When true, this command is only available when experimental features are enabled */
+  readonly experimental?: boolean;
 }
 
 /**

@@ -10,11 +10,12 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
-import { allowUnmappedKeysSchema, getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerUpdateRoute(
   router: VersionedRouter<DashboardApiRequestHandlerContext>,
@@ -23,7 +24,7 @@ export function registerUpdateRoute(
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
     path: `${basePath}/{id}`,
-    summary: `Replace current dashboard state with the dashboard state from request body.`,
+    summary: `Upsert dashboard`,
     ...routeConfig,
   });
 
@@ -40,27 +41,21 @@ export function registerUpdateRoute(
       validate: () => ({
         request: {
           params: schema.object({
-            id: schema.string({
-              meta: { description: 'A unique identifier for the dashboard.' },
-            }),
+            id: asCodeIdSchema,
           }),
-          query: schema.maybe(
-            schema.object({
-              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
-            })
-          ),
           body: getUpdateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard is updated successfully',
+            description: 'updated',
+          },
+          201: {
+            body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
+            description: 'created',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
-          },
-          404: {
-            description: 'Indicates that the dashboard with the given ID is not found.',
+            description: 'forbidden',
           },
         },
       }),
@@ -76,19 +71,13 @@ export function registerUpdateRoute(
           req.body,
           isDashboardAppRequest
         );
-        const response = res.ok({ body: result });
+        const response =
+          result.meta.updated_at === result.meta.created_at
+            ? res.created({ body: result })
+            : res.ok({ body: result });
         telemetry?.incrementCounter(response);
         return response;
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          const response = res.notFound({
-            body: {
-              message: `A dashboard with ID [${req.params.id}] was not found.`,
-            },
-          });
-          telemetry?.incrementCounter(response);
-          return response;
-        }
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden({ body: { message: e.message } });
           telemetry?.incrementCounter(response);

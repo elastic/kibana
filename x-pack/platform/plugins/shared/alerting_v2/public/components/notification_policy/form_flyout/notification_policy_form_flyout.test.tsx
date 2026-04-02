@@ -26,6 +26,10 @@ jest.mock('../form/components/matcher_input', () => ({
   ),
 }));
 
+jest.mock('../../../hooks/use_fetch_data_fields', () => ({
+  useFetchDataFields: () => ({ data: undefined, isLoading: false }),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
@@ -118,6 +122,8 @@ describe('NotificationPolicyFormFlyout', () => {
     expect(onSave).toHaveBeenCalledWith({
       name: 'Policy from test',
       description: 'Description from test',
+      groupingMode: 'per_episode',
+      throttle: { strategy: 'on_status_change' },
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     });
   });
@@ -133,7 +139,8 @@ describe('NotificationPolicyFormFlyout', () => {
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name', 'service.name'],
-      throttle: { interval: '5m' },
+      groupingMode: 'per_field',
+      throttle: { strategy: 'time_interval', interval: '5m' },
       snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       createdBy: 'elastic',
@@ -167,9 +174,10 @@ describe('NotificationPolicyFormFlyout', () => {
       version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
+      groupingMode: 'per_field',
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name', 'service.name'],
-      throttle: { interval: '5m' },
+      throttle: { strategy: 'time_interval', interval: '5m' },
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
     });
   });

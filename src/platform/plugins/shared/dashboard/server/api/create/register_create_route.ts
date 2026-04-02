@@ -10,11 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
-import {
-  createRequestParamsSchema,
-  getCreateRequestBodySchema,
-  getCreateResponseBodySchema,
-} from './schemas';
+import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
@@ -25,7 +21,7 @@ export function registerCreateRoute(
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
-    path: `${basePath}/{id?}`,
+    path: basePath,
     summary: 'Create a dashboard with an auto-generated ID or a specified ID',
     ...routeConfig,
   });
@@ -42,22 +38,18 @@ export function registerCreateRoute(
       version: routeVersion,
       validate: () => ({
         request: {
-          params: createRequestParamsSchema,
           body: getCreateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
           201: {
             body: () => getCreateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard is created successfully',
+            description: 'created',
           },
           400: {
-            description: 'Indicates an invalid schema or parameters.',
+            description: 'invalid request',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
-          },
-          409: {
-            description: 'Indicates that a dashboard with the given ID already exists.',
+            description: 'forbidden',
           },
         },
       }),
@@ -70,23 +62,12 @@ export function registerCreateRoute(
           ctx,
           getCachedDashboardStateSchema(),
           req.body,
-          req.params,
           isDashboardAppRequest
         );
         const response = res.created({ body: result });
         telemetry?.incrementCounter(response);
         return response;
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          const response = res.conflict({
-            body: {
-              message: `A dashboard with ID ${req?.params?.id} already exists.`,
-            },
-          });
-          telemetry?.incrementCounter(response);
-          return response;
-        }
-
         if (e.isBoom && e.output.statusCode === 403) {
           const response = res.forbidden({ body: { message: e.message } });
           telemetry?.incrementCounter(response);

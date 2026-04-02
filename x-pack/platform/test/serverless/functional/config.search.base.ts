@@ -38,9 +38,6 @@ export default createTestConfig({
     searchPlayground: {
       pathname: '/app/search_playground',
     },
-    elasticsearchIndices: {
-      pathname: '/app/elasticsearch/indices',
-    },
     searchInferenceEndpoints: {
       pathname: '/app/management/ml/inference_endpoints',
     },

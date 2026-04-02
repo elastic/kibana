@@ -19,7 +19,7 @@ import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schem
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const createRuleParamsSchema = z.object({
   id: z
@@ -31,16 +31,17 @@ const createRuleParamsSchema = z.object({
 @injectable()
 export class CreateRuleRoute implements RouteHandler {
   static method = 'post' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/{id?}`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/{id?}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
   static options = {
-    access: 'internal',
+    access: 'public',
     summary: 'Create a rule',
     tags: ['oas-tag:alerting-v2'],
+    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {

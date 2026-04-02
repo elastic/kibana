@@ -190,8 +190,8 @@ export class DashboardPlugin
     return {
       scanDashboards,
       client: {
-        read: (requestCtx: DashboardApiRequestHandlerContext, id: string) =>
-          read(requestCtx, getCachedDashboardStateSchema(), id),
+        read: async (requestCtx: DashboardApiRequestHandlerContext, id: string) =>
+          (await read(requestCtx, getCachedDashboardStateSchema(), id)).body,
       },
     };
   }

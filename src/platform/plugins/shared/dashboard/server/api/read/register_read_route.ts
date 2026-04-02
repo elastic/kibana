@@ -50,13 +50,13 @@ export function registerReadRoute(
         response: {
           200: {
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard with the given ID is retrieved successfully',
+            description: 'success',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
           404: {
-            description: 'Indicates that the dashboard with the given ID is not found.',
+            description: 'not found',
           },
         },
       }),
@@ -65,14 +65,15 @@ export function registerReadRoute(
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
       const telemetry = dashboardApi.getTelemetryClient();
       try {
-        const result = await read(
+        const { body, resolveHeaders } = await read(
           ctx,
           getCachedDashboardStateSchema(),
           req.params.id,
           isDashboardAppRequest
         );
         const response = res.ok({
-          body: result,
+          body,
+          ...(isDashboardAppRequest && { headers: resolveHeaders }),
         });
         telemetry?.incrementCounter(response);
         return response;
