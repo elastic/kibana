@@ -233,7 +233,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                       : KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER
                   }
                   aria-label={
-                    isRulesSelected ? RULES_SEARCH_ARIA_LABEL : KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL
+                    isRulesSelected
+                      ? RULES_SEARCH_ARIA_LABEL
+                      : KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL
                   }
                 />
               </EuiFlexItem>
@@ -348,7 +350,14 @@ function KnowledgeIndicatorsGenerationControls({
               align-items: center;
             `}
           >
-            <div style={{ width: 1, alignSelf: 'stretch', backgroundColor: 'currentColor', opacity: 0.15 }} />
+            <div
+              style={{
+                width: 1,
+                alignSelf: 'stretch',
+                backgroundColor: 'currentColor',
+                opacity: 0.15,
+              }}
+            />
           </EuiFlexItem>
         </>
       ) : null}
