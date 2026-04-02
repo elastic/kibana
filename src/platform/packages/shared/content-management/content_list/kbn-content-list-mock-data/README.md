@@ -131,10 +131,7 @@ import {
 } from '@kbn/content-list-mock-data';
 
 // Use the mock services in your story context
-const { getUserProfile, bulkGetUserProfiles } = mockUserProfileServices;
-
-// Fetch a single profile
-const profile = await getUserProfile('u_jane_doe');
+const { bulkGetUserProfiles } = mockUserProfileServices;
 
 // Bulk fetch profiles
 const profiles = await bulkGetUserProfiles(['u_jane_doe', 'u_john_smith']);
@@ -170,7 +167,7 @@ const profiles = await bulkGetUserProfiles(['u_jane_doe', 'u_john_smith']);
 
 | Export | Description |
 |--------|-------------|
-| `mockUserProfileServices` | Object containing `getUserProfile` and `bulkGetUserProfiles` mock implementations. |
+| `mockUserProfileServices` | Object containing `bulkGetUserProfiles` mock implementation. |
 
 ### Types
 

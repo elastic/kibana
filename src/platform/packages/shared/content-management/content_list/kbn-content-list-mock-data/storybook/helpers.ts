@@ -20,8 +20,8 @@ import { mockFavoritesClient } from './services';
 interface MockFindItemsFilters {
   search?: string;
   tag?: { include?: string[]; exclude?: string[] };
+  createdBy?: { include?: string[]; exclude?: string[] };
   starredOnly?: boolean;
-  users?: string[];
 }
 
 /**
@@ -125,6 +125,19 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       );
     }
 
+    // Apply createdBy include filters (UIDs from query model).
+    const createdByFilter = filters.createdBy;
+    const includeCreators = createdByFilter?.include;
+    if (includeCreators && includeCreators.length > 0) {
+      items = items.filter((item) => matchesUserFilter(item.createdBy, includeCreators));
+    }
+
+    // Apply createdBy exclude filters.
+    const excludeCreators = createdByFilter?.exclude;
+    if (excludeCreators && excludeCreators.length > 0) {
+      items = items.filter((item) => !matchesUserFilter(item.createdBy, excludeCreators));
+    }
+
     // Apply starred filter.
     if (filters.starredOnly) {
       const client = configFavoritesClient ?? mockFavoritesClient;
@@ -160,18 +173,6 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Compute per-tag item counts from the full (pre-paginated) result set.
-    // Key by id (or name) to match TagFilterRenderer lookup.
-    const tagCounts: Record<string, number> = {};
-    items.forEach((item) => {
-      item.references?.forEach((ref) => {
-        if (ref.type === 'tag') {
-          const key = ref.id ?? ref.name;
-          tagCounts[key] = (tagCounts[key] || 0) + 1;
-        }
-      });
-    });
-
     // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
@@ -181,7 +182,6 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     return {
       items: paginatedItems,
       total,
-      counts: { tag: tagCounts },
     };
   };
 }
@@ -485,10 +485,17 @@ export const createSimpleMockFindItems = (
       );
     }
 
-    // Apply user filters (createdBy) - supports both email and uid filter values
-    const usersFilter = (filters as { users?: string[] }).users;
-    if (usersFilter && usersFilter.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
+    // Apply createdBy include filters (UIDs from query model).
+    const createdByFilter = filters.createdBy;
+    const includeCreators = createdByFilter?.include;
+    if (includeCreators && includeCreators.length > 0) {
+      items = items.filter((item) => matchesUserFilter(item.createdBy, includeCreators));
+    }
+
+    // Apply createdBy exclude filters.
+    const excludeCreators = createdByFilter?.exclude;
+    if (excludeCreators && excludeCreators.length > 0) {
+      items = items.filter((item) => !matchesUserFilter(item.createdBy, excludeCreators));
     }
 
     // Apply starred filter.
@@ -521,18 +528,6 @@ export const createSimpleMockFindItems = (
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Compute per-tag item counts from the full (pre-paginated) result set.
-    // Key by id (or name) to match TagFilterRenderer lookup.
-    const tagCounts: Record<string, number> = {};
-    items.forEach((item) => {
-      item.references?.forEach((ref) => {
-        if (ref.type === 'tag') {
-          const key = ref.id ?? ref.name;
-          tagCounts[key] = (tagCounts[key] || 0) + 1;
-        }
-      });
-    });
-
     // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
@@ -542,7 +537,6 @@ export const createSimpleMockFindItems = (
     return {
       items: paginatedItems,
       total,
-      counts: { tag: tagCounts },
     };
   };
 };

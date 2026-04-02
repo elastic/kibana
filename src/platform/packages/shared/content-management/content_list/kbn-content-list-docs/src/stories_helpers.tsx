@@ -28,17 +28,26 @@ import {
   useContentListPagination,
   useContentListConfig,
 } from '@kbn/content-list-provider';
-import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
+import type {
+  FindItemsParams,
+  FindItemsResult,
+  FilterFacetConfig,
+  UserProfileEntry,
+} from '@kbn/content-list-provider';
+import type { Tag } from '@kbn/content-management-tags';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
   MOCK_DASHBOARDS,
   createMockFindItems,
   createMockFavoritesClient,
   extractTagIds,
   mockTagsService,
+  mockContentListUserProfilesServices,
+  MOCK_USER_PROFILES_MAP,
 } from '@kbn/content-list-mock-data';
 
-export { mockTagsService, createMockFavoritesClient };
+export { mockTagsService, createMockFavoritesClient, mockContentListUserProfilesServices };
 
 // =============================================================================
 // Mock Data
@@ -48,7 +57,7 @@ export { mockTagsService, createMockFavoritesClient };
  * Build a mock items array of the requested length by cycling through
  * `MOCK_DASHBOARDS` and appending an index suffix when wrapping.
  */
-const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
+export const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
   const base = MOCK_DASHBOARDS;
   if (count <= base.length) {
     return base.slice(0, count);
@@ -117,12 +126,84 @@ export const createStoryFindItems = (options?: {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
       })),
       total: result.total,
-      counts: result.counts,
     };
   };
 };
+
+// =============================================================================
+// Mock FilterFacetConfigs
+// =============================================================================
+
+/**
+ * Compute per-key counts from a set of items.
+ */
+const computeCounts = (
+  items: UserContentCommonSchema[],
+  keyFn: (item: UserContentCommonSchema) => string[]
+): Record<string, number> => {
+  const counts: Record<string, number> = {};
+  for (const item of items) {
+    for (const key of keyFn(item)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+};
+
+/**
+ * Creates a mock {@link FilterFacetConfig} for tags.
+ *
+ * Counts are computed from the provided `items` array. Tag metadata
+ * (name, color, description) comes from `mockTagsService.getTagList()`.
+ */
+export const createMockTagFacetProvider = (
+  items: UserContentCommonSchema[]
+): FilterFacetConfig<Tag> => ({
+  getFacets: async () => {
+    const tagCounts = computeCounts(items, (item) =>
+      (item.references ?? []).filter((ref) => ref.type === 'tag').map((ref) => ref.id)
+    );
+    return mockTagsService.getTagList().map((tag) => ({
+      key: tag.id ?? tag.name,
+      label: tag.name,
+      count: tagCounts[tag.id ?? tag.name] ?? 0,
+      data: tag,
+    }));
+  },
+});
+
+/**
+ * Creates a mock {@link FilterFacetConfig} for user profiles.
+ *
+ * Counts are computed from the provided `items` array. Profile metadata
+ * comes from `MOCK_USER_PROFILES_MAP`.
+ */
+export const createMockUserProfileFacetProvider = (
+  items: UserContentCommonSchema[]
+): FilterFacetConfig<UserProfileEntry> => ({
+  getFacets: async () => {
+    const userCounts = computeCounts(items, (item) => (item.createdBy ? [item.createdBy] : []));
+    return Object.entries(userCounts).map(([uid, count]) => {
+      const profile = MOCK_USER_PROFILES_MAP[uid];
+      return {
+        key: uid,
+        label: profile?.user.full_name ?? profile?.user.username ?? uid,
+        count,
+        data: profile
+          ? {
+              uid,
+              user: profile.user,
+              email: profile.user.email ?? '',
+              fullName: profile.user.full_name ?? profile.user.username,
+            }
+          : undefined,
+      };
+    });
+  },
+});
 
 // =============================================================================
 // JSX Serialization
