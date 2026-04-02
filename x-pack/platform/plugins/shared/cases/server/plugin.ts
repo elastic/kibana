@@ -59,6 +59,7 @@ import { CasesEventBus } from './events/event_bus';
 import { registerCaseWorkflowSteps } from './workflows';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -105,6 +106,8 @@ export class CasePlugin
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
+
+    initUiSettings(core.uiSettings);
 
     registerInternalAttachments(
       this.externalReferenceAttachmentTypeRegistry,
