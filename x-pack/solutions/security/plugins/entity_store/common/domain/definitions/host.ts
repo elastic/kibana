@@ -8,6 +8,7 @@
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import {
+  ENTITY_SOURCE_FIELD_EVALUATION,
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
@@ -36,6 +37,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   },
   entityTypeFallback: 'Host',
   indexPatterns: [],
+  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   fields: [
     newestValue({ destination: 'entity.name', source: 'host.name' }),
     oldestValue({ source: 'host.entity.id' }),

@@ -93,7 +93,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           size="s"
           onClick={this.addColor}
           data-test-subj="colorEditorAddColor"

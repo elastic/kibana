@@ -867,6 +867,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         enrichmentTimes: [],
+        alertsCandidateCount: 0,
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -888,6 +889,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         enrichmentTimes: [],
+        alertsCandidateCount: 1,
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],

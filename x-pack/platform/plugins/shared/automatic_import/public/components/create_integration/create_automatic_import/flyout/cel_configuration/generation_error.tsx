@@ -22,7 +22,7 @@ export const GenerationError = React.memo<GenerationErrorProps>(({ title, error,
       <EuiCallOut
         title={title}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="generationErrorCallout"
       >
         {error}

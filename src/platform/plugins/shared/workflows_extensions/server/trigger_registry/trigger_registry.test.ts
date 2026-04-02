@@ -78,6 +78,36 @@ describe('TriggerRegistry', () => {
       expect(registry.list()).toHaveLength(3);
     });
 
+    it('throws if eventSchema is null', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            eventSchema: null as unknown as ServerTriggerDefinition['eventSchema'],
+          })
+        );
+      }).toThrow('"eventSchema" must be a Zod schema');
+    });
+
+    it('throws if eventSchema is undefined', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            eventSchema: undefined as unknown as ServerTriggerDefinition['eventSchema'],
+          })
+        );
+      }).toThrow('"eventSchema" must be a Zod schema');
+    });
+
+    it('throws if eventSchema is a plain object without safeParse', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            eventSchema: { shape: {} } as unknown as ServerTriggerDefinition['eventSchema'],
+          })
+        );
+      }).toThrow('"eventSchema" must be a Zod schema');
+    });
+
     it('throws if eventSchema is not a Zod object schema', () => {
       expect(() => {
         registry.register(

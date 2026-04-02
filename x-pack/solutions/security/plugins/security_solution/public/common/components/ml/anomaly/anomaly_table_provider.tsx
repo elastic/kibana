@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import React, { useMemo } from 'react';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
@@ -23,10 +24,11 @@ interface Props {
   criteriaFields?: CriteriaFields[];
   children: (args: AnomalyTableProviderChildrenProps) => React.ReactNode;
   skip: boolean;
+  filterQuery?: estypes.QueryDslQueryContainer;
 }
 
 export const AnomalyTableProvider = React.memo<Props>(
-  ({ influencers, startDate, endDate, children, criteriaFields, skip }) => {
+  ({ influencers, startDate, endDate, children, criteriaFields, skip, filterQuery }) => {
     const { jobNameById } = useInstalledSecurityJobNameById();
     const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
 
@@ -38,6 +40,7 @@ export const AnomalyTableProvider = React.memo<Props>(
       skip,
       jobIds,
       aggregationInterval: 'auto',
+      filterQuery,
     });
     return <>{children({ isLoadingAnomaliesData, anomaliesData, jobNameById })}</>;
   }

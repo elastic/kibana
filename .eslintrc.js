@@ -1873,6 +1873,20 @@ module.exports = {
         'import/no-default-export': 'off',
       },
     },
+    /**
+     * Exception for connector specs whose product name contains 'server' (e.g., sharepoint_server).
+     * These are connector configuration specs (shared-common code), not server-side runtime code.
+     * The **\/*server* pattern in the parent rule is relaxed here to allow intra-package imports.
+     */
+    {
+      files: [
+        'src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts',
+        'src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
+      },
+    },
 
     /**
      * Lens overrides

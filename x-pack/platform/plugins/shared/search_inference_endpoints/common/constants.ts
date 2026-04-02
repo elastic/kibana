@@ -20,6 +20,13 @@ export const PLUGIN_TITLE = i18n.translate(
   }
 );
 
+export const EXTERNAL_INFERENCE_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInferenceTitle',
+  {
+    defaultMessage: 'External Inference',
+  }
+);
+
 export const MODEL_SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.modelSettingsTitle',
   {
@@ -53,3 +60,5 @@ export enum ROUTE_VERSIONS {
 }
 
 export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
+
+export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
