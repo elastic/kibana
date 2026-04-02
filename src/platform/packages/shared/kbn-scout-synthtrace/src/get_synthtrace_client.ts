@@ -15,8 +15,7 @@ import {
   LogLevel,
   createLogger,
 } from '@kbn/apm-synthtrace';
-import { ScoutLogger } from './logger';
-import { EsClient } from '../../types';
+import type { ScoutLogger, EsClient } from '@kbn/scout';
 
 let apmSynthtraceEsClientInstance: ApmSynthtraceEsClient | undefined;
 let infraSynthtraceEsClientInstance: InfraSynthtraceEsClient | undefined;

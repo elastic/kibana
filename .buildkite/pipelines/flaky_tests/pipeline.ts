@@ -268,6 +268,7 @@ for (const testSuite of testSuites) {
         {
           osquery_cypress: 115,
           security_serverless_osquery: 115,
+          defend_workflows: 120,
         }[suiteName] || 105;
 
       steps.push({

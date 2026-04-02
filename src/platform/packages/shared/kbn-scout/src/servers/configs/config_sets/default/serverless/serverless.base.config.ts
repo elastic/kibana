@@ -15,8 +15,8 @@ import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
-  getDockerFileMountPath,
-} from '@kbn/test';
+} from '@kbn/test-docker-servers';
+import { getDockerFileMountPath } from '@kbn/es';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';

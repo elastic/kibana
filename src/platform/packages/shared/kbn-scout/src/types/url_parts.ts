@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createTestEsCluster } from './test_es_cluster';
-export type { CreateTestEsClusterOptions, EsTestCluster, ICluster } from './test_es_cluster';
-export { esTestConfig } from './es_test_config';
-export {
-  createEsClientForTesting,
-  createEsClientForFtrConfig,
-  createRemoteEsClientForFtrConfig,
-} from './es_client_for_testing';
-export type { EsClientForTestingOptions } from './es_client_for_testing';
+/**
+ * Parsed URL pieces for test server endpoints.
+ * Duplicated from @kbn/test `UrlParts` so Scout typings do not import @kbn/test.
+ */
+export interface UrlParts {
+  protocol?: string;
+  hostname?: string;
+  port?: number;
+  auth?: string;
+  username?: string;
+  password?: string;
+}
