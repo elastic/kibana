@@ -29,12 +29,9 @@ export const SAVE_INTEGRATION_SUCCESS = i18n.translate(
   }
 );
 
-export const SAVE_PIPELINE_SUCCESS = i18n.translate(
-  'xpack.automaticImport.savePipeline.success',
-  {
-    defaultMessage: 'Pipeline saved successfully',
-  }
-);
+export const SAVE_PIPELINE_SUCCESS = i18n.translate('xpack.automaticImport.savePipeline.success', {
+  defaultMessage: 'Pipeline saved successfully',
+});
 
 export const SAVE_PIPELINE_ERROR = i18n.translate('xpack.automaticImport.savePipeline.error', {
   defaultMessage: 'Failed to save pipeline',
@@ -75,14 +72,14 @@ export const DELETE_DATA_STREAM_SUCCESS = i18n.translate(
 );
 
 export const DELETE_INTEGRATION_SUCCESS = i18n.translate(
-  'xpack.automaticImportV2.hooks.deleteIntegration.success',
+  'xpack.automaticImport.hooks.deleteIntegration.success',
   {
     defaultMessage: 'Integration deleted successfully',
   }
 );
 
 export const DELETE_INTEGRATION_ERROR = i18n.translate(
-  'xpack.automaticImportV2.hooks.deleteIntegration.error',
+  'xpack.automaticImport.hooks.deleteIntegration.error',
   {
     defaultMessage: 'Failed to delete integration',
   }

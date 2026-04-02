@@ -15,7 +15,7 @@ export const ADD_DATA_STREAM_BUTTON = i18n.translate(
 );
 
 export const ADD_DATA_STREAM_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.automaticImportV2.dataStreams.addDataStreamDisabledTooltip',
+  'xpack.automaticImport.dataStreams.addDataStreamDisabledTooltip',
   {
     defaultMessage: 'Enter an integration name and description before adding a data stream.',
   }
@@ -86,7 +86,7 @@ export const LOGS_SECTION_DESCRIPTION = i18n.translate(
 );
 
 export const LOG_SAMPLE_REQUIRED_FOR_ANALYSIS = i18n.translate(
-  'xpack.automaticImportV2.dataStreams.logSampleRequiredForAnalysis',
+  'xpack.automaticImport.dataStreams.logSampleRequiredForAnalysis',
   {
     defaultMessage: 'Log sample is required for analysis',
   }
@@ -133,7 +133,7 @@ export const ANALYZE_LOGS_BUTTON = i18n.translate(
 );
 
 export const ANALYZE_LOGS_DISABLED_LOADING = i18n.translate(
-  'xpack.automaticImportV2.dataStreams.analyzeLogsDisabledLoading',
+  'xpack.automaticImport.dataStreams.analyzeLogsDisabledLoading',
   {
     defaultMessage: 'Please wait for the current operation to finish.',
   }
@@ -272,12 +272,9 @@ export const REANALYZE_MODAL = Object.freeze({
   cancelButton: i18n.translate('xpack.automaticImport.dataStreams.reanalyzeModal.cancelButton', {
     defaultMessage: 'Cancel',
   }),
-  confirmButton: i18n.translate(
-    'xpack.automaticImport.dataStreams.reanalyzeModal.confirmButton',
-    {
-      defaultMessage: 'Re-Analyze',
-    }
-  ),
+  confirmButton: i18n.translate('xpack.automaticImport.dataStreams.reanalyzeModal.confirmButton', {
+    defaultMessage: 'Re-Analyze',
+  }),
 });
 
 export const EDIT_PIPELINE_FLYOUT = Object.freeze({
@@ -299,12 +296,9 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   tableTab: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.tableTab', {
     defaultMessage: 'Table',
   }),
-  pipelineTab: i18n.translate(
-    'xpack.automaticImport.dataStreams.editPipelineFlyout.pipelineTab',
-    {
-      defaultMessage: 'Ingest pipeline',
-    }
-  ),
+  pipelineTab: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.pipelineTab', {
+    defaultMessage: 'Ingest pipeline',
+  }),
   filterPlaceholder: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.filterPlaceholder',
     {
