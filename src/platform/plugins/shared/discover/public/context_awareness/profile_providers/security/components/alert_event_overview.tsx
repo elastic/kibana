@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo, useState } from 'react';
 import { fieldConstants, getFieldValue } from '@kbn/discover-utils';
 import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import {
-  EuiTitle,
-  EuiSpacer,
   EuiAccordion,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import { getSecurityTimelineRedirectUrl } from '../utils';
@@ -80,21 +81,31 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
     () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
     [hit]
   );
-  const alertURL = useMemo(() => getFieldValue(hit, 'kibana.alert.url') as string, [hit]);
   const eventKind = useMemo(() => getFieldValue(hit, 'event.kind') as string, [hit]);
   const isAlert = useMemo(() => eventKind === 'signal', [eventKind]);
-  const eventId = useMemo(() => getFieldValue(hit, '_id') as string, [hit]);
-  const eventURL = useMemo(
-    () =>
-      getSecurityTimelineRedirectUrl({
-        from: getFieldValue(hit, '@timestamp') as string,
-        to: getFieldValue(hit, '@timestamp') as string,
-        eventId: eventId as string,
-        index: getFieldValue(hit, '_index') as string,
-        baseURL: timelinesURL,
-      }),
-    [hit, eventId, timelinesURL]
-  );
+
+  const exploreUrl = useMemo(() => {
+    const documentId = getFieldValue(hit, '_id') as string;
+
+    // Returning the url if it exists here assumes that url will be correctly containg the linked project (for linked alerts).
+    // This way we can navigate to the alerts page and open the flyout (either on the local or the linked project).
+    const alertURL = getFieldValue(hit, 'kibana.alert.url') as string | undefined;
+    if (alertURL) return alertURL;
+
+    // If the url is not populated, we fall back opening Timeline, but this will not work for remote indices as
+    // Timeline should not read from linked project (at least during Tech Preview)
+    const index = getFieldValue(hit, '_index') as string | undefined;
+    if (isCCSRemoteIndexName(index ?? '')) return undefined;
+
+    // This will only be reached for local alerts that don't have the `kibana.alert.url` or all local events.
+    return getSecurityTimelineRedirectUrl({
+      from: getFieldValue(hit, '@timestamp') as string,
+      to: getFieldValue(hit, '@timestamp') as string,
+      eventId: documentId as string,
+      index: index as string,
+      baseURL: timelinesURL,
+    });
+  }, [hit, timelinesURL]);
 
   const eventCategory = useMemo(() => getFieldValue(hit, 'event.category') as string, [hit]);
 
@@ -139,18 +150,20 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
           </ExpandableSection>
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="exploreSecurity"
-          href={isAlert && alertURL ? alertURL : eventURL}
-          target="_blank"
-          iconType="link"
-          fill
-          aria-label={i18n.overviewExploreButtonLabel(isAlert)}
-        >
-          {i18n.overviewExploreButtonLabel(isAlert)}
-        </EuiButton>
-      </EuiFlexItem>
+      {exploreUrl && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="exploreSecurity"
+            href={exploreUrl}
+            target="_blank"
+            iconType="link"
+            fill
+            aria-label={i18n.overviewExploreButtonLabel(isAlert)}
+          >
+            {i18n.overviewExploreButtonLabel(isAlert)}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

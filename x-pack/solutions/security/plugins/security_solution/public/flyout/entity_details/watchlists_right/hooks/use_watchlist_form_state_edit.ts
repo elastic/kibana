@@ -46,7 +46,8 @@ export const useEditWatchlistFormState = ({
     setHasUserEdits(true);
   };
 
-  const { initialWatchlist: fetchedWatchlist } = useGetWatchlistFormData(normalizedWatchlistId);
+  const { initialWatchlist: fetchedWatchlist, entitySourceId } =
+    useGetWatchlistFormData(normalizedWatchlistId);
 
   useResetEditsOnFlyoutOpen(setHasUserEdits);
 
@@ -72,12 +73,14 @@ export const useEditWatchlistFormState = ({
   const hasChanges =
     watchlist.name.trim() !== initialWatchlist.name.trim() ||
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
-    watchlist.riskModifier !== initialWatchlist.riskModifier;
+    watchlist.riskModifier !== initialWatchlist.riskModifier ||
+    JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
   const isDisabled = isMissingId || isNameInvalid || !hasChanges;
 
   return {
     watchlist,
     normalizedWatchlistId,
+    entitySourceId,
     isEditMode: true,
     isDisabled,
     isNameInvalid,

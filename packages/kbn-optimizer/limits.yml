@@ -91,6 +91,7 @@ pageLoadAssetSize:
   indexManagement: 39694
   inference: 10368
   infra: 56302
+  ingestHub: 6112
   ingestPipelines: 17866
   inputControlVis: 7660
   inspectComponent: 4590
@@ -128,7 +129,7 @@ pageLoadAssetSize:
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
-  observabilityOnboarding: 12872
+  observabilityOnboarding: 14161
   observabilityShared: 75115
   osquery: 47422
   painlessLab: 6299
@@ -156,7 +157,7 @@ pageLoadAssetSize:
   searchHomepage: 9005
   searchIndices: 9991
   searchInferenceEndpoints: 9400
-  searchNavigation: 8308
+  searchNavigation: 8900
   searchNotebooks: 18826
   searchPlayground: 12122
   searchprofiler: 6509

@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod

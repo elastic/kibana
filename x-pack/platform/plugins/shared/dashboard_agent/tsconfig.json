@@ -24,7 +24,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }
