@@ -1,9 +1,9 @@
 {
-  "sha1": "4f68dcf8bd715c162d450f1b20551025eaaaa192",
+  "sha1": "00f3a3a451a93e0121e378b5e886bd066f743a91",
   "tests": [
     {
-      "id": "e44950115e3c6f3-c26a254d4ed034a",
-      "title": "markdown - create should create a markdown panel",
+      "id": "e44950115e3c6f3-db89f34e73faf03",
+      "title": "markdown - create should create a markdown library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -28,8 +28,8 @@
       }
     },
     {
-      "id": "e44950115e3c6f3-86f93cb6148ad87",
-      "title": "markdown - create can create a markdown panel with a specific id",
+      "id": "e44950115e3c6f3-1c94b08d9ee6983",
+      "title": "markdown - create should create a markdown library item in a specific space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -49,85 +49,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 53,
-        "column": 10
-      }
-    },
-    {
-      "id": "e44950115e3c6f3-224a6a1e545c219",
-      "title": "markdown - create can create a markdown panel with all attributes",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 74,
-        "column": 10
-      }
-    },
-    {
-      "id": "e44950115e3c6f3-4a98dc8e9e55d2c",
-      "title": "markdown - create should create a markdown panel in a specific space",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 96,
-        "column": 10
-      }
-    },
-    {
-      "id": "e44950115e3c6f3-9e0129445a1fa38",
-      "title": "markdown - create should create a markdown panel with a specific id in a space",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 115,
+        "line": 55,
         "column": 10
       }
     },
@@ -153,7 +75,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 135,
+        "line": 74,
         "column": 10
       }
     },
@@ -179,7 +101,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 168,
+        "line": 106,
         "column": 10
       }
     },
@@ -205,85 +127,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 186,
-        "column": 10
-      }
-    },
-    {
-      "id": "e44950115e3c6f3-0ae374662333bd1",
-      "title": "markdown - create validation - returns error when id already exists",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 204,
-        "column": 10
-      }
-    },
-    {
-      "id": "e44950115e3c6f3-c0b3a5828761770",
-      "title": "markdown - create validation - returns error when id is too long",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 222,
-        "column": 10
-      }
-    },
-    {
-      "id": "e44950115e3c6f3-186dda725156ea7",
-      "title": "markdown - create validation - returns error when id contains invalid characters",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 242,
+        "line": 124,
         "column": 10
       }
     },
@@ -309,13 +153,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 265,
+        "line": 142,
         "column": 10
       }
     },
     {
-      "id": "e44950115e3c6f3-29396b05ef6e963",
-      "title": "markdown - create authorization - returns error when user does not have permission to create markdown panels",
+      "id": "e44950115e3c6f3-cf074d1a549837a",
+      "title": "markdown - create authorization - returns error when user does not have permission to create library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -335,13 +179,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/create_markdown.spec.ts",
-        "line": 284,
+        "line": 161,
         "column": 10
       }
     },
     {
-      "id": "b06b6c5abacedf6-ffd84e3aa8f1ec9",
-      "title": "markdown - delete should return 404 for a non-existent markdown panel",
+      "id": "b06b6c5abacedf6-cc4052e30e36561",
+      "title": "markdown - delete should return 404 for a non-existent markdown library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -366,8 +210,8 @@
       }
     },
     {
-      "id": "b06b6c5abacedf6-d50acf67a207d29",
-      "title": "markdown - delete should return 204 if the markdown panel is deleted",
+      "id": "b06b6c5abacedf6-2bf4be8d0ac2e9c",
+      "title": "markdown - delete should return 204 when a markdown library item is deleted",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -387,13 +231,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/delete_markdown.spec.ts",
-        "line": 69,
+        "line": 66,
         "column": 10
       }
     },
     {
-      "id": "b06b6c5abacedf6-0bfeb9eef08a36e",
-      "title": "markdown - delete should return 204 if the markdown panel is deleted in a specific space",
+      "id": "b06b6c5abacedf6-d3c5f1e0eb1b251",
+      "title": "markdown - delete should return 204 when deleted in a specific space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -413,13 +257,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/delete_markdown.spec.ts",
-        "line": 81,
+        "line": 78,
         "column": 10
       }
     },
     {
-      "id": "b06b6c5abacedf6-f72dea5ec29b9cb",
-      "title": "markdown - delete authorization - returns error when user does not have permission to delete markdown panels",
+      "id": "b06b6c5abacedf6-e240333c6b908c6",
+      "title": "markdown - delete authorization - returns error when user does not have permission to delete library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -439,13 +283,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/delete_markdown.spec.ts",
-        "line": 99,
+        "line": 93,
         "column": 10
       }
     },
     {
-      "id": "5a306d5eed635f8-816c813f7038225",
-      "title": "markdown - get should return 200 with an existing markdown panel",
+      "id": "5a306d5eed635f8-7e6ae64a8deeb93",
+      "title": "markdown - get should return 200 with an existing markdown library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -470,8 +314,8 @@
       }
     },
     {
-      "id": "5a306d5eed635f8-311a69d8dd392b3",
-      "title": "markdown - get should return 200 with an existing markdown panel in a specific space",
+      "id": "5a306d5eed635f8-a2898de00e68b58",
+      "title": "markdown - get should return 200 with an existing markdown library in a specific space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -496,8 +340,8 @@
       }
     },
     {
-      "id": "5a306d5eed635f8-0dbe67ddf7392f9",
-      "title": "markdown - get should return 404 with a non-existing markdown panel",
+      "id": "5a306d5eed635f8-554db73a271444c",
+      "title": "markdown - get should return 404 with a non-existing markdown library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -522,8 +366,8 @@
       }
     },
     {
-      "id": "e45f80279b33abe-970c2cd51688426",
-      "title": "markdown - search should retrieve a paginated list of markdown panels",
+      "id": "e45f80279b33abe-35933e6a0390700",
+      "title": "markdown - search should retrieve a paginated list of markdown library items",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -600,8 +444,8 @@
       }
     },
     {
-      "id": "e45f80279b33abe-3b4ee5fac78afd1",
-      "title": "markdown - search should allow users to paginate through the list of markdown panels",
+      "id": "e45f80279b33abe-25382d86f5c751c",
+      "title": "markdown - search should allow users to paginate through the list of markdown library items",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -626,8 +470,8 @@
       }
     },
     {
-      "id": "a8dfab502e35aef-827f1b316e2633a",
-      "title": "markdown - update should return 200 with an updated markdown panel",
+      "id": "a8dfab502e35aef-7eeecec550fa3e6",
+      "title": "markdown - upsert should update existing markdown library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -652,8 +496,8 @@
       }
     },
     {
-      "id": "a8dfab502e35aef-50df1c821fd08a3",
-      "title": "markdown - update should return 200 with an updated markdown panel in a specific space",
+      "id": "a8dfab502e35aef-c2b0fdd82fc98ca",
+      "title": "markdown - upsert should update existing markdown library item in a specific space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -678,8 +522,8 @@
       }
     },
     {
-      "id": "a8dfab502e35aef-1c76c5919b54b33",
-      "title": "markdown - update should return 404 when updating a non-existent markdown panel",
+      "id": "a8dfab502e35aef-3b09fe84966279c",
+      "title": "markdown - upsert should create new markdown library item",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -704,8 +548,8 @@
       }
     },
     {
-      "id": "a8dfab502e35aef-f25c399c12a14b3",
-      "title": "markdown - update validation - returns error when content is not provided",
+      "id": "a8dfab502e35aef-8369bb444b876ab",
+      "title": "markdown - upsert validation - returns error when content is not provided",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -725,7 +569,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/api/tests/update_markdown.spec.ts",
-        "line": 122,
+        "line": 124,
         "column": 10
       }
     }

@@ -45,6 +45,9 @@ import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
+// Mirrors SmlIndexAction and SmlStart['indexAttachment'] from @kbn/agent-builder-plugin/server.
+// Declared inline to avoid a circular TS project reference: agent_builder already references
+// workflows_management, so a reverse import would create a build cycle.
 export type SmlIndexAction = 'create' | 'update' | 'delete';
 
 export type SmlIndexAttachmentFn = (params: {
@@ -164,8 +167,12 @@ export class WorkflowsManagementApi {
     });
   }
 
-  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
-    return this.workflowsService.getWorkflows(params, spaceId);
+  public async getWorkflows(
+    params: GetWorkflowsParams,
+    spaceId: string,
+    options?: { includeExecutionHistory?: boolean }
+  ): Promise<WorkflowListDto> {
+    return this.workflowsService.getWorkflows(params, spaceId, options);
   }
 
   /**
@@ -543,8 +550,8 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
 
-  public async getWorkflowStats(spaceId: string) {
-    return this.workflowsService.getWorkflowStats(spaceId);
+  public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
+    return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
   public async getWorkflowAggs(fields: string[] = [], spaceId: string) {

@@ -15,7 +15,11 @@ import { CountTimeframeStrategy } from '../lib/director/strategies/count_timefra
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import {
+  DispatcherEnabledProviderToken,
+  DispatcherServiceInternalToken,
+} from '../lib/dispatcher/tokens';
+import { DISPATCHER_ENABLED_SETTING_ID } from '../lib/dispatcher/ui_settings';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
 import { NotificationPolicyNamespaceToken } from '../lib/notification_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
@@ -62,6 +66,7 @@ import {
   EncryptedSavedObjectsClientToken,
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -220,8 +225,22 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  bind(MatcherSuggestionsService).toSelf().inRequestScope();
+
   bind(DispatcherService).toSelf().inSingletonScope();
   bind(DispatcherServiceInternalToken).toService(DispatcherService);
+
+  bind(DispatcherEnabledProviderToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const uiSettings = get(CoreStart('uiSettings'));
+      return async () => {
+        const soClient = savedObjects.createInternalRepository();
+        const client = uiSettings.globalAsScopedToClient(soClient);
+        return client.get<boolean>(DISPATCHER_ENABLED_SETTING_ID);
+      };
+    })
+    .inSingletonScope();
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
