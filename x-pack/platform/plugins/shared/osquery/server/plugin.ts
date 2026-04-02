@@ -6,6 +6,7 @@
  */
 
 import type {
+  KibanaRequest,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -49,6 +50,8 @@ import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
+import { checkOsqueryResponseActionAuthz } from './lib/check_response_action_authz';
+import { CustomHttpRequestError } from '../common/error';
 import { SchemaService } from './lib/schema_service';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
@@ -146,8 +149,24 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
+    const checkResponseActionAuthz = async (
+      request: KibanaRequest,
+      actionParams: { saved_query_id?: string; pack_id?: string }
+    ): Promise<void> => {
+      const [coreStart] = await core.getStartServices();
+      const isAuthorized = await checkOsqueryResponseActionAuthz(coreStart, request, actionParams);
+
+      if (!isAuthorized) {
+        throw new CustomHttpRequestError(
+          'User is not authorized to create/update osquery response action',
+          403
+        );
+      }
+    };
+
     return {
       createActionService: this.createActionService,
+      checkResponseActionAuthz,
     };
   }
 
