@@ -191,6 +191,7 @@ describe('usePodMetricsTable hook', () => {
     const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     useInfrastructureNodeMetricsMock.mockClear();
+    // include this to prevent rendering error in test
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },

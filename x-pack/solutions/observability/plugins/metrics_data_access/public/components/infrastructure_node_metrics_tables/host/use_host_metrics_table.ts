@@ -80,7 +80,7 @@ const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = 
         { name: 'A', aggregation: 'avg', field: SEMCONV_SYSTEM_MEMORY_USAGE },
         { name: 'B', aggregation: 'avg', field: SEMCONV_SYSTEM_MEMORY_UTILIZATION },
       ],
-      equation: 'A / (B > 0 ? B : 1)',
+      equation: 'B > 0 ? A / B : null',
     },
     [SEMCONV_SYSTEM_MEMORY_UTILIZATION]: {
       aggregation: 'avg',
