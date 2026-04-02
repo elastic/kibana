@@ -370,14 +370,6 @@
       "groupingMode": {
         "type": "keyword"
       },
-      "throttle": {
-        "type": "object",
-        "properties": {
-          "strategy": {
-            "type": "keyword"
-          }
-        }
-      },
       "name": {
         "fields": {
           "keyword": {
@@ -389,6 +381,14 @@
       },
       "snoozedUntil": {
         "type": "date"
+      },
+      "throttle": {
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
       },
       "updatedAt": {
         "type": "date"
@@ -442,13 +442,13 @@
           "description": {
             "type": "text"
           },
-          "labels": {
-            "type": "keyword"
-          },
           "name": {
             "type": "text"
           },
           "owner": {
+            "type": "keyword"
+          },
+          "tags": {
             "type": "keyword"
           }
         }
