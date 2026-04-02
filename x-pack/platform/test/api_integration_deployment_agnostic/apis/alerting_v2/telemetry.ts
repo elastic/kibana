@@ -176,7 +176,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parsedState.count_with_no_data).to.be(2);
         expect(parsedState.count_by_no_data_behavior).to.eql({ recover: 1, last_status: 1 });
         expect(parsedState.count_by_no_data_timeframe).to.eql({ '10m': 1, '15m': 1 });
-        expect(parsedState.count_notification_policies).to.be(2);
         expect(parsedState.min_created_at).to.be.a('string');
 
         // Execution stats

@@ -96,14 +96,9 @@ function mockRuleSearchResponse({
   } as any);
 }
 
-function mockNotificationPolicyCountResponse(count: number) {
-  esClient.count.mockResponseOnce({ count } as any);
-}
-
 describe('getRuleStats', () => {
   it('returns stats from aggregations and notification policy count', async () => {
     mockRuleSearchResponse({});
-    mockNotificationPolicyCountResponse(8);
 
     const result = await getRuleStats(esClient);
 
@@ -126,19 +121,16 @@ describe('getRuleStats', () => {
       count_with_no_data: 7,
       count_by_no_data_behavior: { alert: 5, skip: 2 },
       count_by_no_data_timeframe: { '10m': 7 },
-      count_notification_policies: 8,
       min_created_at: '2026-01-15T12:00:00.000Z',
     });
   });
 
   it('runs rule search and notification policy count in parallel', async () => {
     mockRuleSearchResponse({});
-    mockNotificationPolicyCountResponse(0);
 
     await getRuleStats(esClient);
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
-    expect(esClient.count).toHaveBeenCalledTimes(1);
   });
 
   it('returns empty results when no rules exist', async () => {
@@ -163,7 +155,6 @@ describe('getRuleStats', () => {
       noDataTimeframeBuckets: [],
       minCreatedAt: null,
     });
-    mockNotificationPolicyCountResponse(0);
 
     const result = await getRuleStats(esClient);
 
@@ -186,7 +177,6 @@ describe('getRuleStats', () => {
       count_with_no_data: 0,
       count_by_no_data_behavior: {},
       count_by_no_data_timeframe: {},
-      count_notification_policies: 0,
       min_created_at: null,
     });
   });
@@ -198,7 +188,6 @@ describe('getRuleStats', () => {
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
     } as any);
-    mockNotificationPolicyCountResponse(0);
 
     const result = await getRuleStats(esClient);
 
@@ -221,7 +210,6 @@ describe('getRuleStats', () => {
       count_with_no_data: 0,
       count_by_no_data_behavior: {},
       count_by_no_data_timeframe: {},
-      count_notification_policies: 0,
       min_created_at: null,
     });
   });
@@ -253,7 +241,6 @@ describe('getRuleStats', () => {
         min_created_at: { value: null },
       },
     } as any);
-    mockNotificationPolicyCountResponse(0);
 
     const result = await getRuleStats(esClient);
 

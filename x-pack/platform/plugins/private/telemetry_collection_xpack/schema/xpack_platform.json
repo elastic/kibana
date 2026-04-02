@@ -983,12 +983,6 @@
             }
           }
         },
-        "count_notification_policies": {
-          "type": "long",
-          "_meta": {
-            "description": "Total number of notification policies."
-          }
-        },
         "min_created_at": {
           "type": "date",
           "_meta": {

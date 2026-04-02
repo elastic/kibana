@@ -102,6 +102,5 @@ export type RuleStatsResults = Pick<
   | 'count_with_no_data'
   | 'count_by_no_data_behavior'
   | 'count_by_no_data_timeframe'
-  | 'count_notification_policies'
   | 'min_created_at'
 >;

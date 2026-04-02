@@ -40,7 +40,6 @@ const stateSchemaV1 = schema.object({
   count_with_no_data: schema.maybe(schema.number()),
   count_by_no_data_behavior: schema.maybe(schema.recordOf(schema.string(), schema.number())),
   count_by_no_data_timeframe: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-  count_notification_policies: schema.maybe(schema.number()),
   min_created_at: schema.maybe(schema.nullable(schema.string())),
 
   // execution stats
@@ -96,7 +95,6 @@ export const stateSchemaByVersion = {
       count_with_no_data: state.count_with_no_data ?? undefined,
       count_by_no_data_behavior: state.count_by_no_data_behavior ?? undefined,
       count_by_no_data_timeframe: state.count_by_no_data_timeframe ?? undefined,
-      count_notification_policies: state.count_notification_policies ?? undefined,
       min_created_at: state.min_created_at ?? undefined,
       executions_count_24hr: state.executions_count_24hr ?? undefined,
       executions_count_by_status_24hr: state.executions_count_by_status_24hr ?? undefined,

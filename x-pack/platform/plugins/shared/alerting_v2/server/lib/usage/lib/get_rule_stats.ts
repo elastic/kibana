@@ -7,25 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import {
-  RULE_SAVED_OBJECT_TYPE,
-  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { TERMS_SIZE, bucketsToRecord } from './constants';
 import type { RuleStatsAggregations, RuleStatsResults } from './types';
 
 export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleStatsResults> {
-  const [ruleStats, notificationPolicyCount] = await Promise.all([
-    fetchRuleAggregations(esClient),
-    fetchNotificationPolicyCount(esClient),
-  ]);
-
-  return { ...ruleStats, count_notification_policies: notificationPolicyCount };
-}
-
-async function fetchRuleAggregations(
-  esClient: ElasticsearchClient
-): Promise<Omit<RuleStatsResults, 'count_notification_policies'>> {
   const response = await esClient.search({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     size: 0,
@@ -263,17 +249,4 @@ async function fetchRuleAggregations(
     count_by_no_data_timeframe: bucketsToRecord(aggs?.count_by_no_data_timeframe.buckets),
     min_created_at: aggs?.min_created_at.value_as_string ?? null,
   };
-}
-
-async function fetchNotificationPolicyCount(esClient: ElasticsearchClient): Promise<number> {
-  const response = await esClient.count({
-    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    query: {
-      bool: {
-        filter: [{ term: { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } }],
-      },
-    },
-  });
-
-  return response.count;
 }

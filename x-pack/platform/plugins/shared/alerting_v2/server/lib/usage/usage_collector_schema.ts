@@ -104,10 +104,6 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
       _meta: { description: 'Number of rules by no data timeframe.' },
     },
   },
-  count_notification_policies: {
-    type: 'long',
-    _meta: { description: 'Total number of notification policies.' },
-  },
   min_created_at: {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },

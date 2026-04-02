@@ -125,10 +125,6 @@ describe('registerAlertingV2UsageCollector', () => {
             _meta: { description: 'Number of enabled alerting v2 rules.' },
             type: 'long',
           },
-          count_notification_policies: {
-            _meta: { description: 'Total number of notification policies.' },
-            type: 'long',
-          },
           count_total: {
             _meta: { description: 'Total number of alerting v2 rules.' },
             type: 'long',

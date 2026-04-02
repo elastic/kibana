@@ -31,7 +31,6 @@ export interface AlertingV2Usage {
   count_with_no_data?: number;
   count_by_no_data_behavior?: Record<string, number>;
   count_by_no_data_timeframe?: Record<string, number>;
-  count_notification_policies?: number;
   min_created_at?: string | null;
 
   // execution stats
