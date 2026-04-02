@@ -22,10 +22,11 @@ interface ListPrivileges {
   };
 }
 
-const isAbortError = (error: Error) =>
-  error.name === 'AbortError' ||
-  error.message.includes('aborted without reason') ||
-  error.message.includes('signal is aborted');
+const isAbortError = (error: unknown): boolean =>
+  error instanceof Error &&
+  (error.name === 'AbortError' ||
+    error.message.includes('aborted without reason') ||
+    error.message.includes('signal is aborted'));
 
 export const useFetchListPrivileges = (isAppAvailable: boolean = true) => {
   const http = useHttp();

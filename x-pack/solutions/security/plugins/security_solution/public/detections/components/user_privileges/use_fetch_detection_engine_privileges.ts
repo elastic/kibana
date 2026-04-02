@@ -13,10 +13,11 @@ import * as i18n from './translations';
 
 export const useFetchPrivileges = () => useAsync(withOptionalSignal(getUserPrivilege));
 
-const isAbortError = (error: Error) =>
-  error.name === 'AbortError' ||
-  error.message.includes('aborted without reason') ||
-  error.message.includes('signal is aborted');
+const isAbortError = (error: unknown): boolean =>
+  error instanceof Error &&
+  (error.name === 'AbortError' ||
+    error.message.includes('aborted without reason') ||
+    error.message.includes('signal is aborted'));
 
 export const useFetchDetectionEnginePrivileges = (isAppAvailable: boolean = true) => {
   const { start, ...detectionEnginePrivileges } = useFetchPrivileges();
