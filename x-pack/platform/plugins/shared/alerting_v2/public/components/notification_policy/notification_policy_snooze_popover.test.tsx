@@ -22,6 +22,7 @@ const createPolicy = (
     enabled: true,
     matcher: null,
     groupBy: null,
+    groupingMode: null,
     throttle: null,
     snoozedUntil: null,
     destinations: [],

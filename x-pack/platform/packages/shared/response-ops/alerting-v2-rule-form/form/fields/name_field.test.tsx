@@ -91,4 +91,38 @@ describe('NameField', () => {
       expect(screen.getByText('Name is required.')).toBeInTheDocument();
     });
   });
+
+  it('shows error when submitted with the default placeholder name', async () => {
+    const queryClient = createTestQueryClient();
+
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
+      const form = useForm<FormValues>({
+        defaultValues: {
+          ...defaultTestFormValues,
+          metadata: { ...defaultTestFormValues.metadata, name: 'Untitled rule' },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            {children}
+            <button type="button" onClick={form.handleSubmit(() => {})}>
+              Submit
+            </button>
+          </FormProvider>
+        </QueryClientProvider>
+      );
+    };
+
+    const user = userEvent.setup();
+    render(<NameField />, { wrapper: WrapperWithSubmit });
+
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Please provide a unique rule name.')).toBeInTheDocument();
+    });
+  });
 });
