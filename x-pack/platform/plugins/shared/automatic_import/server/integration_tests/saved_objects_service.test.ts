@@ -24,8 +24,6 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { integrationSavedObjectType } from '../services/saved_objects/integration';
-import { dataStreamSavedObjectType } from '../services/saved_objects/data_stream';
 import {
   mockAuthenticatedUser,
   mockIntegrationParams,
@@ -50,9 +48,7 @@ describe('AutomaticImportSavedObjectService', () => {
       manageES = await startES();
       kbnRoot = createRootWithCorePlugins({}, { oss: false });
       await kbnRoot.preboot();
-      const coreSetup = await kbnRoot.setup();
-      coreSetup.savedObjects.registerType(integrationSavedObjectType);
-      coreSetup.savedObjects.registerType(dataStreamSavedObjectType);
+      await kbnRoot.setup();
       coreStart = await kbnRoot.start();
     } catch (error) {
       if (kbnRoot) {

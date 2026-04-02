@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, SavedObjectsClient } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, CoreSetup, SavedObjectsClient } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   createRootWithCorePlugins,
@@ -18,6 +18,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AutomaticImportPluginStartDependencies } from '..';
 import { AutomaticImportService } from '../services/automatic_import_service';
+import type { AutomaticImportSavedObjectService } from '../services/saved_objects/saved_objects_service';
 import { TASK_STATUSES } from '../services/saved_objects/constants';
 import {
   mockAuthenticatedUser,
@@ -52,11 +53,16 @@ describe('AutomaticImportService Integration Tests', () => {
     const mockAnalytics = {
       reportEvent: jest.fn(),
       registerEventType: jest.fn(),
-    } as any;
+    } as unknown as AnalyticsServiceSetup;
+
+    const savedObjectsSetupWithNoopRegister = {
+      ...coreSetup.savedObjects,
+      registerType: () => {},
+    };
 
     automaticImportService = new AutomaticImportService(
       kbnRoot.logger,
-      coreSetup.savedObjects,
+      savedObjectsSetupWithNoopRegister,
       taskManagerSetupStub,
       coreSetup as unknown as CoreSetup<AutomaticImportPluginStartDependencies>,
       mockAnalytics
@@ -83,7 +89,9 @@ describe('AutomaticImportService Integration Tests', () => {
   });
 
   it('getDataStreamResults returns results only when status is completed', async () => {
-    const savedObjectService = (automaticImportService as any).savedObjectService;
+    const savedObjectService = (
+      automaticImportService as unknown as { savedObjectService: AutomaticImportSavedObjectService }
+    ).savedObjectService;
     await savedObjectService.insertIntegration(
       { ...mockIntegrationParams, integrationId: 'itest-integration' },
       mockAuthenticatedUser
@@ -108,7 +116,10 @@ describe('AutomaticImportService Integration Tests', () => {
     ).rejects.toThrow('has not completed yet');
 
     // Mark completed with results
-    const ingestPipelineObj = { processors: [{ set: { field: 'x', value: true } }] };
+    const ingestPipelineObj = {
+      name: 'test-pipeline',
+      processors: [{ set: { field: 'x', value: true } }],
+    };
     const results = [{ a: 1 }, { b: 'two' }];
     await savedObjectService.updateDataStreamSavedObjectAttributes({
       integrationId: 'itest-integration',
@@ -127,7 +138,9 @@ describe('AutomaticImportService Integration Tests', () => {
   });
 
   it('getDataStreamResults rejects when status is failed', async () => {
-    const savedObjectService = (automaticImportService as any).savedObjectService;
+    const savedObjectService = (
+      automaticImportService as unknown as { savedObjectService: AutomaticImportSavedObjectService }
+    ).savedObjectService;
     await savedObjectService.insertIntegration(
       { ...mockIntegrationParams, integrationId: 'itest-integration-failed' },
       mockAuthenticatedUser

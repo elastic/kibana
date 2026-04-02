@@ -6,9 +6,11 @@
  */
 
 import type {
+  AnalyticsServiceSetup,
   CoreSetup,
   ElasticsearchClient,
   KibanaRequest,
+  SavedObject,
   SavedObjectsClient,
 } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
@@ -27,6 +29,10 @@ import type {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import type { IntegrationParams, DataStreamParams } from '../routes/types';
+import type {
+  IntegrationAttributes,
+  DataStreamAttributes,
+} from '../services/saved_objects/schemas/types';
 import { mockAuthenticatedUser } from '../__mocks__/saved_objects';
 import type { AutomaticImportPluginStartDependencies } from '..';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -64,12 +70,22 @@ describe('TaskManagerService Integration Tests', () => {
       const mockAnalytics = {
         reportEvent: jest.fn(),
         registerEventType: jest.fn(),
-      } as any;
+      } as unknown as AnalyticsServiceSetup;
+
+      const savedObjectsSetupWithNoopRegister = {
+        ...coreSetup.savedObjects,
+        registerType: () => {},
+      };
+
+      const taskManagerSetupWithNoopRegister = {
+        ...taskManagerSetup,
+        registerTaskDefinitions: () => {},
+      };
 
       automaticImportService = new AutomaticImportService(
         kbnRoot.logger,
-        coreSetup.savedObjects,
-        taskManagerSetup,
+        savedObjectsSetupWithNoopRegister,
+        taskManagerSetupWithNoopRegister as unknown as TaskManagerSetupContract,
         coreSetup as unknown as CoreSetup<AutomaticImportPluginStartDependencies>,
         mockAnalytics
       );
@@ -99,13 +115,23 @@ describe('TaskManagerService Integration Tests', () => {
         taskManagerStart,
         coreStart.elasticsearch.client.asInternalUser
       );
-      savedObjectService = (automaticImportService as any).savedObjectService;
+      savedObjectService = (
+        automaticImportService as unknown as {
+          savedObjectService: AutomaticImportSavedObjectService;
+        }
+      ).savedObjectService;
 
       // Get the TaskManagerService instance that was already created by AutomaticImportService
-      taskManagerService = (automaticImportService as any).taskManagerService;
+      taskManagerService = (
+        automaticImportService as unknown as { taskManagerService: TaskManagerService }
+      ).taskManagerService;
 
       // Override the workflow for testing with a delay to observe concurrent execution
-      (taskManagerService as any).taskWorkflow = async (params: Record<string, any>) => {
+      (
+        taskManagerService as unknown as {
+          taskWorkflow: (params: Record<string, unknown>) => Promise<void>;
+        }
+      ).taskWorkflow = async (params: Record<string, unknown>) => {
         const { integrationId, dataStreamId } = params;
         kbnRoot.logger.get().info(`Test workflow started for ${integrationId}/${dataStreamId}`);
         // Add delay to allow concurrent execution to be observed
@@ -254,8 +280,8 @@ describe('TaskManagerService Integration Tests', () => {
     it('should schedule and track 5 concurrent unique AI workflow tasks', async () => {
       const numConcurrentTasks = 5;
       const createdObjects: Array<{
-        integration: any;
-        dataStream: any;
+        integration: SavedObject<IntegrationAttributes>;
+        dataStream: SavedObject<DataStreamAttributes>;
         taskId: string;
       }> = [];
 
@@ -332,7 +358,7 @@ describe('TaskManagerService Integration Tests', () => {
         const firstObject = createdObjects[0];
         const duplicateTaskParams = {
           integrationId: firstObject.integration.id,
-          integrationName: firstObject.integration.attributes.title,
+          integrationName: firstObject.integration.attributes.metadata.title,
           dataStreamId: firstObject.dataStream.attributes.data_stream_id,
           dataStreamName: firstObject.dataStream.attributes.title,
           connectorId: 'test-connector-id',
@@ -357,12 +383,9 @@ describe('TaskManagerService Integration Tests', () => {
           createdObjects.map(async (obj) => {
             try {
               await taskManagerStart.runSoon(obj.taskId);
-            } catch (error: any) {
-              // Ignore errors if task is already running or has completed (not found)
-              if (
-                !error.message.includes('currently running') &&
-                !error.message.includes('not found')
-              ) {
+            } catch (error: unknown) {
+              const message = error instanceof Error ? error.message : String(error);
+              if (!message.includes('currently running') && !message.includes('not found')) {
                 throw error;
               }
             }
