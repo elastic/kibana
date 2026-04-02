@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   builtInComparators,
+  convertFieldSpecToFieldOption,
   OfExpression,
   ThresholdExpression,
   ForLastExpression,
@@ -33,7 +34,6 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
 import type { IndexThresholdRuleParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
-import { convertFieldSpecToFieldOption } from '../es_query/util';
 
 export const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',

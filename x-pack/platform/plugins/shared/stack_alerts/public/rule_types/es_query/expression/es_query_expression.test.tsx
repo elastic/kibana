@@ -52,40 +52,6 @@ jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
     }),
   },
 }));
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
-  return {
-    ...original,
-    getIndexPatterns: () => {
-      return ['index1', 'index2'];
-    },
-    getTimeFieldOptions: () => {
-      return [
-        {
-          text: '@timestamp',
-          value: '@timestamp',
-        },
-      ];
-    },
-    getIndexOptions: () => {
-      return Promise.resolve([
-        {
-          label: 'indexOption',
-          options: [
-            {
-              label: 'index1',
-              value: 'index1',
-            },
-            {
-              label: 'index2',
-              value: 'index2',
-            },
-          ],
-        },
-      ]);
-    },
-  };
-});
 
 const createDataPluginMock = () => {
   const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart & {

@@ -20,6 +20,7 @@ import { parseDuration } from '@kbn/alerting-plugin/common';
 import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
   buildAggregation,
+  convertFieldSpecToFieldOption,
   parseAggregationResults,
   isGroupAggregation,
   isCountAggregation,
@@ -34,11 +35,7 @@ import { SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import {
-  convertFieldSpecToFieldOption,
-  convertRawRuntimeFieldtoFieldOption,
-  useTriggerUiActionServices,
-} from '../util';
+import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
 

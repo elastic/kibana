@@ -24,11 +24,11 @@ import {
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  convertFieldSpecToFieldOption,
   firstFieldOption,
   getIndexOptionsByDataView,
   getTimeFieldOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { convertFieldSpecToFieldOption } from '../es_query/util';
 
 interface Props {
   index: string[];

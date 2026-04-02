@@ -8,8 +8,10 @@
 import { uniq } from 'lodash';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { loadIndexPatterns, getMatchingIndices, getESIndexFields } from '../lib/data_apis';
+import type { FieldOption } from '../types';
 
 export interface IOption {
   label: string;
@@ -82,12 +84,16 @@ export const getIndexOptionsByDataView = async (
   const [matchingIndices, matchingDataViews] = await Promise.all([
     dataViews
       .getIndices({ pattern, isRollupIndex: () => false })
-      .then((items) => items.map((item) => item.name)),
-    dataViews.find(pattern, 1000).then((dvs) => dvs.map((dv) => dv.title)),
+      .then((items) => items.map((item) => item.name))
+      .catch(() => [] as string[]),
+    dataViews
+      .find(pattern, 1000)
+      .then((dvs) => dvs.map((dv) => dv.title))
+      .catch(() => [] as string[]),
   ]);
 
   const options: IOption[] = [];
-  const matchingOptions = uniq([...matchingIndices, ...matchingDataViews]);
+  const matchingOptions = [...new Set([...matchingIndices, ...matchingDataViews])];
 
   if (matchingOptions.length) {
     options.push({
@@ -106,6 +112,34 @@ export const getIndexOptionsByDataView = async (
     options: [{ value: search, label: search }],
   });
   return options;
+};
+
+export const convertFieldSpecToFieldOption = (
+  fieldSpec: FieldSpec[],
+  onlyMappedOrRuntime: boolean = true
+): FieldOption[] => {
+  return (fieldSpec ?? [])
+    .filter((spec: FieldSpec) => (onlyMappedOrRuntime ? spec.isMapped || spec.runtimeField : true))
+    .map((spec: FieldSpec) => {
+      const converted = {
+        name: spec.name,
+        searchable: spec.searchable,
+        aggregatable: spec.aggregatable,
+        type: spec.type,
+        normalizedType: spec.type,
+      };
+
+      if (spec.type === 'string') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+        converted.normalizedType = esType;
+      } else if (spec.type === 'number') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+      }
+
+      return converted;
+    });
 };
 
 export const getFields = async (http: HttpSetup, indexes: string[]) => {

@@ -19,6 +19,7 @@ export { builtInComparators, builtInAggregationTypes, builtInGroupByTypes } from
 export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_selection';
 export type { IOption } from './index_controls';
 export {
+  convertFieldSpecToFieldOption,
   getFields,
   getIndexOptions,
   getIndexOptionsByDataView,
