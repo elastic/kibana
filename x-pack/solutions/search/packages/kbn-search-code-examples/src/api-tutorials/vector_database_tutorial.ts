@@ -7,10 +7,12 @@
 
 export const vectorDatabaseTutorialCommands: string = `
 # ===============================================
-# Elasticsearch Vector DB Tutorial
+# 🚀 Elasticsearch Vector Database Tutorial
 # ===============================================
 
-# Vector databases are the storage and retrieval layer behind AI applications like chatbots, RAG pipelines, and recommendation engines. They also enable semantic search, which matches on meaning rather than exact words. The core idea: convert text into numerical vectors (embeddings) that capture semantic meaning, then find the closest matches.
+# Vector databases are the storage and retrieval layer behind AI applications like chatbots, RAG pipelines, and recommendation engines. They also enable semantic search, which matches on meaning rather than exact words. 
+
+# The core idea: convert text into numerical vectors (embeddings) that capture semantic meaning, then find the closest matches.
 
 # Elasticsearch is a vector database that lets you bring your own embeddings (from OpenAI, Cohere, etc.) or generate them automatically via Elastic Inference Service (EIS).
 
@@ -26,7 +28,7 @@ export const vectorDatabaseTutorialCommands: string = `
 
 # 🎯 PATH B — You generate embeddings outside Elasticsearch (for existing external pipelines)
 #   ✓ You already use OpenAI, Cohere, or a custom model running outside Elasticsearch.
-#   ➡️ Jump to: PATH B below (Steps B1-B9)
+#   ➡️ Scroll to: PATH B below (Steps B1-B9)
 
 # Not sure? Start with Path A.
 
@@ -44,29 +46,7 @@ export const vectorDatabaseTutorialCommands: string = `
 # -----------------------------------------------
 # 📦 Step A1: Create your index
 # -----------------------------------------------
-# An index is where your documents live in Elasticsearch. Before indexing documents, you define a mapping (a schema that declares each field and its type). The field type controls how Elasticsearch stores and searches the data, so choosing the right type is the most important decision you make per field.
-
-# Annotated version of the mapping you'll create:
-
-# {
-#  "mappings": {
-#   "properties": {
-#     "title": {
-#       "type": "text" // Full-text search via BM25. Matches individual words: "Canyon" finds "Grand Canyon National Park".
-#     },
-#     "semantic_text": {
-#       "type": "semantic_text" // Stores text and auto-generates vector embeddings. Enables search by meaning, not just keywords.
-#     },
-#     "content": {
-#       "type": "text", // Full-text search via BM25, like "title".
-#       "copy_to": "semantic_text" // Copies content into the semantic_text field so embeddings are generated automatically.
-#     },
-#     "source": {
-#       "type": "keyword" // Exact-match only. Designed for filtering and aggregations (e.g. source="national-parks"), not full-text search.
-#     }
-#   }
-#  }
-# }
+# An index is where your documents live in Elasticsearch. Before indexing documents, you define a mapping (a schema that declares each field and its type). The field type controls how Elasticsearch stores and searches the data, so choosing the right type is very important.
 
 # Create your index with mappings for each field:
 
@@ -74,25 +54,24 @@ export const vectorDatabaseTutorialCommands: string = `
 # This tutorial uses Elasticsearch's default inference model. Before going live, verify it fits your use case:
 #   📖 https://elastic.co/docs/explore-analyze/elastic-inference/eis
 
-# To use a specific model, add the inference ID associated with the model to the "inference_id" field below.
-
 PUT /kibana_sample_data_vectordb
 {
   "mappings": {
     "properties": {
       "title": { 
-        "type": "text" 
+        "type": "text" // Full-text search via BM25. Matches individual words: "Canyon" finds "Grand Canyon National Park".
       },
-      "semantic_text": {
-        "type": "semantic_text",
-        "inference_id": ".jina-embeddings-v3" // ← Specify an inference endpoint ID, or remove if using the default.
+      "semantic_content": {
+        "type": "semantic_text" // Stores text and auto-generates vector embeddings. Enables search by meaning, not just keywords.
+        // To use a specific model instead of Elastic's default add:
+        // "inference_id": ".your-model-endpoint-id"
       },
       "content": {
-        "type": "text",
-        "copy_to": "semantic_text"
+        "type": "text", // Full-text search via BM25, like "title".
+        "copy_to": "semantic_content" // Copies content into the semantic_content field so embeddings are generated automatically.
       },
       "source": { 
-        "type": "keyword" 
+        "type": "keyword" // Exact-match only. Designed for filtering and aggregations (e.g. source="national-parks"), not full-text search.
       }
     }
   }
@@ -105,9 +84,8 @@ PUT /kibana_sample_data_vectordb
 
 DELETE /kibana_sample_data_vectordb
 
-
 # -----------------------------------------------
-# 🔧 Step A2: Understand mapping constraints (optional)
+# 💡 Good to know - Adding new fields to a mapping
 # -----------------------------------------------
 # You can add new fields at any time with a PUT mapping request. Elasticsearch adds them without touching existing docs.
 
@@ -128,9 +106,9 @@ PUT /kibana_sample_data_vectordb/_mapping
 # ===============================================
 
 # -----------------------------------------------
-# 📄 Step A3: Index your documents
+# 📄 Step A2: Index your documents
 # -----------------------------------------------
-# Index 5 sample documents. No embedding code needed: 'content' copies into 'semantic_text', so Elasticsearch generates and stores vectors automatically.
+# Index 5 sample documents. No embedding code needed: 'content' copies into 'semantic_content', so Elasticsearch generates and stores vectors automatically.
 
 # The bulk API indexes multiple documents in one request, with two lines per document:
 #   Line 1 (metadata):  {"index": {"_index": "kibana_sample_data_vectordb"}}
@@ -156,7 +134,7 @@ POST /_bulk?refresh=wait_for
 # ✅ You should see: {"errors": false, "took": ..., "items": [...]}
 # "errors": false means all 5 documents indexed successfully.
 
-# If "errors": true, inspect the "items" array for details. To start fresh, run the DELETE request, then re-run Steps A1 and A3.
+# If "errors": true, inspect the "items" array for details. To start fresh, run the DELETE request, then re-run Steps A1 and A2.
 
 DELETE /kibana_sample_data_vectordb
 
@@ -166,9 +144,9 @@ DELETE /kibana_sample_data_vectordb
 # ===============================================
 
 # -----------------------------------------------
-# 🔍 Step A4: Semantic-only search — demonstration step
+# 🔍 Step A3: Semantic-only search — demonstration step
 # -----------------------------------------------
-# This step has two examples that show what semantic search does well and where it falls short. The contrast sets up why hybrid search (Step A5) is the better default.
+# This step has two examples that show what semantic search does well and where it falls short. The contrast sets up why hybrid search (Step A4) is the better default.
 
 # QUERY 1 - where semantic shines:
 # "volcanic activity" doesn't appear anywhere in our data, but Yellowstone's content mentions "Yellowstone Caldera", "super volcano", and "geyser". Semantic search finds it by meaning when keyword search wouldn't.
@@ -179,7 +157,7 @@ GET /kibana_sample_data_vectordb/_search
     "standard": {
       "query": {
         "semantic": {
-          "field": "semantic_text",
+          "field": "semantic_content",
           "query": "volcanic activity"
         }
       }
@@ -188,6 +166,8 @@ GET /kibana_sample_data_vectordb/_search
 }
 
 # ✅ Yellowstone should rank first. Zero shared words, pure meaning match.
+
+# 📋 Reading the response: your results are in hits.hits[]. The top result is first. Each hit has a _score (higher = better match) and _source (the original document you indexed).
 
 # QUERY 2 - where semantic falls short:
 # "Arizona" is mentioned by name in Grand Canyon's content. Semantic search may not rank Grand Canyon first because it looks for meaning-similarity, not exact word matches. A proper noun with no surrounding context is hard for a semantic model to anchor. Keyword search (BM25) would find it immediately.
@@ -198,7 +178,7 @@ GET /kibana_sample_data_vectordb/_search
     "standard": {
       "query": {
         "semantic": {
-          "field": "semantic_text",
+          "field": "semantic_content",
           "query": "Arizona"
         }
       }
@@ -208,17 +188,16 @@ GET /kibana_sample_data_vectordb/_search
 
 # ✅ Check whether Grand Canyon ranked first. If it didn't, that's the point.
 
-# Semantic search trades exact-match precision for meaning-based recall.
-# Step A5 fixes this by combining both.
+# Semantic search trades exact-match precision for meaning-based recall. Step A4 fixes this by combining both.
 
 # -----------------------------------------------
-# ⚡ Step A5: Hybrid search — keyword + semantic combined
+# ⚡ Step A4: Hybrid search — keyword + semantic combined
 # -----------------------------------------------
 # This is the query pattern you should use as your default in production. It runs both a keyword retriever (BM25) and a semantic retriever, then merges results using RRF (Reciprocal Rank Fusion).
 
-# Run the same "Arizona" query from Step A4, but as hybrid. BM25 finds the exact words in Grand Canyon's content. Semantic adds context. RRF fuses both rankings. Grand Canyon should now rank first.
+# Run the same "Arizona" query from Step A3, but as hybrid. BM25 finds the exact words in Grand Canyon's content. Semantic adds context. RRF fuses both rankings. Grand Canyon should now rank first.
 
-# Hybrid also handles the "volcanic activity" case from Step A4: semantic finds Yellowstone via meaning, BM25 contributes where there are exact title matches.
+# Hybrid also handles the "volcanic activity" case from Step A3: semantic finds Yellowstone via meaning, BM25 contributes where there are exact title matches.
 
 GET /kibana_sample_data_vectordb/_search
 {
@@ -239,7 +218,7 @@ GET /kibana_sample_data_vectordb/_search
           "standard": {
             "query": {
               "semantic": {
-                "field": "semantic_text",
+                "field": "semantic_content",
                 "query": "Arizona"
                 // Semantic: finds documents whose meaning is closest to this word
               }
@@ -261,7 +240,7 @@ GET /kibana_sample_data_vectordb/_search
 
 
 # -----------------------------------------------
-# 🔒 Step A6: Add a filter to the hybrid search
+# 🔒 Step A5: Add a filter to the hybrid search
 # -----------------------------------------------
 # Filters restrict which documents are searched without affecting relevance scores. Use this for access control, tenant isolation, or category filtering.
 
@@ -301,7 +280,7 @@ GET /kibana_sample_data_vectordb/_search
               "bool": {
                 "must": {
                   "semantic": {
-                    "field": "semantic_text",
+                    "field": "semantic_content",
                     "query": "hiking"
                   }
                 },
@@ -327,7 +306,7 @@ GET /kibana_sample_data_vectordb/_search
 # For use in your application.
 
 # -----------------------------------------------
-# 🤖 Step A7: Retrieve chunks for a RAG pipeline
+# 🤖 Step A6: Retrieve chunks for a RAG pipeline
 # -----------------------------------------------
 # RAG (Retrieval-Augmented Generation) is a pattern where you:
 #   1. Search your data for relevant documents (this step)
@@ -356,7 +335,7 @@ GET /kibana_sample_data_vectordb/_search
           "standard": {
             "query": {
               "semantic": {
-                "field": "semantic_text",
+                "field": "semantic_content",
                 "query": "best park for wildlife"
               }
             }
@@ -385,7 +364,7 @@ GET /kibana_sample_data_vectordb/_search
 # ===============================================
 
 # -----------------------------------------------
-# 🧹 Step A8: Delete the index
+# 🧹 Step A7: Delete the index
 # -----------------------------------------------
 # This step removes the sample index and everything in it.
 # Warning: this permanently deletes all 6 documents. Cannot be undone.
@@ -420,8 +399,9 @@ DELETE /kibana_sample_data_vectordb
 
 # The key difference from Path A: instead of semantic_text (which handles everything), you use a dense_vector field and are responsible for generating vectors yourself, both at ingest time and at query time.
 
-# ⚠️ The most important rule in this path (read before starting):
-# You must use the SAME model at ingest time and at query time. If you index documents with OpenAI's text-embedding-3-small, you must also embed queries with text-embedding-3-small. Mixing models produces meaningless results because documents and queries would be in different vector spaces. Changing models later requires re-embedding and reindexing every document. Choose carefully before indexing real data at scale.
+# ⚠️ The most important rule in this path (read before starting) ⚠️
+
+#   You must use the SAME model at ingest time and at query time. If you index documents with OpenAI's text-embedding-3-small, you must also embed queries with text-embedding-3-small. Mixing models produces meaningless results because documents and queries would be in different vector spaces. Changing models later requires re-embedding and reindexing every document. Choose carefully before indexing real data at scale.
 
 
 # ===============================================
@@ -473,55 +453,27 @@ PUT /_inference/text_embedding/my-embedding-endpoint
 #   - Cohere embed-v3: 1024
 #   - E5-small: 384
 
-# Annotated version of the mapping you'll create:
-
-# {
-#  "mappings": {
-#   "properties": {
-#     "title": {
-#       "type": "text" // Full-text search via BM25.
-#     },
-#     "content": {
-#       "type": "text" // The original text. Stored for display and BM25 search. Embeddings are stored separately.
-#     },
-#     "content_embedding": {
-#       "type": "dense_vector", // Stores the raw vector (list of numbers) from your embedding model.
-#       "dims": 1536, // Must exactly match your model's output size. Wrong dims = full reindex to fix.
-#       "index": true, // Required for kNN search. Without this, vectors are stored but not searchable.
-#       "similarity": "cosine", // How Elasticsearch measures closeness between vectors. Cosine is the most common choice.
-#       "index_options": {
-#         "type": "int8_hnsw" // Compressed index type for ~4x memory savings.
-#         // Use 'hnsw' instead if you need maximum accuracy without concern for memory.
-#       }
-#     },
-#     "source": {
-#       "type": "keyword" // Exact-match only. Used for filtering, e.g. tenant ID, category, document source
-#     }
-#   }
-#  }
-# }
-
 PUT /kibana_sample_data_vectordb_byoe
 {
   "mappings": {
     "properties": {
-      "title": { 
-        "type": "text" 
+      "title": {
+        "type": "text" // Full-text search via BM25.
       },
-      "content": { 
-        "type": "text"
-      }, 
+      "content": {
+        "type": "text" // Stored for display and BM25 search. Embeddings are stored separately.
+      },
       "content_embedding": {
-        "type": "dense_vector",
-        "dims": 1536, // ⚠️ Must match your model's output size exactly
-        "index": true,
-        "similarity": "cosine",
+        "type": "dense_vector", // Stores the raw vector (list of numbers) from your embedding model.
+        "dims": 1536, // ⚠️ Must exactly match your model's output size. Wrong dims = full reindex to fix.
+        "index": true, // Required for kNN search. Without this, vectors are stored but not searchable.
+        "similarity": "cosine", // How Elasticsearch measures closeness between vectors. Cosine is the most common choice.
         "index_options": {
-          "type": "int8_hnsw"
+          "type": "int8_hnsw" // Compressed index type for ~4x memory savings. Use 'hnsw' for maximum accuracy.
         }
       },
-      "source": { 
-        "type": "keyword"
+      "source": {
+        "type": "keyword" // Exact-match only. Used for filtering, e.g. tenant ID, category, document source.
       }
     }
   }
@@ -579,12 +531,12 @@ PUT /_ingest/pipeline/embedding-pipeline
 # -----------------------------------------------
 # 📄 Step B4: Index your documents (pipeline generates embeddings automatically)
 # -----------------------------------------------
-# By passing ?pipeline=embedding-pipeline, each document is routed through the pipeline before storage. The pipeline calls the inference endpoint, generates the vector from 'content', and writes it to 'content_embedding'. You send text; Elasticsearch stores both.
+# By passing "?pipeline=embedding-pipeline", each document is routed through the pipeline before storage. The pipeline calls the inference endpoint, generates the vector from 'content', and writes it to 'content_embedding'. You send text; Elasticsearch stores both.
 
 # ⏳ Model error on first run? Wait 10-15 seconds and retry.
 
-# ?pipeline=embedding-pipeline — route each document through the pipeline
-# ?refresh=wait_for — wait until searchable before returning (same as Step A3)
+# ?pipeline=embedding-pipeline → route each document through the pipeline
+# ?refresh=wait_for → wait until searchable before returning (same as Step A2)
 
 POST /_bulk?pipeline=embedding-pipeline&refresh=wait_for
 { "index": { "_index": "kibana_sample_data_vectordb_byoe" } }
@@ -593,6 +545,11 @@ POST /_bulk?pipeline=embedding-pipeline&refresh=wait_for
 {"title": "Yosemite National Park", "content": "Yosemite National Park covers over 750,000 acres of land in California. The park is best known for its granite cliffs, waterfalls and giant sequoia trees. Its most famous cliff, El Capitan, rises about 3,000 feet from Yosemite Valley. It is home to a diverse range of wildlife, including mule deer, black bears, and the endangered Sierra Nevada bighorn sheep. The park has 1,200 square miles of wilderness and is a popular destination for rock climbers.", "source": "national-parks"}
 { "index": { "_index": "kibana_sample_data_vectordb_byoe" } }
 {"title": "Rocky Mountain National Park", "content": "Rocky Mountain National Park receives over 4.5 million visitors annually and is known for its mountainous terrain, including Longs Peak. The park is home to elk, mule deer, moose, and bighorn sheep. It contains montane, subalpine, and alpine tundra ecosystems and is a popular destination for hiking, camping, and wildlife viewing.", "source": "national-parks"}
+{ "index": { "_index": "kibana_sample_data_vectordb_byoe" } }
+{"title": "Grand Canyon National Park", "content": "The Grand Canyon is a steep-sided canyon carved by the Colorado River in Arizona. It is 277 miles long, up to 18 miles wide and attains a depth of over a mile. The park receives nearly six million visitors per year and offers hiking, rafting, and helicopter tours. It is one of the Seven Natural Wonders of the World.", "source": "national-parks"}
+{ "index": { "_index": "kibana_sample_data_vectordb_byoe" } }
+{"title": "Zion National Park", "content": "Zion National Park is located in southwestern Utah and is known for its steep red cliffs and narrow canyons. The Virgin River runs through the main canyon. The park is famous for the Angels Landing and Narrows hikes, and receives over four million visitors annually. Wildlife includes mule deer, mountain lions, and California condors.", "source": "national-parks"}
+
 
 # ✅ You should see: {"errors": false, "took": ..., "items": [...]}
 # "errors": false confirms all documents were embedded and indexed.
@@ -675,7 +632,7 @@ GET /kibana_sample_data_vectordb_byoe/_search
 # -----------------------------------------------
 # ⚡ Step B7: Run a hybrid search — the recommended default
 # -----------------------------------------------
-# This step combines kNN (meaning-based) with BM25 (keyword-based) via RRF. Same idea as Step A5, different retrievers.
+# This step combines kNN (meaning-based) with BM25 (keyword-based) via RRF. Same idea as Step A4, different retrievers.
 
 # This should be your default query pattern — it outperforms either method alone.
 
@@ -721,7 +678,7 @@ GET /kibana_sample_data_vectordb_byoe/_search
 # -----------------------------------------------
 # 🔒 Step B8: Add a filter to the hybrid search
 # -----------------------------------------------
-# This step restricts which documents are searched, same concept as Step A6.
+# This step restricts which documents are searched, same concept as Step A5.
 
 # First, index a document with source "state-park" to verify the filter (source: "national-parks") excludes it from results.
 

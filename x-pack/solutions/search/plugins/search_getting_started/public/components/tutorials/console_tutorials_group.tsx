@@ -129,14 +129,14 @@ export const ConsoleTutorialsGroup = () => {
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.vectorSearchTitle', {
-          defaultMessage: 'Vector DB',
+          defaultMessage: 'Vector Database',
         }),
         dataTestSubj: 'console_tutorials_vector_search',
         description: i18n.translate(
           'xpack.searchGettingStarted.consoleTutorials.vectorSearchDescription',
           {
             defaultMessage:
-              'Learn to use Elastic as a vector datastore for chatbots, RAG, and recommenders. Generate embeddings or bring your own.',
+              'Store and search vectors for semantic search, chatbots, recommenders, and RAG. Generate embeddings or bring your own vectors.',
           }
         ),
         request: consoleTutorials.vectorDatabase,
