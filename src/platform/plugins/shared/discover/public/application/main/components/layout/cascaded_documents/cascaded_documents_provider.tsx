@@ -24,18 +24,9 @@ import type {
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 
-export type DataCascadeUiState = DataCascadeRestorableState;
-
-export type CascadedDocumentsDataGridUiState = UnifiedDataTableRestorableState & {
-  virtualizationMetadata: {
-    initialDisplayedItemIndex: number;
-    scrollRect: { width: number; height: number };
-  };
-};
-
 export type CascadedDocumentsDataGridUiStateMap = Record<
   string,
-  Partial<CascadedDocumentsDataGridUiState>
+  Partial<UnifiedDataTableRestorableState>
 >;
 
 export interface CascadedDocumentsContext
@@ -51,9 +42,9 @@ export interface CascadedDocumentsContext
   getRenderDocumentViewMetaSetter: (
     owner: string
   ) => UnifiedDataTableProps['setRenderDocumentViewMeta'] | undefined;
-  getDataCascadeUiState: () => DataCascadeUiState | undefined;
+  getDataCascadeUiState: () => DataCascadeRestorableState | undefined;
   getDataGridUiStateMap: () => CascadedDocumentsDataGridUiStateMap | undefined;
-  setDataCascadeUiState: (uiState: DataCascadeUiState | undefined) => void;
+  setDataCascadeUiState: (uiState: DataCascadeRestorableState | undefined) => void;
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;

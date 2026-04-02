@@ -278,8 +278,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
         isSortEnabled={false}
         enableInTableSearch
         ariaLabelledBy="data-cascade-leaf-cell"
-        // TODO: I think this will pollute local storage
-        consumer={`discover_esql_cascade_row_leaf_${cellId}`}
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}

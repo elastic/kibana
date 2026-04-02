@@ -175,7 +175,6 @@ describe('ESQLDataCascadeLeafCell', () => {
 
     expect(getExpandedDocSetter).toHaveBeenCalledWith(cellId);
     expect(getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
-    expect(unifiedDataTableProps.consumer).toBe(`discover_esql_cascade_row_leaf_${cellId}`);
     expect(unifiedDataTableProps.rows).toEqual(cellData);
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);

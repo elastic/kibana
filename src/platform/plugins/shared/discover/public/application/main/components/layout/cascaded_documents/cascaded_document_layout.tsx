@@ -16,6 +16,7 @@ import {
   DataCascadeRowCell,
   toRestorableState,
   type DataCascadeRowCellProps,
+  type DataCascadeRestorableState,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
@@ -34,10 +35,7 @@ import {
 import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
-import {
-  type DataCascadeUiState,
-  useCascadedDocumentsContext,
-} from './cascaded_documents_provider';
+import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 import { useCascadedDocumentsTelemetry } from './telemetry';
 
 export interface ESQLDataCascadeProps
@@ -124,7 +122,7 @@ const ESQLDataCascade = React.memo(
       [dataView, props]
     );
 
-    const dataCascadeUiState = useMemo<DataCascadeUiState | undefined>(
+    const dataCascadeUiState = useMemo<DataCascadeRestorableState | undefined>(
       () => getDataCascadeUiState(),
       [getDataCascadeUiState]
     );
