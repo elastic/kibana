@@ -51,6 +51,7 @@ import {
   getAllFieldsInOrder,
   getOriginalSampleDocument,
   getSourceField,
+  getTargetField,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
@@ -310,11 +311,16 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const { currentProcessorSourceField, currentStepId, stepIds } = useStreamEnrichmentSelector(
-    (state) => {
+  const { currentProcessorSourceField, currentProcessorTargetField, currentStepId, stepIds } =
+    useStreamEnrichmentSelector((state) => {
       const isInteractiveMode = selectIsInteractiveMode(state);
       if (!isInteractiveMode || !state.context.interactiveModeRef) {
-        return { currentProcessorSourceField: undefined, currentStepId: undefined, stepIds: [] };
+        return {
+          currentProcessorSourceField: undefined,
+          currentProcessorTargetField: undefined,
+          currentStepId: undefined,
+          stepIds: [],
+        };
       }
 
       const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
@@ -327,6 +333,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
           return {
             currentProcessorSourceField: getSourceField(step),
+            currentProcessorTargetField: getTargetField(step),
             currentStepId: stepRef.id,
             stepIds: allStepIds,
           };
@@ -335,11 +342,11 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
       return {
         currentProcessorSourceField: undefined,
+        currentProcessorTargetField: undefined,
         currentStepId: undefined,
         stepIds: allStepIds,
       };
-    }
-  );
+    });
 
   const processorsMetrics = useSimulatorSelector(
     (snapshot) => snapshot.context.simulation?.processors_metrics
@@ -438,7 +445,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       : undefined;
 
   // Calculate if view mode should be forced to 'columns'
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+  const isViewModeForced = Boolean(
+    validGrokField || validCurrentProcessorSourceField || currentProcessorTargetField
+  );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
   const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
@@ -446,6 +455,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
       currentProcessorSourceField: validCurrentProcessorSourceField,
+      currentProcessorTargetField,
       detectedFields,
       previewDocsFilter,
     });
@@ -466,6 +476,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     return filteredCols;
   }, [
     allColumns,
+    currentProcessorTargetField,
     detectedFields,
     explicitlyDisabledPreviewColumns,
     explicitlyEnabledPreviewColumns,

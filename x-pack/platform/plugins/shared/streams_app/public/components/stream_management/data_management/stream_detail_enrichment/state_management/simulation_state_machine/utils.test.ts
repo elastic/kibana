@@ -15,6 +15,7 @@ import {
   getOriginalSampleDocument,
   getSourceField,
   getTargetField,
+  getTableColumns,
 } from './utils';
 
 const makeAction = (
@@ -296,6 +297,57 @@ describe('Simulation utils', () => {
       expect(
         getTargetField({ action: 'convert', from: 'status', to: 'status' } as any)
       ).toBeUndefined();
+    });
+  });
+
+  describe('getTableColumns', () => {
+    it('returns source + target + detected fields with no duplicates', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: 'tags',
+        currentProcessorTargetField: 'tags_array',
+        detectedFields: [{ name: 'tags_array' }, { name: 'other_field' }] as any,
+        previewDocsFilter: 'outcome_filter_all',
+      });
+      expect(result).toEqual(['tags', 'tags_array', 'other_field']);
+    });
+
+    it('returns only source field for failed/skipped docs', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: 'tags',
+        currentProcessorTargetField: 'tags_array',
+        detectedFields: [{ name: 'detected' }] as any,
+        previewDocsFilter: 'outcome_filter_failed',
+      });
+      expect(result).toEqual(['tags']);
+    });
+
+    it('returns empty when no source field', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: undefined,
+        currentProcessorTargetField: 'tags_array',
+        detectedFields: [{ name: 'detected' }] as any,
+        previewDocsFilter: 'outcome_filter_all',
+      });
+      expect(result).toEqual([]);
+    });
+
+    it('includes target field before simulation (no detected fields)', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: 'tags',
+        currentProcessorTargetField: 'tags_array',
+        detectedFields: [],
+        previewDocsFilter: 'outcome_filter_all',
+      });
+      expect(result).toEqual(['tags', 'tags_array']);
+    });
+
+    it('works without target field (backwards compatible)', () => {
+      const result = getTableColumns({
+        currentProcessorSourceField: 'tags',
+        detectedFields: [{ name: 'detected' }] as any,
+        previewDocsFilter: 'outcome_filter_all',
+      });
+      expect(result).toEqual(['tags', 'detected']);
     });
   });
 });

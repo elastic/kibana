@@ -201,10 +201,12 @@ export function getAllFieldsInOrder(
 
 export function getTableColumns({
   currentProcessorSourceField,
+  currentProcessorTargetField,
   detectedFields = [],
   previewDocsFilter,
 }: {
   currentProcessorSourceField?: string;
+  currentProcessorTargetField?: string;
   detectedFields?: DetectedField[];
   previewDocsFilter: PreviewDocsFilterOption;
 }) {
@@ -218,7 +220,11 @@ export function getTableColumns({
 
   const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
 
-  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
+  return uniq([
+    currentProcessorSourceField,
+    ...(currentProcessorTargetField ? [currentProcessorTargetField] : []),
+    ...uniqueDetectedFields,
+  ]);
 }
 
 type SimulationDocReport = Simulation['documents'][number];
