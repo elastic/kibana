@@ -25,10 +25,6 @@
       "serverless",
       "searchNavigation",
       "sampleDataIngest"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "esUiShared"
     ]
   }
 }
