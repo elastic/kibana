@@ -28,10 +28,10 @@ interface ConditionFieldGroupProps {
  * Condition field group for configuring alert trigger conditions.
  *
  * This component displays:
- * - An editable ES|QL query editor (when includeQuery is true) OR a read-only view of the base query
+ * - An editable ES|QL query editor (when includeBase is true) OR a read-only view of the base query
  *
- * The base query defines what data is being evaluated and the trigger
- * condition must be embedded within it (e.g. as a trailing WHERE clause).
+ * The full ES|QL query defines what data is being evaluated, including any
+ * trigger condition (e.g. a trailing WHERE clause).
  */
 export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroupProps) => {
   const { control } = useFormContext<FormValues>();

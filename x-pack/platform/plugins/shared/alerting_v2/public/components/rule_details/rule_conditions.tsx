@@ -166,8 +166,8 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({ r
 
       <EuiTitle size="xxs">
         <h3>
-          {i18n.translate('xpack.alertingV2.ruleDetails.baseQuery', {
-            defaultMessage: 'Base query',
+          {i18n.translate('xpack.alertingV2.ruleDetails.esqlQuery', {
+            defaultMessage: 'ES|QL query',
           })}
         </h3>
       </EuiTitle>
