@@ -22,7 +22,7 @@ export const DEFAULT_MAX_OPEN_CASES = 5;
 export const MAX_OPEN_CASES_ADVANCED_SETTING = 'cases:maxOpenCasesPerRuleRun' as const;
 
 export const getMaximumOpenCases = (maxOpenCases?: number | null): number => {
-  if (maxOpenCases == null || Number.isNaN(maxOpenCases)) {
+  if (maxOpenCases == null || Number.isNaN(maxOpenCases) || !Number.isFinite(maxOpenCases)) {
     return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
   }
 
