@@ -21,7 +21,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import { STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import type { StreamsTaskType, TaskContext } from '.';
-import { parseError } from '../../streams/errors/parse_error';
+import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
 import type { QueryClient } from '../../streams/assets/query/query_client';
