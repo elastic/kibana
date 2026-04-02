@@ -108,8 +108,8 @@ describe('installPrebuiltWatchlists', function () {
     await callInstall();
 
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(1);
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining(`Prebuilt watchlist ${PRIVILEGED_USER_WATCHLIST_NAME} initialized.`)
+    expect(mockLogger.info).toHaveBeenCalledWith(      
+      expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_NAME}' initialized.`)
     );
   });
 
