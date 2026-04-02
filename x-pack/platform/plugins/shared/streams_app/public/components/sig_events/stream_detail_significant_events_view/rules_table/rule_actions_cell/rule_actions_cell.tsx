@@ -45,6 +45,7 @@ export function RuleActionsCell({
           <EuiContextMenuItem
             key="query-delete"
             icon="trash"
+            color="danger"
             disabled={isDisabled}
             onClick={() => {
               setIsActionsMenuOpen(false);
