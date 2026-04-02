@@ -78,7 +78,7 @@ describe('WatchlistConfigClient', () => {
           watchlist_counts: {
             terms: {
               field: 'watchlist.id',
-              size: 10000,
+              size: ids.length,
             },
           },
         },
