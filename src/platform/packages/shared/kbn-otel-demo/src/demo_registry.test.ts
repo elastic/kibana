@@ -374,7 +374,7 @@ describe('demo_registry', () => {
         expect(yaml).not.toContain('hostAliases');
       });
 
-      it('should use custom collector image when provided', () => {
+      it('should use EDOT collector image by default', () => {
         const config = DEMO_CONFIGS[demoType];
         const manifestGenerator = DEMO_MANIFESTS[demoType];
         const yaml = manifestGenerator.generate({
@@ -387,15 +387,17 @@ describe('demo_registry', () => {
         expect(yaml).not.toContain('otel/opentelemetry-collector-contrib');
       });
 
-      it('should use vanilla collector image by default', () => {
+      it('should use vanilla collector image when --vanilla is used', () => {
         const config = DEMO_CONFIGS[demoType];
         const manifestGenerator = DEMO_MANIFESTS[demoType];
         const yaml = manifestGenerator.generate({
           ...mockOptions,
           config,
+          collectorImage: 'otel/opentelemetry-collector-contrib:0.115.1',
         });
 
-        expect(yaml).toContain('otel/opentelemetry-collector-contrib');
+        expect(yaml).toContain('otel/opentelemetry-collector-contrib:0.115.1');
+        expect(yaml).not.toContain('docker.elastic.co/elastic-agent/elastic-otel-collector');
       });
     });
   });

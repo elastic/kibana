@@ -131,7 +131,7 @@ export interface ManifestOptions {
   envOverrides?: Record<string, Record<string, string>>;
   /** Host aliases to inject into the collector pod for DNS resolution from inside pods */
   hostAliases?: Array<{ ip: string; hostnames: string[] }>;
-  /** OTel Collector container image (defaults to vanilla otel-collector-contrib) */
+  /** OTel Collector container image — always set by ensure_otel_demo (EDOT by default, vanilla with --vanilla) */
   collectorImage?: string;
 }
 

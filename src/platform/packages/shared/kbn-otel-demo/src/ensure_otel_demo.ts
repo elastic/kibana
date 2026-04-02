@@ -280,16 +280,13 @@ export async function deployDemo({
     log.write('');
   }
 
-  // Resolve the EDOT collector image tag (default) or use vanilla
-  let collectorImage: string | undefined;
-  if (!useVanillaCollector) {
-    const edotImage = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
-    const edotVersion = await resolveEdotCollectorVersion(log);
-    collectorImage = `${edotImage}:${edotVersion}`;
-    log.info(`Using EDOT Collector: ${collectorImage}`);
-  } else {
-    log.info('Using vanilla otel-collector-contrib (--vanilla flag)');
+  // Resolve collector image: EDOT by default, vanilla with --vanilla
+  const edotVersion = await resolveEdotCollectorVersion(log);
+  let collectorImage = `docker.elastic.co/elastic-agent/elastic-otel-collector:${edotVersion}`;
+  if (useVanillaCollector) {
+    collectorImage = 'otel/opentelemetry-collector-contrib:0.115.1';
   }
+  log.info(`Using collector: ${collectorImage}`);
 
   // Generate OTel Collector configuration
   const collectorConfig = useVanillaCollector
