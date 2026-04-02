@@ -39,6 +39,9 @@ import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_f
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
+import { PromotionCallout } from './promotion_callout/promotion_callout';
+import { SuggestedRulesFlyout } from './suggested_rules_flyout/suggested_rules_flyout';
+import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -86,7 +89,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
     ) => {
       const queriesTaskResult = completedTaskState.queriesTaskResult;
-      const generatedKnowledgeIndicatorsCount =
+      const featuresTaskResult = completedTaskState.featuresTaskResult;
+      const generatedFeaturesCount =
+        featuresTaskResult?.status === TaskStatus.Completed
+          ? featuresTaskResult.features.length
+          : 0;
+      const generatedQueriesCount =
         queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
 
       toasts.addSuccess({
@@ -96,7 +104,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             defaultMessage:
               '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
             values: {
-              count: generatedKnowledgeIndicatorsCount,
+              count: generatedFeaturesCount + generatedQueriesCount,
             },
           }
         ),
@@ -144,6 +152,23 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
+  const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
+  const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
+    ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
+    : undefined;
+
+  const toggleSelectedKnowledgeIndicator = useCallback((knowledgeIndicator: KnowledgeIndicator) => {
+    setSelectedKnowledgeIndicator((currentKnowledgeIndicator) => {
+      if (!currentKnowledgeIndicator) {
+        return knowledgeIndicator;
+      }
+
+      const currentId = getKnowledgeIndicatorItemId(currentKnowledgeIndicator);
+      const nextId = getKnowledgeIndicatorItemId(knowledgeIndicator);
+
+      return currentId === nextId ? null : knowledgeIndicator;
+    });
+  }, []);
 
   const isRulesSelected = useMemo(
     () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
@@ -173,6 +198,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexItem grow={false}>
+          <PromotionCallout
+            streamName={definition.stream.name}
+            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
+          />
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
             <EuiFlexGroup
@@ -240,7 +272,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 rules={ruleKnowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
-                onViewDetails={setSelectedKnowledgeIndicator}
+                selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
+                onViewDetails={toggleSelectedKnowledgeIndicator}
               />
             ) : (
               <KnowledgeIndicatorsTable
@@ -250,7 +283,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 searchTerm={debouncedTableSearchValue}
                 selectedTypes={selectedKnowledgeIndicatorTypes}
                 statusFilter={knowledgeIndicatorStatusFilter}
-                onViewDetails={setSelectedKnowledgeIndicator}
+                selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
+                onViewDetails={toggleSelectedKnowledgeIndicator}
               />
             )}
           </EuiPanel>
@@ -263,6 +297,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           onClose={() => setSelectedKnowledgeIndicator(null)}
         />
       ) : null}
+
+      {isSuggestedRulesFlyoutOpen && (
+        <SuggestedRulesFlyout
+          streamName={definition.stream.name}
+          onClose={() => setIsSuggestedRulesFlyoutOpen(false)}
+        />
+      )}
     </>
   );
 }
