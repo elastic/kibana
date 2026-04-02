@@ -163,14 +163,25 @@ export class SearchSessionService implements ISearchSessionService {
   public get = async (
     { savedObjectsClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
-    sessionId: string
+    sessionId: string,
+    skipUserCheck: boolean = false
   ) => {
     this.logger.debug(`get | ${sessionId}`);
     const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId
     );
-    this.throwOnUserConflict(user, session);
+
+    // Skip user-sameness check for requests from minimal auth routes (search route).
+    // The search route uses minimal auth for performance, which doesn't include realm information.
+    // Session management routes use full auth and will enforce the complete realm check.
+    if (!skipUserCheck) {
+      this.throwOnUserConflict(user, session);
+    } else {
+      this.logger.debug(
+        `Skipping user-sameness check for session ${session.attributes.sessionId} (minimal auth request)`
+      );
+    }
 
     return session;
   };
@@ -226,11 +237,12 @@ export class SearchSessionService implements ISearchSessionService {
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string,
-    attributes: Partial<SearchSessionSavedObjectAttributes>
+    attributes: Partial<SearchSessionSavedObjectAttributes>,
+    skipUserCheck: boolean = false
   ) => {
     this.logger.debug(`SearchSessionService: update | ${sessionId}`);
     if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
-    await this.get(deps, user, sessionId); // Verify correct user
+    await this.get(deps, user, sessionId, skipUserCheck); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId,
@@ -328,7 +340,13 @@ export class SearchSessionService implements ISearchSessionService {
               },
               {}
             );
-            this.update(queue[0].deps, queue[0].user, sessionId, { idMapping: batchedIdMapping })
+            this.update(
+              queue[0].deps,
+              queue[0].user,
+              sessionId,
+              { idMapping: batchedIdMapping },
+              true // Skip user check for trackId - called from minimal auth search route
+            )
               .then(() => {
                 queue.forEach((q) => q.resolve());
               })
@@ -464,7 +482,8 @@ export class SearchSessionService implements ISearchSessionService {
       throw new Error('Request hash is required to get search ID from session');
     }
 
-    const session = await this.get(deps, user, sessionId);
+    // Skip user check for getId - called from minimal auth search route
+    const session = await this.get(deps, user, sessionId, true);
     if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
       this.logger.debug(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.error(
