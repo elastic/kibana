@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   async function checkHistogramVis(timespan: string, totalCount: string) {
     await header.waitUntilLoadingHasFinished();
     await discover.waitUntilSearchingHasFinished();
+    await discover.waitUntilChartIsVisible();
 
     await testSubjects.existOrFail('xyVisChart');
     await testSubjects.existOrFail('unifiedHistogramEditVisualization');
@@ -62,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ) {
     await header.waitUntilLoadingHasFinished();
     await discover.waitUntilSearchingHasFinished();
+    await discover.waitUntilChartIsVisible();
 
     await testSubjects.existOrFail('xyVisChart');
     await testSubjects.existOrFail('unifiedHistogramSaveVisualization');

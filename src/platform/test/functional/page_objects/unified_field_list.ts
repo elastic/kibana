@@ -50,8 +50,38 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async waitUntilSidebarHasLoaded() {
+    await this.header.waitUntilLoadingHasFinished();
+
     await this.retry.waitFor('sidebar is loaded', async () => {
-      return (await this.getSidebarAriaDescription()).length > 0;
+      const hasFieldSearch = await this.testSubjects.exists('fieldListFiltersFieldSearch', {
+        timeout: 1000,
+      });
+
+      if (!hasFieldSearch) {
+        return false;
+      }
+
+      const hasAriaDescriptionElement = await this.testSubjects.exists(
+        'fieldListGrouped__ariaDescription',
+        {
+          timeout: 1000,
+        }
+      );
+      const hasAriaDescription =
+        hasAriaDescriptionElement && (await this.getSidebarAriaDescription()).length > 0;
+
+      if (hasAriaDescription) {
+        return true;
+      }
+
+      return (
+        (await this.testSubjects.exists('fieldListGroupedFieldGroups', {
+          timeout: 1000,
+        })) ||
+        (await this.testSubjects.exists('fieldListGroupedEmptyFields', {
+          timeout: 1000,
+        }))
+      );
     });
   }
 
@@ -225,6 +255,13 @@ export class UnifiedFieldListPageObject extends FtrService {
       await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
     });
     await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('lens workspace to open', async () => {
+      return (
+        (await this.testSubjects.exists('lnsWorkspace', { timeout: 1000 })) ||
+        (await this.testSubjects.exists('lns-dimensionTrigger', { timeout: 1000 })) ||
+        (await this.testSubjects.exists('lns-dimensionTrigger-textBased', { timeout: 1000 }))
+      );
+    });
   }
 
   public async expectFieldListItemVisualize(field: string) {

@@ -40,6 +40,22 @@ const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = 'cloudConnectorNameInput';
 export class CspmIntegrationPage {
   constructor(private readonly page: ScoutPage) {}
 
+  private async clickSaveButton() {
+    const toastCloseButtons = this.page.getByTestId('toastCloseButton');
+
+    while ((await toastCloseButtons.count()) > 0) {
+      const [toastCloseButton] = await toastCloseButtons.all();
+
+      if (!toastCloseButton) {
+        break;
+      }
+
+      await toastCloseButton.click();
+    }
+
+    await this.page.getByTestId('createPackagePolicySaveButton').click();
+  }
+
   async navigate() {
     await this.page.gotoApp('fleet/integrations/cloud_security_posture/add-integration/cspm');
     // Wait for the provider selector tabs to be visible before continuing
@@ -127,11 +143,11 @@ export class CspmIntegrationPage {
   }
 
   async saveIntegration() {
-    await this.page.getByTestId('createPackagePolicySaveButton').click();
+    await this.clickSaveButton();
   }
 
   async saveAgentBasedIntegration() {
-    await this.page.getByTestId('createPackagePolicySaveButton').click();
+    await this.clickSaveButton();
     const cloudFormationModal = this.page.getByTestId('postInstallCloudFormationModal');
     const armTemplateModal = this.page.getByTestId('postInstallAzureArmTemplateModal');
     const addAgentModal = this.page.getByTestId('postInstallAddAgentModal');

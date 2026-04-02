@@ -22,6 +22,11 @@ interface ListPrivileges {
   };
 }
 
+const isAbortError = (error: Error) =>
+  error.name === 'AbortError' ||
+  error.message.includes('aborted without reason') ||
+  error.message.includes('signal is aborted');
+
 export const useFetchListPrivileges = (isAppAvailable: boolean = true) => {
   const http = useHttp();
   const { lists } = useKibana().services;
@@ -47,7 +52,7 @@ export const useFetchListPrivileges = (isAppAvailable: boolean = true) => {
 
   useEffect(() => {
     const error = listPrivileges.error;
-    if (error != null) {
+    if (error != null && !isAbortError(error)) {
       addError(error, {
         title: i18n.LISTS_PRIVILEGES_FETCH_FAILURE,
       });

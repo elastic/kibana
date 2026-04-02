@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render esql view correctly', async function () {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await discover.waitUntilChartIsVisible();
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
@@ -109,6 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await discover.waitUntilChartIsVisible();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
         expect(await testSubjects.exists('ESQLEditor')).to.be(true);
@@ -163,6 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Apr 10, 2018 @ 00:00:00.000';
         const toTime = 'Nov 15, 2018 @ 00:00:00.000';
         await timePicker.setAbsoluteRange(fromTime, toTime);
+        await discover.waitUntilChartIsVisible();
 
         expect(await testSubjects.exists('ESQLEditor')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
@@ -178,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
+        await discover.waitUntilChartIsVisible();
         // here Lens suggests a XY so it is rendered
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('xyVisChart')).to.be(true);

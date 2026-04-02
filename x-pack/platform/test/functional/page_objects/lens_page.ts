@@ -1472,7 +1472,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param count - expected count of metric
      */
     async assertLegacyMetric(title: string, count: string) {
-      await this.waitForVisualization('legacyMtrVis');
+      await header.waitUntilLoadingHasFinished();
+      await retry.waitFor('legacy metric to render', async () => {
+        return (
+          (await testSubjects.exists('metric_label', { timeout: 1000 })) &&
+          (await testSubjects.exists('metric_value', { timeout: 1000 }))
+        );
+      });
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
@@ -1679,19 +1685,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.waitFor('visualization render to stabilize', async () => {
         const hasVisualization = await hasExpectedVisualization();
 
-        if (await hasWorkspaceContainer()) {
-          if (!(await isWorkspaceRenderComplete())) {
-            return false;
-          }
-
-          await common.sleep(250);
-
-          if (!(await isWorkspaceRenderComplete())) {
-            return false;
-          }
+        if (!hasVisualization) {
+          return false;
         }
 
-        return hasVisualization;
+        if (!(await hasWorkspaceContainer())) {
+          return true;
+        }
+
+        if (await isWorkspaceRenderComplete()) {
+          await common.sleep(250);
+
+          return await isWorkspaceRenderComplete();
+        }
+
+        await common.sleep(250);
+
+        return await hasExpectedVisualization();
       });
     },
 

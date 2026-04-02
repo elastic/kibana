@@ -187,8 +187,33 @@ export class DiscoverPageObject extends FtrService {
       timeout: this.defaultFindTimeout * 10,
     });
     await this.retry.waitFor('discover content to render', async () => {
+      const hasDocTable = await this.testSubjects.exists('discoverDocTable', { timeout: 1000 });
+
+      if (hasDocTable) {
+        const isRenderComplete = await this.testSubjects.getAttribute(
+          'discoverDocTable',
+          'data-render-complete',
+          {
+            findTimeout: this.defaultFindTimeout,
+            tryTimeout: this.defaultFindTimeout * 10,
+          }
+        );
+
+        if (isRenderComplete !== 'true') {
+          return false;
+        }
+
+        await this.common.sleep(100);
+
+        return (
+          (await this.testSubjects.getAttribute('discoverDocTable', 'data-render-complete', {
+            findTimeout: this.defaultFindTimeout,
+            tryTimeout: this.defaultFindTimeout * 10,
+          })) === 'true'
+        );
+      }
+
       return (
-        (await this.testSubjects.exists('discoverDocTable', { timeout: 1000 })) ||
         (await this.testSubjects.exists('discoverNoResults', { timeout: 1000 })) ||
         (await this.testSubjects.exists('discoverQueryHits', { timeout: 1000 })) ||
         (await this.testSubjects.exists('discoverQueryHitsPartial', { timeout: 1000 }))
@@ -493,6 +518,16 @@ export class DiscoverPageObject extends FtrService {
 
   public async isChartVisible() {
     return await this.testSubjects.exists('unifiedHistogramChart');
+  }
+
+  public async waitUntilChartIsVisible() {
+    await this.waitUntilTabIsLoaded();
+
+    await this.retry.waitFor('discover histogram to render', async () => {
+      return await this.testSubjects.exists('unifiedHistogramChart', {
+        timeout: this.defaultFindTimeout,
+      });
+    });
   }
 
   public async isTableVisible() {

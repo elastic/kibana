@@ -55,20 +55,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should go back after loading', async function () {
-      await retry.waitFor('user navigating to context and returning to discover', async () => {
-        // navigate to the context view
-        const initialHitCount = await PageObjects.discover.getHitCount();
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const initialHitCount = await PageObjects.discover.getHitCount();
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-        const rowActions = await dataGrid.getRowActions();
-        await rowActions[1].click();
-        await PageObjects.context.waitUntilContextLoadingHasFinished();
-        await PageObjects.context.clickSuccessorLoadMoreButton();
-        await PageObjects.context.clickSuccessorLoadMoreButton();
-        await PageObjects.context.clickSuccessorLoadMoreButton();
-        await PageObjects.context.waitUntilContextLoadingHasFinished();
-        await browser.goBack();
-        await PageObjects.discover.waitForDocTableLoadingComplete();
+      const rowActions = await dataGrid.getRowActions();
+      await rowActions[1].click();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+
+      await retry.waitFor('user navigating to context and returning to discover', async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         return initialHitCount === hitCount;
       });

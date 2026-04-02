@@ -13,6 +13,11 @@ import * as i18n from './translations';
 
 export const useFetchPrivileges = () => useAsync(withOptionalSignal(getUserPrivilege));
 
+const isAbortError = (error: Error) =>
+  error.name === 'AbortError' ||
+  error.message.includes('aborted without reason') ||
+  error.message.includes('signal is aborted');
+
 export const useFetchDetectionEnginePrivileges = (isAppAvailable: boolean = true) => {
   const { start, ...detectionEnginePrivileges } = useFetchPrivileges();
   const { addError } = useAppToasts();
@@ -36,7 +41,7 @@ export const useFetchDetectionEnginePrivileges = (isAppAvailable: boolean = true
 
   useEffect(() => {
     const error = detectionEnginePrivileges.error;
-    if (error != null) {
+    if (error != null && !isAbortError(error)) {
       addError(error, {
         title: i18n.DETECTION_ENGINE_PRIVILEGES_FETCH_FAILURE,
       });

@@ -102,7 +102,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemVisualize('geo.src');
       await header.waitUntilLoadingHasFinished();
 
-      expect(await filterBar.hasFilter('bytes', '3,500 to 4,000')).to.be(true);
+      await retry.waitFor('lens filter state to be transferred from Discover', async () => {
+        return await filterBar.hasFilter('bytes', '3,500 to 4,000');
+      });
     });
 
     it('should preserve query in lens', async () => {
@@ -112,7 +114,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemVisualize('geo.dest');
       await header.waitUntilLoadingHasFinished();
 
-      expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
+      await retry.waitFor('lens query state to be transferred from Discover', async () => {
+        return (await queryBar.getQueryString()) === 'machine.os : ios';
+      });
     });
 
     it('should visualize correctly using breakdown field', async () => {
@@ -158,6 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilChartIsVisible();
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
@@ -175,6 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilChartIsVisible();
 
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
