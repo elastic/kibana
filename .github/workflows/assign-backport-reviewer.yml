@@ -33,7 +33,6 @@ jobs:
             const currentPrNumber = context.payload.pull_request.number;
             const prAuthor = context.payload.pull_request.user.login;
             const normalize = (s) => s.replace(/^@/, '').trim();
-            const toTeamSlug = (team) => team.split('/')[1] ?? team;
             const isHumanReviewer = (login) =>
               Boolean(login) &&
               login !== 'kibanamachine' &&
@@ -68,7 +67,7 @@ jobs:
             const matchedTeams = [...codeownerTeams.intersection(authorTeams)];
 
             if (matchedTeams.length > 0) {
-              core.setOutput('team_reviewers', matchedTeams.map(toTeamSlug).join(','));
+              core.setOutput('team_reviewers', matchedTeams.join(','));
               return;
             }
 
@@ -118,9 +117,7 @@ jobs:
         with:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const currentPrNumber = context.payload.pull_request.number;
+            const currentPrId = context.payload.pull_request.node_id;
             const teamReviewers = '${{ steps.select-reviewers.outputs.team_reviewers }}'
               .split(',')
               .filter(Boolean);
@@ -130,23 +127,26 @@ jobs:
               return;
             }
 
-            await github.rest.pulls.requestReviewers({
-              owner,
-              repo,
-              pull_number: currentPrNumber,
-              reviewers: reviewer ? [reviewer] : undefined,
-              team_reviewers: teamReviewers.length > 0 ? teamReviewers : undefined,
-            });
-
-            try {
-              await github.rest.pulls.removeRequestedReviewers({
-                owner,
-                repo,
-                pull_number: currentPrNumber,
-                reviewers: ['kibanamachine'],
-              });
-            } catch (error) {
-              if (error.status !== 422) {
-                throw error;
+            await github.graphql(
+              `mutation RequestReviewsByLogin(
+                $pullRequestId: ID!
+                $userLogins: [String!]
+                $teamSlugs: [String!]
+              ) {
+                requestReviewsByLogin(
+                  input: {
+                    pullRequestId: $pullRequestId
+                    userLogins: $userLogins
+                    teamSlugs: $teamSlugs
+                    union: false
+                  }
+                ) {
+                  clientMutationId
+                }
+              }`,
+              {
+                pullRequestId: currentPrId,
+                userLogins: reviewer ? [reviewer] : [],
+                teamSlugs: teamReviewers,
               }
-            }
+            );
