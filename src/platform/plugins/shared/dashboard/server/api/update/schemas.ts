@@ -8,8 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { metaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
   // changing access control is not allowed through update endpoint
@@ -19,11 +19,9 @@ export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
 }
 
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
-  // update endpoint does not return created meta fields
-  const { created_at, created_by, ...restOfMeta } = metaSchema.getPropSchemas();
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
-    meta: schema.object(restOfMeta),
+    meta: asCodeMetaSchema,
   });
 }

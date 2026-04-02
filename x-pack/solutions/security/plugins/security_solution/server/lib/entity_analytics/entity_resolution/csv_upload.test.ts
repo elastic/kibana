@@ -249,6 +249,38 @@ describe('processResolutionCsvUpload', () => {
       });
     });
 
+    it('should error when matched entities exceed the limit', async () => {
+      // Generate enough entities to exceed the 1000 limit
+      const pageSize = 100;
+      const pages = 11; // 11 pages × 100 = 1100 entities > 1000 limit
+
+      mockCrudClient.listEntities.mockReset();
+      // Target lookup
+      mockCrudClient.listEntities.mockResolvedValueOnce({
+        entities: [createMockEntity('target:golden')],
+        nextSearchAfter: undefined,
+      });
+      // Entity matching pages
+      for (let page = 0; page < pages; page++) {
+        const entities = Array.from({ length: pageSize }, (_, i) =>
+          createMockEntity(`alias:${page * pageSize + i}`)
+        );
+        mockCrudClient.listEntities.mockResolvedValueOnce({
+          entities,
+          nextSearchAfter: [page + 1, 0],
+        });
+      }
+
+      const csv = 'type,user.email,resolved_to\nuser,common@test.com,target:golden';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.failed).toBe(1);
+      expect(result.items[0].status).toBe('error');
+      expect(result.items[0].error).toContain('Matched more than 1000 entities');
+      expect(result.items[0].error).toContain('Narrow your identifying fields');
+      expect(mockResolutionClient.linkEntities).not.toHaveBeenCalled();
+    });
+
     it('should handle pagination', async () => {
       mockCrudClient.listEntities
         .mockReset()

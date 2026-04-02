@@ -7,11 +7,9 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { CreateAutoImportIntegrationResponse } from '../../../common';
-import { PLUGIN_ID } from '../../../common/constants';
 import { createIntegration, type CreateUpdateIntegrationRequest } from '../lib/api';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
-import { useUIState } from '../../components/integration_management/contexts';
 
 export interface UseCreateUpdateIntegrationResult {
   createUpdateIntegrationMutation: ReturnType<
@@ -27,8 +25,7 @@ export interface UseCreateUpdateIntegrationResult {
  * Navigates to the edit page after successful creation/update.
  */
 export function useCreateUpdateIntegration(): UseCreateUpdateIntegrationResult {
-  const { http, notifications, application } = useKibana().services;
-  const { closeCreateDataStreamFlyout } = useUIState();
+  const { http, notifications } = useKibana().services;
   const queryClient = useQueryClient();
 
   const mutation = useMutation<
@@ -45,19 +42,10 @@ export function useCreateUpdateIntegration(): UseCreateUpdateIntegrationResult {
         queryClient.invalidateQueries({ queryKey: ['integration', data.integration_id] });
       }
 
-      closeCreateDataStreamFlyout();
-
       notifications.toasts.addSuccess({
         title: i18n.SAVE_INTEGRATION_SUCCESS,
         text: i18n.SAVE_INTEGRATION_SUCCESS_DESCRIPTION(data.integration_id ?? ''),
       });
-
-      // Navigate to the edit page for the newly created integration
-      if (data.integration_id) {
-        application.navigateToApp(PLUGIN_ID, {
-          path: `/edit/${data.integration_id}`,
-        });
-      }
     },
     onError: (error) => {
       notifications.toasts.addError(error, {

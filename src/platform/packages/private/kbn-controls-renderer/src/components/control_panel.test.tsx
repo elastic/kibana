@@ -55,6 +55,7 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONT
       serializeState: () => ({
         type: OPTIONS_LIST_CONTROL,
       }),
+      applySerializedState: () => undefined,
     });
     return {
       Component: () => <div data-test-subj="optionsListControl">Options list control</div>,

@@ -31,10 +31,12 @@ import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/r
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import * as i18n from './translations';
-import type { Gap, GapStatus } from '../../types';
+import type { Gap, GapReasonType, GapStatus } from '../../types';
 import { getStatusLabel, getReasonLabel } from './utils';
 import { GapStatusFilter } from './status_filter';
+import { GapReasonFilter, GAP_REASON_FILTER_ITEMS } from './reason_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
 import { FillGap } from './fill_gap';
 import { FillRuleGapsButton } from './fill_rule_gaps_button';
@@ -211,16 +213,25 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: 'now-24h',
     end: 'now',
   });
-  const { timelines } = useKibana().services;
+  const { timelines, uiSettings } = useKibana().services;
+  const excludedReasonsFromAdvancedSettings = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const gapReasonDetectionEnabled = useIsExperimentalFeatureEnabled('gapReasonDetectionEnabled');
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
+  const [selectedReasonTypes, setSelectedReasonTypes] = useState<GapReasonType[]>(() =>
+    GAP_REASON_FILTER_ITEMS.filter(
+      (reason) => !excludedReasonsFromAdvancedSettings.includes(reason)
+    )
+  );
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
   });
+  const excludedReasons = GAP_REASON_FILTER_ITEMS.filter(
+    (reason) => !selectedReasonTypes.includes(reason)
+  );
 
   const getSortField = (field: keyof Gap) => {
     if (field === '@timestamp' || !field) {
@@ -236,6 +247,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: dateRange.start,
     end: dateRange.end,
     statuses: selectedStatuses,
+    excludedReasons: gapReasonDetectionEnabled ? excludedReasons : undefined,
     sortField: getSortField(sort.field),
     sortOrder: sort.direction,
   });
@@ -290,6 +302,13 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     [setSelectedStatuses]
   );
 
+  const handleReasonChange = useCallback(
+    (reasons: GapReasonType[]) => {
+      setSelectedReasonTypes(reasons);
+    },
+    [setSelectedReasonTypes]
+  );
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup
@@ -309,6 +328,14 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
             <EuiFlexItem grow={false}>
               <GapStatusFilter selectedItems={selectedStatuses} onChange={handleStatusChange} />
             </EuiFlexItem>
+            {gapReasonDetectionEnabled && (
+              <EuiFlexItem grow={false}>
+                <GapReasonFilter
+                  selectedItems={selectedReasonTypes}
+                  onChange={handleReasonChange}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <DatePickerEuiFlexItem>
                 <EuiSuperDatePicker
@@ -351,6 +378,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
       </EuiFlexGroup>
       <EuiBasicTable
         data-test-subj="rule-gaps-table"
+        tableCaption={i18n.GAPS_TABLE_CAPTION}
         items={data?.data ?? []}
         columns={columns}
         pagination={pagination}

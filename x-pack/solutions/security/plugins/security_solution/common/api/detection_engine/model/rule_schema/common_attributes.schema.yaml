@@ -794,3 +794,4 @@ components:
         - unfilled
         - in_progress
         - filled
+        - error
