@@ -59,7 +59,7 @@ const dashboardStateWithLensApi = {
   panels: [
     {
       type: 'lens',
-      uid: 'panel-3',
+      id: 'panel-3',
       grid: { x: 0, y: 0, w: 24, h: 12 },
       config: {
         attributes: {
