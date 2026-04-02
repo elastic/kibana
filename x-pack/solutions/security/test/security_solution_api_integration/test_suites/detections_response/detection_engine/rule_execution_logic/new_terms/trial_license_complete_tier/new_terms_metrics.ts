@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
   dataGeneratorFactory,
@@ -21,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const { indexListOfDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-1',
+    index: 'test-data-1',
     log,
   });
 
@@ -31,32 +32,151 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
 
       await es.indices.delete({
-        index: 'logs-1',
+        index: 'test-data-1,test-data-2',
         ignore_unavailable: true,
       });
-      await es.indices.create({
-        index: 'logs-1',
-        mappings: {
-          properties: {
-            '@timestamp': {
-              type: 'date',
-            },
-            host: {
-              properties: {
-                name: {
-                  type: 'keyword',
-                },
-                ip: {
-                  type: 'ip',
-                },
+
+      const mappings: MappingTypeMapping = {
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          host: {
+            properties: {
+              name: {
+                type: 'keyword',
               },
             },
           },
         },
+      };
+      await es.indices.create({
+        index: 'test-data-1',
+        mappings,
+      });
+      await es.indices.create({
+        index: 'test-data-2',
+        mappings,
       });
     });
 
     describe('metrics collection', () => {
+      describe('matched_indices_count', () => {
+        it('records matched_indices_count for one matching index pattern', async () => {
+          const timestamp = new Date().toISOString();
+          const documents = [
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0' },
+            },
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0' },
+            },
+          ];
+
+          await indexListOfDocuments(documents);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getNewTermsRuleParams({
+              index: ['test-data-1'],
+              query: '*:*',
+              new_terms_fields: ['host.name'],
+              history_window_start: 'now-1h',
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(1);
+        });
+
+        it('records matched_indices_count for a single index pattern with wildcard', async () => {
+          const timestamp = new Date().toISOString();
+          const documents = [
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0' },
+            },
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0' },
+            },
+          ];
+
+          await indexListOfDocuments(documents);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getNewTermsRuleParams({
+              index: ['test-data-*'],
+              query: '*:*',
+              new_terms_fields: ['host.name'],
+              history_window_start: 'now-1h',
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+
+        it('records matched_indices_count for multiple matching index patterns', async () => {
+          const timestamp = new Date().toISOString();
+          const documents = [
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0' },
+            },
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0' },
+            },
+          ];
+
+          await indexListOfDocuments(documents);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getNewTermsRuleParams({
+              index: ['test-da*', 'test-data-1', 'test-data-2'],
+              query: '*:*',
+              new_terms_fields: ['host.name'],
+              history_window_start: 'now-1h',
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+      });
+
       describe('alerts_candidate_count', () => {
         it('records alerts_candidate_count value', async () => {
           const timestamp = new Date().toISOString();
@@ -77,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getNewTermsRuleParams({
-              index: ['logs-1'],
+              index: ['test-data-1'],
               query: '*:*',
               new_terms_fields: ['host.name'],
               history_window_start: 'now-1h',
@@ -120,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getNewTermsRuleParams({
-              index: ['logs-1'],
+              index: ['test-data-1'],
               query: '*:*',
               new_terms_fields: ['host.name'],
               history_window_start: 'now-1h',

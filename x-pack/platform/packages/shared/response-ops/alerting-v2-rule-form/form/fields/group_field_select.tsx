@@ -11,10 +11,11 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
 import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
-import { useRuleFormServices } from '../contexts';
+import { useRuleFormServices, useRuleFormMeta } from '../contexts';
 
 export const GroupFieldSelect = () => {
   const { data } = useRuleFormServices();
+  const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });
   const groupByRowId = 'ruleV2FormGroupByField';
@@ -77,6 +78,7 @@ export const GroupFieldSelect = () => {
               isInvalid={!!error}
               isLoading={isLoading}
               fullWidth
+              compressed={layout === 'flyout'}
             />
           </EuiFormRow>
         );

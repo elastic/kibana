@@ -43,13 +43,30 @@ const PER_EPISODE_STRATEGIES = new Set<string>([
 const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
 const STRATEGIES_REQUIRING_INTERVAL = new Set<string>(['per_status_interval', 'time_interval']);
 
-const validateGroupingModeAndStrategy = (payload: {
+interface ValidationPayload {
   value: {
     groupingMode?: string | null;
     throttle?: { strategy?: string; interval?: string } | null;
   };
   issues: z.core.$ZodRawIssue[];
-}) => {
+}
+
+const validateStrategyInterval = (payload: ValidationPayload) => {
+  const { value: data, issues } = payload;
+  const strategy = data.throttle?.strategy;
+  if (!strategy) return;
+
+  if (STRATEGIES_REQUIRING_INTERVAL.has(strategy) && !data.throttle?.interval) {
+    issues.push({
+      code: 'custom',
+      message: `Strategy "${strategy}" requires an interval to be defined`,
+      path: ['throttle', 'interval'],
+      input: data,
+    });
+  }
+};
+
+const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
   const mode = data.groupingMode ?? 'per_episode';
   const strategy = data.throttle?.strategy;
@@ -65,14 +82,7 @@ const validateGroupingModeAndStrategy = (payload: {
     });
   }
 
-  if (STRATEGIES_REQUIRING_INTERVAL.has(strategy) && !data.throttle?.interval) {
-    issues.push({
-      code: 'custom',
-      message: `Strategy "${strategy}" requires an interval to be defined`,
-      path: ['throttle', 'interval'],
-      input: data,
-    });
-  }
+  validateStrategyInterval(payload);
 };
 
 export type NotificationPolicyDestination = z.infer<typeof notificationPolicyDestinationSchema>;
@@ -164,7 +174,10 @@ export const updateNotificationPolicyDataSchema = z
   })
   .check((payload) => {
     if (payload.value.throttle === null || payload.value.throttle === undefined) return;
-    if (payload.value.groupingMode === undefined) return;
+    if (payload.value.groupingMode === undefined) {
+      validateStrategyInterval(payload);
+      return;
+    }
     validateGroupingModeAndStrategy(payload);
   });
 
