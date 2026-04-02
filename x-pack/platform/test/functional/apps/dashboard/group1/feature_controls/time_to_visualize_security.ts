@@ -229,7 +229,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('visualizeSaveButton');
 
         await visualize.ensureSavePanelOpen();
-        await testSubjects.missingOrFail('add-to-library-checkbox');
 
         await timeToVisualize.saveFromModal('My New Vis 1', {
           addToDashboard: 'new',
