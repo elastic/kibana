@@ -23,10 +23,10 @@ Token URL
 :   The OAuth 2.0 token endpoint for your Salesforce instance. The value is your **domain name** plus `/services/oauth2/token`. Examples: `https://login.salesforce.com/services/oauth2/token` (production), `https://test.salesforce.com/services/oauth2/token` (sandbox), or `https://yourcompany.my.salesforce.com/services/oauth2/token` (My Domain).
 
 Client ID
-:   The **Consumer Key** from a Salesforce OAuth app you register using a [Connected App](#salesforce-connected-app-credentials) or an [External Client App](#salesforce-external-client-app-credentials).
+:   The **Consumer Key** from your Salesforce External Client App OAuth settings (see **Get API credentials**).
 
 Client Secret
-:   The **Consumer Secret** from that Connected App or External Client App.
+:   The **Consumer Secret** from your Salesforce External Client App OAuth settings.
 
 The connector uses the token URL to both obtain an access token and derive the instance base URL for API calls.
 
@@ -68,58 +68,55 @@ Download file
 
 ## Connector networking configuration [salesforce-connector-networking-configuration]
 
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the **Action configuration settings** in the configuration reference for alerting to customize connector networking,
+such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use
+`xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [salesforce-api-credentials]
 
-To use the Salesforce connector, you need a Salesforce OAuth app (a **Connected App** or an **External Client App**) with OAuth 2.0 Client Credentials enabled, then you copy the **Consumer Key** and **Consumer Secret** into the connector in {{kib}}.
+Use the following steps to obtain credentials for the connector’s OAuth 2.0 Client Credentials authentication. The
+steps below are subject to change as the Salesforce UI updates.
 
-### Connected App [salesforce-connected-app-credentials]
+### OAuth callback URL
 
-1. Log in to [Salesforce](https://www.salesforce.com/) and open **Setup**.
-2. In the **Quick Find** box, search for **App Manager** and open it.
-3. Select **New Connected App**.
-4. Select the **Enable OAuth Settings** checkbox.
-5. Under **OAuth and OpenID Connect Settings**:
-   - Add a **Callback URL** (required by Salesforce; the connector uses the client credentials flow).
-   - Under **Selected OAuth Scopes**, add at least: **Access and manage your data (api)**, **Perform requests at any time (refresh_token, offline_access)**, and **Provide access to your data via the Web (web)** as needed for your use case.
-   - Select the **Enable Client Credentials Flow** checkbox if your org supports it (required for server-to-server integration).
-6. Save the app.
-7. Wait a few minutes for the app to be activated, then select **Manage Consumer Details** and verify or set the **Consumer Key** (Client ID) and **Consumer Secret** (Client Secret).
-8. Enter the **Consumer Key** as Client ID and **Consumer Secret** as Client Secret when creating the connector in {{kib}}.
-9. For Token URL, use the formula **domain name** + `/services/oauth2/token`:
-   - Production: `https://login.salesforce.com/services/oauth2/token`
-   - Sandbox: `https://test.salesforce.com/services/oauth2/token`
-   - My Domain: `https://yourcompany.my.salesforce.com/services/oauth2/token`
+Copy the pattern below into Salesforce **Callback URL**, replacing `<your-kibana-host>` with your {{kib}} public
+hostname (no trailing slash before the path). 
 
-For client credentials, also complete any **Policies** steps Salesforce requires for your org (for example **Run As** user and admin pre-approval). See [Setting up a Connected App for the Client Credential Flow](https://help.salesforce.com/s/articleView?id=sf.connected_app_client_credentials_setup.htm&type=5).
+```text
+https://<your-kibana-host>/api/actions/connector/_oauth_callback
+```
 
-### External Client App [salesforce-external-client-app-credentials]
-
-1. Log in to [Salesforce](https://www.salesforce.com/), click the **cog** in the upper-right corner, and select **Setup**.
+1. Log in to the Salesforce org you use for this integration (for example production, a sandbox, or another hosted
+   instance). Open **Setup** from the **cog** in the upper-right corner.
 2. In the left navigation, under **Platform Tools**, expand **Apps** > **External Client Apps**.
 3. Open **External Client App Manager**, then select **New External Client App**.
-4. On the form, set an **External Client App Name** (the label in the list; for example, `Elastic`) and an **API Name** (for example, `Elastic`). Complete any other required fields.
-5. Under **OAuth Settings**, set the **Callback URL** to your {{kib}} instance’s OAuth callback endpoint:
-   `https://<your-kibana-host>/api/actions/connector/_oauth_callback`
-   Replace `<your-kibana-host>` with your deployment’s hostname (no trailing slash before the path). Salesforce typically requires a callback URL when OAuth is enabled on the app. The connector’s **OAuth 2.0 Client Credentials** auth type uses the token endpoint only and does not redirect the browser to this URL; if you use the connector’s **OAuth 2.0 authorization code** auth type instead, this URL must match what {{kib}} uses for the OAuth redirect.
+4. On the form, set an **External Client App Name** (the label in the list; for example, `Elastic`) and an **API Name**
+   (for example, `Elastic`). Complete any other required fields.
+5. Under **OAuth Settings**, set **Callback URL** to the value from **OAuth callback URL**. Salesforce typically requires
+   a callback URL when OAuth is enabled on the app. The connector’s **OAuth 2.0 Client Credentials** auth type uses the
+   token endpoint only and does not redirect the browser to this URL; if you use the connector’s **OAuth 2.0
+   authorization code** auth type instead, this URL must match what {{kib}} uses for the OAuth redirect.
 6. Under **Available Scopes**, select at least:
-   - **Access the identity URL service (id, profile, email, address, phone)**
    - **Manage user data via APIs (api)**
    - **Perform requests at any time (refresh_token, offline_access)**
-   - **Access content resources (content)**
-   - **Access the Salesforce API Platform (sfap_api)**
-7. Under **Flow Enablement**, select the options your Salesforce release shows for the **client credentials** grant—often **Enable Client Credentials Flow** and/or **Enable Authorization Code and Credentials Flow** for External Client Apps.
+7. Under **Flow Enablement**, select the options your Salesforce release shows for the **client credentials**
+   grant—often **Enable Client Credentials Flow** and/or **Enable Authorization Code and Credentials Flow** for External
+   Client Apps.
 8. Under **Security**, ensure these options are selected (labels can vary slightly by release):
    - **Require secret for Web Server Flow**
    - **Request secret for Refresh Token Flow** (or **Require Secret for Refresh Token Flow**)
    - **Require Proof Key for Code Exchange (PKCE) extension for Supported Authorization Flows** when your org requires it.
 9. **Save** the app.
-10. **Client credentials policies:** Edit the app’s **Policies** (for example **Manage** > **Edit Policies**), set **Permitted Users** / pre-approval as your org requires (often **Admin approved users are pre-authorized**), and set **Run As** to the Salesforce user that owns API access for this integration (typically a dedicated integration user with least-privilege permission sets). See [Invoke REST APIs with the Integration User and OAuth Client Credentials](https://developer.salesforce.com/blogs/2024/02/invoke-rest-apis-with-the-salesforce-integration-user-and-oauth-client-credentials).
-11. Open the app again, scroll to **OAuth Settings**, and select **Consumer Key and Secret**. Use **Consumer Key** as **Client ID** and **Consumer Secret** as **Client Secret** in the connector configuration in {{kib}}.
+10. **Client credentials policies:** Edit the app’s **Policies** (for example **Manage** > **Edit Policies**), set
+    **Permitted Users** / pre-approval as your org requires (often **Admin approved users are pre-authorized**), and set
+    **Run As** to the Salesforce user that owns API access for this integration (typically a dedicated integration user
+    with least-privilege permission sets). Use Salesforce Help for current policy and **Run As** requirements for the
+    client credentials flow in your org.
+11. Open the app again, scroll to **OAuth Settings**, and select **Consumer Key and Secret**. Use **Consumer Key** as
+    **Client ID** and **Consumer Secret** as **Client Secret** in the connector configuration in {{kib}}.
 12. For **Token URL**, use your org’s OAuth token endpoint (**domain** + `/services/oauth2/token`):
     - Production: `https://login.salesforce.com/services/oauth2/token`
     - Sandbox: `https://test.salesforce.com/services/oauth2/token`
     - My Domain: `https://yourcompany.my.salesforce.com/services/oauth2/token`
 
-For more background, see [External Client Apps](https://help.salesforce.com/s/articleView?id=sf.external_client_apps.htm&type=5) and the [client credentials flow](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oauth_client_credentials_flow.htm&type=5) in Salesforce Help.
+For more background, search Salesforce Help for **External Client Apps** and the **OAuth 2.0 client credentials flow**.
