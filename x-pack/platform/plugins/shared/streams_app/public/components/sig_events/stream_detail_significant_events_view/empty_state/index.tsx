@@ -53,7 +53,7 @@ export function EmptyState({
       title={
         <h2>
           {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
-            defaultMessage: 'No Significant events yet',
+            defaultMessage: 'This stream has not been onboarded yet',
           })}
         </h2>
       }
@@ -71,7 +71,7 @@ export function EmptyState({
             <EuiText size="s" textAlign="center" color="subdued">
               {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
                 defaultMessage:
-                  'Significant events runs on generated content which we use for context to create meaningful insights. Enable it for this stream.',
+                  'Significant events runs on generated content which we use for context to create meaningful insights. You can onboard this stream.',
               })}
             </EuiText>
           </EuiFlexItem>
@@ -104,8 +104,8 @@ export function EmptyState({
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
+                  <EuiButton                    
+                    size="m"
                     color="primary"
                     isLoading={isGenerating}
                     isDisabled={isGenerateDisabled || isGenerating}
@@ -115,7 +115,7 @@ export function EmptyState({
                       ? isCanceling
                         ? CANCELING_BUTTON_LABEL
                         : GENERATING_BUTTON_LABEL
-                      : GENERATE_BUTTON_LABEL}
+                      : ONBOARD_STREAM_BUTTON_LABEL}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -134,10 +134,10 @@ const NO_SIGNIFICANT_EVENTS_IMAGE_ALT = i18n.translate(
   }
 );
 
-const GENERATE_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEvents.emptyState.generateButtonLabel',
+const ONBOARD_STREAM_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEvents.emptyState.onboardStreamButtonLabel',
   {
-    defaultMessage: 'Generate',
+    defaultMessage: 'Onboard stream',
   }
 );
 
