@@ -6,7 +6,14 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiBadge, EuiButton, EuiPopover, EuiSelectable, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiSelectable,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
@@ -97,46 +104,50 @@ export function KnowledgeIndicatorsTypeFilter({
   );
 
   return (
-    <EuiPopover
-      id={popoverId}
-      aria-label={KNOWLEDGE_INDICATOR_TYPE_FILTER_POPOVER_ARIA_LABEL}
-      button={
-        <EuiButton
-          iconType="arrowDown"
-          iconSide="right"
-          color={hasActiveFilters ? 'primary' : 'text'}
-          fill={hasActiveFilters}
-          onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-        >
-          {KNOWLEDGE_INDICATOR_TYPE_FILTER_LABEL}
-        </EuiButton>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-    >
-      <EuiSelectable
-        aria-label={KNOWLEDGE_INDICATOR_TYPE_FILTER_SELECTABLE_ARIA_LABEL}
-        options={options}
-        onChange={(nextOptions) => {
-          onSelectedTypesChange(
-            nextOptions
-              .filter((option) => option.checked === 'on')
-              .map((option) => String(option.key ?? option.label))
-          );
-        }}
-      >
-        {(list) => (
-          <div
-            css={css`
-              min-width: 260px;
-            `}
+    <EuiFilterGroup>
+      <EuiPopover
+        id={popoverId}
+        aria-label={KNOWLEDGE_INDICATOR_TYPE_FILTER_POPOVER_ARIA_LABEL}
+        button={
+          <EuiFilterButton
+            iconType="arrowDown"
+            iconSide="right"
+            isSelected={isPopoverOpen}
+            hasActiveFilters={hasActiveFilters}
+            numFilters={availableTypes.length}
+            numActiveFilters={selectedTypes.length}
+            onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           >
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
+            {KNOWLEDGE_INDICATOR_TYPE_FILTER_LABEL}
+          </EuiFilterButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+      >
+        <EuiSelectable
+          aria-label={KNOWLEDGE_INDICATOR_TYPE_FILTER_SELECTABLE_ARIA_LABEL}
+          options={options}
+          onChange={(nextOptions) => {
+            onSelectedTypesChange(
+              nextOptions
+                .filter((option) => option.checked === 'on')
+                .map((option) => String(option.key ?? option.label))
+            );
+          }}
+        >
+          {(list) => (
+            <div
+              css={css`
+                min-width: 260px;
+              `}
+            >
+              {list}
+            </div>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+    </EuiFilterGroup>
   );
 }
 
