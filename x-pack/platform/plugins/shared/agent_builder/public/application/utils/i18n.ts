@@ -623,6 +623,36 @@ export const labels = {
         defaultMessage: 'This action will permanently remove the skill. This cannot be undone.',
       }
     ),
+    deleteSkillUsedByAgentsTitle: (skillId: string) =>
+      i18n.translate('xpack.agentBuilder.skills.deleteSkillUsedByAgentsTitle', {
+        defaultMessage: 'Skill "{skillId}" is used by agents',
+        values: { skillId },
+      }),
+    deleteSkillUsedByAgentsDescription: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsDescription',
+      {
+        defaultMessage: 'Remove this skill from all agents that use it and delete the skill?',
+      }
+    ),
+    deleteSkillUsedByAgentsAgentListLabel: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsAgentListLabel',
+      {
+        defaultMessage: 'Agents using this skill',
+      }
+    ),
+    deleteSkillUsedByAgentsAgentList: (agentNames: string[]) => agentNames.join(', '),
+    deleteSkillUsedByAgentsConfirmButton: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsConfirmButton',
+      {
+        defaultMessage: 'Yes, remove and delete',
+      }
+    ),
+    deleteSkillUsedByAgentsCancelButton: i18n.translate(
+      'xpack.agentBuilder.skills.deleteSkillUsedByAgentsCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
     toolIdsLabel: i18n.translate('xpack.agentBuilder.skills.toolIdsLabel', {
       defaultMessage: 'Associated tools',
     }),
