@@ -209,7 +209,7 @@ export interface SmlService {
    * Returns a map of document id → authorized (true/false).
    */
   checkItemsAccess: (params: {
-    items: Array<{ id: string; type: string }>;
+    ids: string[];
     spaceId: string;
     esClient: ElasticsearchClient;
     request: KibanaRequest;

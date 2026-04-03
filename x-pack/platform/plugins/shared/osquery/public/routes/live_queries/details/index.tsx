@@ -19,6 +19,7 @@ import {
 } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { pagePathGetters } from '../../../common/page_paths';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
@@ -32,7 +33,7 @@ const LiveQueryDetailsPageComponent = () => {
   useBreadcrumbs(isHistoryEnabled ? 'history_details' : 'live_query_details', {
     liveQueryId: actionId,
   });
-  const backNavigationTarget = isHistoryEnabled ? 'history' : 'live_queries';
+  const backNavigationTarget = isHistoryEnabled ? pagePathGetters.history() : 'live_queries';
   const handleGoBack = useGoBack(backNavigationTarget);
   const liveQueryListProps = useRouterNavigate(backNavigationTarget, handleGoBack);
   const [isLive, setIsLive] = useState(false);

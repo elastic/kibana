@@ -115,7 +115,7 @@ test.describe(
       await test.step('navigates to create index page', async () => {
         await pageObjects.gettingStarted.goto();
         await pageObjects.gettingStarted.selectAddDataOption('gettingStartedCreateIndexMenuItem');
-        await expect(page).toHaveURL(/indices\/create/);
+        await expect(page).toHaveURL(/index_management\/indices/);
       });
     });
 

@@ -54,6 +54,11 @@ import type {
   UpdateWatchlistRequestBodyInput,
   UpdateWatchlistResponse,
 } from '../../../common/api/entity_analytics/watchlists/management/update.gen';
+import type { ListWatchlistEntitySourcesResponse } from '../../../common/api/entity_analytics/watchlists/data_source/list.gen';
+import type {
+  UpdateWatchlistEntitySourceRequestBodyInput,
+  UpdateWatchlistEntitySourceResponse,
+} from '../../../common/api/entity_analytics/watchlists/data_source/update.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
@@ -83,7 +88,10 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
-import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
+import {
+  WATCHLISTS_URL,
+  WATCHLISTS_INDICES_URL,
+} from '../../../common/entity_analytics/watchlists/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -115,13 +123,16 @@ export const useEntityAnalyticsRoutes = () => {
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
-      http.fetch<GetEntityMaintainersResponse>(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET, {
-        method: 'GET',
-        query: {
-          ...ENTITY_STORE_V2_QUERY,
-          ...(ids && ids.length > 0 ? { ids } : {}),
-        },
-      });
+      http.fetch<GetEntityMaintainersResponse>(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
+        {
+          method: 'GET',
+          query: {
+            ...ENTITY_STORE_V2_QUERY,
+            ...(ids && ids.length > 0 ? { ids } : {}),
+          },
+        }
+      );
 
     const fetchRiskScoreMaintainer = async (): Promise<
       EntityMaintainerResponseItem | undefined
@@ -181,7 +192,7 @@ export const useEntityAnalyticsRoutes = () => {
       signal?: AbortSignal;
       params: FetchEntitiesListParams;
     }) =>
-      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
         version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
         query: {
@@ -239,7 +250,7 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const initRiskEngine = async () => {
       if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
           method: 'POST',
           query: ENTITY_STORE_V2_QUERY,
           body: JSON.stringify({}),
@@ -268,7 +279,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -293,7 +304,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -318,7 +329,7 @@ export const useEntityAnalyticsRoutes = () => {
       if (isMaintainerRiskScoreV2Enabled) {
         await http.fetch<{ ok: true }>(
           getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_RUN,
+            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
             RISK_SCORE_MAINTAINER_ID
           ),
           {
@@ -378,7 +389,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Get Entity Store v2 privileges
      */
     const fetchEntityStoreV2Privileges = () =>
-      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
         version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
       });
@@ -720,6 +731,55 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
+    /**
+     * List entity sources linked to a specific watchlist
+     */
+    const listWatchlistEntitySources = async (params: {
+      watchlistId: string;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<ListWatchlistEntitySourcesResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source/list`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'GET',
+          signal: params.signal,
+        }
+      );
+
+    /**
+     * Update an entity source linked to a watchlist
+     */
+    const updateWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      entitySourceId: string;
+      body: UpdateWatchlistEntitySourceRequestBodyInput;
+    }) =>
+      http.fetch<UpdateWatchlistEntitySourceResponse>(
+        `${WATCHLISTS_URL}/${params.watchlistId}/entity_source/${params.entitySourceId}`,
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'PUT',
+          body: JSON.stringify(params.body),
+        }
+      );
+
+    /**
+     * Search indices with entity fields for watchlists
+     */
+    const searchWatchlistIndices = async (params: {
+      query: string | undefined;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<string[]>(WATCHLISTS_INDICES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          searchQuery: params.query,
+        },
+        signal: params.signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -749,6 +809,9 @@ export const useEntityAnalyticsRoutes = () => {
       getWatchlist,
       updateWatchlist,
       deleteWatchlist,
+      listWatchlistEntitySources,
+      updateWatchlistEntitySource,
+      searchWatchlistIndices,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,

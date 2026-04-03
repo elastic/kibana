@@ -83,6 +83,7 @@ export class StreamsClient {
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
+      isSecurityEnabled: boolean;
       isWiredStreamViewsEnabled: boolean;
       isDev: boolean;
     }
@@ -579,6 +580,7 @@ export class StreamsClient {
         const privileges = await checkAccess({
           name,
           esClient: this.dependencies.esClient,
+          isSecurityEnabled: this.dependencies.isSecurityEnabled,
         });
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
@@ -606,7 +608,11 @@ export class StreamsClient {
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);
       }),
-      checkAccess({ name, esClient: this.dependencies.esClient }).then((privileges) => {
+      checkAccess({
+        name,
+        esClient: this.dependencies.esClient,
+        isSecurityEnabled: this.dependencies.isSecurityEnabled,
+      }).then((privileges) => {
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
@@ -656,6 +662,21 @@ export class StreamsClient {
    */
   async getPrivileges(nameOrNames: string | string[]) {
     const names = Array.isArray(nameOrNames) ? nameOrNames : [nameOrNames];
+
+    if (!this.dependencies.isSecurityEnabled) {
+      return {
+        manage: true,
+        monitor: true,
+        view_index_metadata: true,
+        lifecycle: true,
+        simulate: true,
+        text_structure: true,
+        read_failure_store: true,
+        manage_failure_store: true,
+        create_snapshot_repository: true,
+      };
+    }
+
     const isServerless = this.dependencies.isServerless;
     const REQUIRED_MANAGE_PRIVILEGES = [
       'manage_index_templates',
@@ -855,11 +876,16 @@ export class StreamsClient {
       )
       .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
+    if (!this.dependencies.isSecurityEnabled) {
+      return streams;
+    }
+
     const privileges = await checkAccessBulk({
       names: streams
         .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
       esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
     return streams.filter((stream) => {

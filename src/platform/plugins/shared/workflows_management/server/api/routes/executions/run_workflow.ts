@@ -18,7 +18,8 @@ import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withLicenseCheck } from '../utils/with_license_check';
 
-export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerRunWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow/{id}/run',
@@ -102,8 +103,16 @@ export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteD
             undefined,
             metadata
           );
+          audit.logWorkflowRun(request, {
+            workflowId: id,
+            executionId: workflowExecutionId,
+          });
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          audit.logWorkflowRun(request, {
+            workflowId: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useStartServices } from '../../../../../hooks';
 
 import type {
-  AIV2Telemetry,
+  AutomaticImportTelemetry,
   CreatedIntegrationRow,
   DataStreamResultsFlyoutComponent,
 } from './manage_integrations_table';
@@ -62,7 +62,7 @@ export const ManageIntegrationActions: React.FC<{
   onInstallToCluster,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { automaticImportVTwo } = useStartServices();
+  const { automaticImport } = useStartServices();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -104,26 +104,22 @@ export const ManageIntegrationActions: React.FC<{
 
   const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
-    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-      'aiv2_integration_delete_confirmed',
-      {}
-    );
     try {
       await onDelete(integration.integrationId);
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
-  }, [onDelete, integration.integrationId, automaticImportVTwo]);
+  }, [onDelete, integration.integrationId]);
 
   const openReviewModal = useCallback(() => {
     setIsPopoverOpen(false);
     setShowReviewModal(true);
-    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-      'aiv2_review_approve_menu_clicked',
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_review_approve_menu_clicked',
       {}
     );
-  }, [automaticImportVTwo]);
+  }, [automaticImport]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
@@ -150,6 +146,7 @@ export const ManageIntegrationActions: React.FC<{
           iconType="checkInCircleFilled"
           iconSide="left"
           onClick={openReviewModal}
+          data-test-subj="manageIntegrationReviewApproveInlineBtn"
           style={{
             backgroundColor: euiTheme.colors.backgroundLightPrimary,
             borderRadius: euiTheme.border.radius.small,
@@ -211,6 +208,7 @@ export const ManageIntegrationActions: React.FC<{
                 disabled={reviewApproveDisabled}
                 toolTipContent={reviewApproveTooltip}
                 onClick={openReviewModal}
+                data-test-subj="manageIntegrationReviewApproveMenuItem"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
@@ -221,6 +219,7 @@ export const ManageIntegrationActions: React.FC<{
                 key="installToCluster"
                 icon="exportAction"
                 disabled={!isApproved || isInstalling}
+                data-test-subj="manageIntegrationInstallMenuItem"
                 toolTipContent={
                   isApproved
                     ? undefined
@@ -242,6 +241,7 @@ export const ManageIntegrationActions: React.FC<{
                 key="downloadZip"
                 icon="download"
                 disabled={!isPackageReady || isDownloadingZip}
+                data-test-subj="manageIntegrationDownloadZipMenuItem"
                 toolTipContent={
                   isPackageReady
                     ? undefined
@@ -267,6 +267,7 @@ export const ManageIntegrationActions: React.FC<{
                   closePopover();
                   onEdit(integration.integrationId);
                 }}
+                data-test-subj="manageIntegrationEditMenuItem"
               >
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.actions.edit"
@@ -277,6 +278,7 @@ export const ManageIntegrationActions: React.FC<{
                 key="delete"
                 icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
                 onClick={openDeleteConfirm}
+                data-test-subj="manageIntegrationDeleteMenuItem"
               >
                 <EuiTextColor color="danger">
                   <FormattedMessage

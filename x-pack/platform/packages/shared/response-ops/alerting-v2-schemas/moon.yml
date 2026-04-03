@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-schemas
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/alerting-v2-constants'
 tags:
   - shared-common
   - package

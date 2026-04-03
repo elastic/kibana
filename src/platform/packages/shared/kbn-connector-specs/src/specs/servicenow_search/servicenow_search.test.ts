@@ -40,6 +40,28 @@ describe('ServicenowSearch', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports oauth_client_credentials auth', () => {
+      const types = (ServicenowSearch.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('oauth_client_credentials');
+    });
+
+    it('supports oauth_authorization_code', () => {
+      const oauthType = (
+        ServicenowSearch.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {},
+      });
+    });
+  });
+
   describe('search action', () => {
     it('should search with required parameters', async () => {
       const mockResponse = {

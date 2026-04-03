@@ -351,6 +351,7 @@ export class Plugin
         id: PLUGIN_ID,
         title: featureTitle,
         order: 1,
+        visibleIn: [],
         async mount(params: ManagementAppMountParams) {
           const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
 
