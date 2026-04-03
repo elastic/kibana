@@ -9,6 +9,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   ALERTS_API_ALL,
   ALERTS_API_READ,
@@ -93,7 +94,7 @@ export const getRulesBaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: params.savedObjects,
-        read: params.savedObjects,
+        read: [...params.savedObjects, DATA_VIEW_SAVED_OBJECT_TYPE],
       },
       alerting: {
         rule: {
@@ -141,7 +142,7 @@ export const getRulesBaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: params.savedObjects,
+        read: [...params.savedObjects, DATA_VIEW_SAVED_OBJECT_TYPE],
       },
       alerting: {
         rule: { read: alertingFeatures },
