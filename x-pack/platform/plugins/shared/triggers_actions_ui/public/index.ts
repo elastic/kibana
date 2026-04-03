@@ -109,7 +109,6 @@ export {
   convertFieldSpecToFieldOption,
   getFields,
   getIndexOptions,
-  getIndexOptionsByDataView,
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,

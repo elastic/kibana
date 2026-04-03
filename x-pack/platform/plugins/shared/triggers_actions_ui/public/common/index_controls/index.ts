@@ -9,7 +9,6 @@ import { uniq } from 'lodash';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { loadIndexPatterns, getMatchingIndices, getESIndexFields } from '../lib/data_apis';
 import type { FieldOption } from '../types';
 
@@ -18,7 +17,11 @@ export interface IOption {
   options: Array<{ value: string; label: string }>;
 }
 
-export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
+export const getIndexOptions = async (
+  http: HttpSetup,
+  pattern: string,
+  projectRouting?: string
+) => {
   const options: IOption[] = [];
 
   if (!pattern) {
@@ -29,6 +32,7 @@ export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
     getMatchingIndices({
       pattern,
       http,
+      projectRouting,
     }),
     loadIndexPatterns(pattern),
   ]);
@@ -67,50 +71,6 @@ export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
     ],
   });
 
-  return options;
-};
-
-export const getIndexOptionsByDataView = async (
-  dataViews: DataViewsPublicPluginStart,
-  search: string
-): Promise<IOption[]> => {
-  if (!search) {
-    return [];
-  }
-
-  const formattedPattern = search.startsWith('*') ? search : `*${search}`;
-  const pattern = formattedPattern.endsWith('*') ? formattedPattern : `${formattedPattern}*`;
-
-  const [matchingIndices, matchingDataViews] = await Promise.all([
-    dataViews
-      .getIndices({ pattern, isRollupIndex: () => false })
-      .then((items) => items.map((item) => item.name))
-      .catch(() => [] as string[]),
-    dataViews
-      .find(pattern, 1000)
-      .then((dvs) => dvs.map((dv) => dv.title))
-      .catch(() => [] as string[]),
-  ]);
-
-  const options: IOption[] = [];
-  const matchingOptions = [...new Set([...matchingIndices, ...matchingDataViews])];
-
-  if (matchingOptions.length) {
-    options.push({
-      label: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indicesAndDataViewsLabel',
-        { defaultMessage: 'Based on your data views' }
-      ),
-      options: matchingOptions.map((match) => ({ label: match, value: match })),
-    });
-  }
-  options.push({
-    label: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.chooseLabel',
-      { defaultMessage: 'Choose…' }
-    ),
-    options: [{ value: search, label: search }],
-  });
   return options;
 };
 

@@ -22,7 +22,6 @@ export {
   convertFieldSpecToFieldOption,
   getFields,
   getIndexOptions,
-  getIndexOptionsByDataView,
   firstFieldOption,
 } from './index_controls';
 export { getTimeFieldOptions, getTimeOptions, useKibana } from './lib';

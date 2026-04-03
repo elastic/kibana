@@ -25,6 +25,9 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
+    getIndexPatterns: () => {
+      return ['index1', 'index2'];
+    },
     getTimeFieldOptions: () => {
       return [
         {
@@ -32,6 +35,23 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
           value: '@timestamp',
         },
       ];
+    },
+    getIndexOptions: () => {
+      return Promise.resolve([
+        {
+          label: 'indexOption',
+          options: [
+            {
+              label: 'index1',
+              value: 'index1',
+            },
+            {
+              label: 'index2',
+              value: 'index2',
+            },
+          ],
+        },
+      ]);
     },
   };
 });
@@ -58,11 +78,6 @@ const setupDataViewsMock = () => {
       isMapped: true,
     },
   ]);
-  dataViewsMock.getIndices = jest.fn().mockResolvedValue([
-    { name: 'index1', tags: [] },
-    { name: 'index2', tags: [] },
-  ]);
-  dataViewsMock.find = jest.fn().mockResolvedValue([]);
 };
 
 describe('IndexSelectPopover', () => {
@@ -117,17 +132,18 @@ describe('IndexSelectPopover', () => {
     const indexSearchBoxValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
     expect(indexSearchBoxValue.first().props().value).toEqual('');
 
-    const comboBox = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="thresholdIndexesComboBox"]');
+    const indexComboBox = wrapper.find('#indexSelectSearchBox');
+    indexComboBox.first().simulate('click');
 
     await act(async () => {
-      comboBox.prop('onSearchChange')!('indexPattern1');
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      const event = { target: { value: 'indexPattern1' } };
+      indexComboBox.find('input').first().simulate('change', event);
+      await nextTick();
       wrapper.update();
     });
 
-    expect(dataViewsMock.getIndices).toHaveBeenCalled();
+    const updatedIndexSearchValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
+    expect(updatedIndexSearchValue.first().props().value).toEqual('indexPattern1');
 
     const thresholdComboBox = wrapper
       .find(EuiComboBox)
@@ -137,9 +153,7 @@ describe('IndexSelectPopover', () => {
 
     await act(async () => {
       thresholdComboBox.prop('onChange')!([thresholdOptions[0].options![0]]);
-    });
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await nextTick();
       wrapper.update();
     });
     expect(onIndexChange).toHaveBeenCalledWith(
