@@ -30,8 +30,10 @@ import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 const startMock = coreMock.createStart();
+const featureFlagsStartMock = coreFeatureFlagsMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const noop = jest.fn();
@@ -126,6 +128,7 @@ function wrapSearchBarInContext(
       dataViews: {
         getIdsWithTitle: jest.fn(() => []),
       },
+      featureFlags: featureFlagsStartMock,
     },
   };
 

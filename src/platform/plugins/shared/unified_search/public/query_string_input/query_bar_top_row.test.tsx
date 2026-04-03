@@ -34,8 +34,10 @@ import type { IUnifiedSearchPluginServices } from '../types';
 import userEvent from '@testing-library/user-event';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 const startMock = coreMock.createStart();
+const featureFlagsStartMock = coreFeatureFlagsMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const mockTimeHistory = {
@@ -121,6 +123,7 @@ function wrapQueryBarTopRowInContext(
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
+    featureFlags: featureFlagsStartMock,
     ...servicesOverride,
   };
 

@@ -171,6 +171,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Enable data source browser suggestion in ES|QL editor.
    */
   enableResourceBrowser?: boolean;
+  /**
+   * Enable the new DateRangePicker component.
+   * When true, the new DateRangePicker will be rendered instead of the legacy EuiSuperDatePicker.
+   */
+  enableDateRangePicker?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -802,6 +807,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableResourceBrowser={this.props.enableResourceBrowser}
+          enableDateRangePicker={this.props.enableDateRangePicker}
         />
       </div>
     );

@@ -63,6 +63,7 @@ import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
+import { TIME_PICKER_USE_NEXT_DATE_RANGE_PICKER } from '../../common';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 
@@ -194,6 +195,12 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   renderQueryInputAppend?: () => React.ReactNode;
   disableExternalPadding?: boolean;
   bubbleSubmitEvent?: boolean;
+  /**
+   * Optional prop to enable the new DateRangePicker component.
+   * When true, the new DateRangePicker will be rendered instead of the legacy EuiSuperDatePicker.
+   * This can also be controlled via the `timepicker.useNextDataRangePicker` feature flag.
+   */
+  enableDateRangePicker?: boolean;
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
@@ -340,7 +347,21 @@ export const QueryBarTopRow = React.memo(
       docLinks,
       http,
       dataViews,
+      featureFlags,
     } = kibana.services;
+
+    const [isNextDateRangePickerEnabled, setIsNextDateRangePickerEnabled] = useState(false);
+
+    useEffect(() => {
+      if (!featureFlags) return;
+      const subscription = featureFlags
+        .getBooleanValue$(TIME_PICKER_USE_NEXT_DATE_RANGE_PICKER, false)
+        .subscribe(setIsNextDateRangePickerEnabled);
+      return () => subscription.unsubscribe();
+    }, [featureFlags]);
+
+    const useNextDateRangePicker =
+      Boolean(props.enableDateRangePicker) || isNextDateRangePickerEnabled;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
@@ -647,6 +668,7 @@ export const QueryBarTopRow = React.memo(
 
       const datePicker = (
         <SuperDatePicker
+          key={useNextDateRangePicker ? 'nextDateRangePicker' : 'superDatePicker'}
           isDisabled={isDisabled}
           start={props.dateRangeFrom}
           end={props.dateRangeTo}

@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText, EuiLink, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { TimePrecision } from '../types';
@@ -29,8 +29,6 @@ import { settingsPanelTexts } from '../translations';
 import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
 
 const ADVANCED_SETTINGS_URL_TIME_ZONE = '/app/management/kibana/settings?query=dateFormat:tz';
-const ADVANCED_SETTINGS_URL_LEGACY_PICKER =
-  '/app/management/kibana/settings?query=timepicker:useDateRangePicker';
 
 /**
  * Settings panel for the date range picker, accessible from the main panel gear button.
@@ -113,14 +111,7 @@ export function SettingsPanel() {
         <EuiText size="xs" color="subdued" component="p">
           <FormattedMessage
             id="sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice"
-            defaultMessage="This time picker is in a technical preview. You can revert to the legacy picker in {advancedSettingsLink}."
-            values={{
-              advancedSettingsLink: (
-                <EuiLink href={prependBasePath(ADVANCED_SETTINGS_URL_LEGACY_PICKER)}>
-                  {settingsPanelTexts.advancedSettingsLink}
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="This time picker is in a technical preview. It can be enabled via the feature flag 'timepicker.useNextDataRangePicker' in your Kibana configuration."
           />
         </EuiText>
       </PanelFooter>
