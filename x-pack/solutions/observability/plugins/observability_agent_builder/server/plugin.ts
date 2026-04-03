@@ -93,7 +93,7 @@ export class ObservabilityAgentBuilderPlugin
       }
       if (failures.length) {
         this.logger.warn(
-          `Failed to register inference feature for Observability AI Insights: ${failures.join(
+          `Failed to register inference endpoints for Observability AI Insights: ${failures.join(
             '; '
           )}`
         );
