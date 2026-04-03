@@ -176,8 +176,7 @@ export const validateRuleResponseActions = async <
       if (checkOsqueryResponseActionAuthz) {
         const params = actionData.params;
         await checkOsqueryResponseActionAuthz({
-          saved_query_id:
-            'saved_query_id' in params ? params.saved_query_id : undefined,
+          saved_query_id: 'saved_query_id' in params ? params.saved_query_id : undefined,
           pack_id: 'pack_id' in params ? params.pack_id : undefined,
         });
       } else {
