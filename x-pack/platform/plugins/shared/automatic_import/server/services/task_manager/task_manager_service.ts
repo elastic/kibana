@@ -73,6 +73,7 @@ export class TaskManagerService {
   private agentService: AgentService;
   private automaticImportSavedObjectService: AutomaticImportSavedObjectService | null = null;
   private analytics: AnalyticsServiceSetup;
+  private readonly inFlightRunAbortControllers = new Map<string, AbortController>();
 
   constructor(
     logger: LoggerFactory,
@@ -99,16 +100,24 @@ export class TaskManagerService {
               this.automaticImportSavedObjectService,
               'Automatic import saved object service not initialized'
             );
-            return this.runTask(
-              taskInstance,
-              core,
-              this.automaticImportSavedObjectService,
-              fakeRequest as KibanaRequest,
-              abortController.signal
-            );
+            const tmTaskId = taskInstance.id;
+            this.inFlightRunAbortControllers.set(tmTaskId, abortController);
+            try {
+              return await this.runTask(
+                taskInstance,
+                core,
+                this.automaticImportSavedObjectService,
+                fakeRequest as KibanaRequest,
+                abortController.signal
+              );
+            } finally {
+              this.inFlightRunAbortControllers.delete(tmTaskId);
+            }
           },
           cancel: async () => {
-            abortController.abort();
+            if (!abortController.signal.aborted) {
+              abortController.abort();
+            }
             return this.cancelTask(taskInstance);
           },
         }),
@@ -180,6 +189,11 @@ export class TaskManagerService {
     assert(this.taskManager, 'TaskManager not initialized');
     const taskId = this.generateDataStreamTaskId(dataStreamParams);
     try {
+      const inFlightController = this.inFlightRunAbortControllers.get(taskId);
+      if (inFlightController && !inFlightController.signal.aborted) {
+        inFlightController.abort();
+        this.logger.debug(`Aborted in-flight run for task ${taskId} before removing task document`);
+      }
       await this.taskManager.removeIfExists(taskId);
       this.logger.debug(`Task deleted: ${taskId}`);
     } catch (error) {

@@ -386,3 +386,66 @@ describe('runTask abort handling', () => {
     expect(cancelResult.state.task_status).toBe(TASK_STATUSES.cancelled);
   });
 });
+
+describe('removeDataStreamCreationTask', () => {
+  const mockCore = {
+    getStartServices: jest
+      .fn()
+      .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: {} } } }, {}]),
+  };
+
+  it('aborts the Task Manager AbortController when a run is in flight on this node, then removes the task', async () => {
+    const loggerFactory = loggingSystemMock.create();
+    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+
+    const service = new TaskManagerService(
+      loggerFactory,
+      { registerTaskDefinitions: jest.fn() } as never,
+      mockCore as never,
+      mockAnalytics as never,
+      {} as never
+    );
+
+    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+    service.initialize({ removeIfExists } as never, {} as never);
+
+    const taskId = 'data-stream-task-myint-mydstream';
+    const controller = new AbortController();
+    const abortSpy = jest.spyOn(controller, 'abort');
+
+    (
+      service as unknown as { inFlightRunAbortControllers: Map<string, AbortController> }
+    ).inFlightRunAbortControllers.set(taskId, controller);
+
+    await service.removeDataStreamCreationTask({
+      integrationId: 'myint',
+      dataStreamId: 'mydstream',
+    });
+
+    expect(abortSpy).toHaveBeenCalled();
+    expect(removeIfExists).toHaveBeenCalledWith(taskId);
+  });
+
+  it('calls removeIfExists when there is no in-flight run on this node', async () => {
+    const loggerFactory = loggingSystemMock.create();
+    const mockAnalytics = { reportEvent: jest.fn(), registerEventType: jest.fn() };
+
+    const service = new TaskManagerService(
+      loggerFactory,
+      { registerTaskDefinitions: jest.fn() } as never,
+      mockCore as never,
+      mockAnalytics as never,
+      {} as never
+    );
+
+    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+    service.initialize({ removeIfExists } as never, {} as never);
+
+    await service.removeDataStreamCreationTask({
+      integrationId: 'a',
+      dataStreamId: 'b',
+    });
+
+    expect(removeIfExists).toHaveBeenCalledWith('data-stream-task-a-b');
+  });
+});
