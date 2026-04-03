@@ -51,11 +51,7 @@ function buildResultsFingerprint(results: YamlValidationResult[]): string {
   if (results.length === 0) {
     return '';
   }
-  const parts = new Array<string>(results.length);
-  for (let i = 0; i < results.length; i++) {
-    parts[i] = validationResultFingerprint(results[i]);
-  }
-  return parts.join('\n');
+  return results.map(validationResultFingerprint).join('\n');
 }
 
 export interface UseYamlValidationResult {
