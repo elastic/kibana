@@ -7240,6 +7240,10 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
               },
               {
@@ -8644,6 +8648,10 @@
               },
               {
                 "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/create/create.test.ts"
+              },
+              {
+                "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/execute/execute.test.ts"
               },
               {
@@ -8789,6 +8797,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -10029,6 +10045,10 @@
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_update_route.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/update/update.test.ts"
               },
               {
                 "plugin": "actions",
@@ -18296,6 +18316,10 @@
               {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/sanitize/register_sanitize_route.ts"
               },
               {
                 "plugin": "kql",

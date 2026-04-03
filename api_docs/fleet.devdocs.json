@@ -36589,7 +36589,7 @@
           "\"aws.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 39,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -36623,7 +36623,7 @@
           "\"azure.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 40,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37397,7 +37397,7 @@
           "\"gcp.account_type\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 41,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37976,7 +37976,7 @@
           "\"organization-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 46,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -38482,7 +38482,7 @@
           "\"single-account\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/cloud_connector.ts",
-        "lineNumber": 45,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

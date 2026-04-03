@@ -179,7 +179,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 498,
+            "lineNumber": 499,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -195,7 +195,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 498,
+                "lineNumber": 499,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -212,7 +212,7 @@
                   "PluginsStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 498,
+                "lineNumber": 499,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -232,7 +232,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 630,
+            "lineNumber": 631,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9162,7 +9162,7 @@
         "label": "TIME_SERIES_BUCKET_SELECTOR_FIELD",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/lib/time_series_query.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
