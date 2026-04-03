@@ -43,6 +43,7 @@ const getCreateRuleMenu = (
 
   const tabId = stateContainer.getCurrentTab().id;
   const getState = () => stateContainer.internalState.getState();
+  const subscribe = (listener: () => void) => stateContainer.internalState.subscribe(listener);
 
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
@@ -59,6 +60,7 @@ const getCreateRuleMenu = (
     services: discoverServiceMock,
     tabId,
     getState,
+    subscribe,
   });
 };
 
@@ -144,6 +146,7 @@ describe('CreateESQLRuleFlyout', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const tabId = stateContainer.getCurrentTab().id;
     const getState = () => stateContainer.internalState.getState();
+    const subscribe = (listener: () => void) => stateContainer.internalState.subscribe(listener);
     const onClose = jest.fn();
 
     render(
@@ -158,6 +161,7 @@ describe('CreateESQLRuleFlyout', () => {
         services={discoverServiceMock}
         tabId={tabId}
         getState={getState}
+        subscribe={subscribe}
         onClose={onClose}
       />
     );
@@ -175,6 +179,7 @@ describe('CreateESQLRuleFlyout', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const tabId = stateContainer.getCurrentTab().id;
     const getState = () => stateContainer.internalState.getState();
+    const subscribe = (listener: () => void) => stateContainer.internalState.subscribe(listener);
     const onClose = jest.fn();
 
     render(
@@ -189,6 +194,7 @@ describe('CreateESQLRuleFlyout', () => {
         services={discoverServiceMock}
         tabId={tabId}
         getState={getState}
+        subscribe={subscribe}
         onClose={onClose}
       />
     );

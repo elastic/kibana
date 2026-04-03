@@ -6,9 +6,14 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 export class RuleFormPage {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
+  constructor(private readonly page: ScoutPage) {
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
 
   async gotoCreate() {
     await this.page.gotoApp('management/alertingV2/rules/create');
@@ -83,5 +88,21 @@ export class RuleFormPage {
   async openRulesFlyoutFromDiscover() {
     await this.page.testSubj.locator('discoverRulesMenuButton').click();
     await this.page.testSubj.locator('discoverCreateRuleButton').click();
+  }
+
+  flyout() {
+    return this.page.locator('[aria-labelledby="ruleV2FormFlyoutTitle"]');
+  }
+
+  /**
+   * Sets the Discover ES|QL editor (model index 0) without overwriting
+   * the flyout's editor or submitting.
+   */
+  async setDiscoverQueryWithFlyoutOpen(query: string) {
+    await this.codeEditor.setCodeEditorValue(query, 0);
+  }
+
+  async submitDiscoverQuery() {
+    await this.page.testSubj.click('querySubmitButton');
   }
 }

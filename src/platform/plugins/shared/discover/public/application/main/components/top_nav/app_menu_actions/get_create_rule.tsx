@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
@@ -21,16 +21,22 @@ export function CreateESQLRuleFlyout({
   services,
   tabId,
   getState,
+  subscribe,
   onClose,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  subscribe: (listener: () => void) => () => void;
   onClose: () => void;
 }) {
-  const currentTab = selectTab(getState(), tabId);
-  const query = (currentTab.appState.query as AggregateQuery)?.esql || '';
+  const getQuery = useCallback(
+    () => (selectTab(getState(), tabId).appState.query as AggregateQuery)?.esql || '',
+    [getState, tabId]
+  );
+
+  const query = useSyncExternalStore(subscribe, getQuery);
 
   const { history, core, alertingVTwo } = services;
   const RuleFormFlyout = alertingVTwo!.DynamicRuleFormFlyout;
@@ -67,11 +73,13 @@ export const getCreateRuleMenuItem = ({
   services,
   tabId,
   getState,
+  subscribe,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
   getState: () => DiscoverInternalState;
+  subscribe: (listener: () => void) => () => void;
 }): DiscoverAppMenuItemType => {
   const createRuleItem: DiscoverAppMenuPopoverItem = {
     id: 'create-rule',
@@ -88,6 +96,7 @@ export const getCreateRuleMenuItem = ({
           services={services}
           tabId={tabId}
           getState={getState}
+          subscribe={subscribe}
           onClose={onFinishAction}
         />
       );
