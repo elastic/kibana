@@ -1115,7 +1115,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     },
   },
   styling: {
-    overlays: { data_labels: { visible: false } },
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {
@@ -1211,7 +1211,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
     },
   },
   styling: {
-    overlays: { data_labels: { visible: false } },
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {
@@ -1302,7 +1302,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     },
   },
   styling: {
-    overlays: { data_labels: { visible: false } },
+    bars: { data_labels: { visible: false } },
   },
   layers: [
     {

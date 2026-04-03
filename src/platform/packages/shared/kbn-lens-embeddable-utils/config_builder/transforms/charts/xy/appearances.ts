@@ -46,7 +46,17 @@ const pointVisibilityCompat = getReversibleMappings([
   ['hidden', 'never'],
 ]);
 
-export function convertStylingToAPIFormat(config: XYLensAppearanceState): XYStyling {
+export interface LayerPresence {
+  hasBars: boolean;
+  hasLines: boolean;
+  hasAreas: boolean;
+}
+
+export function convertStylingToAPIFormat(
+  config: XYLensAppearanceState,
+  layerPresence: LayerPresence
+): XYStyling {
+  const hasLinesOrAreas = layerPresence.hasLines || layerPresence.hasAreas;
   return stripUndefined<XYStyling>({
     overlays: {
       partial_buckets: {
@@ -55,23 +65,34 @@ export function convertStylingToAPIFormat(config: XYLensAppearanceState): XYStyl
       current_time_marker: {
         visible: config.showCurrentTimeMarker ?? DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
       },
-      data_labels: {
-        visible:
-          config.valueLabels != null ? config.valueLabels === 'show' : DEFAULT_DATA_LABELS_VISIBLE,
-      },
     },
-    points: {
-      visibility: pointVisibilityCompat.toAPI(config.pointVisibility) ?? DEFAULT_POINTS_VISIBILITY,
-    },
-    lines: {
-      interpolation: curveTypeCompat.toAPI(config.curveType) ?? DEFAULT_LINES_INTERPOLATION,
-    },
-    bars: {
-      minimum_height: config.minBarHeight ?? DEFAULT_BARS_MINIMUM_HEIGHT,
-    },
-    areas: {
-      fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
-    },
+    points: hasLinesOrAreas
+      ? {
+          visibility:
+            pointVisibilityCompat.toAPI(config.pointVisibility) ?? DEFAULT_POINTS_VISIBILITY,
+        }
+      : undefined,
+    lines: layerPresence.hasLines
+      ? {
+          interpolation: curveTypeCompat.toAPI(config.curveType) ?? DEFAULT_LINES_INTERPOLATION,
+        }
+      : undefined,
+    bars: layerPresence.hasBars
+      ? {
+          minimum_height: config.minBarHeight ?? DEFAULT_BARS_MINIMUM_HEIGHT,
+          data_labels: {
+            visible:
+              config.valueLabels != null
+                ? config.valueLabels === 'show'
+                : DEFAULT_DATA_LABELS_VISIBLE,
+          },
+        }
+      : undefined,
+    areas: layerPresence.hasAreas
+      ? {
+          fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
+        }
+      : undefined,
   });
 }
 
@@ -80,8 +101,8 @@ export function convertStylingToStateFormat(config: XYStyling): XYLensAppearance
     hideEndzones: config.overlays?.partial_buckets?.visible,
     showCurrentTimeMarker: config.overlays?.current_time_marker?.visible,
     valueLabels:
-      config.overlays?.data_labels != null
-        ? config.overlays.data_labels.visible
+      config.bars?.data_labels != null
+        ? config.bars.data_labels.visible
           ? 'show'
           : 'hide'
         : undefined,

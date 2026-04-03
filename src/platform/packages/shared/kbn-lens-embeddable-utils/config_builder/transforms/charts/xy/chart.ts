@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYPersistedState } from '@kbn/lens-common';
+import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
@@ -26,7 +26,11 @@ import {
 } from './api_layers';
 import { stripUndefined } from '../utils';
 import { axisLabelOrientationCompat } from '../common';
-import { convertStylingToAPIFormat, convertStylingToStateFormat } from './appearances';
+import {
+  convertStylingToAPIFormat,
+  convertStylingToStateFormat,
+  type LayerPresence,
+} from './appearances';
 
 function convertFittingToStateFormat(fitting: XYState['fitting']) {
   return {
@@ -148,6 +152,15 @@ function convertAxisSettingsToStateFormat(
   });
 }
 
+function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
+  const seriesTypes = new Set(dataLayers.map((layer) => layer.seriesType));
+  return {
+    hasBars: [...seriesTypes].some((t) => t.startsWith('bar')),
+    hasLines: seriesTypes.has('line'),
+    hasAreas: [...seriesTypes].some((t) => t.startsWith('area')),
+  };
+}
+
 type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
@@ -191,7 +204,8 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
-  const decorations = convertStylingToAPIFormat(config);
+  const layerPresence = getLayerPresence(dataLayers);
+  const decorations = convertStylingToAPIFormat(config, layerPresence);
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),

@@ -265,20 +265,6 @@ const xyStylingSchema = schema.object(
               { meta: { description: 'Current time marker configuration' } }
             )
           ),
-          data_labels: schema.maybe(
-            schema.object(
-              {
-                visible: schema.boolean({
-                  defaultValue: DEFAULT_DATA_LABELS_VISIBLE,
-                  meta: {
-                    description:
-                      'Display value labels on data points, only available for bar series.',
-                  },
-                }),
-              },
-              { meta: { description: 'Data label configuration' } }
-            )
-          ),
         },
         {
           meta: {
@@ -343,6 +329,17 @@ const xyStylingSchema = schema.object(
               min: 0,
               meta: { description: 'Minimum bar height in pixels' },
             })
+          ),
+          data_labels: schema.maybe(
+            schema.object(
+              {
+                visible: schema.boolean({
+                  defaultValue: DEFAULT_DATA_LABELS_VISIBLE,
+                  meta: { description: 'Display value labels on bar data points' },
+                }),
+              },
+              { meta: { description: 'Data label configuration for bar series' } }
+            )
           ),
         },
         {
