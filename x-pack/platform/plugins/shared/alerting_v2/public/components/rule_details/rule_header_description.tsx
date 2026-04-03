@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -40,15 +40,16 @@ export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({ ru
   }
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="m">
       {description && (
-        <EuiText size="s" color="subdued" data-test-subj="ruleDescription">
-          {description}
-        </EuiText>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="ruleDescription">
+            {description}
+          </EuiText>
+        </EuiFlexItem>
       )}
       {hasLabels && (
-        <>
-          {description && <EuiSpacer size="m" />}
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
             {labels!.map((label) => (
               <EuiFlexItem key={label} grow={false}>
@@ -56,9 +57,9 @@ export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({ ru
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-        </>
+        </EuiFlexItem>
       )}
-    </>
+    </EuiFlexGroup>
   );
 };
 
