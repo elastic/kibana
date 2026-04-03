@@ -591,11 +591,16 @@ export default function (providerContext: FtrProviderContext) {
 
         const policyIds = results.map((r: any) => r.body.item.id);
 
-        const {
-          body: { items: policies },
-        } = await supertest.get(`/api/fleet/agent_policies?full=true`).expect(200);
+        // Fetch each policy individually to avoid pagination truncating the list
+        const createdPolicies = await Promise.all(
+          policyIds.map((id: string) =>
+            supertest
+              .get(`/api/fleet/agent_policies/${id}?full=true`)
+              .expect(200)
+              .then((r: any) => r.body.item)
+          )
+        );
 
-        const createdPolicies = policies.filter((p: any) => policyIds.includes(p.id));
         const systemPolicyNames: string[] = createdPolicies.map(
           (p: any) => p.package_policies[0].name
         );

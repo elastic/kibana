@@ -19,9 +19,9 @@ import {
   FLEET_SERVER_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
 } from '../../common';
-import { PackagePolicyNameExistsError } from '../errors';
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
+import { PackagePolicyNameExistsError } from '../errors';
 
 import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
 import { incrementPackageName, isPackagePolicyNameCollisionLoser } from './package_policies';
@@ -140,8 +140,17 @@ async function createPackagePolicy(
   }
 
   if (!succeeded) {
-    throw new PackagePolicyNameExistsError(
-      `Failed to create package policy for '${packageToInstall}': could not resolve name collision after ${MAX_RETRIES} attempts`
+    // Best-effort numeric name exhausted retries — append agent policy ID suffix to guarantee
+    // unique completion without discarding the numeric context.
+    // agentPolicy.id is a UUID unique per creation, so this suffix cannot collide.
+    newPackagePolicy.name = `${newPackagePolicy.name}-${agentPolicy.id.slice(0, 8)}`;
+    await packagePolicyService.create(
+      soClient,
+      esClient,
+      newPackagePolicy,
+      { spaceId: options.spaceId, user: options.user, bumpRevision: false, force: options.force },
+      undefined,
+      options.request
     );
   }
 }

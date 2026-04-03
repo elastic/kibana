@@ -104,27 +104,27 @@ describe('createAgentPolicyWithPackages', () => {
     appContextService.stop();
   });
 
-  it('should throw PackagePolicyNameExistsError after exhausting all retries via post-creation collision check', async () => {
+  it('should fall back to a suffixed name after exhausting all retries via post-creation collision check', async () => {
     mockIsPackagePolicyNameCollisionLoser.mockResolvedValue(true);
     mockedPackagePolicyService.delete = jest.fn().mockResolvedValue([]);
 
-    let error: PackagePolicyNameExistsError | undefined;
-    try {
-      await createAgentPolicyWithPackages({
-        esClient: esClientMock,
-        soClient: soClientMock,
-        agentPolicyService: mockedAgentPolicyService,
-        newPolicy: { name: 'Agent policy 1', namespace: 'default' },
-        withSysMonitoring: true,
-        spaceId: 'default',
-      });
-    } catch (err) {
-      error = err;
-    }
+    await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: { name: 'Agent policy 1', namespace: 'default' },
+      withSysMonitoring: true,
+      spaceId: 'default',
+    });
 
-    expect(error).toBeInstanceOf(PackagePolicyNameExistsError);
-    expect(error?.message).toMatch(/could not resolve name collision after 5 attempts/);
+    // All 5 retry attempts should have been deleted
     expect(mockedPackagePolicyService.delete).toHaveBeenCalledTimes(5);
+
+    // Final create call should use the last attempted numeric name suffixed with the
+    // first 8 chars of the agent policy ID (mocked as 'new_id')
+    const lastCreateCall = jest.mocked(mockedPackagePolicyService.create).mock.calls.at(-1)!;
+    const finalName = (lastCreateCall[2] as { name: string }).name;
+    expect(finalName).toBe('system-1-new_id');
   });
 
   it('should retry without deleting when create throws PackagePolicyNameExistsError', async () => {
