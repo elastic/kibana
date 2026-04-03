@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from '@xstate/react';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
@@ -26,6 +26,7 @@ import { selectStreamType } from '../../../state_management/stream_enrichment_st
 
 export type ActionBlockProps = StepConfigurationProps & {
   processorMetrics?: ProcessorMetrics;
+  onInteractiveHover?: (enabled: boolean) => void;
 };
 export function ActionBlock(props: StepConfigurationProps) {
   const { stepRef, level, readOnly = false } = props;
@@ -62,6 +63,7 @@ export function ActionBlock(props: StepConfigurationProps) {
   }, [isFirstMount, isUnderEdit]);
 
   const isClickable = !isUnderEdit && !readOnly;
+  const [tooltipEnabled, setTooltipEnabled] = useState(true);
 
   const panel = (
     <EuiPanel
@@ -91,7 +93,11 @@ export function ActionBlock(props: StepConfigurationProps) {
       {isUnderEdit ? (
         <ActionBlockEditor {...props} ref={freshBlockRef} processorMetrics={processorMetrics} />
       ) : (
-        <ActionBlockListItem {...props} processorMetrics={processorMetrics} />
+        <ActionBlockListItem
+          {...props}
+          processorMetrics={processorMetrics}
+          onInteractiveHover={setTooltipEnabled}
+        />
       )}
     </EuiPanel>
   );
@@ -100,10 +106,14 @@ export function ActionBlock(props: StepConfigurationProps) {
     return (
       <EuiToolTip
         position="top"
-        content={i18n.translate('xpack.streams.actionBlock.tooltip.editProcessorLabel', {
-          defaultMessage: 'Edit {stepAction} processor',
-          values: { stepAction: step.action },
-        })}
+        content={
+          tooltipEnabled
+            ? i18n.translate('xpack.streams.actionBlock.tooltip.editProcessorLabel', {
+                defaultMessage: 'Edit {stepAction} processor',
+                values: { stepAction: step.action },
+              })
+            : null
+        }
         display="block"
       >
         {panel}

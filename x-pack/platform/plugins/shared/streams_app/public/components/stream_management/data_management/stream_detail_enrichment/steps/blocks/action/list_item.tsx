@@ -35,7 +35,7 @@ import { DragHandle } from '../../draggable_step_wrapper';
 
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
-  const { stepRef, level, processorMetrics, readOnly = false } = props;
+  const { stepRef, level, processorMetrics, readOnly = false, onInteractiveHover } = props;
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const isUnsaved = useSelector(
@@ -59,6 +59,8 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   const actionDisplayName = step.action.toUpperCase();
 
   const stopPropagation = (e: MouseEvent) => e.stopPropagation();
+  const suppressTooltip = () => onInteractiveHover?.(false);
+  const restoreTooltip = () => onInteractiveHover?.(true);
 
   return (
     <>
@@ -73,7 +75,12 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             {!readOnly && (
-              <EuiFlexItem grow={false} onClick={stopPropagation}>
+              <EuiFlexItem
+                grow={false}
+                onClick={stopPropagation}
+                onMouseEnter={suppressTooltip}
+                onMouseLeave={restoreTooltip}
+              >
                 <DragHandle />
               </EuiFlexItem>
             )}
@@ -120,7 +127,12 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
               </EuiFlexGroup>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
-              <EuiFlexItem grow={false} onClick={stopPropagation}>
+              <EuiFlexItem
+                grow={false}
+                onClick={stopPropagation}
+                onMouseEnter={suppressTooltip}
+                onMouseLeave={restoreTooltip}
+              >
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   {processorMetrics && (
                     <EuiFlexItem>
