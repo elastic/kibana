@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { checkOsqueryResponseActionAuthz } from './check_response_action_authz';
+import { isOsqueryResponseActionAuthorized } from './check_response_action_authz';
 
-describe('checkOsqueryResponseActionAuthz', () => {
+describe('isOsqueryResponseActionAuthorized', () => {
   let request: KibanaRequest;
   let mockCoreStart: CoreStart;
 
@@ -29,21 +29,21 @@ describe('checkOsqueryResponseActionAuthz', () => {
   it('should return true when user has writeLiveQueries', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: true, runSavedQueries: false });
 
-    const result = await checkOsqueryResponseActionAuthz(mockCoreStart, request, {});
+    const result = await isOsqueryResponseActionAuthorized(mockCoreStart, request, {});
     expect(result).toBe(true);
   });
 
   it('should return false when user lacks writeLiveQueries for direct query', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: false, runSavedQueries: false });
 
-    const result = await checkOsqueryResponseActionAuthz(mockCoreStart, request, {});
+    const result = await isOsqueryResponseActionAuthorized(mockCoreStart, request, {});
     expect(result).toBe(false);
   });
 
   it('should return true when user has runSavedQueries with saved_query_id', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: false, runSavedQueries: true });
 
-    const result = await checkOsqueryResponseActionAuthz(mockCoreStart, request, {
+    const result = await isOsqueryResponseActionAuthorized(mockCoreStart, request, {
       saved_query_id: 'test-query-id',
     });
     expect(result).toBe(true);
@@ -52,7 +52,7 @@ describe('checkOsqueryResponseActionAuthz', () => {
   it('should return true when user has runSavedQueries with pack_id', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: false, runSavedQueries: true });
 
-    const result = await checkOsqueryResponseActionAuthz(mockCoreStart, request, {
+    const result = await isOsqueryResponseActionAuthorized(mockCoreStart, request, {
       pack_id: 'test-pack-id',
     });
     expect(result).toBe(true);
@@ -61,14 +61,14 @@ describe('checkOsqueryResponseActionAuthz', () => {
   it('should return false when user has runSavedQueries but no saved_query_id or pack_id', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: false, runSavedQueries: true });
 
-    const result = await checkOsqueryResponseActionAuthz(mockCoreStart, request, {});
+    const result = await isOsqueryResponseActionAuthorized(mockCoreStart, request, {});
     expect(result).toBe(false);
   });
 
   it('should return false when user lacks both privileges with saved_query_id', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: false, runSavedQueries: false });
 
-    const result = await checkOsqueryResponseActionAuthz(mockCoreStart, request, {
+    const result = await isOsqueryResponseActionAuthorized(mockCoreStart, request, {
       saved_query_id: 'test-query-id',
     });
     expect(result).toBe(false);
@@ -77,7 +77,7 @@ describe('checkOsqueryResponseActionAuthz', () => {
   it('should return true when user has writeLiveQueries regardless of saved_query_id', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: true, runSavedQueries: false });
 
-    const result = await checkOsqueryResponseActionAuthz(mockCoreStart, request, {
+    const result = await isOsqueryResponseActionAuthorized(mockCoreStart, request, {
       saved_query_id: 'test-query-id',
     });
     expect(result).toBe(true);
@@ -86,7 +86,7 @@ describe('checkOsqueryResponseActionAuthz', () => {
   it('should call resolveCapabilities with the correct request and path', async () => {
     mockCoreStart = createMockCoreStart({ writeLiveQueries: true, runSavedQueries: false });
 
-    await checkOsqueryResponseActionAuthz(mockCoreStart, request, {});
+    await isOsqueryResponseActionAuthorized(mockCoreStart, request, {});
 
     expect(mockCoreStart.capabilities.resolveCapabilities).toHaveBeenCalledWith(request, {
       capabilityPath: 'osquery.*',

@@ -23,7 +23,7 @@ import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
-import { checkOsqueryResponseActionAuthz } from '../../lib/check_response_action_authz';
+import { isOsqueryResponseActionAuthorized } from '../../lib/check_response_action_authz';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -53,7 +53,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       async (context, request, response) => {
         const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
-        const isInvalid = !(await checkOsqueryResponseActionAuthz(coreStartServices, request, {
+        const isInvalid = !(await isOsqueryResponseActionAuthorized(coreStartServices, request, {
           saved_query_id: request.body.saved_query_id,
           pack_id: request.body.pack_id,
         }));
