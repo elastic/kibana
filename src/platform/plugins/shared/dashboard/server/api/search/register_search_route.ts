@@ -31,10 +31,10 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => searchResponseBodySchema,
-            description: 'Indicates the search is successful and the dashboards are retrieved',
+            description: 'success',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
         },
       },

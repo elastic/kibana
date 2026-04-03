@@ -98,6 +98,21 @@ export const MachineLearningSection = {
   order: 4,
 };
 
+const modelManagementTitle = i18n.translate('management.sections.modelManagementTitle', {
+  defaultMessage: 'Model Management',
+});
+
+const modelManagementTip = i18n.translate('management.sections.modelManagementTip', {
+  defaultMessage: 'Manage your inference models and endpoints',
+});
+
+export const ModelManagementSection = {
+  id: ManagementSectionId.ModelManagement,
+  title: modelManagementTitle,
+  tip: modelManagementTip,
+  order: 5,
+};
+
 export const SecuritySection = {
   id: 'security',
   title: sectionTitle,
@@ -109,20 +124,20 @@ export const KibanaSection = {
   id: ManagementSectionId.Kibana,
   title: kibanaTitle,
   tip: kibanaTip,
-  order: 4,
+  order: 6,
 };
 
 export const AISection = {
   id: ManagementSectionId.AI,
   title: aiTitle,
-  order: 4,
+  order: 7,
 };
 
 export const StackSection = {
   id: ManagementSectionId.Stack,
   title: stackTitle,
   tip: stackTip,
-  order: 4,
+  order: 8,
 };
 
 export const managementSections = [
@@ -130,6 +145,7 @@ export const managementSections = [
   DataSection,
   InsightsAndAlertingSection,
   MachineLearningSection,
+  ModelManagementSection,
   SecuritySection,
   KibanaSection,
   AISection,

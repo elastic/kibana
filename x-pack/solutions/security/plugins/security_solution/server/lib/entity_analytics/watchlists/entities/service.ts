@@ -101,9 +101,15 @@ export const createWatchlistEntitiesService = ({
 
           acc.entityIdsByType[entityType].push(euid);
 
-          const watchlists = get(record, 'entity.attributes.watchlists') as string[] | undefined;
+          const rawWatchlists = get(record, 'entity.attributes.watchlists');
+          const watchlists = Array.isArray(rawWatchlists)
+            ? rawWatchlists
+            : typeof rawWatchlists === 'string'
+            ? [rawWatchlists]
+            : undefined;
+
           if (watchlists) {
-            acc.watchlistsByEuid.set(euid, watchlists);
+            acc.watchlistsByEuid.set(euid, watchlists as string[]);
           }
 
           if (!isIndexSync) {

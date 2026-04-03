@@ -18,6 +18,7 @@ plugins:
     - entity_store
     - exploratory_view
     - fleet
+    - flyoutSystemExamples
     - gen_ai_settings
     - global_search
     - index_management

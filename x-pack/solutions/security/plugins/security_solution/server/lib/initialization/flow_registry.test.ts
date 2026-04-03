@@ -23,6 +23,14 @@ jest.mock('./flows/create_list_indices', () => ({
   },
 }));
 
+jest.mock('./flows/initialize_security_data_views', () => ({
+  initializeSecurityDataViewsFlow: {
+    id: 'security-data-views' as const,
+    resolveProvisionContext: jest.fn().mockResolvedValue({}),
+    provision: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+  },
+}));
+
 const createMockContext = (): InitializationFlowContext =>
   ({
     requestHandlerContext: {},

@@ -63,9 +63,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   const getResolutionGroup = async (entityId: string) => {
     const { body } = await supertest
-      .get(ENTITY_STORE_ROUTES.RESOLUTION_GROUP)
+      .get(ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP)
       .query({ entity_id: entityId })
-      .set('elastic-api-version', API_VERSIONS.internal.v2)
+      .set('elastic-api-version', API_VERSIONS.public.v1)
       .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
     return body;
@@ -114,8 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/260599
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
       // Use enableEntityStoreV2 (without maintainer init) to prevent the
       // automated resolution maintainer from racing with CSV upload tests.

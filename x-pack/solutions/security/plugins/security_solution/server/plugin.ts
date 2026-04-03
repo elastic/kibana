@@ -125,6 +125,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
+import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
@@ -146,6 +147,7 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/constants';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
@@ -325,6 +327,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
+        entityAnalyticsConfig: config.entityAnalytics,
+        telemetry: core.analytics,
       });
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
         registerWatchlistMaintainer({
@@ -412,6 +416,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
     });
 
+    registerLeadGenerationTask({
+      getStartServices: core.getStartServices,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      telemetry: core.analytics,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
+      config: this.config,
+    });
+
     if (plugins.searchInferenceEndpoints) {
       plugins.searchInferenceEndpoints.features.register({
         featureId: 'security_search_inference_parent',
@@ -432,6 +446,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
+
+      if (!experimentalFeatures.siemMigrationsDisabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: 'security_search_inference_parent',
+          featureId: SIEM_MIGRATION_INFERENCE_FEATURE_ID,
+          featureName: 'Automatic migration',
+          featureDescription: 'Automatic migration inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
 
       plugins.searchInferenceEndpoints.features.register({
         parentFeatureId: 'security_search_inference_parent',
@@ -1058,6 +1083,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
         telemetryConfigProvider: this.telemetryConfigProvider,
+        packageService,
       };
 
       this.healthDiagnosticService.start(serviceStart).catch((e) => {

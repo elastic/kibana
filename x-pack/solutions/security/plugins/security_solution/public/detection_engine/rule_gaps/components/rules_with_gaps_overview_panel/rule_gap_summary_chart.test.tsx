@@ -12,14 +12,17 @@ import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gap
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 jest.mock('../../context/gap_auto_fill_scheduler_context');
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/charts/donutchart', () => ({
   DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
 }));
 
 const mockUseGetRuleIdsWithGaps = useGetRuleIdsWithGaps as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
 const mockInvalidate = jest.fn();
 jest.mock('../../api/hooks/use_get_rule_ids_with_gaps', () => ({
   useGetRuleIdsWithGaps: jest.fn(),
@@ -65,6 +68,13 @@ const createGapsResponse = ({
 describe('RuleGapSummaryChart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        uiSettings: {
+          get: jest.fn().mockReturnValue([]),
+        },
+      },
+    });
     (useRulesTableContext as jest.Mock).mockReturnValue(useRulesTableContextMock.create());
     (useGapAutoFillSchedulerContext as jest.Mock).mockReturnValue({
       canAccessGapAutoFill: false,

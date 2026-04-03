@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { isInferenceProviderError } from '@kbn/inference-common';
 import type {
   GeneratedSignificantEventQuery,
   IdentifyFeaturesResult,
@@ -20,9 +19,7 @@ import { v4 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import type { StreamsTaskType, TaskContext } from '.';
-import { getErrorMessage } from '../../streams/errors/parse_error';
-import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { parseError } from '../../streams/errors/parse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
@@ -65,20 +62,16 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
               const { streamName, from, to, steps, saveQueries, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
-              const {
-                taskClient,
-                inferenceClient,
-                queryClient,
-                streamsClient,
-                modelSettingsClient,
-                uiSettingsClient,
-              } = await taskContext.getScopedClients({
-                request: runContext.fakeRequest,
-              });
+              const { taskClient, queryClient, streamsClient } = await taskContext.getScopedClients(
+                {
+                  request: fakeRequest,
+                }
+              );
 
               try {
                 let featuresTaskResult: TaskResult<IdentifyFeaturesResult> | undefined;
@@ -98,7 +91,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                           streamName,
                         },
                         taskClient,
-                        runContext.fakeRequest
+                        fakeRequest
                       );
 
                       featuresTaskResult = await waitForSubtask<
@@ -120,7 +113,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                           streamName,
                         },
                         taskClient,
-                        runContext.fakeRequest
+                        fakeRequest
                       );
 
                       queriesTaskResult = await waitForSubtask<
@@ -151,26 +144,9 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   { featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
-                // Get connector info for error enrichment (use rule generation connector; fallback to default)
-                let errorMessage = getErrorMessage(error);
-                try {
-                  const onboardingLogger = taskContext.logger.get('onboarding');
-                  const settings = await modelSettingsClient.getSettings();
-                  const connectorIdForError = await resolveConnectorId({
-                    connectorId: settings.connectorIdRuleGeneration,
-                    uiSettingsClient,
-                    logger: onboardingLogger,
-                  });
-                  onboardingLogger.debug(
-                    `Using connector ${connectorIdForError} for rule generation (error enrichment)`
-                  );
-                  const connector = await inferenceClient.getConnectorById(connectorIdForError);
-                  if (isInferenceProviderError(error)) {
-                    errorMessage = formatInferenceProviderError(error, connector);
-                  }
-                } catch {
-                  // Use generic error message if we cannot resolve the connector
-                }
+                // Errors here originate from waitForSubtask (plain Error), not from inference calls.
+                // isInferenceProviderError is always false, so no connector enrichment is needed.
+                const errorMessage = parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
