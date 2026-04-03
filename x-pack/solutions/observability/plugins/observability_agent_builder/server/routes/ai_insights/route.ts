@@ -17,8 +17,8 @@ import {
   getAlertAiInsight,
   type AlertDocForInsight,
 } from './alert_ai_insights/generate_alert_ai_insight';
-import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
+import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -42,21 +42,14 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
-      const resolved = await startDeps.searchInferenceEndpoints?.endpoints.getForFeature(
-        OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-        request
-      );
-      resolved?.warnings.forEach((w) => logger.warn(w));
-
-      let connectorId: string;
-      let connector;
-      if (resolved && resolved.endpoints.length > 0) {
-        connector = resolved.endpoints[0];
-        connectorId = connector.connectorId;
-      } else {
-        connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
-        connector = await inference.getConnectorById(connectorId, request);
-      }
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
 
       const inferenceClient = inference.getClient({ request });
 
@@ -109,21 +102,14 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const resolved = await startDeps.searchInferenceEndpoints?.endpoints.getForFeature(
-        OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-        request
-      );
-      resolved?.warnings.forEach((w) => logger.warn(w));
-
-      let connectorId: string;
-      let connector;
-      if (resolved && resolved.endpoints.length > 0) {
-        connector = resolved.endpoints[0];
-        connectorId = connector.connectorId;
-      } else {
-        connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
-        connector = await inference.getConnectorById(connectorId, request);
-      }
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
 
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
 
@@ -185,21 +171,14 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
-      const resolved = await startDeps.searchInferenceEndpoints?.endpoints.getForFeature(
-        OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-        request
-      );
-      resolved?.warnings.forEach((w) => logger.warn(w));
-
-      let connectorId: string;
-      let connector;
-      if (resolved?.endpoints.length > 0) {
-        connector = resolved.endpoints[0];
-        connectorId = connector.connectorId;
-      } else {
-        connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
-        connector = await inference.getConnectorById(connectorId, request);
-      }
+      const { connectorId, connector } = await resolveConnectorForFeature({
+        searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+        featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+        request,
+        logger,
+        coreStart,
+        inference,
+      });
 
       const inferenceClient = inference.getClient({ request });
       const esClient = coreStart.elasticsearch.client.asScoped(request);

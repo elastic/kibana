@@ -8,19 +8,19 @@
 import type { InferenceFeatureConfig } from '@kbn/search-inference-endpoints/server';
 import { i18n } from '@kbn/i18n';
 import {
-  OBSERVABILITY_AI_INSIGHTS_INFERENCE_PARENT_FEATURE_ID,
+  OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
   OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
 } from '../common/constants';
 
 export const observabilityParentFeature: InferenceFeatureConfig = {
-  featureId: OBSERVABILITY_AI_INSIGHTS_INFERENCE_PARENT_FEATURE_ID,
+  featureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
   featureName: i18n.translate(
     'xpack.observabilityAgentBuilder.inferenceFeature.observabilityParentName',
-    { defaultMessage: 'Observability AI Insights' }
+    { defaultMessage: 'Observability' }
   ),
   featureDescription: i18n.translate(
     'xpack.observabilityAgentBuilder.inferenceFeature.observabilityParentDescription',
-    { defaultMessage: 'Parent feature for Observability AI Insights' }
+    { defaultMessage: 'Inference endpoint settings for Observability features' }
   ),
   taskType: 'chat_completion',
   recommendedEndpoints: [],
@@ -28,7 +28,7 @@ export const observabilityParentFeature: InferenceFeatureConfig = {
 
 const observabilityAiInsightsChatCompletionFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-  parentFeatureId: OBSERVABILITY_AI_INSIGHTS_INFERENCE_PARENT_FEATURE_ID,
+  parentFeatureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
   featureName: i18n.translate('xpack.observabilityAgentBuilder.inferenceFeature.aiSettingsName', {
     defaultMessage: 'AI Insights',
   }),

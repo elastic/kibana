@@ -20,7 +20,7 @@ export const observabilityParentFeature: InferenceFeatureConfig = {
   ),
   featureDescription: i18n.translate(
     'xpack.observabilityAiAssistant.inferenceFeature.observabilityParentDescription',
-    { defaultMessage: 'Parent feature for Observability AI Assistant' }
+    { defaultMessage: 'Inference endpoint settings for Observability AI Assistant features' }
   ),
   taskType: 'chat_completion',
   recommendedEndpoints: [],
