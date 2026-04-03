@@ -222,7 +222,6 @@ describe('Legacy Metric Schema', () => {
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'unique_count',
           size: 'xxl',
           labels: { alignment: 'top' },

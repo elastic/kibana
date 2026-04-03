@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DEFAULT_EXCLUDED_GAP_REASONS } from '../../../../../../../common/constants';
 import type { GapAutoFillSchedulerResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import type { GapAutoFillSchedulerResponse } from '../../../../../../application/gaps/auto_fill_scheduler/result/types';
 
@@ -19,6 +20,7 @@ export const transformToGapAutoFillSchedulerResponseBody = (
   num_retries: result.numRetries,
   rule_types: result.ruleTypes,
   scope: result.scope,
+  excluded_reasons: result.excludedReasons ?? DEFAULT_EXCLUDED_GAP_REASONS,
   created_by: result.createdBy,
   updated_by: result.updatedBy,
   created_at: result.createdAt,
