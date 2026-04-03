@@ -231,14 +231,14 @@ export function SettingsTab() {
                         'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatusEveryRun',
                         {
                           defaultMessage:
-                            'Continuous extraction is active. All eligible streams are processed on every run.',
+                            'Continuous extraction is active. Streams have no cooldown and are re-eligible for extraction immediately after each run.',
                         }
                       )
                     : i18n.translate(
                         'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatus',
                         {
                           defaultMessage:
-                            'Continuous extraction is active. Knowledge indicators are extracted every {hours} hours.',
+                            'Continuous extraction is active. Streams are re-extracted at most every {hours} hours.',
                           values: {
                             hours:
                               continuousExtraction.saved.intervalHours ??
@@ -305,7 +305,7 @@ export function SettingsTab() {
                     'xpack.streams.significantEventsDiscovery.settings.extractionIntervalHelp',
                     {
                       defaultMessage:
-                        'How often to run KI extraction per stream. Set to 0 to process all eligible streams on every run.',
+                        'Minimum period in hours between extractions for a given stream. Set to 0 for no cooldown between runs.',
                     }
                   )}
                 >
