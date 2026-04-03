@@ -118,7 +118,7 @@ describe('ShowShareModal', () => {
           },
         },
       ],
-      query: { query: 'bye', language: 'kuery' },
+      query: { expression: 'bye', language: 'kql' },
     };
     dashboardBackupService.getState = jest.fn().mockReturnValue(unsavedDashboardState);
     ShowShareModal(defaultShareModalProps);

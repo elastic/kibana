@@ -38,6 +38,7 @@ import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
+import { toAsCodeQuery, toStoredQuery } from '../../common';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 export const COMPARE_DEBOUNCE = 100;
@@ -56,9 +57,11 @@ export function initializeUnifiedSearchManager(
   } = dataService.query;
 
   const reload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
+  const query$ = new BehaviorSubject<Query | undefined>(
+    initialState.query ? toStoredQuery(initialState.query) : undefined
+  );
   // setAndSyncQuery method not needed since query synced with 2-way data binding
-  function setQuery(query: Query) {
+  function setQuery(query: Query | undefined) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
     }
@@ -258,6 +261,7 @@ export function initializeUnifiedSearchManager(
     'filters' | 'query' | 'refresh_interval' | 'time_range'
   > => {
     const serializableFilters = asCodeFilters$.value;
+    const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
 
     const timeRange =
       timeRestore$.value && timeRange$.value
@@ -276,7 +280,7 @@ export function initializeUnifiedSearchManager(
         : undefined;
 
     return {
-      query: query$.value,
+      ...(asCodeQuery && { query: asCodeQuery }),
       ...(serializableFilters?.length && { filters: serializableFilters }),
       ...(refreshInterval && { refresh_interval: refreshInterval }),
       ...(timeRange && { time_range: timeRange }),
@@ -309,12 +313,16 @@ export function initializeUnifiedSearchManager(
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
 
-          map(([filters, query, refresh_interval, time_range]) => ({
-            filters,
-            query,
-            refresh_interval,
-            time_range,
-          })),
+          map(([filters, query, refresh_interval, time_range]) => {
+            const latestQuery = query ? toAsCodeQuery(query) : undefined;
+
+            return {
+              filters,
+              ...(latestQuery && { query: latestQuery }),
+              refresh_interval,
+              time_range,
+            };
+          }),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
             diffComparators(comparators, lastSavedState, latestState)
@@ -326,9 +334,8 @@ export function initializeUnifiedSearchManager(
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
           ...(toStoredFilters(lastSavedState.filters, logger) ?? []),
         ]);
-        if (lastSavedState.query) {
-          setQuery(lastSavedState.query);
-        }
+        const storedQuery = lastSavedState.query ? toStoredQuery(lastSavedState.query) : undefined;
+        setQuery(storedQuery);
         if (lastSavedState.time_range) {
           setAndSyncTimeRange(lastSavedState.time_range);
         }

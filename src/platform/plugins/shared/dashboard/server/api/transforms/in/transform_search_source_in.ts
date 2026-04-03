@@ -10,6 +10,7 @@
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { extractReferences } from '@kbn/data-plugin/common';
 import type { DashboardState } from '../../types';
+import { toStoredQuery } from '../../../../common';
 import { logger } from '../../../kibana_services';
 
 export function transformSearchSourceIn(
@@ -22,9 +23,10 @@ export function transformSearchSourceIn(
 
   try {
     const storedFilters = toStoredFilters(filters, logger);
+    const storedQuery = toStoredQuery(query);
     const [extractedState, references] = extractReferences({
       filter: storedFilters,
-      query,
+      query: storedQuery,
     });
     return { searchSourceJSON: JSON.stringify(extractedState), references };
   } catch (error) {

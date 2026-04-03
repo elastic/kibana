@@ -9,8 +9,10 @@
 
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilter, isAsCodeFilter } from '@kbn/as-code-filters-transforms';
+import { isQuery } from '@kbn/data-plugin/public';
 import type { DashboardState } from '../../../../common';
 import { migrateLegacyQuery } from '../../../../common';
+import { toAsCodeQuery } from '../../../../common';
 
 type DashboardSearchState = Pick<
   DashboardState,
@@ -35,7 +37,23 @@ export function extractSearchState(state: {
   }
 
   if (state.query && typeof state.query === 'object') {
-    searchState.query = migrateLegacyQuery(state.query);
+    const maybeQuery = state.query as Record<string, unknown>;
+
+    // New as-code/API query format
+    if (typeof maybeQuery.expression === 'string' && typeof maybeQuery.language === 'string') {
+      const expression = maybeQuery.expression;
+      const language = maybeQuery.language === 'lucene' ? 'lucene' : 'kql';
+      searchState.query = { expression, language };
+    }
+
+    // Legacy query format
+    if (isQuery(state.query)) {
+      const storedQuery = migrateLegacyQuery(state.query);
+      const asCodeQuery = toAsCodeQuery(storedQuery);
+      if (asCodeQuery) {
+        searchState.query = asCodeQuery;
+      }
+    }
   }
 
   // Refresh interval could be passed in with snake_case or camelCase
