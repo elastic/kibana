@@ -16,7 +16,7 @@ import { maintainerIdParamsSchema } from './utils/validator';
 export function registerStartMaintainer(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: `${ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START}`,
+      path: `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START}`,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
