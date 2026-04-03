@@ -351,7 +351,7 @@ const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
  * For typed entities, values come from saved _sf_* variables (pre-LOOKUP JOIN).
  * For generic entities, the value is the EUID column itself (which IS the raw
  * entity.id value post MV_EXPAND).
- * Uses REPLACE to fix the "{," pattern that occurs when the first property is null.
+ * Uses REPLACE to fix null properties.
  */
 const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): string => {
   const properties = fields
@@ -373,8 +373,15 @@ const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): s
       return `CASE(${notTypedCondition},
         ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${euidColumn})`)}, "")`;
     })
-    .join(',\n      ');
-  return `REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "\\\\{,", ${JSON_OBJECT_START})`;
+    .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
+  return `REPLACE(
+    REPLACE(
+      REPLACE(
+        REPLACE(
+          CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), ",,,", ""),
+        ",,", ","),
+    "\\\\{,", ${JSON_OBJECT_START}),
+  ",}", ${JSON_OBJECT_END})`;
 };
 
 const buildActorSourceFieldsEsql = (): string =>
@@ -394,7 +401,7 @@ const buildEnrichedEntityFieldsEsql = (): string => {
 // Put required fields first (no comma prefix), optional fields use comma prefix
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":",
+    CONCAT("\\"entity\\":",
     ${JSON_OBJECT_START},
       ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
       CASE(actorEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
@@ -413,14 +420,14 @@ const buildEnrichedEntityFieldsEsql = (): string => {
         ${JSON_OBJECT_END}), ""),
       ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
     ${JSON_OBJECT_END}),
-    CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
+    CONCAT("\\"entity\\":", ${JSON_OBJECT_START},
       ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
       ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
     ${JSON_OBJECT_END})
   )
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":",
+    CONCAT("\\"entity\\":",
     ${JSON_OBJECT_START},
       ${concatJsonObjectPropertyBool('availableInEntityStore', true)},
       CASE(targetEntityName IS NOT NULL, CONCAT(${JSON_OBJECT_SEPARATOR},
@@ -439,7 +446,7 @@ const buildEnrichedEntityFieldsEsql = (): string => {
         ${JSON_OBJECT_END}), ""),
       ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
     ${JSON_OBJECT_END}),
-    CONCAT(",\\"entity\\":",
+    CONCAT("\\"entity\\":",
     ${JSON_OBJECT_START},
       ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
       ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
