@@ -185,7 +185,6 @@ describe('Region Map Schema', () => {
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'count',
         },
         region: {
@@ -233,11 +232,9 @@ describe('Region Map Schema', () => {
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'avg_bytes',
         },
         region: {
-          operation: 'value',
           column: 'location',
           ems: {
             boundaries: 'world_countries',

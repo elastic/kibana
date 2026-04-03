@@ -1431,13 +1431,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'pie',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1469,13 +1467,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'treemap',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1502,12 +1498,10 @@ export const esqlCharts: Array<PartitionConfig> = [
     ignore_global_filters: false,
     type: 'mosaic',
     metric: {
-      operation: 'value',
       column: 'count',
     },
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
@@ -1595,13 +1589,11 @@ export const esqlCharts: Array<PartitionConfig> = [
     type: 'waffle',
     metrics: [
       {
-        operation: 'value',
         column: 'count',
       },
     ],
     group_by: [
       {
-        operation: 'value',
         column: 'category.keyword',
         color: {
           mode: 'categorical',
