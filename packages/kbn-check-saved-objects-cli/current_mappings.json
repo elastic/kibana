@@ -1376,6 +1376,9 @@
       "integration_id": {
         "type": "keyword"
       },
+      "title": {
+        "type": "text"
+      },
       "job_info": {
         "properties": {
           "job_id": {
