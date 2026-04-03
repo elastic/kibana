@@ -613,6 +613,17 @@ function createNavTree({
             ],
           },
           {
+            id: 'management_model_management',
+            title: i18n.translate('xpack.observability.obltNav.modelManagement', {
+              defaultMessage: 'Model Management',
+            }),
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
+            ],
+          },
+          {
             id: 'management_ai',
             title: i18n.translate('xpack.observability.obltNav.ai', {
               defaultMessage: 'AI',
