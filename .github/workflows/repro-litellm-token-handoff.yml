@@ -1,0 +1,108 @@
+name: Repro LiteLLM Token Handoff2
+
+run-name: Repro LiteLLM token handoff (${{ inputs.github_actions_ref }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      github_actions_ref:
+        description: 'Branch, tag, or commit SHA to test from elastic/github-actions'
+        required: true
+        default: 'main'
+      models:
+        description: 'Comma-separated LiteLLM model allowlist for the minted token'
+        required: true
+        default: 'llm-gateway/claude-opus-4-5'
+      key_ttl:
+        description: 'Minted token TTL'
+        required: true
+        default: '15m'
+      max_budget:
+        description: 'Maximum budget for the minted token'
+        required: true
+        default: '5'
+  push:
+    branches:
+      - gh-claude-review
+
+jobs:
+  mint_token:
+    name: Mint token
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      api_key: ${{ steps.mint.outputs.api_key }}
+    steps:
+      - name: Mint LiteLLM token from elastic/github-actions
+        id: mint
+        uses: elastic/github-actions/litellm-token@${{ inputs.github_actions_ref }}
+        with:
+          base-url: ${{ secrets.LITELLM_BASE_URL }}
+          master-key: ${{ secrets.LITELLM_API_KEY }}
+          models: ${{ inputs.models }}
+          key-ttl: ${{ inputs.key_ttl }}
+          max-budget: ${{ inputs.max_budget }}
+
+  verify_output_handoff:
+    name: Verify downstream output handoff
+    runs-on: ubuntu-latest
+    needs: mint_token
+    permissions: {}
+    steps:
+      - name: Fail if the api_key output was redacted or skipped
+        env:
+          API_KEY: ${{ needs.mint_token.outputs.api_key }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${API_KEY}" ]; then
+            echo "::error::mint_token.outputs.api_key is empty in the downstream job. This usually means the action masked the token before setting it as an output."
+            exit 1
+          fi
+
+          echo "api_key output was available in the downstream job."
+
+  verify_token_survives_job_boundary:
+    name: Verify token survives job boundary
+    runs-on: ubuntu-latest
+    needs: mint_token
+    if: ${{ needs.mint_token.outputs.api_key != '' }}
+    permissions: {}
+    steps:
+      - name: Delete the token from the downstream job
+        env:
+          API_KEY: ${{ needs.mint_token.outputs.api_key }}
+          BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          MASTER_KEY: ${{ secrets.LITELLM_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          response_file="$(mktemp)"
+          http_status="$(
+            curl \
+              --silent \
+              --show-error \
+              --output "${response_file}" \
+              --write-out '%{http_code}' \
+              --request POST \
+              --url "${BASE_URL%/}/key/delete" \
+              --header "Authorization: Bearer ${MASTER_KEY}" \
+              --header 'Content-Type: application/json' \
+              --data "{\"keys\":[\"${API_KEY}\"]}"
+          )"
+
+          case "${http_status}" in
+            200|201|202|204)
+              echo "The downstream job deleted the token successfully, so the token survived the job boundary."
+              ;;
+            400|404|422)
+              echo "::error::The downstream job could not delete the token because LiteLLM reported ${http_status}. This usually means the mint job post hook already revoked it."
+              cat "${response_file}"
+              exit 1
+              ;;
+            *)
+              echo "::error::Unexpected LiteLLM response while checking whether the token survived the job boundary (HTTP ${http_status})."
+              cat "${response_file}"
+              exit 1
+              ;;
+          esac
