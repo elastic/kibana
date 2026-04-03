@@ -1079,9 +1079,6 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     placement: 'inside',
     position: 'top_right',
   },
-  fitting: {
-    type: 'linear',
-  },
   axis: {
     x: {
       title: {
@@ -1175,9 +1172,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
   },
-  fitting: {
-    type: 'linear',
-  },
   axis: {
     x: {
       title: {
@@ -1265,9 +1259,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
     visibility: 'visible',
     placement: 'outside',
     position: 'bottom',
-  },
-  fitting: {
-    type: 'linear',
   },
   axis: {
     x: {

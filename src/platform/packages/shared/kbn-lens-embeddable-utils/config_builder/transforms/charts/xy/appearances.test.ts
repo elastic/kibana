@@ -37,7 +37,7 @@ describe('XY Appearances Transforms', () => {
     expect(result.bars?.minimum_height).toBe(DEFAULT_BARS_MINIMUM_HEIGHT);
     expect(result.areas?.fill_opacity).toBe(DEFAULT_AREAS_FILL_OPACITY);
     expect(result.points?.visibility).toBe(DEFAULT_POINTS_VISIBILITY);
-    expect(result.lines?.interpolation).toBe(DEFAULT_LINES_INTERPOLATION);
+    expect(result.interpolation).toBe(DEFAULT_LINES_INTERPOLATION);
     expect(result.overlays?.partial_buckets?.visible).toBe(DEFAULT_PARTIAL_BUCKETS_VISIBLE);
     expect(result.overlays?.current_time_marker?.visible).toBe(DEFAULT_CURRENT_TIME_MARKER_VISIBLE);
     expect(result.bars?.data_labels?.visible).toBe(DEFAULT_DATA_LABELS_VISIBLE);
@@ -49,17 +49,17 @@ describe('XY Appearances Transforms', () => {
       { hasBars: false, hasLines: true, hasAreas: true }
     );
     expect(result.bars).toBeUndefined();
-    expect(result.lines).toBeDefined();
     expect(result.areas).toBeDefined();
     expect(result.points).toBeDefined();
+    expect(result.interpolation).toBeDefined();
   });
 
-  it('should omit lines styling when no line layers exist', () => {
+  it('should include interpolation when area layers exist without line layers', () => {
     const result = convertStylingToAPIFormat(
       {},
       { hasBars: true, hasLines: false, hasAreas: true }
     );
-    expect(result.lines).toBeUndefined();
+    expect(result.interpolation).toBeDefined();
     expect(result.bars).toBeDefined();
     expect(result.areas).toBeDefined();
     expect(result.points).toBeDefined();
@@ -72,17 +72,35 @@ describe('XY Appearances Transforms', () => {
     );
     expect(result.areas).toBeUndefined();
     expect(result.bars).toBeDefined();
-    expect(result.lines).toBeDefined();
+    expect(result.interpolation).toBeDefined();
     expect(result.points).toBeDefined();
   });
 
-  it('should omit points styling when no line or area layers exist', () => {
+  it('should omit points, interpolation, and fitting when no line or area layers exist', () => {
     const result = convertStylingToAPIFormat(
       {},
       { hasBars: true, hasLines: false, hasAreas: false }
     );
     expect(result.points).toBeUndefined();
+    expect(result.interpolation).toBeUndefined();
+    expect(result.fitting).toBeUndefined();
     expect(result.bars).toBeDefined();
+  });
+
+  it('should include fitting under styling when line layers exist', () => {
+    const result = convertStylingToAPIFormat(
+      { fittingFunction: 'Linear', emphasizeFitting: true, endValue: 'Zero' },
+      { hasBars: false, hasLines: true, hasAreas: false }
+    );
+    expect(result.fitting).toEqual({ type: 'linear', emphasize: true, extend: 'zero' });
+  });
+
+  it('should include fitting under styling when area layers exist', () => {
+    const result = convertStylingToAPIFormat(
+      { fittingFunction: 'Average' },
+      { hasBars: false, hasLines: false, hasAreas: true }
+    );
+    expect(result.fitting).toEqual({ type: 'average' });
   });
 
   it('should include points styling when only area layers exist', () => {
@@ -126,9 +144,10 @@ describe('XY Appearances Transforms', () => {
         current_time_marker: { visible: true },
       },
       points: { visibility: 'auto' },
-      lines: { interpolation: 'smooth' },
+      interpolation: 'smooth',
       bars: { minimum_height: 3, data_labels: { visible: true } },
       areas: { fill_opacity: 0.5 },
+      fitting: { type: 'linear', emphasize: true, extend: 'zero' },
     };
     const state = convertStylingToStateFormat(original);
     const result = convertStylingToAPIFormat(state, allLayersPresent);
@@ -137,9 +156,10 @@ describe('XY Appearances Transforms', () => {
     expect(result.overlays?.current_time_marker).toEqual(original.overlays?.current_time_marker);
     expect(result.bars?.data_labels).toEqual(original.bars?.data_labels);
     expect(result.points?.visibility).toBe(original.points?.visibility);
-    expect(result.lines?.interpolation).toBe(original.lines?.interpolation);
+    expect(result.interpolation).toBe(original.interpolation);
     expect(result.bars?.minimum_height).toBe(original.bars?.minimum_height);
     expect(result.areas?.fill_opacity).toBe(original.areas?.fill_opacity);
+    expect(result.fitting).toEqual(original.fitting);
   });
 
   it('should preserve complex config through State -> API -> State', () => {
@@ -151,6 +171,9 @@ describe('XY Appearances Transforms', () => {
       hideEndzones: false,
       showCurrentTimeMarker: true,
       pointVisibility: 'always' as const,
+      fittingFunction: 'Linear' as const,
+      emphasizeFitting: true,
+      endValue: 'Zero' as const,
     };
     const api = convertStylingToAPIFormat(original, allLayersPresent);
     const result = convertStylingToStateFormat(api);
@@ -162,5 +185,8 @@ describe('XY Appearances Transforms', () => {
     expect(result.hideEndzones).toBe(original.hideEndzones);
     expect(result.showCurrentTimeMarker).toBe(original.showCurrentTimeMarker);
     expect(result.pointVisibility).toBe(original.pointVisibility);
+    expect(result.fittingFunction).toBe(original.fittingFunction);
+    expect(result.emphasizeFitting).toBe(original.emphasizeFitting);
+    expect(result.endValue).toBe(original.endValue);
   });
 });

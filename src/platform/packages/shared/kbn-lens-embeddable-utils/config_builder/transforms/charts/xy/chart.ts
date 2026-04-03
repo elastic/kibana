@@ -11,7 +11,6 @@ import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
-import { capitalize } from 'lodash';
 import type { XYState } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
@@ -31,14 +30,6 @@ import {
   convertStylingToStateFormat,
   type LayerPresence,
 } from './appearances';
-
-function convertFittingToStateFormat(fitting: XYState['fitting']) {
-  return {
-    ...(fitting?.type ? { fittingFunction: capitalize(fitting.type) } : {}),
-    ...(fitting?.dotted ? { emphasizeFitting: fitting.dotted } : {}),
-    ...(fitting?.end_value ? { endValue: capitalize(fitting.end_value) } : {}),
-  };
-}
 
 type AxisType = Required<NonNullable<XYState['axis']>>;
 type XAxisType = AxisType extends { x?: infer T } ? T : undefined;
@@ -181,7 +172,6 @@ export function buildVisualizationState(
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
-    ...convertFittingToStateFormat(config.fitting),
     ...convertAxisSettingsToStateFormat(config.axis),
     ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
     layers,
@@ -209,25 +199,10 @@ export function buildVisualizationAPI(
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
-    ...convertFittingToAPIFormat(config),
     ...convertAxisSettingsToAPIFormat(config, layers),
     ...(decorations ? { styling: decorations } : {}),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
-}
-
-function convertFittingToAPIFormat(config: XYPersistedState): Pick<XYState, 'fitting'> | {} {
-  const fittingOptions = {
-    ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
-    ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
-    ...(config.endValue ? { end_value: config.endValue.toLowerCase() } : {}),
-  };
-
-  if (Object.keys(fittingOptions).length === 0) {
-    return {};
-  }
-
-  return { fitting: fittingOptions };
 }
 
 function convertExtendsToAPIFormat(extent: AxisExtentConfig | undefined): { extent?: ExtentsType } {

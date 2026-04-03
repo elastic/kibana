@@ -240,6 +240,7 @@ export type XYApiLineInterpolation = typeof XY_API_LINE_INTERPOLATION;
 
 const xyStylingSchema = schema.object(
   {
+    // Chart-level (always present)
     overlays: schema.maybe(
       schema.object(
         {
@@ -274,6 +275,64 @@ const xyStylingSchema = schema.object(
         }
       )
     ),
+
+    // Lines + areas shared (alphabetical)
+    fitting: schema.maybe(
+      schema.object(
+        {
+          type: schema.oneOf(
+            [
+              schema.literal('none'),
+              schema.literal('zero'),
+              schema.literal('linear'),
+              schema.literal('carry'),
+              schema.literal('lookahead'),
+              schema.literal('average'),
+              schema.literal('nearest'),
+            ],
+            { meta: { description: 'Fitting function type for missing data' } }
+          ),
+          emphasize: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'Visually distinguish fitted segments with a dashed line style and reduced area opacity',
+              },
+            })
+          ),
+          extend: schema.maybe(
+            schema.oneOf(
+              [schema.literal('none'), schema.literal('zero'), schema.literal('nearest')],
+              {
+                meta: {
+                  description:
+                    'How to render line and area edges when data does not cover the full X domain',
+                },
+              }
+            )
+          ),
+        },
+        {
+          meta: {
+            id: 'xyFitting',
+            description: 'Missing data interpolation configuration for line and area series',
+          },
+        }
+      )
+    ),
+    interpolation: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
+          schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
+          schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
+        ],
+        {
+          defaultValue: DEFAULT_LINES_INTERPOLATION,
+          meta: { description: 'Curve interpolation method for line and area series' },
+        }
+      )
+    ),
     points: schema.maybe(
       schema.object(
         {
@@ -295,27 +354,24 @@ const xyStylingSchema = schema.object(
         }
       )
     ),
-    lines: schema.maybe(
+
+    // Series-type specific (alphabetical)
+    areas: schema.maybe(
       schema.object(
         {
-          interpolation: schema.maybe(
-            schema.oneOf(
-              [
-                schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
-                schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
-                schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
-              ],
-              {
-                defaultValue: DEFAULT_LINES_INTERPOLATION,
-                meta: { description: 'Curve interpolation method for line and area series' },
-              }
-            )
+          fill_opacity: schema.maybe(
+            schema.number({
+              defaultValue: DEFAULT_AREAS_FILL_OPACITY,
+              min: 0,
+              max: 2,
+              meta: { description: 'Area fill opacity (0-1 typical, max 2 for legacy)' },
+            })
           ),
         },
         {
           meta: {
-            id: 'xyStylingLines',
-            description: 'Line rendering settings for line and area series',
+            id: 'xyStylingAreas',
+            description: 'Area-specific rendering settings',
           },
         }
       )
@@ -346,26 +402,6 @@ const xyStylingSchema = schema.object(
           meta: {
             id: 'xyStylingBars',
             description: 'Bar-specific rendering settings',
-          },
-        }
-      )
-    ),
-    areas: schema.maybe(
-      schema.object(
-        {
-          fill_opacity: schema.maybe(
-            schema.number({
-              defaultValue: DEFAULT_AREAS_FILL_OPACITY,
-              min: 0,
-              max: 2,
-              meta: { description: 'Area fill opacity (0-1 typical, max 2 for legacy)' },
-            })
-          ),
-        },
-        {
-          meta: {
-            id: 'xyStylingAreas',
-            description: 'Area-specific rendering settings',
           },
         }
       )
@@ -453,37 +489,6 @@ const xySharedSettings = {
     )
   ),
 
-  fitting: schema.maybe(
-    schema.object(
-      {
-        type: schema.oneOf(
-          [
-            schema.literal('none'),
-            schema.literal('zero'),
-            schema.literal('linear'),
-            schema.literal('carry'),
-            schema.literal('lookahead'),
-            schema.literal('average'),
-            schema.literal('nearest'),
-          ],
-          { meta: { description: 'Fitting function type for missing data' } }
-        ),
-        dotted: schema.maybe(
-          schema.boolean({ meta: { description: 'Show fitted values as dotted lines' } })
-        ),
-        end_value: schema.maybe(
-          schema.oneOf([schema.literal('none'), schema.literal('zero'), schema.literal('nearest')])
-        ),
-      },
-      {
-        meta: {
-          id: 'xyFitting',
-          description:
-            'Missing data interpolation configuration (only valid fitting types applied per chart type)',
-        },
-      }
-    )
-  ),
   axis: schema.maybe(
     schema.object(
       {
