@@ -17,7 +17,7 @@ import React, {
 } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import type { ChartSectionProps, UnifiedHistogramAdapters } from '@kbn/unified-histogram/types';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
@@ -293,7 +293,7 @@ const CustomChartSectionWrapper = ({
   );
 
   const onLensLoad = useCallback(
-    (isLoading: boolean, adapters: Parameters<NonNullable<ChartSectionProps['onLensLoad']>>[1]) => {
+    (isLoading: boolean, adapters: UnifiedHistogramAdapters | undefined) => {
       if (!isLoading) {
         api.setLensRequestAdapter(adapters?.requests);
       }
