@@ -83,8 +83,8 @@ export const startMetadataTransforms = usageTracker.track(
         transform_id: currentTransformId,
       });
     } catch (err) {
-      // ignore if transform already started
-      if (err.statusCode !== 409) {
+      // ignore if transform already started or temporarily not found (race with Fleet install)
+      if (err.statusCode !== 409 && err.statusCode !== 404) {
         throw err;
       }
     }
@@ -98,8 +98,8 @@ export const startMetadataTransforms = usageTracker.track(
         transform_id: unitedTransformId,
       });
     } catch (err) {
-      // ignore if transform already started
-      if (err.statusCode !== 409) {
+      // ignore if transform already started or temporarily not found (race with Fleet install)
+      if (err.statusCode !== 409 && err.statusCode !== 404) {
         throw err;
       }
     }
@@ -132,6 +132,11 @@ async function getMetadataTransformIds(
 
 async function areMetadataTransformsReady(esClient: Client, version: string): Promise<boolean> {
   const transforms = await getMetadataTransformStats(esClient, version);
+
+  if (transforms.length === 0) {
+    return false;
+  }
+
   return !transforms.some(
     // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
     (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
