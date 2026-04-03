@@ -35,6 +35,7 @@ jest.mock('./session', () => {
   class SearchSessionService {
     setup() {}
     start() {}
+    stop() {}
     asScopedProvider = () => (request: any) => mockSessionClient;
   }
   return {
@@ -577,6 +578,197 @@ describe('Search service', () => {
 
         expect(mockSessionClient.updateStatuses).toHaveBeenCalledWith(['id1', 'id2']);
       });
+    });
+  });
+
+  describe('search settings cache', () => {
+    let mockGlobalClient: any;
+    let mockInternalRepo: any;
+
+    beforeEach(() => {
+      mockGlobalClient = {
+        get: jest
+          .fn()
+          .mockResolvedValueOnce(false) // includeFrozen
+          .mockResolvedValueOnce(5), // maxConcurrentShardRequests
+      };
+
+      mockInternalRepo = {};
+
+      mockCoreStart.savedObjects.createInternalRepository.mockReturnValue(mockInternalRepo);
+      mockCoreStart.uiSettings.globalAsScopedToClient.mockReturnValue(mockGlobalClient);
+    });
+
+    it('initializes search settings cache on start', async () => {
+      plugin.setup(mockCoreSetup, {
+        expressions: expressionsPluginMock.createSetupContract(),
+      });
+
+      plugin.start(mockCoreStart, {
+        fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
+      });
+
+      // Wait for async initialization
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockCoreStart.savedObjects.createInternalRepository).toHaveBeenCalled();
+      expect(mockCoreStart.uiSettings.globalAsScopedToClient).toHaveBeenCalledWith(
+        mockInternalRepo
+      );
+      expect(mockGlobalClient.get).toHaveBeenCalledTimes(2);
+
+      const settings = plugin.getSearchSettings();
+      expect(settings.includeFrozen).toBe(false);
+      expect(settings.maxConcurrentShardRequests).toBe(5);
+    });
+
+    it('falls back to defaults when cache initialization fails', async () => {
+      const failingClient = {
+        get: jest.fn().mockRejectedValue(new Error('UI settings error')),
+      } as any;
+      mockCoreStart.uiSettings.globalAsScopedToClient.mockReturnValue(failingClient);
+
+      plugin.setup(mockCoreSetup, {
+        expressions: expressionsPluginMock.createSetupContract(),
+      });
+
+      plugin.start(mockCoreStart, {
+        fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
+      });
+
+      // Wait for async initialization
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const settings = plugin.getSearchSettings();
+      expect(settings.includeFrozen).toBe(false);
+      expect(settings.maxConcurrentShardRequests).toBe(0);
+    });
+
+    it('returns defaults when cache not yet initialized', () => {
+      const settings = plugin.getSearchSettings();
+      expect(settings.includeFrozen).toBe(false);
+      expect(settings.maxConcurrentShardRequests).toBe(0);
+    });
+
+    it('refreshes cache when 30 seconds have passed', async () => {
+      plugin.setup(mockCoreSetup, {
+        expressions: expressionsPluginMock.createSetupContract(),
+      });
+
+      plugin.start(mockCoreStart, {
+        fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
+      });
+
+      // Wait for initial cache initialization
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Spy on Date.now to control time
+      const realDateNow = Date.now;
+      const initialTime = realDateNow();
+      let currentTime = initialTime;
+      jest.spyOn(Date, 'now').mockImplementation(() => currentTime);
+
+      try {
+        mockGlobalClient.get.mockClear();
+        mockGlobalClient.get
+          .mockResolvedValueOnce(true) // includeFrozen (changed)
+          .mockResolvedValueOnce(10); // maxConcurrentShardRequests (changed)
+
+        // simulate time passing beyond the refresh interval
+        currentTime = initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS;
+
+        const initSpy = jest.spyOn(plugin as any, 'initializeSearchSettingsCache');
+
+        (plugin as any).maybeRefreshSearchSettings();
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(initSpy).toHaveBeenCalled();
+
+        const settings = plugin.getSearchSettings();
+        expect(settings.includeFrozen).toBe(true);
+        expect(settings.maxConcurrentShardRequests).toBe(10);
+
+        initSpy.mockRestore();
+      } finally {
+        (Date.now as jest.Mock).mockRestore();
+      }
+    });
+
+    it('does not refresh cache when less than 30 seconds have passed', async () => {
+      plugin.setup(mockCoreSetup, {
+        expressions: expressionsPluginMock.createSetupContract(),
+      });
+
+      plugin.start(mockCoreStart, {
+        fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Spy on Date.now to control time
+      const realDateNow = Date.now;
+      const initialTime = realDateNow();
+      let currentTime = initialTime;
+      jest.spyOn(Date, 'now').mockImplementation(() => currentTime);
+
+      try {
+        mockGlobalClient.get.mockClear();
+
+        // some time passes, but less than the refresh interval
+        currentTime =
+          initialTime + initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS - 1000;
+
+        const initSpy = jest.spyOn(plugin as any, 'initializeSearchSettingsCache');
+
+        (plugin as any).maybeRefreshSearchSettings();
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(initSpy).not.toHaveBeenCalled();
+
+        initSpy.mockRestore();
+      } finally {
+        (Date.now as jest.Mock).mockRestore();
+      }
+    });
+
+    it('clears cache on service stop', async () => {
+      plugin.setup(mockCoreSetup, {
+        expressions: expressionsPluginMock.createSetupContract(),
+      });
+
+      plugin.start(mockCoreStart, {
+        fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
+      });
+
+      // Wait for initial cache initialization
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Verify cache has values
+      const settingsBeforeStop = plugin.getSearchSettings();
+      expect(settingsBeforeStop.includeFrozen).toBe(false);
+      expect(settingsBeforeStop.maxConcurrentShardRequests).toBe(5);
+
+      // Verify cache state is not null before stop
+      expect((plugin as any).searchSettingsCache).not.toBeNull();
+      expect((plugin as any).lastRefreshTime).toBeGreaterThan(0);
+
+      plugin.stop();
+
+      // Verify cache state is cleared
+      expect((plugin as any).searchSettingsCache).toBeNull();
+      expect((plugin as any).lastRefreshTime).toBe(0);
+
+      // Verify getSearchSettings returns defaults after stop
+      const settingsAfterStop = plugin.getSearchSettings();
+      expect(settingsAfterStop.includeFrozen).toBe(false);
+      expect(settingsAfterStop.maxConcurrentShardRequests).toBe(0);
     });
   });
 });

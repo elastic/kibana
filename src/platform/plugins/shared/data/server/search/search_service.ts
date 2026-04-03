@@ -140,12 +140,13 @@ export class SearchService {
   private searchAsInternalUser!: ISearchStrategy;
   private rollupsEnabled: boolean = false;
   private readonly isServerless: boolean;
+
   private searchSettingsCache: {
     includeFrozen: boolean;
     maxConcurrentShardRequests: number;
   } | null = null;
   private lastRefreshTime: number = 0;
-  private readonly MIN_SETTINGS_REFRESH_INTERVAL_MS = 60_000;
+  private readonly MIN_SETTINGS_REFRESH_INTERVAL_MS = 30_000;
   private uiSettings?: CoreStart['uiSettings'];
   private savedObjects?: CoreStart['savedObjects'];
 
