@@ -8,10 +8,11 @@
 import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  otelDatasetFilterDsl,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
   SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
-  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
-  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_CONTAINER_CPU_USAGE,
+  SEMCONV_CONTAINER_MEMORY_WORKING_SET,
 } from '../shared/constants';
 import { getOptionsForSchema } from './container_metrics_configs';
 
@@ -39,14 +40,14 @@ describe('container_metrics_configs', () => {
 
     it('returns SemConv Docker options when isOtel is true and isK8sContainer is false', () => {
       const { options } = getOptionsForSchema(true, false);
-      const filterClauseDsl = {
+      const expectedFilter = {
         bool: {
-          filter: [{ term: { 'event.dataset': 'dockerstatsreceiver.otel' } }],
+          filter: [otelDatasetFilterDsl('dockerstatsreceiver.otel')],
         },
       };
 
       expect(options.groupBy).toBe('container.id');
-      expect(options.filterQuery).toBe(JSON.stringify(filterClauseDsl));
+      expect(options.filterQuery).toBe(JSON.stringify(expectedFilter));
       expect(options.metrics).toEqual(
         expect.arrayContaining([
           { field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION, aggregation: 'avg' },
@@ -58,13 +59,13 @@ describe('container_metrics_configs', () => {
 
     it('returns SemConv Docker options when isOtel is true and isK8sContainer is undefined', () => {
       const { options } = getOptionsForSchema(true);
-      const filterClauseDsl = {
+      const expectedFilter = {
         bool: {
-          filter: [{ term: { 'event.dataset': 'dockerstatsreceiver.otel' } }],
+          filter: [otelDatasetFilterDsl('dockerstatsreceiver.otel')],
         },
       };
       expect(options.groupBy).toBe('container.id');
-      expect(options.filterQuery).toBe(JSON.stringify(filterClauseDsl));
+      expect(options.filterQuery).toBe(JSON.stringify(expectedFilter));
       expect(options.metrics).toEqual(
         expect.arrayContaining([
           { field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION, aggregation: 'avg' },
@@ -76,17 +77,17 @@ describe('container_metrics_configs', () => {
 
     it('returns SemConv K8s options when isOtel is true and isK8sContainer is true', () => {
       const { options } = getOptionsForSchema(true, true);
-      const filterClauseDsl = {
+      const expectedFilter = {
         bool: {
-          filter: [{ term: { 'event.dataset': 'kubeletstatsreceiver.otel' } }],
+          filter: [otelDatasetFilterDsl('kubeletstatsreceiver.otel')],
         },
       };
       expect(options.groupBy).toBe('container.id');
-      expect(options.filterQuery).toBe(JSON.stringify(filterClauseDsl));
+      expect(options.filterQuery).toBe(JSON.stringify(expectedFilter));
       expect(options.metrics).toEqual(
         expect.arrayContaining([
-          { field: SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION, aggregation: 'avg' },
-          { field: SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION, aggregation: 'avg' },
+          { field: SEMCONV_CONTAINER_CPU_USAGE, aggregation: 'avg' },
+          { field: SEMCONV_CONTAINER_MEMORY_WORKING_SET, aggregation: 'avg' },
         ])
       );
       expect(options.metrics).toHaveLength(2);
@@ -119,10 +120,7 @@ describe('container_metrics_configs', () => {
 
       const filterClauseWithEventModuleFilter = {
         bool: {
-          filter: [
-            { term: { 'event.dataset': 'dockerstatsreceiver.otel' } },
-            { ...filterClauseDsl },
-          ],
+          filter: [otelDatasetFilterDsl('dockerstatsreceiver.otel'), { ...filterClauseDsl }],
         },
       };
 
@@ -139,10 +137,7 @@ describe('container_metrics_configs', () => {
       };
       const filterClauseWithEventModuleFilter = {
         bool: {
-          filter: [
-            { term: { 'event.dataset': 'kubeletstatsreceiver.otel' } },
-            { ...filterClauseDsl },
-          ],
+          filter: [otelDatasetFilterDsl('kubeletstatsreceiver.otel'), { ...filterClauseDsl }],
         },
       };
 
