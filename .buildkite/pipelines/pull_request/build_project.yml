@@ -3,7 +3,7 @@ steps:
     label: 'Build Project Image'
     key: build_project_image
     agents:
-      machineType: n2-standard-16
+      machineType: e2-standard-16
       preemptible: true
       diskSizeGb: 150
     timeout_in_minutes: 90

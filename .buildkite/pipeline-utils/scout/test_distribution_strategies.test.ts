@@ -137,11 +137,11 @@ describe('scoutTestDistributionStrategies', () => {
 
     it('creates one Buildkite step per lane across all tracks', async () => {
       const track1 = createMockTrack('local', 'stateful', 'classic', 'default', [
-        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
-        createMockLane(2, 'n2-4-spot', ['config-b.ts']),
+        createMockLane(1, 'e2-4-spot', ['config-a.ts']),
+        createMockLane(2, 'e2-4-spot', ['config-b.ts']),
       ]);
       const track2 = createMockTrack('local', 'serverless', 'search', 'default', [
-        createMockLane(1, 'n2-8-spot', ['config-c.ts']),
+        createMockLane(1, 'e2-8-spot', ['config-c.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
@@ -155,8 +155,8 @@ describe('scoutTestDistributionStrategies', () => {
 
     it('step keys are numbered sequentially across tracks', async () => {
       const track = createMockTrack('local', 'stateful', 'classic', 'default', [
-        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
-        createMockLane(2, 'n2-4-spot', ['config-b.ts']),
+        createMockLane(1, 'e2-4-spot', ['config-a.ts']),
+        createMockLane(2, 'e2-4-spot', ['config-b.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
@@ -171,7 +171,7 @@ describe('scoutTestDistributionStrategies', () => {
 
     it('step env includes correct target and server config vars', async () => {
       const track = createMockTrack('local', 'serverless', 'search', 'custom_config', [
-        createMockLane(1, 'n2-8-spot', ['config-a.ts']),
+        createMockLane(1, 'e2-8-spot', ['config-a.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
@@ -188,7 +188,7 @@ describe('scoutTestDistributionStrategies', () => {
 
     it('step command points to run_test_lane.sh', async () => {
       const track = createMockTrack('local', 'stateful', 'classic', 'default', [
-        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+        createMockLane(1, 'e2-4-spot', ['config-a.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
@@ -204,7 +204,7 @@ describe('scoutTestDistributionStrategies', () => {
       delete process.env.SCOUT_TEST_LANES_GROUP_DEPS;
 
       const track = createMockTrack('local', 'stateful', 'classic', 'default', [
-        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+        createMockLane(1, 'e2-4-spot', ['config-a.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
@@ -220,7 +220,7 @@ describe('scoutTestDistributionStrategies', () => {
       process.env.SCOUT_TEST_LANES_GROUP_DEPS = 'step_a,step_b';
 
       const track = createMockTrack('local', 'stateful', 'classic', 'default', [
-        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+        createMockLane(1, 'e2-4-spot', ['config-a.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
@@ -236,7 +236,7 @@ describe('scoutTestDistributionStrategies', () => {
       process.env.SCOUT_TEST_LANES_GROUP_DEPS = '';
 
       const track = createMockTrack('local', 'stateful', 'classic', 'default', [
-        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+        createMockLane(1, 'e2-4-spot', ['config-a.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
@@ -250,8 +250,8 @@ describe('scoutTestDistributionStrategies', () => {
 
     it('registers each lane step for cancel-on-gate-failure before uploading', async () => {
       const track = createMockTrack('local', 'stateful', 'classic', 'default', [
-        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
-        createMockLane(2, 'n2-4-spot', ['config-b.ts']),
+        createMockLane(1, 'e2-4-spot', ['config-a.ts']),
+        createMockLane(2, 'e2-4-spot', ['config-b.ts']),
       ]);
 
       mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);

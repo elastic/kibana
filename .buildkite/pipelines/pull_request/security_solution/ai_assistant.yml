@@ -3,7 +3,7 @@ steps:
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
     key: security-serverless-ai-assistant
     agents:
-      machineType: n2-standard-4
+      machineType: e2-standard-4
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -21,7 +21,7 @@ steps:
     label: 'AI Assistant - Security Solution Cypress Tests'
     key: security-ai-assistant
     agents:
-      machineType: n2-standard-4
+      machineType: e2-standard-4
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

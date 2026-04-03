@@ -131,7 +131,7 @@ steps:
     label: 'Pick Test Group Run Order'
     key: pick_test_group_run_order
     agents:
-      machineType: n2-standard-2
+      machineType: e2-standard-2
       diskSizeGb: 115
     timeout_in_minutes: 10
     env:
@@ -165,7 +165,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      machineType: n2-standard-2
+      machineType: e2-standard-2
     key: ci_stats_ready
     timeout_in_minutes: 10
     depends_on:
@@ -179,7 +179,7 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
-      machineType: n2-highmem-4
+      machineType: e2-highmem-4
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105

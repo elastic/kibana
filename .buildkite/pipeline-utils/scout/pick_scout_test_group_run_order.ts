@@ -73,7 +73,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     return {
       label: `${affectedPrefix}Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
       key: module.name,
-      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+      agents: expandAgentQueue(usesParallelWorkers ? 'e2-8-spot' : 'e2-4-spot'),
       group: module.group,
     };
   });

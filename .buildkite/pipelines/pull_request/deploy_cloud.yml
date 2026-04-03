@@ -3,7 +3,7 @@ steps:
     label: 'Build and Deploy to Cloud'
     key: deploy_cloud
     agents:
-      machineType: n2-standard-2
+      machineType: e2-standard-2
       preemptible: true
     depends_on:
       - build

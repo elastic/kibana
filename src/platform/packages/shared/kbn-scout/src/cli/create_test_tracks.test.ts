@@ -402,10 +402,10 @@ describe('buildTrack', () => {
     expect(track.lanes[0].loads[0].stats.runtime.estimate).toBe(80);
   });
 
-  it('sets agentQueue to n2-8-spot when lane has a parallel config', () => {
+  it('sets agentQueue to e2-8-spot when lane has a parallel config', () => {
     const load = createTestLoad('parallel/config.ts', 5000, 'parallel');
     const track = buildTrack(100000, 0, testTarget, [load], log);
-    expect(track.lanes[0].metadata.buildkite.agentQueue).toBe('n2-8-spot');
+    expect(track.lanes[0].metadata.buildkite.agentQueue).toBe('e2-8-spot');
   });
 
   it('sets agentQueue to n2-4-spot when lane has only standard configs', () => {

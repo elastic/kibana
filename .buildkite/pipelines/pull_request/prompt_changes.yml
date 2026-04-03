@@ -3,7 +3,7 @@ steps:
     label: 'Check Prompt Changes'
     key: prompt_changes
     agents:
-      machineType: n2-standard-2
+      machineType: e2-standard-2
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
       diskSizeGb: 115

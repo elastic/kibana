@@ -193,7 +193,7 @@ export function buildTrack(
     );
 
     lane.metadata.buildkite = {
-      agentQueue: usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot',
+      agentQueue: usesParallelWorkers ? 'e2-8-spot' : 'n2-4-spot',
     };
   });
 

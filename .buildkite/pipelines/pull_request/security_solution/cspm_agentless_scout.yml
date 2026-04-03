@@ -3,7 +3,7 @@ steps:
     label: 'CSPM Agentless Scout E2E Tests'
     key: cspm-agentless-scout
     agents:
-      machineType: n2-standard-8
+      machineType: e2-standard-8
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

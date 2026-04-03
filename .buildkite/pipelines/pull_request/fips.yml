@@ -3,7 +3,7 @@ steps:
     label: 'Build FIPS Image'
     key: build_fips_image
     agents:
-      machineType: n2-standard-2
+      machineType: e2-standard-2
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

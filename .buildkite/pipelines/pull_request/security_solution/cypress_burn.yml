@@ -21,7 +21,7 @@ steps:
     key: defend-workflows-serverless-burn
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: e2-standard-4
       diskSizeGb: 120
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
@@ -37,7 +37,7 @@ steps:
     label: '[Soft fail] Security Solution Cypress tests, burning changed specs'
     key: security-solution-burn
     agents:
-      machineType: n2-standard-4
+      machineType: e2-standard-4
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

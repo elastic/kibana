@@ -9,7 +9,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
     retry:
       automatic:
         - exit_status: '*'
@@ -208,7 +208,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
       diskSizeGb: 105
     timeout_in_minutes: 10
     depends_on:
@@ -225,7 +225,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
       diskSizeGb: 105
     timeout_in_minutes: 10
     env:
@@ -265,7 +265,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
     timeout_in_minutes: 10
     retry:
       automatic:
@@ -279,7 +279,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
     depends_on:
       - build
       - quick_checks
@@ -294,7 +294,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-8
+      machineType: e2-standard-8
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
@@ -313,7 +313,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
     depends_on:
@@ -331,7 +331,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: e2-standard-4
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
     artifact_paths: 'target/plugin_so_types_snapshot.json'
@@ -353,7 +353,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
 
   - wait
 
@@ -364,7 +364,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: e2-standard-2
     retry:
       automatic:
         - exit_status: '*'
