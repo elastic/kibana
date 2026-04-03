@@ -93,7 +93,7 @@ export class TaskManagerService {
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
         priority: TaskPriority.Normal,
-        createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => ({
           run: async () => {
             assert(
               this.automaticImportSavedObjectService,
@@ -103,10 +103,14 @@ export class TaskManagerService {
               taskInstance,
               core,
               this.automaticImportSavedObjectService,
-              fakeRequest as KibanaRequest
+              fakeRequest as KibanaRequest,
+              abortController.signal
             );
           },
-          cancel: async () => this.cancelTask(taskInstance),
+          cancel: async () => {
+            abortController.abort();
+            return this.cancelTask(taskInstance);
+          },
         }),
       },
     });
@@ -207,7 +211,8 @@ export class TaskManagerService {
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup<AutomaticImportPluginStartDependencies>,
     automaticImportSavedObjectService: AutomaticImportSavedObjectService,
-    request: KibanaRequest
+    request: KibanaRequest,
+    abortSignal: AbortSignal
   ) {
     assert(this.agentService, 'Agent service not initialized');
     assert(
@@ -264,7 +269,8 @@ export class TaskManagerService {
         esClient,
         model,
         fieldsMetadataClient,
-        langSmithOptions
+        langSmithOptions,
+        abortSignal
       );
 
       this.logger.debug(`Task ${taskId} completed successfully`);
@@ -280,13 +286,22 @@ export class TaskManagerService {
       this.logger.debug(
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
+      if (abortSignal.aborted) {
+        throw new Error(`Task ${taskId} was cancelled`);
+      }
+
       const fieldMapping = await generateFieldMappings(
         (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
         fieldsMetadataClient
       );
       this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
 
-      const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
+      const validationResult = await validateFieldMappings(
+        esClient,
+        fieldMapping,
+        this.logger,
+        abortSignal
+      );
       if (!validationResult.valid) {
         this.logger.warn(
           `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
@@ -318,6 +333,24 @@ export class TaskManagerService {
         },
       };
     } catch (error) {
+      if (abortSignal.aborted) {
+        this.logger.debug(`Task ${taskId} was cancelled`);
+        try {
+          await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
+            integrationId,
+            dataStreamId,
+            status: TASK_STATUSES.cancelled,
+          });
+        } catch (updateError) {
+          this.logger.error(
+            `Failed to mark data stream ${dataStreamId} as cancelled: ${JSON.stringify(
+              updateError
+            )}`
+          );
+        }
+        return { state: { task_status: TASK_STATUSES.cancelled } };
+      }
+
       this.logger.error(`Task ${taskId} failed: ${error}`);
 
       // Report telemetry for failed completion

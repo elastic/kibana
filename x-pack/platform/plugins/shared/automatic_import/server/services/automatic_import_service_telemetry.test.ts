@@ -969,13 +969,21 @@ describe('AutomaticImportSetupService', () => {
       tmForRunTask.runTask = jest
         .fn()
         .mockImplementation(
-          async (taskInstance: unknown, core: unknown, savedObjectService: unknown) => {
+          async (
+            taskInstance: unknown,
+            core: unknown,
+            savedObjectService: unknown,
+            request: unknown,
+            abortSignal: AbortSignal
+          ) => {
             // Call the original runTask but with our mocked core setup
             return originalRunTask.call(
               taskManagerService,
               taskInstance,
               coreSetupMock,
-              savedObjectService
+              savedObjectService,
+              request,
+              abortSignal
             );
           }
         );
@@ -1069,12 +1077,20 @@ describe('AutomaticImportSetupService', () => {
       tmFailedTest.runTask = jest
         .fn()
         .mockImplementation(
-          async (taskInstance: unknown, core: unknown, savedObjectService: unknown) => {
+          async (
+            taskInstance: unknown,
+            core: unknown,
+            savedObjectService: unknown,
+            request: unknown,
+            abortSignal: AbortSignal
+          ) => {
             return originalRunTask.call(
               taskManagerService,
               taskInstance,
               coreSetupMock,
-              savedObjectService
+              savedObjectService,
+              request,
+              abortSignal
             );
           }
         );
@@ -1162,12 +1178,20 @@ describe('AutomaticImportSetupService', () => {
       tmUnrecoverable.runTask = jest
         .fn()
         .mockImplementation(
-          async (taskInstance: unknown, core: unknown, savedObjectService: unknown) => {
+          async (
+            taskInstance: unknown,
+            core: unknown,
+            savedObjectService: unknown,
+            request: unknown,
+            abortSignal: AbortSignal
+          ) => {
             return originalRunTask.call(
               taskManagerService,
               taskInstance,
               coreSetupMock,
-              savedObjectService
+              savedObjectService,
+              request,
+              abortSignal
             );
           }
         );

@@ -95,7 +95,8 @@ const fieldMappingsToEsProperties = (
 export const validateFieldMappings = async (
   esClient: ElasticsearchClient,
   fields: FieldMappingEntry[],
-  logger: Logger
+  logger: Logger,
+  abortSignal?: AbortSignal
 ): Promise<FieldValidationResult> => {
   const staticErrors: string[] = [];
   for (const field of fields) {
@@ -116,12 +117,15 @@ export const validateFieldMappings = async (
   const properties = fieldMappingsToEsProperties(customFields);
 
   try {
-    await esClient.indices.simulateTemplate({
-      index_patterns: ['validate_auto_import_fields-*'],
-      template: {
-        mappings: { properties },
+    await esClient.indices.simulateTemplate(
+      {
+        index_patterns: ['validate_auto_import_fields-*'],
+        template: {
+          mappings: { properties },
+        },
       },
-    });
+      { signal: abortSignal }
+    );
 
     return { valid: true, errors: [] };
   } catch (error) {

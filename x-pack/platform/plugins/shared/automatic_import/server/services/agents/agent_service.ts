@@ -48,7 +48,8 @@ export class AgentService {
     esClient: ElasticsearchClient,
     model: InferenceChatModel,
     fieldsMetadataClient: IFieldsMetadataClient,
-    langSmithOptions?: LangSmithOptions
+    langSmithOptions?: LangSmithOptions,
+    abortSignal?: AbortSignal
   ) {
     this.logger.debug(
       `invokeAutomaticImportAgent: Invoking automatic import agent for integration ${integrationId} and data stream ${dataStreamId}`
@@ -153,6 +154,7 @@ ${ecsRootFieldsSummary}
         callbacks: [...langSmithTracers],
         runName: 'automatic_import_agent',
         tags: ['automatic_import_agent'],
+        signal: abortSignal,
       }
     );
 
