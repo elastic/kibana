@@ -392,7 +392,7 @@ describe('useTopNavLinks', () => {
       ).result.current;
     };
 
-    it('should include the alerts menu (not a separate createRule) when in ES|QL mode and alerting v2 is enabled', async () => {
+    it('should include the alerts menu when in ES|QL mode and alerting v2 is enabled', async () => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
