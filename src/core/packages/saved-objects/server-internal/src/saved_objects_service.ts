@@ -368,7 +368,7 @@ export class SavedObjectsService
           includedHiddenTypes,
           extensions
         );
-        return new SavedObjectsClient(repository);
+        return new SavedObjectsClient(repository, request);
       },
       typeRegistry: this.typeRegistry,
       encryptionExtensionFactory: this.encryptionExtensionFactory,
