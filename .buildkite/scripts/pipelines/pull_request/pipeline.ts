@@ -665,6 +665,20 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
+    // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
+    if (
+      await doAnyChangesMatch([
+        /^src\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
+        /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
+        /^src\/platform\/packages\/shared\/workflows\//,
+        /^\.buildkite\/pipelines\/pull_request\/workflows_oom_testing\.yml/,
+      ])
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/workflows_oom_testing.yml', cancelable)
+      );
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
     }
