@@ -79,10 +79,17 @@ import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
+  VERIFIER_PKG_NAME,
+  VERIFIER_POLICY_TEMPLATE,
+  VERIFIER_INPUT_TYPE,
+  VERIFIER_DATA_STREAM_TYPE,
+  VERIFIER_DATASET,
 } from '../../common/constants';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  CloudConnectorPackagePolicy,
   CloudConnectorSecretVar,
   CloudConnectorVar,
   CloudConnectorVars,
@@ -93,6 +100,7 @@ import type {
   GcpCloudConnectorVars,
   IntegrationsOutput,
   PackageInfo,
+  VerifierStreamVars,
 } from '../../common/types';
 import {
   AgentPolicyNameExistsError,
@@ -2646,15 +2654,13 @@ class AgentPolicyService {
       { skipDeploy: true }
     );
 
-    const mappedAccountType =
-      VERIFIER_ACCOUNT_TYPE_MAP[accountType ?? 'single-account'] ?? 'single_account';
+    const resolvedAccountType = accountType ?? CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE;
     logger.info(
-      `${VERIFY_PERMISSIONS_TASK} Connector ${connectorId} accountType="${accountType}" mappedAccountType="${mappedAccountType}"`
+      `${VERIFY_PERMISSIONS_TASK} Connector ${connectorId} accountType="${resolvedAccountType}"`
     );
 
     const credentialVars = buildVerifierCredentialVars(cloudProvider, connectorVars);
 
-    const VERIFIER_PKG_NAME = 'verifier_otel';
     const verifierPkgResult = await ensureInstalledPackage({
       savedObjectsClient: soClient,
       esClient,
@@ -2673,8 +2679,24 @@ class AgentPolicyService {
       prerelease: true,
     });
 
-    const VERIFIER_DATASET = `${VERIFIER_PKG_NAME}.verifierreceiver`;
-    const verifierPackagePolicy: NewPackagePolicy = {
+    const streamVars: VerifierStreamVars = {
+      'data_stream.dataset': { type: 'text', value: VERIFIER_DATASET },
+      identity_federation_id: { type: 'text', value: connectorId },
+      identity_federation_name: { type: 'text', value: connectorName },
+      verification_id: { type: 'text', value: verificationId },
+      verification_type: { type: 'select', value: 'scheduled' },
+      provider: { type: 'text', value: cloudProvider },
+      account_type: { type: 'select', value: resolvedAccountType },
+      ...credentialVars,
+      policy_id: { type: 'text', value: agentPolicy.id },
+      policy_name: { type: 'text', value: policyName },
+      policy_templates: { type: 'text', value: policyTemplates },
+      package_name: { type: 'text', value: packageName },
+      package_title: { type: 'text', value: packageTitle },
+      package_version: { type: 'text', value: packageVersion },
+    };
+
+    const verifierPackagePolicy: CloudConnectorPackagePolicy = {
       name: `verifier-${connectorName}-${shortId}`,
       namespace: 'default',
       enabled: true,
@@ -2690,36 +2712,17 @@ class AgentPolicyService {
       },
       inputs: [
         {
-          type: 'otelcol',
-          policy_template: 'verifierreceiver',
+          type: VERIFIER_INPUT_TYPE,
+          policy_template: VERIFIER_POLICY_TEMPLATE,
           enabled: true,
           streams: [
             {
               enabled: true,
               data_stream: {
-                type: 'logs',
+                type: VERIFIER_DATA_STREAM_TYPE,
                 dataset: VERIFIER_DATASET,
               },
-              vars: {
-                'data_stream.dataset': { type: 'text', value: VERIFIER_DATASET },
-                cloud_connector_id: { type: 'text', value: connectorId },
-                cloud_connector_name: { type: 'text', value: connectorName },
-                verification_id: { type: 'text', value: verificationId },
-                verification_type: { type: 'select', value: 'scheduled' },
-                provider: { type: 'text', value: cloudProvider },
-                account_type: { type: 'select', value: mappedAccountType },
-                ...(cloudProvider === 'aws'
-                  ? { default_region: { type: 'text', value: 'us-east-1' } }
-                  : {}),
-                ...credentialVars,
-                policy_id: { type: 'text', value: agentPolicy.id },
-                policy_name: { type: 'text', value: policyName },
-                policy_templates: { type: 'text', value: policyTemplates },
-                package_name: { type: 'text', value: packageName },
-                package_title: { type: 'text', value: packageTitle },
-                package_version: { type: 'text', value: packageVersion },
-                namespace: { type: 'text', value: 'default' },
-              },
+              vars: streamVars,
             },
           ],
         },
@@ -2770,11 +2773,8 @@ class AgentPolicyService {
     policyId: string
   ): Promise<void> {
     const logger = this.getLogger('deleteVerifierPolicy');
-    logger.info(`${VERIFY_PERMISSIONS_TASK} Deleting verifier policy ${policyId}`);
-
     try {
       await this.delete(soClient, esClient, policyId, { force: true });
-      logger.info(`${VERIFY_PERMISSIONS_TASK} Deleted verifier policy ${policyId}`);
     } catch (err) {
       logger.error(
         `${VERIFY_PERMISSIONS_TASK} Failed to delete verifier agent policy ${policyId}: ${err}`
@@ -2784,11 +2784,6 @@ class AgentPolicyService {
 }
 
 export const agentPolicyService = new AgentPolicyService();
-
-const VERIFIER_ACCOUNT_TYPE_MAP: Record<string, string> = {
-  'single-account': 'single_account',
-  'organization-account': 'organization',
-};
 
 function buildVerifierCredentialVars(
   provider: string,

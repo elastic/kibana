@@ -26,9 +26,9 @@ import { throwIfAborted } from '../utils';
 
 const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
-const TASK_TIMEOUT = '10m'; // CHANGE TO 5m WHEN READY
+const TASK_TIMEOUT = '5m';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const TASK_INTERVAL = '5m'; // CHANGE TO 5m WHEN READY
+const TASK_INTERVAL = '5m';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
 const VERIFICATION_TTL_MS = 5 * 60 * 1000;
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
@@ -252,6 +252,9 @@ async function cleanupExpiredVerifierPolicies(
 
     for (const policy of verifierPolicies.items) {
       throwIfAborted(abortController);
+      logger.info(
+        `${VERIFY_PERMISSIONS_TASK} Current policy verifier policy ${policy.id} created at ${policy.created_at} updated at ${policy.updated_at}`
+      );
       const createdAt = policy.created_at ?? policy.updated_at;
       const ageMs = Date.now() - new Date(createdAt).getTime();
 

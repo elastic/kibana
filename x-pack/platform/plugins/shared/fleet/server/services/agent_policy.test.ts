@@ -2890,7 +2890,7 @@ describe('Agent policy', () => {
       });
     });
 
-    it('should map account_type "single-account" to "single_account"', async () => {
+    it('should pass account_type "single-account" directly', async () => {
       await agentPolicyService.createVerifierPolicy(
         soClient,
         esClient,
@@ -2904,11 +2904,11 @@ describe('Agent policy', () => {
       const { streams: s0 } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
       expect(s0[0].vars!.account_type).toEqual({
         type: 'select',
-        value: 'single_account',
+        value: 'single-account',
       });
     });
 
-    it('should map account_type "organization-account" to "organization"', async () => {
+    it('should pass account_type "organization-account" directly', async () => {
       await agentPolicyService.createVerifierPolicy(
         soClient,
         esClient,
@@ -2925,11 +2925,11 @@ describe('Agent policy', () => {
       const { streams: s1 } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
       expect(s1[0].vars!.account_type).toEqual({
         type: 'select',
-        value: 'organization',
+        value: 'organization-account',
       });
     });
 
-    it('should default account_type to "single_account" when accountType is undefined', async () => {
+    it('should default account_type to "single-account" when accountType is undefined', async () => {
       await agentPolicyService.createVerifierPolicy(
         soClient,
         esClient,
@@ -2943,7 +2943,7 @@ describe('Agent policy', () => {
       const { streams: s2 } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
       expect(s2[0].vars!.account_type).toEqual({
         type: 'select',
-        value: 'single_account',
+        value: 'single-account',
       });
     });
 
@@ -2958,8 +2958,8 @@ describe('Agent policy', () => {
       const { streams: s3 } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
       const vars = s3[0].vars!;
 
-      expect(vars.cloud_connector_id).toEqual({ type: 'text', value: 'connector-123' });
-      expect(vars.cloud_connector_name).toEqual({ type: 'text', value: 'my-connector' });
+      expect(vars.identity_federation_id).toEqual({ type: 'text', value: 'connector-123' });
+      expect(vars.identity_federation_name).toEqual({ type: 'text', value: 'my-connector' });
       expect(vars.verification_id).toBeDefined();
       expect(vars.verification_id.value).toBeTruthy();
       expect(vars.verification_type).toEqual({ type: 'select', value: 'scheduled' });
@@ -2968,8 +2968,8 @@ describe('Agent policy', () => {
       expect(vars.package_name).toEqual({ type: 'text', value: 'aws' });
       expect(vars.package_title).toEqual({ type: 'text', value: 'AWS' });
       expect(vars.package_version).toEqual({ type: 'text', value: '2.17.0' });
-      expect(vars.namespace).toEqual({ type: 'text', value: 'default' });
-      expect(vars.default_region).toEqual({ type: 'text', value: 'us-east-1' });
+      expect(vars.namespace).toBeUndefined();
+      expect(vars.default_region).toBeUndefined();
     });
 
     it('should include AWS credential vars for aws provider', async () => {
@@ -3120,6 +3120,117 @@ describe('Agent policy', () => {
       ).rejects.toThrow('validation error');
 
       expect(deploySpy).not.toHaveBeenCalled();
+    });
+
+    it('should propagate secret_references from created package policy', async () => {
+      mockedPackagePolicyService.create.mockResolvedValueOnce({
+        id: 'pp-id',
+        secret_references: [{ id: 'secret-1' }, { id: 'secret-2' }],
+      } as any);
+
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        baseConnector as any,
+        baseVerificationInfo
+      );
+
+      expect(mockedPackagePolicyService.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('should include all manifest-required vars for the verifier_otel package', async () => {
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        baseConnector as any,
+        baseVerificationInfo
+      );
+
+      const { streams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+      const vars = streams[0].vars!;
+
+      const requiredVarNames = [
+        'identity_federation_id',
+        'verification_id',
+        'provider',
+        'policy_id',
+        'policy_templates',
+        'package_name',
+      ];
+
+      for (const varName of requiredVarNames) {
+        expect(vars[varName]).toBeDefined();
+        expect(vars[varName].value).toBeTruthy();
+      }
+    });
+
+    it('should use verifier constants for input type, policy template, and dataset', async () => {
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        baseConnector as any,
+        baseVerificationInfo
+      );
+
+      const newPolicy = mockedPackagePolicyService.create.mock.calls[0][2];
+      const input = newPolicy.inputs[0];
+      const stream = input.streams[0];
+
+      expect(newPolicy.package?.name).toBe('verifier_otel');
+      expect(input.type).toBe('otelcol');
+      expect(input.policy_template).toBe('verifierreceiver');
+      expect(stream.data_stream.type).toBe('logs');
+      expect(stream.data_stream.dataset).toBe('verifier_otel.verifierreceiver');
+      expect(stream.vars!['data_stream.dataset'].value).toBe('verifier_otel.verifierreceiver');
+    });
+
+    it('should set cloud_connector_id and supports_cloud_connector on the package policy', async () => {
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        baseConnector as any,
+        baseVerificationInfo
+      );
+
+      const newPolicy = mockedPackagePolicyService.create.mock.calls[0][2];
+      expect(newPolicy.cloud_connector_id).toBe('connector-123');
+      expect(newPolicy.cloud_connector_name).toBe('my-connector');
+      expect(newPolicy.supports_cloud_connector).toBe(true);
+      expect(newPolicy.supports_agentless).toBe(true);
+    });
+
+    it('should create agent policy with agentless.cloud_connectors targeting the cloud provider', async () => {
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        baseConnector as any,
+        baseVerificationInfo
+      );
+
+      const createAttrs = soClient.create.mock.calls[0][1] as any;
+      expect(createAttrs.agentless).toEqual({
+        cloud_connectors: {
+          enabled: true,
+          target_csp: 'aws',
+        },
+      });
+    });
+
+    it('should not include vars that are absent from the verifier_otel manifest', async () => {
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        baseConnector as any,
+        baseVerificationInfo
+      );
+
+      const { streams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+      const vars = streams[0].vars!;
+
+      expect(vars.default_region).toBeUndefined();
+      expect(vars.namespace).toBeUndefined();
+      expect(vars.cloud_connector_id).toBeUndefined();
+      expect(vars.cloud_connector_name).toBeUndefined();
     });
   });
 });

@@ -55,11 +55,43 @@ const mockSoClient = {
 
 const mockEsClient = {} as any;
 
+const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60 * 1000).toISOString();
+
+const hoursAgo = (hours: number) => new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+
+const makePackagePolicySO = (
+  id: string,
+  connectorId: string,
+  template: string,
+  enabled = true
+) => ({
+  id,
+  attributes: {
+    cloud_connector_id: connectorId,
+    inputs: [{ enabled, policy_template: template }],
+    package: { name: 'aws', title: 'AWS', version: '2.0.0' },
+  },
+});
+
+const makeConnectorSO = (id: string, overrides: Record<string, unknown> = {}) => ({
+  id,
+  attributes: {
+    name: `Connector ${id}`,
+    cloudProvider: 'aws',
+    vars: {},
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    ...overrides,
+  },
+});
+
 describe('verify_permissions_task', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSoClient.find.mockReset();
+    mockSoClient.update.mockReset();
     const mockContext = createAppContextStartContractMock();
     appContextService.start(mockContext);
 
@@ -83,7 +115,7 @@ describe('verify_permissions_task', () => {
         expect.objectContaining({
           'fleet:verify_permissions': expect.objectContaining({
             title: 'OTel Verify Permission Task',
-            timeout: '10m',
+            timeout: '5m',
           }),
         })
       );
@@ -115,24 +147,37 @@ describe('verify_permissions_task', () => {
   });
 
   describe('runPermissionVerifierTask (via task runner)', () => {
-    let taskRunner: { run: () => Promise<unknown>; cancel?: () => Promise<unknown> };
-
-    beforeEach(() => {
+    const createTaskRunner = (abortCtrl?: AbortController) => {
       const taskManager = taskManagerMock.createSetup();
       registerVerifyPermissionsTask(taskManager);
-
       const registeredDef =
         taskManager.registerTaskDefinitions.mock.calls[0][0]['fleet:verify_permissions'];
-      taskRunner = registeredDef.createTaskRunner({
+      return registeredDef.createTaskRunner({
         taskInstance: {} as any,
-        abortController: new AbortController(),
+        abortController: abortCtrl ?? new AbortController(),
       });
+    };
+
+    let taskRunner: ReturnType<typeof createTaskRunner>;
+
+    beforeEach(() => {
+      taskRunner = createTaskRunner();
     });
 
     it('should skip when enableOTelVerifier is disabled', async () => {
       jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
         enableOTelVerifier: false,
       } as any);
+
+      await taskRunner.run();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('OTel verifier is disabled')
+      );
+      expect(mockedAgentPolicyService.list).not.toHaveBeenCalled();
+    });
+
+    it('should skip when experimental features are undefined', async () => {
+      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue(undefined as any);
 
       await taskRunner.run();
       expect(logger.debug).toHaveBeenCalledWith(
@@ -159,6 +204,27 @@ describe('verify_permissions_task', () => {
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Active verifier policy'));
     });
 
+    it('should proceed past gate check when verifier policy has expired', async () => {
+      const sixMinutesAgo = minutesAgo(6);
+
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({
+          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+        } as any)
+        .mockResolvedValueOnce({
+          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+        } as any);
+
+      mockedAgentPolicyService.deleteVerifierPolicy.mockResolvedValue();
+      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
+
+      await taskRunner.run();
+
+      expect(logger.debug).not.toHaveBeenCalledWith(
+        expect.stringContaining('Active verifier policy')
+      );
+    });
+
     it('should complete when no connectors have installed packages', async () => {
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
@@ -172,7 +238,52 @@ describe('verify_permissions_task', () => {
       );
     });
 
+    it('should filter out empty connector IDs from package policy map', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [
+            makePackagePolicySO('pp-1', '', 'cloudtrail'),
+            makePackagePolicySO('pp-2', '  ', 'guardduty'),
+          ],
+        })
+        .mockResolvedValueOnce({ saved_objects: [] });
+
+      await taskRunner.run();
+
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('No connectors with installed packages found')
+      );
+    });
+
     it('should skip connector when not eligible', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail')],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [
+            makeConnectorSO('conn-1', {
+              created_at: '2020-01-01T00:00:00Z',
+              updated_at: '2020-01-01T00:00:00Z',
+              verification_status: 'success',
+              verification_started_at: new Date().toISOString(),
+            }),
+          ],
+        });
+
+      await taskRunner.run();
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('not eligible'));
+    });
+
+    it('should skip connector with empty policy templates', async () => {
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
         .mockResolvedValueOnce({ items: [] } as any);
@@ -184,31 +295,18 @@ describe('verify_permissions_task', () => {
               id: 'pp-1',
               attributes: {
                 cloud_connector_id: 'conn-1',
-                inputs: [{ enabled: true, policy_template: 'cloudtrail' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
+                inputs: [{ enabled: false, policy_template: 'cloudtrail' }],
               },
             },
           ],
         })
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'conn-1',
-              attributes: {
-                name: 'My Connector',
-                cloudProvider: 'aws',
-                vars: {},
-                created_at: '2020-01-01T00:00:00Z',
-                updated_at: '2020-01-01T00:00:00Z',
-                verification_status: 'success',
-                verification_started_at: new Date().toISOString(),
-              },
-            },
-          ],
+          saved_objects: [makeConnectorSO('conn-1')],
         });
 
       await taskRunner.run();
-      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('not eligible'));
+
+      expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
     });
 
     it('should verify eligible connector and update status on success', async () => {
@@ -222,30 +320,10 @@ describe('verify_permissions_task', () => {
 
       mockSoClient.find
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'pp-1',
-              attributes: {
-                cloud_connector_id: 'conn-1',
-                inputs: [{ enabled: true, policy_template: 'cloudtrail' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
-              },
-            },
-          ],
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail')],
         })
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'conn-1',
-              attributes: {
-                name: 'My Connector',
-                cloudProvider: 'aws',
-                vars: {},
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            },
-          ],
+          saved_objects: [makeConnectorSO('conn-1')],
         });
 
       mockSoClient.update.mockResolvedValue({});
@@ -285,30 +363,10 @@ describe('verify_permissions_task', () => {
 
       mockSoClient.find
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'pp-1',
-              attributes: {
-                cloud_connector_id: 'conn-1',
-                inputs: [{ enabled: true, policy_template: 'guardduty' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
-              },
-            },
-          ],
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'guardduty')],
         })
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'conn-1',
-              attributes: {
-                name: 'Failed Connector',
-                cloudProvider: 'aws',
-                vars: {},
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            },
-          ],
+          saved_objects: [makeConnectorSO('conn-1')],
         });
 
       mockSoClient.update.mockResolvedValue({});
@@ -325,6 +383,32 @@ describe('verify_permissions_task', () => {
       );
     });
 
+    it('should log error but not throw when updateConnectorStatus fails', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+        policyId: 'verifier-policy-1',
+      });
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail')],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [makeConnectorSO('conn-1')],
+        });
+
+      mockSoClient.update.mockRejectedValue(new Error('SO update failed'));
+
+      await expect(taskRunner.run()).resolves.not.toThrow();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update connector conn-1 status')
+      );
+    });
+
     it('should aggregate multiple policy templates for the same connector', async () => {
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
@@ -337,37 +421,12 @@ describe('verify_permissions_task', () => {
       mockSoClient.find
         .mockResolvedValueOnce({
           saved_objects: [
-            {
-              id: 'pp-1',
-              attributes: {
-                cloud_connector_id: 'conn-1',
-                inputs: [{ enabled: true, policy_template: 'cloudtrail' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
-              },
-            },
-            {
-              id: 'pp-2',
-              attributes: {
-                cloud_connector_id: 'conn-1',
-                inputs: [{ enabled: true, policy_template: 'guardduty' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
-              },
-            },
+            makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail'),
+            makePackagePolicySO('pp-2', 'conn-1', 'guardduty'),
           ],
         })
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'conn-1',
-              attributes: {
-                name: 'Multi Template Connector',
-                cloudProvider: 'aws',
-                vars: {},
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            },
-          ],
+          saved_objects: [makeConnectorSO('conn-1', { name: 'Multi Template Connector' })],
         });
 
       mockSoClient.update.mockResolvedValue({});
@@ -384,8 +443,42 @@ describe('verify_permissions_task', () => {
       );
     });
 
+    it('should deduplicate identical policy templates for the same connector', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+        policyId: 'verifier-policy-1',
+      });
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [
+            makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail'),
+            makePackagePolicySO('pp-2', 'conn-1', 'cloudtrail'),
+          ],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [makeConnectorSO('conn-1')],
+        });
+
+      mockSoClient.update.mockResolvedValue({});
+
+      await taskRunner.run();
+
+      expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledWith(
+        mockSoClient,
+        mockEsClient,
+        expect.anything(),
+        expect.objectContaining({
+          policyTemplates: ['cloudtrail'],
+        })
+      );
+    });
+
     it('should cleanup expired verifier policies', async () => {
-      const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000).toISOString();
+      const sixMinutesAgo = minutesAgo(6);
 
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({
@@ -406,6 +499,59 @@ describe('verify_permissions_task', () => {
       );
     });
 
+    it('should not cleanup verifier policies within TTL', async () => {
+      const twoMinutesAgo = minutesAgo(2);
+
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({
+          items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
+        } as any)
+        .mockResolvedValueOnce({
+          items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
+        } as any);
+
+      await taskRunner.run();
+
+      expect(mockedAgentPolicyService.deleteVerifierPolicy).not.toHaveBeenCalled();
+    });
+
+    it('should continue to Phase 2 even when cleanup deletion fails', async () => {
+      const sixMinutesAgo = minutesAgo(6);
+
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({
+          items: [{ id: 'bad-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+        } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockedAgentPolicyService.deleteVerifierPolicy.mockRejectedValue(new Error('delete failed'));
+
+      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
+
+      await taskRunner.run();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete verifier policy bad-verifier')
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('No connectors with installed packages found')
+      );
+    });
+
+    it('should continue to Phase 2 even when entire cleanup phase throws', async () => {
+      mockedAgentPolicyService.list
+        .mockRejectedValueOnce(new Error('list exploded'))
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
+
+      await taskRunner.run();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to cleanup verifier policies')
+      );
+    });
+
     it('should only verify one connector per task run (serial execution gate)', async () => {
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
@@ -418,47 +564,12 @@ describe('verify_permissions_task', () => {
       mockSoClient.find
         .mockResolvedValueOnce({
           saved_objects: [
-            {
-              id: 'pp-1',
-              attributes: {
-                cloud_connector_id: 'conn-1',
-                inputs: [{ enabled: true, policy_template: 'cloudtrail' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
-              },
-            },
-            {
-              id: 'pp-2',
-              attributes: {
-                cloud_connector_id: 'conn-2',
-                inputs: [{ enabled: true, policy_template: 'guardduty' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
-              },
-            },
+            makePackagePolicySO('pp-1', 'conn-1', 'cloudtrail'),
+            makePackagePolicySO('pp-2', 'conn-2', 'guardduty'),
           ],
         })
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'conn-1',
-              attributes: {
-                name: 'Connector One',
-                cloudProvider: 'aws',
-                vars: {},
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            },
-            {
-              id: 'conn-2',
-              attributes: {
-                name: 'Connector Two',
-                cloudProvider: 'aws',
-                vars: {},
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            },
-          ],
+          saved_objects: [makeConnectorSO('conn-1'), makeConnectorSO('conn-2')],
         });
 
       mockSoClient.update.mockResolvedValue({});
@@ -475,7 +586,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should skip all verifications when a non-expired verifier deployment is in flight', async () => {
-      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      const twoMinutesAgo = minutesAgo(2);
 
       mockedAgentPolicyService.list
         .mockResolvedValueOnce({ items: [] } as any)
@@ -502,36 +613,21 @@ describe('verify_permissions_task', () => {
         .mockResolvedValueOnce({ items: [] } as any)
         .mockResolvedValueOnce({ items: [] } as any);
 
-      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      const twoMinutesAgo = minutesAgo(2);
 
       mockSoClient.find
         .mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'pp-1',
-              attributes: {
-                cloud_connector_id: 'conn-failed',
-                inputs: [{ enabled: true, policy_template: 'cloudtrail' }],
-                package: { name: 'aws', title: 'AWS', version: '2.0.0' },
-              },
-            },
-          ],
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-failed', 'cloudtrail')],
         })
         .mockResolvedValueOnce({
           saved_objects: [
-            {
-              id: 'conn-failed',
-              attributes: {
-                name: 'Failed Connector',
-                cloudProvider: 'aws',
-                vars: {},
-                created_at: '2025-01-01T00:00:00Z',
-                updated_at: '2025-01-01T00:00:00Z',
-                verification_status: 'failed',
-                verification_started_at: twoMinutesAgo,
-                verification_failed_at: twoMinutesAgo,
-              },
-            },
+            makeConnectorSO('conn-failed', {
+              created_at: '2025-01-01T00:00:00Z',
+              updated_at: '2025-01-01T00:00:00Z',
+              verification_status: 'failed',
+              verification_started_at: twoMinutesAgo,
+              verification_failed_at: twoMinutesAgo,
+            }),
           ],
         });
 
@@ -539,6 +635,166 @@ describe('verify_permissions_task', () => {
 
       expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('not eligible'));
+    });
+
+    it('should retry a failed connector after the backoff window elapses', async () => {
+      mockedAgentPolicyService.list
+        .mockResolvedValueOnce({ items: [] } as any)
+        .mockResolvedValueOnce({ items: [] } as any);
+
+      mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+        policyId: 'verifier-policy-retry',
+      });
+
+      const sixMinutesAgo = minutesAgo(6);
+
+      mockSoClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [makePackagePolicySO('pp-1', 'conn-retry', 'cloudtrail')],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [
+            makeConnectorSO('conn-retry', {
+              created_at: '2025-01-01T00:00:00Z',
+              updated_at: '2025-01-01T00:00:00Z',
+              verification_status: 'failed',
+              verification_started_at: sixMinutesAgo,
+              verification_failed_at: sixMinutesAgo,
+            }),
+          ],
+        });
+
+      mockSoClient.update.mockResolvedValue({});
+
+      await taskRunner.run();
+
+      expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+    });
+
+    describe('abort handling', () => {
+      it('should exit gracefully when aborted before Phase 2', async () => {
+        const abortCtrl = new AbortController();
+        taskRunner = createTaskRunner(abortCtrl);
+
+        mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
+
+        abortCtrl.abort();
+
+        await taskRunner.run();
+
+        expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Task was aborted'));
+        expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
+      });
+
+      it('should exit gracefully when aborted after cleanup but before verification', async () => {
+        const abortCtrl = new AbortController();
+        taskRunner = createTaskRunner(abortCtrl);
+
+        mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
+        mockedAgentPolicyService.list.mockImplementationOnce(async () => {
+          abortCtrl.abort();
+          return { items: [] } as any;
+        });
+
+        mockSoClient.find.mockResolvedValue({ saved_objects: [] });
+
+        await taskRunner.run();
+
+        expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Task was aborted'));
+      });
+    });
+
+    describe('isConnectorEligible (integration via task runner)', () => {
+      const setupEligibilityTest = (connectorAttrs: Record<string, unknown>) => {
+        mockedAgentPolicyService.list
+          .mockResolvedValueOnce({ items: [] } as any)
+          .mockResolvedValueOnce({ items: [] } as any);
+
+        mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
+          policyId: 'verifier-policy-elig',
+        });
+
+        mockSoClient.find
+          .mockResolvedValueOnce({
+            saved_objects: [makePackagePolicySO('pp-1', 'conn-elig', 'cspm')],
+          })
+          .mockResolvedValueOnce({
+            saved_objects: [makeConnectorSO('conn-elig', connectorAttrs)],
+          });
+
+        mockSoClient.update.mockResolvedValue({});
+      };
+
+      it('should verify connector that has never been verified (no verification_started_at)', async () => {
+        setupEligibilityTest({});
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should verify recently created connector', async () => {
+        setupEligibilityTest({
+          created_at: minutesAgo(2),
+          verification_started_at: minutesAgo(10),
+          verification_status: 'success',
+        });
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should verify recently updated connector', async () => {
+        setupEligibilityTest({
+          created_at: hoursAgo(1),
+          updated_at: minutesAgo(2),
+          verification_started_at: minutesAgo(10),
+          verification_status: 'success',
+        });
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should re-verify connector whose verification_started_at expired and status is not failed', async () => {
+        setupEligibilityTest({
+          created_at: hoursAgo(1),
+          updated_at: hoursAgo(1),
+          verification_started_at: minutesAgo(6),
+          verification_status: 'pending',
+        });
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not re-verify connector whose verification_started_at is recent and status is success', async () => {
+        setupEligibilityTest({
+          created_at: hoursAgo(1),
+          updated_at: hoursAgo(1),
+          verification_started_at: minutesAgo(2),
+          verification_status: 'success',
+        });
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
+      });
+
+      it('should verify connector with no verification_status set (backwards compat)', async () => {
+        setupEligibilityTest({
+          created_at: hoursAgo(1),
+          updated_at: hoursAgo(1),
+          verification_started_at: minutesAgo(10),
+        });
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

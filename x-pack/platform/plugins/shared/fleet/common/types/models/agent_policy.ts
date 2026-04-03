@@ -89,6 +89,14 @@ export interface AgentlessPolicy {
   };
 }
 
+/**
+ * An agentless policy with cloud_connectors guaranteed to be present and enabled.
+ * Used by verifier agent policies that target a specific cloud provider.
+ */
+export interface VerifierAgentlessPolicy extends AgentlessPolicy {
+  cloud_connectors: Required<CloudConnectors> & { enabled: true };
+}
+
 export interface GlobalDataTag {
   name: string;
   value: string | number;
