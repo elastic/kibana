@@ -13,7 +13,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -28,11 +28,6 @@ import { selectStreamType } from '../../state_management/stream_enrichment_state
 import { collectDescendantStepIds } from '../../state_management/utils';
 import type { StepConfigurationProps } from '../steps_list';
 import { deleteProcessorPromptOptions } from './action/prompt_options';
-import {
-  ADD_DESCRIPTION_MENU_LABEL,
-  EDIT_DESCRIPTION_MENU_LABEL,
-  REMOVE_DESCRIPTION_MENU_LABEL,
-} from './action/translations';
 import { deleteConditionPromptOptions } from './where/prompt_options';
 
 const moveUpItemText = i18n.translate(
@@ -80,16 +75,13 @@ const deleteItemText = i18n.translate(
 type StepContextMenuProps = Pick<
   StepConfigurationProps,
   'stepRef' | 'stepUnderEdit' | 'isFirstStepInLevel' | 'isLastStepInLevel'
-> & {
-  onEditDescription?: () => void;
-};
+>;
 
 export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   stepRef,
   stepUnderEdit,
   isFirstStepInLevel,
   isLastStepInLevel,
-  onEditDescription,
 }) => {
   const {
     reorderStep,
@@ -120,10 +112,6 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const isWhere = isConditionBlock(step);
-  const hasCustomDescription =
-    isActionBlock(step) &&
-    typeof step.description === 'string' &&
-    step.description.trim().length > 0;
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
@@ -205,49 +193,6 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     >
       {moveDownItemText}
     </EuiContextMenuItem>,
-    ...(!isWhere
-      ? hasCustomDescription
-        ? [
-            <EuiContextMenuItem
-              data-test-subj="stepContextMenuEditDescriptionItem"
-              key="editDescription"
-              icon="comment"
-              disabled={!canEdit}
-              onClick={() => {
-                togglePopover(false);
-                onEditDescription?.();
-              }}
-            >
-              {EDIT_DESCRIPTION_MENU_LABEL}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              data-test-subj="stepContextMenuRemoveDescriptionItem"
-              key="removeDescription"
-              icon="minusCircle"
-              disabled={!canEdit}
-              onClick={() => {
-                togglePopover(false);
-                stepRef.send({ type: 'step.changeDescription', description: '' });
-              }}
-            >
-              {REMOVE_DESCRIPTION_MENU_LABEL}
-            </EuiContextMenuItem>,
-          ]
-        : [
-            <EuiContextMenuItem
-              data-test-subj="stepContextMenuEditDescriptionItem"
-              key="editDescription"
-              icon="comment"
-              disabled={!canEdit}
-              onClick={() => {
-                togglePopover(false);
-                onEditDescription?.();
-              }}
-            >
-              {ADD_DESCRIPTION_MENU_LABEL}
-            </EuiContextMenuItem>,
-          ]
-      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
       data-stream-type={streamType}

@@ -60,7 +60,7 @@ export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> =
   const [value, setValue] = useState(initialValue);
 
   const handleSave = () => {
-    onSave(value);
+    onSave(value.trim());
   };
 
   const isEditMode = Boolean(step.description?.trim());

@@ -219,7 +219,6 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                         stepUnderEdit={props.stepUnderEdit}
                         isFirstStepInLevel={props.isFirstStepInLevel}
                         isLastStepInLevel={props.isLastStepInLevel}
-                        onEditDescription={() => toggleEditDescriptionModal(true)}
                       />
                     </EuiFlexItem>
                   )}
