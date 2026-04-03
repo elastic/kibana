@@ -306,6 +306,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   data-test-subj="streamsAppProcessorDescription"
                   css={css`
                     font-family: ${euiTheme.font.familyCode};
+                    font-style: italic;
                     ${euiTextTruncate()}
                     ${!readOnly && canEdit
                       ? `cursor: pointer;
