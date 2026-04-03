@@ -7,11 +7,9 @@
 
 import { useSelector } from '@xstate/react';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { isActionBlock } from '@kbn/streamlang';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -32,7 +30,6 @@ export function ActionBlock(props: StepConfigurationProps) {
   const { euiTheme } = useEuiTheme();
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
-  const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
@@ -63,15 +60,7 @@ export function ActionBlock(props: StepConfigurationProps) {
 
   const isClickable = !isUnderEdit && !readOnly;
 
-  const tooltipContent =
-    isClickable && isActionBlock(step)
-      ? i18n.translate('xpack.streams.actionBlock.tooltip.editProcessorLabel', {
-          defaultMessage: 'Edit {stepAction} processor',
-          values: { stepAction: step.action },
-        })
-      : undefined;
-
-  const panel = (
+  return (
     <EuiPanel
       data-test-subj="streamsAppProcessorBlock"
       data-stream-type={streamType}
@@ -102,16 +91,5 @@ export function ActionBlock(props: StepConfigurationProps) {
         <ActionBlockListItem {...props} processorMetrics={processorMetrics} />
       )}
     </EuiPanel>
-  );
-
-  if (tooltipContent) {
-    return (
-      <EuiToolTip position="top" content={tooltipContent} display="block">
-        {panel}
-      </EuiToolTip>
-    );
-  }
-
-  return panel;
   );
 }

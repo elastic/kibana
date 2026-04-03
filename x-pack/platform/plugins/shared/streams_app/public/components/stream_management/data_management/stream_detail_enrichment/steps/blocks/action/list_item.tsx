@@ -90,34 +90,46 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 margin-right: ${euiTheme.size.s};
               `}
             >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="xs"
-                css={css`
-                  min-width: 0;
-                `}
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
+                  {
+                    defaultMessage: 'Edit {stepAction} processor',
+                    values: { stepAction: step.action },
+                  }
+                )}
+                display="block"
               >
-                <EuiFlexItem
-                  grow={false}
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="xs"
                   css={css`
                     min-width: 0;
-                    max-width: 100%;
                   `}
                 >
-                  <EuiText
-                    size="s"
-                    component="span"
-                    style={{ fontWeight: euiTheme.font.weight.bold }}
-                    data-test-subj="streamsAppProcessorTitleEditButton"
+                  <EuiFlexItem
+                    grow={false}
                     css={css`
-                      display: block;
-                      ${euiTextTruncate()}
+                      min-width: 0;
+                      max-width: 100%;
                     `}
                   >
-                    {actionDisplayName}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    <EuiText
+                      size="s"
+                      component="span"
+                      style={{ fontWeight: euiTheme.font.weight.bold }}
+                      data-test-subj="streamsAppProcessorTitleEditButton"
+                      css={css`
+                        display: block;
+                        ${euiTextTruncate()}
+                      `}
+                    >
+                      {actionDisplayName}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiToolTip>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
               <EuiFlexItem grow={false} onClick={stopPropagation}>
