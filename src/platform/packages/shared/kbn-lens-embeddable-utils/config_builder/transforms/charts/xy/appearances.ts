@@ -86,7 +86,8 @@ export function convertStylingToAPIFormat(
     // Chart-level (always present)
     overlays: {
       partial_buckets: {
-        visible: config.hideEndzones != null ? !config.hideEndzones : DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+        visible:
+          config.hideEndzones != null ? !config.hideEndzones : DEFAULT_PARTIAL_BUCKETS_VISIBLE,
       },
       current_time_marker: {
         visible: config.showCurrentTimeMarker ?? DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
