@@ -44,9 +44,15 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
   const index = dataStream;
-  // Pass the full fieldTypes array to handle conflicting types
-  const types = fieldTypes.length > 0 ? fieldTypes : [firstNonNullable(fieldTypes)];
+  const type = firstNonNullable(fieldTypes);
   const instrument = firstNonNullable(metricTypes);
+
+  if (!type || !instrument) {
+    return '';
+  }
+
+  // Pass the full fieldTypes array to handle conflicting types
+  const types = fieldTypes.length > 1 ? fieldTypes : [type];
   const query = esql.ts(index);
   const metricAggregation = createMetricAggregation({
     type: types,
