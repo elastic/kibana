@@ -41,7 +41,6 @@ const baseCreateData: CreateRuleParams['data'] = {
   evaluation: {
     query: {
       base: 'FROM logs-* | LIMIT 1',
-      condition: 'WHERE true',
     },
   },
 };
@@ -51,7 +50,7 @@ const baseSoAttrs = createRuleSoAttributes({
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
   evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1', condition: 'WHERE true' },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 });
 
@@ -238,7 +237,7 @@ describe('RulesClient', () => {
           data: {
             ...baseCreateData,
             evaluation: {
-              query: { base: 'FROM |', condition: 'WHERE true' },
+              query: { base: 'FROM |' },
             },
           },
           options: { id: 'rule-id-5' },

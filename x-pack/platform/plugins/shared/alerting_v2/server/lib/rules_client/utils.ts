@@ -72,7 +72,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     evaluation: {
       query: {
         base: data.evaluation.query.base,
-        condition: data.evaluation.query.condition,
       },
     },
     recovery_policy: data.recovery_policy,
@@ -158,7 +157,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     evaluation: {
       query: {
         base: attrs.evaluation.query.base,
-        condition: attrs.evaluation.query.condition,
       },
     },
     recovery_policy: attrs.recovery_policy,

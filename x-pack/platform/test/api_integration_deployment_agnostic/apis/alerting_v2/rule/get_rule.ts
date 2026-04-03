@@ -43,7 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           evaluation: {
-            query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+            query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
           },
           grouping: { fields: ['host.name'] },
         });
@@ -67,7 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.time_field).to.be('@timestamp');
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
       expect(response.body.evaluation).to.eql({
-        query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+        query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
       });
       expect(response.body.grouping).to.eql({ fields: ['host.name'] });
       expect(response.body.enabled).to.be(true);
