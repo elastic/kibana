@@ -203,6 +203,7 @@ const createSecuritySolutionRequestContextMock = (
     getEntityStoreApiKeyManager: jest.fn(),
     getPrivilegedUserMonitoringApiKeyManager: jest.fn(),
     getEntityStoreCrudClient: jest.fn(() => clients.entityStoreCrudClient),
+    getEntityStoreUpdateClient: jest.fn(() => clients.entityStoreCrudClient as never),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
     getPadPackageInstallationClient: jest.fn(() => clients.padPackageInstallationClient),

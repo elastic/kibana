@@ -8,10 +8,10 @@
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RulesClient } from '../../lib/rules_client';
+import { createRouteDependencies } from '../test_utils';
 import { GetRulesRoute } from './get_rules_route';
 
 describe('GetRulesRoute', () => {
-  const response = httpServerMock.createResponseFactory();
   const rulesClient = {
     findRules: jest.fn(),
   } as unknown as jest.Mocked<Pick<RulesClient, 'findRules'>>;
@@ -21,6 +21,7 @@ describe('GetRulesRoute', () => {
   });
 
   it('forwards filter, search, and sort params to the rules client', async () => {
+    const { ctx, response } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
       query: {
         page: 2,
@@ -39,7 +40,7 @@ describe('GetRulesRoute', () => {
       perPage: 50,
     });
 
-    const route = new GetRulesRoute(request, response, rulesClient as unknown as RulesClient);
+    const route = new GetRulesRoute(ctx, request, rulesClient as unknown as RulesClient);
     await route.handle();
 
     expect(rulesClient.findRules).toHaveBeenCalledWith({
@@ -61,6 +62,7 @@ describe('GetRulesRoute', () => {
   });
 
   it('returns a custom error response when the rules client throws', async () => {
+    const { ctx, response } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
       query: {
         sortField: 'kind',
@@ -70,7 +72,7 @@ describe('GetRulesRoute', () => {
 
     rulesClient.findRules.mockRejectedValueOnce(Boom.badRequest('invalid sort'));
 
-    const route = new GetRulesRoute(request, response, rulesClient as unknown as RulesClient);
+    const route = new GetRulesRoute(ctx, request, rulesClient as unknown as RulesClient);
     await route.handle();
 
     expect(response.customError).toHaveBeenCalledWith(
