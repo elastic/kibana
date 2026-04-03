@@ -74,7 +74,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     for (const stepKey of [
       'pick_test_group_run_order',
       'build_scout_tests',
-      'check_oas_snapshot',
       'build_api_docs',
     ]) {
       execFileSync('buildkite-agent', [
