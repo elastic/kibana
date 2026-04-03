@@ -13,7 +13,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
-  useIsWithinBreakpoints,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -36,8 +36,8 @@ export const ConsoleTutorialsGroup = () => {
   const { console: consolePlugin } = useKibana().services;
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
-  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-  const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
+  const isMediumBreakpoint = useIsWithinMaxBreakpoint('m');
+  const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
   const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
 
   const openConsole = useCallback(
@@ -172,20 +172,22 @@ export const ConsoleTutorialsGroup = () => {
               data-telemetry-id={tutorial.dataTestSubj}
               onClick={() => openConsole(tutorial.request)}
             >
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                {isNew(tutorial.publishedAt) && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="accent" fill>
-                      {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
-                        defaultMessage: 'New',
-                      })}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-                <EuiTitle size="xxs" className="tutorialTitle">
-                  <h4>{tutorial.title}</h4>
-                </EuiTitle>
-              </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  {isNew(tutorial.publishedAt) && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="accent" fill>
+                        {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
+                          defaultMessage: 'New',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  <EuiTitle size="xxs" className="tutorialTitle">
+                    <h4>{tutorial.title}</h4>
+                  </EuiTitle>
+                </EuiFlexGroup>
+              </EuiFlexItem>
               <EuiText size="xs" color="subdued">
                 {tutorial.description}
               </EuiText>

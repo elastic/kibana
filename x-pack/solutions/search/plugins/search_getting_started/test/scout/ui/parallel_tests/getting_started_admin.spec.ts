@@ -50,7 +50,7 @@ test.describe(
         expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
       });
 
-      await test.step('renders all tutorial cards and buttons', async () => {
+      await test.step('renders all tutorial cards', async () => {
         await pageObjects.gettingStarted.expandTutorialCards();
 
         const searchBasicsCard = await pageObjects.gettingStarted.getTutorialCard('search_basics');
@@ -64,23 +64,8 @@ test.describe(
         const esqlCard = await pageObjects.gettingStarted.getTutorialCard('esql');
         await expect(esqlCard).toBeVisible();
 
-        const searchBasicsButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'search_basics'
-        );
-        await expect(searchBasicsButton).toBeVisible();
-
-        const semanticSearchButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'semantic_search'
-        );
-        await expect(semanticSearchButton).toBeVisible();
-
-        const esqlButton = await pageObjects.gettingStarted.getTutorialCardButton('esql');
-        await expect(esqlButton).toBeVisible();
-
-        const timeSeriesAnalysisButton = await pageObjects.gettingStarted.getTutorialCardButton(
-          'tsds'
-        );
-        await expect(timeSeriesAnalysisButton).toBeVisible();
+        const tsdsCard = await pageObjects.gettingStarted.getTutorialCard('tsds');
+        await expect(tsdsCard).toBeVisible();
       });
 
       await test.step('renders kibana version badge', async () => {
@@ -153,7 +138,7 @@ test.describe(
       await pageObjects.gettingStarted.expandTutorialCards();
 
       await test.step('search basics card opens console', async () => {
-        await pageObjects.gettingStarted.clickTutorialCardButton('search_basics');
+        await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('search_basics');
 
         const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
         await expect(embeddedConsole).toBeVisible();
@@ -162,8 +147,8 @@ test.describe(
         await expect(embeddedConsole).toBeHidden();
       });
 
-      await test.step('semantic search button opens console', async () => {
-        await pageObjects.gettingStarted.clickTutorialCardButton('semantic_search');
+      await test.step('semantic search card opens console', async () => {
+        await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('semantic_search');
 
         const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
         await expect(embeddedConsole).toBeVisible();
