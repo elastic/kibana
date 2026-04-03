@@ -18,6 +18,8 @@ import {
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+  LENS_PERCENTILE_DEFAULT_VALUE,
+  LENS_PERCENTILE_RANK_DEFAULT_VALUE,
   LENS_TERMS_LIMIT_DEFAULT,
 } from './constants';
 
@@ -113,6 +115,78 @@ describe('Bucket Operation Schemas', () => {
 
         const validated = bucketTermsOperationSchema.validate(input);
         expect(validated.rank_by).toEqual(rankBy);
+      });
+    });
+
+    it('validates rank_by custom with percentile operation', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile',
+          field: 'latency',
+          direction: 'desc',
+          percentile: 90,
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual(input.rank_by);
+    });
+
+    it('validates rank_by custom with percentile operation uses default', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile',
+          field: 'latency',
+          direction: 'desc',
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual({
+        ...input.rank_by,
+        percentile: LENS_PERCENTILE_DEFAULT_VALUE,
+      });
+    });
+
+    it('validates rank_by custom with percentile_rank operation', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile_rank',
+          field: 'latency',
+          direction: 'asc',
+          rank: 500,
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual(input.rank_by);
+    });
+
+    it('validates rank_by custom with percentile_rank operation uses default', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile_rank',
+          field: 'latency',
+          direction: 'asc',
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual({
+        ...input.rank_by,
+        rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
       });
     });
   });
