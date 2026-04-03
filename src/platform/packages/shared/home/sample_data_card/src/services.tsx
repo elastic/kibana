@@ -120,7 +120,7 @@ export const SampleDataCardKibanaProvider: FC<PropsWithChildren<KibanaDependenci
       application.navigateToUrl(http.basePath.prepend(targetUrl));
     },
     installSampleDataSet: async (id, defaultIndex) => {
-      await http.post(`${SAMPLE_DATA_API}/${id}`);
+      await http.post(`${SAMPLE_DATA_API}/${encodeURIComponent(id)}`);
 
       if (uiSettings.isDefault('defaultIndex')) {
         uiSettings.set('defaultIndex', defaultIndex);
@@ -129,7 +129,7 @@ export const SampleDataCardKibanaProvider: FC<PropsWithChildren<KibanaDependenci
       clearDataViewsCache();
     },
     removeSampleDataSet: async (id, defaultIndex) => {
-      await http.delete(`${SAMPLE_DATA_API}/${id}`);
+      await http.delete(`${SAMPLE_DATA_API}/${encodeURIComponent(id)}`);
 
       if (
         !uiSettings.isDefault('defaultIndex') &&

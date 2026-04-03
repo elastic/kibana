@@ -806,6 +806,7 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
+        '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         'no-restricted-modules': [
           'error',
