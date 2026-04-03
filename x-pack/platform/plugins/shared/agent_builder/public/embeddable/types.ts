@@ -104,6 +104,16 @@ export interface EmbeddableConversationSidebarProps {
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
   }) => void;
+  /**
+   * Called whenever the response loading state changes.
+   * Useful for notifying tab bars or other parent UI when an agent finishes responding.
+   */
+  onLoadingStateChange?: (isLoading: boolean) => void;
+  /**
+   * Called when the conversation receives a title (on first creation or title update).
+   * Useful for keeping external tab labels in sync with the conversation title.
+   */
+  onTitleChange?: (title: string) => void;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
