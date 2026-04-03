@@ -215,18 +215,29 @@ export function SettingsTab() {
                 size="s"
                 color="success"
                 iconType="check"
-                title={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatus',
-                  {
-                    defaultMessage:
-                      'Continuous extraction is active. Knowledge indicators are extracted every {hours} hours.',
-                    values: {
-                      hours:
-                        continuousExtraction.saved.intervalHours ??
-                        DEFAULT_EXTRACTION_INTERVAL_HOURS,
-                    },
-                  }
-                )}
+                title={
+                  (continuousExtraction.saved.intervalHours ??
+                    DEFAULT_EXTRACTION_INTERVAL_HOURS) === 0
+                    ? i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatusEveryRun',
+                        {
+                          defaultMessage:
+                            'Continuous extraction is active. All eligible streams are processed on every run.',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.continuousKiExtractionActiveStatus',
+                        {
+                          defaultMessage:
+                            'Continuous extraction is active. Knowledge indicators are extracted every {hours} hours.',
+                          values: {
+                            hours:
+                              continuousExtraction.saved.intervalHours ??
+                              DEFAULT_EXTRACTION_INTERVAL_HOURS,
+                          },
+                        }
+                      )
+                }
                 data-test-subj="streams-settings-continuous-extraction-status"
               />
               <EuiSpacer size="m" />
@@ -285,8 +296,7 @@ export function SettingsTab() {
                     'xpack.streams.significantEventsDiscovery.settings.extractionIntervalHelp',
                     {
                       defaultMessage:
-                        'How often to run KI extraction per stream. Minimum: {min} hour.',
-                      values: { min: MIN_EXTRACTION_INTERVAL_HOURS },
+                        'How often to run KI extraction per stream. Set to 0 to process all eligible streams on every run.',
                     }
                   )}
                 >
@@ -298,7 +308,7 @@ export function SettingsTab() {
                         ...prev,
                         intervalHours: Math.max(
                           MIN_EXTRACTION_INTERVAL_HOURS,
-                          Number(e.target.value) || MIN_EXTRACTION_INTERVAL_HOURS
+                          Number(e.target.value) || 0
                         ),
                       }))
                     }

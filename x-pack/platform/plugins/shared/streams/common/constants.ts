@@ -73,7 +73,7 @@ export const COORDINATOR_INTERVAL_MINUTES = 10;
 
 // Stream selection: how many streams to process per run and how often
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
-export const MIN_EXTRACTION_INTERVAL_HOURS = 1;
+export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
 export const MAX_SCHEDULED_STREAMS = 5;
 
 export const POLL_DELAY_SECONDS = 5;

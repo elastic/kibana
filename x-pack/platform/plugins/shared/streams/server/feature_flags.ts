@@ -128,7 +128,7 @@ export function registerFeatureFlags(
               }
             ),
             type: 'number',
-            schema: schema.number({ min: 1 }),
+            schema: schema.number({ min: 0 }),
             scope: 'global',
             solutionViews: ['classic', 'oblt'],
             readonly: true,
