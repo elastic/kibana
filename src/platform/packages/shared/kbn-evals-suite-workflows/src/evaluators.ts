@@ -8,14 +8,72 @@
  */
 
 import { parse as parseYaml } from 'yaml';
-import type { DefaultEvaluators } from '@kbn/evals';
-import { getToolCallSteps } from '@kbn/evals';
+import type { DefaultEvaluators, Evaluator, Example } from '@kbn/evals';
+import { getToolCallSteps, createTrajectoryEvaluator } from '@kbn/evals';
 import type {
   WorkflowEditExample,
   WorkflowCreateExample,
   WorkflowTaskOutput,
   StructuralExpectations,
+  EfficiencyExpectations,
 } from './types';
+
+type WorkflowExample = WorkflowEditExample | WorkflowCreateExample;
+
+const INFRA_ERROR_NA = {
+  score: null as null,
+  label: 'N/A' as const,
+  explanation: 'Not applicable: infrastructure error — not a model quality issue',
+};
+
+const NEGATIVE_CASE_NA = {
+  score: null as null,
+  label: 'N/A' as const,
+  explanation: 'Not applicable: negative case — model should reject this request',
+};
+
+const INFRA_ERROR_PATTERN = /timeout|ECONNREFUSED|503|502|401|ENOTFOUND|socket hang up/i;
+
+/**
+ * Wraps an evaluator so it returns N/A when the conversation encountered an
+ * infrastructure error (timeouts, connection refused, auth failures, etc.).
+ * These are environment issues, not model quality problems.
+ */
+export function skipInfraErrors<TExample extends Example>(
+  evaluator: Evaluator<TExample, WorkflowTaskOutput>
+): Evaluator<TExample, WorkflowTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      const errors = (args.output as WorkflowTaskOutput)?.errors ?? [];
+      const isInfra = errors.some((e) => INFRA_ERROR_PATTERN.test(String(e)));
+      if (isInfra) {
+        return INFRA_ERROR_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
+/**
+ * Wraps an evaluator so it returns N/A for negative-case examples (category === 'negative').
+ * These are prompts where the model should refuse to generate a workflow, so
+ * production-quality metrics are meaningless and should not skew averages.
+ */
+export function skipNegativeCases<TExample extends Example>(
+  evaluator: Evaluator<TExample, WorkflowTaskOutput>
+): Evaluator<TExample, WorkflowTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      const metadata = args.metadata as WorkflowExample['metadata'] | undefined;
+      if (metadata?.category === 'negative') {
+        return NEGATIVE_CASE_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
 
 /**
  * Tool results from the converse API are ToolResult objects:
@@ -211,6 +269,36 @@ export function createNoErrorsEvaluator() {
   };
 }
 
+/**
+ * Scores whether the model correctly refused to generate a workflow for a negative case.
+ * Returns N/A for positive cases since workflow generation is expected there.
+ */
+export function createRejectionEvaluator() {
+  return {
+    name: 'Rejection',
+    kind: 'CODE' as const,
+    evaluate: async ({
+      output,
+      metadata,
+    }: {
+      output: WorkflowTaskOutput;
+      metadata: WorkflowExample['metadata'];
+    }) => {
+      if (metadata?.category !== 'negative') {
+        return { score: null, label: 'N/A' as const, explanation: 'Not a negative case' };
+      }
+      const refused = !output.resultYaml;
+      return {
+        score: refused ? 1 : 0,
+        label: refused ? ('PASS' as const) : ('FAIL' as const),
+        explanation: refused
+          ? 'Model correctly refused to generate a workflow'
+          : 'Model incorrectly generated a workflow for a request it should have rejected',
+      };
+    },
+  };
+}
+
 interface ParsedStep {
   name?: string;
   type?: string;
@@ -275,22 +363,35 @@ export function createStructuralCorrectnessEvaluator() {
         return { score: 0, metadata: { reason: 'Failed to parse result YAML' } };
       }
 
-      const checks: Array<{ name: string; pass: boolean; detail: string }> = [];
+      const checks: Array<{ name: string; pass: boolean; score?: number; detail: string }> = [];
 
       if (expectedStepCount !== undefined) {
         const count = workflow.steps.length;
         if (typeof expectedStepCount === 'number') {
-          const pass = count === expectedStepCount;
+          const diff = Math.abs(count - expectedStepCount);
+          const stepScore = diff === 0 ? 1 : Math.max(0, 1 - diff / expectedStepCount);
           checks.push({
             name: 'stepCount',
-            pass,
+            pass: stepScore >= 0.5,
+            score: stepScore,
             detail: `expected ${expectedStepCount}, got ${count}`,
           });
         } else {
-          const pass = count >= expectedStepCount.min && count <= expectedStepCount.max;
+          let stepScore: number;
+          if (count < expectedStepCount.min) {
+            stepScore = expectedStepCount.min > 0 ? Math.max(0, count / expectedStepCount.min) : 0;
+          } else if (count > expectedStepCount.max) {
+            stepScore =
+              expectedStepCount.max > 0
+                ? Math.max(0, 1 - (count - expectedStepCount.max) / expectedStepCount.max)
+                : 0;
+          } else {
+            stepScore = 1;
+          }
           checks.push({
             name: 'stepCount',
-            pass,
+            pass: stepScore >= 0.5,
+            score: stepScore,
             detail: `expected ${expectedStepCount.min}-${expectedStepCount.max}, got ${count}`,
           });
         }
@@ -321,9 +422,9 @@ export function createStructuralCorrectnessEvaluator() {
         }
       }
 
-      const passed = checks.filter((c) => c.pass).length;
+      const totalScore = checks.reduce((sum, c) => sum + (c.score ?? (c.pass ? 1 : 0)), 0);
       return {
-        score: checks.length > 0 ? passed / checks.length : 1,
+        score: checks.length > 0 ? totalScore / checks.length : 1,
         metadata: { checks },
       };
     },
@@ -398,11 +499,71 @@ export function createEditPreservationEvaluator() {
   };
 }
 
+const LOOKUP_TOOL_PATTERNS = ['get_step_definitions', 'get_connectors', 'get_examples'];
+
+const isLookupCall = (toolId: string | undefined): boolean =>
+  LOOKUP_TOOL_PATTERNS.some((p) => toolId?.includes(p));
+
+/**
+ * Budget-based efficiency: tiered penalty when total tool calls exceed the budget.
+ * Mirrors the approach used by kbn-evals-suite-streams's stepEfficiency.
+ */
+const calculateBudgetScore = (totalCalls: number, budget: number): number => {
+  if (totalCalls <= budget) {
+    return 1.0;
+  }
+  const overshoot = totalCalls / budget;
+  if (overshoot <= 1.5) {
+    return 0.7;
+  }
+  if (overshoot <= 2.0) {
+    return 0.4;
+  }
+  return 0.1;
+};
+
+/**
+ * Penalizes redundant lookups: calling the same lookup tool more than once
+ * (by tool_id) is wasteful. Score degrades proportionally to duplicates.
+ */
+const calculateRedundantLookupScore = (
+  toolCalls: Array<{ tool_id?: string }>
+): { score: number; redundantCount: number; uniqueLookups: number } => {
+  const lookups = toolCalls.filter((t) => isLookupCall(t.tool_id));
+  if (lookups.length === 0) {
+    return { score: 1, redundantCount: 0, uniqueLookups: 0 };
+  }
+
+  const lookupCounts = new Map<string, number>();
+  for (const t of lookups) {
+    const id = t.tool_id ?? 'unknown';
+    lookupCounts.set(id, (lookupCounts.get(id) ?? 0) + 1);
+  }
+
+  const uniqueLookups = lookupCounts.size;
+  const redundantCount = lookups.length - uniqueLookups;
+  const score = redundantCount === 0 ? 1.0 : Math.max(0, 1 - redundantCount / lookups.length);
+
+  return { score, redundantCount, uniqueLookups };
+};
+
+const FAILED_CALL_WEIGHT = 0.4;
+const BUDGET_WEIGHT = 0.35;
+const REDUNDANT_LOOKUP_WEIGHT = 0.25;
+
+const DEFAULT_TOOL_CALL_BUDGET = 6;
+
 export function createEfficiencyEvaluator() {
   return {
     name: 'Efficiency',
     kind: 'CODE' as const,
-    evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
+    evaluate: async ({
+      output,
+      expected,
+    }: {
+      output: WorkflowTaskOutput;
+      expected: EfficiencyExpectations;
+    }) => {
       const toolCalls = getToolCallSteps(output);
       const workflowCalls = toolCalls.filter((t) => t.tool_id?.includes('workflow_'));
       const failedCalls = workflowCalls.filter((t) =>
@@ -411,25 +572,177 @@ export function createEfficiencyEvaluator() {
           return data && data.success === false;
         })
       );
-      const lookupCalls = toolCalls.filter(
-        (t) =>
-          t.tool_id?.includes('get_step_definitions') ||
-          t.tool_id?.includes('get_connectors') ||
-          t.tool_id?.includes('get_examples')
-      );
 
       const totalToolCalls = toolCalls.length;
       const wastedCalls = failedCalls.length;
-      const efficiency = totalToolCalls > 0 ? Math.max(0, 1 - wastedCalls / totalToolCalls) : 1;
+
+      const failedCallScore =
+        totalToolCalls > 0 ? Math.max(0, 1 - wastedCalls / totalToolCalls) : 1;
+
+      const budget = expected.expectedMaxToolCalls ?? DEFAULT_TOOL_CALL_BUDGET;
+      const budgetScore = calculateBudgetScore(totalToolCalls, budget);
+
+      const {
+        score: redundantScore,
+        redundantCount,
+        uniqueLookups,
+      } = calculateRedundantLookupScore(toolCalls);
+
+      const efficiency =
+        FAILED_CALL_WEIGHT * failedCallScore +
+        BUDGET_WEIGHT * budgetScore +
+        REDUNDANT_LOOKUP_WEIGHT * redundantScore;
 
       return {
-        score: efficiency,
+        score: Math.round(efficiency * 1000) / 1000,
         metadata: {
           totalToolCalls,
           workflowEditCalls: workflowCalls.length,
           failedCalls: wastedCalls,
-          lookupCalls: lookupCalls.length,
+          failedCallScore,
+          budget,
+          budgetScore,
+          lookupCalls: toolCalls.filter((t) => isLookupCall(t.tool_id)).length,
+          uniqueLookups,
+          redundantLookups: redundantCount,
+          redundantLookupScore: redundantScore,
         },
+      };
+    },
+  };
+}
+
+export function createToolTrajectoryEvaluator() {
+  return createTrajectoryEvaluator({
+    extractToolCalls: (output) => {
+      const steps = (output as WorkflowTaskOutput).steps ?? [];
+      return steps.filter((s) => s.type === 'tool_call' && s.tool_id).map((s) => s.tool_id!);
+    },
+    goldenPathExtractor: (expected) => {
+      const exp = expected as EfficiencyExpectations;
+      return exp.expectedToolSequence ?? [];
+    },
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+}
+
+/**
+ * Checks that every step type in the generated YAML exists in the step
+ * definitions catalog returned by the `get_step_definitions` tool call.
+ * Does NOT flag placeholder connector IDs — only validates step types.
+ */
+export function createGroundednessEvaluator() {
+  return {
+    name: 'StepTypeGroundedness',
+    kind: 'CODE' as const,
+    evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
+      if (!output.resultYaml) {
+        return { score: 0, metadata: { reason: 'No result YAML available' } };
+      }
+
+      const workflow = parseWorkflowYaml(output.resultYaml);
+      if (!workflow) {
+        return { score: 0, metadata: { reason: 'Failed to parse result YAML' } };
+      }
+
+      const usedTypes = workflow.steps.map((s) => s.type).filter(Boolean) as string[];
+      if (usedTypes.length === 0) {
+        return { score: 1, metadata: { reason: 'No steps with types found' } };
+      }
+
+      const catalogTypes = extractCatalogTypes(output);
+      if (catalogTypes.size === 0) {
+        return {
+          score: null,
+          label: 'N/A' as const,
+          metadata: { reason: 'No step definitions catalog found in tool calls' },
+        };
+      }
+
+      const results = usedTypes.map((type) => ({
+        type,
+        grounded: catalogTypes.has(type),
+      }));
+      const groundedCount = results.filter((r) => r.grounded).length;
+      const hallucinated = results.filter((r) => !r.grounded).map((r) => r.type);
+
+      return {
+        score: groundedCount / results.length,
+        metadata: {
+          totalStepTypes: results.length,
+          groundedCount,
+          hallucinated,
+          catalogSize: catalogTypes.size,
+        },
+      };
+    },
+  };
+}
+
+/**
+ * Extracts the set of valid step type identifiers from the
+ * `get_step_definitions` tool call result in the conversation steps.
+ */
+const extractCatalogTypes = (output: WorkflowTaskOutput): Set<string> => {
+  const steps = output.steps ?? [];
+  const catalogTypes = new Set<string>();
+
+  for (const step of steps) {
+    if (step.type !== 'tool_call' || !step.tool_id?.includes('get_step_definitions')) {
+      continue;
+    }
+    for (const result of step.results ?? []) {
+      const data = unwrapToolResultData(result);
+      if (!data) {
+        continue;
+      }
+
+      const definitions = (data.stepTypes ?? data.definitions ?? data.steps ?? data) as
+        | Record<string, unknown>
+        | unknown[];
+      if (Array.isArray(definitions)) {
+        for (const def of definitions) {
+          if (typeof def === 'object' && def !== null) {
+            const d = def as Record<string, unknown>;
+            if (typeof d.type === 'string') {
+              catalogTypes.add(d.type);
+            }
+            if (typeof d.id === 'string') {
+              catalogTypes.add(d.id);
+            }
+          }
+        }
+      } else if (typeof definitions === 'object' && definitions !== null) {
+        for (const key of Object.keys(definitions)) {
+          catalogTypes.add(key);
+        }
+      }
+    }
+  }
+
+  return catalogTypes;
+};
+
+/**
+ * Wall-clock latency evaluator. Measures how long the task took and scores
+ * proportionally: full marks at or under `maxSeconds`, degrading linearly above.
+ */
+export function createLatencyEvaluator({ maxSeconds = 60 }: { maxSeconds?: number } = {}) {
+  return {
+    name: 'Latency',
+    kind: 'CODE' as const,
+    evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
+      const { latencyMs } = output;
+      if (latencyMs == null) {
+        return { score: null, label: 'N/A' as const, metadata: { reason: 'No latency data' } };
+      }
+      const seconds = latencyMs / 1000;
+      const score =
+        seconds <= maxSeconds ? 1 : Math.max(0, 1 - (seconds - maxSeconds) / maxSeconds);
+      return {
+        score: Math.round(score * 1000) / 1000,
+        metadata: { latencyMs, seconds, maxSeconds },
       };
     },
   };

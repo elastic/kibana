@@ -16,12 +16,21 @@ import {
   createEditSuccessEvaluator,
   createValidationPassEvaluator,
   createNoErrorsEvaluator,
+  createRejectionEvaluator,
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
+  createGroundednessEvaluator,
   createEfficiencyEvaluator,
+  createToolTrajectoryEvaluator,
+  createLatencyEvaluator,
+  skipInfraErrors,
+  skipNegativeCases,
   extractResultYaml,
   extractYamlFromAttachments,
 } from '../src/evaluators';
+
+const skip = <E extends WorkflowCreateExample>(e: Parameters<typeof skipInfraErrors<E>>[0]) =>
+  skipInfraErrors(skipNegativeCases(e));
 
 const evaluate = base.extend<
   {
@@ -38,9 +47,11 @@ const evaluate = base.extend<
           {
             dataset,
             task: async ({ input }) => {
+              const startMs = Date.now();
               const response = await chatClient.converse({
                 messages: [{ message: input.instruction }],
               });
+              const latencyMs = Date.now() - startMs;
 
               const taskOutput = {
                 messages: response.messages,
@@ -59,16 +70,21 @@ const evaluate = base.extend<
               return {
                 ...taskOutput,
                 resultYaml,
+                latencyMs,
               };
             },
           },
           selectEvaluators<WorkflowCreateExample, WorkflowTaskOutput>([
-            createNoErrorsEvaluator(),
-            createEditSuccessEvaluator(),
-            createValidationPassEvaluator(),
-            createStructuralCorrectnessEvaluator(),
-            createEfficiencyEvaluator(),
-            createCriteriaEvaluator({ evaluators }),
+            skip(createNoErrorsEvaluator()),
+            skip(createEditSuccessEvaluator()),
+            skip(createValidationPassEvaluator()),
+            skip(createStructuralCorrectnessEvaluator()),
+            skip(createGroundednessEvaluator()),
+            skip(createEfficiencyEvaluator()),
+            skip(createToolTrajectoryEvaluator()),
+            skip(createLatencyEvaluator()),
+            skip(createCriteriaEvaluator({ evaluators })),
+            skipInfraErrors(createRejectionEvaluator()),
           ])
         );
       });
@@ -100,6 +116,11 @@ evaluate.describe(
                 ],
                 expectedStepCount: { min: 1, max: 2 },
                 expectedStepTypes: ['http'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'simple-creation' },
             },
@@ -116,6 +137,11 @@ evaluate.describe(
                 ],
                 expectedStepCount: 1,
                 expectedStepTypes: ['console'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'simple-creation' },
             },
@@ -145,6 +171,11 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['http', 'console'],
                 expectedStepCount: { min: 4, max: 5 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'conditional-creation' },
             },
@@ -172,8 +203,13 @@ evaluate.describe(
                   'There is a loop that iterates over the items.',
                   'Inside the loop, each item is logged to the console.',
                 ],
-                expectedStepTypes: ['data.set', 'console'],
-                expectedStepCount: { min: 3, max: 4 },
+                expectedStepTypes: ['data.set|foreach', 'console'],
+                expectedStepCount: { min: 2, max: 5 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'loop-creation' },
             },
@@ -203,6 +239,11 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['http'],
                 expectedStepCount: { min: 1, max: 3 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'error-handling-creation' },
             },
@@ -234,6 +275,11 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['console', 'http', 'data.set'],
                 expectedStepCount: 4,
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'multi-step-creation' },
             },
@@ -269,6 +315,11 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['elasticsearch.search', 'console'],
                 expectedStepCount: 2,
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'es-search-creation' },
             },
@@ -304,6 +355,11 @@ evaluate.describe(
                   'elasticsearch.bulk',
                 ],
                 expectedStepCount: { min: 4, max: 6 },
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'es-index-management-creation' },
             },
@@ -334,6 +390,11 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['elasticsearch.esql.query', 'console'],
                 expectedStepCount: 2,
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'esql-creation' },
             },
@@ -373,6 +434,11 @@ evaluate.describe(
                   'kibana.createCase|cases.createCase|kibana.createCaseDefaultSpace',
                 ],
                 expectedStepCount: { min: 2, max: 4 },
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'cases-creation' },
             },
@@ -410,6 +476,11 @@ evaluate.describe(
                     'kibana.createCase|cases.createCase|kibana.createCaseDefaultSpace',
                   ],
                   expectedStepCount: { min: 3, max: 5 },
+                  expectedMaxToolCalls: 8,
+                  expectedToolSequence: [
+                    'platform.workflows.get_step_definitions',
+                    'platform.workflows.workflow_replace_yaml',
+                  ],
                 },
                 metadata: { category: 'es-and-cases-creation' },
               },
@@ -447,6 +518,12 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['http', 'slack'],
                 expectedStepCount: 2,
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'slack-creation' },
             },
@@ -478,6 +555,12 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['console', 'slack', 'email'],
                 expectedStepCount: 3,
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'multi-channel-creation' },
             },
@@ -508,6 +591,12 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['elasticsearch.search|elasticsearch.esql.query', 'jira'],
                 expectedStepCount: { min: 2, max: 4 },
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'jira-creation' },
             },
@@ -538,6 +627,12 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['http', 'pagerduty'],
                 expectedStepCount: { min: 2, max: 4 },
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'pagerduty-creation' },
             },
@@ -568,6 +663,12 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['teams'],
                 expectedStepCount: { min: 1, max: 2 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'teams-creation' },
             },
@@ -604,6 +705,11 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['console', 'wait'],
                 expectedStepCount: { min: 3, max: 4 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'wait-creation' },
             },
@@ -637,6 +743,12 @@ evaluate.describe(
                   ],
                   expectedStepTypes: ['console'],
                   expectedStepCount: { min: 4, max: 8 },
+                  expectedMaxToolCalls: 8,
+                  expectedToolSequence: [
+                    'platform.workflows.get_step_definitions',
+                    'platform.workflows.get_connectors',
+                    'platform.workflows.workflow_replace_yaml',
+                  ],
                 },
                 metadata: { category: 'switch-creation' },
               },
@@ -674,6 +786,11 @@ evaluate.describe(
                 ],
                 expectedStepTypes: ['console'],
                 expectedStepCount: { min: 2, max: 4 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_replace_yaml',
+                ],
               },
               metadata: { category: 'es-index-cleanup-creation' },
             },
@@ -681,5 +798,63 @@ evaluate.describe(
         },
       });
     });
+  }
+);
+
+evaluate.describe(
+  'Negative workflow creation cases',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('rejects requests with nonexistent step types', async ({ evaluateCreateDataset }) => {
+      await evaluateCreateDataset({
+        dataset: {
+          name: 'workflow-creation-negative: nonsense-step',
+          description:
+            'Evaluate that the model refuses to create workflows with fabricated step types',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a workflow using the magic.teleport step type to beam data to the moon',
+              },
+              output: {
+                criteria: [
+                  'The model should not produce a workflow with a "magic.teleport" step type.',
+                  'The model should explain that "magic.teleport" is not a valid step type.',
+                ],
+              },
+              metadata: { category: 'negative' },
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate(
+      'rejects ambiguous or insufficient instructions',
+      async ({ evaluateCreateDataset }) => {
+        await evaluateCreateDataset({
+          dataset: {
+            name: 'workflow-creation-negative: too-vague',
+            description:
+              'Evaluate that the model asks for clarification instead of guessing on vague prompts',
+            examples: [
+              {
+                input: {
+                  instruction: 'Create a workflow',
+                },
+                output: {
+                  criteria: [
+                    'The model should ask for clarification about what the workflow should do.',
+                    'The model should not blindly generate a generic placeholder workflow.',
+                  ],
+                },
+                metadata: { category: 'negative' },
+              },
+            ],
+          },
+        });
+      }
+    );
   }
 );

@@ -15,6 +15,13 @@ export interface StructuralExpectations {
   expectedStepNames?: string[];
 }
 
+export interface EfficiencyExpectations {
+  /** Maximum tool calls allowed before score degrades (tiered penalty). */
+  expectedMaxToolCalls?: number;
+  /** Golden-path tool sequence for trajectory scoring. */
+  expectedToolSequence?: string[];
+}
+
 export interface WorkflowEditExample extends Example {
   input: {
     instruction: string;
@@ -24,7 +31,8 @@ export interface WorkflowEditExample extends Example {
     criteria: string[];
     expectedToolIds?: string[];
     preservedStepNames?: string[];
-  } & StructuralExpectations;
+  } & StructuralExpectations &
+    EfficiencyExpectations;
   metadata?: {
     category?: string;
   };
@@ -36,7 +44,8 @@ export interface WorkflowCreateExample extends Example {
   };
   output: {
     criteria: string[];
-  } & StructuralExpectations;
+  } & StructuralExpectations &
+    EfficiencyExpectations;
   metadata?: {
     category?: string;
   };
@@ -52,4 +61,5 @@ export type WorkflowTaskOutput = TaskOutput & {
   }>;
   errors: unknown[];
   resultYaml?: string;
+  latencyMs?: number;
 };

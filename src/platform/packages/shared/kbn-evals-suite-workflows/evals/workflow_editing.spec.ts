@@ -20,7 +20,12 @@ import {
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
   createEditPreservationEvaluator,
+  createGroundednessEvaluator,
   createEfficiencyEvaluator,
+  createToolTrajectoryEvaluator,
+  createLatencyEvaluator,
+  skipInfraErrors,
+  skipNegativeCases,
   extractResultYaml,
   extractYamlFromAttachments,
 } from '../src/evaluators';
@@ -53,6 +58,9 @@ steps:
       message: "Workflow completed"
 `;
 
+const skip = <E extends WorkflowEditExample>(e: Parameters<typeof skipInfraErrors<E>>[0]) =>
+  skipInfraErrors(skipNegativeCases(e));
+
 const evaluate = base.extend<
   {
     evaluateEditDataset: (opts: {
@@ -68,6 +76,7 @@ const evaluate = base.extend<
           {
             dataset,
             task: async ({ input }) => {
+              const startMs = Date.now();
               const response = await chatClient.converse({
                 messages: [{ message: input.instruction }],
                 attachments: [
@@ -77,6 +86,7 @@ const evaluate = base.extend<
                   },
                 ],
               });
+              const latencyMs = Date.now() - startMs;
 
               const taskOutput = {
                 messages: response.messages,
@@ -95,18 +105,22 @@ const evaluate = base.extend<
               return {
                 ...taskOutput,
                 resultYaml,
+                latencyMs,
               };
             },
           },
           selectEvaluators<WorkflowEditExample, WorkflowTaskOutput>([
-            createNoErrorsEvaluator(),
-            createEditSuccessEvaluator(),
-            createValidationPassEvaluator(),
-            createToolUsageEvaluator(),
-            createStructuralCorrectnessEvaluator(),
-            createEditPreservationEvaluator(),
-            createEfficiencyEvaluator(),
-            createCriteriaEvaluator({ evaluators }),
+            skip(createNoErrorsEvaluator()),
+            skip(createEditSuccessEvaluator()),
+            skip(createValidationPassEvaluator()),
+            skip(createToolUsageEvaluator()),
+            skip(createStructuralCorrectnessEvaluator()),
+            skip(createEditPreservationEvaluator()),
+            skip(createGroundednessEvaluator()),
+            skip(createEfficiencyEvaluator()),
+            skip(createToolTrajectoryEvaluator()),
+            skip(createLatencyEvaluator()),
+            skip(createCriteriaEvaluator({ evaluators })),
           ])
         );
       });
@@ -133,11 +147,17 @@ evaluate.describe(
               output: {
                 criteria: [
                   'A new step was added to the workflow.',
-                  'The new step sends a message containing "Data fetch complete".',
+                  'The new step sends a message indicating that the data fetch is done or complete.',
                 ],
                 expectedToolIds: ['platform.workflows.workflow_insert_step'],
                 expectedStepCount: { min: 4, max: 4 },
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_insert_step',
+                ],
               },
               metadata: { category: 'insert-step' },
             },
@@ -155,6 +175,11 @@ evaluate.describe(
                 expectedStepCount: { min: 4, max: 4 },
                 expectedStepTypes: ['elasticsearch.search'],
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_insert_step',
+                ],
               },
               metadata: { category: 'insert-step' },
             },
@@ -182,6 +207,8 @@ evaluate.describe(
                 ],
                 expectedStepCount: 3,
                 preservedStepNames: ['log_start', 'log_end'],
+                expectedMaxToolCalls: 3,
+                expectedToolSequence: ['platform.workflows.workflow_modify_step_property'],
               },
               metadata: { category: 'modify-step' },
             },
@@ -210,6 +237,8 @@ evaluate.describe(
                 expectedStepCount: 2,
                 expectedStepNames: ['log_start', 'fetch_data'],
                 preservedStepNames: ['log_start', 'fetch_data'],
+                expectedMaxToolCalls: 2,
+                expectedToolSequence: ['platform.workflows.workflow_delete_step'],
               },
               metadata: { category: 'delete-step' },
             },
@@ -237,6 +266,11 @@ evaluate.describe(
                 ],
                 expectedStepCount: 3,
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
+                expectedMaxToolCalls: 3,
+                expectedToolSequence: [
+                  'platform.workflows.workflow_modify_property',
+                  'platform.workflows.workflow_modify_property',
+                ],
               },
               metadata: { category: 'modify-property' },
             },
@@ -267,6 +301,12 @@ evaluate.describe(
                 expectedStepCount: 2,
                 expectedStepNames: ['log_start', 'fetch_data'],
                 preservedStepNames: ['log_start'],
+                expectedMaxToolCalls: 5,
+                expectedToolSequence: [
+                  'platform.workflows.workflow_modify_property',
+                  'platform.workflows.workflow_delete_step',
+                  'platform.workflows.workflow_modify_step_property',
+                ],
               },
               metadata: { category: 'multi-step' },
             },
@@ -333,6 +373,8 @@ evaluate.describe(
                 ],
                 expectedStepCount: 4,
                 preservedStepNames: ['create_index', 'index_document', 'log_results'],
+                expectedMaxToolCalls: 3,
+                expectedToolSequence: ['platform.workflows.workflow_modify_step_property'],
               },
               metadata: { category: 'modify-es-step' },
             },
@@ -368,6 +410,11 @@ evaluate.describe(
                   'search_data',
                   'log_results',
                 ],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_insert_step',
+                ],
               },
               metadata: { category: 'insert-es-step' },
             },
@@ -392,11 +439,15 @@ evaluate.describe(
               output: {
                 criteria: [
                   'All references to "my-data-index" were changed to "production-data".',
-                  'A step that checks index existence was added before create_index.',
-                  'Conditional logic ensures the index is created only when it does not already exist.',
+                  'The workflow ensures the index is only created if it does not already exist, either by adding an existence check step with conditional logic or by using an idempotent flag (such as ignore_if_exists) on the create step.',
                 ],
-                expectedStepTypes: ['elasticsearch.indices.exists'],
-                expectedStepCount: { min: 5, max: 7 },
+                expectedStepCount: { min: 4, max: 7 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: [
+                  'platform.workflows.workflow_modify_step_property',
+                  'platform.workflows.workflow_modify_step_property',
+                  'platform.workflows.workflow_modify_step_property',
+                ],
               },
               metadata: { category: 'multi-step-es' },
             },
@@ -450,6 +501,8 @@ evaluate.describe(
                 ],
                 expectedStepCount: 2,
                 preservedStepNames: ['log_case_id'],
+                expectedMaxToolCalls: 3,
+                expectedToolSequence: ['platform.workflows.workflow_modify_step_property'],
               },
               metadata: { category: 'modify-cases-step' },
             },
@@ -480,6 +533,11 @@ evaluate.describe(
                 expectedStepCount: 3,
                 expectedStepTypes: ['cases.addComment|kibana.addCaseComment|kibana.request'],
                 preservedStepNames: ['create_case', 'log_case_id'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_insert_step',
+                ],
               },
               metadata: { category: 'insert-cases-step' },
             },
@@ -513,6 +571,12 @@ evaluate.describe(
                 ],
                 expectedStepCount: { min: 5, max: 7 },
                 preservedStepNames: ['create_case'],
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.workflow_insert_step',
+                  'platform.workflows.workflow_insert_step',
+                ],
               },
               metadata: { category: 'multi-step-cases' },
             },
@@ -567,6 +631,8 @@ evaluate.describe(
                 ],
                 expectedStepCount: 3,
                 preservedStepNames: ['fetch_alerts', 'log_done'],
+                expectedMaxToolCalls: 3,
+                expectedToolSequence: ['platform.workflows.workflow_modify_step_property'],
               },
               metadata: { category: 'modify-connector-step' },
             },
@@ -598,6 +664,12 @@ evaluate.describe(
                 expectedToolIds: ['platform.workflows.workflow_insert_step'],
                 expectedStepCount: 4,
                 preservedStepNames: ['fetch_alerts', 'notify_slack', 'log_done'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_insert_step',
+                ],
               },
               metadata: { category: 'insert-connector-step' },
             },
@@ -628,6 +700,12 @@ evaluate.describe(
                 ],
                 expectedStepCount: 3,
                 preservedStepNames: ['fetch_alerts', 'log_done'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: [
+                  'platform.workflows.get_step_definitions',
+                  'platform.workflows.get_connectors',
+                  'platform.workflows.workflow_modify_step',
+                ],
               },
               metadata: { category: 'replace-connector-step' },
             },

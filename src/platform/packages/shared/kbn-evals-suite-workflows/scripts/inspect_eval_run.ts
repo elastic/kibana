@@ -56,7 +56,7 @@ async function main() {
   if (!runId || runId === '--help') {
     await listRecentRuns(client);
     console.log('\nUsage: npx ts-node scripts/inspect_eval_run.ts <run_id> [mode]');
-    console.log('Modes: summary (default), failures, compare, conversations');
+    console.log('Modes: summary (default), failures, compare, conversations, efficiency');
     return;
   }
 
@@ -72,6 +72,9 @@ async function main() {
       break;
     case 'conversations':
       await showConversations(client, runId);
+      break;
+    case 'efficiency':
+      await showEfficiency(client, runId);
       break;
     default:
       console.error(`Unknown mode: ${mode}`);
@@ -315,6 +318,89 @@ async function showConversations(client: Client, runId: string) {
     }
 
     console.log('\n' + '='.repeat(80) + '\n');
+  }
+}
+
+async function showEfficiency(client: Client, runId: string) {
+  const efficiencyDocs = await fetchDocs(client, runId, {
+    term: { 'evaluator.name': 'Efficiency' },
+  });
+  const trajectoryDocs = await fetchDocs(client, runId, {
+    term: { 'evaluator.name': 'trajectory' },
+  });
+
+  if (efficiencyDocs.length === 0) {
+    console.log(`No Efficiency results for run_id: ${runId}`);
+    return;
+  }
+
+  console.log(`\n=== Efficiency Breakdown for ${runId} ===\n`);
+
+  const byDataset = groupBy(efficiencyDocs, (d) => d.example.dataset.name);
+  const trajectoryByKey = new Map(
+    trajectoryDocs.map((d) => [`${d.example.dataset.name}|${d.example.index}`, d])
+  );
+
+  for (const [dsName, docs] of Object.entries(byDataset)) {
+    console.log(`\n  ${dsName}:`);
+    for (const doc of docs) {
+      const meta = doc.evaluator.metadata as Record<string, unknown> | null;
+      const trajDoc = trajectoryByKey.get(`${dsName}|${doc.example.index}`);
+      const trajScore = trajDoc?.evaluator.score;
+      const trajMeta = trajDoc?.evaluator.metadata as Record<string, unknown> | null;
+
+      const total = meta?.totalToolCalls ?? '?';
+      const budget = meta?.budget ?? '?';
+      const budgetScore = typeof meta?.budgetScore === 'number' ? meta.budgetScore.toFixed(2) : '?';
+      const failed = meta?.failedCalls ?? '?';
+      const failedScore =
+        typeof meta?.failedCallScore === 'number' ? meta.failedCallScore.toFixed(2) : '?';
+      const redundant = meta?.redundantLookups ?? '?';
+      const redundantScore =
+        typeof meta?.redundantLookupScore === 'number' ? meta.redundantLookupScore.toFixed(2) : '?';
+
+      const instruction = truncate(doc.example.input?.instruction ?? '', 60);
+
+      console.log(
+        `    [${doc.example.index}] score=${doc.evaluator.score?.toFixed(3)}  ` +
+          `calls=${total}/${budget}(${budgetScore})  ` +
+          `failed=${failed}(${failedScore})  ` +
+          `redundant=${redundant}(${redundantScore})` +
+          (trajScore != null ? `  traj=${trajScore.toFixed(2)}` : '') +
+          `  | ${instruction}`
+      );
+
+      if (trajMeta) {
+        const missing = trajMeta.missingTools as string[] | undefined;
+        const extra = trajMeta.extraTools as string[] | undefined;
+        if (missing && missing.length > 0) {
+          console.log(`      missing tools: ${missing.join(', ')}`);
+        }
+        if (extra && extra.length > 0) {
+          console.log(`      extra tools: ${extra.join(', ')}`);
+        }
+      }
+    }
+  }
+
+  const allScores = efficiencyDocs
+    .map((d) => d.evaluator.score)
+    .filter((s): s is number => s !== null);
+  const mean = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+  const imperfect = allScores.filter((s) => s < 1).length;
+
+  console.log(`\n  Overall: mean=${mean.toFixed(3)}  imperfect=${imperfect}/${allScores.length}`);
+
+  if (trajectoryDocs.length > 0) {
+    const trajScores = trajectoryDocs
+      .map((d) => d.evaluator.score)
+      .filter((s): s is number => s !== null);
+    const trajMean = trajScores.reduce((a, b) => a + b, 0) / trajScores.length;
+    console.log(
+      `  Trajectory: mean=${trajMean.toFixed(3)}  imperfect=${
+        trajScores.filter((s) => s < 1).length
+      }/${trajScores.length}`
+    );
   }
 }
 
