@@ -117,6 +117,7 @@ describe('QueryActivityTable', () => {
     cleanup();
     await renderTable({ queries: [query], canCancelTasks: false });
     expect(screen.queryByLabelText('Cancel query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
 
     cleanup();
     await renderTable({ queries: [createQuery({ cancellable: false })], canCancelTasks: true });

@@ -130,8 +130,8 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
     return queriesWithSourceDisplay.filter((q) => q.startTime <= sinceMs);
   }, [queriesWithSourceDisplay, runTimeValue, runTimeUnit]);
 
-  const columns: Array<EuiBasicTableColumn<TableRunningQuery>> = useMemo(
-    () => [
+  const columns: Array<EuiBasicTableColumn<TableRunningQuery>> = useMemo(() => {
+    const baseColumns: Array<EuiBasicTableColumn<TableRunningQuery>> = [
       {
         field: 'taskId',
         name: i18n.translate('xpack.queryActivity.table.taskIdColumn', {
@@ -187,12 +187,18 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
         truncateText: true,
         render: (runningTimeMs: number) => formatRuntime(runningTimeMs),
       },
+    ];
+
+    if (!canCancelTasks) return baseColumns;
+
+    return [
+      ...baseColumns,
       {
         name: i18n.translate('xpack.queryActivity.table.actionsColumn', {
           defaultMessage: 'Actions',
         }),
         width: '240px',
-        align: 'right',
+        align: 'right' as const,
         render: (value: unknown, record?: TableRunningQuery) => {
           const query = (record ?? value) as TableRunningQuery | undefined;
           if (!query) return null;
@@ -223,10 +229,6 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
             return null;
           }
 
-          if (!canCancelTasks) {
-            return null;
-          }
-
           return (
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.queryActivity.table.stopQueryAriaLabel', {
@@ -239,9 +241,8 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
           );
         },
       },
-    ],
-    [canCancelTasks, requestStopQuery, stopRequestedTaskIds]
-  );
+    ];
+  }, [canCancelTasks, requestStopQuery, stopRequestedTaskIds]);
 
   const uniqueSources = useMemo(
     () => [...new Set(queriesWithSourceDisplay.map((q) => q.sourceDisplay))],
