@@ -9,7 +9,6 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-
 import { TaskStatus } from '@kbn/streams-schema';
 import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { TaskClient } from '../tasks/task_client';
@@ -121,11 +120,6 @@ export const createContinuousKiExtractionWorkflowService = (
 
       if (!enabled) {
         return;
-      }
-
-      const purged = await taskClient.deleteByType(FEATURES_IDENTIFICATION_TASK_TYPE);
-      if (purged > 0) {
-        log.info(`Purged ${purged} feature-identification task(s) for clean-slate re-extraction`);
       }
 
       await managementApi.createWorkflow(
