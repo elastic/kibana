@@ -21,7 +21,7 @@ import styled from 'styled-components';
 
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -30,10 +30,7 @@ import {
   isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -59,7 +56,6 @@ import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
-  getStepsData,
 } from '../../../common/helpers';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
@@ -92,6 +88,7 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const MyEuiPanel = styled(EuiPanel)<{
@@ -119,11 +116,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC<{
-  rule?: RuleResponse;
-  sendToAgentChat?: boolean; // allows the user to send the rule to the agent chat as an attachment
-  backComponent?: React.ReactNode;
-}> = ({ rule, sendToAgentChat, backComponent }) => {
+const CreateRulePageComponent: React.FC<{}> = () => {
   const { application, triggersActionsUi, cps } = useKibana().services;
   const { navigateToApp } = application;
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
@@ -146,8 +139,6 @@ const CreateRulePageComponent: React.FC<{
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
   // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
-
-  const isAICreatedRuleValidated = useRef<boolean>(false);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -175,12 +166,6 @@ const CreateRulePageComponent: React.FC<{
     [kibanaAbsoluteUrl]
   );
 
-  const stepsData = rule
-    ? getStepsData({
-        rule,
-      })
-    : undefined;
-
   const {
     defineStepForm,
     defineStepData,
@@ -192,10 +177,10 @@ const CreateRulePageComponent: React.FC<{
     actionsStepData,
     handleNewConnectorCreated,
   } = useRuleForms({
-    defineStepDefault: stepsData?.defineRuleData || defineStepDefault,
-    aboutStepDefault: stepsData?.aboutRuleData || stepAboutDefaultValue,
-    scheduleStepDefault: stepsData?.scheduleRuleData || defaultSchedule,
-    actionsStepDefault: stepsData?.ruleActionsData || actionsStepDefault,
+    defineStepDefault,
+    aboutStepDefault: stepAboutDefaultValue,
+    scheduleStepDefault: defaultSchedule,
+    actionsStepDefault,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -212,7 +197,8 @@ const CreateRulePageComponent: React.FC<{
   );
 
   const [openSteps, setOpenSteps] = useState({
-    [RuleStep.defineRule]: false,
+    // Matches define-rule EuiAccordion initialIsOpen={true}
+    [RuleStep.defineRule]: true,
     [RuleStep.aboutRule]: false,
     [RuleStep.scheduleRule]: false,
     [RuleStep.ruleActions]: false,
@@ -236,17 +222,44 @@ const CreateRulePageComponent: React.FC<{
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
+  const onAiCreatedRuleAppliedRef = useRef<(() => void | Promise<void>) | undefined>(undefined);
+  const isAiRuleAppliedRef = useRef(false);
+
+  const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
+    defineStepForm,
+    aboutStepForm,
+    scheduleStepForm,
+    actionsStepForm,
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    onAiCreatedRuleAppliedRef,
+  });
+
   useEffect(() => {
     if (prevRuleType && prevRuleType !== ruleType) {
       aboutStepForm.updateFieldValues({
         threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
       });
-      scheduleStepForm.updateFieldValues(
-        isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
-      );
+      if (isAiRuleUpdateRef.current) {
+        isAiRuleUpdateRef.current = false;
+      } else {
+        scheduleStepForm.updateFieldValues(
+          isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
+        );
+      }
     }
     setPrevRuleType(ruleType);
-  }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
+  }, [
+    aboutStepForm,
+    scheduleStepForm,
+    isThreatMatchRuleValue,
+    prevRuleType,
+    ruleType,
+    isAiRuleUpdateRef,
+  ]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
@@ -292,7 +305,11 @@ const CreateRulePageComponent: React.FC<{
   );
   const goToStep = useCallback(
     (step: RuleStep) => {
-      if (ruleStepsOrder.indexOf(step) > ruleStepsOrder.indexOf(activeStep) && !openSteps[step]) {
+      if (
+        !openSteps[step] &&
+        (isAiRuleAppliedRef.current ||
+          ruleStepsOrder.indexOf(step) > ruleStepsOrder.indexOf(activeStep))
+      ) {
         toggleStepAccordion(step);
       }
       setActiveStep(step);
@@ -310,6 +327,36 @@ const CreateRulePageComponent: React.FC<{
     } else if (step === RuleStep.ruleActions) {
       ruleActionsRef.current?.onToggle();
     }
+  };
+
+  const openStepsRef = useRef(openSteps);
+  openStepsRef.current = openSteps;
+  const goToStepRef = useRef(goToStep);
+  goToStepRef.current = goToStep;
+  const toggleStepAccordionRef = useRef(toggleStepAccordion);
+  toggleStepAccordionRef.current = toggleStepAccordion;
+
+  onAiCreatedRuleAppliedRef.current = async () => {
+    isAiRuleAppliedRef.current = true;
+    const o = openStepsRef.current;
+    if (o[RuleStep.defineRule]) {
+      toggleStepAccordionRef.current(RuleStep.defineRule);
+    }
+    if (o[RuleStep.aboutRule]) {
+      toggleStepAccordionRef.current(RuleStep.aboutRule);
+    }
+    if (o[RuleStep.scheduleRule]) {
+      toggleStepAccordionRef.current(RuleStep.scheduleRule);
+    }
+
+    await Promise.all([
+      defineStepForm.validate(),
+      aboutStepForm.validate(),
+      scheduleStepForm.validate(),
+      actionsStepForm.validate(),
+    ]);
+
+    goToStepRef.current(RuleStep.ruleActions);
   };
 
   const validateStep = useCallback(
@@ -379,15 +426,6 @@ const CreateRulePageComponent: React.FC<{
     return { valid, warnings };
   }, [validateStep]);
 
-  useEffect(() => {
-    // validate Define step when rule is loaded after AI suggestion.
-    // It's required to make sure we highlight possible errors in query that were not caught during AI generation.
-    if (rule && sendToAgentChat && isAICreatedRuleValidated.current === false) {
-      validateStep(RuleStep.defineRule);
-      isAICreatedRuleValidated.current = true;
-    }
-  }, [rule, sendToAgentChat, validateStep]);
-
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
     [defineStepForm]
@@ -395,6 +433,11 @@ const CreateRulePageComponent: React.FC<{
 
   const editStep = useCallback(
     async (step: RuleStep) => {
+      if (isAiRuleAppliedRef.current) {
+        goToStep(step);
+        return;
+      }
+
       const { valid } = await validateStep(activeStep);
 
       if (valid) {
@@ -850,10 +893,9 @@ const CreateRulePageComponent: React.FC<{
     []
   );
 
-  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
-  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
-    'endpointExceptionsMovedUnderManagement'
-  );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+  const shouldShowEndpointExceptionsCannotBeAddedToRuleCallout =
+    endpointPerPolicyOptIn?.status === true && endpointPerPolicyOptIn.reason === 'userOptedIn';
 
   if (
     redirectToDetections(
@@ -888,7 +930,7 @@ const CreateRulePageComponent: React.FC<{
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
-                      {isEndpointExceptionsMovedFFEnabled && (
+                      {shouldShowEndpointExceptionsCannotBeAddedToRuleCallout && (
                         <EndpointExceptionsMovedCallout
                           id="ruleCreation"
                           dismissable
@@ -897,8 +939,7 @@ const CreateRulePageComponent: React.FC<{
                       )}
 
                       <CustomHeaderPageMemo
-                        backOptions={backComponent ? undefined : backOptions}
-                        backComponent={backComponent}
+                        backOptions={backOptions}
                         isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
                         isRulePreviewVisible={isRulePreviewVisible}

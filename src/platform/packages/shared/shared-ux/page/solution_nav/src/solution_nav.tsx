@@ -84,6 +84,10 @@ export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 
    * Hidden when the nav is collapsed.
    */
   footer?: React.ReactNode;
+  /**
+   * Whether the nav has pinned bottom items.
+   */
+  hasPinnedBottomNavItems?: boolean;
 };
 
 const FLYOUT_SIZE = 248;
@@ -115,6 +119,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   onCollapse,
   canBeCollapsed = true,
   footer,
+  hasPinnedBottomNavItems = false,
   ...rest
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -258,7 +263,16 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
   const footerContent = footer && (
     <div css={styles.solutionNavFooter} data-test-subj="solutionNavFooter">
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule
+        margin="m"
+        css={
+          hasPinnedBottomNavItems
+            ? css`
+                margin-block-start: ${euiTheme.size.xs};
+              `
+            : undefined
+        }
+      />
       {footer}
     </div>
   );

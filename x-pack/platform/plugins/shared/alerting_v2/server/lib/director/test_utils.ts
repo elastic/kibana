@@ -6,7 +6,10 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisodeStatus, AlertEventStatus } from '../../resources/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventStatus,
+} from '../../resources/datastreams/alert_events';
 import { createAlertEvent } from '../rule_executor/test_utils';
 import { createRuleResponse } from '../test_utils';
 import type { StateTransitionContext } from './strategies/types';

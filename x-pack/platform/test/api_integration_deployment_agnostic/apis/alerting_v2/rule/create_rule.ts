@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { RoleCredentials } from '../../../services';
 
-const RULE_API_PATH = '/internal/alerting/v2/rule';
+const RULE_API_PATH = '/api/alerting/v2/rules';
 const RULE_SO_TYPE = 'alerting_rule';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -140,7 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           evaluation: {
-            query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+            query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
           },
           recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 3 },
@@ -156,7 +156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       expect(response.body.schedule).to.eql({ every: '5m', lookback: '10m' });
       expect(response.body.evaluation).to.eql({
-        query: { base: 'FROM logs-* | LIMIT 10', condition: 'status == "error"' },
+        query: { base: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
       });
       expect(response.body.recovery_policy).to.eql({ type: 'no_breach' });
       expect(response.body.state_transition).to.eql({ pending_count: 3 });

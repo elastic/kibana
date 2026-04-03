@@ -6,16 +6,12 @@
  */
 
 import { ML_ANOMALIES_INDEX } from '../../../../../../../../common/constants';
-import { useIntervalForHeatmap } from './pad_heatmap_interval_hooks';
-import type { AnomalyBand } from '../pad_anomaly_bands';
+import {
+  useIntervalForHeatmap,
+  getHiddenBandsFilters,
+  type AnomalyBand,
+} from '../../../../../recent_anomalies';
 import { getPrivilegedMonitorUsersJoin } from '../../../../queries/helpers';
-
-const getHiddenBandsFilters = (anomalyBands: AnomalyBand[]) => {
-  const hiddenBands = anomalyBands.filter((each) => each.hidden);
-  const recordScoreFilterClause = (eachHiddenBand: AnomalyBand) =>
-    `| WHERE record_score < ${eachHiddenBand.start} OR record_score >= ${eachHiddenBand.end} `;
-  return hiddenBands.map(recordScoreFilterClause).join('');
-};
 
 export const usePadTopAnomalousUsersEsqlSource = ({
   jobIds,
@@ -30,7 +26,8 @@ export const usePadTopAnomalousUsersEsqlSource = ({
 }) => {
   const formattedJobIds = jobIds.map((each) => `"${each}"`).join(', ');
 
-  return `FROM ${ML_ANOMALIES_INDEX}
+  return `SET unmapped_fields="nullify";
+    FROM ${ML_ANOMALIES_INDEX}
     | WHERE job_id IN (${formattedJobIds})
     | WHERE record_score IS NOT NULL AND user.name IS NOT NULL
     ${getHiddenBandsFilters(anomalyBands)}
@@ -60,7 +57,8 @@ export const usePadAnomalyDataEsqlSource = ({
   const formattedJobIds = jobIds.map((each) => `"${each}"`).join(', ');
   const formattedUserNames = userNames.map((each) => `"${each}"`).join(', ');
 
-  return `FROM ${ML_ANOMALIES_INDEX}
+  return `SET unmapped_fields="nullify";
+    FROM ${ML_ANOMALIES_INDEX}
     | WHERE job_id IN (${formattedJobIds})
     | WHERE record_score IS NOT NULL AND user.name IS NOT NULL AND user.name IN (${formattedUserNames})
     ${getHiddenBandsFilters(anomalyBands)}

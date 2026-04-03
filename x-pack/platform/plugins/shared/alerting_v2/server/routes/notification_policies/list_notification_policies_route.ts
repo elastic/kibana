@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Request, Response } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
 const sortFieldSchema = z.enum([
   'name',
@@ -38,54 +39,54 @@ const listNotificationPoliciesQuerySchema = z.object({
 });
 
 @injectable()
-export class ListNotificationPoliciesRoute {
+export class ListNotificationPoliciesRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}`;
+  static path = `${ALERTING_V2_NOTIFICATION_POLICY_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
     },
   };
-  static options = { access: 'internal' } as const;
+  static routeOptions = {
+    summary: 'List notification policies',
+    description:
+      'Get a paginated list of notification policies with optional filtering and sorting.',
+  } as const;
   static validate = {
     request: {
       query: buildRouteValidationWithZod(listNotificationPoliciesQuerySchema),
     },
   } as const;
 
+  protected readonly routeName = 'list notification policies';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
       z.infer<typeof listNotificationPoliciesQuerySchema>,
       unknown
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
     private readonly notificationPolicyClient: NotificationPolicyClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const { page, perPage, search, destinationType, createdBy, enabled, sortField, sortOrder } =
-        this.request.query ?? {};
-      const result = await this.notificationPolicyClient.findNotificationPolicies({
-        page,
-        perPage,
-        search,
-        destinationType,
-        createdBy,
-        enabled,
-        sortField,
-        sortOrder,
-      });
-      return this.response.ok({ body: result });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  protected async execute() {
+    const { page, perPage, search, destinationType, createdBy, enabled, sortField, sortOrder } =
+      this.request.query ?? {};
+    const result = await this.notificationPolicyClient.findNotificationPolicies({
+      page,
+      perPage,
+      search,
+      destinationType,
+      createdBy,
+      enabled,
+      sortField,
+      sortOrder,
+    });
+    return this.ctx.response.ok({ body: result });
   }
 }
