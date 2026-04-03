@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 /**
  * Generates the OpenTelemetry Collector configuration for the EDOT Collector.
@@ -90,5 +90,5 @@ export function getEdotCollectorConfiguration({
     },
   };
 
-  return yaml.dump(config);
+  return stringify(config);
 }
