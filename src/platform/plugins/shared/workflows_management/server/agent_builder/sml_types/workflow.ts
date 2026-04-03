@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { SmlTypeDefinition } from './types';
 import {
   WORKFLOW_SML_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,

@@ -12,7 +12,6 @@ import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -39,6 +38,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { ZodObject } from '@kbn/zod/v4';
+import type { SmlTypeDefinition } from './agent_builder/sml_types/types';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {

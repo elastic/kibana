@@ -94,9 +94,9 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/test'
   - '@kbn/tooling-log'
-  - '@kbn/agent-builder-plugin'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/logging'
+  - '@kbn/core-saved-objects-api-server'
 tags:
   - plugin
   - prod
