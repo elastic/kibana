@@ -8,6 +8,7 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,8 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
-import React from 'react';
-import useToggle from 'react-use/lib/useToggle';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { ActionBlockProps } from '.';
 import {
   useInteractiveModeSelector,
@@ -33,7 +33,6 @@ import { ConditionDisplay } from '../../../../shared';
 import { getStepPanelColour } from '../../../utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { StepContextMenu } from '../context_menu';
-import { EditStepDescriptionModal } from './edit_step_description_modal';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
@@ -57,10 +56,26 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   const hasValidationErrors = validationErrors.length > 0;
 
   const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
-  const [isEditDescriptionModalOpen, toggleEditDescriptionModal] = useToggle(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // For the inner description we once again invert the colours
   const descriptionPanelColour = getStepPanelColour(level + 1);
+
+  useEffect(() => {
+    if (isEditingDescription && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditingDescription]);
+
+  const saveDescription = useCallback(() => {
+    if (!isActionBlock(step)) return;
+    const trimmed = editValue.trim();
+    stepRef.send({ type: 'step.changeDescription', description: trimmed });
+    setIsEditingDescription(false);
+  }, [editValue, step, stepRef]);
 
   if (!isActionBlock(step)) return null;
 
@@ -73,7 +88,19 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const handleDescriptionClick = () => {
     if (!readOnly && canEdit) {
-      toggleEditDescriptionModal(true);
+      const initialValue =
+        step.description && step.description.trim().length > 0
+          ? step.description
+          : getStepDescription({ ...step, description: undefined });
+      setEditValue(initialValue);
+      setIsEditingDescription(true);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      e.preventDefault();
+      saveDescription();
     }
   };
 
@@ -246,6 +273,25 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   }
                 )}
               />
+            ) : isEditingDescription ? (
+              <EuiFieldText
+                inputRef={inputRef}
+                fullWidth
+                compressed
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={saveDescription}
+                onKeyDown={handleKeyDown}
+                data-test-subj="streamsAppProcessorDescriptionInlineEdit"
+                aria-label={i18n.translate(
+                  'xpack.streams.actionBlockListItem.descriptionInlineEdit.ariaLabel',
+                  { defaultMessage: 'Edit processor description' }
+                )}
+                css={css`
+                  font-family: ${euiTheme.font.familyCode};
+                  font-size: ${euiTheme.size.m};
+                `}
+              />
             ) : (
               <EuiToolTip content={stepDescription} display="block">
                 <EuiText
@@ -273,16 +319,6 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isEditDescriptionModalOpen && (
-        <EditStepDescriptionModal
-          step={step}
-          onCancel={() => toggleEditDescriptionModal(false)}
-          onSave={(description) => {
-            toggleEditDescriptionModal(false);
-            stepRef.send({ type: 'step.changeDescription', description });
-          }}
-        />
-      )}
     </>
   );
 };
