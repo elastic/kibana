@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SmlTypeDefinition } from './types';
 import {
   WORKFLOW_SML_TYPE,
@@ -35,7 +36,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
   async *list(context) {
     const pageSize = 1000;
     const indexPattern = getIndexPattern();
-    let searchAfter: unknown[] | undefined;
+    let searchAfter: SortResults | undefined;
     let hasMore = true;
 
     while (hasMore) {
@@ -71,7 +72,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
         hasMore = hits.length >= pageSize;
         if (hasMore && hits.length > 0) {
           const lastHit = hits[hits.length - 1];
-          searchAfter = lastHit.sort as unknown[];
+          searchAfter = lastHit.sort;
         }
       } catch (error) {
         context.logger.warn(`SML workflow: failed to list workflows: ${(error as Error).message}`);
