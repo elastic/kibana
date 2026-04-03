@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import type { ActionBlockProps } from '.';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
@@ -59,9 +58,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   const stepDescription = getStepDescription(step);
   const actionDisplayName = step.action.toUpperCase();
 
-  const handleTitleClick = () => {
-    stepRef.send({ type: 'step.edit' });
-  };
+  const stopPropagation = (e: MouseEvent) => e.stopPropagation();
 
   return (
     <>
@@ -76,11 +73,11 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             {!readOnly && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} onClick={stopPropagation}>
                 <DragHandle />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} onClick={stopPropagation}>
               <ProcessorStatusIndicator
                 stepRef={stepRef}
                 stepsProcessingSummaryMap={props.stepsProcessingSummaryMap}
@@ -107,58 +104,23 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                     max-width: 100%;
                   `}
                 >
-                  <EuiToolTip
-                    position="top"
-                    content={
-                      <>
-                        <p>
-                          <strong>{actionDisplayName}</strong>
-                        </p>
-                        <p>
-                          {i18n.translate(
-                            'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
-                            {
-                              defaultMessage: 'Edit {stepAction} processor',
-                              values: {
-                                stepAction: step.action,
-                              },
-                            }
-                          )}
-                        </p>
-                      </>
-                    }
+                  <EuiText
+                    size="s"
+                    component="span"
+                    style={{ fontWeight: euiTheme.font.weight.bold }}
+                    data-test-subj="streamsAppProcessorTitleEditButton"
+                    css={css`
+                      display: block;
+                      ${euiTextTruncate()}
+                    `}
                   >
-                    <EuiButtonEmpty
-                      onClick={handleTitleClick}
-                      color="text"
-                      aria-label={i18n.translate(
-                        'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
-                        { defaultMessage: 'Edit processor' }
-                      )}
-                      size="xs"
-                      data-test-subj="streamsAppProcessorTitleEditButton"
-                      css={css`
-                        max-width: 100%;
-                      `}
-                    >
-                      <EuiText
-                        size="s"
-                        component="span"
-                        style={{ fontWeight: euiTheme.font.weight.bold }}
-                        css={css`
-                          display: block;
-                          ${euiTextTruncate()}
-                        `}
-                      >
-                        {actionDisplayName}
-                      </EuiText>
-                    </EuiButtonEmpty>
-                  </EuiToolTip>
+                    {actionDisplayName}
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} onClick={stopPropagation}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   {processorMetrics && (
                     <EuiFlexItem>

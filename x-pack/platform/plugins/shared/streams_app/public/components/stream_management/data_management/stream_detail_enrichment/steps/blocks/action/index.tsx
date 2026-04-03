@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from '@xstate/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
@@ -26,7 +26,7 @@ export type ActionBlockProps = StepConfigurationProps & {
   processorMetrics?: ProcessorMetrics;
 };
 export function ActionBlock(props: StepConfigurationProps) {
-  const { stepRef, level } = props;
+  const { stepRef, level, readOnly = false } = props;
   const { euiTheme } = useEuiTheme();
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
@@ -42,6 +42,12 @@ export function ActionBlock(props: StepConfigurationProps) {
   const isFirstMount = useFirstMountState();
   const freshBlockRef = useRef<HTMLDivElement>(null);
 
+  const handlePanelClick = useCallback(() => {
+    if (!isUnderEdit && !readOnly) {
+      stepRef.send({ type: 'step.edit' });
+    }
+  }, [isUnderEdit, readOnly, stepRef]);
+
   useEffect(() => {
     if (isFirstMount && isUnderEdit && freshBlockRef.current) {
       freshBlockRef.current.scrollIntoView({
@@ -52,12 +58,15 @@ export function ActionBlock(props: StepConfigurationProps) {
     }
   }, [isFirstMount, isUnderEdit]);
 
+  const isClickable = !isUnderEdit && !readOnly;
+
   return (
     <EuiPanel
       data-test-subj="streamsAppProcessorBlock"
       data-stream-type={streamType}
       hasShadow={false}
       color={isUnderEdit && isRootStepValue ? undefined : panelColour}
+      onClick={isClickable ? handlePanelClick : undefined}
       css={
         isUnderEdit
           ? css`
@@ -69,6 +78,9 @@ export function ActionBlock(props: StepConfigurationProps) {
               border: ${euiTheme.border.thin};
               border-radius: ${euiTheme.size.s};
               padding: ${euiTheme.size.m};
+              ${isClickable
+                ? `cursor: pointer;`
+                : ''}
             `
       }
     >
