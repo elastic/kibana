@@ -61,7 +61,7 @@ function parseListContainersXml(xml: string): {
   const containerBlocks = xml.match(containerBlockRegex) ?? [];
   for (const block of containerBlocks) {
     const nameMatch = block.match(/<Name>([^<]*)<\/Name>/);
-    if (nameMatch?.[1]) containers.push({ name: nameMatch[1] });
+    if (nameMatch?.[1]) containers.push({ name: decodeXmlEntities(nameMatch[1]) });
   }
   return {
     containers,
