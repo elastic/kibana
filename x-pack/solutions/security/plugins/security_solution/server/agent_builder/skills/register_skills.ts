@@ -10,6 +10,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
+import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
@@ -50,6 +51,8 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(
     getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
   );
+
+  agentBuilder.skills.register(getDetectionRuleEditSkill());
   await agentBuilder.skills.register(
     getSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );
