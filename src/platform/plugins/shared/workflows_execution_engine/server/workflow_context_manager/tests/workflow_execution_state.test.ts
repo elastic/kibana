@@ -438,33 +438,178 @@ describe('WorkflowExecutionState', () => {
       );
     });
 
-    it('should load existing step executions', async () => {
+    it('should load existing step executions with output excluded', async () => {
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
       (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
         {
           id: '11',
           stepId: 'testStep',
+          stepType: 'connector',
           status: ExecutionStatus.RUNNING,
         } as EsWorkflowStepExecution,
         {
           id: '22',
           stepId: 'testStep2',
+          stepType: 'connector',
           status: ExecutionStatus.COMPLETED,
         } as EsWorkflowStepExecution,
       ]);
       await underTest.load();
 
-      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['11', '22']);
-      expect(underTest.getLatestStepExecution('testStep')).toEqual({
-        id: '11',
-        stepId: 'testStep',
-        status: ExecutionStatus.RUNNING,
-      } as EsWorkflowStepExecution);
-      expect(underTest.getLatestStepExecution('testStep2')).toEqual({
-        id: '22',
-        stepId: 'testStep2',
-        status: ExecutionStatus.COMPLETED,
-      } as EsWorkflowStepExecution);
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['11', '22'],
+        undefined,
+        ['output']
+      );
+      expect(underTest.getLatestStepExecution('testStep')).toEqual(
+        expect.objectContaining({
+          id: '11',
+          stepId: 'testStep',
+          status: ExecutionStatus.RUNNING,
+        })
+      );
+      expect(underTest.getLatestStepExecution('testStep2')).toEqual(
+        expect.objectContaining({
+          id: '22',
+          stepId: 'testStep2',
+          status: ExecutionStatus.COMPLETED,
+        })
+      );
+    });
+
+    it('should mark non-data.set step outputs as deferred after load', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+        {
+          id: '11',
+          stepId: 'connectorStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+        } as EsWorkflowStepExecution,
+        {
+          id: '22',
+          stepId: 'ifStep',
+          stepType: 'if',
+          status: ExecutionStatus.COMPLETED,
+        } as EsWorkflowStepExecution,
+      ]);
+      await underTest.load();
+
+      expect(underTest.hasEvictedOutputs()).toBe(true);
+    });
+
+    it('should eagerly load data.set step outputs via secondary fetch', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
+      const dataSetOutput = { myVar: 'hello' };
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)
+        // First call: load without outputs
+        .mockResolvedValueOnce([
+          {
+            id: '11',
+            stepId: 'connectorStep',
+            stepType: 'connector',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+          {
+            id: '22',
+            stepId: 'dataSetStep',
+            stepType: 'data.set',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ])
+        // Second call: eager data.set output fetch
+        .mockResolvedValueOnce([
+          {
+            id: '22',
+            output: dataSetOutput,
+          } as unknown as EsWorkflowStepExecution,
+        ]);
+      await underTest.load();
+
+      // data.set output should be eagerly loaded
+      expect(underTest.getStepExecution('22')?.output).toEqual(dataSetOutput);
+      // data.set should NOT be in evicted set
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['22'],
+        ['id', 'output']
+      );
+      // connector step should be deferred (evicted)
+      expect(underTest.hasEvictedOutputs()).toBe(true);
+    });
+
+    it('should allow rehydrateOutputs to restore deferred outputs from load', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11'] });
+      const restoredOutput = { result: 'restored' };
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)
+        // First call: load without outputs
+        .mockResolvedValueOnce([
+          {
+            id: '11',
+            stepId: 'connectorStep',
+            stepType: 'connector',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ]);
+      await underTest.load();
+
+      expect(underTest.hasEvictedOutputs()).toBe(true);
+
+      // Rehydrate
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValueOnce([
+        {
+          id: '11',
+          output: restoredOutput,
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+      await underTest.rehydrateOutputs(['11']);
+
+      expect(underTest.getStepExecution('11')?.output).toEqual(restoredOutput);
+      expect(underTest.hasEvictedOutputs()).toBe(false);
+    });
+
+    it('should not mark any outputs as evicted when all steps are data.set', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
+      const dataSetOutput1 = { var1: 'a' };
+      const dataSetOutput2 = { var2: 'b' };
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)
+        .mockResolvedValueOnce([
+          {
+            id: '11',
+            stepId: 'setVar1',
+            stepType: 'data.set',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+          {
+            id: '22',
+            stepId: 'setVar2',
+            stepType: 'data.set',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ])
+        .mockResolvedValueOnce([
+          { id: '11', output: dataSetOutput1 } as unknown as EsWorkflowStepExecution,
+          { id: '22', output: dataSetOutput2 } as unknown as EsWorkflowStepExecution,
+        ]);
+      await underTest.load();
+
+      expect(underTest.hasEvictedOutputs()).toBe(false);
+      expect(underTest.getStepExecution('11')?.output).toEqual(dataSetOutput1);
+      expect(underTest.getStepExecution('22')?.output).toEqual(dataSetOutput2);
+    });
+
+    it('should treat steps with undefined stepType as non-data.set (mark evicted)', async () => {
+      underTest.updateWorkflowExecution({ stepExecutionIds: ['11'] });
+      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValueOnce([
+        {
+          id: '11',
+          stepId: 'legacyStep',
+          // stepType intentionally omitted
+          status: ExecutionStatus.COMPLETED,
+        } as EsWorkflowStepExecution,
+      ]);
+      await underTest.load();
+
+      expect(underTest.hasEvictedOutputs()).toBe(true);
     });
 
     it('should sort step executions by executionIndex when loaded from repository', async () => {
@@ -721,26 +866,196 @@ describe('WorkflowExecutionState', () => {
       });
     });
 
-    describe('flushStepChanges triggers eviction', () => {
-      it('should evict large outputs from completed steps after flush', async () => {
+    describe('deferred output eviction via flushStepChanges', () => {
+      it('should NOT evict output on the flush that persists it', async () => {
         createCompletedStep('step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
         evictableState.recordOutputSize('step-1', 250);
 
         await evictableState.flushStepChanges();
 
+        // Output should still be in memory after the first flush
+        expect(evictableState.getStepExecution('step-1')?.output).toBeDefined();
+        expect(evictableState.hasEvictedOutputs()).toBe(false);
+      });
+
+      it('should evict output on the second flush', async () => {
+        createCompletedStep('step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
+        evictableState.recordOutputSize('step-1', 250);
+
+        await evictableState.flushStepChanges(); // persists + queues for eviction
+        await evictableState.flushStepChanges(); // drains pending eviction
+
         expect(evictableState.getStepExecution('step-1')?.output).toBeUndefined();
         expect(evictableState.hasEvictedOutputs()).toBe(true);
       });
 
-      it('should not evict small outputs after flush', async () => {
+      it('should not evict small outputs even after two flushes', async () => {
         const smallOutput = { key: 'val' };
         createCompletedStep('step-1', 'myStep', smallOutput, 'connector');
         evictableState.recordOutputSize('step-1', 10);
 
         await evictableState.flushStepChanges();
+        await evictableState.flushStepChanges();
 
         expect(evictableState.getStepExecution('step-1')?.output).toEqual(smallOutput);
         expect(evictableState.hasEvictedOutputs()).toBe(false);
+      });
+
+      it('should handle multiple steps completing between flushes', async () => {
+        createCompletedStep('step-1', 's1', { data: 'x'.repeat(200) }, 'connector');
+        createCompletedStep('step-2', 's2', { data: 'y'.repeat(200) }, 'connector');
+        evictableState.recordOutputSize('step-1', 250);
+        evictableState.recordOutputSize('step-2', 300);
+
+        await evictableState.flushStepChanges(); // persists both, queues both
+        expect(evictableState.getStepExecution('step-1')?.output).toBeDefined();
+        expect(evictableState.getStepExecution('step-2')?.output).toBeDefined();
+
+        await evictableState.flushStepChanges(); // drains both
+        expect(evictableState.getStepExecution('step-1')?.output).toBeUndefined();
+        expect(evictableState.getStepExecution('step-2')?.output).toBeUndefined();
+        expect(evictableState.hasEvictedOutputs()).toBe(true);
+      });
+
+      it('should evict previous batch and queue new batch on successive flushes', async () => {
+        // Step A completes in cycle 1
+        createCompletedStep('step-a', 'sA', { data: 'a'.repeat(200) }, 'connector');
+        evictableState.recordOutputSize('step-a', 250);
+        await evictableState.flushStepChanges(); // persists A, queues A
+
+        // Step B completes in cycle 2
+        createCompletedStep('step-b', 'sB', { data: 'b'.repeat(200) }, 'connector');
+        evictableState.recordOutputSize('step-b', 300);
+        await evictableState.flushStepChanges(); // evicts A, persists B, queues B
+
+        expect(evictableState.getStepExecution('step-a')?.output).toBeUndefined();
+        expect(evictableState.getStepExecution('step-b')?.output).toBeDefined();
+
+        // Cycle 3: drain B
+        await evictableState.flushStepChanges();
+        expect(evictableState.getStepExecution('step-b')?.output).toBeUndefined();
+      });
+
+      it('should process pending eviction on empty flush (no new changes)', async () => {
+        createCompletedStep('step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
+        evictableState.recordOutputSize('step-1', 250);
+
+        await evictableState.flushStepChanges(); // persists + queues
+        expect(evictableState.getStepExecution('step-1')?.output).toBeDefined();
+
+        // No new upserts — but empty flush should still drain pending
+        await evictableState.flushStepChanges();
+        expect(evictableState.getStepExecution('step-1')?.output).toBeUndefined();
+        expect(evictableState.hasEvictedOutputs()).toBe(true);
+      });
+
+      it('should not evict data.set outputs even after deferral', async () => {
+        createCompletedStep('step-1', 'myDataSet', { largeData: 'x'.repeat(200) }, 'data.set');
+        evictableState.recordOutputSize('step-1', 250);
+
+        await evictableState.flushStepChanges();
+        await evictableState.flushStepChanges();
+
+        expect(evictableState.getStepExecution('step-1')?.output).toBeDefined();
+        expect(evictableState.hasEvictedOutputs()).toBe(false);
+      });
+    });
+
+    describe('input eviction', () => {
+      it('should evict input from completed step after flush', async () => {
+        evictableState.upsertStep({
+          id: 'step-1',
+          stepId: 'myStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+          input: { message: 'hello' },
+          output: { result: 'ok' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        await evictableState.flushStepChanges();
+
+        expect(evictableState.getStepExecution('step-1')?.input).toBeUndefined();
+      });
+
+      it('should evict input from failed step after flush', async () => {
+        evictableState.upsertStep({
+          id: 'step-1',
+          stepId: 'myStep',
+          stepType: 'connector',
+          status: ExecutionStatus.FAILED,
+          input: { message: 'hello' },
+          output: null,
+        } as Partial<EsWorkflowStepExecution>);
+
+        await evictableState.flushStepChanges();
+
+        expect(evictableState.getStepExecution('step-1')?.input).toBeUndefined();
+      });
+
+      it('should NOT evict input from running step after flush', async () => {
+        const input = { foreach: '{{steps.data.output}}' };
+        evictableState.upsertStep({
+          id: 'step-1',
+          stepId: 'loopStep',
+          stepType: 'foreach',
+          status: ExecutionStatus.RUNNING,
+          input,
+        } as Partial<EsWorkflowStepExecution>);
+
+        await evictableState.flushStepChanges();
+
+        expect(evictableState.getStepExecution('step-1')?.input).toEqual(input);
+      });
+
+      it('should NOT evict input from waiting step after flush', async () => {
+        const input = { duration: '20m' };
+        evictableState.upsertStep({
+          id: 'step-1',
+          stepId: 'waitStep',
+          stepType: 'wait',
+          status: ExecutionStatus.WAITING,
+          input,
+        } as Partial<EsWorkflowStepExecution>);
+
+        await evictableState.flushStepChanges();
+
+        expect(evictableState.getStepExecution('step-1')?.input).toEqual(input);
+      });
+
+      it('should not cause stepDocumentsChanges on subsequent flush after input eviction', async () => {
+        evictableState.upsertStep({
+          id: 'step-1',
+          stepId: 'myStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+          input: { message: 'hello' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        await evictableState.flushStepChanges(); // persists + evicts input
+        jest.clearAllMocks();
+
+        await evictableState.flushStepChanges(); // should be a no-op for persistence
+        expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
+      });
+
+      it('should evict input immediately and output on the next flush', async () => {
+        evictableState.upsertStep({
+          id: 'step-1',
+          stepId: 'myStep',
+          stepType: 'connector',
+          status: ExecutionStatus.COMPLETED,
+          input: { message: 'hello' },
+          output: { data: 'x'.repeat(200) },
+        } as Partial<EsWorkflowStepExecution>);
+        evictableState.recordOutputSize('step-1', 250);
+
+        await evictableState.flushStepChanges(); // flush 1: input evicted, output queued
+        expect(evictableState.getStepExecution('step-1')?.input).toBeUndefined();
+        expect(evictableState.getStepExecution('step-1')?.output).toBeDefined();
+
+        await evictableState.flushStepChanges(); // flush 2: output evicted
+        expect(evictableState.getStepExecution('step-1')?.output).toBeUndefined();
+        expect(evictableState.hasEvictedOutputs()).toBe(true);
       });
     });
 

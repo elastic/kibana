@@ -43,6 +43,14 @@ export class WorkflowExecutionState {
    */
   private readonly outputSizes = new Map<string, number>();
 
+  /**
+   * Step execution IDs whose outputs were persisted in the previous flush and
+   * should be evaluated for eviction on the NEXT flush. This one-cycle deferral
+   * keeps outputs in memory long enough for the immediately-following step to
+   * read them without an ES round-trip.
+   */
+  private pendingOutputEvictionIds: string[] = [];
+
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
@@ -54,6 +62,15 @@ export class WorkflowExecutionState {
     this.workflowExecution = initialWorkflowExecution;
   }
 
+  /**
+   * Loads step executions from Elasticsearch for a resumed workflow.
+   * To reduce memory footprint, outputs are excluded from the initial fetch and
+   * marked as deferred — the existing `ensureContextReady()` → `rehydrateOutputs()`
+   * path will fetch them on demand when a step actually needs them.
+   *
+   * `data.set` outputs are the exception: they are eagerly loaded because
+   * `getVariables()` reads ALL data.set outputs globally.
+   */
   public async load(): Promise<void> {
     if (!this.workflowExecution.stepExecutionIds) {
       throw new Error(
@@ -61,11 +78,43 @@ export class WorkflowExecutionState {
       );
     }
 
+    // Fetch step metadata without the (potentially large) output field
     const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
-      this.workflowExecution.stepExecutionIds
+      this.workflowExecution.stepExecutionIds,
+      undefined,
+      ['output']
     );
     foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
     this.buildStepIdExecutionIdIndex();
+
+    // Mark non-data.set steps as deferred so rehydrateOutputs() will fetch them on demand.
+    // data.set outputs are pinned (needed globally by getVariables()) and eagerly loaded below.
+    const dataSetIds: string[] = [];
+    for (const step of foundSteps) {
+      if (step.stepType === 'data.set') {
+        dataSetIds.push(step.id);
+      } else {
+        this.evictedOutputIdsAndBytes.set(step.id, 0);
+      }
+    }
+
+    // Eagerly load data.set outputs so getVariables() works without rehydration
+    if (dataSetIds.length > 0) {
+      const dataSetOutputs = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
+        dataSetIds,
+        ['id', 'output']
+      );
+      for (const doc of dataSetOutputs) {
+        const existing = this.stepExecutions.get(doc.id);
+        if (existing) {
+          existing.output = doc.output;
+        }
+      }
+    }
+
+    this.logger?.debug(
+      `Loaded ${foundSteps.length} step(s) with deferred outputs (${dataSetIds.length} data.set outputs eagerly loaded)`
+    );
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -262,6 +311,30 @@ export class WorkflowExecutionState {
     }
   }
 
+  /**
+   * Evicts input fields from terminal (COMPLETED/FAILED) steps to reduce memory footprint.
+   * Unlike output eviction, this has no size threshold and no deferral — no successor step
+   * references a predecessor's input. Input data remains in Elasticsearch.
+   * This is a memory-only operation — it does NOT modify `stepDocumentsChanges`.
+   */
+  private evictCompletedStepInputs(candidateIds: ReadonlyArray<string>): void {
+    let evictedCount = 0;
+    for (const id of candidateIds) {
+      const step = this.stepExecutions.get(id);
+      if (step) {
+        const isTerminal =
+          step.status === ExecutionStatus.COMPLETED || step.status === ExecutionStatus.FAILED;
+        if (isTerminal && step.input !== undefined) {
+          step.input = undefined;
+          evictedCount++;
+        }
+      }
+    }
+    if (evictedCount > 0) {
+      this.logger?.debug(`Evicted input from ${evictedCount} completed step(s)`);
+    }
+  }
+
   private isEvictionCandidate(stepExecutionId: string, step: EsWorkflowStepExecution): boolean {
     if (this.evictedOutputIdsAndBytes.has(stepExecutionId)) {
       return false;
@@ -290,6 +363,13 @@ export class WorkflowExecutionState {
 
   public async flushStepChanges(): Promise<void> {
     if (!this.stepDocumentsChanges.size) {
+      // No new changes, but still drain any pending output evictions
+      // from the previous flush cycle.
+      if (this.pendingOutputEvictionIds.length > 0) {
+        const toEvict = this.pendingOutputEvictionIds;
+        this.pendingOutputEvictionIds = [];
+        this.evictCompletedStepOutputs(toEvict);
+      }
       return;
     }
     const flushedIds = Array.from(this.stepDocumentsChanges.keys());
@@ -298,8 +378,17 @@ export class WorkflowExecutionState {
     this.stepDocumentsChanges.clear();
     await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
 
-    // After successful persistence, evict large outputs from completed steps
-    this.evictCompletedStepOutputs(flushedIds);
+    // Deferred output eviction: evict the PREVIOUS flush's candidates,
+    // then queue THIS flush's candidates for the next cycle.
+    if (this.pendingOutputEvictionIds.length > 0) {
+      const toEvict = this.pendingOutputEvictionIds;
+      this.pendingOutputEvictionIds = [];
+      this.evictCompletedStepOutputs(toEvict);
+    }
+    this.pendingOutputEvictionIds = flushedIds;
+
+    // Input eviction: immediate (no deferral needed — no successor reads predecessor input)
+    this.evictCompletedStepInputs(flushedIds);
   }
 
   public async flush(): Promise<void> {

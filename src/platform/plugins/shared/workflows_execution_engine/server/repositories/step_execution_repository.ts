@@ -64,12 +64,14 @@ export class StepExecutionRepository {
    */
   public async getStepExecutionsByIds(
     stepExecutionIds: string[],
-    sourceIncludes?: string[]
+    sourceIncludes?: string[],
+    sourceExcludes?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     const response = await this.esClient.mget<EsWorkflowStepExecution>({
       index: this.indexName,
       ids: stepExecutionIds,
       ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
+      ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
     });
 
     const stepExecutions: EsWorkflowStepExecution[] = [];

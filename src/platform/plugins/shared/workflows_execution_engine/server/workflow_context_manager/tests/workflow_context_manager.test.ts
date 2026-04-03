@@ -1868,5 +1868,124 @@ describe('WorkflowContextManager', () => {
 
       expect(testContainer.workflowExecutionState.rehydrateOutputs).toHaveBeenCalled();
     });
+
+    it('should only rehydrate step IDs referenced in template expressions', async () => {
+      // Create a 3-step workflow: step_a → step_b → step_c
+      // step_c only references step_b — step_a should NOT be rehydrated
+      const threeStepWorkflow: WorkflowYaml = {
+        name: 'Targeted Rehydration',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          { name: 'step_a', type: 'console', with: { message: 'A' } } as ConnectorStep,
+          {
+            name: 'step_b',
+            type: 'console',
+            with: { message: '{{steps.step_a.output}}' },
+          } as ConnectorStep,
+          {
+            name: 'step_c',
+            type: 'console',
+            with: { message: '{{steps.step_b.output}}' },
+          } as ConnectorStep,
+        ],
+      };
+
+      const graph = WorkflowGraph.fromWorkflowDefinition(threeStepWorkflow);
+      // Get the actual step_c node from the graph
+      const stepCNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'step_c');
+
+      const state: WorkflowExecutionState = {} as WorkflowExecutionState;
+      state.hasEvictedOutputs = jest.fn().mockReturnValue(true);
+      state.rehydrateOutputs = jest.fn().mockResolvedValue(undefined);
+      state.getLatestStepExecution = jest.fn().mockImplementation((stepId: string) => {
+        const map: Record<string, { id: string }> = {
+          step_a: { id: 'exec-a' },
+          step_b: { id: 'exec-b' },
+        };
+        return map[stepId];
+      });
+      state.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'exec-1',
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: threeStepWorkflow,
+      } as EsWorkflowExecution);
+      state.getAllStepExecutions = jest.fn().mockReturnValue([]);
+      state.getStepExecution = jest.fn().mockReturnValue({} as EsWorkflowStepExecution);
+
+      const contextManager = new WorkflowContextManager({
+        templateEngine: {} as unknown as WorkflowTemplatingEngine,
+        node: stepCNode!,
+        stackFrames: [],
+        workflowExecutionGraph: graph,
+        workflowExecutionState: state,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await contextManager.ensureContextReady();
+
+      // Should only rehydrate step_b (referenced by step_c), NOT step_a
+      expect(state.rehydrateOutputs).toHaveBeenCalledWith(['exec-b']);
+    });
+
+    it('should fall back to all predecessors when dynamic access is detected', async () => {
+      // step_b uses dynamic access: steps[variables.name].output
+      const dynamicWorkflow: WorkflowYaml = {
+        name: 'Dynamic Access',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          { name: 'step_a', type: 'console', with: { message: 'A' } } as ConnectorStep,
+          {
+            name: 'step_b',
+            type: 'console',
+            with: { message: '{{steps[variables.name].output}}' },
+          } as ConnectorStep,
+        ],
+      };
+
+      const graph = WorkflowGraph.fromWorkflowDefinition(dynamicWorkflow);
+      const stepBNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'step_b');
+
+      const state: WorkflowExecutionState = {} as WorkflowExecutionState;
+      state.hasEvictedOutputs = jest.fn().mockReturnValue(true);
+      state.rehydrateOutputs = jest.fn().mockResolvedValue(undefined);
+      state.getLatestStepExecution = jest.fn().mockReturnValue({ id: 'exec-a' });
+      state.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'exec-1',
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: dynamicWorkflow,
+      } as EsWorkflowExecution);
+      state.getAllStepExecutions = jest.fn().mockReturnValue([]);
+      state.getStepExecution = jest.fn().mockReturnValue({} as EsWorkflowStepExecution);
+
+      const contextManager = new WorkflowContextManager({
+        templateEngine: {} as unknown as WorkflowTemplatingEngine,
+        node: stepBNode!,
+        stackFrames: [],
+        workflowExecutionGraph: graph,
+        workflowExecutionState: state,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await contextManager.ensureContextReady();
+
+      // Should fall back to ALL predecessors (step_a)
+      expect(state.rehydrateOutputs).toHaveBeenCalledWith(['exec-a']);
+    });
   });
 });

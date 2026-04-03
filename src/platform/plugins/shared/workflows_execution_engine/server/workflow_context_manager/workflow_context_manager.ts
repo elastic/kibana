@@ -21,6 +21,7 @@ import {
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
+import { extractReferencedStepIds } from './extract_referenced_step_ids';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -107,11 +108,26 @@ export class WorkflowContextManager {
     const neededIds = new Set<string>();
     const executionId = this.workflowExecutionState.getWorkflowExecution().id;
 
-    // 1. Predecessors (needed by getStepData via getContext)
-    for (const pred of this.predecessors) {
-      const latestExec = this.workflowExecutionState.getLatestStepExecution(pred.stepId);
-      if (latestExec) {
-        neededIds.add(latestExec.id);
+    // 1. Predecessors — use static template analysis to rehydrate only the step
+    //    outputs actually referenced by this node's expressions. Falls back to
+    //    all predecessors when analysis is ambiguous (dynamic bracket access, etc.).
+    const referencedStepIds = extractReferencedStepIds(this.node);
+
+    if (referencedStepIds === null) {
+      // Fallback: rehydrate all predecessors
+      for (const pred of this.predecessors) {
+        const latestExec = this.workflowExecutionState.getLatestStepExecution(pred.stepId);
+        if (latestExec) {
+          neededIds.add(latestExec.id);
+        }
+      }
+    } else {
+      // Targeted: rehydrate only the step IDs found in template expressions
+      for (const stepId of referencedStepIds) {
+        const latestExec = this.workflowExecutionState.getLatestStepExecution(stepId);
+        if (latestExec) {
+          neededIds.add(latestExec.id);
+        }
       }
     }
 

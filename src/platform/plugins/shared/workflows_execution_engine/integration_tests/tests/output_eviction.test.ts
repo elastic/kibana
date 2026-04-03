@@ -183,6 +183,448 @@ steps:
   });
 });
 
+describe('workflow output targeted rehydration', () => {
+  let workflowRunFixture: WorkflowRunFixture;
+  let getByIdsSpy: jest.SpyInstance;
+
+  // 4-step workflow: step_a → step_b → pause → step_c
+  // After resume, step_c only references step_b — step_a should NOT be rehydrated
+  const yaml = `
+name: targeted rehydration workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_a
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Hello from step A'
+  - name: step_b
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
+    with:
+      message: 'Step A said: {{steps.step_a.output}}'
+  - name: pause
+    type: wait
+    with:
+      duration: 20m
+  - name: step_c
+    type: console
+    with:
+      message: 'Step B said: {{steps.step_b.output}}'
+`;
+
+  beforeAll(async () => {
+    workflowRunFixture = new WorkflowRunFixture();
+    (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
+      minPayloadSize: new ByteSizeValue(1),
+    };
+    await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+  });
+
+  it('should pause after step_b completes', () => {
+    const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(execution?.status).toBe(ExecutionStatus.WAITING);
+  });
+
+  describe('after resume', () => {
+    beforeAll(async () => {
+      getByIdsSpy = jest.spyOn(
+        workflowRunFixture.stepExecutionRepositoryMock,
+        'getStepExecutionsByIds'
+      );
+      await workflowRunFixture.resumeWorkflow();
+    });
+
+    it('should complete workflow successfully', () => {
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(execution?.error).toBeUndefined();
+    });
+
+    it('should perform targeted rehydration for step_c (only step_b, not step_a)', () => {
+      // Find rehydration calls: sourceIncludes: ['id', 'output'] (second arg)
+      const rehydrationCalls = getByIdsSpy.mock.calls.filter(
+        (call) => Array.isArray(call[1]) && call[1].includes('output')
+      );
+
+      // At least one rehydration should have been targeted (single step ID)
+      const targetedCalls = rehydrationCalls.filter((call) => call[0].length === 1);
+      expect(targetedCalls.length).toBeGreaterThan(0);
+
+      // The step_b execution ID should appear in a targeted rehydration call
+      const stepBExec = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((s) => s.stepId === 'step_b');
+
+      const rehydratedIds = targetedCalls.flatMap((call) => call[0]);
+      expect(rehydratedIds).toContain(stepBExec?.id);
+    });
+  });
+});
+
+describe('workflow output rehydration with dynamic steps access', () => {
+  let workflowRunFixture: WorkflowRunFixture;
+  let getByIdsSpy: jest.SpyInstance;
+
+  // Workflow: set_step_name (data.set) → step_a → pause → dynamic_consumer
+  // dynamic_consumer uses steps[variables.step_name] — dynamic bracket access
+  // This must trigger fallback to rehydrate ALL predecessors (not targeted)
+  const yaml = `
+name: dynamic steps access workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: set_step_name
+    type: data.set
+    with:
+      step_name: step_a
+
+  - name: step_a
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Hello from step A'
+
+  - name: pause
+    type: wait
+    with:
+      duration: 20m
+
+  - name: dynamic_consumer
+    type: console
+    with:
+      message: 'Dynamic ref: {{steps[variables.step_name].output}}'
+`;
+
+  beforeAll(async () => {
+    workflowRunFixture = new WorkflowRunFixture();
+    (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
+      minPayloadSize: new ByteSizeValue(1),
+    };
+    await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+  });
+
+  it('should pause after step_a completes', () => {
+    const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(execution?.status).toBe(ExecutionStatus.WAITING);
+  });
+
+  describe('after resume', () => {
+    beforeAll(async () => {
+      getByIdsSpy = jest.spyOn(
+        workflowRunFixture.stepExecutionRepositoryMock,
+        'getStepExecutionsByIds'
+      );
+      await workflowRunFixture.resumeWorkflow();
+    });
+
+    it('should complete workflow successfully despite dynamic steps access', () => {
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(execution?.error).toBeUndefined();
+    });
+
+    it('should rehydrate ALL predecessors (fallback) for the dynamic access step', () => {
+      // Rehydration calls use sourceIncludes: ['id', 'output']
+      const rehydrationCalls = getByIdsSpy.mock.calls.filter(
+        (call) => Array.isArray(call[1]) && call[1].includes('output')
+      );
+
+      // At least one rehydration call should fetch MORE than 1 ID (fallback, not targeted)
+      const fallbackCalls = rehydrationCalls.filter((call) => call[0].length > 1);
+      expect(fallbackCalls.length).toBeGreaterThan(0);
+    });
+  });
+});
+
+describe('workflow input eviction', () => {
+  let workflowRunFixture: WorkflowRunFixture;
+
+  beforeEach(() => {
+    workflowRunFixture = new WorkflowRunFixture();
+    // Low threshold so connector outputs get evicted
+    (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
+      minPayloadSize: new ByteSizeValue(1),
+    };
+  });
+
+  it('should preserve step input in ES after in-memory eviction', async () => {
+    const yaml = `
+name: input eviction workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_a
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Hello from step A'
+  - name: step_b
+    type: console
+    with:
+      message: 'Step A said: {{steps.step_a.output}}'
+`;
+    await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+    const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+
+    // step_a's input should be persisted in the mock repository (ES)
+    const stepA = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).find((s) => s.stepId === 'step_a');
+    expect(stepA?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(stepA?.input).toBeDefined(); // persisted in the mock (simulates ES)
+  });
+
+  it('should complete multi-step workflow with deferred output eviction', async () => {
+    const yaml = `
+name: deferred output eviction workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_a
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Hello from step A'
+  - name: step_b
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
+    with:
+      message: 'Step A said: {{steps.step_a.output}}'
+  - name: step_c
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Step B said: {{steps.step_b.output}}'
+  - name: step_d
+    type: console
+    with:
+      message: 'Step C said: {{steps.step_c.output}}'
+`;
+    await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+    const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      'fake_workflow_execution_id'
+    );
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(execution?.error).toBeUndefined();
+  });
+});
+
+describe('workflow eviction with pause and resume', () => {
+  describe('wait step pause/resume with eviction', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
+        minPayloadSize: new ByteSizeValue(1),
+      };
+
+      const yaml = `
+name: pause resume eviction workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_a
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Before pause'
+  - name: pause
+    type: wait
+    with:
+      duration: 20m
+  - name: step_b
+    type: console
+    with:
+      message: 'Step A said: {{steps.step_a.output}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+    });
+
+    it('should pause at wait step', () => {
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.WAITING);
+    });
+
+    it('should complete after resume with step_a output rehydrated', async () => {
+      await workflowRunFixture.resumeWorkflow();
+
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(execution?.error).toBeUndefined();
+
+      const stepB = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((s) => s.stepId === 'step_b');
+      expect(stepB?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+  });
+
+  describe('waitForInput (reply) with evicted inputs from prior steps', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
+        minPayloadSize: new ByteSizeValue(1),
+      };
+
+      const yaml = `
+name: reply eviction workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_a
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Producing output'
+  - name: ask
+    type: waitForInput
+    with:
+      message: 'Approve?'
+  - name: step_b
+    type: console
+    with:
+      message: 'Step A: {{steps.step_a.output}}, reply: {{steps.ask.output}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+    });
+
+    it('should pause at waitForInput', () => {
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('should complete after reply with evicted step outputs rehydrated', async () => {
+      const exec = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      )!;
+      exec.context = { ...exec.context, resumeInput: { approved: true } };
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(exec.id, exec);
+
+      await workflowRunFixture.resumeWorkflow();
+
+      const updated = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(updated?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(updated?.error).toBeUndefined();
+
+      const stepB = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((s) => s.stepId === 'step_b');
+      expect(stepB?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+  });
+
+  describe('multiple pause/resume cycles with eviction', () => {
+    let workflowRunFixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
+        minPayloadSize: new ByteSizeValue(1),
+      };
+
+      const yaml = `
+name: multi pause resume eviction workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_a
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Step A'
+  - name: pause1
+    type: wait
+    with:
+      duration: 20m
+  - name: step_b
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
+    with:
+      message: 'Step A said: {{steps.step_a.output}}'
+  - name: pause2
+    type: wait
+    with:
+      duration: 20m
+  - name: step_c
+    type: console
+    with:
+      message: 'Step B said: {{steps.step_b.output}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+    });
+
+    it('should pause at first wait', () => {
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.WAITING);
+    });
+
+    it('should pause at second wait after first resume', async () => {
+      await workflowRunFixture.resumeWorkflow();
+
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.WAITING);
+
+      // step_b should have completed successfully using rehydrated step_a output
+      const stepB = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((s) => s.stepId === 'step_b');
+      expect(stepB?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('should complete after second resume', async () => {
+      await workflowRunFixture.resumeWorkflow();
+
+      const execution = workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(execution?.error).toBeUndefined();
+
+      const stepC = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).find((s) => s.stepId === 'step_c');
+      expect(stepC?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+  });
+});
+
 describe('workflow output eviction with pause and resume', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
@@ -240,7 +682,13 @@ steps:
   });
 
   describe('after resume', () => {
+    let getByIdsSpy: jest.SpyInstance;
+
     beforeAll(async () => {
+      getByIdsSpy = jest.spyOn(
+        workflowRunFixture.stepExecutionRepositoryMock,
+        'getStepExecutionsByIds'
+      );
       await workflowRunFixture.resumeWorkflow();
     });
 
@@ -250,6 +698,13 @@ steps:
       );
       expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
       expect(execution?.error).toBeUndefined();
+    });
+
+    it('should load step executions with output excluded during resume', () => {
+      // The first call to getStepExecutionsByIds during resume should exclude outputs
+      const loadCall = getByIdsSpy.mock.calls[0];
+      expect(loadCall[1]).toBeUndefined(); // sourceIncludes
+      expect(loadCall[2]).toEqual(['output']); // sourceExcludes
     });
 
     it('should have executed after_wait step referencing before_wait output', () => {

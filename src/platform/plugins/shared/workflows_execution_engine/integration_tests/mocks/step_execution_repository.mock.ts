@@ -22,13 +22,23 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
 
   public getStepExecutionsByIds(
     stepExecutionIds: string[],
-    _sourceIncludes?: string[]
+    _sourceIncludes?: string[],
+    sourceExcludes?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
-    return Promise.resolve(
-      stepExecutionIds
-        .map((id) => this.stepExecutions.get(id) || null)
-        .filter((step) => step !== null) as EsWorkflowStepExecution[]
-    );
+    const results = stepExecutionIds
+      .map((id) => this.stepExecutions.get(id) || null)
+      .filter((step): step is EsWorkflowStepExecution => step !== null)
+      .map((step) => {
+        if (sourceExcludes?.length) {
+          const filtered = { ...step };
+          for (const field of sourceExcludes) {
+            delete (filtered as Record<string, unknown>)[field];
+          }
+          return filtered;
+        }
+        return step;
+      });
+    return Promise.resolve(results);
   }
 
   public getStepExecutionsByWorkflowExecution(
