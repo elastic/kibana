@@ -80,6 +80,8 @@ cd ~/.backport/repositories/elastic/kibana
 git status
 ```
 
+ **NEVER edit files that do NOT have merge conflicts**
+
 For each conflicting file:
 
 1. **Read the file** to see the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`)
@@ -91,24 +93,7 @@ For each conflicting file:
    ```
 3. **Resolve the conflict** by editing the file to remove conflict markers with
    the correct content.
-
-#### Lock file conflicts (yarn.lock, package-lock.json)
-
-**NEVER resolve lock files manually.** Follow this order:
-
-1. Resolve `package.json` conflicts first (manually fix the conflict markers)
-2. Run `yarn kbn bootstrap` in `~/.backport/repositories/elastic/kibana`
-   to regenerate `yarn.lock` from the resolved `package.json` and solve the conflicts automatically
-3. Stage both files:
-   ```bash
-   git add package.json yarn.lock
-   ```
-
-#### Other file conflicts
-
-- Resolve using standard conflict resolution: read both sides, pick the
-  correct content, remove the markers.
-- Stage resolved files with `git add <file>` or `git rm <file>` for deletions.
+4. Stage resolved files with `git add <file>` or `git rm <file>` for deletions.
 
 ### Step 4: Continue the backport
 
@@ -129,9 +114,11 @@ Report the created backport PR URLs to the user.
 
 ## Rules
 
+- **NEVER edit files that do NOT have merge conflicts** This includes when `package.json`
+  has conflicts but `yarn.lock` does not have conflicts.
 - **NEVER guess.** If you are not confident in a conflict resolution, stop
   and tell the user to handle it manually.
-- **NEVER resolve lock files manually.** Always use `yarn kbn bootstrap`
+- **NEVER resolve lock files conflicts manually.** Always use `yarn kbn bootstrap`
   after resolving `package.json`.
 - **NEVER run `node scripts/check_changes.ts` in the backport clone.** That
   script exists on `main` and does NOT exist on older backport branches.
@@ -147,13 +134,13 @@ Report the created backport PR URLs to the user.
 
 ### Renovate PRs (dependency updates)
 
-These almost always fail due to `package.json` + `yarn.lock` conflicts.
+These almost always fail due to `package.json` and/or `yarn.lock` conflicts.
 The resolution is typically straightforward:
 - The source PR bumps a dependency version in `package.json`
 - The target branch has a different set of dependencies
 - Resolve by applying the version bump from the source commit to the
-  target branch's `package.json`, then regenerate `yarn.lock` with
-  `yarn kbn bootstrap`
+  target branch's `package.json`, 
+- Then ONLY IF there are also `yarn.lock` conflicts regenerate `yarn.lock` with `yarn kbn bootstrap`
 
 ### Non-trivial conflicts
 
