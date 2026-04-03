@@ -74,27 +74,10 @@ export function resolveConflictingFieldTypes(
  * @returns The TO_* function name (e.g., 'TO_DOUBLE', 'TO_LONG'), or undefined if no cast is needed
  */
 function getCastFunctionForType(fieldType: ES_FIELD_TYPES | undefined): string | undefined {
-  if (!fieldType) {
-    return undefined;
-  }
-
-  // Map field types to their ES|QL casting functions
   switch (fieldType) {
     case 'double':
       return 'TO_DOUBLE';
-    case 'float':
-      return 'TO_DOUBLE'; // Cast floats to double for consistency
-    case 'half_float':
-      return 'TO_DOUBLE';
-    case 'scaled_float':
-      return 'TO_DOUBLE';
     case 'long':
-      return 'TO_LONG';
-    case 'integer':
-      return 'TO_LONG';
-    case 'short':
-      return 'TO_LONG';
-    case 'byte':
       return 'TO_LONG';
     default:
       return undefined;
