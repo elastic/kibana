@@ -390,21 +390,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.isShowingDocViewer();
 
         // event 1
-        // Dismiss toasts before each flyout cell action to prevent
-        // ElementClickInterceptedError from "Column added/removed" toasts
-        // overlaying the flyout data grid on the right side of the screen.
-        await toasts.dismissAll();
         await dataGrid.clickFieldActionInFlyout('service.name', 'toggleColumnButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
         // event 2
-        await toasts.dismissAll();
         await dataGrid.clickFieldActionInFlyout('log.level', 'toggleColumnButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
         // event 3
+        // preventing flakiness in this case, there were 2 toasts displayed, covering the cell in the flaky case
         await toasts.dismissAll();
         await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
         await header.waitUntilLoadingHasFinished();
