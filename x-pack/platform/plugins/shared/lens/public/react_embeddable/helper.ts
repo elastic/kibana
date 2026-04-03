@@ -25,7 +25,11 @@ import type {
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import {
+  splitFlattenedApiConfig,
+  type LensByValueSerializedAPIConfig,
+  type LensSerializedAPIConfig,
+} from '@kbn/lens-common-2';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
@@ -41,7 +45,6 @@ import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/co
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 
 import { isByRefLensConfig } from '../../common/transforms/utils';
-import { splitFlattenedApiConfig } from '../../common/transforms/helpers';
 import type { StrippedLensState } from '../../common/transforms/helpers';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';

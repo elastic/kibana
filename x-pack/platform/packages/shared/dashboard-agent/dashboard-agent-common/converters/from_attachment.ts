@@ -12,6 +12,7 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { splitFlattenedApiConfig } from '@kbn/lens-common-2';
 import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
@@ -24,23 +25,18 @@ const LENS_EMBEDDABLE_TYPE = 'lens';
 
 /**
  * Converts an AttachmentPanel to a DashboardPanel.
- * For Lens panels with API format attributes, converts to internal format.
+ * For Lens panels with flat API format config, converts chart fields to internal attributes.
  */
 const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): DashboardPanel => {
-  let configObject = config;
-  if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
-    const lensAttributes = new LensConfigBuilder().fromAPIFormat(config.attributes);
-    configObject = {
-      ...config,
-      attributes: lensAttributes,
-    };
+  if (type === LENS_EMBEDDABLE_TYPE) {
+    const { panelState, chartConfig } = splitFlattenedApiConfig(config);
+    if (isLensAPIFormat(chartConfig)) {
+      const lensAttributes = new LensConfigBuilder().fromAPIFormat(chartConfig);
+      return { type, uid, grid, config: { ...panelState, attributes: lensAttributes } };
+    }
   }
-  return {
-    type,
-    uid,
-    grid,
-    config: configObject,
-  };
+
+  return { type, uid, grid, config };
 };
 
 type AgentWidget = AttachmentPanel | AgentDashboardSection;

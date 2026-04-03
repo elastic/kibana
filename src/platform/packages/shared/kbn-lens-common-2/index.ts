@@ -120,3 +120,26 @@ export type LensApi = Simplify<
  * Backward compatibility types
  */
 export type LensEmbeddableOutput = LensApi;
+
+/**
+ * Splits a flat API config into panel-level state and chart config.
+ * Panel-level keys (title, description, etc.) go into `panelState`,
+ * everything else goes into `chartConfig`.
+ */
+export function splitFlattenedApiConfig(config: LensSerializedAPIConfig) {
+  const {
+    title,
+    description,
+    hide_title,
+    hide_border,
+    time_range,
+    drilldowns,
+    ref_id,
+    ...chartConfig
+  } = config;
+
+  return {
+    panelState: { title, description, hide_title, hide_border, time_range, drilldowns, ref_id },
+    chartConfig,
+  };
+}

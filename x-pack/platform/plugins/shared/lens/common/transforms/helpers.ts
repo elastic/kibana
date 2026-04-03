@@ -8,7 +8,6 @@
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { LensSerializedState } from '@kbn/lens-common';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { stripUndefined } from '@kbn/lens-embeddable-utils/config_builder/transforms/charts/utils';
 
 /**
@@ -28,27 +27,6 @@ type IncludedPanelStateKeys =
   | keyof SerializedDrilldowns;
 
 export type StrippedLensState = Pick<LensSerializedState, IncludedPanelStateKeys>;
-
-/**
- * Splits a flat API config into panel-level state and chart config
- */
-export function splitFlattenedApiConfig(config: LensSerializedAPIConfig) {
-  const {
-    title,
-    description,
-    hide_title,
-    hide_border,
-    time_range,
-    drilldowns,
-    ref_id,
-    ...chartConfig
-  } = config;
-
-  return {
-    panelState: { title, description, hide_title, hide_border, time_range, drilldowns, ref_id },
-    chartConfig,
-  };
-}
 
 /**
  * The serialized state contains many properties that are inherited from the dashboard or other container

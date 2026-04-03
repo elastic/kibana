@@ -36,22 +36,25 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
   // TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
   if (panel.type === 'lens') {
     const panelConfig = panel.config as
-      | { attributes?: LensApiSchemaType | LensAttributes }
+      | { attributes?: LensApiSchemaType | LensAttributes; [key: string]: unknown }
       | undefined;
     const attributes = panelConfig?.attributes;
 
     if (isLensAttributes(attributes)) {
       try {
-        const apiFormatAttributes = new LensConfigBuilder().toAPIFormat(
-          attributes
-        ) as unknown as Record<string, unknown>;
+        const apiConfig = new LensConfigBuilder().toAPIFormat(attributes) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        const { attributes: _, ...panelState } = panelConfig ?? {};
 
         return {
           type: 'lens',
           uid: panel.uid ?? '',
           config: {
-            ...panelConfig,
-            attributes: apiFormatAttributes,
+            ...panelState,
+            ...apiConfig,
           },
           grid: panel.grid,
         };

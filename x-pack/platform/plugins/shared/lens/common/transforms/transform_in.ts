@@ -8,6 +8,7 @@
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { splitFlattenedApiConfig } from '@kbn/lens-common-2';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
 import type {
@@ -15,7 +16,6 @@ import type {
   LensByValueTransformInResult,
   LensTransformIn,
 } from './types';
-import { splitFlattenedApiConfig } from './helpers';
 import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensConfig } from './utils';
 import type { LensSerializedState } from '../../public';
 
