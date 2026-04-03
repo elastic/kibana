@@ -345,7 +345,7 @@ describe('Serialization utils', () => {
             sort: [{ name: 'order_date', direction: 'desc' }],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
             density: DataGridDensity.COMPACT,
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: dataViewId },
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
           }),
         ],
       });

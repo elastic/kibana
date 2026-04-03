@@ -139,7 +139,7 @@ describe('searchEmbeddableTransforms', () => {
       expect(density).toBe(DataGridDensity.COMPACT);
       expect(dataSource).toEqual({
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'data-view-1',
+        ref_id: 'data-view-1',
       });
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
