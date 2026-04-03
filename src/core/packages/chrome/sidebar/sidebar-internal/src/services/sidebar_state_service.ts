@@ -8,8 +8,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, map } from 'rxjs';
-import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import type { SidebarAppId, SidebarSide } from '@kbn/core-chrome-sidebar';
 import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 import type { SidebarRegistryService } from './sidebar_registry_service';
 import type { StorageHelper } from './storage_helper';
@@ -30,6 +30,8 @@ function getDefaultWidth(): number {
 export class SidebarStateService {
   private readonly currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
   private readonly width$ = new BehaviorSubject<number>(getDefaultWidth());
+  private readonly fullWidth$ = new BehaviorSubject<boolean>(false);
+  private readonly sidebarSide$ = new BehaviorSubject<SidebarSide>('right');
 
   constructor(
     private readonly registry: SidebarRegistryService,
@@ -45,7 +47,15 @@ export class SidebarStateService {
   @bind
   @memoize
   getWidth$(): Observable<number> {
-    return this.width$.asObservable();
+    return combineLatest([this.fullWidth$, this.width$]).pipe(
+      map(([isFull]) => (isFull ? window.innerWidth : this.width$.getValue()))
+    );
+  }
+
+  @bind
+  @memoize
+  isFullWidth$(): Observable<boolean> {
+    return this.fullWidth$.asObservable();
   }
 
   @bind
@@ -72,11 +82,21 @@ export class SidebarStateService {
       this.setWidth(width);
     }
 
+    const side = this.storage.get<string>('sidebarSide');
+    if (side === 'left' || side === 'right') {
+      this.sidebarSide$.next(side);
+    }
+
     window.addEventListener('resize', this.handleWindowResize);
   }
 
   private handleWindowResize = () => {
-    this.setWidth(this.getWidth());
+    if (this.fullWidth$.getValue()) {
+      // Re-emit so layout recomputes with the new window.innerWidth
+      this.width$.next(this.width$.getValue());
+    } else {
+      this.setWidth(this.getWidth());
+    }
   };
 
   @bind
@@ -110,7 +130,7 @@ export class SidebarStateService {
     const maxWidth = getMaxWidth();
     width = Math.max(MIN_WIDTH, Math.min(maxWidth, width));
 
-    if (this.getWidth() !== width) {
+    if (this.width$.getValue() !== width) {
       this.width$.next(width);
       this.storage.set('width', width);
     }
@@ -118,12 +138,45 @@ export class SidebarStateService {
 
   @bind
   getWidth(): number {
-    return this.width$.getValue();
+    return this.fullWidth$.getValue() ? window.innerWidth : this.width$.getValue();
+  }
+
+  @bind
+  setFullWidth(value: boolean): void {
+    if (this.fullWidth$.getValue() !== value) {
+      this.fullWidth$.next(value);
+      // Trigger re-emission of width so subscribers recalculate
+      this.width$.next(this.width$.getValue());
+    }
+  }
+
+  @bind
+  isFullWidth(): boolean {
+    return this.fullWidth$.getValue();
   }
 
   @bind
   getCurrentAppId(): SidebarAppId | null {
     return this.currentAppId$.getValue();
+  }
+
+  @bind
+  @memoize
+  getSidebarSide$(): Observable<SidebarSide> {
+    return this.sidebarSide$.asObservable();
+  }
+
+  @bind
+  getSidebarSide(): SidebarSide {
+    return this.sidebarSide$.getValue();
+  }
+
+  @bind
+  setSidebarSide(side: SidebarSide): void {
+    if (this.sidebarSide$.getValue() !== side) {
+      this.sidebarSide$.next(side);
+      this.storage.set('sidebarSide', side);
+    }
   }
 
   stop() {

@@ -11,6 +11,7 @@ import type { FC, MouseEvent, TouchEvent, KeyboardEvent } from 'react';
 import React, { useCallback, useRef } from 'react';
 import { EuiResizableButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useSidebarSide } from '@kbn/core-chrome-browser-hooks/use_sidebar_side';
 import { css } from '@emotion/react';
 import { useSidebarWidth, useSidebar } from '../hooks';
 
@@ -21,15 +22,17 @@ const resizeButtonStyles = css`
 const KEYBOARD_RESIZE_STEP = 10;
 
 /**
- * A resize handle component that can be placed on the edge of a panel
- * to allow users to resize it by dragging or using keyboard arrows.
- *
- * Designed for panels positioned on the right side of the viewport,
- * where dragging left increases width and dragging right decreases width.
+ * A resize handle component that can be placed on the edge of a panel.
+ * Supports panels on either side of the viewport — drag direction and
+ * keyboard arrows are flipped automatically when the sidebar is on the left.
  */
 export const PanelResizeHandle: FC<{}> = () => {
   const { setWidth } = useSidebar();
   const currentWidth = useSidebarWidth();
+  const sidebarSide = useSidebarSide();
+  // When the sidebar is on the left, dragging right grows it and left shrinks it.
+  // When on the right (default), dragging left grows it and right shrinks it.
+  const directionFactor = sidebarSide === 'left' ? -1 : 1;
 
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
@@ -40,10 +43,8 @@ export const PanelResizeHandle: FC<{}> = () => {
       startWidthRef.current = currentWidth;
 
       const handleMouseMove = (moveEvent: globalThis.MouseEvent) => {
-        // Dragging left increases width, dragging right decreases (panel is on the right)
-        const delta = startXRef.current - moveEvent.clientX;
-        const newWidth = startWidthRef.current + delta;
-        setWidth(newWidth);
+        const delta = (startXRef.current - moveEvent.clientX) * directionFactor;
+        setWidth(startWidthRef.current + delta);
       };
 
       const handleMouseUp = () => {
@@ -54,7 +55,7 @@ export const PanelResizeHandle: FC<{}> = () => {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
-    [currentWidth, setWidth]
+    [currentWidth, directionFactor, setWidth]
   );
 
   const handleTouchStart = useCallback(
@@ -65,9 +66,8 @@ export const PanelResizeHandle: FC<{}> = () => {
 
       const handleTouchMove = (moveEvent: globalThis.TouchEvent) => {
         const moveTouch = moveEvent.touches[0];
-        const delta = startXRef.current - moveTouch.clientX;
-        const newWidth = startWidthRef.current + delta;
-        setWidth(newWidth);
+        const delta = (startXRef.current - moveTouch.clientX) * directionFactor;
+        setWidth(startWidthRef.current + delta);
       };
 
       const handleTouchEnd = () => {
@@ -78,16 +78,16 @@ export const PanelResizeHandle: FC<{}> = () => {
       document.addEventListener('touchmove', handleTouchMove);
       document.addEventListener('touchend', handleTouchEnd);
     },
-    [currentWidth, setWidth]
+    [currentWidth, directionFactor, setWidth]
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       let delta = 0;
       if (e.key === 'ArrowLeft') {
-        delta = KEYBOARD_RESIZE_STEP; // Increase width
+        delta = KEYBOARD_RESIZE_STEP * directionFactor;
       } else if (e.key === 'ArrowRight') {
-        delta = -KEYBOARD_RESIZE_STEP; // Decrease width
+        delta = -KEYBOARD_RESIZE_STEP * directionFactor;
       }
 
       if (delta !== 0) {
@@ -95,7 +95,7 @@ export const PanelResizeHandle: FC<{}> = () => {
         setWidth(currentWidth + delta);
       }
     },
-    [currentWidth, setWidth]
+    [currentWidth, directionFactor, setWidth]
   );
 
   return (

@@ -115,13 +115,17 @@ const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
-  .kbnBody {
-    // adjust position of the classic side-navigation
-    .euiFlyout.euiCollapsibleNav {
-      ${logicalCSS('top', layoutVar('application.top', '0px'))};
-      ${logicalCSS('left', layoutVar('application.left', '0px'))};
-      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-    }
+    .kbnBody {
+      // adjust position of the classic side-navigation
+      .euiFlyout.euiCollapsibleNav {
+        ${logicalCSS('top', layoutVar('application.top', '0px'))};
+        // EUI sets left as a JS inline style by reading --kbn-layout--application-left.
+        // When the sidebar is on the left, application.left = navigationWidth + sidebarWidth,
+        // which pushes the nav flyout to start after the sidebar instead of at the left edge.
+        // !important is required to override EUI's JavaScript-set element.style.left.
+        left: ${layoutVar('navigation.width', '0px')} !important;
+        ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+      }
 
     // overlay mask "belowHeader" should only cover the application area
     .euiOverlayMask[data-relative-to-header='below'] {

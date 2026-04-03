@@ -22,6 +22,15 @@ const root = css`
   min-height: 0; // to allow flex children to shrink properly
 `;
 
+// When the sidebar is on the left, drop its z-index below EUI flyouts (1000) so that
+// the global nav (EuiCollapsibleNav, z-index ~1000) slides over it correctly.
+// The high z-index is only needed on the right to prevent app-level flyouts from
+// covering the chat panel.
+const rootLeft = css`
+  z-index: ${layoutLevels.navigation};
+`;
+
 export const styles = {
   root,
+  rootLeft,
 };

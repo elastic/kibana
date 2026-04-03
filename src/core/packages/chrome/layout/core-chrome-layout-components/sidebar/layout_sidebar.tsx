@@ -12,6 +12,7 @@ import React from 'react';
 import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { styles } from './layout_sidebar.styles';
+import { useLayoutState } from '../layout_state_context';
 
 export interface LayoutSidebarProps {
   children: ReactNode;
@@ -24,9 +25,11 @@ export interface LayoutSidebarProps {
  * @returns The rendered LayoutSidebar component.
  */
 export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
+  const { sidebarSide } = useLayoutState();
+
   return (
     <div
-      css={styles.root}
+      css={[styles.root, sidebarSide === 'left' && styles.rootLeft]}
       className="kbnChromeLayoutSidebar"
       data-test-subj="kbnChromeLayoutSidebar"
       {...euiIncludeSelectorInFocusTrap.prop}

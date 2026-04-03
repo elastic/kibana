@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
-import type { SidebarAppId, SidebarAppStatus } from '@kbn/core-chrome-sidebar';
+import type { SidebarAppId, SidebarAppStatus, SidebarSide } from '@kbn/core-chrome-sidebar';
 
 /** Global sidebar state API */
 export interface UseSidebarApi {
@@ -45,6 +45,12 @@ export function useSidebar(): UseSidebarApi {
 export function useSidebarWidth(): number {
   const sidebar = useSidebarService();
   return useObservable(sidebar.getWidth$(), sidebar.getWidth());
+}
+
+/** Hook for sidebar side ('left' | 'right') */
+export function useSidebarSide(): SidebarSide {
+  const sidebar = useSidebarService();
+  return useObservable(sidebar.getSidebarSide$(), sidebar.getSidebarSide());
 }
 
 /**

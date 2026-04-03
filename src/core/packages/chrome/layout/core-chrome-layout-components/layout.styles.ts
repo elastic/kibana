@@ -10,7 +10,7 @@
 import { css } from '@emotion/react';
 import type { LayoutState } from './layout.types';
 
-const cssProp = css`
+const baseCssProp = css`
   height: 100vh;
   width: 100vw;
   min-height: 100%;
@@ -22,7 +22,9 @@ const cssProp = css`
   }
 
   display: grid;
+`;
 
+const gridAreasSidebarRight = css`
   grid-template-areas:
     'banner banner banner'
     'header header header'
@@ -30,16 +32,31 @@ const cssProp = css`
     'footer footer footer';
 `;
 
+const gridAreasSidebarLeft = css`
+  grid-template-areas:
+    'banner banner banner'
+    'header header header'
+    'navigation sidebar application'
+    'footer footer footer';
+`;
+
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
-  const { navigationWidth, sidebarWidth, bannerHeight, headerHeight, footerHeight } = layoutState;
+  const {
+    navigationWidth,
+    sidebarWidth,
+    bannerHeight,
+    headerHeight,
+    footerHeight,
+    sidebarSide,
+  } = layoutState;
+
+  const isLeft = sidebarSide === 'left';
 
   const style = {
-    gridTemplateColumns: `
-      ${navigationWidth}px
-      1fr
-      ${sidebarWidth}px
-    `,
+    gridTemplateColumns: isLeft
+      ? `${navigationWidth}px ${sidebarWidth}px 1fr`
+      : `${navigationWidth}px 1fr ${sidebarWidth}px`,
     gridTemplateRows: `
       ${bannerHeight}px
       ${headerHeight}px
@@ -49,7 +66,7 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
   };
 
   return {
-    css: cssProp,
+    css: [baseCssProp, isLeft ? gridAreasSidebarLeft : gridAreasSidebarRight],
     style,
   };
 };

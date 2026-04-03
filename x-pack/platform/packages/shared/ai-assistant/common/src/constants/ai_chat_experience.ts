@@ -8,4 +8,5 @@
 export enum AIChatExperience {
   Classic = 'classic',
   Agent = 'agent',
+  Off = 'off',
 }
