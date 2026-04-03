@@ -27,15 +27,6 @@ import {
 
 const MAX_PANELS = 100;
 
-export const allowUnmappedKeysSchema = schema.boolean({
-  defaultValue: false,
-  meta: {
-    deprecated: true,
-    description:
-      'When enabled, dashboard REST endpoints support unmapped keys. Unmapped key schemas can be changed or removed without notice and are not supported.',
-  },
-});
-
 export const panelGridSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
   y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),

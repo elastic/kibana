@@ -16,6 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/alerting-v2-schemas",
     "@kbn/core-http-browser",
     "@kbn/data-views-plugin",
     "@kbn/field-formats-plugin",
@@ -26,6 +27,10 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/react-query",
     "@kbn/data-plugin",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/i18n-react",
+    "@kbn/es-query",
+    "@kbn/react-hooks",
+    "@kbn/alerting-v2-constants",
   ]
 }

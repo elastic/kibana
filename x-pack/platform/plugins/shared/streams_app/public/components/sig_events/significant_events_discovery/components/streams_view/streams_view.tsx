@@ -292,6 +292,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             onClick={onBulkOnboardStreamsClick}
             iconType="radar"
             disabled={selectedStreams.length === 0}
+            size="xs"
           >
             {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
           </EuiButtonEmpty>
@@ -302,6 +303,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
             disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
             isLoading={isSchedulingInsights || isWaitingForInsightsTask}
             data-test-subj="significant_events_discover_insights_button"
+            size="xs"
           >
             {DISCOVER_INSIGHTS_BUTTON_LABEL}
           </EuiButtonEmpty>

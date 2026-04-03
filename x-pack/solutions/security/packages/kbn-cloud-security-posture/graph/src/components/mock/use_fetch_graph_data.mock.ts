@@ -14,7 +14,7 @@ import {
 import type { UseFetchGraphDataParams } from '../../hooks/use_fetch_graph_data';
 import { useMockDataContext } from './mock_context_provider';
 
-// Scenario: Grouped entities node as actor (4 items, different ecsParentField, all availableInEntityStore = false)
+// Scenario: Grouped entities node as actor (4 items, different entity types, all availableInEntityStore = false)
 // with single target
 export const groupedActorMockData = {
   nodes: [
@@ -35,32 +35,32 @@ export const groupedActorMockData = {
           id: 'user-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'user',
             availableInEntityStore: false,
+            sourceFields: { 'user.email': 'user1@example.com' },
           },
         },
         {
           id: 'service-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'service',
             availableInEntityStore: false,
+            sourceFields: { 'service.name': 'auth-service' },
           },
         },
         {
           id: 'host-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'host',
             availableInEntityStore: false,
+            sourceFields: { 'host.id': 'host-abc', 'host.name': 'web-server-1' },
           },
         },
         {
           id: 'entity-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'entity',
             availableInEntityStore: false,
+            sourceFields: { 'entity.id': 'entity-entity-1' },
           },
         },
       ],
@@ -79,8 +79,8 @@ export const groupedActorMockData = {
           entity: {
             name: 'Target Role',
             type: 'role',
-            ecsParentField: 'entity',
             availableInEntityStore: true,
+            sourceFields: { 'entity.target.id': 'target-role' },
           },
         },
       ],
@@ -131,7 +131,7 @@ export const groupedActorMockData = {
   ],
 };
 
-// Scenario: Single entity node actor with grouped entities node as target (4 items, different ecsParentField, all availableInEntityStore = false)
+// Scenario: Single entity node actor with grouped entities node as target (4 items, different entity types, all availableInEntityStore = false)
 export const groupedTargetMockData = {
   nodes: [
     {
@@ -152,8 +152,12 @@ export const groupedTargetMockData = {
           entity: {
             name: 'Single Actor',
             type: 'user',
-            ecsParentField: 'user',
             availableInEntityStore: true,
+            sourceFields: {
+              'user.id': 'single-actor',
+              'user.email': 'actor@example.com',
+              'user.name': 'Single Actor',
+            },
           },
         },
       ],
@@ -171,32 +175,35 @@ export const groupedTargetMockData = {
           id: 'user-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'user',
             availableInEntityStore: false,
+            sourceFields: { 'user.target.id': 'target-user-1' },
           },
         },
         {
           id: 'service-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'service',
             availableInEntityStore: false,
+            sourceFields: { 'service.target.name': 'target-svc' },
           },
         },
         {
           id: 'host-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'host',
             availableInEntityStore: false,
+            sourceFields: {
+              'host.target.id': 'target-host-abc',
+              'host.target.hostname': 'db-server-1',
+            },
           },
         },
         {
           id: 'entity-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'entity',
             availableInEntityStore: false,
+            sourceFields: { 'entity.target.id': 'entity-target-1' },
           },
         },
       ],
@@ -266,8 +273,8 @@ export const singleActorMockData = {
           id: 'admin@example.com',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'user',
             availableInEntityStore: false,
+            sourceFields: { 'user.email': 'admin@example.com', 'user.name': 'admin' },
           },
         },
       ],
@@ -286,8 +293,10 @@ export const singleActorMockData = {
           entity: {
             name: 'Custom Role',
             type: 'role',
-            ecsParentField: 'entity',
             availableInEntityStore: true,
+            sourceFields: {
+              'entity.target.id': 'projects/your-project-id/roles/customRole',
+            },
           },
         },
       ],

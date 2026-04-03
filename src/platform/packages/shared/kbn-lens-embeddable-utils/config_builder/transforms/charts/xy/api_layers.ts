@@ -42,6 +42,7 @@ import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataset } from '../../../utils';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
 import { getValueApiColumn } from '../../columns/esql_column';
+import { toApiFilterLanguage } from '../../columns/filter';
 import {
   isAPIColumnOfBucketType,
   isAPIColumnOfReferenceType,
@@ -447,11 +448,12 @@ export function buildAPIAnnotationsLayer(
           label: annotation.label,
           query: annotation.filter
             ? {
-                language: annotation.filter.language as 'kuery' | 'lucene',
+                language: toApiFilterLanguage(annotation.filter.language),
                 // it should never be a non-string here as schema ensures that
-                query: typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
+                expression:
+                  typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
               }
-            : { language: 'kuery', query: '' },
+            : { language: 'kql', expression: '' },
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
