@@ -79,15 +79,16 @@ export function initializeDashboardServices(
   titleManager: ReturnType<typeof initializeTitleManager>,
   { attributeService, uiActions }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
-  // For by-ref panels, the saved object document title/description serve as defaults.
-  // For by-value panels, title/description live at the panel config level only.
+  // For by-ref panels, the saved object document title/description serve as defaults
+  // so the user can "reset to default" back to the saved object's title.
+  // For by-value panels, there is no canonical default —> the panel title is the only title.
   const defaultTitle$ = new BehaviorSubject<string | undefined>(
-    initialState.ref_id ? initialState.attributes.title : initialState.title
+    initialState.ref_id ? initialState.attributes.title : undefined
   );
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
     initialState.ref_id
       ? internalApi.attributes$.getValue().description || initialState.description
-      : initialState.description
+      : undefined
   );
 
   return {
