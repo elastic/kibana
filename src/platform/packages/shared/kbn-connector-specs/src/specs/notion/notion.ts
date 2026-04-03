@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Notion from './types';
+import getDataSourceWorkflow from './workflows/get_data_source.yaml';
+import getPageWorkflow from './workflows/get_page.yaml';
+import queryDataSourceWorkflow from './workflows/query_data_source.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 export const NotionConnector: ConnectorSpec = {
   metadata: {
@@ -24,7 +28,21 @@ export const NotionConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
+          tokenUrl: 'https://api.notion.com/v1/oauth/token',
+        },
+      },
+    ],
     headers: {
       'Notion-Version': '2025-09-03',
     },
@@ -130,4 +148,11 @@ export const NotionConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [
+    getDataSourceWorkflow,
+    getPageWorkflow,
+    queryDataSourceWorkflow,
+    searchWorkflow,
+  ],
 };

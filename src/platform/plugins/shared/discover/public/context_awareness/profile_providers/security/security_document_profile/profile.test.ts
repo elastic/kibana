@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createSecurityDocumentProfileProvider } from './profile';
@@ -44,11 +44,42 @@ describe('createSecurityDocumentProfileProvider — getDocViewer', () => {
     });
   });
 
-  it('does NOT register the overview tab for a non-alert event', () => {
+  it('registers the overview tab for a signal with an unrelated rule type', () => {
+    const registry = new DocViewsRegistry();
+    const docViewer = getDocViewerFor(
+      buildRecord({
+        'event.kind': 'signal',
+        [ALERT_RULE_TYPE_ID]: 'siem.queryRule',
+      })
+    );
+    docViewer.docViewsRegistry(registry);
+    expect(registry.getAll()).toHaveLength(1);
+    expect(registry.getAll()[0]).toMatchObject({
+      id: 'doc_view_alerts_overview',
+      title: 'Alert Overview',
+    });
+  });
+
+  it('registers the overview tab for a non-alert event', () => {
     const registry = new DocViewsRegistry();
     const docViewer = getDocViewerFor(buildRecord({ 'event.kind': 'event' }));
     docViewer.docViewsRegistry(registry);
-    expect(registry.getAll()).toHaveLength(0);
+    expect(registry.getAll()).toHaveLength(1);
+    expect(registry.getAll()[0]).toMatchObject({
+      id: 'doc_view_alerts_overview',
+      title: 'Event Overview',
+    });
+  });
+
+  it('registers the overview tab when event.kind is absent', () => {
+    const registry = new DocViewsRegistry();
+    const docViewer = getDocViewerFor(buildRecord({}));
+    docViewer.docViewsRegistry(registry);
+    expect(registry.getAll()).toHaveLength(1);
+    expect(registry.getAll()[0]).toMatchObject({
+      id: 'doc_view_alerts_overview',
+      title: 'Event Overview',
+    });
   });
 
   it('does NOT register the overview tab for a scheduled attack discovery alert', () => {
@@ -56,7 +87,7 @@ describe('createSecurityDocumentProfileProvider — getDocViewer', () => {
     const docViewer = getDocViewerFor(
       buildRecord({
         'event.kind': 'signal',
-        [ALERT_RULE_TYPE_ID]: 'attack-discovery',
+        [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
       })
     );
     docViewer.docViewsRegistry(registry);

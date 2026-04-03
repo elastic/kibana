@@ -13,6 +13,7 @@ import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import {
   extractAlertRuleId,
   extractCompositionContext,
+  extractEventChainDepthFromExecution,
   extractExecutionMetadata,
   extractQueueDelayMs,
   extractTimeToFirstStep,
@@ -207,16 +208,71 @@ describe('extractExecutionMetadata', () => {
     expect(meta.stepAvgDurationsByType).toEqual({ elasticsearch_search: 200 });
   });
 
+  it('includes emitToStartMs for event-driven executions with dispatch metadata', () => {
+    const wfExec = createMockWorkflowExecution({
+      triggeredBy: 'cases.caseCreated',
+      startedAt: '2024-01-01T00:00:05.000Z',
+      context: {
+        metadata: { eventDispatchTimestamp: '2024-01-01T00:00:01.000Z' },
+      },
+    });
+
+    const meta = extractExecutionMetadata(wfExec, []);
+    expect(meta.emitToStartMs).toBe(4000);
+  });
+
+  it('includes emitToStartMs when dispatch metadata is only on top-level execution.metadata', () => {
+    const wfExec = createMockWorkflowExecution({
+      triggeredBy: 'cases.caseCreated',
+      startedAt: '2024-01-01T00:00:05.000Z',
+      context: {},
+      metadata: { eventDispatchTimestamp: '2024-01-01T00:00:01.000Z' },
+    });
+
+    expect(extractExecutionMetadata(wfExec, []).emitToStartMs).toBe(4000);
+  });
+
+  it('prefers top-level metadata eventDispatchTimestamp over context.metadata when both exist', () => {
+    const wfExec = createMockWorkflowExecution({
+      triggeredBy: 'cases.caseCreated',
+      startedAt: '2024-01-01T00:00:10.000Z',
+      context: {
+        metadata: { eventDispatchTimestamp: '2024-01-01T00:00:08.000Z' },
+      },
+      metadata: { eventDispatchTimestamp: '2024-01-01T00:00:01.000Z' },
+    });
+
+    expect(extractExecutionMetadata(wfExec, []).emitToStartMs).toBe(9000);
+  });
+
   it('omits optional execution fields when there is nothing to report', () => {
     const wfExec = createMockWorkflowExecution();
     const meta = extractExecutionMetadata(wfExec, []);
     expect(meta.ruleId).toBeUndefined();
     expect(meta.queueDelayMs).toBeUndefined();
+    expect(meta.emitToStartMs).toBeUndefined();
     expect(meta.timeToFirstStep).toBeUndefined();
     expect(meta.stepDurations).toBeUndefined();
     expect(meta.stepAvgDurationsByType).toBeUndefined();
     expect(meta.timeoutMs).toBeUndefined();
     expect(meta.timeoutExceededByMs).toBeUndefined();
+  });
+
+  it('omits emitToStartMs when dispatch timestamp is invalid or after startedAt', () => {
+    const wfExecInvalid = createMockWorkflowExecution({
+      context: {
+        metadata: { eventDispatchTimestamp: 'not-a-date' },
+      },
+    });
+    const wfExecFuture = createMockWorkflowExecution({
+      startedAt: '2024-01-01T00:00:00.000Z',
+      context: {
+        metadata: { eventDispatchTimestamp: '2024-01-01T00:00:05.000Z' },
+      },
+    });
+
+    expect(extractExecutionMetadata(wfExecInvalid, []).emitToStartMs).toBeUndefined();
+    expect(extractExecutionMetadata(wfExecFuture, []).emitToStartMs).toBeUndefined();
   });
 });
 
@@ -431,5 +487,36 @@ describe('extractCompositionContext', () => {
         })
       )
     ).toEqual({ compositionDepth: 1 });
+  });
+});
+
+describe('extractEventChainDepthFromExecution', () => {
+  it('returns depth from context.event.eventChainDepth', () => {
+    expect(
+      extractEventChainDepthFromExecution(
+        createMockWorkflowExecution({
+          context: { event: { eventChainDepth: 2 } },
+        })
+      )
+    ).toBe(2);
+  });
+
+  it('returns undefined when eventChainDepth is missing or invalid', () => {
+    expect(extractEventChainDepthFromExecution(createMockWorkflowExecution())).toBeUndefined();
+    expect(
+      extractEventChainDepthFromExecution(
+        createMockWorkflowExecution({ context: { event: { eventChainDepth: -1 } } })
+      )
+    ).toBeUndefined();
+  });
+
+  it('includes eventChainDepth in extractExecutionMetadata when set', () => {
+    const meta = extractExecutionMetadata(
+      createMockWorkflowExecution({
+        context: { event: { eventChainDepth: 1, timestamp: '2025-01-01T00:00:00Z', spaceId: 'd' } },
+      }),
+      []
+    );
+    expect(meta.eventChainDepth).toBe(1);
   });
 });

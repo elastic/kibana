@@ -51,7 +51,7 @@ const noConnectorOption = {
             margin-right: 13px;
             margin-bottom: 0 !important;
           `}
-          type="minusInCircle"
+          type="minusCircle"
           size={ICON_SIZE}
         />
       </EuiFlexItem>

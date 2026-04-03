@@ -52,7 +52,7 @@ describe('Waffle Schema', () => {
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -82,14 +82,14 @@ describe('Waffle Schema', () => {
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         ],
         legend: {
           values: ['absolute'],
           truncate_after_lines: 2,
           visibility: 'visible',
-          size: 'medium',
+          size: 'm',
         },
         values: {
           visible: true,
@@ -139,7 +139,7 @@ describe('Waffle Schema', () => {
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
             color: {
               mode: 'categorical',
               palette: 'default',
@@ -200,12 +200,12 @@ describe('Waffle Schema', () => {
             operation: 'terms',
             fields: ['region'],
             collapse_by: 'sum',
-            size: 5,
+            limit: 5,
           },
           {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -253,7 +253,7 @@ describe('Waffle Schema', () => {
             {
               operation: 'terms',
               fields: ['category'],
-              size: 5,
+              limit: 5,
             },
           ],
         };
@@ -275,18 +275,18 @@ describe('Waffle Schema', () => {
               operation: 'terms',
               fields: ['region'],
               collapse_by: 'sum',
-              size: 5,
+              limit: 5,
             },
             {
               operation: 'terms',
               fields: ['country'],
               collapse_by: 'avg',
-              size: 5,
+              limit: 5,
             },
             {
               operation: 'terms',
               fields: ['category'],
-              size: 5,
+              limit: 5,
             },
           ],
         };
@@ -307,12 +307,12 @@ describe('Waffle Schema', () => {
             {
               operation: 'terms',
               fields: ['category'],
-              size: 5,
+              limit: 5,
             },
             {
               operation: 'terms',
               fields: ['region'],
-              size: 5,
+              limit: 5,
             },
           ],
         };
@@ -359,7 +359,7 @@ describe('Waffle Schema', () => {
             {
               operation: 'terms',
               fields: ['category'],
-              size: 5,
+              limit: 5,
             },
           ],
         };
@@ -386,7 +386,7 @@ describe('Waffle Schema', () => {
               operation: 'terms',
               fields: ['region'],
               collapse_by: 'sum',
-              size: 5,
+              limit: 5,
             },
             {
               operation: 'date_histogram',
@@ -421,12 +421,12 @@ describe('Waffle Schema', () => {
               operation: 'terms',
               fields: ['region'],
               collapse_by: 'sum',
-              size: 5,
+              limit: 5,
             },
             {
               operation: 'terms',
               fields: ['category'],
-              size: 5,
+              limit: 5,
             },
             {
               operation: 'date_histogram',

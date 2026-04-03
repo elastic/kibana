@@ -81,6 +81,14 @@ describe('approveIntegrationRoute telemetry', () => {
 
     expect(reportTelemetryEvent).toHaveBeenCalledTimes(2);
 
+    expect(approveIntegration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        integrationId: 'int-1',
+        version: '1.0.0',
+        categories: ['security'],
+      })
+    );
+
     expect(reportTelemetryEvent).toHaveBeenNthCalledWith(
       1,
       AIV2TelemetryEventType.IntegrationInstalled,

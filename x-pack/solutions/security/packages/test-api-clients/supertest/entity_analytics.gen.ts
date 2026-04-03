@@ -552,9 +552,17 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
-  internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
+  /**
+      * Uploads a CSV file to assign asset criticality.
+
+CSV must contain header row with "type" and "criticality_level" columns, in addition to ECS fields used to match entities in the entity store (e.g. "host.name", "user.id", "user.email").
+
+Each row will match up to 10,000 entities.
+
+      */
+  internalUploadAssetCriticalityV2Csv(kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv_v2', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');

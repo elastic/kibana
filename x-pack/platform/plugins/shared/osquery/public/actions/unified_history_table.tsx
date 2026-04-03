@@ -81,7 +81,7 @@ const COLUMN_CONFIGS = [
   {
     id: 'query',
     label: i18n.translate('xpack.osquery.history.table.queryColumnTitle', {
-      defaultMessage: 'Query',
+      defaultMessage: 'Query or Pack',
     }),
   },
   {
@@ -140,7 +140,8 @@ const datePickerCss = css`
   max-width: 500px;
 `;
 
-const separatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.lightShade });
+const separatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.subduedText });
+const UPDATE_BUTTON_PROPS = { fill: false };
 const badgePaddingCss = { padding: '0 6px' };
 
 const isLiveRow = (row: UnifiedHistoryRow): row is LiveHistoryRow => row.sourceType === 'live';
@@ -237,6 +238,7 @@ const UnifiedHistoryTableComponent = () => {
     data: historyData,
     isLoading,
     isFetching,
+    isPlaceholderData,
     refetch,
   } = useUnifiedHistory({
     pageSize,
@@ -346,10 +348,12 @@ const UnifiedHistoryTableComponent = () => {
     if (isScheduledRow(row) && (row.queryName || row.packName)) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow>{row.queryName ?? row.packName}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{row.queryName ?? row.packName}</EuiFlexItem>
           {row.packName && row.queryName && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{row.packName}</EuiBadge>
+              <EuiBadge color="hollow" iconType="package">
+                {row.packName}
+              </EuiBadge>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -571,10 +575,10 @@ const UnifiedHistoryTableComponent = () => {
     if (visibleSet.has('query')) {
       cols.push({
         field: 'queryText',
-        name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
-          defaultMessage: 'Query',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.queryOrPackColumnTitle', {
+          defaultMessage: 'Query or Pack',
         }),
-        width: '40%',
+        width: '42%',
         render: renderQueryColumn,
       });
     }
@@ -585,7 +589,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
           defaultMessage: 'Tags',
         }),
-        width: '100px',
+        width: '7%',
         render: renderTagsColumn,
       });
     }
@@ -596,7 +600,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
           defaultMessage: 'Results',
         }),
-        width: '120px',
+        width: '7%',
         render: renderResultsColumn,
       });
     }
@@ -607,7 +611,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumnTitle', {
           defaultMessage: 'Source',
         }),
-        width: '120px',
+        width: '7%',
         render: renderSourceColumn,
       });
     }
@@ -618,7 +622,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
-        width: '120px',
+        width: '10%',
         render: renderAgentsColumn,
       });
     }
@@ -629,7 +633,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
           defaultMessage: 'Created at',
         }),
-        width: '200px',
+        width: '14%',
         render: renderTimestampColumn,
       });
     }
@@ -640,7 +644,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdByColumnTitle', {
           defaultMessage: 'Run by',
         }),
-        width: '200px',
+        width: '13%',
         render: renderRunByColumn,
       });
     }
@@ -665,7 +669,7 @@ const UnifiedHistoryTableComponent = () => {
     []
   );
 
-  const hasMore = historyData?.hasMore ?? false;
+  const hasMore = (historyData?.hasMore ?? false) && !isPlaceholderData;
 
   // pageCount drives the navigation arrows: when hasMore is true we advertise
   // one extra page so the forward arrow stays enabled.
@@ -711,6 +715,7 @@ const UnifiedHistoryTableComponent = () => {
             isPaused={isPaused}
             refreshInterval={refreshInterval}
             onRefreshChange={handleRefreshChange}
+            updateButtonProps={UPDATE_BUTTON_PROPS}
             data-test-subj="history-date-picker"
           />
         </EuiFlexItem>

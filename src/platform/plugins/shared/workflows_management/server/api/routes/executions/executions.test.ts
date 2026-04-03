@@ -12,6 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
 import type { RouteDependencies } from '../types';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
@@ -25,6 +26,17 @@ describe('Execution Routes', () => {
         isActive: true,
         hasAtLeast: jest.fn().mockReturnValue(true),
         type: 'enterprise',
+      },
+    }),
+    core: Promise.resolve({
+      security: {
+        audit: {
+          logger: {
+            enabled: false,
+            log: jest.fn(),
+            includeSavedObjectNames: false,
+          },
+        },
       },
     }),
   };
@@ -105,6 +117,7 @@ describe('Execution Routes', () => {
       api: mockApi as any,
       logger: loggingSystemMock.createLogger(),
       spaces: mockSpaces as any,
+      audit: new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined }),
     } as unknown as RouteDependencies);
   });
 
@@ -258,7 +271,7 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should call api.testStep with yaml, ids, context, space, and request', async () => {
+    it('should call api.testStep with yaml, ids, executionContext, contextOverride, space, and request', async () => {
       mockApi.testStep.mockResolvedValue('step-exec-1');
       const h = handler('POST', path)!;
       const request = {
@@ -266,6 +279,7 @@ describe('Execution Routes', () => {
           stepId: 'step-1',
           workflowId: 'wf-1',
           workflowYaml: 'steps: []',
+          executionContext: { inputs: { foo: 'bar' }, event: { type: 'test' } },
           contextOverride: { x: 1 },
         },
       };
@@ -276,6 +290,7 @@ describe('Execution Routes', () => {
         'steps: []',
         'step-1',
         'wf-1',
+        { inputs: { foo: 'bar' }, event: { type: 'test' } },
         { x: 1 },
         'default',
         request

@@ -16,6 +16,10 @@ import type {
 } from '../../plugin_contract';
 import { securityTool } from './constants';
 import type { ExperimentalFeatures } from '../../../common';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
@@ -37,8 +41,9 @@ export function createDetectionRuleTool(
   const toolDefinition: BuiltinToolDefinition<typeof createDetectionRuleSchema> = {
     id: SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Creates a security detection rule based on natural language description. Analyzes the query, identifies relevant data sources, generates ES|QL queries, and produces a complete detection rule with metadata, tags, and scheduling information.',
+    description: `Creates a security detection rule based on natural language description. Analyzes the query, identifies relevant data sources, generates ES|QL queries, and produces a complete detection rule with metadata, tags, and scheduling information.
+
+The tool stores the result as an attachment (creating new or updating existing). Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.`,
     schema: createDetectionRuleSchema,
     tags: ['security', 'detection', 'rule-creation', 'siem'],
     availability: {
@@ -59,7 +64,10 @@ export function createDetectionRuleTool(
         });
       },
     },
-    handler: async ({ user_query: userQuery }, { esClient, modelProvider, request, events }) => {
+    handler: async (
+      { user_query: userQuery },
+      { esClient, modelProvider, request, events, attachments }
+    ) => {
       try {
         logger.debug(
           `Create detection rule tool invoked with query: ${userQuery.substring(0, 100)}...`
@@ -116,6 +124,34 @@ export function createDetectionRuleTool(
 
         logger.debug(`Successfully created detection rule: ${result.rule.name}`);
 
+        const attachmentData = {
+          text: JSON.stringify(result.rule),
+          attachmentLabel: result.rule.name,
+        };
+        const attachmentDescription = `Rule: ${result.rule.name}`;
+
+        let resultAttachmentId: string | undefined;
+        let version: number | undefined;
+
+        try {
+          const created = await attachments.add({
+            id: SECURITY_RULE_ATTACHMENT_ID,
+            type: SecurityAgentBuilderAttachments.rule,
+            data: attachmentData,
+            description: attachmentDescription,
+          });
+          resultAttachmentId = created.id;
+          version = created.current_version;
+          logger.debug(`Created rule attachment ${resultAttachmentId} v${version}`);
+        } catch (attachmentError) {
+          logger.error(
+            `Could not persist rule attachment: ${
+              attachmentError instanceof Error ? attachmentError.message : String(attachmentError)
+            }`
+          );
+          throw Error('Could not persist rule attachment');
+        }
+
         return {
           results: [
             {
@@ -123,6 +159,8 @@ export function createDetectionRuleTool(
               data: {
                 success: true,
                 rule: result.rule,
+                ...(resultAttachmentId && { attachmentId: resultAttachmentId }),
+                ...(version !== undefined && { version }),
               },
             },
           ],

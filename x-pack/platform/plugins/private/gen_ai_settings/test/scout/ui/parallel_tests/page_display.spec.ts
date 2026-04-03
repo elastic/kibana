@@ -9,7 +9,8 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/258770
+spaceTest.describe.skip(
   'GenAI Settings - Page Display',
   {
     tag: [

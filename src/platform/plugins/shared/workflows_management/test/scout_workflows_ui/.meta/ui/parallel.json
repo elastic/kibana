@@ -1,5 +1,5 @@
 {
-  "sha1": "c27d5e19bc0f3e2b9042a103e4c09c38e4d1db4d",
+  "sha1": "8a6d7640696f2c0ec663cd6946435da5a6f71b39",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -874,6 +874,34 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
         "line": 198,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-54e320e1fa67f55",
+      "title": "WorkflowsList/ImportExport should show file size error for oversized files",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 226,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-869d74e73bdbfd0",
+      "title": "WorkflowsList/ImportExport should show parse error callout when ZIP contains non-YAML entries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 247,
         "column": 7
       }
     },

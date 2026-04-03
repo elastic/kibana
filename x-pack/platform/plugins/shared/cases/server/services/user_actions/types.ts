@@ -120,7 +120,7 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
   connectorId?: string;
   action?: UserActionAction;
 }

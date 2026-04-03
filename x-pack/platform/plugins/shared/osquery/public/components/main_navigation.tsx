@@ -85,7 +85,7 @@ export const MainNavigation = () => {
                     href="https://ela.st/osquery-feedback"
                     target="_blank"
                     aria-label={feedbackButtonLabel}
-                    iconType="popout"
+                    iconType="external"
                     iconSide="right"
                     color="primary"
                     size="s"
@@ -106,7 +106,6 @@ export const MainNavigation = () => {
         {topBar}
         {isListView && (
           <div css={navCss}>
-            <EuiSpacer size="l" />
             <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem>
                 <EuiText>
@@ -187,7 +186,7 @@ export const MainNavigation = () => {
                   href="https://ela.st/osquery-feedback"
                   target="_blank"
                   aria-label={feedbackButtonLabel}
-                  iconType="popout"
+                  iconType="external"
                   iconSide="right"
                   color="primary"
                 >

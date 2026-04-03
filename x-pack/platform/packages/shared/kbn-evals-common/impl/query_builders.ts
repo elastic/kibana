@@ -48,6 +48,7 @@ interface RunBucket {
   git_commit_sha?: TermsBucket;
   total_repetitions?: { value?: number };
   build_url?: TermsBucket;
+  pull_request?: TermsBucket;
 }
 
 interface RunsListingAggregations {
@@ -67,7 +68,7 @@ export interface RunsListingResult {
     git_branch: string | null;
     git_commit_sha: string | null;
     total_repetitions: number;
-    ci: { build_url: string | undefined };
+    ci: { build_url: string | undefined; pull_request: string | undefined };
   }>;
   total: number;
 }
@@ -220,6 +221,7 @@ export const buildRunsListingAggregation = ({ page, perPage }: RunsListingPagina
       git_commit_sha: { terms: { field: 'run_metadata.git_commit_sha', size: 1 } },
       total_repetitions: { max: { field: 'run_metadata.total_repetitions' } },
       build_url: { terms: { field: 'ci.buildkite.build_url', size: 1 } },
+      pull_request: { terms: { field: 'ci.buildkite.pull_request', size: 1 } },
     },
   },
 });
@@ -270,6 +272,7 @@ export const parseRunsListingResponse = (
       total_repetitions: bucket.total_repetitions?.value ?? 1,
       ci: {
         build_url: firstBucket(bucket.build_url),
+        pull_request: firstBucket(bucket.pull_request),
       },
     };
   });

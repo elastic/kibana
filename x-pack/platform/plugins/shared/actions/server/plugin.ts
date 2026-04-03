@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -662,14 +663,23 @@ export class ActionsPlugin
       request: KibanaRequest
     ): Promise<string | undefined> => {
       try {
+        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+        if (!id) {
+          this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+          return undefined;
+        }
+
         const response = await core.elasticsearch.client
           .asScoped(request)
           .asCurrentUser.security.getApiKey({
             with_profile_uid: true,
+            id,
           });
+
         if (response.api_keys && response.api_keys.length > 0) {
           return response.api_keys[0].profile_uid;
         }
+
         logger.debug(
           `No API keys were returned from query, cannot retrieve associated profile id.`
         );

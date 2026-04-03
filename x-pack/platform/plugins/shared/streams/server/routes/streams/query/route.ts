@@ -14,6 +14,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
+import { upsertQueryStreamRequest } from '../../../oas_examples';
 
 /**
  * Schema for API request body - accepts esql for UX simplicity.
@@ -37,6 +38,7 @@ const readQueryStreamRoute = createServerRoute({
     summary: 'Get query stream settings',
     description: 'Fetches the query settings of a query stream definition',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
   },
@@ -91,8 +93,20 @@ const upsertQueryStreamRoute = createServerRoute({
     description: 'Upserts the query settings of a query stream definition',
     summary: 'Upsert query stream settings',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertQueryStream: { value: upsertQueryStreamRequest },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
