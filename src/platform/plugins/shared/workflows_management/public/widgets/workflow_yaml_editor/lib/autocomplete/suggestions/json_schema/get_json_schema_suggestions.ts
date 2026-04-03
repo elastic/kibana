@@ -23,7 +23,7 @@ function getEnumSuggestions(
   propertyName: string | null,
   workflowDefinition: ExtendedAutocompleteContext['workflowDefinition']
 ): monaco.languages.CompletionItem[] {
-  const manualTrigger = workflowDefinition?.triggers.find((trigger) => isManualTrigger(trigger));
+  const manualTrigger = workflowDefinition?.triggers?.find((trigger) => isManualTrigger(trigger));
   const inputs = manualTrigger?.inputs;
 
   if (!propertyName || !inputs) {
