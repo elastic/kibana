@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/streams-ai'
   - '@kbn/cps'
+  - '@kbn/deeplinks-management'
 tags:
   - plugin
   - prod

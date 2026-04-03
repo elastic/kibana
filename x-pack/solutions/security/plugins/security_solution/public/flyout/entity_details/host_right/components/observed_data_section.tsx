@@ -16,6 +16,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -26,6 +27,7 @@ import { useObservedHostFields } from '../hooks/use_observed_host_fields';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import type { HostItem } from '../../../../../common/search_strategy';
+import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import type { IdentityFields } from '../../../document_details/shared/utils';
 import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
@@ -159,8 +161,18 @@ const ObservedDataSectionContent = memo(
 
     const { jobNameById } = useInstalledSecurityJobNameById();
     const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
+    const euidApi = useEntityStoreEuidApi();
+    const euid = euidApi?.euid;
+    const hostNameFallback = observedHost.details?.host?.name?.[0];
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
-      criteriaFields: hostToCriteria(observedHost.details),
+      criteriaFields: hostToCriteria(observedHost.details, euid),
+      filterQuery: buildAnomaliesTableInfluencersFilterQuery({
+        euid,
+        entityType: 'host',
+        isScopedToEntity: true,
+        identityFields,
+        fallbackDisplayName: hostNameFallback,
+      }),
       startDate: from,
       endDate: to,
       skip: isInitializing,
