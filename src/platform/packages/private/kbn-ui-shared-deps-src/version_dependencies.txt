@@ -56,13 +56,8 @@ css-tree@1.1.3
 cssesc@3.0.0
 csstype@3.1.2
 dompurify@3.3.2
-<<<<<<< HEAD
-electron-to-chromium@1.5.250
-enhanced-resolve@5.18.3
-=======
 electron-to-chromium@1.5.321
-enhanced-resolve@5.20.0
->>>>>>> cc0e0d3bff17a097543fb8fa2ecd1f42843b3e3b (Update cssnano (main) (#259009))
+enhanced-resolve@5.18.3
 error-stack-parser@2.0.6
 es-module-lexer@1.5.4
 escalade@3.2.0

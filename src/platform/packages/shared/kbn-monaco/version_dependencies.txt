@@ -41,13 +41,8 @@ caniuse-lite@1.0.30001781
 chrome-trace-event@1.0.2
 commander@2.20.3
 common-path-prefix@3.0.0
-<<<<<<< HEAD
-electron-to-chromium@1.5.250
-enhanced-resolve@5.18.3
-=======
 electron-to-chromium@1.5.321
-enhanced-resolve@5.20.0
->>>>>>> cc0e0d3bff17a097543fb8fa2ecd1f42843b3e3b (Update cssnano (main) (#259009))
+enhanced-resolve@5.18.3
 es-module-lexer@1.5.4
 escalade@3.2.0
 eslint-scope@5.1.1
