@@ -37,25 +37,27 @@ export const ElasticInferenceServiceModelsHeader = () => {
       description={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.description', {
         defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
       })}
+      paddingSize="none"
+      bottomBorder={true}
       rightSideItems={[
         ...(cloud?.isCloudEnabled && billingUrl
           ? [
-              <EuiButton
-                href={billingUrl}
-                target="_blank"
-                iconType="external"
-                aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.ariaLabel',
-                  {
-                    defaultMessage: 'Click to go Cloud usage details',
-                  }
-                )}
-              >
-                {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
-                  defaultMessage: 'View Cloud usage',
-                })}
-              </EuiButton>,
-            ]
+            <EuiButton
+              href={billingUrl}
+              target="_blank"
+              iconType="external"
+              aria-label={i18n.translate(
+                'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.ariaLabel',
+                {
+                  defaultMessage: 'Click to go Cloud usage details',
+                }
+              )}
+            >
+              {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
+                defaultMessage: 'View Cloud usage',
+              })}
+            </EuiButton>,
+          ]
           : []),
         <EuiButtonEmpty
           iconType="documentation"
