@@ -19,6 +19,7 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/server';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
+import { toLensStateFilterLanguage } from '../../columns/filter';
 import type {
   DataLayerType,
   ReferenceLineLayerType,
@@ -152,7 +153,11 @@ function buildByValueAnnotationLayer(
       return {
         type: 'query',
         id: `${layer.type}_event_${index}`,
-        filter: { type: 'kibana_query', ...annotation.query },
+        filter: {
+          type: 'kibana_query',
+          query: annotation.query.expression,
+          language: toLensStateFilterLanguage(annotation.query.language),
+        },
         label: annotation.label ?? 'Event',
         color: annotation.color?.color,
         ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),

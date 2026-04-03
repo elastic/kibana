@@ -61,7 +61,6 @@ export const esqlLegacyMetric: LegacyMetricState = {
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
   metric: {
-    operation: 'value',
     column: 'count',
   },
   sampling: 1,
@@ -147,7 +146,6 @@ export const comprehensiveEsqlLegacyMetric: LegacyMetricState = {
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },
   metric: {
-    operation: 'value',
     column: 'countA',
     labels: { alignment: 'top' },
     values: { alignment: 'right' },

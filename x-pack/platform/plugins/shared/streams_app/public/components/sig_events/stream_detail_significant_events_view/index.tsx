@@ -113,6 +113,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       void Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['features', definition.stream.name] }),
+        queryClient.invalidateQueries({
+          queryKey: ['onboardingTaskStatus', definition.stream.name],
+        }),
       ]);
     },
     [definition.stream.name, queryClient, toasts]
