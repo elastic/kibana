@@ -17,6 +17,7 @@ jest.mock('./header', () => ({ Header: () => <div data-test-subj="mock-header" /
 jest.mock('./tabs/overview_tab', () => ({
   OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
 }));
+jest.mock('./footer', () => ({ Footer: () => <div data-test-subj="mock-footer" /> }));
 
 const createAlertHit = (): DataTableRecord =>
   ({
@@ -36,7 +37,11 @@ describe('<DocumentFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <DocumentFlyout hit={createAlertHit()} renderCellActions={jest.fn()} />
+        <DocumentFlyout
+          hit={createAlertHit()}
+          onAlertUpdated={jest.fn()}
+          renderCellActions={jest.fn()}
+        />
       </TestProviders>
     );
 
@@ -48,11 +53,33 @@ describe('<DocumentFlyout />', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <DocumentFlyout hit={createAlertHit()} renderCellActions={jest.fn()} />
+        <DocumentFlyout
+          hit={createAlertHit()}
+          onAlertUpdated={jest.fn()}
+          renderCellActions={jest.fn()}
+        />
       </TestProviders>
     );
 
     expect(getByTestId('document-overview-loading')).toBeInTheDocument();
     expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+  });
+
+  it('renders the header, overview tab and footer', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentFlyout
+          hit={createAlertHit()}
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('mock-header')).toBeInTheDocument();
+    expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
+    expect(getByTestId('mock-footer')).toBeInTheDocument();
   });
 });

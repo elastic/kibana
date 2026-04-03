@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import type { WatchlistEntitySourceClient } from '../infra';
 import { createSourcesSyncService } from './sources_sync';
 import type { SyncSourceEntry } from './sources_sync';
@@ -16,26 +17,30 @@ export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
 export const createIndexSyncService = ({
   esClient,
+  crudClient,
   logger,
-  targetIndex,
   descriptorClient,
+  watchlist,
 }: {
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
   logger: Logger;
-  targetIndex: string;
   descriptorClient: WatchlistEntitySourceClient;
+  watchlist: { name: string; id: string; index: string };
 }) => {
   const updateDetectionService = createUpdateDetectionService({
     esClient,
+    crudClient,
     logger,
-    targetIndex,
     descriptorClient,
+    watchlist,
   });
   const deletionDetectionService = createDeletionDetectionService({
     esClient,
+    crudClient,
     logger,
-    targetIndex,
     descriptorClient,
+    watchlist,
   });
   const sourcesSyncService = createSourcesSyncService({ logger });
 
@@ -43,14 +48,15 @@ export const createIndexSyncService = ({
     await sourcesSyncService.syncBySourceIds({
       descriptorClient,
       sources,
-      process: async (source, entityStoreEntityIdsByType, correlationMap) => {
+      process: async (source, entityStoreEntityIdsByType, correlationMap, watchlistsByEuid) => {
         const entities = await updateDetectionService.updateDetection(
           source,
           entityStoreEntityIdsByType,
-          correlationMap
+          correlationMap,
+          watchlistsByEuid
         );
         const currentEuids = entities.map((e) => e.euid);
-        await deletionDetectionService.deletionDetection(source, currentEuids);
+        await deletionDetectionService.deletionDetection(source, currentEuids, watchlistsByEuid);
       },
     });
   };

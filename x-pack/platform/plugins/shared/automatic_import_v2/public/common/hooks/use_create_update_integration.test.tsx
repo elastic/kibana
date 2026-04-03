@@ -10,15 +10,12 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useCreateUpdateIntegration } from './use_create_update_integration';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as api from '../lib/api';
-import { PLUGIN_ID } from '../../../common/constants';
 
 jest.mock('../lib/api');
 const mockCreateIntegration = api.createIntegration as jest.Mock;
 
-const mockNavigateToApp = jest.fn();
 const mockToastsAddSuccess = jest.fn();
 const mockToastsAddError = jest.fn();
-const mockCloseCreateDataStreamFlyout = jest.fn();
 
 jest.mock('./use_kibana', () => ({
   useKibana: () => ({
@@ -30,16 +27,7 @@ jest.mock('./use_kibana', () => ({
           addError: mockToastsAddError,
         },
       },
-      application: {
-        navigateToApp: mockNavigateToApp,
-      },
     },
-  }),
-}));
-
-jest.mock('../../components/integration_management/contexts', () => ({
-  useUIState: () => ({
-    closeCreateDataStreamFlyout: mockCloseCreateDataStreamFlyout,
   }),
 }));
 
@@ -133,50 +121,6 @@ describe('useCreateUpdateIntegration', () => {
         })
       );
     });
-
-    it('should navigate to edit page after creation', async () => {
-      mockCreateIntegration.mockResolvedValue({
-        integration_id: 'created-id',
-      });
-
-      const { result } = renderHook(() => useCreateUpdateIntegration(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        await result.current.createUpdateIntegrationMutation.mutateAsync({
-          connectorId: 'c1',
-          integrationId: 'i1',
-          title: 'Test',
-          description: 'Test',
-        });
-      });
-
-      expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-        path: '/edit/created-id',
-      });
-    });
-
-    it('should close the data stream flyout on success', async () => {
-      mockCreateIntegration.mockResolvedValue({
-        integration_id: 'new-id',
-      });
-
-      const { result } = renderHook(() => useCreateUpdateIntegration(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        await result.current.createUpdateIntegrationMutation.mutateAsync({
-          connectorId: 'c1',
-          integrationId: 'i1',
-          title: 'Test',
-          description: 'Test',
-        });
-      });
-
-      expect(mockCloseCreateDataStreamFlyout).toHaveBeenCalled();
-    });
   });
 
   describe('failed mutation', () => {
@@ -241,34 +185,6 @@ describe('useCreateUpdateIntegration', () => {
       await waitFor(() => {
         expect(result.current.error).toBeInstanceOf(Error);
       });
-
-      consoleSpy.mockRestore();
-    });
-
-    it('should not navigate on failure', async () => {
-      // Suppress expected console.error from React Query's onError callback
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-      mockCreateIntegration.mockRejectedValue(new Error('Server error'));
-
-      const { result } = renderHook(() => useCreateUpdateIntegration(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        try {
-          await result.current.createUpdateIntegrationMutation.mutateAsync({
-            connectorId: 'c1',
-            integrationId: 'i1',
-            title: 'Test',
-            description: 'Test',
-          });
-        } catch {
-          // Expected to throw
-        }
-      });
-
-      expect(mockNavigateToApp).not.toHaveBeenCalled();
 
       consoleSpy.mockRestore();
     });

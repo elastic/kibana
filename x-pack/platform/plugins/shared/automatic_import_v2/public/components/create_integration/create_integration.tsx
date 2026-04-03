@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useLocation } from 'react-router-dom';
@@ -13,7 +13,6 @@ import { IntegrationManagement } from '../integration_management/integration_man
 import { UIStateProvider } from '../integration_management/contexts';
 import { TelemetryContextProvider } from '../telemetry_context';
 import { CreateIntegrationUpload } from './create_integration_upload';
-import { ManageIntegrations } from './manage_integrations';
 
 const queryClient = new QueryClient();
 
@@ -21,14 +20,10 @@ interface CreateIntegrationProps {
   services: Services;
 }
 const CreateIntegrationContents = React.memo(() => {
-  const { pathname, search } = useLocation();
-  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const { pathname } = useLocation();
 
   if (pathname.endsWith('/upload')) {
     return <CreateIntegrationUpload />;
-  }
-  if (params.get('view') === 'manage') {
-    return <ManageIntegrations />;
   }
   return <IntegrationManagement />;
 });
