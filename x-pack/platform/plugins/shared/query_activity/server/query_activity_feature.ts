@@ -17,6 +17,10 @@ export const queryActivityFeature: KibanaFeatureConfig = {
   name: i18n.translate('xpack.queryActivity.feature.featureName', {
     defaultMessage: 'Query activity',
   }),
+  privilegesTooltip: i18n.translate('xpack.queryActivity.feature.privilegesTooltip', {
+    defaultMessage:
+      'Granting this feature privilege shows the Query activity navigation option, but cluster privileges (cluster:monitor or cluster:manage) are also required to access the page.',
+  }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
   management: {
