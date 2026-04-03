@@ -90,7 +90,8 @@
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
-    "@kbn/shared-ux-page-kibana-template"
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }
