@@ -5,23 +5,23 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: limit
-    type: number
-    required: false
-    description: Maximum number of escalation policies to return
-  - name: query
-    type: string
-    required: false
-    description: 'Free-text search string that searches across name and description fields (e.g., "production" or "on-call")'
-  - name: user_ids
-    type: array
-    required: false
-    description: Filter escalation policies by user IDs
-  - name: team_ids
-    type: array
-    required: false
-    description: Filter escalation policies by team IDs
+    inputs:
+      - name: limit
+        type: number
+        required: false
+        description: Maximum number of escalation policies to return
+      - name: query
+        type: string
+        required: false
+        description: 'Free-text search string that searches across name and description fields (e.g., "production" or "on-call")'
+      - name: user_ids
+        type: array
+        required: false
+        description: Filter escalation policies by user IDs
+      - name: team_ids
+        type: array
+        required: false
+        description: Filter escalation policies by team IDs
 steps:
   - name: list-escalation-policies
     type: pagerduty_mcp.listEscalationPolicies

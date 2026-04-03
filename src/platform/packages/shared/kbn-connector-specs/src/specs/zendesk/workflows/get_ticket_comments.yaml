@@ -6,21 +6,21 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: ticket_id
-    type: string
-    required: true
-    description: 'The Zendesk ticket ID'
-  - name: page
-    type: number
-    required: false
-    default: 1
-    description: 'Page number for pagination'
-  - name: per_page
-    type: number
-    required: false
-    default: 25
-    description: 'Comments per page (max 100)'
+    inputs:
+      - name: ticket_id
+        type: string
+        required: true
+        description: 'The Zendesk ticket ID'
+      - name: page
+        type: number
+        required: false
+        default: 1
+        description: 'Page number for pagination'
+      - name: per_page
+        type: number
+        required: false
+        default: 25
+        description: 'Comments per page (max 100)'
 steps:
   - name: get-ticket-comments
     type: zendesk.getTicketComments

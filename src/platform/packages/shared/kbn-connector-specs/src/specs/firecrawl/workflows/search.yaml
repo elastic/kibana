@@ -5,13 +5,13 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: query
-    type: string
-  - name: limit
-    type: number
-    required: false
-    default: 5
+    inputs:
+      - name: query
+        type: string
+      - name: limit
+        type: number
+        required: false
+        default: 5
 steps:
   - name: search-web
     type: firecrawl.search

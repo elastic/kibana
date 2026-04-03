@@ -5,23 +5,23 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: query
-    type: string
-    required: true
-    description: "Search query with KQL syntax support (e.g., \"from:bob sent>2024-01-01\")"
-  - name: from
-    type: number
-    required: false
-    description: "Zero-based offset for pagination (default: 0). Combine with size to page through results."
-  - name: size
-    type: number
-    required: false
-    description: "Number of results to return (max 25; default: 25 when omitted)"
-  - name: enable_top_results
-    type: boolean
-    required: false
-    description: "Sort results by relevance (default: false)"
+    inputs:
+      - name: query
+        type: string
+        required: true
+        description: "Search query with KQL syntax support (e.g., \"from:bob sent>2024-01-01\")"
+      - name: from
+        type: number
+        required: false
+        description: "Zero-based offset for pagination (default: 0). Combine with size to page through results."
+      - name: size
+        type: number
+        required: false
+        description: "Number of results to return (max 25; default: 25 when omitted)"
+      - name: enable_top_results
+        type: boolean
+        required: false
+        description: "Sort results by relevance (default: false)"
 steps:
   - name: search-messages
     type: microsoft-teams.searchMessages

@@ -11,20 +11,20 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: file_key
-    type: string
-    required: true
-    description: 'The file key from a Figma file URL'
-  - name: node_ids
-    type: string
-    required: false
-    description: 'Comma-separated node IDs to retrieve specific nodes (e.g., "1:2,1:3")'
-  - name: depth
-    type: number
-    required: false
-    default: 2
-    description: 'How deep into the document tree to traverse (1 = pages only, 2 = pages + top-level objects). Omit or increase for full tree.'
+    inputs:
+      - name: file_key
+        type: string
+        required: true
+        description: 'The file key from a Figma file URL'
+      - name: node_ids
+        type: string
+        required: false
+        description: 'Comma-separated node IDs to retrieve specific nodes (e.g., "1:2,1:3")'
+      - name: depth
+        type: number
+        required: false
+        default: 2
+        description: 'How deep into the document tree to traverse (1 = pages only, 2 = pages + top-level objects). Omit or increase for full tree.'
 steps:
   - name: get-file
     type: figma.getFile

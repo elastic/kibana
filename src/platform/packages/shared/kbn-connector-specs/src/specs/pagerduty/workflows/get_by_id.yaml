@@ -5,20 +5,20 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: id
-    type: string
-    required: true
-    description: The ID of the item to retrieve (schedule, incident, escalation policy, or team ID)
-  - name: item_type
-    type: choice
-    required: true
-    description: 'The type of item to retrieve'
-    options:
-      - schedule
-      - incident
-      - escalation_policy
-      - team
+    inputs:
+      - name: id
+        type: string
+        required: true
+        description: The ID of the item to retrieve (schedule, incident, escalation policy, or team ID)
+      - name: item_type
+        type: choice
+        required: true
+        description: 'The type of item to retrieve'
+        options:
+          - schedule
+          - incident
+          - escalation_policy
+          - team
 steps:
   - name: if-schedule
     type: if

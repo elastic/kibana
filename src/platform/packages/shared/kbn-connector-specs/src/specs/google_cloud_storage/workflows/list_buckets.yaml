@@ -5,22 +5,22 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: project
-    type: string
-    description: Google Cloud project ID. Use list_projects to discover available project IDs.
-  - name: maxResults
-    type: number
-    required: false
-    description: Maximum number of buckets to return (default 100, max 1000)
-  - name: pageToken
-    type: string
-    required: false
-    description: "Pagination token from a previous response to get the next page of results"
-  - name: prefix
-    type: string
-    required: false
-    description: Filter to only return buckets whose names begin with this prefix
+    inputs:
+      - name: project
+        type: string
+        description: Google Cloud project ID. Use list_projects to discover available project IDs.
+      - name: maxResults
+        type: number
+        required: false
+        description: Maximum number of buckets to return (default 100, max 1000)
+      - name: pageToken
+        type: string
+        required: false
+        description: "Pagination token from a previous response to get the next page of results"
+      - name: prefix
+        type: string
+        required: false
+        description: Filter to only return buckets whose names begin with this prefix
 steps:
   - name: list_buckets
     type: google_cloud_storage.listBuckets

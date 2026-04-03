@@ -5,11 +5,11 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: pageToken
-    type: string
-    required: false
-    description: "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page."
+    inputs:
+      - name: pageToken
+        type: string
+        required: false
+        description: "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page."
 steps:
   - name: list_calendars
     type: google_calendar.listCalendars

@@ -5,39 +5,39 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: resourceType
-    type: choice
-    options:
-      - 'space'
-      - 'page'
-  - name: limit
-    type: number
-    required: false
-  - name: cursor
-    type: string
-    required: false
-  - name: ids
-    type: string
-    required: false
-  - name: keys
-    type: string
-    required: false
-  - name: type
-    type: string
-    required: false
-  - name: status
-    type: string
-    required: false
-  - name: spaceId
-    type: string
-    required: false
-  - name: title
-    type: string
-    required: false
-  - name: bodyFormat
-    type: string
-    required: false
+    inputs:
+      - name: resourceType
+        type: choice
+        options:
+          - 'space'
+          - 'page'
+      - name: limit
+        type: number
+        required: false
+      - name: cursor
+        type: string
+        required: false
+      - name: ids
+        type: string
+        required: false
+      - name: keys
+        type: string
+        required: false
+      - name: type
+        type: string
+        required: false
+      - name: status
+        type: string
+        required: false
+      - name: spaceId
+        type: string
+        required: false
+      - name: title
+        type: string
+        required: false
+      - name: bodyFormat
+        type: string
+        required: false
 steps:
   - name: route-by-type
     type: if

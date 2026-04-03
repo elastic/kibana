@@ -5,24 +5,24 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: table_name
-    type: string
-    required: true
-    description: 'The ServiceNow table the record belongs to (e.g., incident, change_request, problem)'
-  - name: record_sys_id
-    type: string
-    required: true
-    description: 'The sys_id of the record whose comments and work notes to retrieve'
-  - name: limit
-    type: number
-    required: false
-    default: 20
-    description: 'Maximum number of journal entries to return'
-  - name: offset
-    type: number
-    required: false
-    description: 'Offset for pagination'
+    inputs:
+      - name: table_name
+        type: string
+        required: true
+        description: 'The ServiceNow table the record belongs to (e.g., incident, change_request, problem)'
+      - name: record_sys_id
+        type: string
+        required: true
+        description: 'The sys_id of the record whose comments and work notes to retrieve'
+      - name: limit
+        type: number
+        required: false
+        default: 20
+        description: 'Maximum number of journal entries to return'
+      - name: offset
+        type: number
+        required: false
+        description: 'Offset for pagination'
 steps:
   - name: get-comments
     type: servicenow_search.getComments

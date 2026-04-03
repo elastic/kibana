@@ -5,7 +5,7 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs: []
+    inputs: []
 steps:
   - name: get-user-data
     type: pagerduty_mcp.getUserData

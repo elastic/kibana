@@ -5,34 +5,34 @@ tags: ["agent-builder-tool"]
 enabled: true
 triggers:
   - type: "manual"
-inputs:
-  - name: get_action
-    type: choice
-    options:
-      - "getMeetingDetails"
-      - "getPastMeetingDetails"
-      - "getMeetingRecordings"
-      - "getMeetingParticipants"
-      - "getMeetingRegistrants"
-    required: true
-    description: "getMeetingDetails — topic, agenda, start time, duration, host, join URL, and settings for a scheduled or recurring meeting. getPastMeetingDetails — summary stats (total minutes, participant count, start/end times) for a meeting that has already ended. getMeetingRecordings — cloud recording files with recording_type, download_url, file_type, file_size, and status. getMeetingParticipants — attendees of a past meeting with join/leave times and duration (past meetings only, supports page_size and next_page_token). getMeetingRegistrants — people registered for a meeting (upcoming or past with registration enabled, supports status, page_size, and next_page_token)."
-  - name: meeting_id
-    type: string
-    required: true
-    description: "The meeting ID or UUID."
-  - name: status
-    type: string
-    required: false
-    description: "Registration status filter for getMeetingRegistrants. Valid values: pending, approved, denied. Defaults to approved."
-  - name: page_size
-    type: number
-    required: false
-    default: 20
-    description: "Number of results per page (1-300). Used by getMeetingParticipants and getMeetingRegistrants."
-  - name: next_page_token
-    type: string
-    required: false
-    description: "Pagination token from a previous response. Used by getMeetingParticipants and getMeetingRegistrants."
+    inputs:
+      - name: get_action
+        type: choice
+        options:
+          - "getMeetingDetails"
+          - "getPastMeetingDetails"
+          - "getMeetingRecordings"
+          - "getMeetingParticipants"
+          - "getMeetingRegistrants"
+        required: true
+        description: "getMeetingDetails — topic, agenda, start time, duration, host, join URL, and settings for a scheduled or recurring meeting. getPastMeetingDetails — summary stats (total minutes, participant count, start/end times) for a meeting that has already ended. getMeetingRecordings — cloud recording files with recording_type, download_url, file_type, file_size, and status. getMeetingParticipants — attendees of a past meeting with join/leave times and duration (past meetings only, supports page_size and next_page_token). getMeetingRegistrants — people registered for a meeting (upcoming or past with registration enabled, supports status, page_size, and next_page_token)."
+      - name: meeting_id
+        type: string
+        required: true
+        description: "The meeting ID or UUID."
+      - name: status
+        type: string
+        required: false
+        description: "Registration status filter for getMeetingRegistrants. Valid values: pending, approved, denied. Defaults to approved."
+      - name: page_size
+        type: number
+        required: false
+        default: 20
+        description: "Number of results per page (1-300). Used by getMeetingParticipants and getMeetingRegistrants."
+      - name: next_page_token
+        type: string
+        required: false
+        description: "Pagination token from a previous response. Used by getMeetingParticipants and getMeetingRegistrants."
 steps:
   - name: get-meeting-details
     type: zoom.getMeetingDetails

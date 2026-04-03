@@ -5,22 +5,22 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: download_action
-    type: choice
-    options:
-      - "downloadFile"
-      - "getSitePageContents"
-    required: true
-    description: "Required. Which action to perform: 'downloadFile' to fetch file content by server-relative path; 'getSitePageContents' to fetch a site page by integer ID."
-  - name: path
-    type: string
-    required: false
-    description: "Server-relative URL of the file (for downloadFile)"
-  - name: page_id
-    type: number
-    required: false
-    description: "Integer item ID of the site page (for getSitePageContents)"
+    inputs:
+      - name: download_action
+        type: choice
+        options:
+          - "downloadFile"
+          - "getSitePageContents"
+        required: true
+        description: "Required. Which action to perform: 'downloadFile' to fetch file content by server-relative path; 'getSitePageContents' to fetch a site page by integer ID."
+      - name: path
+        type: string
+        required: false
+        description: "Server-relative URL of the file (for downloadFile)"
+      - name: page_id
+        type: number
+        required: false
+        description: "Integer item ID of the site page (for getSitePageContents)"
 steps:
   - name: download-file-flow
     type: if

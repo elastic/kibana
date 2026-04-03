@@ -5,15 +5,15 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: eventId
-    type: string
-    description: The ID of the event to retrieve. Use event IDs from search or list results.
-  - name: calendarId
-    type: string
-    required: false
-    default: primary
-    description: "Calendar ID containing the event. Use 'primary' for the user's primary calendar, or a person's email address to access their calendar."
+    inputs:
+      - name: eventId
+        type: string
+        description: The ID of the event to retrieve. Use event IDs from search or list results.
+      - name: calendarId
+        type: string
+        required: false
+        default: primary
+        description: "Calendar ID containing the event. Use 'primary' for the user's primary calendar, or a person's email address to access their calendar."
 steps:
   - name: get_event
     type: google_calendar.getEvent

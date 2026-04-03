@@ -5,15 +5,15 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: jql
-    type: string
-  - name: maxResults
-    type: number
-    required: false
-  - name: nextPageToken
-    type: string
-    required: false
+    inputs:
+      - name: jql
+        type: string
+      - name: maxResults
+        type: number
+        required: false
+      - name: nextPageToken
+        type: string
+        required: false
 steps:
   - name: search-issues-with-jql
     type: jira-cloud.searchIssuesWithJql

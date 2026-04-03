@@ -5,43 +5,43 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: list_action
-    type: choice
-    options:
-      - "getAllSites"
-      - "getSite"
-      - "getSitePages"
-      - "getSiteDrives"
-      - "getSiteLists"
-      - "getSiteListItems"
-      - "getDriveItems"
-    required: true
-    description: "The list action to perform"
-  - name: search
-    type: string
-    required: false
-    description: "Used by getAllSites. Optional with app-only auth (client credentials). With delegated auth (authorization code), falls back to site search — provide a keyword or omit for wildcard."
-  - name: site_id
-    type: string
-    required: false
-    description: "Required for getSite (or use relative_url instead), getSitePages, getSiteDrives, getSiteLists, getSiteListItems. Use getAllSites to discover site IDs."
-  - name: relative_url
-    type: string
-    required: false
-    description: "Alternative to site_id for getSite. Format: 'contoso.sharepoint.com:/sites/hr:'"
-  - name: list_id
-    type: string
-    required: false
-    description: "Required for getSiteListItems. Use getSiteLists to discover list IDs for a site."
-  - name: drive_id
-    type: string
-    required: false
-    description: "Required for getDriveItems. Use getSiteDrives to discover drive IDs for a site."
-  - name: path
-    type: string
-    required: false
-    description: "Optional for getDriveItems. Relative path within the drive root (e.g. 'Folder/Subfolder'). Omit to list root."
+    inputs:
+      - name: list_action
+        type: choice
+        options:
+          - "getAllSites"
+          - "getSite"
+          - "getSitePages"
+          - "getSiteDrives"
+          - "getSiteLists"
+          - "getSiteListItems"
+          - "getDriveItems"
+        required: true
+        description: "The list action to perform"
+      - name: search
+        type: string
+        required: false
+        description: "Used by getAllSites. Optional with app-only auth (client credentials). With delegated auth (authorization code), falls back to site search — provide a keyword or omit for wildcard."
+      - name: site_id
+        type: string
+        required: false
+        description: "Required for getSite (or use relative_url instead), getSitePages, getSiteDrives, getSiteLists, getSiteListItems. Use getAllSites to discover site IDs."
+      - name: relative_url
+        type: string
+        required: false
+        description: "Alternative to site_id for getSite. Format: 'contoso.sharepoint.com:/sites/hr:'"
+      - name: list_id
+        type: string
+        required: false
+        description: "Required for getSiteListItems. Use getSiteLists to discover list IDs for a site."
+      - name: drive_id
+        type: string
+        required: false
+        description: "Required for getDriveItems. Use getSiteDrives to discover drive IDs for a site."
+      - name: path
+        type: string
+        required: false
+        description: "Optional for getDriveItems. Relative path within the drive root (e.g. 'Folder/Subfolder'). Omit to list root."
 steps:
   - name: get-all-sites
     type: sharepoint-online.getAllSites

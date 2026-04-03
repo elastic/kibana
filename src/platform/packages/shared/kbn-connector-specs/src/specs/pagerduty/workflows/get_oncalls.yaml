@@ -5,40 +5,40 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: limit
-    type: number
-    required: false
-    description: Maximum number of on-call results to return (default 20)
-    default: 20
-  - name: schedule_ids
-    type: array
-    required: false
-    description: 'List of schedule IDs to filter by (e.g., ["P123ABC", "P456DEF"])'
-  - name: user_ids
-    type: array
-    required: false
-    description: 'List of user IDs to filter by'
-  - name: escalation_policy_ids
-    type: array
-    required: false
-    description: 'List of escalation policy IDs to filter by'
-  - name: since
-    type: string
-    required: false
-    description: 'Start of time range for on-call periods (ISO 8601 format)'
-  - name: until
-    type: string
-    required: false
-    description: 'End of time range for on-call periods (ISO 8601 format)'
-  - name: time_zone
-    type: string
-    required: false
-    description: 'Time zone in which dates in the result will be rendered (IANA time zone database name)'
-  - name: earliest
-    type: boolean
-    required: false
-    description: 'If true, return only the earliest on-call for each user+escalation policy combination (default true)'
+    inputs:
+      - name: limit
+        type: number
+        required: false
+        description: Maximum number of on-call results to return (default 20)
+        default: 20
+      - name: schedule_ids
+        type: array
+        required: false
+        description: 'List of schedule IDs to filter by (e.g., ["P123ABC", "P456DEF"])'
+      - name: user_ids
+        type: array
+        required: false
+        description: 'List of user IDs to filter by'
+      - name: escalation_policy_ids
+        type: array
+        required: false
+        description: 'List of escalation policy IDs to filter by'
+      - name: since
+        type: string
+        required: false
+        description: 'Start of time range for on-call periods (ISO 8601 format)'
+      - name: until
+        type: string
+        required: false
+        description: 'End of time range for on-call periods (ISO 8601 format)'
+      - name: time_zone
+        type: string
+        required: false
+        description: 'Time zone in which dates in the result will be rendered (IANA time zone database name)'
+      - name: earliest
+        type: boolean
+        required: false
+        description: 'If true, return only the earliest on-call for each user+escalation policy combination (default true)'
 steps:
   - name: list-oncalls
     type: pagerduty_mcp.listOncalls

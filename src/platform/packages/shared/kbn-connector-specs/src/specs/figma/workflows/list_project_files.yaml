@@ -8,11 +8,11 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: project_id
-    type: string
-    required: true
-    description: 'The Figma project ID'
+    inputs:
+      - name: project_id
+        type: string
+        required: true
+        description: 'The Figma project ID'
 steps:
   - name: list-project-files
     type: figma.listProjectFiles

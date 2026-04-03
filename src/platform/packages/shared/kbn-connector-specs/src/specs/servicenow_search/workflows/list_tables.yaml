@@ -5,20 +5,20 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: query
-    type: string
-    required: false
-    description: 'Optional filter to search table names or labels (e.g., "incident", "CMDB", "asset")'
-  - name: limit
-    type: number
-    required: false
-    default: 50
-    description: 'Maximum number of tables to return'
-  - name: offset
-    type: number
-    required: false
-    description: 'Offset for pagination'
+    inputs:
+      - name: query
+        type: string
+        required: false
+        description: 'Optional filter to search table names or labels (e.g., "incident", "CMDB", "asset")'
+      - name: limit
+        type: number
+        required: false
+        default: 50
+        description: 'Maximum number of tables to return'
+      - name: offset
+        type: number
+        required: false
+        description: 'Offset for pagination'
 steps:
   - name: list-tables
     type: servicenow_search.listTables

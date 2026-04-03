@@ -5,9 +5,9 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: data_source_id
-    type: string
+    inputs:
+      - name: data_source_id
+        type: string
 steps:
   - name: get-data-source
     type: notion.getDataSource

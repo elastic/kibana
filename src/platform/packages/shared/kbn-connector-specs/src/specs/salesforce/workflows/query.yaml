@@ -5,15 +5,15 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: soql
-    type: string
-    required: true
-    description: "SOQL query string, e.g. SELECT Id, Name FROM Account LIMIT 10"
-  - name: next_records_url
-    type: string
-    required: false
-    description: "Pagination URL from previous response's nextRecordsUrl"
+    inputs:
+      - name: soql
+        type: string
+        required: true
+        description: "SOQL query string, e.g. SELECT Id, Name FROM Account LIMIT 10"
+      - name: next_records_url
+        type: string
+        required: false
+        description: "Pagination URL from previous response's nextRecordsUrl"
 steps:
   - name: query
     type: salesforce.query

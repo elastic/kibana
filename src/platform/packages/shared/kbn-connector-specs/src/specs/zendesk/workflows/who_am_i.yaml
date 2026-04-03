@@ -6,7 +6,7 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs: []
+    inputs: []
 steps:
   - name: who-am-i
     type: zendesk.whoAmI

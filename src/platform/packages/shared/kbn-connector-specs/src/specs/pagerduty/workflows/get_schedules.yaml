@@ -5,27 +5,27 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: limit
-    type: number
-    required: false
-    description: Maximum number of schedules to return
-  - name: query
-    type: string
-    required: false
-    description: Free-text search string that searches across name and description fields (e.g., "primary" or "weekend")
-  - name: include
-    type: array
-    required: false
-    description: "Array of related resources to include, valid values are: (schedule_layers,overrides_subschedule,final_schedule)"
-  - name: team_ids
-    type: array
-    required: false
-    description: Filter schedules by team IDs
-  - name: user_ids
-    type: array
-    required: false
-    description: Filter schedules by user IDs
+    inputs:
+      - name: limit
+        type: number
+        required: false
+        description: Maximum number of schedules to return
+      - name: query
+        type: string
+        required: false
+        description: Free-text search string that searches across name and description fields (e.g., "primary" or "weekend")
+      - name: include
+        type: array
+        required: false
+        description: "Array of related resources to include, valid values are: (schedule_layers,overrides_subschedule,final_schedule)"
+      - name: team_ids
+        type: array
+        required: false
+        description: Filter schedules by team IDs
+      - name: user_ids
+        type: array
+        required: false
+        description: Filter schedules by user IDs
 steps:
   - name: list-schedules
     type: pagerduty_mcp.listSchedules

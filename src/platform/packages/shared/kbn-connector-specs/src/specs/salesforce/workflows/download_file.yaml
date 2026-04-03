@@ -5,11 +5,11 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: content_version_id
-    type: string
-    required: true
-    description: "ContentVersion record Id (15 or 18 chars). Get from SOQL on ContentVersion or ContentDocumentLink."
+    inputs:
+      - name: content_version_id
+        type: string
+        required: true
+        description: "ContentVersion record Id (15 or 18 chars). Get from SOQL on ContentVersion or ContentDocumentLink."
 steps:
   - name: download-file
     type: salesforce.download_file

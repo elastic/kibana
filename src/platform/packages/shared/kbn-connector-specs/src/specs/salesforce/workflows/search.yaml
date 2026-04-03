@@ -5,19 +5,19 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: search_term
-    type: string
-    required: true
-    description: "Text to search for, e.g. Acme Corp or Q4 renewal"
-  - name: returning
-    type: string
-    required: true
-    description: "Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep results smaller. Use describe to discover names."
-  - name: next_records_url
-    type: string
-    required: false
-    description: "URL from previous response's nextRecordsUrl for pagination"
+    inputs:
+      - name: search_term
+        type: string
+        required: true
+        description: "Text to search for, e.g. Acme Corp or Q4 renewal"
+      - name: returning
+        type: string
+        required: true
+        description: "Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep results smaller. Use describe to discover names."
+      - name: next_records_url
+        type: string
+        required: false
+        description: "URL from previous response's nextRecordsUrl for pagination"
 steps:
   - name: search
     type: salesforce.search

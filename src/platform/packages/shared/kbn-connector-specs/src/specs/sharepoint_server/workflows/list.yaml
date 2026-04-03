@@ -5,24 +5,24 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: list_action
-    type: choice
-    options:
-      - "getWeb"
-      - "getLists"
-      - "getListItems"
-      - "getFolderContents"
-    required: true
-    description: "Required. Which action to perform. Choose one: getWeb, getLists, getListItems, getFolderContents."
-  - name: list_title
-    type: string
-    required: false
-    description: "Required when list_action is 'getListItems'. Exact display name of the list (the Title field from getLists). Example: 'Documents', 'Tasks'."
-  - name: path
-    type: string
-    required: false
-    description: "Server-relative URL of the folder (required for getFolderContents). Get this from getLists (RootFolder.ServerRelativeUrl) or a previous getFolderContents result. Starts with '/'."
+    inputs:
+      - name: list_action
+        type: choice
+        options:
+          - "getWeb"
+          - "getLists"
+          - "getListItems"
+          - "getFolderContents"
+        required: true
+        description: "Required. Which action to perform. Choose one: getWeb, getLists, getListItems, getFolderContents."
+      - name: list_title
+        type: string
+        required: false
+        description: "Required when list_action is 'getListItems'. Exact display name of the list (the Title field from getLists). Example: 'Documents', 'Tasks'."
+      - name: path
+        type: string
+        required: false
+        description: "Server-relative URL of the folder (required for getFolderContents). Get this from getLists (RootFolder.ServerRelativeUrl) or a previous getFolderContents result. Starts with '/'."
 steps:
   - name: get-web
     type: sharepoint-server.getWeb

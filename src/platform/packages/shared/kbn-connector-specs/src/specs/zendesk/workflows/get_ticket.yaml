@@ -7,11 +7,11 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: ticket_id
-    type: string
-    required: true
-    description: 'The Zendesk ticket ID'
+    inputs:
+      - name: ticket_id
+        type: string
+        required: true
+        description: 'The Zendesk ticket ID'
 steps:
   - name: get-ticket
     type: zendesk.getTicket

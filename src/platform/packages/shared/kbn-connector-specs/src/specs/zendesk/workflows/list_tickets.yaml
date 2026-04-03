@@ -5,21 +5,21 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: page
-    type: number
-    required: false
-    default: 1
-    description: 'Page number for pagination'
-  - name: per_page
-    type: number
-    required: false
-    default: 25
-    description: 'Number of tickets per page (max 100)'
-  - name: include
-    type: string
-    required: false
-    description: 'Comma-separated sideloads, no spaces. E.g. users, users,groups, users,groups,organizations. Options: users, groups, organizations.'
+    inputs:
+      - name: page
+        type: number
+        required: false
+        default: 1
+        description: 'Page number for pagination'
+      - name: per_page
+        type: number
+        required: false
+        default: 25
+        description: 'Number of tickets per page (max 100)'
+      - name: include
+        type: string
+        required: false
+        description: 'Comma-separated sideloads, no spaces. E.g. users, users,groups, users,groups,organizations. Options: users, groups, organizations.'
 steps:
   - name: list-tickets
     type: zendesk.listTickets

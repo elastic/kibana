@@ -5,15 +5,15 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: messageId
-    type: string
-    required: true
-    description: "Required. The Gmail message ID. Get this from search or list_messages or get_message."
-  - name: attachmentId
-    type: string
-    required: true
-    description: "Required. The attachment ID from the message. Get from get_message (format 'full') in payload.parts[].body.attachmentId."
+    inputs:
+      - name: messageId
+        type: string
+        required: true
+        description: "Required. The Gmail message ID. Get this from search or list_messages or get_message."
+      - name: attachmentId
+        type: string
+        required: true
+        description: "Required. The attachment ID from the message. Get from get_message (format 'full') in payload.parts[].body.attachmentId."
 steps:
   - name: get_attachment
     type: gmail.getAttachment

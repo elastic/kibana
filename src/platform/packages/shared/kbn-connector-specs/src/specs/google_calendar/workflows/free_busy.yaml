@@ -5,20 +5,20 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: timeMin
-    type: string
-    description: "Start of the time interval to check, as an RFC3339 timestamp. Example: 2024-01-15T09:00:00Z"
-  - name: timeMax
-    type: string
-    description: "End of the time interval to check, as an RFC3339 timestamp. Example: 2024-01-15T18:00:00Z"
-  - name: calendarIds
-    type: array
-    description: "List of calendar IDs to check availability for. Use 'primary' for the user's own calendar, or a person's email address to check their availability. Example: ['primary', 'colleague@company.com']"
-  - name: timeZone
-    type: string
-    required: false
-    description: "Time zone for the query (optional, defaults to UTC). Example: America/New_York"
+    inputs:
+      - name: timeMin
+        type: string
+        description: "Start of the time interval to check, as an RFC3339 timestamp. Example: 2024-01-15T09:00:00Z"
+      - name: timeMax
+        type: string
+        description: "End of the time interval to check, as an RFC3339 timestamp. Example: 2024-01-15T18:00:00Z"
+      - name: calendarIds
+        type: array
+        description: "List of calendar IDs to check availability for. Use 'primary' for the user's own calendar, or a person's email address to check their availability. Example: ['primary', 'colleague@company.com']"
+      - name: timeZone
+        type: string
+        required: false
+        description: "Time zone for the query (optional, defaults to UTC). Example: America/New_York"
 steps:
   - name: query_free_busy
     type: google_calendar.freeBusy

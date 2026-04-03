@@ -5,51 +5,51 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: list_type
-    type: choice
-    required: true
-    description: |
-      The type of GitHub resource to list in a repository. All use cursor-based pagination (first/after):
-        listIssues - List issues (supports state filter: open, closed, all)
-        listPullRequests - List pull requests (supports state filter: open, closed, all)
-        listCommits - List commits (supports sha param to specify branch or starting commit)
-        listBranches - List branches
-        listReleases - List releases
-        listTags - List tags
-    options:
-      - listIssues
-      - listPullRequests
-      - listCommits
-      - listBranches
-      - listReleases
-      - listTags
-  - name: owner
-    type: string
-    required: true
-    description: "Repository owner (username or organization)"
-  - name: repo
-    type: string
-    required: true
-    description: "Repository name"
-  - name: state
-    type: string
-    default: "open"
-    required: false
-    description: "Filter by state. Valid values: open, closed, all. Used by listIssues and listPullRequests."
-  - name: sha
-    type: string
-    required: false
-    description: "Branch name or commit SHA to start listing from. Used by listCommits."
-  - name: first
-    type: number
-    default: 10
-    required: false
-    description: "Number of results to return"
-  - name: after
-    type: string
-    required: false
-    description: "Cursor for pagination (endCursor from previous response)"
+    inputs:
+      - name: list_type
+        type: choice
+        required: true
+        description: |
+          The type of GitHub resource to list in a repository. All use cursor-based pagination (first/after):
+            listIssues - List issues (supports state filter: open, closed, all)
+            listPullRequests - List pull requests (supports state filter: open, closed, all)
+            listCommits - List commits (supports sha param to specify branch or starting commit)
+            listBranches - List branches
+            listReleases - List releases
+            listTags - List tags
+        options:
+          - listIssues
+          - listPullRequests
+          - listCommits
+          - listBranches
+          - listReleases
+          - listTags
+      - name: owner
+        type: string
+        required: true
+        description: "Repository owner (username or organization)"
+      - name: repo
+        type: string
+        required: true
+        description: "Repository name"
+      - name: state
+        type: string
+        default: "open"
+        required: false
+        description: "Filter by state. Valid values: open, closed, all. Used by listIssues and listPullRequests."
+      - name: sha
+        type: string
+        required: false
+        description: "Branch name or commit SHA to start listing from. Used by listCommits."
+      - name: first
+        type: number
+        default: 10
+        required: false
+        description: "Number of results to return"
+      - name: after
+        type: string
+        required: false
+        description: "Cursor for pagination (endCursor from previous response)"
 steps:
   - name: route-list
     type: switch

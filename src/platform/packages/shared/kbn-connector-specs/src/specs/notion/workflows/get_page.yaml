@@ -5,9 +5,9 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: page_id
-    type: string
+    inputs:
+      - name: page_id
+        type: string
 steps:
   - name: get-page
     type: notion.getPage

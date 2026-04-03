@@ -5,11 +5,11 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: table
-    type: string
-    required: true
-    description: 'The name of the ServiceNow table to describe (e.g., incident, kb_knowledge, change_request)'
+    inputs:
+      - name: table
+        type: string
+        required: true
+        description: 'The name of the ServiceNow table to describe (e.g., incident, kb_knowledge, change_request)'
 steps:
   - name: describe-table
     type: servicenow_search.describeTable

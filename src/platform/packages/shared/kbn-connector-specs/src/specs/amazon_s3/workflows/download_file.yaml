@@ -5,20 +5,20 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: bucket
-    type: string
-    required: true
-    description: "The name of the S3 bucket containing the file to download."
-  - name: key
-    type: string
-    required: true
-    description: "The key of the file to download from the S3 bucket."
-  - name: maximumDownloadSizeBytes
-    type: number
-    required: false
-    default: 131072
-    description: "Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB. Don't ask to override this unless necessary to complete a task as it may run over the token count."
+    inputs:
+      - name: bucket
+        type: string
+        required: true
+        description: "The name of the S3 bucket containing the file to download."
+      - name: key
+        type: string
+        required: true
+        description: "The key of the file to download from the S3 bucket."
+      - name: maximumDownloadSizeBytes
+        type: number
+        required: false
+        default: 131072
+        description: "Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB. Don't ask to override this unless necessary to complete a task as it may run over the token count."
 steps:
   - name: downloadFile
     type: amazon_s3.downloadFile

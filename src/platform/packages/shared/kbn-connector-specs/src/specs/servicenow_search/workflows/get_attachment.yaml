@@ -5,11 +5,11 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: sys_id
-    type: string
-    required: true
-    description: 'The sys_id of the attachment to download'
+    inputs:
+      - name: sys_id
+        type: string
+        required: true
+        description: 'The sys_id of the attachment to download'
 steps:
   - name: download-attachment
     type: servicenow_search.getAttachment

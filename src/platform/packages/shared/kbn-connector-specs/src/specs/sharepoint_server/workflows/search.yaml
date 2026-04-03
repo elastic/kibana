@@ -5,19 +5,19 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: query
-    type: string
-    required: true
-    description: "KQL search query string"
-  - name: from
-    type: number
-    required: false
-    description: "Start row offset for pagination"
-  - name: size
-    type: number
-    required: false
-    description: "Number of results to return"
+    inputs:
+      - name: query
+        type: string
+        required: true
+        description: "KQL search query string"
+      - name: from
+        type: number
+        required: false
+        description: "Start row offset for pagination"
+      - name: size
+        type: number
+        required: false
+        description: "Number of results to return"
 steps:
   - name: search-sharepoint-server
     type: sharepoint-server.search

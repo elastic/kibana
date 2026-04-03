@@ -5,20 +5,20 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: url
-    type: string
-  - name: search
-    type: string
-    required: false
-  - name: limit
-    type: number
-    required: false
-    default: 5000
-  - name: includeSubdomains
-    type: boolean
-    required: false
-    default: true
+    inputs:
+      - name: url
+        type: string
+      - name: search
+        type: string
+        required: false
+      - name: limit
+        type: number
+        required: false
+        default: 5000
+      - name: includeSubdomains
+        type: boolean
+        required: false
+        default: true
 steps:
   - name: map-urls
     type: firecrawl.map

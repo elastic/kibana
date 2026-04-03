@@ -5,37 +5,37 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: crawl_action
-    type: choice
-    required: true
-    description: 'crawlAndWait — sync, block until done, get results. crawl — async, return job ID; use getCrawlStatus later. getCrawlStatus — status/results for existing job (pass id).'
-    options:
-      - "crawl"
-      - "getCrawlStatus"
-      - "crawlAndWait"
-  - name: url
-    type: string
-    required: false
-    description: 'Starting URL to crawl (for crawl and crawlAndWait). e.g. https://example.com.'
-  - name: id
-    type: string
-    required: false
-    description: 'Crawl job ID from a previous crawl call; required when crawl_action is getCrawlStatus.'
-  - name: limit
-    type: number
-    required: false
-    default: 20
-    description: 'Maximum number of pages to crawl (1–100). For crawl and crawlAndWait. Default 20.'
-  - name: maxDiscoveryDepth
-    type: number
-    required: false
-    description: 'Maximum depth to follow links from the start URL. For crawl and crawlAndWait. Omit for default.'
-  - name: allowExternalLinks
-    type: boolean
-    required: false
-    default: false
-    description: 'If true, follow links to other domains. For crawl and crawlAndWait.'
+    inputs:
+      - name: crawl_action
+        type: choice
+        required: true
+        description: 'crawlAndWait — sync, block until done, get results. crawl — async, return job ID; use getCrawlStatus later. getCrawlStatus — status/results for existing job (pass id).'
+        options:
+          - "crawl"
+          - "getCrawlStatus"
+          - "crawlAndWait"
+      - name: url
+        type: string
+        required: false
+        description: 'Starting URL to crawl (for crawl and crawlAndWait). e.g. https://example.com.'
+      - name: id
+        type: string
+        required: false
+        description: 'Crawl job ID from a previous crawl call; required when crawl_action is getCrawlStatus.'
+      - name: limit
+        type: number
+        required: false
+        default: 20
+        description: 'Maximum number of pages to crawl (1–100). For crawl and crawlAndWait. Default 20.'
+      - name: maxDiscoveryDepth
+        type: number
+        required: false
+        description: 'Maximum depth to follow links from the start URL. For crawl and crawlAndWait. Omit for default.'
+      - name: allowExternalLinks
+        type: boolean
+        required: false
+        default: false
+        description: 'If true, follow links to other domains. For crawl and crawlAndWait.'
 steps:
   - name: start-crawl
     type: firecrawl.crawl

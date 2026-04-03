@@ -5,33 +5,33 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: item_type
-    type: choice
-    required: true
-    description: 'The type of items to list'
-    options:
-      - schedules
-      - escalation_policies
-      - users
-      - teams
-  - name: limit
-    type: number
-    required: false
-    description: Maximum number of items to return
-    default: 20
-  - name: query
-    type: string
-    required: false
-    description: 'Free-text search across name and description fields (users: name, email; teams: name, description)'
-  - name: include
-    type: array
-    required: false
-    description: |
-      Only used when item_type is schedules or escalation_policies. List of related resources to include.
-          schedules - e.g. schedule_layers, overrides_subschedule, final_schedule
-          escalation_policies - services, teams, targets
-          users, teams - N/A
+    inputs:
+      - name: item_type
+        type: choice
+        required: true
+        description: 'The type of items to list'
+        options:
+          - schedules
+          - escalation_policies
+          - users
+          - teams
+      - name: limit
+        type: number
+        required: false
+        description: Maximum number of items to return
+        default: 20
+      - name: query
+        type: string
+        required: false
+        description: 'Free-text search across name and description fields (users: name, email; teams: name, description)'
+      - name: include
+        type: array
+        required: false
+        description: |
+          Only used when item_type is schedules or escalation_policies. List of related resources to include.
+              schedules - e.g. schedule_layers, overrides_subschedule, final_schedule
+              escalation_policies - services, teams, targets
+              users, teams - N/A
 steps:
   - name: if-schedules
     type: if

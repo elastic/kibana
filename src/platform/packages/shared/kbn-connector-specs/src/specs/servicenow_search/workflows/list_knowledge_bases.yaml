@@ -5,16 +5,16 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: limit
-    type: number
-    required: false
-    default: 20
-    description: 'Maximum number of knowledge bases to return'
-  - name: offset
-    type: number
-    required: false
-    description: 'Offset for pagination'
+    inputs:
+      - name: limit
+        type: number
+        required: false
+        default: 20
+        description: 'Maximum number of knowledge bases to return'
+      - name: offset
+        type: number
+        required: false
+        description: 'Offset for pagination'
 steps:
   - name: list-knowledge-bases
     type: servicenow_search.listKnowledgeBases

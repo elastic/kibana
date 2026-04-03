@@ -5,19 +5,19 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: data_source_id
-    type: string
-  - name: filter_by
-    type: string
-    required: false
-  - name: page_size
-    type: number
-    required: false
-    default: 10
-  - name: start_cursor
-    type: string
-    required: false
+    inputs:
+      - name: data_source_id
+        type: string
+      - name: filter_by
+        type: string
+        required: false
+      - name: page_size
+        type: number
+        required: false
+        default: 10
+      - name: start_cursor
+        type: string
+        required: false
 steps:
   - name: query-data-source
     type: notion.queryDataSource

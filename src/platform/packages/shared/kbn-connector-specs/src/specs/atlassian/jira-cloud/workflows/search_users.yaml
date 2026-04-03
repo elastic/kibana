@@ -5,25 +5,25 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: query
-    type: string
-    required: false
-  - name: username
-    type: string
-    required: false
-  - name: accountId
-    type: string
-    required: false
-  - name: startAt
-    type: number
-    required: false
-  - name: maxResults
-    type: number
-    required: false
-  - name: property
-    type: string
-    required: false
+    inputs:
+      - name: query
+        type: string
+        required: false
+      - name: username
+        type: string
+        required: false
+      - name: accountId
+        type: string
+        required: false
+      - name: startAt
+        type: number
+        required: false
+      - name: maxResults
+        type: number
+        required: false
+      - name: property
+        type: string
+        required: false
 steps:
   - name: search-users
     type: jira-cloud.searchUsers
