@@ -32,7 +32,7 @@ export interface EpisodesFilterBarProps {
   services: { http: HttpStart };
 }
 
-export function EpisodesFilterBar({
+export const EpisodesFilterBar = ({
   filterState,
   onFilterChange,
   timeRange,
@@ -41,10 +41,9 @@ export function EpisodesFilterBar({
   onRefresh,
   isLoading = false,
   services,
-}: EpisodesFilterBarProps) {
+}: EpisodesFilterBarProps) => {
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
 
-  // Debounced update to filters
   useDebounce(
     () => {
       const trimmedValue = queryStringInput.trim() || undefined;
@@ -82,12 +81,11 @@ export function EpisodesFilterBar({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
-      {/* Search */}
       <EuiFlexItem grow>
         <EuiFieldSearch
           fullWidth
           compressed
-          placeholder={i18n.translate('xpack.observability.alertsV2.filterBar.searchPlaceholder', {
+          placeholder={i18n.translate('xpack.alertingV2.episodes.filterBar.searchPlaceholder', {
             defaultMessage: 'Search episodes…',
           })}
           value={queryStringInput}
@@ -96,7 +94,6 @@ export function EpisodesFilterBar({
         />
       </EuiFlexItem>
 
-      {/* Filters: Status, Rule */}
       <EuiFlexItem grow={false}>
         <EuiFilterGroup compressed>
           <AlertEpisodesStatusFilter
@@ -115,7 +112,6 @@ export function EpisodesFilterBar({
         </EuiFilterGroup>
       </EuiFlexItem>
 
-      {/* Time picker + refresh button */}
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
           compressed
@@ -133,4 +129,4 @@ export function EpisodesFilterBar({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+};

@@ -25,7 +25,7 @@ describe('RelatedAlertEpisode', () => {
           'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
         }}
         rule={rule}
-        href="/app/observability/alerts-v2/episodes/ep-1"
+        href="/app/management/alertingV2/episodes/ep-1"
       />
     );
 

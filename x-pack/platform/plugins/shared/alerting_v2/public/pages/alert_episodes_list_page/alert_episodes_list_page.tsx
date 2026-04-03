@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiPageHeader,
   EuiScreenReaderOnly,
   EuiSkeletonText,
   EuiSpacer,
@@ -29,6 +30,7 @@ import {
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
@@ -44,20 +46,19 @@ import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_al
 import useObservable from 'react-use/lib/useObservable';
 import type { InputTimeRange } from '@kbn/data-plugin/public/query';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { paths } from '../../../common/locators/paths';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { paths } from '../../constants';
+import type { AlertingV2EpisodesKibanaServices } from '../../episodes_kibana_services';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 
 const PAGE_SIZE = 1000;
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
-const ALERTS_V2_TABLE_SETTINGS: UnifiedDataTableSettings = {
+const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
-    actions: { width: 320 },
+    actions: { width: 360 },
     'episode.status': { width: 220 },
   },
 };
@@ -92,11 +93,12 @@ function EmptyToolbar() {
   return <></>;
 }
 
-export function AlertsV2Page() {
-  const services = useKibana().services;
-  const { ObservabilityPageTemplate } = usePluginContext();
+export const AlertEpisodesListPage = () => {
+  const services = useKibana<AlertingV2EpisodesKibanaServices>().services;
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
+
+  useBreadcrumbs('episodes_list');
 
   const timeRange$ = useMemo(
     () => timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
@@ -150,7 +152,6 @@ export function AlertsV2Page() {
       setSortState(DEFAULT_SORT);
       return;
     }
-    // Table supports multiple sort columns; the last element is the one the user just changed
     const [field, dir] = nextSort[nextSort.length - 1];
     if (field != null && dir != null) {
       setSortState({
@@ -214,29 +215,28 @@ export function AlertsV2Page() {
   }, []);
 
   return (
-    <ObservabilityPageTemplate
-      data-test-subj="observabilityAlertsV2Page"
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.alertsV2.pageTitle', {
-          defaultMessage: 'Alerts v2',
-        }),
-      }}
-      pageSectionProps={{
-        grow: true,
-        contentProps: {
-          css: css`
-            display: flex;
-            flex-grow: 1;
-            ${logicalCSS('min-height')}: 0;
-          `,
-        },
-      }}
+    <div
+      data-test-subj="alertingV2EpisodesListPage"
+      css={css`
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        ${logicalCSS('min-height')}: 0;
+        min-width: 0;
+      `}
     >
-      <HeaderMenu />
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={i18n.translate('xpack.alertingV2.episodes.listPageTitle', {
+          defaultMessage: 'Alert episodes',
+        })}
+      />
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup
         direction="column"
         css={css`
+          flex: 1;
           min-width: 0;
         `}
       >
@@ -264,10 +264,9 @@ export function AlertsV2Page() {
           >
             <EuiScreenReaderOnly>
               <span id="alertingEpisodesTableAriaLabel">
-                {i18n.translate(
-                  'xpack.observability.alertsV2Page.span.alertingEpisodesTableLabel',
-                  { defaultMessage: 'Alerting episodes table' }
-                )}
+                {i18n.translate('xpack.alertingV2.episodes.tableAriaLabel', {
+                  defaultMessage: 'Alerting episodes table',
+                })}
               </span>
             </EuiScreenReaderOnly>
             {!dataView ? (
@@ -275,14 +274,13 @@ export function AlertsV2Page() {
             ) : (
               <UnifiedDataTable
                 ariaLabelledBy="alertingEpisodesTableAriaLabel"
-                settings={ALERTS_V2_TABLE_SETTINGS}
+                settings={ALERT_EPISODES_TABLE_SETTINGS}
                 css={getTableCss(euiTheme)}
                 gridStyleOverride={{
                   stripes: false,
                   cellPadding: 'l',
                 }}
                 renderCustomToolbar={EmptyToolbar}
-                // Columns
                 dataView={dataView}
                 columns={columns}
                 onSetColumns={onSetColumns}
@@ -291,13 +289,13 @@ export function AlertsV2Page() {
                 customGridColumnsConfiguration={{
                   actions: ({ column }) => ({
                     ...column,
-                    displayAsText: i18n.translate('xpack.observability.alertsV2.columns.actions', {
+                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.actions', {
                       defaultMessage: 'Actions',
                     }),
                   }),
                   tags: ({ column }) => ({
                     ...column,
-                    displayAsText: i18n.translate('xpack.observability.alertsV2.columns.tags', {
+                    displayAsText: i18n.translate('xpack.alertingV2.episodes.columns.tags', {
                       defaultMessage: 'Tags',
                     }),
                   }),
@@ -331,9 +329,7 @@ export function AlertsV2Page() {
                         http={services.http}
                         viewDetailsHref={
                           episodeId
-                            ? services.http.basePath.prepend(
-                                paths.observability.alertingV2EpisodeDetails(episodeId)
-                              )
+                            ? services.http.basePath.prepend(paths.alertEpisodeDetails(episodeId))
                             : undefined
                         }
                       />
@@ -390,32 +386,23 @@ export function AlertsV2Page() {
                     );
                   },
                 }}
-                // Data
                 rows={rows}
-                // Forcing totalHits to be greater than the max page size to show
-                // the footer callout about the max limit reached
                 totalHits={!episodesData?.rows.length ? 0 : PAGE_SIZE + 1}
                 loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-                // Pagination
-                // We're not really paginating, this is just to show the
-                // footer callout about the max limit reached
                 isPaginationEnabled
                 paginationMode="singlePage"
                 sampleSizeState={PAGE_SIZE}
-                // Sorting
                 isSortEnabled
                 sort={sort}
                 onSort={onSort}
-                // Rows
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={setRowHeight}
-                // Dependencies
                 services={services}
               />
             )}
           </CellActionsProvider>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ObservabilityPageTemplate>
+    </div>
   );
-}
+};

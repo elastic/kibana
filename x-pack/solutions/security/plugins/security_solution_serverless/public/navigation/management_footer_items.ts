@@ -6,13 +6,37 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
+const getV2AlertingPreviewNodes = (showAlertingV2: boolean): NodeDefinition[] =>
+  showAlertingV2
+    ? [
+        {
+          id: 'v2_alerting_preview',
+          title: i18n.translate(
+            'xpack.securitySolutionServerless.nav.stackManagement.v2AlertingPreview',
+            {
+              defaultMessage: 'V2 Alerting Preview',
+            }
+          ),
+          renderAs: 'panelOpener',
+          breadcrumbStatus: 'hidden',
+          children: [
+            { link: 'management:rules', breadcrumbStatus: 'hidden' },
+            { link: 'management:episodes', breadcrumbStatus: 'hidden' },
+            { link: 'management:notification_policies', breadcrumbStatus: 'hidden' },
+          ],
+        },
+      ]
+    : [];
+
 export const createManagementFooterItemsTree = (
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  showAlertingV2 = false
 ): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
@@ -104,6 +128,7 @@ export const createManagementFooterItemsTree = (
             },
           ],
         },
+        ...getV2AlertingPreviewNodes(showAlertingV2),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           breadcrumbStatus: 'hidden',

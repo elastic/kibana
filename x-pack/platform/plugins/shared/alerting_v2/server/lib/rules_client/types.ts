@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  FindRulesResponse,
+  UpdateRuleData,
+  RuleResponse,
+} from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
-export type { CreateRuleData, UpdateRuleData, RuleResponse };
+export type { CreateRuleData, FindRulesResponse, UpdateRuleData, RuleResponse };
 
 export interface CreateRuleParams {
   data: CreateRuleData;
@@ -19,13 +24,6 @@ export interface FindRulesParams {
   perPage?: number;
   filter?: string;
   search?: string;
-}
-
-export interface FindRulesResponse {
-  items: RuleResponse[];
-  total: number;
-  page: number;
-  perPage: number;
 }
 
 export type BulkRulesParams =

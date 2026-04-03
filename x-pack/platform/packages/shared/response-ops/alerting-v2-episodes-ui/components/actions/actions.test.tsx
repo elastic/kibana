@@ -39,12 +39,12 @@ describe('AlertEpisodeActionsCell', () => {
     render(
       <AlertEpisodeActions
         http={mockHttp}
-        viewDetailsHref="/app/observability/alerts-v2/episodes/ep-1"
+        viewDetailsHref="/app/management/alertingV2/episodes/ep-1"
       />
     );
     expect(screen.getByTestId('alertingEpisodeActionsViewDetailsButton')).toHaveAttribute(
       'href',
-      '/app/observability/alerts-v2/episodes/ep-1'
+      '/app/management/alertingV2/episodes/ep-1'
     );
   });
 

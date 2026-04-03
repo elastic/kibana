@@ -11,8 +11,9 @@ import { Chart, Heatmap, Predicate, ScaleType, Settings, Tooltip } from '@elasti
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { useKibana } from '../../../utils/kibana_react';
+import type { AlertingV2EpisodesKibanaServices } from '../../../episodes_kibana_services';
 
 /** Short strip: one heatmap row + compact x-axis labels. */
 const CHART_HEIGHT = 40;
@@ -64,23 +65,23 @@ function statusFromHeatmapValue(value: number): AlertEpisodeStatus {
 function statusLabel(status: AlertEpisodeStatus): string {
   switch (status) {
     case ALERT_EPISODE_STATUS.PENDING:
-      return i18n.translate('xpack.observability.pendingStatusBadgeLabel', {
+      return i18n.translate('xpack.alertingV2.episodes.pendingStatusBadgeLabel', {
         defaultMessage: 'Pending',
       });
     case ALERT_EPISODE_STATUS.ACTIVE:
-      return i18n.translate('xpack.observability.activeStatusBadgeLabel', {
+      return i18n.translate('xpack.alertingV2.episodes.activeStatusBadgeLabel', {
         defaultMessage: 'Active',
       });
     case ALERT_EPISODE_STATUS.RECOVERING:
-      return i18n.translate('xpack.observability.recoveringStatusBadgeLabel', {
+      return i18n.translate('xpack.alertingV2.episodes.recoveringStatusBadgeLabel', {
         defaultMessage: 'Recovering',
       });
     case ALERT_EPISODE_STATUS.INACTIVE:
-      return i18n.translate('xpack.observability.inactiveStatusBadgeLabel', {
+      return i18n.translate('xpack.alertingV2.episodes.inactiveStatusBadgeLabel', {
         defaultMessage: 'Inactive',
       });
     default:
-      return i18n.translate('xpack.observability.unknownStatusBadgeLabel', {
+      return i18n.translate('xpack.alertingV2.episodes.unknownStatusBadgeLabel', {
         defaultMessage: 'Unknown',
       });
   }
@@ -103,11 +104,9 @@ function compactAxisTime(iso: string): string {
   });
 }
 
-/** Single horizontal strip; status is encoded in `value`. */
 const LIFECYCLE_Y = 'Lifecycle';
 
 interface HeatmapDatum {
-  /** Column index after chronological sort — one cell per event. */
   x: number;
   y: string;
   value: number;
@@ -126,9 +125,9 @@ export interface EpisodeLifecycleHeatmapProps {
   eventRows: Record<string, unknown>[];
 }
 
-export function EpisodeLifecycleHeatmap({ eventRows }: EpisodeLifecycleHeatmapProps) {
+export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapProps) => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana();
+  const { services } = useKibana<AlertingV2EpisodesKibanaServices>();
   const baseTheme = services.charts.theme.useChartsBaseTheme();
 
   const data: HeatmapDatum[] = useMemo(() => {
@@ -220,22 +219,18 @@ export function EpisodeLifecycleHeatmap({ eventRows }: EpisodeLifecycleHeatmapPr
 
   if (data.length === 0) {
     return (
-      <EuiPanel
-        hasBorder
-        paddingSize="m"
-        data-test-subj="observabilityEpisodeLifecycleHeatmapEmpty"
-      >
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeLifecycleHeatmapEmpty">
         <EuiEmptyPrompt
           title={
             <h2>
-              {i18n.translate('xpack.observability.episodeDetails.lifecycleEmptyTitle', {
+              {i18n.translate('xpack.alertingV2.episodes.lifecycleEmptyTitle', {
                 defaultMessage: 'No events in this episode yet',
               })}
             </h2>
           }
           body={
             <p>
-              {i18n.translate('xpack.observability.episodeDetails.lifecycleEmptyBody', {
+              {i18n.translate('xpack.alertingV2.episodes.lifecycleEmptyBody', {
                 defaultMessage: 'Status changes across the episode lifecycle will appear here.',
               })}
             </p>
@@ -246,10 +241,10 @@ export function EpisodeLifecycleHeatmap({ eventRows }: EpisodeLifecycleHeatmapPr
   }
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="observabilityEpisodeLifecycleHeatmap">
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeLifecycleHeatmap">
       <EuiTitle size="xxs">
         <h2>
-          {i18n.translate('xpack.observability.episodeDetails.lifecycleTitle', {
+          {i18n.translate('xpack.alertingV2.episodes.lifecycleTitle', {
             defaultMessage: 'Episode timeline',
           })}
         </h2>
@@ -308,4 +303,4 @@ export function EpisodeLifecycleHeatmap({ eventRows }: EpisodeLifecycleHeatmapPr
       </Chart>
     </EuiPanel>
   );
-}
+};

@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/i18n'
-  - '@kbn/alerting-v2-plugin'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/esql-types'
   - '@kbn/expressions-plugin'

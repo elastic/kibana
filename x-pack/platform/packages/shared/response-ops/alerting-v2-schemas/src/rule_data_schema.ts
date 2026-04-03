@@ -312,6 +312,8 @@ export const findRulesResponseSchema = z
   })
   .describe('Paginated list of rules.');
 
+export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
+
 /** Bulk operation response schema. */
 export const bulkOperationResponseSchema = z
   .object({

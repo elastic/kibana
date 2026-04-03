@@ -12,6 +12,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import {
   ALERTING_V2_RULES_MANAGEMENT_PATH,
   ALERTING_V2_NOTIFICATION_POLICIES_MANAGEMENT_PATH,
+  ALERTING_V2_EPISODES_MANAGEMENT_PATH,
   MANAGEMENT_APP_ID,
 } from '../constants';
 import { getAlertingV2Breadcrumb, type AlertingV2BreadcrumbPage } from '../lib/breadcrumb';
@@ -67,6 +68,13 @@ export function useBreadcrumbs(
       }),
     };
 
+    const episodesListBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('episodes_list'),
+      href: application.getUrlForApp(MANAGEMENT_APP_ID, {
+        path: ALERTING_V2_EPISODES_MANAGEMENT_PATH,
+      }),
+    };
+
     let breadcrumbs: ChromeBreadcrumb[];
 
     switch (page) {
@@ -106,6 +114,18 @@ export function useBreadcrumbs(
           rootBreadcrumb,
           notificationPoliciesListBreadcrumb,
           getAlertingV2Breadcrumb('notification_policy_edit'),
+        ];
+        break;
+      case 'episodes_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('episodes_list') }];
+        break;
+      case 'episode_details':
+        breadcrumbs = [
+          rootBreadcrumb,
+          episodesListBreadcrumb,
+          getAlertingV2Breadcrumb('episode_details', {
+            ruleName: options.ruleName ?? '',
+          }),
         ];
         break;
       default:

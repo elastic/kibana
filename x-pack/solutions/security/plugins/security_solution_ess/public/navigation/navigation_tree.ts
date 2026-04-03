@@ -6,6 +6,7 @@
  */
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -189,6 +190,25 @@ export const createNavigationTree = (
             { link: 'monitoring' },
           ],
         },
+        ...(services.application.capabilities.alertingVTwo
+          ? [
+              {
+                id: 'v2_alerting_preview',
+                title: i18n.translate(
+                  'xpack.securitySolutionEss.nav.stackManagement.v2AlertingPreview',
+                  {
+                    defaultMessage: 'V2 Alerting Preview',
+                  }
+                ),
+                renderAs: 'panelOpener' as const,
+                children: [
+                  { link: 'management:rules' as const },
+                  { link: 'management:episodes' as const },
+                  { link: 'management:notification_policies' as const },
+                ],
+              },
+            ]
+          : []),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [

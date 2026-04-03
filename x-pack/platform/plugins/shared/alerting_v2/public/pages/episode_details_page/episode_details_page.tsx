@@ -13,6 +13,7 @@ import {
   EuiButtonGroup,
   EuiCodeBlock,
   EuiDescriptionList,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -24,12 +25,11 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
-  logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { RelatedAlertEpisode } from '@kbn/alerting-v2-episodes-ui/components/related/related_alert_episode';
@@ -50,12 +50,11 @@ import { AlertEpisodeGroupingFields } from '@kbn/alerting-v2-episodes-ui/compone
 import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import { paths } from '../../../common/locators/paths';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
-import PageNotFound from '../404';
+import { paths } from '../../constants';
+import type { AlertingV2EpisodesKibanaServices } from '../../episodes_kibana_services';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EpisodeLifecycleHeatmap } from './components/episode_lifecycle_heatmap';
 
 const episodeDetailsBreadcrumbFallback = i18n.translate(
@@ -121,10 +120,9 @@ type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 export function EpisodeDetailsPage() {
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
-  const { ObservabilityPageTemplate } = usePluginContext();
-  const { services } = useKibana();
+  const { services } = useKibana<AlertingV2EpisodesKibanaServices>();
   const { euiTheme } = useEuiTheme();
-  const { data, notifications, http, serverless, expressions } = services;
+  const { data, notifications, http, expressions } = services;
 
   const { data: eventRows = [], isLoading: isLoadingEvents } = useFetchEpisodeEventsQuery({
     episodeId,
@@ -198,21 +196,7 @@ export function EpisodeDetailsPage() {
       ? rule.metadata.name
       : episodeDetailsBreadcrumbFallback;
 
-  useBreadcrumbs(
-    [
-      {
-        href: http.basePath.prepend(paths.observability.alertingV2),
-        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-          defaultMessage: 'Alerts',
-        }),
-        deepLinkId: 'observability-overview:alerts_v2',
-      },
-      {
-        text: episodeBreadcrumbTitle,
-      },
-    ],
-    { serverless }
-  );
+  useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
@@ -241,48 +225,41 @@ export function EpisodeDetailsPage() {
   const isLoading = isLoadingEvents || (Boolean(ruleId) && isLoadingRule);
 
   if (!episodeId) {
-    return <PageNotFound />;
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={
+          <h2>
+            {i18n.translate('xpack.alertingV2.episodes.episodeNotFoundTitle', {
+              defaultMessage: 'Episode not found',
+            })}
+          </h2>
+        }
+      />
+    );
   }
 
   const pageTitle = (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      responsive={true}
-      wrap
-      justifyContent="spaceBetween"
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
-            <h1 data-test-subj="observabilityEpisodeDetailsRuleTitle">
-              {rule?.metadata.name ??
-                i18n.translate('xpack.observability.episodeDetails.loadingRuleTitle', {
-                  defaultMessage: 'Episode details',
-                })}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        {lastStatus ? (
-          <EuiFlexItem grow={false}>
-            <AlertEpisodeStatusBadges
-              status={lastStatus}
-              episodeAction={episodeAction}
-              groupAction={groupAction}
-            />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={true} wrap>
       <EuiFlexItem grow={false}>
-        <AlertEpisodeActions
-          episodeId={episodeId}
-          groupHash={groupHash}
-          episodeAction={episodeAction}
-          groupAction={groupAction}
-          http={http}
-          buttonsOutlined={false}
-        />
+        <EuiTitle size="l">
+          <h1 data-test-subj="alertingV2EpisodeDetailsRuleTitle">
+            {rule?.metadata.name ??
+              i18n.translate('xpack.observability.episodeDetails.loadingRuleTitle', {
+                defaultMessage: 'Episode details',
+              })}
+          </h1>
+        </EuiTitle>
       </EuiFlexItem>
+      {lastStatus ? (
+        <EuiFlexItem grow={false}>
+          <AlertEpisodeStatusBadges
+            status={lastStatus}
+            episodeAction={episodeAction}
+            groupAction={groupAction}
+          />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 
@@ -295,12 +272,12 @@ export function EpisodeDetailsPage() {
 
   const showTagsInHeader = !isLoading && tags.length > 0;
   const tagsInHeader = showTagsInHeader ? (
-    <div data-test-subj="observabilityEpisodeDetailsHeaderTags">
+    <div data-test-subj="alertingV2EpisodeDetailsHeaderTags">
       <AlertEpisodeTags tags={tags} />
     </div>
   ) : null;
 
-  const description =
+  const headerDescription =
     tagsInHeader || ruleDescriptionText ? (
       <>
         {ruleDescriptionText}
@@ -337,7 +314,7 @@ export function EpisodeDetailsPage() {
       >
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
-            <h2 data-test-subj="observabilityEpisodeDetailsSidebarTitle">{sidebarHeaderTitle}</h2>
+            <h2 data-test-subj="alertingV2EpisodeDetailsSidebarTitle">{sidebarHeaderTitle}</h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -352,14 +329,14 @@ export function EpisodeDetailsPage() {
             options={[
               {
                 id: 'episode_details',
-                'data-test-subj': 'observabilityEpisodeDetailsSidebarTabEpisodeDetails',
+                'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabEpisodeDetails',
                 label: i18n.translate('xpack.observability.episodeDetails.sidebarTabTitle', {
                   defaultMessage: 'Details',
                 }),
               },
               {
                 id: 'runbook',
-                'data-test-subj': 'observabilityEpisodeDetailsSidebarTabRunbook',
+                'data-test-subj': 'alertingV2EpisodeDetailsSidebarTabRunbook',
                 label: runbookSidebarTitle,
               },
             ]}
@@ -380,7 +357,7 @@ export function EpisodeDetailsPage() {
           overflow-y: auto;
           padding: ${euiTheme.size.l};
         `}
-        data-test-subj="observabilityEpisodeDetailsSidebarBody"
+        data-test-subj="alertingV2EpisodeDetailsSidebarBody"
       >
         {sidebarPanel === 'episode_details' ? (
           <>
@@ -430,7 +407,7 @@ export function EpisodeDetailsPage() {
                 >
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
-                      <h3 data-test-subj="observabilityEpisodeDetailsRuleOverviewHeading">
+                      <h3 data-test-subj="alertingV2EpisodeDetailsRuleOverviewHeading">
                         {i18n.translate('xpack.observability.episodeDetails.ruleOverviewTitle', {
                           defaultMessage: 'Rule overview',
                         })}
@@ -442,10 +419,8 @@ export function EpisodeDetailsPage() {
                       size="xs"
                       color="text"
                       iconType="eye"
-                      href={http.basePath.prepend(
-                        paths.observability.alertingV2ManagementRuleDetails(rule.id)
-                      )}
-                      data-test-subj="observabilityEpisodeDetailsViewRuleDetailsButton"
+                      href={http.basePath.prepend(paths.ruleDetails(rule.id))}
+                      data-test-subj="alertingV2EpisodeDetailsViewRuleDetailsButton"
                     >
                       {i18n.translate('xpack.observability.episodeDetails.viewRuleDetails', {
                         defaultMessage: 'View rule details',
@@ -457,7 +432,7 @@ export function EpisodeDetailsPage() {
                 <EuiPanel
                   hasBorder
                   paddingSize="m"
-                  data-test-subj="observabilityEpisodeDetailsRuleOverviewPanel"
+                  data-test-subj="alertingV2EpisodeDetailsRuleOverviewPanel"
                 >
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={true} wrap>
                     <EuiFlexItem grow={false}>
@@ -490,7 +465,7 @@ export function EpisodeDetailsPage() {
                     <EuiFlexItem grow={false}>
                       <EuiBadge
                         color={rule.enabled ? 'success' : 'default'}
-                        data-test-subj="observabilityEpisodeDetailsRuleStatusBadge"
+                        data-test-subj="alertingV2EpisodeDetailsRuleStatusBadge"
                       >
                         {rule.enabled
                           ? i18n.translate('xpack.observability.episodeDetails.ruleStatusEnabled', {
@@ -512,7 +487,7 @@ export function EpisodeDetailsPage() {
                     paddingSize="s"
                     isCopyable
                     overflowHeight={240}
-                    data-test-subj="observabilityEpisodeDetailsRuleQueryCodeBlock"
+                    data-test-subj="alertingV2EpisodeDetailsRuleQueryCodeBlock"
                   >
                     {ruleOverviewEsql}
                   </EuiCodeBlock>
@@ -526,16 +501,12 @@ export function EpisodeDetailsPage() {
             css={css`
               word-wrap: break-word;
             `}
-            data-test-subj="observabilityEpisodeDetailsRunbookContent"
+            data-test-subj="alertingV2EpisodeDetailsRunbookContent"
           >
             {runbookArtifact.value}
           </EuiMarkdownFormat>
         ) : (
-          <EuiText
-            size="s"
-            color="subdued"
-            data-test-subj="observabilityEpisodeDetailsRunbookEmpty"
-          >
+          <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeDetailsRunbookEmpty">
             {i18n.translate('xpack.observability.episodeDetails.runbookEmpty', {
               defaultMessage: 'No runbook has been added to this rule.',
             })}
@@ -546,132 +517,138 @@ export function EpisodeDetailsPage() {
   );
 
   return (
-    <ObservabilityPageTemplate
-      data-test-subj="observabilityEpisodeDetailsPage"
-      pageHeader={{
-        pageTitle,
-        description,
-      }}
-      pageSectionProps={{
-        grow: true,
-        paddingSize: 'none',
-        contentProps: {
-          css: css`
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            ${logicalCSS('min-height')}: 0;
-          `,
-        },
-      }}
+    <KibanaPageTemplate
+      paddingSize="none"
+      bottomBorder={false}
+      data-test-subj="alertingV2EpisodeDetailsPage"
     >
-      <HeaderMenu />
-
       {isLoading ? (
-        <CenterJustifiedSpinner />
+        <KibanaPageTemplate.Section grow>
+          <CenterJustifiedSpinner />
+        </KibanaPageTemplate.Section>
       ) : (
         <>
-          <EuiSplitPanel.Outer direction="row" hasBorder={false} hasShadow={false} grow>
-            <EuiSplitPanel.Inner grow paddingSize="l">
-              <EpisodeLifecycleHeatmap eventRows={eventRows} />
-              <EuiSpacer size="l" />
-              {rule ? (
-                <EuiAccordion
-                  id="observabilityRelatedAlertEpisodes"
-                  paddingSize="none"
-                  buttonProps={{
-                    paddingSize: 'm',
-                    css: css`
-                      .euiAccordion__buttonContent {
-                        width: 100%;
-                      }
-                    `,
-                  }}
-                  buttonContent={
-                    <EuiText>
-                      <h3>
-                        {i18n.translate('xpack.observability.episodeDetails.relatedEpisodesTitle', {
-                          defaultMessage: 'Related alert episodes',
-                        })}
-                      </h3>
-                    </EuiText>
-                  }
-                  initialIsOpen
-                  data-test-subj="observabilityRelatedAlertEpisodesAccordion"
-                >
-                  {isLoadingRelatedEpisodes ? (
-                    <EuiFlexGroup justifyContent="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner size="l" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ) : relatedEpisodeRows.length === 0 ? (
-                    <EuiPanel
-                      color="subdued"
-                      hasShadow={false}
-                      paddingSize="m"
-                      data-test-subj="observabilityRelatedEpisodesEmpty"
-                    >
-                      <EuiFlexGroup justifyContent="center" alignItems="center">
+          <KibanaPageTemplate.Header
+            pageTitle={pageTitle}
+            description={headerDescription}
+            bottomBorder
+            rightSideItems={[
+              <AlertEpisodeActions
+                key="alertingV2EpisodeHeaderActions"
+                episodeId={episodeId}
+                groupHash={groupHash}
+                episodeAction={episodeAction}
+                groupAction={groupAction}
+                http={http}
+                buttonsOutlined={false}
+              />,
+            ]}
+            rightSideGroupProps={{ gutterSize: 's' }}
+          />
+          <KibanaPageTemplate.Section paddingSize="none" grow>
+            <EuiSplitPanel.Outer direction="row" hasBorder={false} hasShadow={false} grow>
+              <EuiSplitPanel.Inner grow paddingSize="l">
+                <EpisodeLifecycleHeatmap eventRows={eventRows} />
+                <EuiSpacer size="l" />
+                {rule ? (
+                  <EuiAccordion
+                    id="alertingV2RelatedAlertEpisodes"
+                    paddingSize="none"
+                    buttonProps={{
+                      paddingSize: 'm',
+                      css: css`
+                        .euiAccordion__buttonContent {
+                          width: 100%;
+                        }
+                      `,
+                    }}
+                    buttonContent={
+                      <EuiText>
+                        <h3>
+                          {i18n.translate(
+                            'xpack.observability.episodeDetails.relatedEpisodesTitle',
+                            {
+                              defaultMessage: 'Related alert episodes',
+                            }
+                          )}
+                        </h3>
+                      </EuiText>
+                    }
+                    initialIsOpen
+                    data-test-subj="alertingV2RelatedAlertEpisodesAccordion"
+                  >
+                    {isLoadingRelatedEpisodes ? (
+                      <EuiFlexGroup justifyContent="center">
                         <EuiFlexItem grow={false}>
-                          <EuiText size="s" color="subdued" textAlign="center">
-                            {i18n.translate(
-                              'xpack.observability.episodeDetails.relatedEpisodesEmpty',
-                              {
-                                defaultMessage: 'No related episodes found.',
-                              }
-                            )}
-                          </EuiText>
+                          <EuiLoadingSpinner size="l" />
                         </EuiFlexItem>
                       </EuiFlexGroup>
-                    </EuiPanel>
-                  ) : (
-                    <EuiFlexGroup direction="column" gutterSize="s">
-                      {relatedEpisodeRows.map((row) => {
-                        const relatedId = row['episode.id'] as string;
-                        const relatedGroupHash = row.group_hash as string | undefined;
-                        return (
-                          <RelatedAlertEpisode
-                            key={relatedId}
-                            episode={row}
-                            rule={rule}
-                            episodeAction={relatedEpisodeActionsMap?.get(relatedId)}
-                            groupAction={
-                              relatedGroupHash
-                                ? relatedGroupActionsMap?.get(relatedGroupHash)
-                                : undefined
-                            }
-                            href={http.basePath.prepend(
-                              paths.observability.alertingV2EpisodeDetails(relatedId)
-                            )}
-                          />
-                        );
-                      })}
-                    </EuiFlexGroup>
-                  )}
-                </EuiAccordion>
-              ) : null}
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner
-              grow={false}
-              paddingSize="none"
-              css={css`
-                flex-shrink: 0;
-                flex-basis: 400px;
-                min-width: 40px;
-                max-width: 500px;
-                border-left: ${euiTheme.border.thin};
-                display: flex;
-                flex-direction: column;
-                min-height: 0;
-              `}
-              data-test-subj="observabilityEpisodeDetailsSidebar"
-            >
-              {sidebar}
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
+                    ) : relatedEpisodeRows.length === 0 ? (
+                      <EuiPanel
+                        color="subdued"
+                        hasShadow={false}
+                        paddingSize="m"
+                        data-test-subj="alertingV2RelatedEpisodesEmpty"
+                      >
+                        <EuiFlexGroup justifyContent="center" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s" color="subdued" textAlign="center">
+                              {i18n.translate(
+                                'xpack.observability.episodeDetails.relatedEpisodesEmpty',
+                                {
+                                  defaultMessage: 'No related episodes found.',
+                                }
+                              )}
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                    ) : (
+                      <EuiFlexGroup direction="column" gutterSize="s">
+                        {relatedEpisodeRows.map((row) => {
+                          const relatedId = row['episode.id'] as string;
+                          const relatedGroupHash = row.group_hash as string | undefined;
+                          return (
+                            <RelatedAlertEpisode
+                              key={relatedId}
+                              episode={row}
+                              rule={rule}
+                              episodeAction={relatedEpisodeActionsMap?.get(relatedId)}
+                              groupAction={
+                                relatedGroupHash
+                                  ? relatedGroupActionsMap?.get(relatedGroupHash)
+                                  : undefined
+                              }
+                              href={http.basePath.prepend(paths.alertEpisodeDetails(relatedId))}
+                            />
+                          );
+                        })}
+                      </EuiFlexGroup>
+                    )}
+                  </EuiAccordion>
+                ) : null}
+              </EuiSplitPanel.Inner>
+              <EuiSplitPanel.Inner
+                grow={false}
+                paddingSize="none"
+                css={css`
+                  flex-shrink: 0;
+                  flex-basis: 400px;
+                  min-width: 40px;
+                  max-width: 500px;
+                  border-left: ${euiTheme.border.thin};
+                  display: flex;
+                  flex-direction: column;
+                  min-height: 0;
+                `}
+                data-test-subj="alertingV2EpisodeDetailsSidebar"
+              >
+                {sidebar}
+              </EuiSplitPanel.Inner>
+            </EuiSplitPanel.Outer>
+          </KibanaPageTemplate.Section>
         </>
       )}
-    </ObservabilityPageTemplate>
+    </KibanaPageTemplate>
   );
 }

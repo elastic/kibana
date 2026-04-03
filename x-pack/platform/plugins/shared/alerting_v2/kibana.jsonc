@@ -20,10 +20,16 @@
       "lens",
       "security",
       "encryptedSavedObjects",
-      "workflowsManagement"
+      "workflowsManagement",
+      "expressions",
+      "uiActions",
+      "fieldFormats",
+      "charts",
+      "management",
+      "kibanaUtils"
     ],
-    "optionalPlugins": ["management"],
-    "requiredBundles": ["alerting"],
+    "optionalPlugins": [],
+    "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }
 }

@@ -11,8 +11,6 @@ import { AnnotationsPage } from '../pages/annotations/annotations';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
-import { AlertsV2Page } from '../pages/alerts_v2/alerts_v2';
-import { EpisodeDetailsPage } from '../pages/alerting_v2/episode_details_page';
 import { AlertDetails } from '../pages/alert_details/alert_details';
 import { CasesPage } from '../pages/cases/cases';
 import { LandingPage } from '../pages/landing/landing';
@@ -23,8 +21,6 @@ import { RulePage } from '../pages/rules/rule';
 import {
   ALERT_DETAIL_PATH,
   ALERTS_PATH,
-  ALERTING_V2_EPISODE_DETAIL_PATH,
-  ALERTING_V2_PATH,
   ANNOTATIONS_PATH,
   CASES_PATH,
   CREATE_RULE_PATH,
@@ -225,29 +221,10 @@ const routes: Record<RoutePath, RouteDefinition> = {
   },
 };
 
-const alertingV2Routes: Record<RoutePath, RouteDefinition> = {
-  [ALERTING_V2_PATH]: {
-    handler: () => {
-      return <AlertsV2Page />;
-    },
-    params: {},
-    exact: true,
-  },
-  [ALERTING_V2_EPISODE_DETAIL_PATH]: {
-    handler: () => {
-      return <EpisodeDetailsPage />;
-    },
-    params: {},
-    exact: true,
-  },
-};
-
 export const useAppRoutes = () => {
-  const { pricing, application } = useKibana().services;
+  const { pricing } = useKibana().services;
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
-  const isAlertingV2Enabled = application.capabilities.alertingVTwo;
   return {
     ...(isCompleteOverviewEnabled ? { ...completeRoutes, ...routes } : { ...routes }),
-    ...(isAlertingV2Enabled ? alertingV2Routes : {}),
   };
 };

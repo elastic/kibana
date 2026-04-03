@@ -8,18 +8,16 @@
 import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  FindRulesResponse,
+  RuleResponse,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
-export type { RuleResponse as RuleApiResponse };
-
-export interface FindRulesResponse {
-  items: RuleResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
 export interface ListRulesParams {
   page?: number;
