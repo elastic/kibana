@@ -193,7 +193,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
 
       let connectorId: string;
       let connector;
-      if (resolved && resolved.endpoints.length > 0) {
+      if (resolved?.endpoints.length > 0) {
         connector = resolved.endpoints[0];
         connectorId = connector.connectorId;
       } else {
