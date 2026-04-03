@@ -17,6 +17,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/std",
     "@kbn/presentation-publishing",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": [
     "target/**/*",

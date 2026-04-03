@@ -135,6 +135,7 @@
     "@kbn/cps-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/as-code-filters-constants",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": ["target/**/*"]
 }
