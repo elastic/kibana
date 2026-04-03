@@ -20,22 +20,23 @@ import {
   addToCase,
   checkActionItemsInResults,
   loadRuleAlerts,
+  navigateToRule,
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
-// Failing: See https://github.com/elastic/kibana/issues/255386
-describe.skip(
+describe(
   'Alert Event Details - Cases',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     let ruleId: string;
+    let ruleName: string;
     let packId: string;
     let packName: string;
     const packData = packFixture();
 
-    beforeEach(() => {
+    before(() => {
       initializeDataViews();
       loadPack(packData).then((data) => {
         packId = data.saved_object_id;
@@ -43,11 +44,16 @@ describe.skip(
       });
       loadRule(true).then((data) => {
         ruleId = data.id;
+        ruleName = data.name;
         loadRuleAlerts(data.name);
       });
     });
 
-    afterEach(() => {
+    beforeEach(() => {
+      navigateToRule(ruleName);
+    });
+
+    after(() => {
       cleanupPack(packId);
       cleanupRule(ruleId);
     });
@@ -106,8 +112,8 @@ describe.skip(
         cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
         cy.getBySel('securitySolutionFlyoutResponseButton').click();
         cy.getBySel('responseActionsViewWrapper').should('exist');
-        cy.contains('select * from users;');
-        cy.contains(/SELECT \* FROM os_version where name='.+'/);
+        cy.contains('select * from users;', { timeout: 60000 });
+        cy.contains(/SELECT \* FROM os_version where name='.+'/, { timeout: 60000 });
         cy.getBySel('osquery-results-comment').each(($comment) => {
           cy.wrap($comment).within(() => {
             // On initial load result table might not render due to displayed error
