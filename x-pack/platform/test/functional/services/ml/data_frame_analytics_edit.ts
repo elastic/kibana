@@ -89,7 +89,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       }
     },
 
-    async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig, addTimerange: boolean = false) {
+    async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
@@ -101,12 +101,10 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         customUrl.indexName
       );
       await customUrls.setCustomUrlQueryEntityFieldNames(customUrl.queryEntityFieldNames);
-      if (addTimerange) {
-        await mlCommonUI.selectSelectValueByVisibleText(
-          'mlJobCustomUrlTimeRangeInput',
-          customUrl.timeRange
-        );
-      }
+      await mlCommonUI.selectSelectValueByVisibleText(
+        'mlJobCustomUrlTimeRangeInput',
+        customUrl.timeRange
+      );
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }

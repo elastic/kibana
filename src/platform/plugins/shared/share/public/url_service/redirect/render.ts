@@ -8,15 +8,14 @@
  */
 
 import * as React from 'react';
-import { createRoot } from 'react-dom/client';
+import { render as mount, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import type { PageProps } from './components/page';
 import { Page } from './components/page';
 
 export const render = (container: HTMLElement, props: PageProps) => {
-  const root = createRoot(container);
-  root.render(React.createElement(Page, props));
+  mount(React.createElement(Page, props), container);
 
   return () => {
-    root.unmount();
+    unmountComponentAtNode(container);
   };
 };

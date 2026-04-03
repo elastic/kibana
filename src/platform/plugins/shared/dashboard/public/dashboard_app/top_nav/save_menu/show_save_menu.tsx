@@ -8,8 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 
 import { EuiContextMenu, EuiThemeProvider, EuiWrappingPopover } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -31,14 +30,12 @@ interface SaveMenuProps {
 
 const container = document.createElement('div');
 let isOpen = false;
-let root: Root | null = null;
 
 function cleanup() {
   if (!isOpen) {
     return;
   }
-  root?.unmount();
-  root = null;
+  unmountComponentAtNode(container);
   document.body.removeChild(container);
   isOpen = false;
 }
@@ -126,12 +123,12 @@ export function showSaveMenu({
 
   isOpen = true;
   document.body.appendChild(container);
-  root = createRoot(container);
-  root.render(
+  render(
     <KibanaContextProvider services={coreServices}>
       <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
         <SaveMenu {...props} />
       </EuiThemeProvider>
-    </KibanaContextProvider>
+    </KibanaContextProvider>,
+    container
   );
 }

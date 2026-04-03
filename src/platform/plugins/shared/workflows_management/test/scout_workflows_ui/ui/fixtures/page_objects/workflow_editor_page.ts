@@ -263,19 +263,37 @@ export class WorkflowEditorPage {
     );
   }
 
+  private async waitForRunButtonToBeEnabled() {
+    await this.page.waitForFunction(
+      () => {
+        const runButton = document.querySelector<HTMLButtonElement>(
+          '[data-test-subj="runWorkflowHeaderButton"]'
+        );
+
+        return Boolean(runButton && !runButton.disabled);
+      },
+      null,
+      { timeout: 15_000 }
+    );
+  }
+
   /**
    * Save the workflow
    */
   async saveWorkflow() {
     await this.saveButton.click();
     await this.page.testSubj.waitForSelector('workflowSavedChangesBadge');
+    await this.runButton.waitFor({ state: 'visible' });
+    await this.waitForRunButtonToBeEnabled();
   }
 
   /**
    * Click the run button (opens execute modal or unsaved changes confirmation)
    */
   async clickRunButton() {
-    await this.runButton.click();
+    await this.waitForRunButtonToBeEnabled();
+    await this.runButton.focus();
+    await this.page.keyboard.press('Enter');
   }
 
   /**

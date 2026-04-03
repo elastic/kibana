@@ -49,25 +49,40 @@ export class PerformanceTracker {
   async waitForJsLoad(cdp: CDPSession, timeout: number = 2000): Promise<void> {
     return new Promise<void>((resolve) => {
       let lastRequestTime = Date.now();
-      let activeRequests = 0;
+      const activeRequests = new Set<string>();
 
-      // Track new JS requests
-      cdp.on('Network.requestWillBeSent', (event) => {
-        if (event.request.url.endsWith('.js') && event.request.url.includes('bundles')) {
-          activeRequests++;
+      const isBundleRequest = (url: string) => url.endsWith('.js') && url.includes('bundles');
+
+      const handleRequestWillBeSent = (event: { requestId: string; request: { url: string } }) => {
+        if (isBundleRequest(event.request.url)) {
+          activeRequests.add(event.requestId);
           lastRequestTime = Date.now();
         }
-      });
+      };
 
-      // Track when JS requests are completed
-      cdp.on('Network.loadingFinished', () => {
-        activeRequests = Math.max(0, activeRequests - 1);
-      });
+      const handleLoadingFinished = (event: { requestId: string }) => {
+        activeRequests.delete(event.requestId);
+      };
+
+      const handleLoadingFailed = (event: { requestId: string }) => {
+        activeRequests.delete(event.requestId);
+      };
+
+      cdp.on('Network.requestWillBeSent', handleRequestWillBeSent);
+      cdp.on('Network.loadingFinished', handleLoadingFinished);
+      cdp.on('Network.loadingFailed', handleLoadingFailed);
+
+      const stopTracking = () => {
+        cdp.off('Network.requestWillBeSent', handleRequestWillBeSent);
+        cdp.off('Network.loadingFinished', handleLoadingFinished);
+        cdp.off('Network.loadingFailed', handleLoadingFailed);
+      };
 
       // Check every 500ms if no new requests arrived
       const interval = setInterval(() => {
-        if (Date.now() - lastRequestTime > timeout && activeRequests === 0) {
+        if (Date.now() - lastRequestTime > timeout && activeRequests.size === 0) {
           clearInterval(interval);
+          stopTracking();
           resolve();
         }
       }, 500);

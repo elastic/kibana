@@ -294,7 +294,13 @@ export class CommonPageObject extends FtrService {
             return;
           }
 
-          requestAnimationFrame(() => requestAnimationFrame(finish));
+          const timeoutId = window.setTimeout(finish, 50);
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              window.clearTimeout(timeoutId);
+              finish();
+            })
+          );
         };
 
         const pollForIdle = () => {

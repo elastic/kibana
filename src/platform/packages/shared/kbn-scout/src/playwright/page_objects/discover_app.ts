@@ -27,6 +27,7 @@ export class DiscoverApp {
 
   private async waitForDiscoverPage() {
     await expect(this.page.testSubj.locator('dscPage')).toBeVisible();
+    await this.page.waitForLoadingIndicatorHidden();
   }
 
   private async getVisibleDataViewSwitch() {
@@ -97,7 +98,15 @@ export class DiscoverApp {
   }
 
   async waitForHistogramRendered() {
-    await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
+    await this.waitForDiscoverPage();
+    await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
+      state: 'hidden',
+      timeout: 30_000,
+    });
+    await this.page.testSubj.waitForSelector('unifiedHistogramRendered', {
+      state: 'visible',
+      timeout: 30_000,
+    });
   }
 
   async getCurrentQueryName(): Promise<string> {

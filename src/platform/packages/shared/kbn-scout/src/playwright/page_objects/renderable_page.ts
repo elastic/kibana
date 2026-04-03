@@ -22,7 +22,7 @@ export class RenderablePage {
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
-const DATA_LOADING_SELECTOR = '[data-loading]';
+const DATA_LOADING_SELECTOR = '[data-loading="true"]';
 
 async function renderWait(count: number, page: ScoutPage) {
   const renderCompleteLocator = page.locator(RENDER_COMPLETE_SELECTOR);

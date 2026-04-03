@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('discover');
       await pageObjects.timePicker.setDefaultAbsoluteRange();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+      await pageObjects.discover.waitUntilChartIsVisible();
       expect((await pageObjects.discover.getHitCount()).length).to.be.greaterThan(0);
     });
 

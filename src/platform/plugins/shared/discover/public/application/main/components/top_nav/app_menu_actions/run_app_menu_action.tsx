@@ -17,8 +17,7 @@
  */
 
 import React from 'react';
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -39,7 +38,6 @@ import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
-let root: Root | null = null;
 
 function restoreFocus(anchorElement?: HTMLElement, parentTestId?: string) {
   const overflowButton = document.querySelector(
@@ -63,8 +61,7 @@ function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
     return;
   }
 
-  root?.unmount();
-  root = null;
+  unmountComponentAtNode(container);
   document.body.removeChild(container);
   isOpen = false;
 
@@ -118,8 +115,7 @@ export async function runAppMenuAction({
       <KibanaContextProvider services={services}>{result}</KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
-  root = createRoot(container);
-  root.render(element);
+  render(element, container);
 }
 
 /**

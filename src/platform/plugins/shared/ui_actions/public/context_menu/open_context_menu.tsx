@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
+import { render, unmountComponentAtNode } from '@kbn/core-mount-utils-browser';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
@@ -18,7 +17,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme, getUserProfile } from '../services';
 
 let activeSession: ContextMenuSession | null = null;
-let activeRoot: Root | null = null;
 
 const CONTAINER_ID = 'contextMenu-container';
 
@@ -138,8 +136,7 @@ class ContextMenuSession extends EventEmitter {
     if (activeSession === this) {
       const container = document.getElementById(CONTAINER_ID);
       if (container) {
-        activeRoot?.unmount();
-        activeRoot = null;
+        unmountComponentAtNode(container);
         this.emit('closed');
       }
     }
@@ -174,8 +171,7 @@ export function openContextMenu(
     session.close();
   };
 
-  activeRoot = createRoot(container);
-  activeRoot.render(
+  render(
     <KibanaRenderContextProvider
       analytics={getAnalytics()}
       i18n={getI18n()}
@@ -184,6 +180,7 @@ export function openContextMenu(
     >
       <EuiPopover
         className="embPanel__optionsMenuPopover"
+        aria-label="Context menu"
         // @ts-expect-error @types/react@18 upgrade - Type 'HTMLElement' is not assignable to type 'NonNullable<ReactNode> | undefined'
         button={container}
         isOpen={true}
@@ -197,7 +194,8 @@ export function openContextMenu(
           data-test-subj={props['data-test-subj']}
         />
       </EuiPopover>
-    </KibanaRenderContextProvider>
+    </KibanaRenderContextProvider>,
+    container
   );
 
   return session;
