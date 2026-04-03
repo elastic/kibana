@@ -20,6 +20,8 @@ import { useTimeBucketsService } from '../../../util/time_buckets_service';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
+import type { CustomRuleEditorSource } from '../../../../../common/constants/usage_collection';
+
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
@@ -38,7 +40,7 @@ interface TimeSeriesChartWithTooltipsProps {
     interval: string;
   };
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
-  telemetrySource: string;
+  telemetrySource: CustomRuleEditorSource;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,

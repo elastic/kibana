@@ -57,29 +57,9 @@ export type TrainedModelsTelemetryEvent =
       schema: RootSchema<TrainedModelsDeploymentEbtProps>;
     };
 
-export interface CustomRuleEditorOpenedEbtProps {
-  source:
-    | 'explorer_anomalies_table'
-    | 'single_metric_viewer_anomalies_table'
-    | 'single_metric_viewer_timeseries_chart'
-    | 'explorer_single_metric_chart'
-    | 'explorer_distribution_chart'
-    | 'embeddable_single_metric_anomaly_chart'
-    | 'embeddable_distribution_anomaly_chart'
-    | 'embeddable_timeseries_chart';
-}
-
-export const RULE_EDITOR_OPENED = 'ml.custom_rule_editor_opened';
-
-export interface CustomRuleEditorOpenedEbtEvent {
-  eventType: typeof RULE_EDITOR_OPENED;
-  schema: RootSchema<CustomRuleEditorOpenedEbtProps>;
-}
-
 export interface ITelemetryClient {
   trackTrainedModelsDeploymentCreated: (eventProps: TrainedModelsDeploymentEbtProps) => void;
   trackTrainedModelsModelDownload: (eventProps: TrainedModelsModelDownloadEbtProps) => void;
   trackTrainedModelsDeploymentUpdated: (eventProps: TrainedModelsDeploymentEbtProps) => void;
   trackTrainedModelsModelTested: (eventProps: TrainedModelsModelTestedEbtProps) => void;
-  trackCustomRuleEditorOpened: (eventProps: CustomRuleEditorOpenedEbtProps) => void;
 }

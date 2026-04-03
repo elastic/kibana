@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { customRulesEbtEvents, trainedModelsEbtEvents } from './events';
+import { trainedModelsEbtEvents } from './events';
 import { TelemetryClient } from './telemetry_client';
 import type { ITelemetryClient } from './types';
 
@@ -27,8 +27,6 @@ export class TelemetryService {
     analytics.registerEventType(trainedModelsEbtEvents.trainedModelsModelDownloadEventType);
     analytics.registerEventType(trainedModelsEbtEvents.trainedModelsDeploymentUpdatedEventType);
     analytics.registerEventType(trainedModelsEbtEvents.trainedModelsModelTestedEventType);
-
-    analytics.registerEventType(customRulesEbtEvents.customRuleEditorOpenedEventType);
 
     this.initialized = true;
   }

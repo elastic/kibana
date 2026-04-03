@@ -714,7 +714,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
     const telemetrySource = isEmbeddable
-      ? 'embeddable_single_metric_anomaly_chart'
+      ? 'embeddable_single_metric_chart'
       : 'explorer_single_metric_chart';
 
     return (

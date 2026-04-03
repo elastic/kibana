@@ -32,6 +32,7 @@ import type { FocusTrapProps } from '../../util/create_focus_trap_props';
 import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
 import type { MlAnomalyDetectionAlertParams } from '../../../../common/types/alerts';
 import { buildAlertParamsFromAnomaly } from './build_alert_params_from_anomaly';
+import type { CustomRuleEditorSource } from '../../../../common/constants/usage_collection';
 
 interface AnomaliesTableProps {
   bounds?: TimeRangeBounds;
@@ -40,7 +41,10 @@ interface AnomaliesTableProps {
   influencerFilter?: (fieldName: string, fieldValue: string, action: FilterAction) => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
   selectedJobs: ExplorerJob[];
-  telemetrySource: 'explorer_anomalies_table' | 'single_metric_viewer_anomalies_table';
+  telemetrySource: Extract<
+    CustomRuleEditorSource,
+    'explorer_anomalies_table' | 'single_metric_viewer_anomalies_table'
+  >;
 }
 
 interface AnomaliesTableState {

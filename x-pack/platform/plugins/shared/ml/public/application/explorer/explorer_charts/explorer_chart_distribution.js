@@ -766,7 +766,7 @@ export class ExplorerChartDistribution extends React.Component {
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
     const telemetrySource = isEmbeddable
-      ? 'embeddable_distribution_anomaly_chart'
+      ? 'embeddable_distribution_chart'
       : 'explorer_distribution_chart';
 
     return (

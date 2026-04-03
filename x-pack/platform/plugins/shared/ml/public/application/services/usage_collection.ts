@@ -8,15 +8,20 @@
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import type { MlUsageEvent } from '../../../common/constants/usage_collection';
+import type {
+  CustomRuleEditorSource,
+  MlUsageEvent,
+} from '../../../common/constants/usage_collection';
 
 export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup) {
   if (usageCollection === undefined) {
     // if usageCollection is disabled, swallow the clicks and counts
     const noop = (eventNames: string | string[], count?: number) => undefined;
+    const noopReportCustomRuleEditorOpened = (_source: CustomRuleEditorSource) => undefined;
     return {
       click: noop,
       count: noop,
+      reportCustomRuleEditorOpened: noopReportCustomRuleEditorOpened,
     };
   }
 
@@ -25,5 +30,13 @@ export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup
       usageCollection.reportUiCounter(PLUGIN_ID, METRIC_TYPE.CLICK, eventNames, count),
     count: (eventNames: MlUsageEvent | MlUsageEvent[], count?: number) =>
       usageCollection.reportUiCounter(PLUGIN_ID, METRIC_TYPE.COUNT, eventNames, count),
+    reportCustomRuleEditorOpened: (source: CustomRuleEditorSource) =>
+      usageCollection.reportUiCounter(
+        PLUGIN_ID,
+        METRIC_TYPE.COUNT,
+        `custom_rule_editor_opened__${source}`
+      ),
   };
 }
+
+export type MlPublicUsageCollection = ReturnType<typeof mlUsageCollectionProvider>;

@@ -11,9 +11,8 @@ import type {
   TrainedModelsDeploymentEbtProps,
   TrainedModelsModelDownloadEbtProps,
   TrainedModelsModelTestedEbtProps,
-  CustomRuleEditorOpenedEbtProps,
 } from './types';
-import { TrainedModelsTelemetryEventTypes, RULE_EDITOR_OPENED } from './types';
+import { TrainedModelsTelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}
@@ -32,9 +31,5 @@ export class TelemetryClient implements ITelemetryClient {
 
   public trackTrainedModelsModelTested = (eventProps: TrainedModelsModelTestedEbtProps) => {
     this.analytics.reportEvent(TrainedModelsTelemetryEventTypes.MODEL_TESTED, eventProps);
-  };
-
-  public trackCustomRuleEditorOpened = (eventProps: CustomRuleEditorOpenedEbtProps) => {
-    this.analytics.reportEvent(RULE_EDITOR_OPENED, eventProps);
   };
 }

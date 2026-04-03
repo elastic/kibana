@@ -276,7 +276,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             }
 
             if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
-              registerEmbeddables(pluginsSetup.embeddable, core);
+              registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
             }
 
             const { registerMlUiActions, registerSearchLinks, registerCasesAttachments } =

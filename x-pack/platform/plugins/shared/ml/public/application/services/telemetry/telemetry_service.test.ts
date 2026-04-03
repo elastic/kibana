@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { TelemetryService } from './telemetry_service';
-import { TrainedModelsTelemetryEventTypes, RULE_EDITOR_OPENED } from './types';
+import { TrainedModelsTelemetryEventTypes } from './types';
 
 describe('TelemetryService', () => {
   let analyticsMock: ReturnType<typeof coreMock.createSetup>['analytics'];
@@ -33,19 +33,9 @@ describe('TelemetryService', () => {
       expect(registeredEventTypes).toContain(TrainedModelsTelemetryEventTypes.MODEL_TESTED);
     });
 
-    it('registers all custom rule event types', () => {
+    it('registers 4 event types in total', () => {
       telemetryService.setup({ analytics: analyticsMock });
-
-      const registeredEventTypes = (analyticsMock.registerEventType as jest.Mock).mock.calls.map(
-        ([eventDef]) => eventDef.eventType
-      );
-
-      expect(registeredEventTypes).toContain(RULE_EDITOR_OPENED);
-    });
-
-    it('registers 5 event types in total', () => {
-      telemetryService.setup({ analytics: analyticsMock });
-      expect(analyticsMock.registerEventType).toHaveBeenCalledTimes(5);
+      expect(analyticsMock.registerEventType).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -58,7 +48,7 @@ describe('TelemetryService', () => {
       telemetryService.setup({ analytics: analyticsMock });
       const client = telemetryService.start();
       expect(client).toBeDefined();
-      expect(typeof client.trackCustomRuleEditorOpened).toBe('function');
+      expect(typeof client.trackTrainedModelsDeploymentCreated).toBe('function');
     });
   });
 });
