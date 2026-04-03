@@ -64,4 +64,13 @@ describe('resolveEsqlVariables', () => {
       resolveEsqlVariables(query, [{ key: 'x', value: '1', type: ESQLVariableType.VALUES }])
     ).toBe(query);
   });
+
+  it('correctly replaces both variables when one key is a prefix of another', () => {
+    expect(
+      resolveEsqlVariables({ esql: 'FROM logs* | WHERE ?a == 1 AND ?ab == 2' }, [
+        { key: 'a', value: 'X', type: ESQLVariableType.VALUES },
+        { key: 'ab', value: 'Y', type: ESQLVariableType.VALUES },
+      ])
+    ).toEqual({ esql: 'FROM logs* | WHERE "X" == 1 AND "Y" == 2' });
+  });
 });

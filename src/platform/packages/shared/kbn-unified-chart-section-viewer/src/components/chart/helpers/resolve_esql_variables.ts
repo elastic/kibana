@@ -19,7 +19,8 @@ export function resolveEsqlVariables(
   }
 
   let resolved = query.esql;
-  for (const { key, value } of variables) {
+  const sortedVariables = [...variables].sort((a, b) => b.key.length - a.key.length);
+  for (const { key, value } of sortedVariables) {
     const literal = typeof value === 'string' ? `"${value.replaceAll('"', '""')}"` : String(value);
     resolved = resolved.replaceAll(`?${key}`, literal);
   }

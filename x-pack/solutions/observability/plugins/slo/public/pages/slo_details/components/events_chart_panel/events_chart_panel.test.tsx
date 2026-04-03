@@ -159,7 +159,7 @@ describe('EventsChartPanel', () => {
       act(() => capturedOnBarClick?.(barTimeRange, 'Good'));
 
       expect(navigateToApmTracesEsqlLinkMock).toHaveBeenCalledWith(
-        expect.objectContaining({ selectedSloEventType: 'Good', timeRange: barTimeRange })
+        expect.objectContaining({ selectedEventType: 'Good', timeRange: barTimeRange })
       );
       expect(openInDiscoverMock).not.toHaveBeenCalled();
     });
@@ -171,7 +171,7 @@ describe('EventsChartPanel', () => {
       act(() => capturedOnBarClick?.(barTimeRange, 'Bad'));
 
       expect(navigateToApmTracesEsqlLinkMock).toHaveBeenCalledWith(
-        expect.objectContaining({ selectedSloEventType: 'Bad', timeRange: barTimeRange })
+        expect.objectContaining({ selectedEventType: 'Bad', timeRange: barTimeRange })
       );
       expect(openInDiscoverMock).not.toHaveBeenCalled();
     });
