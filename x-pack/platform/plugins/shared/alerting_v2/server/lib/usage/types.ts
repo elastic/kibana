@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export interface NameValuePair {
+  name: string;
+  value: number;
+}
+
 /**
  * Usage type for telemetry usage collector.
  */
@@ -15,27 +20,27 @@ export interface AlertingV2Usage {
   // rule stats
   count_total?: number;
   count_enabled?: number;
-  count_by_kind?: Record<string, number>;
-  count_by_schedule?: Record<string, number>;
-  count_by_lookback?: Record<string, number>;
+  count_by_kind?: { alert?: number; signal?: number };
+  count_by_schedule?: NameValuePair[];
+  count_by_lookback?: NameValuePair[];
   count_with_query_condition?: number;
   count_with_recovery_policy?: number;
-  count_by_recovery_policy_type?: Record<string, number>;
+  count_by_recovery_policy_type?: { query?: number; no_breach?: number };
   count_with_recovery_query_condition?: number;
   avg_pending_count?: number | null;
   avg_recovering_count?: number | null;
-  count_by_pending_timeframe?: Record<string, number>;
-  count_by_recovering_timeframe?: Record<string, number>;
+  count_by_pending_timeframe?: NameValuePair[];
+  count_by_recovering_timeframe?: NameValuePair[];
   count_with_grouping?: number;
   avg_grouping_fields_count?: number | null;
   count_with_no_data?: number;
-  count_by_no_data_behavior?: Record<string, number>;
-  count_by_no_data_timeframe?: Record<string, number>;
+  count_by_no_data_behavior?: { no_data?: number; last_status?: number; recover?: number };
+  count_by_no_data_timeframe?: NameValuePair[];
   min_created_at?: string | null;
 
   // execution stats
   executions_count_24hr?: number;
-  executions_count_by_status_24hr?: Record<string, number>;
+  executions_count_by_status_24hr?: { success?: number; failure?: number; unknown?: number };
   executions_delay_p50_ms?: number | null;
   executions_delay_p75_ms?: number | null;
   executions_delay_p95_ms?: number | null;
@@ -48,13 +53,13 @@ export interface AlertingV2Usage {
   notification_policies_count_with_matcher?: number;
   notification_policies_count_with_group_by?: number;
   notification_policies_avg_group_by_fields_count?: number | null;
-  notification_policies_count_by_throttle_interval?: Record<string, number>;
+  notification_policies_count_by_throttle_interval?: NameValuePair[];
 
   // alert event stats
   alerts_count?: number;
-  alerts_count_by_kind?: Record<string, number>;
-  alerts_count_by_source?: Record<string, number>;
-  alerts_count_by_type?: Record<string, number>;
+  alerts_count_by_kind?: { breached?: number; recovered?: number; no_data?: number };
+  alerts_count_by_source?: NameValuePair[];
+  alerts_count_by_type?: { signal?: number; alert?: number };
   alerts_episode_count?: number;
   alerts_min_timestamp?: string | null;
   alerts_index_size_bytes?: number | null;

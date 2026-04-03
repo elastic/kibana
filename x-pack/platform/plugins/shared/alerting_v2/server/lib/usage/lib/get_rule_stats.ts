@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { TERMS_SIZE, bucketsToRecord } from './constants';
+import { TERMS_SIZE, bucketsToRecord, bucketsToArray } from './constants';
 import type { RuleStatsAggregations, RuleStatsResults } from './types';
 
 export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleStatsResults> {
@@ -231,22 +231,26 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
   return {
     count_total: total,
     count_enabled: aggs?.count_enabled.doc_count ?? 0,
-    count_by_kind: bucketsToRecord(aggs?.count_by_kind.buckets),
-    count_by_schedule: bucketsToRecord(aggs?.count_by_schedule.buckets),
-    count_by_lookback: bucketsToRecord(aggs?.count_by_lookback.buckets),
+    count_by_kind: bucketsToRecord<'alert' | 'signal'>(aggs?.count_by_kind.buckets),
+    count_by_schedule: bucketsToArray(aggs?.count_by_schedule.buckets),
+    count_by_lookback: bucketsToArray(aggs?.count_by_lookback.buckets),
     count_with_query_condition: aggs?.count_with_query_condition.doc_count ?? 0,
     count_with_recovery_policy: aggs?.count_with_recovery_policy.doc_count ?? 0,
-    count_by_recovery_policy_type: bucketsToRecord(aggs?.count_by_recovery_policy_type.buckets),
+    count_by_recovery_policy_type: bucketsToRecord<'query' | 'no_breach'>(
+      aggs?.count_by_recovery_policy_type.buckets
+    ),
     count_with_recovery_query_condition: aggs?.count_with_recovery_query_condition.doc_count ?? 0,
     avg_pending_count: aggs?.avg_pending_count.value ?? null,
     avg_recovering_count: aggs?.avg_recovering_count.value ?? null,
-    count_by_pending_timeframe: bucketsToRecord(aggs?.count_by_pending_timeframe.buckets),
-    count_by_recovering_timeframe: bucketsToRecord(aggs?.count_by_recovering_timeframe.buckets),
+    count_by_pending_timeframe: bucketsToArray(aggs?.count_by_pending_timeframe.buckets),
+    count_by_recovering_timeframe: bucketsToArray(aggs?.count_by_recovering_timeframe.buckets),
     count_with_grouping: aggs?.count_with_grouping.doc_count ?? 0,
     avg_grouping_fields_count: aggs?.avg_grouping_fields_count.value ?? null,
     count_with_no_data: aggs?.count_with_no_data.doc_count ?? 0,
-    count_by_no_data_behavior: bucketsToRecord(aggs?.count_by_no_data_behavior.buckets),
-    count_by_no_data_timeframe: bucketsToRecord(aggs?.count_by_no_data_timeframe.buckets),
+    count_by_no_data_behavior: bucketsToRecord<'no_data' | 'last_status' | 'recover'>(
+      aggs?.count_by_no_data_behavior.buckets
+    ),
+    count_by_no_data_timeframe: bucketsToArray(aggs?.count_by_no_data_timeframe.buckets),
     min_created_at: aggs?.min_created_at.value_as_string ?? null,
   };
 }

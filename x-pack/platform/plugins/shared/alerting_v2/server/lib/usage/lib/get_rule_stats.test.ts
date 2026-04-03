@@ -97,7 +97,7 @@ function mockRuleSearchResponse({
 }
 
 describe('getRuleStats', () => {
-  it('returns stats from aggregations and notification policy count', async () => {
+  it('returns stats from aggregations', async () => {
     mockRuleSearchResponse({});
 
     const result = await getRuleStats(esClient);
@@ -106,31 +106,26 @@ describe('getRuleStats', () => {
       count_total: 20,
       count_enabled: 15,
       count_by_kind: { metric: 12, log: 8 },
-      count_by_schedule: { '1m': 10, '5m': 10 },
-      count_by_lookback: { '5m': 20 },
+      count_by_schedule: [
+        { name: '1m', value: 10 },
+        { name: '5m', value: 10 },
+      ],
+      count_by_lookback: [{ name: '5m', value: 20 }],
       count_with_query_condition: 5,
       count_with_recovery_policy: 3,
       count_by_recovery_policy_type: { auto: 3 },
       count_with_recovery_query_condition: 1,
       avg_pending_count: 3.0,
       avg_recovering_count: 2.0,
-      count_by_pending_timeframe: { '5m': 8 },
-      count_by_recovering_timeframe: { '10m': 6 },
+      count_by_pending_timeframe: [{ name: '5m', value: 8 }],
+      count_by_recovering_timeframe: [{ name: '10m', value: 6 }],
       count_with_grouping: 4,
       avg_grouping_fields_count: 2.0,
       count_with_no_data: 7,
       count_by_no_data_behavior: { alert: 5, skip: 2 },
-      count_by_no_data_timeframe: { '10m': 7 },
+      count_by_no_data_timeframe: [{ name: '10m', value: 7 }],
       min_created_at: '2026-01-15T12:00:00.000Z',
     });
-  });
-
-  it('runs rule search and notification policy count in parallel', async () => {
-    mockRuleSearchResponse({});
-
-    await getRuleStats(esClient);
-
-    expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 
   it('returns empty results when no rules exist', async () => {
@@ -162,21 +157,21 @@ describe('getRuleStats', () => {
       count_total: 0,
       count_enabled: 0,
       count_by_kind: {},
-      count_by_schedule: {},
-      count_by_lookback: {},
+      count_by_schedule: [],
+      count_by_lookback: [],
       count_with_query_condition: 0,
       count_with_recovery_policy: 0,
       count_by_recovery_policy_type: {},
       count_with_recovery_query_condition: 0,
       avg_pending_count: null,
       avg_recovering_count: null,
-      count_by_pending_timeframe: {},
-      count_by_recovering_timeframe: {},
+      count_by_pending_timeframe: [],
+      count_by_recovering_timeframe: [],
       count_with_grouping: 0,
       avg_grouping_fields_count: null,
       count_with_no_data: 0,
       count_by_no_data_behavior: {},
-      count_by_no_data_timeframe: {},
+      count_by_no_data_timeframe: [],
       min_created_at: null,
     });
   });
@@ -195,21 +190,21 @@ describe('getRuleStats', () => {
       count_total: 0,
       count_enabled: 0,
       count_by_kind: {},
-      count_by_schedule: {},
-      count_by_lookback: {},
+      count_by_schedule: [],
+      count_by_lookback: [],
       count_with_query_condition: 0,
       count_with_recovery_policy: 0,
       count_by_recovery_policy_type: {},
       count_with_recovery_query_condition: 0,
       avg_pending_count: null,
       avg_recovering_count: null,
-      count_by_pending_timeframe: {},
-      count_by_recovering_timeframe: {},
+      count_by_pending_timeframe: [],
+      count_by_recovering_timeframe: [],
       count_with_grouping: 0,
       avg_grouping_fields_count: null,
       count_with_no_data: 0,
       count_by_no_data_behavior: {},
-      count_by_no_data_timeframe: {},
+      count_by_no_data_timeframe: [],
       min_created_at: null,
     });
   });

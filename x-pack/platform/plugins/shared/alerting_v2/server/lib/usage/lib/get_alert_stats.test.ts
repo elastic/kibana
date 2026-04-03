@@ -66,7 +66,17 @@ describe('getAlertStats', () => {
     expect(result).toEqual({
       alerts_count: 42,
       alerts_count_by_kind: { active: 30, recovered: 12 },
-      alerts_count_by_source: { metrics: 25, logs: 17 },
+      alerts_count_by_source: [
+        {
+          name: 'metrics',
+          value: 25,
+        },
+        {
+          name: 'logs',
+          value: 17,
+        },
+      ],
+
       alerts_count_by_type: { threshold: 42 },
       alerts_episode_count: 10,
       alerts_min_timestamp: '2026-01-01T00:00:00.000Z',
@@ -101,7 +111,7 @@ describe('getAlertStats', () => {
     expect(result).toEqual({
       alerts_count: 0,
       alerts_count_by_kind: {},
-      alerts_count_by_source: {},
+      alerts_count_by_source: [],
       alerts_count_by_type: {},
       alerts_episode_count: 0,
       alerts_min_timestamp: null,
@@ -123,7 +133,7 @@ describe('getAlertStats', () => {
     expect(result).toEqual({
       alerts_count: 0,
       alerts_count_by_kind: {},
-      alerts_count_by_source: {},
+      alerts_count_by_source: [],
       alerts_count_by_type: {},
       alerts_episode_count: 0,
       alerts_min_timestamp: null,

@@ -16,6 +16,8 @@ import { schema } from '@kbn/config-schema';
  * `latestTaskStateSchema` at the newest version.
  */
 
+const nameValuePairSchema = schema.object({ name: schema.string(), value: schema.number() });
+
 const stateSchemaV1 = schema.object({
   has_errors: schema.boolean(),
   error_messages: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
@@ -24,27 +26,49 @@ const stateSchemaV1 = schema.object({
   // rule stats
   count_total: schema.maybe(schema.number()),
   count_enabled: schema.maybe(schema.number()),
-  count_by_kind: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-  count_by_schedule: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-  count_by_lookback: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+  count_by_kind: schema.maybe(
+    schema.object({
+      alert: schema.maybe(schema.number()),
+      signal: schema.maybe(schema.number()),
+    })
+  ),
+  count_by_schedule: schema.maybe(schema.arrayOf(nameValuePairSchema)),
+  count_by_lookback: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   count_with_query_condition: schema.maybe(schema.number()),
   count_with_recovery_policy: schema.maybe(schema.number()),
-  count_by_recovery_policy_type: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+  count_by_recovery_policy_type: schema.maybe(
+    schema.object({
+      query: schema.maybe(schema.number()),
+      no_breach: schema.maybe(schema.number()),
+    })
+  ),
   count_with_recovery_query_condition: schema.maybe(schema.number()),
   avg_pending_count: schema.maybe(schema.nullable(schema.number())),
   avg_recovering_count: schema.maybe(schema.nullable(schema.number())),
-  count_by_pending_timeframe: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-  count_by_recovering_timeframe: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+  count_by_pending_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
+  count_by_recovering_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   count_with_grouping: schema.maybe(schema.number()),
   avg_grouping_fields_count: schema.maybe(schema.nullable(schema.number())),
   count_with_no_data: schema.maybe(schema.number()),
-  count_by_no_data_behavior: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-  count_by_no_data_timeframe: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+  count_by_no_data_behavior: schema.maybe(
+    schema.object({
+      no_data: schema.maybe(schema.number()),
+      last_status: schema.maybe(schema.number()),
+      recover: schema.maybe(schema.number()),
+    })
+  ),
+  count_by_no_data_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   min_created_at: schema.maybe(schema.nullable(schema.string())),
 
   // execution stats
   executions_count_24hr: schema.maybe(schema.number()),
-  executions_count_by_status_24hr: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+  executions_count_by_status_24hr: schema.maybe(
+    schema.object({
+      success: schema.maybe(schema.number()),
+      failure: schema.maybe(schema.number()),
+      unknown: schema.maybe(schema.number()),
+    })
+  ),
   executions_delay_p50_ms: schema.maybe(schema.nullable(schema.number())),
   executions_delay_p75_ms: schema.maybe(schema.nullable(schema.number())),
   executions_delay_p95_ms: schema.maybe(schema.nullable(schema.number())),
@@ -58,14 +82,25 @@ const stateSchemaV1 = schema.object({
   notification_policies_count_with_group_by: schema.maybe(schema.number()),
   notification_policies_avg_group_by_fields_count: schema.maybe(schema.nullable(schema.number())),
   notification_policies_count_by_throttle_interval: schema.maybe(
-    schema.recordOf(schema.string(), schema.number())
+    schema.arrayOf(nameValuePairSchema)
   ),
 
   // alert event stats
   alerts_count: schema.maybe(schema.number()),
-  alerts_count_by_kind: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-  alerts_count_by_source: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-  alerts_count_by_type: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+  alerts_count_by_kind: schema.maybe(
+    schema.object({
+      breached: schema.maybe(schema.number()),
+      recovered: schema.maybe(schema.number()),
+      no_data: schema.maybe(schema.number()),
+    })
+  ),
+  alerts_count_by_source: schema.maybe(schema.arrayOf(nameValuePairSchema)),
+  alerts_count_by_type: schema.maybe(
+    schema.object({
+      signal: schema.maybe(schema.number()),
+      alert: schema.maybe(schema.number()),
+    })
+  ),
   alerts_episode_count: schema.maybe(schema.number()),
   alerts_min_timestamp: schema.maybe(schema.nullable(schema.string())),
   alerts_index_size_bytes: schema.maybe(schema.nullable(schema.number())),

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { TERMS_SIZE, bucketsToRecord } from './constants';
+import { TERMS_SIZE, bucketsToArray } from './constants';
 import type { NotificationPolicyStatsAggregations, NotificationPolicyStatsResults } from './types';
 
 export async function getNotificationPolicyStats(
@@ -96,7 +96,7 @@ export async function getNotificationPolicyStats(
     notification_policies_count_with_matcher: aggs?.count_with_matcher.doc_count ?? 0,
     notification_policies_count_with_group_by: aggs?.count_with_group_by.doc_count ?? 0,
     notification_policies_avg_group_by_fields_count: aggs?.avg_group_by_fields_count.value ?? null,
-    notification_policies_count_by_throttle_interval: bucketsToRecord(
+    notification_policies_count_by_throttle_interval: bucketsToArray(
       aggs?.count_by_throttle_interval.buckets
     ),
   };

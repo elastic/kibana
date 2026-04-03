@@ -60,7 +60,16 @@ describe('getNotificationPolicyStats', () => {
       notification_policies_count_with_matcher: 2,
       notification_policies_count_with_group_by: 1,
       notification_policies_avg_group_by_fields_count: 2.5,
-      notification_policies_count_by_throttle_interval: { '5m': 3, '1h': 2 },
+      notification_policies_count_by_throttle_interval: [
+        {
+          name: '5m',
+          value: 3,
+        },
+        {
+          name: '1h',
+          value: 2,
+        },
+      ],
     });
   });
 
@@ -75,7 +84,7 @@ describe('getNotificationPolicyStats', () => {
     const result = await getNotificationPolicyStats(esClient);
 
     expect(result.notification_policies_avg_group_by_fields_count).toBeNull();
-    expect(result.notification_policies_count_by_throttle_interval).toEqual({});
+    expect(result.notification_policies_count_by_throttle_interval).toEqual([]);
   });
 
   it('returns empty results when no notification policies exist', async () => {
@@ -96,7 +105,7 @@ describe('getNotificationPolicyStats', () => {
       notification_policies_count_with_matcher: 0,
       notification_policies_count_with_group_by: 0,
       notification_policies_avg_group_by_fields_count: null,
-      notification_policies_count_by_throttle_interval: {},
+      notification_policies_count_by_throttle_interval: [],
     });
   });
 
@@ -116,7 +125,7 @@ describe('getNotificationPolicyStats', () => {
       notification_policies_count_with_matcher: 0,
       notification_policies_count_with_group_by: 0,
       notification_policies_avg_group_by_fields_count: null,
-      notification_policies_count_by_throttle_interval: {},
+      notification_policies_count_by_throttle_interval: [],
     });
   });
 

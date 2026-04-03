@@ -857,30 +857,54 @@
         },
         "count_by_kind": {
           "properties": {
-            "DYNAMIC_KEY": {
+            "alert": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules by kind."
+                "description": "Number of rules of kind alert."
+              }
+            },
+            "signal": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules of kind signal."
               }
             }
           }
         },
         "count_by_schedule": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules by schedule interval."
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Schedule interval string."
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of rules with this schedule."
+                }
               }
             }
           }
         },
         "count_by_lookback": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules by lookback duration."
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Lookback duration string."
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of rules with this lookback."
+                }
               }
             }
           }
@@ -899,10 +923,16 @@
         },
         "count_by_recovery_policy_type": {
           "properties": {
-            "DYNAMIC_KEY": {
+            "query": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules by recovery policy type."
+                "description": "Number of rules with recovery policy type query."
+              }
+            },
+            "no_breach": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules with recovery policy type no_breach."
               }
             }
           }
@@ -926,21 +956,39 @@
           }
         },
         "count_by_pending_timeframe": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules by pending timeframe."
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Pending timeframe duration string."
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of rules with this pending timeframe."
+                }
               }
             }
           }
         },
         "count_by_recovering_timeframe": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules by recovering timeframe."
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Recovering timeframe duration string."
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of rules with this recovering timeframe."
+                }
               }
             }
           }
@@ -965,20 +1013,41 @@
         },
         "count_by_no_data_behavior": {
           "properties": {
-            "DYNAMIC_KEY": {
+            "no_data": {
               "type": "long",
               "_meta": {
-                "description": "Number of rules by no data behavior."
+                "description": "Number of rules with no_data behavior."
+              }
+            },
+            "last_status": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules with last_status behavior."
+              }
+            },
+            "recover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules with recover behavior."
               }
             }
           }
         },
         "count_by_no_data_timeframe": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of rules by no data timeframe."
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "No data timeframe duration string."
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of rules with this no data timeframe."
+                }
               }
             }
           }
@@ -997,10 +1066,22 @@
         },
         "executions_count_by_status_24hr": {
           "properties": {
-            "DYNAMIC_KEY": {
+            "success": {
               "type": "long",
               "_meta": {
-                "description": "Rule executor executions by outcome status in the last 24 hours."
+                "description": "Successful rule executor executions in the last 24 hours."
+              }
+            },
+            "failure": {
+              "type": "long",
+              "_meta": {
+                "description": "Failed rule executor executions in the last 24 hours."
+              }
+            },
+            "unknown": {
+              "type": "long",
+              "_meta": {
+                "description": "Rule executor executions with unknown outcome in the last 24 hours."
               }
             }
           }
@@ -1066,11 +1147,20 @@
           }
         },
         "notification_policies_count_by_throttle_interval": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of notification policies by throttle interval."
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Throttle interval duration string."
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of notification policies with this throttle interval."
+                }
               }
             }
           }
@@ -1083,30 +1173,57 @@
         },
         "alerts_count_by_kind": {
           "properties": {
-            "DYNAMIC_KEY": {
+            "breached": {
               "type": "long",
               "_meta": {
-                "description": "Number of alert events by status."
+                "description": "Number of alert events with status breached."
+              }
+            },
+            "recovered": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of alert events with status recovered."
+              }
+            },
+            "no_data": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of alert events with status no_data."
               }
             }
           }
         },
         "alerts_count_by_source": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of alert events by source."
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Alert source."
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of alert events from this source."
+                }
               }
             }
           }
         },
         "alerts_count_by_type": {
           "properties": {
-            "DYNAMIC_KEY": {
+            "signal": {
               "type": "long",
               "_meta": {
-                "description": "Number of alert events by type."
+                "description": "Number of alert events of type signal."
+              }
+            },
+            "alert": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of alert events of type alert."
               }
             }
           }

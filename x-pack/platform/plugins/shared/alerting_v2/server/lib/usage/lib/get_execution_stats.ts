@@ -79,7 +79,9 @@ export async function getExecutionStats(
 
   return {
     executions_count_24hr: total,
-    executions_count_by_status_24hr: bucketsToRecord(aggs?.count_by_status.buckets),
+    executions_count_by_status_24hr: bucketsToRecord<'success' | 'failure' | 'unknown'>(
+      aggs?.count_by_status.buckets
+    ),
     executions_delay_p50_ms: nanosToMillis(pcts?.['50.0']),
     executions_delay_p75_ms: nanosToMillis(pcts?.['75.0']),
     executions_delay_p95_ms: nanosToMillis(pcts?.['95.0']),

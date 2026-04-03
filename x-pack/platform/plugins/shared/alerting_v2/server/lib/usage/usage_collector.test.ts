@@ -30,20 +30,36 @@ describe('registerAlertingV2UsageCollector', () => {
         schema: {
           alerts_count: { _meta: { description: 'Total number of alert events.' }, type: 'long' },
           alerts_count_by_kind: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of alert events by status.' },
+            breached: {
+              _meta: { description: 'Number of alert events with status breached.' },
+              type: 'long',
+            },
+            no_data: {
+              _meta: { description: 'Number of alert events with status no_data.' },
+              type: 'long',
+            },
+            recovered: {
+              _meta: { description: 'Number of alert events with status recovered.' },
               type: 'long',
             },
           },
           alerts_count_by_source: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of alert events by source.' },
-              type: 'long',
+            items: {
+              name: { _meta: { description: 'Alert source.' }, type: 'keyword' },
+              value: {
+                _meta: { description: 'Number of alert events from this source.' },
+                type: 'long',
+              },
             },
+            type: 'array',
           },
           alerts_count_by_type: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of alert events by type.' },
+            alert: {
+              _meta: { description: 'Number of alert events of type alert.' },
+              type: 'long',
+            },
+            signal: {
+              _meta: { description: 'Number of alert events of type signal.' },
               type: 'long',
             },
           },
@@ -77,49 +93,91 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'float',
           },
           count_by_kind: {
-            DYNAMIC_KEY: { _meta: { description: 'Number of rules by kind.' }, type: 'long' },
+            alert: { _meta: { description: 'Number of rules of kind alert.' }, type: 'long' },
+            signal: { _meta: { description: 'Number of rules of kind signal.' }, type: 'long' },
           },
           count_by_lookback: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of rules by lookback duration.' },
-              type: 'long',
+            items: {
+              name: { _meta: { description: 'Lookback duration string.' }, type: 'keyword' },
+              value: {
+                _meta: { description: 'Number of rules with this lookback.' },
+                type: 'long',
+              },
             },
+            type: 'array',
           },
           count_by_no_data_behavior: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of rules by no data behavior.' },
+            last_status: {
+              _meta: { description: 'Number of rules with last_status behavior.' },
+              type: 'long',
+            },
+            no_data: {
+              _meta: { description: 'Number of rules with no_data behavior.' },
+              type: 'long',
+            },
+            recover: {
+              _meta: { description: 'Number of rules with recover behavior.' },
               type: 'long',
             },
           },
           count_by_no_data_timeframe: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of rules by no data timeframe.' },
-              type: 'long',
+            items: {
+              name: {
+                _meta: { description: 'No data timeframe duration string.' },
+                type: 'keyword',
+              },
+              value: {
+                _meta: { description: 'Number of rules with this no data timeframe.' },
+                type: 'long',
+              },
             },
+            type: 'array',
           },
           count_by_pending_timeframe: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of rules by pending timeframe.' },
-              type: 'long',
+            items: {
+              name: {
+                _meta: { description: 'Pending timeframe duration string.' },
+                type: 'keyword',
+              },
+              value: {
+                _meta: { description: 'Number of rules with this pending timeframe.' },
+                type: 'long',
+              },
             },
+            type: 'array',
           },
           count_by_recovering_timeframe: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of rules by recovering timeframe.' },
-              type: 'long',
+            items: {
+              name: {
+                _meta: { description: 'Recovering timeframe duration string.' },
+                type: 'keyword',
+              },
+              value: {
+                _meta: { description: 'Number of rules with this recovering timeframe.' },
+                type: 'long',
+              },
             },
+            type: 'array',
           },
           count_by_recovery_policy_type: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of rules by recovery policy type.' },
+            no_breach: {
+              _meta: { description: 'Number of rules with recovery policy type no_breach.' },
+              type: 'long',
+            },
+            query: {
+              _meta: { description: 'Number of rules with recovery policy type query.' },
               type: 'long',
             },
           },
           count_by_schedule: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of rules by schedule interval.' },
-              type: 'long',
+            items: {
+              name: { _meta: { description: 'Schedule interval string.' }, type: 'keyword' },
+              value: {
+                _meta: { description: 'Number of rules with this schedule.' },
+                type: 'long',
+              },
             },
+            type: 'array',
           },
           count_enabled: {
             _meta: { description: 'Number of enabled alerting v2 rules.' },
@@ -159,9 +217,17 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'long',
           },
           executions_count_by_status_24hr: {
-            DYNAMIC_KEY: {
+            failure: {
+              _meta: { description: 'Failed rule executor executions in the last 24 hours.' },
+              type: 'long',
+            },
+            success: {
+              _meta: { description: 'Successful rule executor executions in the last 24 hours.' },
+              type: 'long',
+            },
+            unknown: {
               _meta: {
-                description: 'Rule executor executions by outcome status in the last 24 hours.',
+                description: 'Rule executor executions with unknown outcome in the last 24 hours.',
               },
               type: 'long',
             },
@@ -198,10 +264,19 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'long',
           },
           notification_policies_count_by_throttle_interval: {
-            DYNAMIC_KEY: {
-              _meta: { description: 'Number of notification policies by throttle interval.' },
-              type: 'long',
+            items: {
+              name: {
+                _meta: { description: 'Throttle interval duration string.' },
+                type: 'keyword',
+              },
+              value: {
+                _meta: {
+                  description: 'Number of notification policies with this throttle interval.',
+                },
+                type: 'long',
+              },
             },
+            type: 'array',
           },
           notification_policies_count_with_group_by: {
             _meta: { description: 'Number of notification policies with group by.' },

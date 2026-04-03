@@ -46,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             time_field: '@timestamp',
             schedule: { every: '1m', lookback: '5m' },
             evaluation: {
-              query: { base: 'FROM metrics-* | LIMIT 10', condition: 'value > 100' },
+              query: { base: 'FROM metrics-* | LIMIT 10' },
             },
             grouping: { fields: ['host.name', 'service.name'] },
             no_data: { behavior: 'last_status', timeframe: '10m' },
@@ -76,7 +76,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'alert-rule-2' },
             time_field: '@timestamp',
             schedule: { every: '5m', lookback: '10m' },
-            evaluation: { query: { base: 'FROM metrics-* | LIMIT 5', condition: 'value > 100' } },
+            evaluation: { query: { base: 'FROM metrics-* | LIMIT 5' } },
             no_data: { behavior: 'recover', timeframe: '15m' },
           }),
       ]);
@@ -166,16 +166,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parsedState.count_total).to.be(3);
         expect(parsedState.count_enabled).to.be(2);
         expect(parsedState.count_by_kind).to.eql({ alert: 2, signal: 1 });
-        expect(parsedState.count_by_schedule).to.eql({ '1m': 1, '5m': 2 });
-        expect(parsedState.count_by_lookback).to.eql({ '5m': 1, '10m': 1 });
-        expect(parsedState.count_with_query_condition).to.be(2);
+        expect(
+          [...parsedState.count_by_schedule].sort((a: { name: string }, b: { name: string }) =>
+            a.name.localeCompare(b.name)
+          )
+        ).to.eql([
+          { name: '1m', value: 1 },
+          { name: '5m', value: 2 },
+        ]);
+        expect(
+          [...parsedState.count_by_lookback].sort((a: { name: string }, b: { name: string }) =>
+            a.name.localeCompare(b.name)
+          )
+        ).to.eql([
+          { name: '10m', value: 1 },
+          { name: '5m', value: 1 },
+        ]);
+        expect(parsedState.count_with_query_condition).to.be(0);
         expect(parsedState.count_with_recovery_policy).to.be(1);
         expect(parsedState.count_by_recovery_policy_type).to.eql({ no_breach: 1 });
         expect(parsedState.count_with_grouping).to.be(1);
         expect(parsedState.avg_grouping_fields_count).to.be(2);
         expect(parsedState.count_with_no_data).to.be(2);
         expect(parsedState.count_by_no_data_behavior).to.eql({ recover: 1, last_status: 1 });
-        expect(parsedState.count_by_no_data_timeframe).to.eql({ '10m': 1, '15m': 1 });
+        expect(
+          [...parsedState.count_by_no_data_timeframe].sort(
+            (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name)
+          )
+        ).to.eql([
+          { name: '10m', value: 1 },
+          { name: '15m', value: 1 },
+        ]);
         expect(parsedState.min_created_at).to.be.a('string');
 
         // Execution stats
@@ -193,10 +214,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parsedState.notification_policies_count_with_matcher).to.be(1);
         expect(parsedState.notification_policies_count_with_group_by).to.be(1);
         expect(parsedState.notification_policies_avg_group_by_fields_count).to.be(2);
-        expect(parsedState.notification_policies_count_by_throttle_interval).to.eql({
-          '5m': 1,
-          '1h': 1,
-        });
+        expect(
+          [...parsedState.notification_policies_count_by_throttle_interval].sort(
+            (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name)
+          )
+        ).to.eql([
+          { name: '1h', value: 1 },
+          { name: '5m', value: 1 },
+        ]);
       });
     });
   });

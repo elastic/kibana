@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
-import { TERMS_SIZE, bucketsToRecord } from './constants';
+import { TERMS_SIZE, bucketsToRecord, bucketsToArray } from './constants';
 import type { AlertStatsAggregations, AlertStatsResults } from './types';
 
 export async function getAlertStats(esClient: ElasticsearchClient): Promise<AlertStatsResults> {
@@ -50,9 +50,11 @@ export async function getAlertStats(esClient: ElasticsearchClient): Promise<Aler
 
   return {
     alerts_count: total,
-    alerts_count_by_kind: bucketsToRecord(aggs?.count_by_kind.buckets),
-    alerts_count_by_source: bucketsToRecord(aggs?.count_by_source.buckets),
-    alerts_count_by_type: bucketsToRecord(aggs?.count_by_type.buckets),
+    alerts_count_by_kind: bucketsToRecord<'breached' | 'recovered' | 'no_data'>(
+      aggs?.count_by_kind.buckets
+    ),
+    alerts_count_by_source: bucketsToArray(aggs?.count_by_source.buckets),
+    alerts_count_by_type: bucketsToRecord<'signal' | 'alert'>(aggs?.count_by_type.buckets),
     alerts_episode_count: aggs?.episode_count.value ?? 0,
     alerts_min_timestamp: aggs?.min_timestamp.value_as_string ?? null,
     alerts_index_size_bytes: sizeBytes,
