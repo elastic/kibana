@@ -50,7 +50,9 @@ const baseWorkflowEditSchema = z.object({
   description: z.string().optional().describe('Human-readable description of what the change does'),
 });
 
-const stepDefinitionSchema = z.object({
+const ENABLE_EXTENDED_STEP_PROPERTIES = true;
+
+export const stepDefinitionSchema = z.object({
   name: z.string(),
   type: z.string(),
   'connector-id': z.string().optional(),
@@ -59,6 +61,17 @@ const stepDefinitionSchema = z.object({
   with: z.record(z.string(), z.unknown()).optional(),
   output: z.record(z.string(), z.unknown()).optional(),
   steps: z.array(z.record(z.string(), z.unknown())).optional(),
+  ...(ENABLE_EXTENDED_STEP_PROPERTIES
+    ? {
+        'on-failure': z.unknown().optional(),
+        timeout: z.string().optional(),
+        description: z.string().optional(),
+        do: z.array(z.record(z.string(), z.unknown())).optional(),
+        then: z.array(z.record(z.string(), z.unknown())).optional(),
+        else: z.array(z.record(z.string(), z.unknown())).optional(),
+        condition: z.string().optional(),
+      }
+    : {}),
 });
 
 const findWorkflowYamlAttachment = (

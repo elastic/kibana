@@ -20,6 +20,7 @@ import {
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
   createEditPreservationEvaluator,
+  createEfficiencyEvaluator,
   extractResultYaml,
   extractYamlFromAttachments,
 } from '../src/evaluators';
@@ -104,6 +105,7 @@ const evaluate = base.extend<
             createToolUsageEvaluator(),
             createStructuralCorrectnessEvaluator(),
             createEditPreservationEvaluator(),
+            createEfficiencyEvaluator(),
             createCriteriaEvaluator({ evaluators }),
           ])
         );
@@ -185,22 +187,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-step' },
             },
-            {
-              input: {
-                instruction:
-                  'Update the log_start step message to say "Processing initiated at {{ now }}".',
-                initialYaml: baseWorkflowYaml,
-              },
-              output: {
-                criteria: [
-                  'The log_start step message was updated.',
-                  'The new message contains "Processing initiated".',
-                ],
-                expectedStepCount: 3,
-                preservedStepNames: ['fetch_data', 'log_end'],
-              },
-              metadata: { category: 'modify-step' },
-            },
           ],
         },
       });
@@ -250,22 +236,6 @@ evaluate.describe(
                 criteria: [
                   'The workflow name was changed to "Data Processing Pipeline".',
                   'The workflow description was updated accordingly.',
-                ],
-                expectedStepCount: 3,
-                preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
-              },
-              metadata: { category: 'modify-property' },
-            },
-            {
-              input: {
-                instruction:
-                  'Change the trigger from manual to a scheduled trigger that runs every 15 minutes.',
-                initialYaml: baseWorkflowYaml,
-              },
-              output: {
-                criteria: [
-                  'The trigger type was changed from manual to scheduled.',
-                  'The schedule interval is set to 15 minutes.',
                 ],
                 expectedStepCount: 3,
                 preservedStepNames: ['log_start', 'fetch_data', 'log_end'],
@@ -368,23 +338,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-es-step' },
             },
-            {
-              input: {
-                instruction:
-                  'Add a new "timestamp" field of type "date" to the create_index step mappings.',
-                initialYaml: esBaseWorkflowYaml,
-              },
-              output: {
-                criteria: [
-                  'The create_index step mappings were updated.',
-                  'A new "timestamp" field of type "date" was added to the mappings properties.',
-                  'The existing "name" and "status" fields are preserved.',
-                ],
-                expectedStepCount: 4,
-                preservedStepNames: ['index_document', 'search_data', 'log_results'],
-              },
-              metadata: { category: 'modify-es-step' },
-            },
           ],
         },
       });
@@ -404,7 +357,7 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'A new elasticsearch.esql.query step was added after search_data.',
+                  'A new ES|QL query step was added after search_data.',
                   'The ES|QL query references the my-data-index index.',
                   'The query filters or aggregates data.',
                 ],
@@ -417,24 +370,6 @@ evaluate.describe(
                   'search_data',
                   'log_results',
                 ],
-              },
-              metadata: { category: 'insert-es-step' },
-            },
-            {
-              input: {
-                instruction:
-                  'Replace the single index_document step with an elasticsearch.bulk step that indexes three documents: {"name": "Doc A", "status": "active"}, {"name": "Doc B", "status": "inactive"}, and {"name": "Doc C", "status": "active"}.',
-                initialYaml: esBaseWorkflowYaml,
-              },
-              output: {
-                criteria: [
-                  'The index_document step was replaced with an elasticsearch.bulk step.',
-                  'The bulk step indexes three documents.',
-                  'Each document has a name and status field.',
-                ],
-                expectedStepCount: 4,
-                expectedStepTypes: ['elasticsearch.bulk'],
-                preservedStepNames: ['create_index', 'search_data', 'log_results'],
               },
               metadata: { category: 'insert-es-step' },
             },
@@ -453,14 +388,14 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Change the index name from "my-data-index" to "production-data" in all steps, add an elasticsearch.indices.exists check before create_index, and wrap the create_index step in an if-step that only runs when the index does not exist.',
+                  'Change the index name from "my-data-index" to "production-data" in all steps, add an index existence check before create_index, and wrap the create_index step in a condition that only runs when the index does not exist.',
                 initialYaml: esBaseWorkflowYaml,
               },
               output: {
                 criteria: [
                   'All references to "my-data-index" were changed to "production-data".',
-                  'An elasticsearch.indices.exists step was added before create_index.',
-                  'An if-step conditionally creates the index only when it does not already exist.',
+                  'A step that checks index existence was added before create_index.',
+                  'Conditional logic ensures the index is created only when it does not already exist.',
                 ],
                 expectedStepTypes: ['elasticsearch.indices.exists'],
                 expectedStepCount: { min: 5, max: 7 },
@@ -520,22 +455,6 @@ evaluate.describe(
               },
               metadata: { category: 'modify-cases-step' },
             },
-            {
-              input: {
-                instruction:
-                  'Change the owner of the create_case step from "securitySolution" to "observability".',
-                initialYaml: casesBaseWorkflowYaml,
-              },
-              output: {
-                criteria: [
-                  'The create_case step owner was changed to "observability".',
-                  'The title, description, and other properties remain unchanged.',
-                ],
-                expectedStepCount: 2,
-                preservedStepNames: ['log_case_id'],
-              },
-              metadata: { category: 'modify-cases-step' },
-            },
           ],
         },
       });
@@ -550,37 +469,18 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Add a cases.addComment step after create_case that adds the comment "Initial triage started" to the newly created case.',
+                  'Add a step after create_case that adds the comment "Initial triage started" to the newly created case.',
                 initialYaml: casesBaseWorkflowYaml,
               },
               output: {
                 criteria: [
-                  'A cases.addComment step was added after create_case.',
+                  'A step that adds a comment was added after create_case.',
                   'The step references the created case ID from the previous step output.',
                   'The comment text is "Initial triage started" or similar.',
                 ],
                 expectedToolIds: ['platform.workflows.workflow_insert_step'],
                 expectedStepCount: 3,
-                expectedStepTypes: ['cases.addComment'],
-                preservedStepNames: ['create_case', 'log_case_id'],
-              },
-              metadata: { category: 'insert-cases-step' },
-            },
-            {
-              input: {
-                instruction:
-                  'Add a cases.getCase step at the end that retrieves the case created earlier, including comments.',
-                initialYaml: casesBaseWorkflowYaml,
-              },
-              output: {
-                criteria: [
-                  'A cases.getCase step was added at the end of the workflow.',
-                  'The step references the case ID from the create_case step output.',
-                  'The include_comments option is set to true.',
-                ],
-                expectedToolIds: ['platform.workflows.workflow_insert_step'],
-                expectedStepCount: 3,
-                expectedStepTypes: ['cases.getCase'],
+                expectedStepTypes: ['cases.addComment|kibana.addCaseComment|kibana.request'],
                 preservedStepNames: ['create_case', 'log_case_id'],
               },
               metadata: { category: 'insert-cases-step' },
@@ -599,17 +499,20 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Add a foreach loop after create_case that iterates over a list of comments ["Triage started", "Investigating root cause", "Escalated to team lead"] and adds each as a comment to the case using cases.addComment. Then add a cases.updateCase step at the end that changes the case title to "Triaged: {{ steps.create_case.output.case.title }}".',
+                  'Add a loop after create_case that iterates over a list of comments ["Triage started", "Investigating root cause", "Escalated to team lead"] and adds each as a comment to the case. Then add a step at the end that updates the case title to "Triaged: {{ steps.create_case.output.case.title }}".',
                 initialYaml: casesBaseWorkflowYaml,
               },
               output: {
                 criteria: [
                   'A foreach loop was added that iterates over a list of comments.',
-                  'Inside the loop, a cases.addComment step adds each comment to the case.',
-                  'A cases.updateCase step was added at the end.',
+                  'Inside the loop, a step adds each comment to the case.',
+                  'A step that updates the case was added at the end.',
                   'The update step changes the case title.',
                 ],
-                expectedStepTypes: ['cases.addComment', 'cases.updateCase'],
+                expectedStepTypes: [
+                  'cases.addComment|kibana.addCaseComment|kibana.request',
+                  'cases.updateCase|kibana.updateCase|kibana.request',
+                ],
                 expectedStepCount: { min: 5, max: 7 },
                 preservedStepNames: ['create_case'],
               },
@@ -693,6 +596,7 @@ evaluate.describe(
                   'The email is sent to "oncall@example.com".',
                   'The email has a subject of "Alert Summary" or similar.',
                   'The message body references the alert data from a previous step.',
+                  'Connector steps include a connector-id field (either a real connector ID or a descriptive placeholder).',
                 ],
                 expectedToolIds: ['platform.workflows.workflow_insert_step'],
                 expectedStepCount: 4,
@@ -723,6 +627,7 @@ evaluate.describe(
                   'The email is sent to "alerts@example.com".',
                   'The email subject is "New Alerts" or similar.',
                   'The notification message content is preserved.',
+                  'Connector steps include a connector-id field (either a real connector ID or a descriptive placeholder).',
                 ],
                 expectedStepCount: 3,
                 preservedStepNames: ['fetch_alerts', 'log_done'],

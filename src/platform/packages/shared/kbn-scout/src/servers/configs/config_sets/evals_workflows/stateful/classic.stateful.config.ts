@@ -10,6 +10,51 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
 
+const mockWorkflowConnectors = {
+  'mock-slack': {
+    name: 'Mock Slack',
+    actionTypeId: '.slack',
+    config: {},
+    secrets: { webhookUrl: 'https://hooks.slack.com/services/mock/mock/mock' },
+  },
+  'mock-email': {
+    name: 'Mock Email',
+    actionTypeId: '.email',
+    config: {
+      from: 'workflows@example.com',
+      service: 'other',
+      host: 'localhost',
+      port: 25,
+      secure: false,
+    },
+    secrets: {},
+  },
+  'mock-jira': {
+    name: 'Mock Jira',
+    actionTypeId: '.jira',
+    config: { apiUrl: 'https://mock.atlassian.net', projectKey: 'MOCK' },
+    secrets: { apiToken: 'mock-token', email: 'mock@example.com' },
+  },
+  'mock-pagerduty': {
+    name: 'Mock PagerDuty',
+    actionTypeId: '.pagerduty',
+    config: { apiUrl: 'https://events.pagerduty.com/v2/enqueue' },
+    secrets: { routingKey: 'mock-routing-key' },
+  },
+  'mock-teams': {
+    name: 'Mock Teams',
+    actionTypeId: '.teams',
+    config: {},
+    secrets: { webhookUrl: 'https://outlook.office.com/webhook/mock' },
+  },
+  'mock-servicenow': {
+    name: 'Mock ServiceNow',
+    actionTypeId: '.servicenow',
+    config: { apiUrl: 'https://mock.service-now.com' },
+    secrets: { username: 'mock', password: 'mock' },
+  },
+};
+
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
   kbnTestServer: {
@@ -19,6 +64,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      `--xpack.actions.preconfigured=${JSON.stringify(mockWorkflowConnectors)}`,
     ],
   },
 };

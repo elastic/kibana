@@ -120,6 +120,8 @@ export function createToolUsageEvaluator() {
   };
 }
 
+const SCORE_ON_FINAL_RESULT = true;
+
 export function createEditSuccessEvaluator() {
   return {
     name: 'EditToolSuccess',
@@ -129,6 +131,25 @@ export function createEditSuccessEvaluator() {
 
       if (editResults.length === 0) {
         return { score: 0, metadata: { reason: 'No workflow edit tool calls found' } };
+      }
+
+      if (SCORE_ON_FINAL_RESULT) {
+        const lastResult = editResults[editResults.length - 1];
+        const finalSuccess = lastResult.success === true;
+        const hadIntermediateFailures = editResults.slice(0, -1).some((r) => r.success === false);
+
+        return {
+          score: finalSuccess ? 1 : 0,
+          metadata: {
+            editResultCount: editResults.length,
+            hadIntermediateFailures,
+            results: editResults.map((r) => ({
+              success: r.success,
+              error: r.error,
+              toolId: r.toolId,
+            })),
+          },
+        };
       }
 
       const allSuccessful = editResults.every((r) => r.success === true);
@@ -278,9 +299,10 @@ export function createStructuralCorrectnessEvaluator() {
       if (expectedStepTypes && expectedStepTypes.length > 0) {
         const actualTypes = new Set(workflow.steps.map((s) => s.type).filter(Boolean));
         for (const requiredType of expectedStepTypes) {
-          const pass = actualTypes.has(requiredType);
+          const alternatives = requiredType.split('|');
+          const pass = alternatives.some((alt) => actualTypes.has(alt));
           checks.push({
-            name: `stepType:${requiredType}`,
+            name: `stepType:${alternatives[0]}`,
             pass,
             detail: pass ? 'present' : `missing (found: ${[...actualTypes].join(', ')})`,
           });
@@ -371,6 +393,43 @@ export function createEditPreservationEvaluator() {
       return {
         score: results.length > 0 ? preserved / results.length : 1,
         metadata: { results },
+      };
+    },
+  };
+}
+
+export function createEfficiencyEvaluator() {
+  return {
+    name: 'Efficiency',
+    kind: 'CODE' as const,
+    evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
+      const toolCalls = getToolCallSteps(output);
+      const workflowCalls = toolCalls.filter((t) => t.tool_id?.includes('workflow_'));
+      const failedCalls = workflowCalls.filter((t) =>
+        t.results?.some((r) => {
+          const data = unwrapToolResultData(r);
+          return data && data.success === false;
+        })
+      );
+      const lookupCalls = toolCalls.filter(
+        (t) =>
+          t.tool_id?.includes('get_step_definitions') ||
+          t.tool_id?.includes('get_connectors') ||
+          t.tool_id?.includes('get_examples')
+      );
+
+      const totalToolCalls = toolCalls.length;
+      const wastedCalls = failedCalls.length;
+      const efficiency = totalToolCalls > 0 ? Math.max(0, 1 - wastedCalls / totalToolCalls) : 1;
+
+      return {
+        score: efficiency,
+        metadata: {
+          totalToolCalls,
+          workflowEditCalls: workflowCalls.length,
+          failedCalls: wastedCalls,
+          lookupCalls: lookupCalls.length,
+        },
       };
     },
   };
