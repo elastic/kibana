@@ -36,7 +36,7 @@ describe('Treemap Schema', () => {
       const validated = treemapStateSchema.validate(input);
       expect(validated.type).toBe('treemap');
       expect(validated.metrics).toHaveLength(1);
-      expect(validated.metrics[0].operation).toBe('count');
+      expect(validated.metrics[0]).toHaveProperty('operation', 'count');
     });
 
     it('validates configuration with metrics and group_by', () => {
@@ -548,7 +548,6 @@ describe('Treemap Schema', () => {
         ...baseESQLTreemapConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
@@ -556,7 +555,7 @@ describe('Treemap Schema', () => {
 
       const validated = treemapStateSchema.validate(input);
       expect(validated.dataset.type).toBe('esql');
-      expect(validated.metrics[0].operation).toBe('value');
+      expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
 
     it('validates ES|QL configuration with group_by', () => {
@@ -564,13 +563,11 @@ describe('Treemap Schema', () => {
         ...baseESQLTreemapConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
         group_by: [
           {
-            operation: 'value',
             column: 'category',
           },
         ],
@@ -586,7 +583,6 @@ describe('Treemap Schema', () => {
         title: 'Sales Treemap',
         metrics: [
           {
-            operation: 'value',
             column: 'sum_sales',
             color: {
               type: 'static',
@@ -596,7 +592,6 @@ describe('Treemap Schema', () => {
         ],
         group_by: [
           {
-            operation: 'value',
             column: 'category',
             color: {
               mode: 'categorical',

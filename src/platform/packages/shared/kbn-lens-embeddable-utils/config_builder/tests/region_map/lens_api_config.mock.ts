@@ -88,11 +88,9 @@ export const basicEsqlRegionMap = {
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   region: {
-    operation: 'value',
     column: 'geo.dest',
     ems: {
       boundaries: 'world_countries',
@@ -183,11 +181,9 @@ export const comprehensiveEsqlRegionMap = {
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   region: {
-    operation: 'value',
     column: 'geo.dest',
     ems: {
       boundaries: 'world_countries',
