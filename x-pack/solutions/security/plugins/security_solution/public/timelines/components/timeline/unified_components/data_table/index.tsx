@@ -22,7 +22,6 @@ import type {
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
@@ -57,7 +56,7 @@ import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
-import { DocumentFlyout } from '../../../../../flyout_v2/document';
+import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/document_flyout_wrapper';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -185,13 +184,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         if (newFlyoutSystemEnabled) {
-          const hit: DataTableRecord = buildDataTableRecord(eventData.raw);
           overlays.openSystemFlyout(
             flyoutProviders({
               services,
               store,
               history,
-              children: <DocumentFlyout hit={hit} renderCellActions={cellActionRenderer} />,
+              children: (
+                <DocumentFlyoutWrapper
+                  documentId={eventData._id}
+                  indexName={eventData.ecs._index}
+                  renderCellActions={cellActionRenderer}
+                  onAlertUpdated={refetch}
+                />
+              ),
             }),
             {
               ownFocus: false,
@@ -235,6 +240,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         store,
         history,
         timelineId,
+        refetch,
         openFlyout,
         telemetry,
       ]

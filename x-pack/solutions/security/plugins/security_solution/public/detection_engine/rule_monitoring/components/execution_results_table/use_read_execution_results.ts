@@ -25,6 +25,7 @@ export const useReadExecutionResults = (args: ReadRuleExecutionResultsRequestArg
     ({ signal }) => api.readRuleExecutionResults({ ...args, signal }),
     {
       ...DEFAULT_QUERY_OPTIONS,
+      refetchOnMount: 'always',
       keepPreviousData: true,
       onError: (error) => {
         addError(error, { title: i18n.FETCH_ERROR });

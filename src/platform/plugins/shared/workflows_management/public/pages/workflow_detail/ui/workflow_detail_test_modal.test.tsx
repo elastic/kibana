@@ -10,6 +10,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
   selectEditorYaml,
@@ -20,7 +21,6 @@ import {
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
@@ -133,7 +133,7 @@ describe('WorkflowDetailTestModal', () => {
     });
 
     mockUseWorkflowsCapabilities.mockReturnValue({
-      ...mockWorkflowsManagementCapabilities,
+      ...createMockWorkflowsCapabilities(),
       canExecuteWorkflow: true,
     });
 
@@ -160,7 +160,7 @@ describe('WorkflowDetailTestModal', () => {
 
     it('should not render when user lacks permissions', () => {
       mockUseWorkflowsCapabilities.mockReturnValue({
-        ...mockWorkflowsManagementCapabilities,
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
 
@@ -231,7 +231,7 @@ describe('WorkflowDetailTestModal', () => {
       });
 
       mockUseWorkflowsCapabilities.mockReturnValue({
-        ...mockWorkflowsManagementCapabilities,
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
 
