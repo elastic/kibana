@@ -19,7 +19,7 @@ import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, toAsCodeQuery } from '@kbn/dashboard-plugin/public';
 
 import type { LinksLayoutType } from '../../../common/content_management';
 import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
@@ -98,7 +98,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
       dashboardId: link.destination,
     };
     if (linkOptions.use_filters && query) {
-      params.query = query as Query;
+      params.query = toAsCodeQuery(query as Query);
     }
 
     if (linkOptions.use_time_range && timeRange) {
