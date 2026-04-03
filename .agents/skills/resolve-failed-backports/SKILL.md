@@ -33,7 +33,7 @@ the source PR:
 SOURCE_SHA=$(gh api repos/elastic/kibana/pulls/<PR> --jq '.merge_commit_sha')
 
 gh api --paginate --slurp repos/elastic/kibana/issues/<PR>/comments \
-  --jq 'add
+  --jq '(add // [])
     | map(
         select(.user.login == "kibanamachine")
         | select(.body | test("Some backports could not be created|All backports failed"))
