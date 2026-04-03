@@ -47,12 +47,14 @@ export class AutomaticImportResponseFactory {
       ...(headers ?? {}),
     };
 
+    const message = body instanceof Error ? body.message : body ?? statusToErrorMessage(statusCode);
+
     return this.response.custom({
       headers: defaultedHeaders,
       statusCode,
       body: Buffer.from(
         JSON.stringify({
-          message: body ?? statusToErrorMessage(statusCode),
+          message,
           status_code: statusCode,
         })
       ),

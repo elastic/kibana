@@ -1,0 +1,28 @@
+version: '1'
+name: 'sources.gmail.search'
+description: 'Search for emails in Gmail. Use a specific query (from:, subject:, is:unread, after:, newer_than:Nd) and limit maxResults (e.g. 10-20) to avoid large responses.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: query
+    type: string
+    required: false
+    description: "Gmail search query. Use operators to narrow results: from:user@example.com, to:, subject:, is:unread, is:read, after:2024/01/01, newer_than:7d, has:attachment. Prefer specific queries; do not leave empty or broad."
+  - name: maxResults
+    type: number
+    required: false
+    description: "Max messages to return (default 10, max 100). Prefer 10-20 to keep context small."
+  - name: pageToken
+    type: string
+    required: false
+    description: Pagination token from a previous response
+steps:
+  - name: search_messages
+    type: gmail.searchMessages
+    connector-id: <%= gmail-stack-connector-id %>
+    with:
+      query: "${{inputs.query}}"
+      maxResults: ${{inputs.maxResults}}
+      pageToken: "${{inputs.pageToken}}"

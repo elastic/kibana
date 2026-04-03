@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from './constants';
+export { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from './constants';

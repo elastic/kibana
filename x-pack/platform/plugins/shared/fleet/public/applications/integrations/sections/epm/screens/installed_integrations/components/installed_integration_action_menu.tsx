@@ -38,7 +38,11 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
       ctaLink={docLinks.links.enterpriseSearch.elasticInferenceService}
       isCloudEnabled={cloud?.isCloudEnabled ?? false}
     >
-      <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setIsPopoverOpen((s) => !s)}>
+      <EuiButton
+        iconType="chevronSingleDown"
+        iconSide="right"
+        onClick={() => setIsPopoverOpen((s) => !s)}
+      >
         <FormattedMessage
           id="xpack.fleet.epmInstalledIntegrations.actionButton"
           defaultMessage="Actions"
@@ -166,7 +170,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
             ? [
                 <EuiContextMenuItem
                   key="rollback"
-                  icon="returnKey"
+                  icon="return"
                   disabled={!hasRollbackableIntegrations}
                   onClick={openRollbackModal}
                 >

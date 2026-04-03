@@ -10,6 +10,7 @@ import type { FeedbackSubmittedData } from '../../../common';
 
 interface FeedbackSubmittedEventData extends FeedbackSubmittedData {
   user_id?: string;
+  source: string;
 }
 
 export const FEEDBACK_SUBMITTED_EVENT_TYPE = 'feedback_submitted';
@@ -83,6 +84,13 @@ const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
     _meta: {
       description: 'The organization id of the user submitting feedback',
       optional: true,
+    },
+  },
+  source: {
+    type: 'keyword',
+    _meta: {
+      description: 'The source of the feedback submission (e.g., "kibana" or "cloud")',
+      optional: false,
     },
   },
 };

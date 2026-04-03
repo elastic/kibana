@@ -7,7 +7,7 @@
 
 import { each, map, some, uniq } from 'lodash';
 import { containsDynamicQuery } from '@kbn/osquery-plugin/common/utils/replace_params_query';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { ResponseActionAlerts } from './types';
 import type { SetupPlugins } from '../../../plugin_contract';
@@ -61,6 +61,7 @@ export const osqueryResponseAction = (
       .create(
         {
           ...rest,
+          ...(packId && { pack_id: packId }),
           queries: requiredOptional(queries),
           ecs_mapping: ecsMapping,
           saved_query_id: savedQueryId,
@@ -82,6 +83,7 @@ export const osqueryResponseAction = (
       .create(
         {
           ...rest,
+          ...(packId && { pack_id: packId }),
           queries: requiredOptional(queries),
           ecs_mapping: ecsMapping,
           saved_query_id: savedQueryId,

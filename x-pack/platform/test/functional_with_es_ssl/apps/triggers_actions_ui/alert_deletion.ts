@@ -95,7 +95,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await indexTestDocs();
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
     });
 
     afterEach(async () => {

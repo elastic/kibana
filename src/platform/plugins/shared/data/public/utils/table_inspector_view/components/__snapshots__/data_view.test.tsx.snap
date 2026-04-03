@@ -211,84 +211,88 @@ Array [
     class="euiBasicTable insDataTableFormat__table eui-xScroll css-e89sgl-table"
     data-test-subj="inspectorTable"
   >
-    <table
-      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
-      id="__table_generated-id"
-      tabindex="-1"
+    <div
+      class="emotion-euiContainerCSS"
     >
-      <caption
-        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-      />
-      <thead>
-        <tr>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_1_0"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              id="generated-id-wrapper"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                  >
-                    column1
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="css-0"
+      <table
+        class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
+        id="__table_generated-id"
+        tabindex="-1"
       >
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+        <caption
+          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+        />
+        <thead>
+          <tr>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_1_0"
+              role="columnheader"
+              scope="col"
             >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  123
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
-                  />
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      column1
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="css-0"
+        >
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    123
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div>
       <div
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -318,7 +322,7 @@ Array [
                 </span>
                 <span
                   color="inherit"
-                  data-euiicon-type="arrowDown"
+                  data-euiicon-type="chevronSingleDown"
                 />
               </span>
             </button>
@@ -350,7 +354,7 @@ Array [
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="arrowLeft"
+                data-euiicon-type="chevronSingleLeft"
               />
             </button>
             <ul
@@ -391,7 +395,7 @@ Array [
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="arrowRight"
+                data-euiicon-type="chevronSingleRight"
               />
             </button>
           </nav>
@@ -499,85 +503,89 @@ Array [
     class="euiBasicTable insDataTableFormat__table eui-xScroll css-e89sgl-table"
     data-test-subj="inspectorTable"
   >
-    <table
-      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
-      id="__table_generated-id"
-      tabindex="-1"
+    <div
+      class="emotion-euiContainerCSS"
     >
-      <caption
-        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-      />
-      <thead>
-        <tr>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_1_0"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              id="generated-id-wrapper"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="column1"
-                  >
-                    column1
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="css-0"
+      <table
+        class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
+        id="__table_generated-id"
+        tabindex="-1"
       >
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+        <caption
+          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+        />
+        <thead>
+          <tr>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_1_0"
+              role="columnheader"
+              scope="col"
             >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                >
-                  123
-                </div>
-                <div
-                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
-                  />
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="column1"
+                    >
+                      column1
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="css-0"
+        >
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    123
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div>
       <div
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -607,7 +615,7 @@ Array [
                 </span>
                 <span
                   color="inherit"
-                  data-euiicon-type="arrowDown"
+                  data-euiicon-type="chevronSingleDown"
                 />
               </span>
             </button>
@@ -639,7 +647,7 @@ Array [
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="arrowLeft"
+                data-euiicon-type="chevronSingleLeft"
               />
             </button>
             <ul
@@ -680,7 +688,7 @@ Array [
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="arrowRight"
+                data-euiicon-type="chevronSingleRight"
               />
             </button>
           </nav>

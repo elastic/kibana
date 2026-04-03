@@ -21,7 +21,14 @@ const defaultContext: ActionBuilderContext = {
   },
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: true, selection: true },
+  supports: {
+    sorting: true,
+    pagination: true,
+    search: true,
+    selection: true,
+    tags: false,
+    starred: false,
+  },
   actions: { onDelete },
 };
 

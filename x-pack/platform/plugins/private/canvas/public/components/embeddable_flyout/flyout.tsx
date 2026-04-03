@@ -5,38 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useSelector, useDispatch } from 'react-redux';
 import type { Props as ComponentProps } from './flyout.component';
 import { AddEmbeddableFlyout as Component } from './flyout.component';
-// @ts-expect-error untyped local
-import { addElement } from '../../state/actions/elements';
-import { getSelectedPage } from '../../state/selectors/workpad';
-import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
-import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import type { State } from '../../../types';
-import { presentationUtilService } from '../../services/kibana_services';
+import { useCanvasApi } from '../hooks/use_canvas_api';
 
-const allowedEmbeddables = {
-  [EmbeddableTypes.map]: (id: string) => {
-    return `savedMap id="${id}" | render`;
-  },
-  [EmbeddableTypes.lens]: (id: string) => {
-    return `savedLens id="${id}" | render`;
-  },
-  [EmbeddableTypes.visualization]: (id: string) => {
-    return `savedVisualization id="${id}" | render`;
-  },
-  /*
-  [EmbeddableTypes.search]: (id: string) => {
-    return `filters | savedSearch id="${id}" | render`;
-  },*/
-};
-
-type AddEmbeddable = (pageId: string, partialElement: { expression: string }) => void;
-
-type FlyoutProps = Pick<ComponentProps, 'onClose'> & Partial<Omit<ComponentProps, 'onClose'>>;
+type FlyoutProps = Pick<ComponentProps, 'onClose'>;
 
 export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (props) => {
   const el: HTMLElement = useMemo(() => document.createElement('div'), []);
@@ -58,60 +33,11 @@ export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (
     return null;
   }
 
-  return createPortal(
-    <Component {...props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
-    el
-  );
+  return createPortal(<Component {...props} />, el);
 };
 
-export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
-  availableEmbeddables,
-  ...restProps
-}) => {
-  const isByValueEnabled = presentationUtilService.labsService.isProjectEnabled(
-    'labs:canvas:byValueEmbeddable'
-  );
+export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({ onClose }) => {
+  const canvasApi = useCanvasApi();
 
-  const dispatch = useDispatch();
-  const pageId = useSelector<State, string>((state) => getSelectedPage(state));
-
-  const addEmbeddable: AddEmbeddable = useCallback(
-    (selectedPageId, partialElement) => dispatch(addElement(selectedPageId, partialElement)),
-    [dispatch]
-  );
-
-  const onSelect = useCallback(
-    (id: string, type: string): void => {
-      const partialElement = {
-        expression: `markdown "Could not find embeddable for type ${type}" | render`,
-      };
-
-      // If by-value is enabled, we'll handle both by-reference and by-value embeddables
-      // with the new generic `embeddable` function.
-      // Otherwise we fallback to the embeddable type specific expressions.
-      if (isByValueEnabled) {
-        partialElement.expression = embeddableInputToExpression(
-          { savedObjectId: id },
-          type,
-          undefined,
-          true
-        );
-      } else if (allowedEmbeddables[type]) {
-        partialElement.expression = allowedEmbeddables[type](id);
-      }
-
-      addEmbeddable(pageId, partialElement);
-      restProps.onClose();
-    },
-    [addEmbeddable, pageId, restProps, isByValueEnabled]
-  );
-
-  return (
-    <EmbeddableFlyoutPortal
-      {...restProps}
-      availableEmbeddables={availableEmbeddables || []}
-      onSelect={onSelect}
-      isByValueEnabled={isByValueEnabled}
-    />
-  );
+  return <EmbeddableFlyoutPortal onClose={onClose} container={canvasApi} />;
 };

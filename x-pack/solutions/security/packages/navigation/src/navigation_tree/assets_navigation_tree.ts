@@ -85,8 +85,8 @@ export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => (
           link: securityLink(SecurityPageName.responseActionsHistory),
         },
         {
-          id: SecurityPageName.scriptsLibrary,
-          link: securityLink(SecurityPageName.scriptsLibrary),
+          id: SecurityPageName.scriptLibrary,
+          link: securityLink(SecurityPageName.scriptLibrary),
         },
       ],
     },

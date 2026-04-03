@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../primitive.gen';
 import {
@@ -32,6 +32,10 @@ export const ApproveIntegrationRequest = z
      * The version of the integration
      */
     version: NonEmptyString,
+    /**
+     * The categories of the integration
+     */
+    categories: z.array(NonEmptyString).min(1).max(50),
     /**
      * The LangSmith tracing options
      */
@@ -92,7 +96,7 @@ export const CreateAutoImportIntegrationRequestBody = z
     /**
      * The data streams of the integration
      */
-    dataStreams: z.array(DataStream).optional(),
+    dataStreams: z.array(DataStream).max(50).optional(),
   })
   .strict();
 export type CreateAutoImportIntegrationRequestBodyInput = z.input<
@@ -122,6 +126,19 @@ export const DeleteAutoImportIntegrationRequestParams = z.object({
 });
 export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
+>;
+
+export type DownloadAutoImportIntegrationRequestParams = z.infer<
+  typeof DownloadAutoImportIntegrationRequestParams
+>;
+export const DownloadAutoImportIntegrationRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+});
+export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
+  typeof DownloadAutoImportIntegrationRequestParams
 >;
 
 export type GetAllAutoImportIntegrationsResponse = z.infer<
@@ -193,14 +210,15 @@ export const UpdateAutoImportIntegrationRequestBody = z
             /**
              * The input types of the data stream
              */
-            inputTypes: z.array(InputType).optional(),
+            inputTypes: z.array(InputType).max(100).optional(),
             /**
              * The raw samples of the data stream
              */
-            rawSamples: z.array(NonEmptyString).optional(),
+            rawSamples: z.array(NonEmptyString).max(1000).optional(),
           })
           .strict()
       )
+      .max(50)
       .optional(),
   })
   .strict();

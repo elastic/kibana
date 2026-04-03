@@ -73,8 +73,7 @@ describe('project_routing on serverless non-CPS', () => {
         client.search({
           index: SYSTEM_INDEX,
           query: { match_all: {} },
-          // @ts-expect-error - project_routing is a valid body parameter
-          body: { project_routing: ALL_PROJECT_ROUTING },
+          project_routing: ALL_PROJECT_ROUTING,
         })
       ).resolves.not.toThrow();
 
@@ -82,8 +81,7 @@ describe('project_routing on serverless non-CPS', () => {
         client.search({
           index: TEST_INDEX,
           query: { match_all: {} },
-          // @ts-expect-error - project_routing is a valid body parameter
-          body: { project_routing: ALL_PROJECT_ROUTING },
+          project_routing: ALL_PROJECT_ROUTING,
         })
       ).resolves.not.toThrow();
     });
@@ -171,8 +169,7 @@ describe('project_routing on serverless non-CPS', () => {
         client.search({
           index: SYSTEM_INDEX,
           query: { match_all: {} },
-          // @ts-expect-error - project_routing is a valid body parameter
-          body: { project_routing: ALL_PROJECT_ROUTING },
+          project_routing: ALL_PROJECT_ROUTING,
         })
       ).rejects.toThrow();
 
@@ -180,8 +177,7 @@ describe('project_routing on serverless non-CPS', () => {
         client.search({
           index: TEST_INDEX,
           query: { match_all: {} },
-          // @ts-expect-error - project_routing is a valid body parameter
-          body: { project_routing: ALL_PROJECT_ROUTING },
+          project_routing: ALL_PROJECT_ROUTING,
         })
       ).rejects.toThrow();
     });

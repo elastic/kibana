@@ -25,7 +25,7 @@ import type {
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { Attachment } from '../../../../common/types/domain';
+import type { AttachmentV2 } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import {
@@ -76,7 +76,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
 });
 
 export const createRegisteredAttachmentUserActionBuilder = <
-  C extends Attachment,
+  C extends AttachmentV2,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
@@ -128,7 +128,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
-      attachmentId: attachment.id,
+      savedObjectId: attachment.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 
@@ -139,6 +139,8 @@ export const createRegisteredAttachmentUserActionBuilder = <
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
     const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
+    const className =
+      attachmentViewObject.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
 
     return [
       {
@@ -148,7 +150,8 @@ export const createRegisteredAttachmentUserActionBuilder = <
             userProfiles={userProfiles}
           />
         ),
-        className: `comment-${attachment.type}-attachment-${attachmentTypeId}`,
+        className,
+        css: attachmentViewObject.css,
         event: attachmentViewObject.event,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,

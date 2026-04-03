@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, pickBy } from 'lodash';
 import type {
   CaseAssignees,
   CaseCustomField,
@@ -48,6 +48,7 @@ import {
   isCaseSettings,
   isCustomFieldsArray,
   isStringArray,
+  isExtendedFields,
 } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
@@ -147,6 +148,8 @@ export class UserActionPersister {
         originalValue,
         newValue,
       });
+    } else if (field === UserActionTypes.extended_fields && isExtendedFields(newValue)) {
+      return this.buildExtendedFieldsUserActions(params);
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -160,6 +163,29 @@ export class UserActionPersister {
     }
 
     return [];
+  }
+
+  private buildExtendedFieldsUserActions(params: GetUserActionItemByDifference): UserActionEvent[] {
+    const { originalValue, newValue, caseId, owner, user } = params;
+    // Only record the fields that actually changed, not the full merged object.
+    const oldFields = isExtendedFields(originalValue) ? originalValue : {};
+    const changedFields = pickBy(
+      isExtendedFields(newValue) ? newValue : {},
+      (value, key) => oldFields[key] !== value
+    );
+
+    if (Object.keys(changedFields).length === 0) {
+      return [];
+    }
+
+    const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.extended_fields);
+    const fieldUserAction = userActionBuilder?.build({
+      caseId,
+      owner,
+      user,
+      payload: { extended_fields: changedFields },
+    });
+    return fieldUserAction ? [fieldUserAction] : [];
   }
 
   private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
@@ -356,7 +382,7 @@ export class UserActionPersister {
         caseId,
         user,
         owner: attachment.owner,
-        attachmentId: attachment.id,
+        savedObjectId: attachment.id,
         payload: { attachment: attachment.attachment },
       });
 
@@ -425,7 +451,7 @@ export class UserActionPersister {
     userAction,
     refresh,
   }: CreateUserActionArgs<T>): Promise<void> {
-    const { action, type, caseId, user, owner, payload, connectorId, attachmentId } = userAction;
+    const { action, type, caseId, user, owner, payload, connectorId, savedObjectId } = userAction;
 
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
@@ -437,7 +463,7 @@ export class UserActionPersister {
         user,
         owner,
         connectorId,
-        attachmentId,
+        savedObjectId,
         payload,
       });
 
@@ -462,7 +488,7 @@ export class UserActionPersister {
       }
 
       const userActionsPayload = userActions
-        .map(({ action, type, caseId, user, owner, payload, connectorId, attachmentId }) => {
+        .map(({ action, type, caseId, user, owner, payload, connectorId, savedObjectId }) => {
           const userActionBuilder = this.builderFactory.getBuilder<T>(type);
           const userAction = userActionBuilder?.build({
             action,
@@ -470,7 +496,7 @@ export class UserActionPersister {
             user,
             owner,
             connectorId,
-            attachmentId,
+            savedObjectId,
             payload,
           });
 

@@ -11,12 +11,15 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('tools landing page', function () {
     it('should render', async () => {
       await agentBuilder.navigateToToolsLanding();
-      await testSubjects.existOrFail('agentBuilderToolsPage');
-      await testSubjects.existOrFail('agentBuilderToolsTable');
+      await retry.try(async () => {
+        await testSubjects.existOrFail('agentBuilderToolsPage');
+        await testSubjects.existOrFail('agentBuilderToolsTable');
+      });
     });
 
     it('should bulk delete tools from the table', async () => {
@@ -37,14 +40,18 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
       }
 
       await agentBuilder.navigateToToolsLanding();
-      await testSubjects.existOrFail('agentBuilderToolsTable');
+      await retry.try(async () => {
+        await testSubjects.existOrFail('agentBuilderToolsTable');
+      });
 
       // Search for our specific tools to filter the table (avoids pagination issues)
       const search = agentBuilder.toolsSearch();
       await search.type(`ftr.esql.${timestamp}`);
 
-      // Wait for the first tool to appear (ensures search has filtered the results)
-      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${ids[0]}`);
+      // Wait for the tools data to load and the first row to appear before proceeding
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`agentBuilderToolsTableRow-${ids[0]}`);
+      });
 
       await agentBuilder.bulkDeleteTools(ids);
 

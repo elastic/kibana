@@ -52,14 +52,6 @@ export interface TitlesApi
     PublishesWritableDescription,
     PublishesWritableHideBorder {}
 
-export const initializeTitleManager = (
-  initialTitlesState: SerializedTitles,
-  options?: {
-    borderlessByDefault: boolean;
-  }
-): TitleManager => {
-  return initializeStateManager(initialTitlesState, {
-    ...defaultTitlesState,
-    hide_border: options?.borderlessByDefault ?? defaultTitlesState.hide_border,
-  });
+export const initializeTitleManager = (initialTitlesState: SerializedTitles): TitleManager => {
+  return initializeStateManager(initialTitlesState, defaultTitlesState);
 };

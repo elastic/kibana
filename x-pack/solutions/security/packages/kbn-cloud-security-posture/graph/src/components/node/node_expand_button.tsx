@@ -41,7 +41,7 @@ export const NodeExpandButton = ({ x, y, color, onClick, ...props }: NodeExpandB
       <RoundEuiButtonIcon
         color={color ?? 'primary'}
         backgroundColor={euiTheme.colors.backgroundBasePlain}
-        iconType={isToggled ? 'minusInCircleFilled' : 'plusInCircleFilled'}
+        iconType={isToggled ? 'minusCircle' : 'plusCircle'}
         onClick={onClickHandler}
         iconSize="m"
         aria-label="Open or close node actions"

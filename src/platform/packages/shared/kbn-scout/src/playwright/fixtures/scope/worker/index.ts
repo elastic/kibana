@@ -21,6 +21,9 @@ export type {
 export { esArchiverFixture } from './es_archiver';
 export type { EsArchiverFixture } from './es_archiver';
 
+export { linkedEsFixtures } from './linked_es_archiver';
+export type { LinkedProjectFixture } from './linked_es_archiver';
+
 export { uiSettingsFixture } from './ui_settings';
 export type { UiSettingsFixture } from './ui_settings';
 
@@ -29,9 +32,6 @@ export type { ScoutSpaceParallelFixture, SpaceSolutionView } from './scout_space
 
 export { apiServicesFixture } from './apis';
 export type { ApiServicesFixture } from './apis';
-
-export { synthtraceFixture } from './synthtrace';
-export type { SynthtraceFixture } from './synthtrace';
 
 export { lighthouseFixture } from './lighthouse';
 export type { LighthouseFixture, LighthouseAuditOptions } from './lighthouse';

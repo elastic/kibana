@@ -14,7 +14,7 @@ import * as i18n from './translations';
 
 const authSchema = z
   .object({
-    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL }),
+    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
     clientId: z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
@@ -24,6 +24,10 @@ const authSchema = z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+    tokenEndpointAuthMethod: z
+      .enum(['client_secret_post', 'client_secret_basic'])
+      .meta({ label: i18n.OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL, hidden: true })
+      .optional(),
   })
   .meta({ label: i18n.OAUTH_LABEL });
 
@@ -43,10 +47,12 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
+        authType: 'oauth',
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,
         clientSecret: secret.clientSecret,
+        tokenEndpointAuthMethod: secret.tokenEndpointAuthMethod ?? 'client_secret_post',
       });
     } catch (error) {
       throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);

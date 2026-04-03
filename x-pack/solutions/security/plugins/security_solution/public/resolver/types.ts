@@ -6,17 +6,18 @@
  */
 
 import type React from 'react';
-import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
+import type { AnyAction, Dispatch, Middleware, Store } from 'redux';
 import type { BBox } from 'rbush';
 import type { Provider } from 'react-redux';
+import type { CellActionRenderer } from '../flyout_v2/shared/components/cell_actions';
 import type {
-  ResolverNode,
-  ResolverRelatedEvents,
-  ResolverEntityIndex,
-  SafeResolverEvent,
-  ResolverPaginatedEvents,
   NewResolverTree,
+  ResolverEntityIndex,
+  ResolverNode,
+  ResolverPaginatedEvents,
+  ResolverRelatedEvents,
   ResolverSchema,
+  SafeResolverEvent,
 } from '../../common/endpoint/types';
 import type { Tree } from '../../common/endpoint/generate_data';
 import type { State } from '../common/store/types';
@@ -848,9 +849,13 @@ export interface ResolverProps {
   shouldUpdate: boolean;
 
   /**
-   * Optional callback for showing details panels separately from the graph.
+   * Renderer used by Resolver panels for field cell actions.
    */
-  showPanelOnClick?: () => void;
+  renderCellActions: CellActionRenderer;
+  /**
+   * Optional callback invoked after alert mutations in nested flyouts.
+   */
+  onAlertUpdated?: () => void;
 }
 
 /**

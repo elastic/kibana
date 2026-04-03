@@ -23,7 +23,8 @@
       "security",
       "features",
       "taskManager",
-      "kibanaUtils"
+      "kibanaUtils",
+      "fieldsMetadata"
     ],
     "requiredBundles": [
       "esUiShared"

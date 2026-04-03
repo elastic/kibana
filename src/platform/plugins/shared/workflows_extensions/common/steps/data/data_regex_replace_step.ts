@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const DataRegexReplaceStepTypeId = 'data.regex_replace' as const;
+export const DataRegexReplaceStepTypeId = 'data.regexReplace' as const;
 
 export const ConfigSchema = z.object({
   source: z.unknown(),

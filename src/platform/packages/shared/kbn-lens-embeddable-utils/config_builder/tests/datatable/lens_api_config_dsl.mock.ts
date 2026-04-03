@@ -14,7 +14,7 @@ import type { DatatableState, DatatableStateNoESQL } from '../../schema';
  */
 export const singleMetricDatatableWithAdhocDataView: DatatableState = {
   title: 'Single metric',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'index',
     index: 'test-index',
@@ -35,7 +35,7 @@ export const singleMetricDatatableWithAdhocDataView: DatatableState = {
  */
 export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with ad hoc dataView',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'index',
     index: 'test-index',
@@ -57,7 +57,7 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -80,7 +80,7 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -93,7 +93,7 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -111,7 +111,7 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
  */
 export const fullConfigDatatableWithAdhocDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with full config',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'index',
     index: 'test-index',
@@ -200,7 +200,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -231,7 +231,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -244,7 +244,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -268,7 +268,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     },
   },
   paging: 10,
-  show_row_numbers: true,
+  row_numbers: { visible: true },
 } satisfies DatatableStateNoESQL;
 
 /**
@@ -276,7 +276,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
  */
 export const fullConfigDatatableWithDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with full config',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'dataView',
     id: 'my-custom-data-view-id',
@@ -364,7 +364,7 @@ export const fullConfigDatatableWithDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -395,7 +395,7 @@ export const fullConfigDatatableWithDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -408,7 +408,7 @@ export const fullConfigDatatableWithDataView: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -439,7 +439,7 @@ export const fullConfigDatatableWithDataView: DatatableState = {
  */
 export const sortedByPivotedMetricColumnDatatable: DatatableState = {
   title: 'Sorted by a pivoted metric column',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'dataView',
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -527,7 +527,7 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -558,7 +558,7 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -571,7 +571,7 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -608,7 +608,7 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
  */
 export const sortedByRowDatatable: DatatableState = {
   title: 'Sorted by row column',
-  type: 'datatable',
+  type: 'data_table',
   dataset: {
     type: 'dataView',
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -696,7 +696,7 @@ export const sortedByRowDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['agent.keyword'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -727,7 +727,7 @@ export const sortedByRowDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.src'],
-      size: 3,
+      limit: 3,
       other_bucket: {
         include_documents_without_field: false,
       },
@@ -740,7 +740,7 @@ export const sortedByRowDatatable: DatatableState = {
     {
       operation: 'terms',
       fields: ['geo.dest'],
-      size: 5,
+      limit: 5,
       other_bucket: {
         include_documents_without_field: false,
       },

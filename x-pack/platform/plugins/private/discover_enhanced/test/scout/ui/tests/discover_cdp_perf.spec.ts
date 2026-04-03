@@ -52,8 +52,8 @@ test.describe(
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/discover#/');
 
-      // Ensure all JS bundles are loaded
-      await perfTracker.waitForJsLoad(cdp);
+      // Ensure all JS bundles are loaded (longer timeout to account for lazy-loaded plugins like aiops)
+      await perfTracker.waitForJsLoad(cdp, 5000);
 
       // Collect and validate stats
       const stats = perfTracker.collectJsBundleStats(currentUrl);

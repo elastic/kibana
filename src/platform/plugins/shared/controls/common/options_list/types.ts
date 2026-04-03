@@ -36,13 +36,16 @@ export const isOptionsListESQLControlState = (
  * ----------------------------------------------------------------
  */
 
-export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
+export type OptionsListSuggestions<SelectionType = OptionsListSelection> = Array<{
+  value: SelectionType;
+  docCount?: number;
+}>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListSuccessResponse {
-  suggestions: OptionsListSuggestions;
+  suggestions: OptionsListSuggestions<OptionsListSelection>;
   totalCardinality: number;
   invalidSelections?: OptionsListSelection[];
 }

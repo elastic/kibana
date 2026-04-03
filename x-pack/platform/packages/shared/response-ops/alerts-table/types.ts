@@ -54,6 +54,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { Case } from './apis/bulk_get_cases';
 import type { ItemsSelectionState } from './components/tags/items/types';
 
@@ -116,6 +117,8 @@ export interface Ecs {
  *
  * We don't use the full cases service interface to avoid circular dependencies
  */
+export type CasesOwner = 'securitySolution' | 'observability' | 'cases';
+
 export interface CasesService {
   ui: {
     getCasesContext: () => FC<any>;
@@ -126,7 +129,7 @@ export interface CasesService {
   };
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
-    canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
+    canUseCases: (owners: CasesOwner[]) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
     getObservablesFromEcs: (ecsArray: any[][]) => Observable[];
   };
@@ -332,6 +335,18 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
       AlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
   >;
   /**
+   * Get the alert formatter for a specific rule type.
+   * Used to generate "View in App" links for individual alerts.
+   */
+  getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Navigation config for the alert details page.
+   * When provided, the "View alert details" row action and the flyout footer
+   * render as `href` links to the alert details page instead of opening
+   * the flyout.
+   */
+  alertDetailsNavigation?: AlertDetailsNavigation;
+  /**
    * Additional toolbar controls render function
    */
   renderAdditionalToolbarControls?: ComponentRenderer<AC>;
@@ -503,6 +518,8 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'casesConfiguration'
     | 'openLinksInNewTab'
     | 'isMutedAlertsEnabled'
+    | 'getAlertFormatter'
+    | 'alertDetailsNavigation'
   >,
   | 'columns'
   | 'pageIndex'
@@ -553,7 +570,7 @@ export interface PublicAlertsDataGridProps
    */
   casesConfiguration?: {
     featureId: string;
-    owner: Parameters<CasesService['helpers']['canUseCases']>[0];
+    owner: CasesOwner[];
     appId?: string;
     syncAlerts?: boolean;
     extractObservables?: boolean;
@@ -608,21 +625,35 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   alertsQuerySnapshot?: EsQuerySnapshot;
 }
 
+export interface AlertDetailsNavigation {
+  /** The Kibana app ID to navigate to (e.g. 'observability') */
+  appId: string;
+  /** Returns the in-app path for a given alert ID (e.g. `/alerts/${alertId}`) */
+  getPath: (alertId: string) => string;
+}
+
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
   RenderContext<AC> &
     EuiDataGridCellValueElementProps & {
       key?: Key;
       alert: Alert;
       onActionExecuted?: () => void;
-      isAlertDetailsEnabled?: boolean;
       /**
        * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
        */
       resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
       /**
-       * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
+       * SPA navigation config for the alert details page.
+       * When provided, the "View alert details" row action and flyout footer
+       * render as `href` links to the alert details page instead of opening
+       * the flyout.
        */
-      resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
+      alertDetailsNavigation?: AlertDetailsNavigation;
+      /**
+       * Get the alert formatter for a specific rule type.
+       * Used to generate "View in App" links for individual alerts.
+       */
+      getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
     };
 
 export interface BulkActionsConfig {

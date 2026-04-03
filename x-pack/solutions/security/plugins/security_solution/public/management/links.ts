@@ -18,14 +18,13 @@ import {
   BLOCKLIST_PATH,
   ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SCRIPTS_LIBRARY_PATH,
+  SCRIPT_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
   TRUSTED_APPS_PATH,
@@ -35,14 +34,13 @@ import {
   BLOCKLIST,
   ENDPOINT_EXCEPTIONS,
   ENDPOINTS,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
+  ENTITY_ANALYTICS,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
-  SCRIPTS_LIBRARY,
+  SCRIPT_LIBRARY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
 } from '../app/translations';
@@ -59,19 +57,17 @@ import { IconHostIsolationExceptions } from '../common/icons/host_isolation_exce
 import { IconTrustedApplications } from '../common/icons/trusted_applications';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { IconAssetCriticality } from '../common/icons/asset_criticality';
 import { IconTrustedDevices } from '../common/icons/trusted_devices';
 import { IconEndpointExceptions } from '../common/icons/endpoint_exceptions';
+import { IconScriptLibrary } from '../common/icons/script_library';
+import { KibanaServices } from '../common/lib/kibana';
 
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
       defaultMessage: 'Entity analytics',
     }),
-    linkIds: [
-      SecurityPageName.entityAnalyticsManagement,
-      SecurityPageName.entityAnalyticsEntityStoreManagement,
-    ],
+    linkIds: [SecurityPageName.entityAnalyticsManagement],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -87,7 +83,7 @@ const categories = [
       SecurityPageName.blocklist,
       SecurityPageName.endpointExceptions,
       SecurityPageName.responseActionsHistory,
-      SecurityPageName.scriptsLibrary,
+      SecurityPageName.scriptLibrary,
     ],
   },
   {
@@ -220,28 +216,20 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.entityAnalyticsManagement,
-      title: ENTITY_ANALYTICS_RISK_SCORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
-        defaultMessage: "Monitor entities' risk scores, and track anomalies.",
-      }),
+      title: ENTITY_ANALYTICS,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
+        {
+          defaultMessage:
+            'Manage entity risk scores, entity store, and asset criticality settings.',
+        }
+      ),
       landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       licenseType: 'platinum',
-    },
-    {
-      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-      title: ENTITY_STORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: 'Store data for entities observed in events.',
-      }),
-      landingIcon: IconAssetCriticality,
-      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -255,14 +243,14 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
-      id: SecurityPageName.scriptsLibrary,
-      title: SCRIPTS_LIBRARY,
-      description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
-        defaultMessage: 'View and manage your scripts library.',
+      id: SecurityPageName.scriptLibrary,
+      title: SCRIPT_LIBRARY,
+      description: i18n.translate('xpack.securitySolution.appLinks.scriptLibraryDescription', {
+        defaultMessage:
+          'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.',
       }),
-      // TODO: Replace with a custom icon same as other links when available
-      landingIcon: 'broom',
-      path: SCRIPTS_LIBRARY_PATH,
+      landingIcon: IconScriptLibrary,
+      path: SCRIPT_LIBRARY_PATH,
       skipUrlState: true,
       hideTimeline: true,
       experimentalKey: 'responseActionsScriptLibraryManagement',
@@ -283,6 +271,7 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
+  const isServerless = KibanaServices.getBuildFlavor() === 'serverless';
 
   const {
     canReadActionsLogManagement,
@@ -298,7 +287,7 @@ export const getManagementFilteredLinks = async (
     canReadScriptsLibrary,
   } =
     fleetAuthz && currentUser
-      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
+      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles, isServerless)
       : getEndpointAuthzInitialState();
 
   const showHostIsolationExceptions =
@@ -348,7 +337,7 @@ export const getManagementFilteredLinks = async (
   }
 
   if (!canReadScriptsLibrary) {
-    linksToExclude.push(SecurityPageName.scriptsLibrary);
+    linksToExclude.push(SecurityPageName.scriptLibrary);
   }
 
   return excludeLinks(linksToExclude);

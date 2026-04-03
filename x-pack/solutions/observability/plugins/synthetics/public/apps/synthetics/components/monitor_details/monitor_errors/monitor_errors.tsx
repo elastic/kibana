@@ -20,12 +20,16 @@ import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
 
 export const MonitorErrors = () => {
   const { errorStates, upStates, loading, data } = useMonitorErrors();
   const initialLoading = !data;
 
   const emptyState = !loading && errorStates && errorStates?.length === 0;
+
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   const redirect = useMonitorDetailsPage();
   if (redirect) {

@@ -1,0 +1,2091 @@
+{
+  "id": "@kbn/alerting-v2-rule-form",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.DynamicRuleForm",
+        "type": "Function",
+        "tags": [],
+        "label": "DynamicRuleForm",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.DynamicRuleFormProps",
+            "text": "DynamicRuleFormProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/index.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleForm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.DynamicRuleFormProps",
+                "text": "DynamicRuleFormProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/index.tsx",
+            "lineNumber": 26,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.DynamicRuleFormFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "DynamicRuleFormFlyout",
+        "description": [
+          "Pre-composed flyout for Discover integration - syncs with external query changes"
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.DynamicRuleFormFlyoutProps",
+            "text": "DynamicRuleFormFlyoutProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/index.tsx",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.DynamicRuleFormFlyoutProps",
+                "text": "DynamicRuleFormFlyoutProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/index.tsx",
+            "lineNumber": 44,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.LazyDynamicRuleFormFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyDynamicRuleFormFlyout",
+        "description": [],
+        "signature": [
+          "React.LazyExoticComponent<(props: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.DynamicRuleFormFlyoutProps",
+            "text": "DynamicRuleFormFlyoutProps"
+          },
+          ") => React.JSX.Element>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/index.tsx",
+        "lineNumber": 21,
+        "columnNumber": 7,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.LazyDynamicRuleFormFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.LazyRuleFormFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyRuleFormFlyout",
+        "description": [],
+        "signature": [
+          "React.LazyExoticComponent<({ push, onClose, isLoading, children, }: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.RuleFormFlyoutProps",
+            "text": "RuleFormFlyoutProps"
+          },
+          ") => React.JSX.Element>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/index.tsx",
+        "lineNumber": 15,
+        "columnNumber": 7,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.LazyRuleFormFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.LazyStandaloneRuleFormFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyStandaloneRuleFormFlyout",
+        "description": [],
+        "signature": [
+          "React.LazyExoticComponent<(props: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.StandaloneRuleFormFlyoutProps",
+            "text": "StandaloneRuleFormFlyoutProps"
+          },
+          ") => React.JSX.Element>"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/index.tsx",
+        "lineNumber": 27,
+        "columnNumber": 7,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.LazyStandaloneRuleFormFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.mapFormValuesToCreateRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "mapFormValuesToCreateRequest",
+        "description": [
+          "\nMaps `FormValues` to the create API request payload.\nAdds `kind` on top of the common request shape since it is required for creation."
+        ],
+        "signature": [
+          "(formValues: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.FormValues",
+            "text": "FormValues"
+          },
+          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; condition?: string | undefined; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+        "lineNumber": 205,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.mapFormValuesToCreateRequest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "formValues",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.FormValues",
+                "text": "FormValues"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 205,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.mapFormValuesToRuleRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "mapFormValuesToRuleRequest",
+        "description": [
+          "\nMaps `FormValues` to the common API request shape (snake_case) shared by\nboth create and update endpoints. Does not include `kind`."
+        ],
+        "signature": [
+          "(formValues: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.FormValues",
+            "text": "FormValues"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.RuleRequestCommon",
+            "text": "RuleRequestCommon"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+        "lineNumber": 175,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.mapFormValuesToRuleRequest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "formValues",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.FormValues",
+                "text": "FormValues"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 175,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.mapFormValuesToUpdateRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "mapFormValuesToUpdateRequest",
+        "description": [
+          "\nMaps `FormValues` to the update API request payload.\nCoerces absent optional fields to `null` so the API interprets them as\nexplicit removals (as opposed to `undefined` which omits the key entirely)."
+        ],
+        "signature": [
+          "(formValues: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.FormValues",
+            "text": "FormValues"
+          },
+          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+        "lineNumber": 215,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.mapFormValuesToUpdateRequest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "formValues",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.FormValues",
+                "text": "FormValues"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 215,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.mapRuleResponseToFormValues",
+        "type": "Function",
+        "tags": [],
+        "label": "mapRuleResponseToFormValues",
+        "description": [
+          "\nMaps a `RuleResponse` (API shape, snake_case) to `Partial<FormValues>` (form shape, camelCase).\n\nOnly fields present in the response are included so the form defaults fill in the rest.\nUse this when populating the edit form with an existing rule's data."
+        ],
+        "signature": [
+          "(rule: Record<any, any>) => Partial<",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.FormValues",
+            "text": "FormValues"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+        "lineNumber": 238,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.mapRuleResponseToFormValues.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "Record<any, any>"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 238,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleFormProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleFormProvider",
+        "description": [
+          "\nProvides services and metadata to all rule form descendants.\n\n`meta` defaults to `{ layout: 'page' }` when omitted."
+        ],
+        "signature": [
+          "({ children, services, meta, }: React.PropsWithChildren<{ services: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.RuleFormServices",
+            "text": "RuleFormServices"
+          },
+          "; meta?: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.RuleFormMeta",
+            "text": "RuleFormMeta"
+          },
+          " | undefined; }>) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  services,\n  meta = DEFAULT_META,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ services: ",
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormServices",
+                "text": "RuleFormServices"
+              },
+              "; meta?: ",
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormMeta",
+                "text": "RuleFormMeta"
+              },
+              " | undefined; }>"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 45,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleResultsPreview",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleResultsPreview",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/index.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.StandaloneRuleForm",
+        "type": "Function",
+        "tags": [],
+        "label": "StandaloneRuleForm",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.StandaloneRuleFormProps",
+            "text": "StandaloneRuleFormProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/index.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleForm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.StandaloneRuleFormProps",
+                "text": "StandaloneRuleFormProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/index.tsx",
+            "lineNumber": 32,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.StandaloneRuleFormFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "StandaloneRuleFormFlyout",
+        "description": [
+          "Pre-composed flyout for classic experience - static initialization"
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.StandaloneRuleFormFlyoutProps",
+            "text": "StandaloneRuleFormFlyoutProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/index.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.StandaloneRuleFormFlyoutProps",
+                "text": "StandaloneRuleFormFlyoutProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/index.tsx",
+            "lineNumber": 51,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.useRuleFormMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "useRuleFormMeta",
+        "description": [
+          "Returns the form metadata (layout, etc.)."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.RuleFormMeta",
+            "text": "RuleFormMeta"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+        "lineNumber": 69,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.useRuleFormServices",
+        "type": "Function",
+        "tags": [],
+        "label": "useRuleFormServices",
+        "description": [
+          "Backward-compatible hook that returns only the services object."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/alerting-v2-rule-form",
+            "scope": "public",
+            "docId": "kibKbnAlertingV2RuleFormPluginApi",
+            "section": "def-public.RuleFormServices",
+            "text": "RuleFormServices"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.DynamicRuleFormFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DynamicRuleFormFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.push",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "push",
+            "description": [
+              "Whether to use push flyout or overlay"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "Callback when flyout is closed"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "The query that drives form values - changes will sync to form state"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [
+              "Required services"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormServices",
+                "text": "RuleFormServices"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.DynamicRuleFormProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DynamicRuleFormProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "The query that drives form values - changes will sync to form state"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormServices",
+                "text": "RuleFormServices"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormLayout",
+                "text": "RuleFormLayout"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.onSubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onSubmit",
+            "description": [
+              "\nExternal submit handler. When provided, form submission delegates to this callback.\nWhen omitted, the form uses `useCreateRule` internally."
+            ],
+            "signature": [
+              "((values: ",
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.FormValues",
+                "text": "FormValues"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-v2-rule-form",
+                "id": "def-public.DynamicRuleFormProps.onSubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "values",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/alerting-v2-rule-form",
+                    "scope": "public",
+                    "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                    "section": "def-public.FormValues",
+                    "text": "FormValues"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+                "lineNumber": 27,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.onSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccess",
+            "description": [
+              "Callback invoked after a successful internal submission (useCreateRule)."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.includeYaml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeYaml",
+            "description": [
+              "Whether to include YAML editor toggle (default: false)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "Whether the form is in a loading/disabled state"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.isSubmitting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSubmitting",
+            "description": [
+              "Whether the form is currently submitting (controls button loading state)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.includeSubmission",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeSubmission",
+            "description": [
+              "Whether to show submit/cancel buttons (default: false)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.submitLabel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "submitLabel",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormProps.cancelLabel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cancelLabel",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/dynamic_rule_form.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.FormValues",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormValues",
+        "description": [
+          "\nForm values for creating a new alerting rule.\nThis interface defines the contract for the rule creation form,\nindependent of the API schema to allow for controlled evolution."
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.kind",
+            "type": "Any",
+            "tags": [],
+            "label": "kind",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "RuleMetadata"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.timeField",
+            "type": "string",
+            "tags": [],
+            "label": "timeField",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.schedule",
+            "type": "Object",
+            "tags": [],
+            "label": "schedule",
+            "description": [],
+            "signature": [
+              "RuleSchedule"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.evaluation",
+            "type": "Object",
+            "tags": [],
+            "label": "evaluation",
+            "description": [],
+            "signature": [
+              "RuleEvaluation"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.grouping",
+            "type": "Object",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              "RuleGrouping",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.recoveryPolicy",
+            "type": "Object",
+            "tags": [],
+            "label": "recoveryPolicy",
+            "description": [],
+            "signature": [
+              "RecoveryPolicy",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.stateTransition",
+            "type": "Object",
+            "tags": [],
+            "label": "stateTransition",
+            "description": [],
+            "signature": [
+              "StateTransition",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.FormValues.artifacts",
+            "type": "Array",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              "RuleArtifact",
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleFormFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleFormFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormFlyoutProps.push",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "push",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormFlyoutProps.isLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormFlyoutProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleFormMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleFormMeta",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormMeta.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "Whether the form is rendered on a full page or inside a flyout."
+            ],
+            "signature": [
+              "\"page\" | \"flyout\""
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleFormServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleFormServices",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormServices.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormServices.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [],
+            "signature": [
+              "NotificationsStart"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormServices.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormServices.lens",
+            "type": "Object",
+            "tags": [],
+            "label": "lens",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensPublicStart",
+                "text": "LensPublicStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleRequestCommon",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRequestCommon",
+        "description": [
+          "\nCommon rule request shape shared between create and update payloads.\nContains all fields except `kind` (only required for create)."
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ name: string; description?: string | undefined; owner?: string | undefined; labels?: string[] | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.time_field",
+            "type": "string",
+            "tags": [],
+            "label": "time_field",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.schedule",
+            "type": "Object",
+            "tags": [],
+            "label": "schedule",
+            "description": [],
+            "signature": [
+              "{ every: string; lookback?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.evaluation",
+            "type": "Object",
+            "tags": [],
+            "label": "evaluation",
+            "description": [],
+            "signature": [
+              "{ query: { base: string; condition?: string | undefined; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.grouping",
+            "type": "Object",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              "{ fields: string[]; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.recovery_policy",
+            "type": "Object",
+            "tags": [],
+            "label": "recovery_policy",
+            "description": [],
+            "signature": [
+              "{ type: any; query?: { base?: string | undefined; condition?: string | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.state_transition",
+            "type": "Object",
+            "tags": [],
+            "label": "state_transition",
+            "description": [],
+            "signature": [
+              "{ pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleRequestCommon.artifacts",
+            "type": "Array",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              "RuleArtifactPayload | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.StandaloneRuleFormFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StandaloneRuleFormFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/standalone_rule_form_flyout.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormFlyoutProps.push",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "push",
+            "description": [
+              "Whether to use push flyout or overlay"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/standalone_rule_form_flyout.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "Callback when flyout is closed"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/standalone_rule_form_flyout.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormFlyoutProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "Initial query for the rule (only used on mount)"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/standalone_rule_form_flyout.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormFlyoutProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [
+              "Required services"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormServices",
+                "text": "RuleFormServices"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/standalone_rule_form_flyout.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.StandaloneRuleFormProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StandaloneRuleFormProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "Initial query for the rule"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormServices",
+                "text": "RuleFormServices"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.RuleFormLayout",
+                "text": "RuleFormLayout"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.onSubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onSubmit",
+            "description": [
+              "\nExternal submit handler. When provided, form submission delegates to this callback.\nWhen omitted (and `includeSubmission` is true), the form uses `useCreateRule` internally."
+            ],
+            "signature": [
+              "((values: ",
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.FormValues",
+                "text": "FormValues"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-v2-rule-form",
+                "id": "def-public.StandaloneRuleFormProps.onSubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "values",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/alerting-v2-rule-form",
+                    "scope": "public",
+                    "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                    "section": "def-public.FormValues",
+                    "text": "FormValues"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+                "lineNumber": 25,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.onSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccess",
+            "description": [
+              "Callback invoked after a successful internal submission (useCreateRule)."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.includeYaml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeYaml",
+            "description": [
+              "Whether to include YAML editor toggle (default: false). Requires services.application."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "Whether the form is in a loading/disabled state"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.isSubmitting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSubmitting",
+            "description": [
+              "Whether the form is currently submitting (controls button loading state)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.includeSubmission",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeSubmission",
+            "description": [
+              "Whether to show submit/cancel buttons (default: false)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.submitLabel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "submitLabel",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.cancelLabel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cancelLabel",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.initialValues",
+            "type": "Object",
+            "tags": [],
+            "label": "initialValues",
+            "description": [
+              "\nOptional initial form values to populate the form with (e.g. when editing an existing rule).\nThese are shallow-merged over the query-derived defaults."
+            ],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/alerting-v2-rule-form",
+                "scope": "public",
+                "docId": "kibKbnAlertingV2RuleFormPluginApi",
+                "section": "def-public.FormValues",
+                "text": "FormValues"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.StandaloneRuleFormProps.ruleId",
+            "type": "string",
+            "tags": [],
+            "label": "ruleId",
+            "description": [
+              "When provided, the form operates in edit mode and uses PATCH instead of POST on submission."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/standalone_rule_form.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RULE_FORM_ID",
+        "type": "string",
+        "tags": [],
+        "label": "RULE_FORM_ID",
+        "description": [
+          "Form ID constant - only one rule form should exist at a time"
+        ],
+        "signature": [
+          "\"ruleV2Form\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleFormLayout",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleFormLayout",
+        "description": [],
+        "signature": [
+          "\"page\" | \"flyout\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/contexts/rule_form_context.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

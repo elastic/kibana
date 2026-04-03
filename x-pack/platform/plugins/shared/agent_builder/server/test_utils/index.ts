@@ -52,3 +52,11 @@ export {
   type ConversationClientMock,
 } from './conversations';
 export { createFormatContextMock } from './attachments';
+export {
+  createReadonlySkillProviderMock,
+  createWritableSkillProviderMock,
+  createMockedInternalSkill,
+  createMockedPersistedSkillDefinition,
+  type ReadonlySkillProviderMock,
+  type WritableSkillProviderMock,
+} from './skills';

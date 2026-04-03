@@ -399,7 +399,7 @@
         "label": "RevokeTokenResponse",
         "description": [],
         "signature": [
-          "{}"
+          "{ [x: string]: never; }"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
         "lineNumber": 61,
@@ -493,9 +493,9 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { access_token: string; refresh_token?: string | undefined; }, { access_token: string; refresh_token?: string | undefined; }>"
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
         "lineNumber": 36,
@@ -515,9 +515,9 @@
           "ZodObject",
           "<{ access_token: ",
           "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { access_token: string; }, { access_token: string; }>"
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/http_api/ears.ts",
         "lineNumber": 48,

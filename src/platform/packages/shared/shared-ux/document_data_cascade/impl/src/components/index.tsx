@@ -13,13 +13,14 @@ import type { DataCascadeImplRef } from '../lib/core/api';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from '../store_provider';
 
 export type { GroupNode, LeafNode, DataCascadeImplProps as DataCascadeProps, DataCascadeImplRef };
-export type { DataCascadeUISnapshot } from '../lib/core/api';
+export type { DataCascadeUISnapshot, DataCascadeRestorableState } from '../lib/core/api';
+export { toRestorableState } from '../lib/core/api';
 export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
 
 export type {
   DataCascadeRowProps,
   DataCascadeRowCellProps,
-  CascadeRowCellNestedVirtualizationAnchorProps,
+  CascadeGroupNodeUIInteraction,
 } from './data_cascade_impl';
 
 type DataCascadeProviderProps = ComponentProps<typeof DataCascadeProvider>;
@@ -42,9 +43,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     initialGroupColumn,
     customTableHeader,
     tableTitleSlot,
-    initialTableState,
-    initialScrollOffset,
-    initialRect,
+    initialState,
     onCascadeGroupingChange,
     size,
     enableStickyGroupHeader,
@@ -56,10 +55,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
   }: Omit<DataCascadeImplProps<G, L>, 'cascadeRef'> & DataCascadeProviderProps,
   ref: ForwardedRef<DataCascadeImplRef<G, L>>
 ) {
-  // create a stable reference for the component initializer props
-  const initialTableStateRef = useRef(initialTableState);
-  const initialScrollOffsetRef = useRef(initialScrollOffset);
-  const initialRectRef = useRef(initialRect);
+  const initialStateRef = useRef(initialState);
 
   const cascadeImplProps = useMemo<DataCascadeImplProps<G, L>>(() => {
     const props = {
@@ -68,7 +64,6 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
       enableStickyGroupHeader,
       allowMultipleRowToggle,
       enableRowSelection,
-      data,
       overscan,
       children,
       cascadeRef: ref,
@@ -81,7 +76,6 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     allowMultipleRowToggle,
     children,
     customTableHeader,
-    data,
     enableRowSelection,
     overscan,
     onCascadeGroupingChange,
@@ -96,15 +90,12 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
       <DataCascadeProvider<G, L>
         cascadeGroups={cascadeGroups}
         initialGroupColumn={initialGroupColumn}
-        initialTableState={initialTableStateRef.current}
+        initialState={initialStateRef.current}
+        data={data as G[]}
       >
-        <DataCascadeImpl<G, L>
-          {...cascadeImplProps}
-          initialScrollOffset={initialScrollOffsetRef.current}
-          initialRect={initialRectRef.current}
-        />
+        <DataCascadeImpl<G, L> {...cascadeImplProps} initialState={initialStateRef.current} />
       </DataCascadeProvider>
     ),
-    [cascadeGroups, cascadeImplProps, initialGroupColumn]
+    [cascadeGroups, cascadeImplProps, data, initialGroupColumn]
   );
 }) as DataCascadeComponent;

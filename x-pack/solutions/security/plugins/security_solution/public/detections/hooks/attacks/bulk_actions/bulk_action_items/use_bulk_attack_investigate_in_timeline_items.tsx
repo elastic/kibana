@@ -7,16 +7,21 @@
 
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { buildAlertsKqlFilter } from '../../../../components/alerts_table/actions';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../components/alerts_table/translations';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 
 export interface UseBulkAttackInvestigateInTimelineItemsProps {
   /** Optional callback to close the popover after triggering action */
   closePopover?: () => void;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
@@ -24,23 +29,33 @@ export interface UseBulkAttackInvestigateInTimelineItemsProps {
  */
 export const useBulkAttackInvestigateInTimelineItems = ({
   closePopover,
+  telemetrySource,
 }: UseBulkAttackInvestigateInTimelineItemsProps = {}): BulkAttackActionItems => {
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const onInvestigateInTimelineClick = useCallback<Required<BulkActionsConfig>['onClick']>(
     async (alertItems) => {
       const alertIds = extractRelatedDetectionAlertIds(alertItems);
       const alertIdFilters = buildAlertsKqlFilter('_id', alertIds);
 
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.TimelineInvestigationOpened, {
+          source: telemetrySource,
+        });
+      }
+
       investigateInTimeline({
         filters: alertIdFilters,
       });
       closePopover?.();
     },
-    [closePopover, investigateInTimeline]
+    [closePopover, investigateInTimeline, telemetrySource, telemetry]
   );
 
   const items = useMemo<BulkActionsConfig[]>(

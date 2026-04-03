@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { resolveSmlAttachItems } from '../../../sml/execute_sml_attach_items';
+import type { SmlToolsOptions } from './types';
+
+const smlAttachSchema = z.object({
+  chunk_ids: z
+    .array(z.string())
+    .min(1)
+    .max(50)
+    .describe('One or more chunk_id values exactly as returned by sml_search.'),
+});
+
+/**
+ * Creates the sml_attach tool.
+ * Converts SML search results into conversation attachments.
+ */
+export const createSmlAttachTool = ({
+  getSmlService,
+}: SmlToolsOptions): BuiltinToolDefinition<typeof smlAttachSchema> => ({
+  id: platformCoreTools.smlAttach,
+  type: ToolType.builtin,
+  description:
+    'Attach assets found by sml_search to the conversation. ' +
+    'Pass one or more chunk_id strings exactly as returned by sml_search. ' +
+    'Chunk id follows the format: attachment_type:origin_id:uuid and could be referenced by sml://{attachment_type}/{origin_id}. ' +
+    'Each chunk is resolved into a full conversation attachment (e.g. a Lens visualization). ' +
+    'Chunks that cannot be resolved return individual errors without failing the entire call.',
+  schema: smlAttachSchema,
+  tags: ['sml', 'attachment'],
+  availability: {
+    cacheMode: 'global',
+    handler: async ({ uiSettings }) => {
+      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      return enabled
+        ? { status: 'available' }
+        : {
+            status: 'unavailable',
+            reason: 'SML features require experimental features to be enabled',
+          };
+    },
+  },
+  handler: async ({ chunk_ids: chunkIds }, context) => {
+    const smlService = getSmlService();
+    const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
+
+    const resolvedItems = await resolveSmlAttachItems({
+      chunkIds,
+      sml: smlService,
+      esClient: esClient.asCurrentUser,
+      request,
+      spaceId,
+      savedObjectsClient,
+      logger,
+    });
+
+    const results = await Promise.all(
+      resolvedItems.map(async (r) => {
+        if (!r.success) {
+          return createErrorResult({
+            message: r.message,
+            metadata: { chunk_id: r.chunk_id, attachment_type: r.attachment_type },
+          });
+        }
+
+        const added = await attachments.add(r.attachment, ATTACHMENT_REF_ACTOR.agent);
+
+        return {
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.other,
+          data: {
+            success: true,
+            attachment_id: added.id,
+            attachment_type: r.attachment.type,
+            message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
+          },
+        };
+      })
+    );
+
+    return { results };
+  },
+});

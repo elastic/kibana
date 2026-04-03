@@ -17,7 +17,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
   const deleteRoute = router.delete({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Delete a markdown panel by ID.`,
+    summary: `Delete a markdown library item.`,
     ...commonRouteConfig,
   });
 
@@ -29,10 +29,21 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the markdown panel.',
+                description: 'A unique identifier for the markdown library item.',
               },
             }),
           }),
+        },
+        response: {
+          204: {
+            description: 'deleted',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          404: {
+            description: 'not found',
+          },
         },
       },
     },
@@ -43,17 +54,17 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A markdown panel with ID ${req.params.id} was not found.`,
+              message: `A markdown library item with ID ${req.params.id} was not found.`,
             },
           });
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest();
+        return res.badRequest({ body: { message: e.message } });
       }
 
-      return res.ok();
+      return res.noContent();
     }
   );
 }

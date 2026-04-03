@@ -36,7 +36,7 @@ export function WaterfallFlyout({ waterfallItemId, waterfall, toggleFlyout }: Pr
     '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
-  const currentItem = waterfall.items.find((item) => item.id === waterfallItemId);
+  const currentItem = waterfall.items?.find((item) => item.id === waterfallItemId);
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

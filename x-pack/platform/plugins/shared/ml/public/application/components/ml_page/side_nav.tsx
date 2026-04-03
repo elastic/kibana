@@ -194,7 +194,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         ...(CHANGE_POINT_DETECTION_ENABLED
           ? [
               {
-                id: 'changePointDetection',
+                id: 'chartChangePoint',
                 pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
                 name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
                   defaultMessage: 'Change point detection',

@@ -22,6 +22,8 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
+  SecuritySolutionAlertFlyoutFooterFeature,
+  SecuritySolutionAlertFlyoutHeaderTitleFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
@@ -72,6 +74,7 @@ import { generateIndicatorAttachmentType } from './cases/attachments/indicator/u
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
+import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -89,6 +92,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _store?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
   private _discoverFlyoutServicesPromise?: Promise<StartServices>;
+  private _startedSubPluginsPromise?: Promise<StartedSubPlugins>;
+  private _discoverFlyoutStorePromise?: Promise<SecurityAppStore>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -126,7 +131,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { renderApp } = await this.lazyApplicationDependencies();
       const [coreStart, startPlugins] = await core.getStartServices();
 
-      const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+      const subPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
       const store = await this.store(coreStart, startPlugins, subPlugins);
 
       const services = await this.services.generateServices(coreStart, startPlugins, params);
@@ -279,13 +284,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
     if (plugins.agentBuilder?.attachments) {
-      registerAttachmentUiDefinitions({
+      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerRuleAttachment({
         attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        aiRuleCreation: this.services.aiRuleCreation,
       });
     }
 
+    // Enable CPS picker only for individual dashboard views (not the listing page).
+    // TODO: Remove this restriction once CPS is enabled across all Security Solution pages.
     plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      /security\/dashboards\//.test(location)
+      /security\/dashboards\/[^?]+/.test(location)
         ? ProjectRoutingAccess.EDITABLE
         : ProjectRoutingAccess.DISABLED
     );
@@ -311,6 +321,45 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._discoverFlyoutServicesPromise;
   }
 
+  private ensureStartedSubPlugins(
+    coreStart: CoreStart,
+    startPlugins: StartPlugins
+  ): Promise<StartedSubPlugins> {
+    if (!this._startedSubPluginsPromise) {
+      this._startedSubPluginsPromise = this.startSubPlugins(
+        this.storage,
+        coreStart,
+        startPlugins
+      ).catch((e) => {
+        // allow retry on next call
+        this._startedSubPluginsPromise = undefined;
+        throw e;
+      });
+    }
+
+    return this._startedSubPluginsPromise;
+  }
+
+  private getDiscoverFlyoutStore(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>
+  ): Promise<SecurityAppStore> {
+    if (!this._discoverFlyoutStorePromise) {
+      this._discoverFlyoutStorePromise = core
+        .getStartServices()
+        .then(async ([coreStart, startPlugins]) => {
+          const startedSubPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
+          return this.store(coreStart, startPlugins, startedSubPlugins);
+        })
+        .catch((e) => {
+          // allow retry if something failed during lazy init
+          this._discoverFlyoutStorePromise = undefined;
+          throw e;
+        });
+    }
+
+    return this._discoverFlyoutStorePromise;
+  }
+
   public async registerDiscoverSharedFeatures(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
@@ -334,17 +383,69 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: (hit) => {
+      render: ({ hit, onAlertUpdated }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
 
         return (
           <React.Suspense fallback={null}>
-            <LazyAlertFlyoutOverviewTab hit={hit} servicesPromise={servicesPromise} />
+            <LazyAlertFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
+            />
           </React.Suspense>
         );
       },
     };
     discoverFeatureRegistry.register(alertFlyoutOverviewTabFeature);
+
+    const LazyAlertFlyoutHeader = React.lazy(async () => {
+      const { AlertFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutHeader };
+    });
+    const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
+      id: 'security-solution-alert-flyout-header-title',
+      renderHeader: (props) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutHeader
+              {...props}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(headerTitleFeature);
+
+    const LazyAlertFlyoutFooter = React.lazy(async () => {
+      const { AlertFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutFooter };
+    });
+    const headerFooterFeature: SecuritySolutionAlertFlyoutFooterFeature = {
+      id: 'security-solution-alert-flyout-footer',
+      renderFooter: (hit) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutFooter
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(headerFooterFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {

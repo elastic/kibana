@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -76,7 +76,7 @@ When NOT to use:
 
 After reviewing topology results, consider:
 - Use \`observability.get_trace_metrics\` with timeseries to check latency/error trends over time
-- Use \`observability.get_correlated_logs\` to find error patterns in failing dependencies`,
+- Use \`observability.get_traces\` to find error patterns in failing dependencies`,
     schema: getServiceTopologyToolSchema,
     tags: ['observability', 'apm', 'service-map', 'topology'],
     availability: {

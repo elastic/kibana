@@ -6,13 +6,13 @@
  */
 
 import type { MouseEvent } from 'react';
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useStyles } from './styles';
 import type {
-  ProcessEventAlertCategory,
+  AlertTypeCount,
   ProcessEvent,
   ProcessEventAlert,
-  AlertTypeCount,
+  ProcessEventAlertCategory,
 } from '../../../common';
 import { ProcessTreeAlert } from '../process_tree_alert';
 import { DEFAULT_ALERT_FILTER_VALUE, MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
@@ -24,7 +24,7 @@ export interface ProcessTreeAlertsDeps {
   isProcessSelected?: boolean;
   alertTypeCounts: AlertTypeCount[];
   onAlertSelected: (e: MouseEvent) => void;
-  onShowAlertDetails: (alertUuid: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
 }
 
 export function ProcessTreeAlerts({

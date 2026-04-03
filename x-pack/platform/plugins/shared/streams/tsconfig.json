@@ -7,6 +7,7 @@
   "include": [
     "../../../../../typings/**/*",
     "common/**/*",
+    "docs/**/*",
     "scripts/**/*",
     "server/**/*",
     "public/**/*",
@@ -72,12 +73,19 @@
     "@kbn/utility-types",
     "@kbn/console-plugin",
     "@kbn/actions-plugin",
-    "@kbn/apm-utils",
     "@kbn/alerting-types",
     "@kbn/core-http-common",
     "@kbn/scout",
     "@kbn/esql-language",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/core-ui-settings-server",
+    "@kbn/agent-builder-plugin",
+    "@kbn/search-inference-endpoints",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/datemath",
+    "@kbn/setup-node-env",
   ]
 }

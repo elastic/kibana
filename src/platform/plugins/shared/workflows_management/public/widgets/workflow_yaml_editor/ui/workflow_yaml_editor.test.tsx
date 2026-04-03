@@ -12,6 +12,8 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
@@ -50,8 +52,7 @@ jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', ()
   useYamlValidation: () => ({
     error: null,
     isLoading: false,
-    validateVariables: jest.fn(),
-    handleMarkersChanged: jest.fn(),
+    validationResults: [],
   }),
 }));
 
@@ -81,6 +82,9 @@ jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
   useSaveYaml: jest.fn(),
 }));
 
+const mockKqlStart = kqlPluginMock.createStartContract();
+const mockFieldFormatsStart = fieldFormatsServiceMock.createStartContract();
+
 // Mock the useKibana hook
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => ({
@@ -92,6 +96,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
           addError: jest.fn(),
         },
       },
+      kql: mockKqlStart,
+      fieldFormats: mockFieldFormatsStart,
     },
   })),
 }));
@@ -291,8 +297,6 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
 steps:
   - name: step1
     type: console.log
@@ -337,9 +341,7 @@ version: "1"
 name: "test workflow"
 triggers:
   - type: alert
-    with:
-      rule_id: "test-rule"
-      invalid: [ unclosed array
+    invalid: [ unclosed array
 steps:
   - name: step1
 `.trim();

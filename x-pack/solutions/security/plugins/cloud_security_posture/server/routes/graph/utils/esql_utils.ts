@@ -1,0 +1,266 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+
+/**
+ * Utility functions for building ESQL queries
+ */
+
+/**
+ * Extracts namespace from a field name.
+ * Examples:
+ * - "user.entity.id" -> "user"
+ * - "entity.id" -> "entity"
+ * - "entity.target.id" -> "entity"
+ * - "service.target.entity.id" -> "service"
+ *
+ * @param field - The field name to extract namespace from
+ * @returns The namespace (first part before the first dot)
+ */
+export const getFieldNamespace = (field: string): string => {
+  // Special case: "entity.id" or "entity.target.id" -> "entity"
+  if (field.startsWith('entity.')) {
+    return 'entity';
+  }
+  // Otherwise, extract the first part before the first dot
+  return field.split('.')[0];
+};
+
+/**
+ * Generates ESQL CASE statements for field hints based on entity ID matches.
+ * This is used to determine which field (namespace) an entity ID came from.
+ *
+ * @param fields - Array of field names to check
+ * @param entityIdVar - The ESQL variable name containing the entity ID to match
+ * @returns ESQL CASE statement string with proper indentation
+ *
+ * @example
+ * ```typescript
+ * generateFieldHintCases(['user.entity.id', 'service.entity.id'], 'actorEntityId')
+ * // Returns:
+ * //     MV_CONTAINS(user.entity.id, actorEntityId), "user",
+ * //     MV_CONTAINS(service.entity.id, actorEntityId), "service"
+ * ```
+ */
+export const generateFieldHintCases = (fields: readonly string[], entityIdVar: string): string => {
+  return fields
+    .map((field) => `    MV_CONTAINS(${field}, ${entityIdVar}), "${getFieldNamespace(field)}"`)
+    .join(',\n');
+};
+
+/**
+ * Generates an ESQL expression that formats a JSON property with comma prefix.
+ * If the value is NOT NULL, it returns the full property with quoted value.
+ * If the value is NULL, it returns an empty string (property is omitted entirely).
+ *
+ * Always includes comma prefix - place required properties first in the JSON
+ * object so optional properties using this function come after.
+ *
+ * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
+ * @param valueVar - The ESQL variable name containing the value
+ * @returns ESQL expression that outputs a JSON property or empty string
+ *
+ * @example
+ * ```typescript
+ * formatJsonProperty('type', 'actorEntityType')
+ * // If actorEntityType = "user" → ,"type":"user"
+ * // If actorEntityType = null   → "" (empty, property omitted)
+ *
+ * // Usage: put required fields first, then optional fields
+ * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
+ * ```
+ */
+export const formatJsonProperty = (propertyName: string, valueVar: string): string => {
+  // CONCAT returns null if any argument is null, so if valueVar is null,
+  // the entire CONCAT returns null, and COALESCE returns empty string
+  return `COALESCE(CONCAT(",\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+};
+
+/**
+ * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
+ * This is the preferred method for enriching actor and target entities with entity store data.
+ *
+ * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default')
+ * @returns ESQL statements for LOOKUP JOIN enrichment
+ *
+ * @example
+ * ```typescript
+ * buildLookupJoinEsql('.entities.v2.latest.security_default')
+ * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
+ * ```
+ */
+export const buildLookupJoinEsql = (lookupIndexName: string): string => {
+  return `| DROP entity.id
+| DROP entity.target.id
+// rename entity.*fields before next pipeline to avoid name collisions
+| EVAL entity.id = actorEntityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| RENAME actorEntityName    = entity.name
+| RENAME actorEntityType    = entity.type
+| RENAME actorEntitySubType = entity.sub_type
+| RENAME actorHostIp        = host.ip
+| RENAME actorLookupEntityId = entity.id
+
+| EVAL entity.id = targetEntityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| RENAME targetEntityName    = entity.name
+| RENAME targetEntityType    = entity.type
+| RENAME targetEntitySubType = entity.sub_type
+| RENAME targetHostIp        = host.ip
+| RENAME targetLookupEntityId = entity.id`;
+};
+
+/**
+ * Generates ESQL EVAL statement for actor entity ID using COALESCE.
+ * Returns the first non-null value from the actor entity fields.
+ *
+ * @param actorFields - Array of actor entity field names
+ * @returns ESQL EVAL statement for actorEntityId
+ *
+ * @example
+ * ```typescript
+ * buildActorEntityIdEval(['user.entity.id', 'service.entity.id'])
+ * // Returns:
+ * // | EVAL actorEntityId = COALESCE(
+ * //     user.entity.id,
+ * //     service.entity.id
+ * //   )
+ * ```
+ */
+export const buildActorEntityIdEval = (actorFields: readonly string[]): string => {
+  const fieldsCoalesce = actorFields.join(',\n    ');
+  return `| EVAL actorEntityId = COALESCE(
+    ${fieldsCoalesce}
+  )`;
+};
+
+/**
+ * Generates ESQL EVAL statements for target entity ID collection using MV_APPEND.
+ * Collects all non-null target entity IDs into a multi-value field, deduplicating them.
+ *
+ * @param targetFields - Array of target entity field names
+ * @returns Multi-line ESQL EVAL statements for targetEntityId
+ *
+ * @example
+ * ```typescript
+ * buildTargetEntityIdEvals(['file.target.entity.id', 'process.target.entity.id'])
+ * // Returns:
+ * // | EVAL targetEntityId = TO_STRING(null)
+ * // | EVAL targetEntityId = CASE(
+ * //     file.target.entity.id IS NULL,
+ * //     targetEntityId,
+ * //     CASE(
+ * //       targetEntityId IS NULL,
+ * //       file.target.entity.id,
+ * //       MV_DEDUPE(MV_APPEND(targetEntityId, file.target.entity.id))
+ * //     )
+ * //   )
+ * // | EVAL targetEntityId = CASE(...)  // repeated for each target field
+ * ```
+ */
+export const buildTargetEntityIdEvals = (targetFields: readonly string[]): string => {
+  return [
+    '| EVAL targetEntityId = TO_STRING(null)',
+    ...targetFields.map((field) => {
+      return `| EVAL targetEntityId = CASE(
+    ${field} IS NULL,
+    targetEntityId,
+    CASE(
+      targetEntityId IS NULL,
+      ${field},
+      MV_DEDUPE(MV_APPEND(targetEntityId, ${field}))
+    )
+  )`;
+    }),
+  ].join('\n');
+};
+
+/**
+ * Generates ESQL EVAL statements for entity field hints (ecsParentField).
+ * Creates CASE statements to determine which ECS field an entity ID came from.
+ *
+ * @param actorFields - Array of actor entity field names (empty to skip actor hints)
+ * @param targetFields - Array of target entity field names (empty to skip target hints)
+ * @returns ESQL EVAL statements for actorEcsParentField and/or targetEcsParentField
+ *
+ * @example
+ * ```typescript
+ * buildEntityFieldHints(['user.entity.id'], ['file.target.entity.id'])
+ * // Returns:
+ * // | EVAL actorEcsParentField = CASE(
+ * //     MV_CONTAINS(user.entity.id, actorEntityId), "user",
+ * //     ""
+ * //   )
+ * // | EVAL targetEcsParentField = CASE(
+ * //     MV_CONTAINS(file.target.entity.id, targetEntityId), "file",
+ * //     ""
+ * // )
+ * ```
+ */
+export const buildEntityFieldHints = (
+  actorFields: readonly string[],
+  targetFields: readonly string[]
+): string => {
+  const statements: string[] = [];
+
+  if (actorFields.length > 0) {
+    const actorCases = generateFieldHintCases(actorFields, 'actorEntityId');
+    statements.push(`| EVAL actorEcsParentField = CASE(
+${actorCases},
+    ""
+  )`);
+  }
+
+  if (targetFields.length > 0) {
+    const targetCases = generateFieldHintCases(targetFields, 'targetEntityId');
+    statements.push(`| EVAL targetEcsParentField = CASE(
+${targetCases},
+    ""
+)`);
+  }
+
+  return statements.join('\n');
+};
+
+/**
+ * Generates ESQL EVAL statements for source metadata (IP addresses and geo country codes).
+ *
+ * @returns ESQL EVAL statements for sourceIps and sourceCountryCodes
+ *
+ * @example
+ * ```typescript
+ * buildSourceMetadataEvals()
+ * // Returns:
+ * // | EVAL sourceIps = source.ip
+ * // | EVAL sourceCountryCodes = source.geo.country_iso_code
+ * ```
+ */
+export const buildSourceMetadataEvals = (): string => {
+  return `| EVAL sourceIps = source.ip
+| EVAL sourceCountryCodes = source.geo.country_iso_code`;
+};
+
+/**
+ * Builds ESQL enrichment pipeline based on availability.
+ * Uses LOOKUP JOIN when available, otherwise falls back to null values.
+ */
+export const buildEntityEnrichment = (isLookupIndexAvailable: boolean, spaceId: string): string => {
+  if (isLookupIndexAvailable) {
+    return buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId));
+  }
+
+  return `// No enrichment available - use null values
+| EVAL actorEntityName = TO_STRING(null)
+| EVAL actorEntityType = TO_STRING(null)
+| EVAL actorEntitySubType = TO_STRING(null)
+| EVAL actorHostIp = TO_STRING(null)
+| EVAL targetEntityName = TO_STRING(null)
+| EVAL targetEntityType = TO_STRING(null)
+| EVAL targetEntitySubType = TO_STRING(null)
+| EVAL targetHostIp = TO_STRING(null)`;
+};

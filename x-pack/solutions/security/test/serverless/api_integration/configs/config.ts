@@ -33,8 +33,12 @@ export default createTestConfig({
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
-    // Enables /internal/cloud_security_posture/graph API
-    `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
+    // Complete tier enables graph visualization product feature
+    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+      { product_line: 'security', product_tier: 'complete' },
+      { product_line: 'endpoint', product_tier: 'complete' },
+      { product_line: 'cloud', product_tier: 'complete' },
+    ])}`,
   ],
   enableFleetDockerRegistry: false,
 });

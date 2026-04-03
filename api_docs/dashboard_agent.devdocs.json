@@ -12,7 +12,7 @@
         "label": "DashboardAgentPluginPublicSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-        "lineNumber": 17,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -27,7 +27,7 @@
         "label": "DashboardAgentPluginPublicStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-        "lineNumber": 19,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -49,7 +49,113 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboardAgent",
+            "id": "def-public.DashboardAgentPluginPublicStartDependencies.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboardAgent",
+            "id": "def-public.DashboardAgentPluginPublicStartDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => Promise<void>; getExportHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "IntlShape",
+              ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboardAgent",
+            "id": "def-public.DashboardAgentPluginPublicStartDependencies.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -69,7 +175,7 @@
       "label": "DashboardAgentPluginPublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-      "lineNumber": 11,
+      "lineNumber": 14,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -85,7 +191,7 @@
       "label": "DashboardAgentPluginPublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-      "lineNumber": 14,
+      "lineNumber": 17,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

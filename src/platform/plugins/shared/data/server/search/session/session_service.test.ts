@@ -949,6 +949,61 @@ describe('SearchSessionService', () => {
         });
       });
 
+      describe('when some sessions error out', () => {
+        it('should return the statuses for the sessions that did not error out', async () => {
+          // Given
+          const session1 = {
+            ...mockSavedObject,
+            id: 'session1',
+            attributes: {
+              ...mockSavedObject.attributes,
+              sessionId: 'session1',
+            },
+          };
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              session1,
+              {
+                id: 'error_object',
+                type: SEARCH_SESSION_TYPE,
+                error: { error: 'some error', message: 'some error', statusCode: 500 },
+              } as SavedObject,
+            ],
+          });
+          const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');
+          spy.mockResolvedValue({
+            status: SearchSessionStatus.COMPLETE,
+          });
+
+          // When
+          const statuses = await service.updateStatuses(
+            { savedObjectsClient, asCurrentUserElasticsearchClient },
+            mockUser1,
+            ['session1', 'session2']
+          );
+
+          // Then
+          expect(statuses).toEqual(
+            expect.objectContaining({
+              sessions: expect.objectContaining({
+                session1: expect.objectContaining({
+                  name: 'my_name',
+                  appId: 'my_app_id',
+                  locatorId: 'my_locator_id',
+                }),
+              }),
+              statuses: expect.objectContaining({
+                session1: expect.objectContaining({
+                  status: SearchSessionStatus.COMPLETE,
+                  errors: [],
+                }),
+              }),
+            })
+          );
+          expect(spy).toHaveBeenCalledTimes(1);
+        });
+      });
+
       describe('when there are no sessions', () => {
         it('should return an empty map', async () => {
           // Given

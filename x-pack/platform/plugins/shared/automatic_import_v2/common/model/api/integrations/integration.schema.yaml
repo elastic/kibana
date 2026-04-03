@@ -48,6 +48,7 @@ paths:
                 dataStreams:
                   description: The data streams of the integration
                   type: array
+                  maxItems: 50
                   items:
                     $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/DataStream"
       responses:
@@ -132,6 +133,7 @@ paths:
                 dataStreams:
                   description: The data streams of the integration
                   type: array
+                  maxItems: 50
                   items:
                     type: object
                     additionalProperties: false
@@ -142,11 +144,13 @@ paths:
                       inputTypes:
                         description: The input types of the data stream
                         type: array
+                        maxItems: 100
                         items:
                           $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/InputType"
                       rawSamples:
                         description: The raw samples of the data stream
                         type: array
+                        maxItems: 1000
                         items:
                           $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
       responses:
@@ -216,6 +220,33 @@ paths:
           description: The integration is deleted.
         404:
           description: The integration is not found.
+  /internal/automatic_import/integrations/{integration_id}/download:
+    get:
+      summary: Downloads an integration as a zip package.
+      operationId: DownloadAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Downloads an integration package as a zip file by its id.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      responses:
+        200:
+          description: The integration zip package.
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          description: The integration is not found.
   /internal/automatic_import/integrations/{integration_id}/approve:
     post:
       summary: Approves an existing integration.
@@ -275,10 +306,18 @@ components:
       additionalProperties: false
       required:
         - version
+        - categories
       properties:
         version:
           description: The version of the integration
           $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        categories:
+          description: The categories of the integration
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
         langSmithOptions:
           description: The LangSmith tracing options
           $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"

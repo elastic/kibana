@@ -31,6 +31,7 @@ export type LlmFeature = Pick<
   | 'evidence'
   | 'tags'
   | 'meta'
+  | 'filter'
 >;
 
 export function resolveFeatureTypeFilters<T extends string>(
@@ -107,6 +108,7 @@ export function toFeatureForLlmContext(feature: Feature): LlmFeature {
     'properties',
     'evidence',
     'tags',
+    'filter',
     'meta',
   ]);
 }

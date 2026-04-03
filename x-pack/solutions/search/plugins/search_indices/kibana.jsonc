@@ -19,15 +19,12 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cloudConnect",
       "console",
       "usageCollection",
       "serverless",
       "searchNavigation",
       "sampleDataIngest"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "esUiShared"
     ]
   }
 }

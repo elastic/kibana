@@ -14,13 +14,14 @@ import {
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
   LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
-  LENS_TERMS_SIZE_DEFAULT,
+  LENS_TERMS_LIMIT_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
 } from './constants';
 import { formatSchema } from './format';
 import { labelSharedProp } from './shared';
+import { builderEnums } from './enums';
 
 export const bucketDateHistogramOperationSchema = schema.object(
   {
@@ -93,11 +94,11 @@ export const bucketTermsOperationSchema = schema.object(
       { minSize: 1, maxSize: 4 }
     ),
     /**
-     * Size of the terms
+     * Maximum number of terms.
      */
-    size: schema.number({
-      defaultValue: LENS_TERMS_SIZE_DEFAULT,
-      meta: { description: 'Size of the terms' },
+    limit: schema.number({
+      defaultValue: LENS_TERMS_LIMIT_DEFAULT,
+      meta: { description: 'Maximum number of terms' },
     }),
     /**
      * Whether to increase accuracy
@@ -175,7 +176,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the alphabetical order
            */
-          direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByAlphabeticalDirection' },
+          }),
         }),
         schema.object({
           type: schema.literal('rare'),
@@ -204,7 +207,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the column
            */
-          direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByColumnDirection' },
+          }),
         }),
         schema.object({
           type: schema.literal('custom'),
@@ -236,7 +241,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the custom operation
            */
-          direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByCustomDirection' },
+          }),
         }),
       ])
     ),
@@ -310,67 +317,70 @@ export const bucketHistogramOperationSchema = schema.object(
   { meta: { id: 'histogramOperation', title: 'Histogram Operation' } }
 );
 
-export const bucketRangesOperationSchema = schema.object({
-  operation: schema.literal('range'),
-  ...formatSchema,
-  ...labelSharedProp,
-  /**
-   * Label for the operation
-   */
-  label: schema.maybe(
-    schema.string({
+export const bucketRangesOperationSchema = schema.object(
+  {
+    operation: schema.literal('range'),
+    ...formatSchema,
+    ...labelSharedProp,
+    /**
+     * Label for the operation
+     */
+    label: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Label for the operation',
+        },
+      })
+    ),
+    /**
+     * Field to be used for the range
+     */
+    field: schema.string({
       meta: {
-        description: 'Label for the operation',
+        description: 'Field to be used for the range',
       },
-    })
-  ),
-  /**
-   * Field to be used for the range
-   */
-  field: schema.string({
-    meta: {
-      description: 'Field to be used for the range',
-    },
-  }),
-  /**
-   * Ranges
-   */
-  ranges: schema.arrayOf(
-    schema.object({
-      /**
-       * Less than or equal to
-       */
-      lte: schema.maybe(
-        schema.number({
-          meta: {
-            description: 'Less than or equal to',
-          },
-        })
-      ),
-      /**
-       * Greater than
-       */
-      gt: schema.maybe(
-        schema.number({
-          meta: {
-            description: 'Greater than',
-          },
-        })
-      ),
-      /**
-       * Label
-       */
-      label: schema.maybe(
-        schema.string({
-          meta: {
-            description: 'Label',
-          },
-        })
-      ),
     }),
-    { maxSize: 100, meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
-  ),
-});
+    /**
+     * Ranges
+     */
+    ranges: schema.arrayOf(
+      schema.object({
+        /**
+         * Less than or equal to
+         */
+        lte: schema.maybe(
+          schema.number({
+            meta: {
+              description: 'Less than or equal to',
+            },
+          })
+        ),
+        /**
+         * Greater than
+         */
+        gt: schema.maybe(
+          schema.number({
+            meta: {
+              description: 'Greater than',
+            },
+          })
+        ),
+        /**
+         * Label
+         */
+        label: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'Label',
+            },
+          })
+        ),
+      }),
+      { maxSize: 100 }
+    ),
+  },
+  { meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
+);
 
 export const bucketOperationDefinitionSchema = schema.oneOf([
   bucketDateHistogramOperationSchema,

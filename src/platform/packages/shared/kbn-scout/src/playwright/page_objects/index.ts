@@ -12,6 +12,7 @@ import type { ScoutLogger } from '../../common';
 import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
+import { DashboardLinks } from './dashboard_links';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
@@ -22,6 +23,8 @@ import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { LoginPage } from './login_page';
+import { OverlaysPage } from './overlays';
+import { VisualizeApp } from './visualize_app';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export interface PageObjectsFixtures {
@@ -35,6 +38,7 @@ export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
   dashboard: DashboardApp;
+  dashboardLinks: DashboardLinks;
   filterBar: FilterBar;
   maps: MapsPage;
   renderable: RenderablePage;
@@ -43,6 +47,8 @@ export interface PageObjects {
   inspector: Inspector;
   lens: LensApp;
   login: LoginPage;
+  overlays: OverlaysPage;
+  visualize: VisualizeApp;
 }
 
 /**
@@ -55,6 +61,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
+    dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
@@ -64,6 +71,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
-    // Add new page objects here
+    overlays: createLazyPageObject(OverlaysPage, fixtures.page),
+    visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };
 }

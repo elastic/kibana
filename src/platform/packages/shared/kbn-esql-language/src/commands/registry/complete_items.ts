@@ -307,10 +307,12 @@ export const mmrLimitKeywordSuggestion: ISuggestionItem = {
   }),
 };
 
+export const defaultLimitValueSuggestions = ['10', '100', '1000'];
+
 // wrapping in a function to avoid circular dependency issues with the tests
 export const mmrLimitValueSuggestions: () => ISuggestionItem[] = () =>
   buildConstantsDefinitions(
-    ['10', '100', '1000'],
+    defaultLimitValueSuggestions,
     i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
       defaultMessage: 'Suggested limit',
     }),
@@ -659,6 +661,22 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
     kind: 'Issue',
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.addDateHistogramDetail', {
       defaultMessage: 'Add date histogram using bucket()',
+    }),
+    sortText: '1',
+    category: SuggestionCategory.CUSTOM_ACTION,
+  });
+
+export const getTimeseriesDateHistogramCompletionItem: (
+  histogramBarTarget?: number
+) => ISuggestionItem = (histogramBarTarget: number = 50) =>
+  withAutoSuggest({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.addTimeseriesDateHistogram', {
+      defaultMessage: 'Add date histogram',
+    }),
+    text: `TBUCKET(${histogramBarTarget})`,
+    kind: 'Issue',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.addTimeseriesDateHistogramDetail', {
+      defaultMessage: 'Add date histogram using tbucket()',
     }),
     sortText: '1',
     category: SuggestionCategory.CUSTOM_ACTION,

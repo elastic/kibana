@@ -59,10 +59,6 @@ export const strings = {
     i18n.translate('unifiedSearch.query.queryBar.kqlLanguageName', {
       defaultMessage: 'KQL',
     }),
-  getOptionsAddFilterButtonLabel: () =>
-    i18n.translate('unifiedSearch.filter.options.addFilterButtonLabel', {
-      defaultMessage: 'Add filter',
-    }),
   getOptionsApplyAllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
       defaultMessage: 'Apply to all',
@@ -360,13 +356,6 @@ export function useQueryBarMenuPanels({
   const kqlLabel = strings.getKqlLanguageName();
 
   const filtersRelatedPanels: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: strings.getOptionsAddFilterButtonLabel(),
-      icon: 'plus',
-      onClick: () => {
-        setRenderedComponent('addFilter');
-      },
-    },
     {
       name: strings.getOptionsApplyAllFiltersButtonLabel(),
       icon: 'filter',

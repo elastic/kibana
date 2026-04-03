@@ -14,7 +14,7 @@ import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { PointVisibilityOption } from './point_visibility_option';
-import type { XYState } from '../../types';
+import type { XYVisualizationState } from '../../types';
 import {
   flipSeriesType,
   getBarSeriesLayers,
@@ -48,8 +48,8 @@ export function getValueLabelDisableReason({
 }
 
 export const XyAppearanceSettings: React.FC<{
-  state: XYState;
-  setState: (newState: XYState) => void;
+  state: XYVisualizationState;
+  setState: (newState: XYVisualizationState) => void;
 }> = ({ state, setState }) => {
   const dataLayers = getDataLayers(state.layers);
   const isAreaPercentage = dataLayers.some(

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { compact, keyBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { createToolValidationError } from '@kbn/inference-plugin/common/chat_complete/errors';
@@ -23,11 +23,15 @@ import type {
 } from '../types';
 import { registerGetDataOnScreenFunction } from '../../functions/get_data_on_screen';
 
-const toZodSchema = (schema: Record<string, any>): z.ZodTypeAny => {
+const toZodSchema = (schema: unknown): z.ZodTypeAny => {
+  if (!schema || typeof schema !== 'object') {
+    return z.any();
+  }
+
   const normalized =
     'properties' in schema && !('type' in schema) ? { type: 'object', ...schema } : schema;
 
-  return jsonSchemaToZod(normalized as any) as z.ZodTypeAny;
+  return fromJSONSchema(normalized as Record<string, unknown>) ?? z.any();
 };
 
 export class ChatFunctionClient {
@@ -72,7 +76,7 @@ export class ChatFunctionClient {
     } catch (error) {
       const errorMessage =
         error instanceof z.ZodError
-          ? error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          ? error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ')
           : error instanceof Error
           ? error.message
           : 'Unknown validation error';

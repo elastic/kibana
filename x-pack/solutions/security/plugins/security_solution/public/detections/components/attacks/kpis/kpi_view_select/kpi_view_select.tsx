@@ -6,7 +6,10 @@
  */
 
 import { EuiButtonGroup } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
+
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { KpiViewSelection, getOptionProperties } from './helpers';
 import * as i18n from './translations';
 
@@ -24,9 +27,22 @@ export interface KpiViewSelectProps {
 
 export const KpiViewSelect: React.FC<KpiViewSelectProps> = React.memo(
   ({ kpiViewSelection, setKpiViewSelection }) => {
+    const {
+      services: { telemetry },
+    } = useKibana();
+
     const options = useMemo(
       () => KPI_VIEW_OPTIONS.map((option) => getOptionProperties(option)),
       []
+    );
+
+    const onKpiViewChange = useCallback(
+      (id: string) => {
+        const view = id as KpiViewSelection;
+        setKpiViewSelection(view);
+        telemetry.reportEvent(AttacksEventTypes.KPIViewChanged, { view });
+      },
+      [setKpiViewSelection, telemetry]
     );
 
     return (
@@ -34,7 +50,7 @@ export const KpiViewSelect: React.FC<KpiViewSelectProps> = React.memo(
         legend={i18n.LEGEND_TITLE}
         options={options}
         idSelected={kpiViewSelection}
-        onChange={(id) => setKpiViewSelection(id as KpiViewSelection)}
+        onChange={onKpiViewChange}
         buttonSize="compressed"
         color="primary"
         data-test-subj="kpi-view-select-tabs"

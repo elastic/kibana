@@ -11,6 +11,7 @@
 
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
+import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { getPathAtOffset } from '../../../../common/lib/yaml';
 import { formatZodError } from '../../../../common/lib/zod';
@@ -27,6 +28,16 @@ export function formatMonacoYamlMarker(
   if (marker.source && marker.source.startsWith('yaml-schema:')) {
     // update the severity to error to make it more visible and match vs code behavior
     newMarker.severity = monaco.MarkerSeverity.Error;
+  }
+
+  // JSON Schema `pattern` errors lose the Zod error message during conversion.
+  // Match the pattern string from the schema source of truth and replace with
+  // the original human-readable message.
+  if (marker.message?.includes(SCHEDULED_INTERVAL_PATTERN.source)) {
+    return {
+      ...newMarker,
+      message: SCHEDULED_INTERVAL_ERROR,
+    };
   }
 
   // Check if this is a validation error that could benefit from dynamic formatting

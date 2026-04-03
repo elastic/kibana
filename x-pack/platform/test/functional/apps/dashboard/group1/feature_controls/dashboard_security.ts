@@ -36,7 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
-  describe('dashboard feature controls security', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/257665
+  describe.skip('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'

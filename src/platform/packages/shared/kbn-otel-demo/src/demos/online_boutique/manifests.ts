@@ -57,7 +57,7 @@ function createCommonManifests(options: ManifestOptions): object[] {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${namespace}`,
     },
     rules: [
       {
@@ -103,7 +103,7 @@ function createCommonManifests(options: ManifestOptions): object[] {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${namespace}`,
     },
     subjects: [
       {
@@ -114,7 +114,7 @@ function createCommonManifests(options: ManifestOptions): object[] {
     ],
     roleRef: {
       kind: 'ClusterRole',
-      name: 'otel-collector',
+      name: `otel-collector-${namespace}`,
       apiGroup: 'rbac.authorization.k8s.io',
     },
   });

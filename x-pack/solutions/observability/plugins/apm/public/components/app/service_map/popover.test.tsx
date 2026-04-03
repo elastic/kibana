@@ -109,6 +109,11 @@ jest.mock('@xyflow/react', () => {
   };
 });
 
+// Mock service map components
+jest.mock('./popover/edge_contents', () => ({
+  EdgeContents: jest.fn(() => <div data-testid="edge-contents" />),
+}));
+
 describe('MapPopover', () => {
   const defaultProps = {
     selectedNode: null,

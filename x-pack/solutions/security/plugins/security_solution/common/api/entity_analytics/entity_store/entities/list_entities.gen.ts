@@ -14,8 +14,8 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { EntityType, InspectQuery } from '../common.gen';
 import { Entity } from './common.gen';

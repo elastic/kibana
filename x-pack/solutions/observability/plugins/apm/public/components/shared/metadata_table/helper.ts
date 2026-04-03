@@ -15,10 +15,13 @@ export const getSectionsFromFields = (fields: Record<string, any>) => {
     .filter((field) => !EXCLUDED_FIELDS.some((excluded) => field.startsWith(excluded)))
     .sort()
     .map((field) => {
+      const currentField = fields[field];
       return {
         section: field.split('.')[0],
         field,
-        value: fields[field],
+        value: Array.isArray(currentField)
+          ? currentField
+          : [currentField].filter((v: unknown) => v != null),
       };
     });
 
@@ -53,9 +56,10 @@ export const filterSectionsByTerm = (sections: SectionDescriptor[], searchTerm: 
     .map((section) => {
       const { properties = [] } = section;
       const filteredProps = properties.filter(({ field, value }) => {
+        const values = Array.isArray(value) ? value : [value].filter((v) => v != null);
         return (
           field.toLowerCase().includes(searchTerm) ||
-          value.some((val: string | number) => String(val).toLowerCase().includes(searchTerm))
+          values.some((val: string | number) => String(val).toLowerCase().includes(searchTerm))
         );
       });
       return { ...section, properties: filteredProps };

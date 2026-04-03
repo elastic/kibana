@@ -1,0 +1,38 @@
+version: '1'
+name: 'sources.google_calendar.free_busy'
+description: Check free/busy availability for one or more people or calendars over a time range. Returns busy time slots for each requested calendar. More token-efficient than listing full events when you only need to know if someone is available. Use a person's email address as their calendar ID.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: timeMin
+    type: string
+    description: "Start of the time interval to check, as an RFC3339 timestamp. Example: 2024-01-15T09:00:00Z"
+  - name: timeMax
+    type: string
+    description: "End of the time interval to check, as an RFC3339 timestamp. Example: 2024-01-15T18:00:00Z"
+  - name: calendarIds
+    type: array
+    description: "List of calendar IDs to check availability for. Use 'primary' for the user's own calendar, or a person's email address to check their availability. Example: ['primary', 'colleague@company.com']"
+  - name: timeZone
+    type: string
+    required: false
+    description: "Time zone for the query (optional, defaults to UTC). Example: America/New_York"
+steps:
+  - name: query_free_busy
+    type: google_calendar.freeBusy
+    connector-id: <%= google_calendar-stack-connector-id %>
+    with:
+      timeMin: "${{inputs.timeMin}}"
+      timeMax: "${{inputs.timeMax}}"
+      calendarIds: ${{inputs.calendarIds}}
+      timeZone: "${{inputs.timeZone}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.query_free_busy.output }}
+    with:
+      fields:
+        timeMin: "${{ item.timeMin }}"
+        timeMax: "${{ item.timeMax }}"
+        calendars: "${{ item.calendars }}"

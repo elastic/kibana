@@ -647,10 +647,10 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
               <MetricExpression
                 metric={{
                   value: metric!,
-                  text: ofFields.find((v) => v?.value === metric)?.text || '',
+                  text: ofFields?.find((v) => v?.value === metric)?.text || '',
                 }}
                 metrics={
-                  ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
+                  ofFields?.filter((m) => m !== undefined && m.value !== undefined) as Array<{
                     value: SnapshotMetricType;
                     text: string;
                   }>

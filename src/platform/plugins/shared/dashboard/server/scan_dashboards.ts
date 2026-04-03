@@ -47,9 +47,12 @@ export async function scanDashboards(
 
   return {
     dashboards: soResponse.saved_objects.map((so) => {
-      const { description, tags, title, panels } = transformDashboardOut(
+      const {
+        dashboardState: { description, tags, title, panels },
+      } = transformDashboardOut(
         so.attributes,
-        so.references
+        so.references,
+        true // temporary fix to return old Lens SO panel format
       );
 
       return {

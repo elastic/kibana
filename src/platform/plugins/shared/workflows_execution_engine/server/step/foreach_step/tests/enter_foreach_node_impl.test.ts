@@ -249,6 +249,69 @@ describe('EnterForeachNodeImpl', () => {
       });
     });
 
+    describe('when foreach configuration is a native array', () => {
+      beforeEach(() => {
+        node.configuration.foreach = ['a', 'b', 'c'] as any;
+      });
+
+      it('should persist input as a JSON string', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: JSON.stringify(['a', 'b', 'c']),
+        });
+      });
+
+      it('should initialize foreach state with correct total', async () => {
+        await underTest.run();
+
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          index: 0,
+          total: 3,
+        });
+      });
+
+      it('should not call renderValueAccordingToContext or evaluateExpressionInContext', async () => {
+        await underTest.run();
+
+        expect(
+          stepExecutionRuntime.contextManager.renderValueAccordingToContext
+        ).not.toHaveBeenCalled();
+        expect(
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should enter the first iteration scope', async () => {
+        await underTest.run();
+
+        expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
+        expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
+      });
+    });
+
+    describe('when foreach configuration is an empty native array', () => {
+      beforeEach(() => {
+        node.configuration.foreach = [] as any;
+      });
+
+      it('should persist input as a JSON string', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: JSON.stringify([]),
+        });
+      });
+
+      it('should set total to 0 and skip execution', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          total: 0,
+        });
+        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitNode');
+      });
+    });
+
     it('should go to next node', async () => {
       await underTest.run();
 

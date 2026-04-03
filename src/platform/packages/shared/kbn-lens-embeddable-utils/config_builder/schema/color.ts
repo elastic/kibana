@@ -131,7 +131,7 @@ const colorByValueBaseSchema = schema.object({
 
 export const legacyColorByValueSchema = colorByValueBaseSchema.extends(
   {
-    type: schema.literal('legacy-dynamic'),
+    type: schema.literal('legacy_dynamic'),
 
     palette: schema.string({
       meta: {
@@ -223,13 +223,17 @@ const colorFromPaletteSchema = schema.object(
 
 const colorCodeSchema = schema.object(
   {
-    type: schema.literal('colorCode'),
+    type: schema.literal('color_code'),
     value: schema.string({ meta: { description: 'The static color value to use.' } }),
   },
-  { meta: { id: 'colorCode', title: 'Color Code' } }
+  { meta: { id: 'color_code', title: 'Color Code' } }
 );
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
+
+const unassignedColorSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema], {
+  meta: { description: 'The color to use for unassigned values.', id: 'unassignedColorSchema' },
+});
 
 const categoricalColorMappingSchema = schema.object(
   {
@@ -244,7 +248,7 @@ const categoricalColorMappingSchema = schema.object(
       }),
       { maxSize: 1000 }
     ),
-    unassignedColor: schema.maybe(colorCodeSchema),
+    unassigned: schema.maybe(unassignedColorSchema),
   },
   { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
 );
@@ -255,6 +259,11 @@ const gradientColorMappingSchema = schema.object(
     palette: schema.string({
       meta: { description: 'The palette name to use for color assignment.' },
     }),
+    sort: schema.maybe(
+      schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+        meta: { description: 'Sort direction' },
+      })
+    ),
     mapping: schema.maybe(
       schema.arrayOf(
         schema.object({
@@ -264,7 +273,7 @@ const gradientColorMappingSchema = schema.object(
       )
     ),
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
-    unassignedColor: schema.maybe(colorCodeSchema),
+    unassigned: schema.maybe(unassignedColorSchema),
   },
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );
@@ -300,6 +309,7 @@ export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingS
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
 export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
 export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
+export type UnassignedColorType = TypeOf<typeof unassignedColorSchema>;
 /**
  * Schema for where to apply the color (to value or background).
  */

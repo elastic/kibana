@@ -9,8 +9,11 @@
 
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
+  BaseEventSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
+  EventTimestampSchema,
+  WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
   WorkflowSettingsSchema,
@@ -139,6 +142,212 @@ describe('WorkflowSchemaForAutocomplete', () => {
       steps: [],
       triggers: [],
     });
+  });
+});
+
+describe('WorkflowOutputStepSchema', () => {
+  it('should validate a basic workflow.output step', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+      with: {
+        result: 'success',
+        count: 42,
+      },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({
+        name: 'emit_output',
+        type: 'workflow.output',
+        status: 'completed', // default status
+        with: {
+          result: 'success',
+          count: 42,
+        },
+      });
+    }
+  });
+
+  it('should apply default status of "completed"', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+      with: { data: 'test' },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe('completed');
+    }
+  });
+
+  it('should accept status: completed', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+      status: 'completed',
+      with: { data: 'test' },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe('completed');
+    }
+  });
+
+  it('should accept status: cancelled', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+      status: 'cancelled',
+      with: { data: 'test' },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe('cancelled');
+    }
+  });
+
+  it('should accept status: failed', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+      status: 'failed',
+      with: { error: 'Something went wrong' },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe('failed');
+    }
+  });
+
+  it('should reject invalid status values', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+      status: 'pending', // invalid
+      with: { data: 'test' },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept complex output values', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+      with: {
+        stringField: 'test',
+        numberField: 123,
+        booleanField: true,
+        arrayField: [1, 2, 3],
+        objectField: { nested: 'value' },
+        expressionField: '{{ steps.previous.output }}',
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should support if conditions', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'conditional_output',
+      type: 'workflow.output',
+      if: '{{ steps.check.output.shouldEmit }}',
+      with: { result: 'success' },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.if).toBe('{{ steps.check.output.shouldEmit }}');
+    }
+  });
+
+  it('should require name field', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      type: 'workflow.output',
+      with: { data: 'test' },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should require with field', () => {
+    const result = WorkflowOutputStepSchema.safeParse({
+      name: 'emit_output',
+      type: 'workflow.output',
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('WorkflowSchema with workflow.output', () => {
+  it('should accept a workflow with workflow.output step', () => {
+    const result = WorkflowSchema.safeParse({
+      name: 'test-workflow',
+      triggers: [{ type: 'manual' }],
+      outputs: [
+        { name: 'result', type: 'string', required: true },
+        { name: 'count', type: 'number', required: true },
+      ],
+      steps: [
+        {
+          name: 'process',
+          type: 'http',
+          with: { url: 'https://api.example.com' },
+        },
+        {
+          name: 'emit_result',
+          type: 'workflow.output',
+          status: 'completed',
+          with: {
+            result: '{{ steps.process.output.data }}',
+            count: 42,
+          },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept workflow.output as the only step', () => {
+    const result = WorkflowSchema.safeParse({
+      name: 'test-workflow',
+      triggers: [{ type: 'manual' }],
+      outputs: [{ name: 'message', type: 'string' }],
+      steps: [
+        {
+          name: 'emit_immediately',
+          type: 'workflow.output',
+          with: { message: 'Hello, World!' },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept workflow with outputs but no workflow.output step', () => {
+    const result = WorkflowSchema.safeParse({
+      name: 'test-workflow',
+      triggers: [{ type: 'manual' }],
+      outputs: [{ name: 'result', type: 'string' }],
+      steps: [
+        {
+          name: 'process',
+          type: 'http',
+          with: { url: 'https://api.example.com' },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
   });
 });
 
@@ -567,5 +776,49 @@ describe('JsonModelSchema', () => {
     };
     const result = WorkflowSchemaForAutocomplete.safeParse(workflow);
     expect(result.success).toBe(true);
+  });
+});
+
+describe('BaseEventSchema', () => {
+  it('should have only spaceId (no timestamp)', () => {
+    const shape = BaseEventSchema.shape;
+    expect(Object.keys(shape)).toEqual(['spaceId']);
+    expect(shape).not.toHaveProperty('timestamp');
+  });
+
+  it('should accept valid event with spaceId', () => {
+    const result = BaseEventSchema.safeParse({ spaceId: 'default' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({ spaceId: 'default' });
+    }
+  });
+
+  it('should reject event without spaceId', () => {
+    const result = BaseEventSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('EventTimestampSchema', () => {
+  it('should have timestamp field', () => {
+    const shape = EventTimestampSchema.shape;
+    expect(Object.keys(shape)).toEqual(['timestamp']);
+    expect(shape.timestamp).toBeDefined();
+  });
+
+  it('should accept valid ISO 8601 timestamp string', () => {
+    const result = EventTimestampSchema.safeParse({
+      timestamp: '2025-01-01T00:00:00.000Z',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.timestamp).toBe('2025-01-01T00:00:00.000Z');
+    }
+  });
+
+  it('should reject missing timestamp', () => {
+    const result = EventTimestampSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 });

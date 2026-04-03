@@ -66,6 +66,11 @@ jest.mock('./workflow_detail_test_modal', () => ({
     <div data-test-subj="workflow-detail-test-modal">{'Test Modal'}</div>
   ),
 }));
+jest.mock('./workflow_detail_test_step_modal', () => ({
+  WorkflowDetailTestStepModal: () => (
+    <div data-test-subj="workflow-detail-test-step-modal">{'Test Step Modal'}</div>
+  ),
+}));
 jest.mock('../../../features/workflow_execution_detail', () => ({
   WorkflowExecutionDetail: ({ executionId }: any) => (
     <div data-test-subj="workflow-execution-detail">{executionId}</div>
@@ -274,6 +279,13 @@ describe('WorkflowDetailPage', () => {
     it('should render workflow detail test modal', () => {
       const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' });
       expect(getByTestId('workflow-detail-test-modal')).toBeInTheDocument();
+    });
+  });
+
+  describe('workflow test step modal', () => {
+    it('should render workflow detail test step modal', () => {
+      const { getByTestId } = renderWithProviders({ id: 'test-workflow-123' });
+      expect(getByTestId('workflow-detail-test-step-modal')).toBeInTheDocument();
     });
   });
 

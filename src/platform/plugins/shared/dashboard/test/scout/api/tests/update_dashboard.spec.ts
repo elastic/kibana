@@ -18,12 +18,14 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
@@ -32,7 +34,7 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  apiTest('should return 200 with an updated dashboard', async ({ apiClient }) => {
+  apiTest('should update existing dashboard', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -49,23 +51,23 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe('Refresh Requests (Updated)');
   });
 
-  apiTest('should return 404 when updating a non-existent dashboard', async ({ apiClient }) => {
-    const response = await apiClient.put(`${DASHBOARD_API_PATH}/not-an-id`, {
+  apiTest('should create new dashboard', async ({ apiClient }) => {
+    const id = 'new-dashboard-id';
+    const title = `I'm a new dashboard`;
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        title: 'Some other dashboard (updated)',
+        title: `I'm a new dashboard`,
       },
       responseType: 'json',
     });
 
-    expect(response.body).toStrictEqual({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'A dashboard with ID [not-an-id] was not found.',
-    });
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.id).toBe(id);
+    expect(response.body.data.title).toBe(title);
   });
 
   apiTest('validation - returns error when object is not provided', async ({ apiClient }) => {
@@ -81,6 +83,27 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
       '[request body.title]: expected value of type [string] but got [undefined]'
+    );
+  });
+
+  apiTest('validation - returns error when access_control is provided', async ({ apiClient }) => {
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: 'Refresh Requests (Updated)',
+        access_control: {
+          access_mode: 'write_restricted',
+        },
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      "[request body.access_control]: a value wasn't expected to be present"
     );
   });
 
@@ -102,4 +125,23 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
       '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest(
+    'validation - returns error if user does not have permission to update a dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'Refresh Requests (Updated again)',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to update dashboard');
+    }
+  );
 });

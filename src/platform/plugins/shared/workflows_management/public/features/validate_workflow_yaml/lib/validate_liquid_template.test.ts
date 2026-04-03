@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parseDocument } from 'yaml';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import type { LiquidValidationError } from '../../../../common/lib/validate_liquid_template';
 
@@ -28,10 +29,12 @@ describe('validateLiquidTemplate (public wrapper)', () => {
   describe('valid templates', () => {
     it('should return empty array when common validation returns no errors', () => {
       mockValidateLiquidTemplateCommon.mockReturnValue([]);
+      const yaml = 'message: "Hello {{ name }} world"';
+      const doc = parseDocument(yaml);
 
-      const result = validateLiquidTemplate('Hello {{ name }} world');
+      const result = validateLiquidTemplate(yaml, doc);
       expect(result).toEqual([]);
-      expect(mockValidateLiquidTemplateCommon).toHaveBeenCalledWith('Hello {{ name }} world');
+      expect(mockValidateLiquidTemplateCommon).toHaveBeenCalledWith(yaml, doc);
     });
   });
 
@@ -47,8 +50,10 @@ describe('validateLiquidTemplate (public wrapper)', () => {
         },
       ];
       mockValidateLiquidTemplateCommon.mockReturnValue(commonErrors);
+      const yaml = 'message: "Hello {{ name | unknownFilter }} world"';
+      const doc = parseDocument(yaml);
 
-      const result = validateLiquidTemplate('Hello {{ name | unknownFilter }} world');
+      const result = validateLiquidTemplate(yaml, doc);
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
@@ -75,8 +80,10 @@ describe('validateLiquidTemplate (public wrapper)', () => {
         },
       ];
       mockValidateLiquidTemplateCommon.mockReturnValue(commonErrors);
+      const yaml = 'line1: ok\nmessage: "{% unknownTag %}"';
+      const doc = parseDocument(yaml);
 
-      const result = validateLiquidTemplate('line1\n{% unknownTag %}\nline3');
+      const result = validateLiquidTemplate(yaml, doc);
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
@@ -90,20 +97,23 @@ describe('validateLiquidTemplate (public wrapper)', () => {
 
     it('should return empty array when no errors from common', () => {
       mockValidateLiquidTemplateCommon.mockReturnValue([]);
+      const yaml = 'message: plain text';
+      const doc = parseDocument(yaml);
 
-      const result = validateLiquidTemplate('plain text');
+      const result = validateLiquidTemplate(yaml, doc);
       expect(result).toEqual([]);
     });
   });
 
   describe('delegation', () => {
-    it('should pass the yaml string to common validation', () => {
+    it('should pass the yaml string and document to common validation', () => {
       mockValidateLiquidTemplateCommon.mockReturnValue([]);
 
-      const yaml = 'some: yaml\nwith: {{ liquid }}';
-      validateLiquidTemplate(yaml);
+      const yaml = 'some: yaml\nwith: "{{ liquid }}"';
+      const doc = parseDocument(yaml);
+      validateLiquidTemplate(yaml, doc);
 
-      expect(mockValidateLiquidTemplateCommon).toHaveBeenCalledWith(yaml);
+      expect(mockValidateLiquidTemplateCommon).toHaveBeenCalledWith(yaml, doc);
     });
   });
 });
