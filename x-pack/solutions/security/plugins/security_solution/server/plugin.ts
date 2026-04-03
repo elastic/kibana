@@ -327,6 +327,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
+        entityAnalyticsConfig: config.entityAnalytics,
+        telemetry: core.analytics,
       });
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
         registerWatchlistMaintainer({

@@ -10,8 +10,8 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
-import type { RuleApiResponse } from '../../services/rules_api';
-import { EMPTY_VALUE } from './utils';
+import type { RuleApiResponse } from '../../../services/rules_api';
+import { EMPTY_VALUE } from '../utils';
 
 export interface RuleMetadataProps {
   rule: RuleApiResponse;
