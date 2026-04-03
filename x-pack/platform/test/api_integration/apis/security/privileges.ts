@@ -444,7 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
         'readAlertDeleteSettings',
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
-      query_activity: ['all', 'read', 'minimal_all', 'minimal_read'],
+      queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
