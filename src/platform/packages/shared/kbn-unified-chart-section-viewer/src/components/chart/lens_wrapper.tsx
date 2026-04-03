@@ -17,7 +17,6 @@ import type { UnifiedMetricsGridProps } from '../../types';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
-  esqlQuery?: string;
   titleHighlight?: string;
   onViewDetails?: () => void;
   onCopyToDashboard?: () => void;
@@ -32,7 +31,6 @@ export type LensWrapperProps = {
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 export function LensWrapper({
   lensProps,
-  esqlQuery,
   services,
   onBrushEnd,
   onFilter,
