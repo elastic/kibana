@@ -768,7 +768,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await utils.cleanUpCustomRoles();
+        await utils.cleanUpCustomRole();
         await deleteAllRules(supertest, log);
         await deleteAllExceptions(supertest, log);
       });
