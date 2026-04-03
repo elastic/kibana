@@ -17,8 +17,8 @@ locally and resolving the conflicts.
 
 ## Prerequisites
 
-- `~/.backport/config.json` must contain a valid `accessToken`. If missing,
-  ask the user to create the file with `{ "accessToken": "<GitHub PAT>" }`.
+- `~/.backport/config.json` must contain a valid `accessToken`. If the `accessToken` is missing,
+  ask the user to consult https://github.com/sorenlouv/backport/blob/main/docs/config-file-options.md#global-config-backportconfigjson.
 - `gh` CLI must be authenticated with access to `elastic/kibana`. If not
   authenticated, ask the user to run `gh auth login`.
 
