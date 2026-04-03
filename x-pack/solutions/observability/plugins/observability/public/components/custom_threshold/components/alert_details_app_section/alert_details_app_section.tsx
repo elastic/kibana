@@ -81,7 +81,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
       timestamp: alertStart!,
     },
     color: euiTheme.colors.danger,
-    icon: 'warning',
+    icon: 'alert',
     id: 'custom_threshold_alert_start_annotation',
   };
   const alertRangeAnnotation: RangeEventAnnotationConfig = {

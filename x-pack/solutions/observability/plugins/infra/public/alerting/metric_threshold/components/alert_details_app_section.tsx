@@ -79,7 +79,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
       timestamp: alertStart!,
     },
     color: euiTheme.colors.danger,
-    icon: 'warning',
+    icon: 'alert',
     id: 'metric_threshold_alert_start_annotation',
   };
 
