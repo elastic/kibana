@@ -161,3 +161,11 @@ export interface HealthDiagnosticQueryFailure {
   message: string;
   reason?: CircuitBreakerResult;
 }
+
+export class PermissionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PermissionError';
+    Object.setPrototypeOf(this, PermissionError.prototype);
+  }
+}

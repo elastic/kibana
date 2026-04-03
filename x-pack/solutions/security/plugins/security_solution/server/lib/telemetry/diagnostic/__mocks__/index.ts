@@ -69,6 +69,12 @@ export const createMockEsClient = () => {
     ilm: {
       explainLifecycle: jest.fn(),
     },
+    indices: {
+      exists: jest.fn(),
+    },
+    security: {
+      hasPrivileges: jest.fn(),
+    },
     helpers: mockHelpers,
     cluster: { health: jest.fn() },
     nodes: { stats: jest.fn() },
@@ -161,6 +167,8 @@ export const setupPointInTime = (
 ) => {
   mockEsClient.openPointInTime.mockResolvedValue({ id: pitId });
   mockEsClient.closePointInTime.mockResolvedValue({});
+  mockEsClient.indices.exists.mockResolvedValue(true);
+  mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
 };
 
 export const createTestObserver = () => {
