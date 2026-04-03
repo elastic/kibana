@@ -88,6 +88,6 @@
     "@kbn/datemath",
     "@kbn/setup-node-env",
     "@kbn/synthtrace",
-    "@kbn/synthtrace-client",
+    "@kbn/tooling-log",
   ]
 }
