@@ -35,9 +35,18 @@ interface RetryServiceLike {
   waitForWithTimeout: (
     label: string,
     timeout: number,
-    predicate: () => Promise<boolean> | boolean
+    predicate: () => Promise<boolean>
   ) => Promise<void>;
 }
+
+const isMaintainerAlreadyRunningError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes('currently running') || message.includes('failed to run task');
+};
 
 export const entityMaintainerRouteHelpersFactory = (
   supertest: SuperTest.Agent,
@@ -135,22 +144,61 @@ export const waitForMaintainerRun = async ({
     // Maintainer may not exist yet
   }
 
-  // Trigger a manual run so we don't have to wait for the scheduled interval
-  try {
-    await routes.runMaintainer(maintainerId);
-  } catch {
-    // May fail if maintainer isn't ready yet; the scheduled run will cover it
-  }
+  let requiredNewRuns = minRuns;
+  let manualRunTriggered = false;
+  let alreadyRunningHandled = false;
 
   await retry.waitForWithTimeout(
-    `Entity maintainer "${maintainerId}" to complete at least ${minRuns} new run(s) (baseline: ${baselineRuns})`,
+    `Entity maintainer "${maintainerId}" to complete at least ${requiredNewRuns} new run(s) (baseline: ${baselineRuns})`,
     timeoutMs,
+    async () => {
+      // Keep trying to trigger a manual run until the task accepts it.
+      // After stop/start a previous run may still be in-flight; when we
+      // see "already running" we need one extra completion but must keep
+      // retrying so we can trigger the additional run once the current
+      // one finishes.
+      if (!manualRunTriggered) {
+        try {
+          await routes.runMaintainer(maintainerId);
+          manualRunTriggered = true;
+        } catch (error) {
+          if (isMaintainerAlreadyRunningError(error)) {
+            if (!alreadyRunningHandled) {
+              requiredNewRuns += 1;
+              alreadyRunningHandled = true;
+            }
+          }
+        }
+      }
+
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number }) => m.id === maintainerId
+      );
+
+      return maintainer !== undefined && maintainer.runs >= baselineRuns + requiredNewRuns;
+    }
+  );
+
+  // runSoon (called above via runMaintainer) can cause the task manager to
+  // schedule an immediate follow-up run once the current one finishes.  If
+  // the caller stops the maintainer while that follow-up is still saving its
+  // state, a version_conflict_engine_exception wedges the task permanently.
+  // Wait for the runs count to stabilise across two consecutive polls so the
+  // task is idle before we hand control back.
+  let lastSeenRuns = -1;
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to settle after run`,
+    30_000,
     async () => {
       const response = await routes.getMaintainers(200, [maintainerId]);
       const maintainer = response.body.maintainers.find(
         (m: { id: string; runs: number }) => m.id === maintainerId
       );
-      return maintainer !== undefined && maintainer.runs >= baselineRuns + minRuns;
+      const runs = maintainer?.runs ?? 0;
+      if (runs === lastSeenRuns) return true;
+      lastSeenRuns = runs;
+      return false;
     }
   );
 };

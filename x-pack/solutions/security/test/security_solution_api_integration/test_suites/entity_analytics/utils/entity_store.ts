@@ -66,7 +66,7 @@ export const EntityStoreUtils = (
         .send({ entityTypes: ['user', 'host', 'service'] })
         .expect(200);
     } catch (e) {
-      log.warning(`Error uninstalling entity store during cleanup: ${e.message}`);
+      log.debug(`Entity store not installed, skipping uninstall during cleanup: ${e.message}`);
     }
 
     const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
