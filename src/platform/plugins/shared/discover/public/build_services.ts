@@ -94,7 +94,6 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
-  /** When true, panel state uses Discover session API format (discover_session_id, session tabs). */
   getEmbeddableTransformsEnabled: () => boolean;
 }
 
