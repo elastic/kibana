@@ -33,10 +33,10 @@ export function resolveConflictingFieldTypes(
     return fieldTypes[0];
   }
 
-  // Filter out duplicates
+  // Filter out duplicates — no cast needed when all types are the same
   const uniqueTypes = Array.from(new Set(fieldTypes));
   if (uniqueTypes.length === 1) {
-    return uniqueTypes[0];
+    return undefined;
   }
 
   // Numeric type precedence for auto-casting
@@ -103,24 +103,18 @@ function buildAggregationNode(
   const fieldTypesArray = Array.isArray(types) ? types : [types];
   const primaryType = fieldTypesArray[0];
 
-  // If we have multiple types, check if they differ and need casting
+  // If we have multiple types, resolve and apply casting if needed
   let castedField = field;
   if (fieldTypesArray.length > 1) {
-    // Get unique types to determine if there's actual conflict
-    const uniqueTypes = Array.from(new Set(fieldTypesArray));
-
-    // Only apply casting if there are actually different types
-    if (uniqueTypes.length > 1) {
-      const resolvedType = resolveConflictingFieldTypes(fieldTypesArray);
-      if (resolvedType) {
-        const castFunction = getCastFunctionForType(resolvedType);
-        if (castFunction) {
-          castedField = synth.exp`${synth.kwd(castFunction)}(${field})`;
-        }
+    const resolvedType = resolveConflictingFieldTypes(fieldTypesArray);
+    if (resolvedType) {
+      const castFunction = getCastFunctionForType(resolvedType);
+      if (castFunction) {
+        castedField = synth.exp`${synth.kwd(castFunction)}(${field})`;
       }
-      // If types are incompatible, we'll proceed with the primary type
-      // and let the query execution surface the error to the user
     }
+    // If types are incompatible, we'll proceed with the primary type
+    // and let the query execution surface the error to the user
   }
 
   if (customFunction) {

@@ -129,9 +129,9 @@ describe('resolveConflictingFieldTypes', () => {
   });
 
   describe('duplicate types', () => {
-    it('should return the type when duplicates are present', () => {
+    it('should return undefined when duplicates are present (no cast needed)', () => {
       const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE]);
-      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+      expect(result).toBeUndefined();
     });
   });
 
