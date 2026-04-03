@@ -36,7 +36,7 @@ describe('Waffle Schema', () => {
       const validated = waffleStateSchema.validate(input);
       expect(validated.type).toBe('waffle');
       expect(validated.metrics).toHaveLength(1);
-      expect(validated.metrics[0].operation).toBe('count');
+      expect(validated.metrics[0]).toHaveProperty('operation', 'count');
     });
 
     it('validates configuration with metrics and group_by', () => {
@@ -461,7 +461,6 @@ describe('Waffle Schema', () => {
         ...baseESQLWaffleConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
@@ -469,7 +468,7 @@ describe('Waffle Schema', () => {
 
       const validated = waffleStateSchema.validate(input);
       expect(validated.dataset.type).toBe('esql');
-      expect(validated.metrics[0].operation).toBe('value');
+      expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
 
     it('validates ES|QL configuration with group_by', () => {
@@ -477,13 +476,11 @@ describe('Waffle Schema', () => {
         ...baseESQLWaffleConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
         group_by: [
           {
-            operation: 'value',
             column: 'category',
           },
         ],
@@ -501,11 +498,9 @@ describe('Waffle Schema', () => {
         ...baseESQLWaffleConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
           {
-            operation: 'value',
             column: 'sum_sales',
           },
         ],
