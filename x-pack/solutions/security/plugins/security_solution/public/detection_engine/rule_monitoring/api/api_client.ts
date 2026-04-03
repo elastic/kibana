@@ -139,9 +139,7 @@ export const api: IRuleMonitoringApiClient = {
     return http().fetch<ReadRuleExecutionResultsResponse>(url, {
       method: 'POST',
       version: '1',
-      body: JSON.stringify(
-        omitBy({ filter: finalFilter, sort, page, per_page: perPage }, isUndefined)
-      ),
+      body: JSON.stringify({ filter: finalFilter, sort, page, per_page: perPage }),
       signal,
     });
   },

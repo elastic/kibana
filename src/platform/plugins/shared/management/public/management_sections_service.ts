@@ -15,6 +15,7 @@ import {
   DataSection,
   InsightsAndAlertingSection,
   MachineLearningSection,
+  ModelManagementSection,
   SecuritySection,
   KibanaSection,
   StackSection,
@@ -45,6 +46,7 @@ export class ManagementSectionsService {
       data: this.registerSection(DataSection),
       insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
       machineLearning: this.registerSection(MachineLearningSection),
+      modelManagement: this.registerSection(ModelManagementSection),
       security: this.registerSection(SecuritySection),
       kibana: this.registerSection(KibanaSection),
       ai: this.registerSection(AISection),
@@ -53,7 +55,7 @@ export class ManagementSectionsService {
   }
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
 
-  private getAllSections = () => [...this.sections.values()];
+  getAllSections = () => [...this.sections.values()];
 
   private registerSection = (section: RegisterManagementSectionArgs) => {
     if (this.sections.has(section.id)) {
