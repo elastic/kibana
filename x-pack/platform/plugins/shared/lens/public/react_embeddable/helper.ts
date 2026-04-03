@@ -21,7 +21,7 @@ import type {
   LensSerializedState,
   StructuredDatasourceStates,
   TextBasedPersistedState,
-  XYState,
+  XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
@@ -278,7 +278,7 @@ export function updateAttributesWithAnnotation(
   const { attributes } = state;
   if (attributes.visualizationType !== 'lnsXY') return undefined;
 
-  const vizState = attributes.state.visualization as XYState | undefined;
+  const vizState = attributes.state.visualization as XYVisualizationState | undefined;
   if (!vizState?.layers) return undefined;
 
   // In the persisted form, annotation layers use annotationGroupRef (a reference name)
@@ -350,13 +350,13 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
   vizState: unknown,
   eventAnnotationService: EventAnnotationServiceType
 ): Promise<unknown> {
-  const xyState = vizState as XYState | undefined;
-  if (!xyState?.layers) return vizState;
+  const XYVisualizationState = vizState as XYVisualizationState | undefined;
+  if (!XYVisualizationState?.layers) return vizState;
 
-  let updatedLayers: XYState['layers'] | undefined;
+  let updatedLayers: XYVisualizationState['layers'] | undefined;
 
-  for (let i = 0; i < xyState.layers.length; i++) {
-    const layer = xyState.layers[i];
+  for (let i = 0; i < XYVisualizationState.layers.length; i++) {
+    const layer = XYVisualizationState.layers[i];
     if (
       'annotationGroupId' in layer &&
       '__lastSaved' in layer &&
@@ -388,7 +388,7 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
       await eventAnnotationService.updateAnnotationGroup(groupConfig, refLayer.annotationGroupId);
 
       if (!updatedLayers) {
-        updatedLayers = [...xyState.layers];
+        updatedLayers = [...XYVisualizationState.layers];
       }
       updatedLayers[i] = { ...refLayer, __lastSaved: groupConfig };
     }
@@ -396,5 +396,5 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
 
   if (!updatedLayers) return vizState;
 
-  return { ...xyState, layers: updatedLayers };
+  return { ...XYVisualizationState, layers: updatedLayers };
 }

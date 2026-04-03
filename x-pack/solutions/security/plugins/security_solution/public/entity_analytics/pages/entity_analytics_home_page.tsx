@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,8 +30,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { PageLoader } from '../../common/components/page_loader';
 import { PageScope } from '../../data_view_manager/constants';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { CombinedRiskDonutChart } from '../components/home/combined_risk_donut_chart';
-import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_placeholder_panel';
+import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import {
@@ -44,6 +44,7 @@ import {
   type EntitiesBaseURLQuery,
   type URLQuery,
 } from '../components/home/entities_table';
+import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -64,6 +65,37 @@ export const EntityAnalyticsHomePage = () => {
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
     [newDataViewPickerEnabled, oldIsSourcererLoading, status]
+  );
+
+  const location = useLocation();
+  const history = useHistory();
+
+  const selectedWatchlistId = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('watchlistId') || undefined;
+  }, [location.search]);
+
+  const selectedWatchlistName = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('watchlistName') || undefined;
+  }, [location.search]);
+
+  const setSelectedWatchlist = useCallback(
+    (id?: string, name?: string) => {
+      const params = new URLSearchParams(location.search);
+      if (id) {
+        params.set('watchlistId', id);
+      } else {
+        params.delete('watchlistId');
+      }
+      if (name) {
+        params.set('watchlistName', name);
+      } else {
+        params.delete('watchlistName');
+      }
+      history.replace({ ...location, search: params.toString() });
+    },
+    [location, history]
   );
 
   const indicesExist = useMemo(
@@ -100,7 +132,12 @@ export const EntityAnalyticsHomePage = () => {
               defaultMessage="Entity Analytics"
             />
           }
-          rightSideItems={[<WatchlistFilter />]}
+          rightSideItems={[
+            <WatchlistFilter
+              selectedId={selectedWatchlistId ?? ''}
+              onChangeSelectedId={setSelectedWatchlist}
+            />,
+          ]}
         />
 
         {isSourcererLoading ? (
@@ -113,21 +150,27 @@ export const EntityAnalyticsHomePage = () => {
                 responsive={false}
                 gutterSize="l"
               >
-                <EuiFlexItem grow={2}>
+                <EuiFlexItem grow={1}>
                   <EuiPanel hasBorder>
-                    <CombinedRiskDonutChart />
+                    <DynamicRiskLevelPanel
+                      watchlistId={selectedWatchlistId}
+                      watchlistName={selectedWatchlistName}
+                    />
                   </EuiPanel>
                 </EuiFlexItem>
-                <EuiFlexItem grow={3}>
+                <EuiFlexItem grow={2}>
                   <EuiPanel hasBorder>
-                    <EntityAnalyticsRecentAnomalies />
+                    <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
                   </EuiPanel>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiPanel hasBorder>
-              <EntityAnalyticsEntitiesTable />
+              <EntityAnalyticsEntitiesTable
+                watchlistId={selectedWatchlistId}
+                watchlistName={selectedWatchlistName}
+              />
             </EuiPanel>
           </EuiFlexGroup>
         )}
@@ -138,7 +181,13 @@ export const EntityAnalyticsHomePage = () => {
   );
 };
 
-const EntityAnalyticsEntitiesTable = () => {
+const EntityAnalyticsEntitiesTable = ({
+  watchlistId,
+  watchlistName,
+}: {
+  watchlistId?: string;
+  watchlistName?: string;
+}) => {
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
@@ -157,24 +206,52 @@ const EntityAnalyticsEntitiesTable = () => {
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
-              defaultMessage="Entities"
-            />
+            {watchlistId ? (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
+                defaultMessage="{watchlistName} entities"
+                values={{
+                  watchlistName: watchlistName ?? watchlistId,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
+                defaultMessage="Entities"
+              />
+            )}
           </h3>
         </EuiTitle>
       </EuiFlexItem>
-      <EntityAnalyticsEntitiesTableContent />
+      <EntityAnalyticsEntitiesTableContent watchlistId={watchlistId} />
     </DataViewContext.Provider>
   );
 };
 
-const EntityAnalyticsEntitiesTableContent = () => {
-  const state = useEntityURLState({
+const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: string }) => {
+  const urlState = useEntityURLState({
     paginationLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
     columnsLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY,
     defaultQuery: getDefaultQuery,
   });
+
+  const state = useMemo(() => {
+    if (!watchlistId) return urlState;
+
+    return {
+      ...urlState,
+      query: {
+        ...urlState.query,
+        bool: {
+          ...urlState.query?.bool,
+          filter: [
+            ...(urlState.query?.bool?.filter ?? []),
+            { term: { 'entity.attributes.watchlists': watchlistId } },
+          ],
+        },
+      },
+    };
+  }, [urlState, watchlistId]);
 
   return <EntitiesTableSection state={state} />;
 };

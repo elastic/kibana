@@ -133,13 +133,25 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       },
     },
     params: t.type({
-      body: t.type({
+      body: t.partial({
         index: t.string,
         id: t.string,
+        fields: t.record(t.string, t.unknown),
       }),
     }),
     handler: async ({ request, core, params, response, logger, plugins }) => {
-      const { index, id } = params.body;
+      const { index, id, fields } = params.body;
+
+      const hasDocIdentity = typeof index === 'string' && typeof id === 'string';
+      // if a user is in ESQL mode, there is currently no id or index metadata
+      // unless a user specifically queries for it, so pass fields directly
+      const hasFields = fields && Object.keys(fields).length > 0;
+
+      if (!hasDocIdentity && !hasFields) {
+        return response.badRequest({
+          body: 'Must provide either {index, id} or {fields}',
+        });
+      }
 
       const [coreStart, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
@@ -154,6 +166,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         plugins,
         index,
         id,
+        fields,
         inferenceClient,
         connectorId,
         connector,

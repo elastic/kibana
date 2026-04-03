@@ -10,8 +10,9 @@
 export { registerRoutes } from './register_routes';
 
 export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './create';
+export type { DashboardSanitizeResponseBody } from './sanitize';
 export type { DashboardReadResponseBody } from './read';
-export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
+export type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './search';
 export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './update';
 export type {
   DashboardState,
@@ -29,3 +30,4 @@ export { create } from './create/create';
 export { read } from './read/read';
 export { update } from './update/update';
 export { deleteDashboard } from './delete/delete';
+export { sanitize } from './sanitize/sanitize';

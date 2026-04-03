@@ -117,9 +117,14 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables the storing of gaps in the event log
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: false,
+
+  /**
+   * Enables the redesigned execution results table on the rule details page
+   */
+  newExecutionResultsTableEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -183,10 +188,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   automaticDashboardsMigration: true,
 
-  /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
   /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0

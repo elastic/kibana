@@ -46,11 +46,12 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 }) => {
   const {
     chrome,
-    setBreadcrumbs,
     http,
     notifications: { toasts },
     ruleTypeRegistry,
     application: { navigateToApp },
+    cps,
+    setBreadcrumbs,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -174,6 +175,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           }}
           http={http}
           toasts={toasts}
+          cps={cps}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
         />

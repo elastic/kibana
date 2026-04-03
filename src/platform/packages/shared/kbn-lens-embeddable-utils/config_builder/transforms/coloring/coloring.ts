@@ -14,24 +14,23 @@ import type {
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
+  ColorMappingCategoricalType,
   ColorMappingColorDefType,
+  ColorMappingGradientType,
   ColorMappingType,
   StaticColorType,
+  UnassignedColorType,
 } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
+import { getReversibleMappings } from '../charts/utils';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
 
-const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
-  number: 'absolute',
-  percent: 'percentage',
-};
-
-const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | 'number'> = {
-  absolute: 'number',
-  percentage: 'percent',
-};
+const paletteRangeCompat = getReversibleMappings([
+  ['percentage', 'percent'],
+  ['absolute', 'number'],
+]);
 
 export const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
 
@@ -80,9 +79,7 @@ export function fromColorByValueAPIToLensState(
       rangeMin,
       // @ts-expect-error - This can be null
       rangeMax,
-      rangeType: config.range
-        ? API_TO_LEGACY_RANGE_NAMES[config.range]
-        : API_TO_LEGACY_RANGE_NAMES.absolute,
+      rangeType: paletteRangeCompat.toState(config.range ?? 'absolute'),
       stops: !needsPaletteShift
         ? stops
         : stops.map((stop, i) => ({
@@ -141,9 +138,7 @@ export function fromColorByValueLensStateToAPI(
     }));
   }
 
-  const range = rangeType
-    ? LEGACY_TO_API_RANGE_NAMES[rangeType]
-    : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
+  const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
   const stops = !reverse
     ? originalStops
     : originalStops
@@ -274,12 +269,11 @@ function isLensStateCategoricalConfigColorMapping(
 
 function fromUnassignedColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.LoopColor | undefined
-): { unassignedColor: Extract<ColorMappingColorDefType, { type: 'color_code' }> } | {} {
+): UnassignedColorType | undefined {
   if (!color || color.type === 'loop') {
-    return {};
+    return undefined;
   }
-  const unassignedColor = fromColorLensStateToAPI(color);
-  return { unassignedColor };
+  return fromColorLensStateToAPI(color);
 }
 
 export function fromColorMappingLensStateToAPI(
@@ -291,15 +285,13 @@ export function fromColorMappingLensStateToAPI(
       mode: 'categorical',
       palette: `${LEGACY_PALETTE_PREFIX}${legacyPalette.name}`,
       mapping: [],
-    };
+    } satisfies ColorMappingCategoricalType;
   }
   if (!colorMapping) {
     return;
   }
 
-  const unassignedColor = fromUnassignedColorLensStateToAPI(
-    colorMapping.specialAssignments[0]?.color
-  );
+  const unassigned = fromUnassignedColorLensStateToAPI(colorMapping.specialAssignments[0]?.color);
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -310,8 +302,8 @@ export function fromColorMappingLensStateToAPI(
           color: fromColorLensStateToAPI(color),
         };
       }),
-      ...unassignedColor,
-    };
+      ...(unassigned ? { unassigned } : {}),
+    } satisfies ColorMappingCategoricalType;
   }
 
   // because of early return above, we know it is a gradient at this point so casting is safe
@@ -328,8 +320,8 @@ export function fromColorMappingLensStateToAPI(
     }),
     sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
-    ...unassignedColor,
-  };
+    ...(unassigned ? { unassigned } : {}),
+  } satisfies ColorMappingGradientType;
 }
 
 function fromColorDefAPIToLensState(
@@ -411,8 +403,8 @@ export function fromColorMappingAPIToLensState(
           type: 'other',
         },
       ],
-      color: colorMapping.unassignedColor
-        ? fromColorDefAPIToLensState(colorMapping.unassignedColor)
+      color: colorMapping.unassigned
+        ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
       touched: false,
     },

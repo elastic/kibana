@@ -19,23 +19,23 @@ describe('XY Appearances Transforms', () => {
 
   it('should preserve complex config through API -> State -> API', () => {
     const original: XYDecorations = {
-      show_value_labels: true,
+      values: { visible: true },
       line_interpolation: 'smooth',
       fill_opacity: 0.5,
       minimum_bar_height: 3,
-      show_end_zones: true,
-      show_current_time_marker: true,
+      end_zones: { visible: true },
+      current_time_marker: { visible: true },
       point_visibility: 'auto',
     };
     const state = convertAppearanceToStateFormat(original);
     const result = convertAppearanceToAPIFormat(state);
 
-    expect(result.show_value_labels).toBe(original.show_value_labels);
+    expect(result.values).toEqual(original.values);
     expect(result.line_interpolation).toBe(original.line_interpolation);
     expect(result.fill_opacity).toBe(original.fill_opacity);
     expect(result.minimum_bar_height).toBe(original.minimum_bar_height);
-    expect(result.show_end_zones).toBe(original.show_end_zones);
-    expect(result.show_current_time_marker).toBe(original.show_current_time_marker);
+    expect(result.end_zones).toEqual(original.end_zones);
+    expect(result.current_time_marker).toEqual(original.current_time_marker);
     expect(result.point_visibility).toBe(original.point_visibility);
   });
 

@@ -86,8 +86,8 @@ describe('Metric Operations Schemas', () => {
         empty_as_null: true,
         time_scale: 's' as const,
         filter: {
-          language: 'kuery' as const,
-          query: 'status:active',
+          language: 'kql' as const,
+          expression: 'status:active',
         },
       };
 

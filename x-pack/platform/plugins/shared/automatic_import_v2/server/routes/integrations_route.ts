@@ -28,6 +28,7 @@ import {
 import { buildAutomaticImportResponse } from './utils';
 import type { IntegrationParams, DataStreamParams } from './types';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
+import { withAvailability } from './with_availability';
 
 export const registerIntegrationRoutes = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
@@ -60,7 +61,7 @@ const getAllIntegrationsRoute = (
         version: '1',
         validate: false,
       },
-      async (context, _, response) => {
+      withAvailability(async (context, _, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -90,7 +91,7 @@ const getAllIntegrationsRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const getIntegrationByIdRoute = (
@@ -116,7 +117,7 @@ const getIntegrationByIdRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -133,7 +134,7 @@ const getIntegrationByIdRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const createIntegrationRoute = (
@@ -159,7 +160,7 @@ const createIntegrationRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         const { automaticImportService, getCurrentUser, esClient } =
           await context.automaticImportv2;
         const {
@@ -221,7 +222,7 @@ const createIntegrationRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const approveIntegrationRoute = (
@@ -248,7 +249,7 @@ const approveIntegrationRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const { automaticImportService, getCurrentUser, reportTelemetryEvent } =
             await context.automaticImportv2;
@@ -291,7 +292,7 @@ const approveIntegrationRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const deleteIntegrationRoute = (
@@ -317,7 +318,7 @@ const deleteIntegrationRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const { automaticImportService } = await context.automaticImportv2;
           const { integration_id: integrationId } = request.params;
@@ -345,7 +346,7 @@ const deleteIntegrationRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const downloadIntegrationRoute = (
@@ -371,7 +372,7 @@ const downloadIntegrationRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -397,5 +398,5 @@ const downloadIntegrationRoute = (
             body: err,
           });
         }
-      }
+      })
     );

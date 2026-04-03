@@ -8,7 +8,7 @@
  */
 
 import {
-  DEFAULT_CONTROL_WIDTH,
+  DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
@@ -58,7 +58,7 @@ describe('pinned panels', () => {
     {
       uid: 'control1',
       type: OPTIONS_LIST_CONTROL,
-      width: DEFAULT_CONTROL_WIDTH,
+      width: DEFAULT_PINNED_CONTROL_STATE.width,
       config: {
         foo: 'bar',
       },

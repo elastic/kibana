@@ -11,9 +11,9 @@ import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../common/types/session_view';
 import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
-import type { ResolverCellActionRenderer } from '../../resolver/types';
 import { PREFIX } from '../../flyout/shared/test_ids';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useKibana } from '../../common/lib/kibana';
@@ -46,14 +46,18 @@ export interface SessionViewProps {
   /**
    * Renderer used by Session View panels for field cell actions.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const SessionView: FC<SessionViewProps> = memo(
-  ({ hit, jumpToEntityId, jumpToCursor, renderCellActions }) => {
+  ({ hit, jumpToEntityId, jumpToCursor, renderCellActions, onAlertUpdated }) => {
     const { services } = useKibana();
     const { overlays, sessionView } = services;
     const store = useStore();
@@ -83,6 +87,7 @@ export const SessionView: FC<SessionViewProps> = memo(
                 documentId={alertId}
                 indexName={alertIndex}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
@@ -94,7 +99,7 @@ export const SessionView: FC<SessionViewProps> = memo(
             type: 'overlay',
           }
         ),
-      [history, overlays, renderCellActions, services, store]
+      [history, onAlertUpdated, overlays, renderCellActions, services, store]
     );
 
     const handleJumpToEvent = useCallback(
@@ -145,6 +150,7 @@ export const SessionView: FC<SessionViewProps> = memo(
                 investigatedAlertId={sessionViewConfig.investigatedAlertId}
                 renderCellActions={renderCellActions}
                 onJumpToEvent={handleJumpToEvent}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
@@ -160,6 +166,7 @@ export const SessionView: FC<SessionViewProps> = memo(
       [
         handleJumpToEvent,
         history,
+        onAlertUpdated,
         overlays,
         renderCellActions,
         services,

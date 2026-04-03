@@ -108,6 +108,10 @@ export const RiskScoreInput = z.object({
    */
   timestamp: z.string().optional(),
   contribution_score: z.number().optional(),
+  /**
+   * The EUID of the entity within the graph that generated this alert.
+   */
+  entity_id: z.string().optional(),
 });
 
 export type RiskScoreCategories = z.infer<typeof RiskScoreCategories>;
@@ -132,6 +136,10 @@ export const EntityRiskScoreRecord = z.object({
    * The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
    */
   id_value: z.string(),
+  /**
+   * Unique identifier for the scoring run that produced this document.
+   */
+  calculation_run_id: z.string().optional(),
   /**
    * Lexical description of the entity's risk.
    */
@@ -172,6 +180,18 @@ export const EntityRiskScoreRecord = z.object({
         modifier_value: z.number().optional(),
         contribution: z.number(),
         metadata: z.object({}).catchall(z.unknown()).optional(),
+      })
+    )
+    .optional(),
+  /**
+   * Distinguishes base, propagated, and resolution scores.
+   */
+  score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
+  related_entities: z
+    .array(
+      z.object({
+        entity_id: z.string().optional(),
+        relationship_type: z.string().optional(),
       })
     )
     .optional(),

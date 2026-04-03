@@ -84,6 +84,16 @@ const createMockServices = () => {
         get: jest.fn().mockReturnValue({ iconClass: 'logoOpenAI' }),
       },
     },
+    application: {
+      ...coreStart.application,
+      capabilities: {
+        ...coreStart.application.capabilities,
+        actions: {
+          ...(coreStart.application.capabilities?.actions ?? {}),
+          save: true,
+        },
+      },
+    },
   };
 };
 
@@ -168,6 +178,44 @@ describe('ConnectorSelector', () => {
 
       const { getByTestId } = await renderConnectorSelector();
       expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    });
+
+    it('should disable Add connector when user cannot create connectors', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [],
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      const base = createMockServices();
+      const servicesCannotCreate = {
+        ...base,
+        application: {
+          ...base.application,
+          capabilities: {
+            ...base.application.capabilities,
+            actions: {
+              ...(base.application.capabilities?.actions ?? {}),
+              save: false,
+            },
+          },
+        },
+      };
+
+      let result: ReturnType<typeof render>;
+      await act(async () => {
+        result = render(
+          <I18nProvider>
+            <KibanaContextProvider services={servicesCannotCreate}>
+              <FormWrapper>
+                <ConnectorSelector />
+              </FormWrapper>
+            </KibanaContextProvider>
+          </I18nProvider>
+        );
+      });
+
+      expect(result!.getByTestId('addNewConnectorButtonDisabled')).toBeDisabled();
     });
 
     it('should display the selected connector name on the button', async () => {

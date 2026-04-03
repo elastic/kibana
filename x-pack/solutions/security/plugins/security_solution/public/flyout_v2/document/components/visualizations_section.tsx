@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
@@ -19,7 +20,6 @@ import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
 import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { SessionView } from '../../session_view';
 
@@ -42,7 +42,11 @@ export interface VisualizationsSectionProps {
   /**
    * Optional prop to pass cell action renderer to the analyzer graph.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
 }
 
 /**
@@ -50,7 +54,7 @@ export interface VisualizationsSectionProps {
  * It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(
-  ({ hit, renderCellActions }: VisualizationsSectionProps) => {
+  ({ hit, renderCellActions, onAlertUpdated }: VisualizationsSectionProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -70,7 +74,13 @@ export const VisualizationsSection = memo(
             services,
             store,
             history,
-            children: <AnalyzerGraph hit={hit} renderCellActions={renderCellActions} />,
+            children: (
+              <AnalyzerGraph
+                hit={hit}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
           }),
           {
             ownFocus: false,
@@ -79,7 +89,7 @@ export const VisualizationsSection = memo(
             type: 'overlay',
           }
         ),
-      [history, hit, overlays, renderCellActions, services, store]
+      [history, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
     const onShowSessionView = useCallback(
       () =>
@@ -94,6 +104,7 @@ export const VisualizationsSection = memo(
                 jumpToCursor={sessionViewConfig?.jumpToCursor}
                 jumpToEntityId={sessionViewConfig?.jumpToEntityId}
                 renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
               />
             ),
           }),
@@ -107,6 +118,7 @@ export const VisualizationsSection = memo(
       [
         history,
         hit,
+        onAlertUpdated,
         overlays,
         renderCellActions,
         services,

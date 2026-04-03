@@ -71,7 +71,7 @@ export const getThreatsDetectedMetricLensAttributes: MyGetLensAttributes = ({ sp
       ],
       query: { language: 'kuery', query: '' },
       visualization: {
-        icon: 'crosshairs',
+        icon: 'crosshair',
         iconAlign: 'right',
         valuesTextAlign: 'left',
         layerId: 'unifiedHistogram',

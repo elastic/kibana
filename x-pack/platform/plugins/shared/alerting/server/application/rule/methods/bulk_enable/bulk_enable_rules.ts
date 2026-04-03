@@ -37,6 +37,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -257,6 +258,9 @@ const bulkEnableRulesWithOCC = async (
                 warning: null,
               },
               scheduledTaskId: rule.id,
+              ...(rule.attributes.lastRun
+                ? { lastRun: migrateLegacyLastRunOutcomeMsg(rule.attributes.lastRun) }
+                : {}),
             });
 
             const shouldScheduleTask = await getShouldScheduleTask(

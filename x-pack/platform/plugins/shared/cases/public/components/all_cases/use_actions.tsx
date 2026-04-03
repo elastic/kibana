@@ -190,7 +190,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         button={
           <EuiButtonIcon
             onClick={tooglePopover}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
             color="text"
             key={`case-action-popover-button-${theCase.id}`}
@@ -260,13 +260,14 @@ export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActi
     actions: shouldShowActions
       ? {
           name: i18n.ACTIONS,
+          width: '4.5em',
+          minWidth: '4.5em',
           align: 'right',
           render: (theCase: CaseUI) => {
             return (
               <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
             );
           },
-          width: '100px',
         }
       : null,
   };

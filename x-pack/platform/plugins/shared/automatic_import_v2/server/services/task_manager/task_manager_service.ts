@@ -175,6 +175,7 @@ export class TaskManagerService {
       this.logger.debug(`Task deleted: ${taskId}`);
     } catch (error) {
       this.logger.error(`Failed to remove task ${taskId}:`, error);
+      throw error;
     }
   }
 
@@ -250,11 +251,14 @@ export class TaskManagerService {
         },
       });
 
+      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+
       const result = await this.agentService.invokeAutomaticImportAgent(
         integrationId,
         dataStreamId,
         esClient,
         model,
+        fieldsMetadataClient,
         langSmithOptions
       );
 
@@ -271,8 +275,6 @@ export class TaskManagerService {
       this.logger.debug(
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
-
-      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
       const fieldMapping = await generateFieldMappings(
         (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
         fieldsMetadataClient
@@ -326,15 +328,6 @@ export class TaskManagerService {
           `Data stream ${dataStreamId} marked as failed for integration ${integrationId}`
         );
       } catch (updateError) {
-        this.reportDataStreamCreationComplete({
-          integrationId,
-          integrationName,
-          dataStreamId,
-          dataStreamName,
-          durationMs: Date.now() - startTime,
-          success: false,
-          errorMessage,
-        });
         this.logger.error(
           `Failed to mark data stream ${dataStreamId} as failed: ${JSON.stringify(updateError)}`
         );
@@ -346,7 +339,8 @@ export class TaskManagerService {
         dataStreamId,
         dataStreamName,
         durationMs: Date.now() - startTime,
-        success: true,
+        success: false,
+        errorMessage,
       });
 
       if (isUnrecoverableByStatus(error))

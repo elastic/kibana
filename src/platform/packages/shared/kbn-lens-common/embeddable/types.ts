@@ -59,7 +59,6 @@ import type {
   VisualizationDisplayOptions,
 } from '../types';
 import type { FormBasedPersistedState, TextBasedPersistedState } from '../datasources/types';
-import type { XYState } from '../visualizations/xy/types';
 import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/types';
 import type { LegacyMetricState } from '../visualizations/legacy_metric/types';
@@ -69,6 +68,7 @@ import type { DatatableVisualizationState } from '../visualizations/datatable/ty
 import type { ChoroplethChartState } from '../visualizations/region_map/types';
 import type { LensTagCloudState } from '../visualizations/tagcloud/types';
 import type { LensTableRowContextMenuEvent } from '../visualizations/types';
+import type { XYPersistedState } from '../visualizations/xy/persistence';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensApiProps {}
@@ -477,7 +477,7 @@ type TypedLensAttributes<TVisType, TVisState> = Simplify<
 export type TypedLensSerializedState = Simplify<
   Omit<LensSerializedState, 'attributes'> & {
     attributes:
-      | TypedLensAttributes<'lnsXY', XYState>
+      | TypedLensAttributes<'lnsXY', XYPersistedState>
       | TypedLensAttributes<'lnsPie', LensPartitionVisualizationState>
       | TypedLensAttributes<'lnsHeatmap', HeatmapVisualizationState>
       | TypedLensAttributes<'lnsGauge', GaugeVisualizationState>

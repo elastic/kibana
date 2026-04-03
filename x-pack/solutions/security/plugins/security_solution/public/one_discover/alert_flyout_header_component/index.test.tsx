@@ -18,8 +18,30 @@ import type { StartServices } from '../../types';
 
 const mockDocumentHeader = jest.fn((_props: unknown) => <div>{'MockDocumentHeader'}</div>);
 
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 jest.mock('../../flyout_v2/document/header', () => ({
   Header: (props: unknown) => mockDocumentHeader(props),
+}));
+
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../common/components/discover_in_timeline/provider', () => ({
+  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
+jest.mock('../../cases/components/provider/provider', () => ({
+  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../assistant/provider', () => ({
+  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 describe('AlertFlyoutHeader', () => {
@@ -32,6 +54,12 @@ describe('AlertFlyoutHeader', () => {
     uiActions: {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
     },
+    application: {
+      capabilities: {
+        securitySolution: { show: true, crud: true },
+      },
+    },
+    upselling: {},
   } as unknown as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {
@@ -51,6 +79,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={jest.fn()}
         />
       );
     });
@@ -81,6 +110,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
         />
       </Router>
     );
@@ -99,6 +129,7 @@ describe('AlertFlyoutHeader', () => {
         hit={hit}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAlertUpdated={jest.fn()}
       />
     );
 

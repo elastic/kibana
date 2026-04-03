@@ -27,7 +27,7 @@ export const basicRegionMapWithAdHocDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -59,7 +59,7 @@ export const basicRegionMapWithDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -123,8 +123,8 @@ export const comprehensiveRegionMapWithAdHocDataView = {
     filters: [
       {
         filter: {
-          query: 'geo.dest : "US"',
-          language: 'kuery',
+          expression: 'geo.dest : "US"',
+          language: 'kql',
         },
         label: 'US',
       },
@@ -157,8 +157,8 @@ export const comprehensiveRegionMapWithDataView = {
     filters: [
       {
         filter: {
-          query: 'geo.dest : "US"',
-          language: 'kuery',
+          expression: 'geo.dest : "US"',
+          language: 'kql',
         },
         label: 'US',
       },

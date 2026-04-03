@@ -30,6 +30,8 @@ export interface TracesFlyout {
     readonly waterfallClickArea: Locator;
     readonly fullScreenButton: Locator;
     readonly openInDiscoverButton: Locator;
+    readonly tourOkButton: Locator;
+    getServiceBadge(name: string): Locator;
   };
 
   readonly errors: {
@@ -54,6 +56,7 @@ export interface TracesFlyout {
       readonly row: Locator;
       readonly content: Locator;
       readonly errorBadge: Locator;
+      readonly serviceBadge: Locator;
     };
     readonly childDocFlyout: {
       readonly aboutSection: Locator;
@@ -108,6 +111,13 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
       openInDiscoverButton: page.testSubj.locator(
         'unifiedDocViewerObservabilityTracesOpenInDiscoverButton'
       ),
+      tourOkButton: page.testSubj.locator('traceWaterfallFullScreenActionTourOkButton'),
+      getServiceBadge(name: string) {
+        return page.testSubj
+          .locator('traceItemRowWrapper')
+          .filter({ hasText: name })
+          .locator('[data-test-subj="apmBarDetailsServiceNameBadge"]');
+      },
     },
 
     errors: {
@@ -136,8 +146,9 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
             .filter({ hasText: name });
           return {
             row,
-            content: row.locator('[data-test-subj="traceItemRowContent"]'),
+            content: row.locator('[data-test-subj="apmBarDetailsName"]'),
             errorBadge: row.locator('[data-test-subj="apmBarDetailsErrorBadge"]'),
+            serviceBadge: row.locator('[data-test-subj="apmBarDetailsServiceNameBadge"]'),
           };
         },
         childDocFlyout: {

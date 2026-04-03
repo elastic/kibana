@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { RULES_FEATURE_ID_V2 } from '@kbn/security-solution-features/constants';
+import {
+  RULES_FEATURE_ID_V2,
+  RULES_FEATURE_ID_V3,
+} from '@kbn/security-solution-features/constants';
 import type { CustomRole } from '../../../../config/services/types';
 
 /** Role with Rules V2 ALL and preview indices access. Should be able to create rules and preview them. **/
@@ -27,6 +30,24 @@ export const rulesAllPreviewIndexRole: CustomRole = {
       {
         feature: {
           [RULES_FEATURE_ID_V2]: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+/** Role with only Rules V3 ALL (no Alerts or other SIEM features). */
+export const rulesAllV3OnlyRole: CustomRole = {
+  name: 'rules_all_v3_only',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          [RULES_FEATURE_ID_V3]: ['all'],
         },
         spaces: ['*'],
       },

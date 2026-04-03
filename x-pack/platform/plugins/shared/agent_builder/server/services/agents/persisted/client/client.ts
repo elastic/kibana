@@ -28,12 +28,18 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import type { AgentsUsingToolsResult, PersistedAgentDefinition } from '../types';
+import type {
+  AgentsUsingSkillsResult,
+  AgentsUsingToolsResult,
+  PersistedAgentDefinition,
+} from '../types';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { validateToolSelection } from './utils/tools';
+import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
+import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import { SYSTEM_USER_ID } from '../../../constants';
 import {
   buildVisibilityReadFilter,
@@ -53,6 +59,10 @@ export interface AgentClient {
   delete(options: AgentDeleteRequest): Promise<boolean>;
   getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
+  getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
+  removePluginRefsFromAgents(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
+  getAgentsUsingSkills(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
+  removeSkillRefsFromAgents(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
 }
 
 export const createClient = async ({
@@ -143,6 +153,48 @@ class AgentClientImpl implements AgentClient {
       storage: this.storage,
       spaceId: this.space,
       toolIds: params.toolIds,
+      logger: this.logger,
+    });
+  }
+
+  async getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult> {
+    return runPluginRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      pluginIds: params.pluginIds,
+      logger: this.logger,
+      checkOnly: true,
+    });
+  }
+
+  async removePluginRefsFromAgents(params: {
+    pluginIds: string[];
+  }): Promise<AgentsUsingToolsResult> {
+    return runPluginRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      pluginIds: params.pluginIds,
+      logger: this.logger,
+    });
+  }
+
+  async getAgentsUsingSkills(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult> {
+    return runSkillRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      skillIds: params.skillIds,
+      logger: this.logger,
+      checkOnly: true,
+    });
+  }
+
+  async removeSkillRefsFromAgents(params: {
+    skillIds: string[];
+  }): Promise<AgentsUsingSkillsResult> {
+    return runSkillRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      skillIds: params.skillIds,
       logger: this.logger,
     });
   }

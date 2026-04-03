@@ -57,6 +57,7 @@ describe('approveIntegrationRoute telemetry', () => {
         },
         getCurrentUser,
         reportTelemetryEvent,
+        isAvailable: () => true,
       }),
     } as any);
 
@@ -79,6 +80,14 @@ describe('approveIntegrationRoute telemetry', () => {
     await handler(makeContext(), makeRequest(), response);
 
     expect(reportTelemetryEvent).toHaveBeenCalledTimes(2);
+
+    expect(approveIntegration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        integrationId: 'int-1',
+        version: '1.0.0',
+        categories: ['security'],
+      })
+    );
 
     expect(reportTelemetryEvent).toHaveBeenNthCalledWith(
       1,

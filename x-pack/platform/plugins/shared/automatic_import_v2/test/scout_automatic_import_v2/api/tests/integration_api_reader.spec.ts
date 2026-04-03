@@ -70,7 +70,7 @@ apiTest.describe('automatic_import_v2 Integration API (reader)', { tag: tags.sta
       `${INTEGRATION_API_BASE_PATH}/${SHARED_INTEGRATION_ID}/approve`,
       {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: { version: '0.1.0' },
+        body: { version: '0.1.0', categories: ['security'] },
         responseType: 'json',
       }
     );

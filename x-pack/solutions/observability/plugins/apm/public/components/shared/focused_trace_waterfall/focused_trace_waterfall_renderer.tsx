@@ -14,6 +14,7 @@ import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { FocusedTraceWaterfall } from '.';
 import { Loading } from '../trace_waterfall/loading';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import { useGetServiceBadgeHrefFromCore } from '../trace_waterfall/use_get_service_badge_href_from_core';
 
 interface Props extends FocusedTraceWaterfallProps {
   core: CoreStart;
@@ -23,6 +24,9 @@ export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, doc
   useEffectOnce(() => {
     createCallApmApi(core);
   });
+
+  const getServiceBadgeHref = useGetServiceBadgeHrefFromCore(core, rangeFrom, rangeTo);
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}/summary', {
@@ -53,5 +57,7 @@ export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, doc
     );
   }
 
-  return <FocusedTraceWaterfall items={data} isEmbeddable />;
+  return (
+    <FocusedTraceWaterfall items={data} isEmbeddable getServiceBadgeHref={getServiceBadgeHref} />
+  );
 }

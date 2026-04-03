@@ -55,5 +55,6 @@ apiTest.describe('dashboards - get', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.message).toBe('A dashboard with ID [does-not-exist] was not found.');
   });
 });

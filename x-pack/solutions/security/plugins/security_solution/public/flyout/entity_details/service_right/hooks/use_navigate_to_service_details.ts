@@ -14,15 +14,19 @@ import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
 
 interface UseNavigateToServiceDetailsParams {
+  entityId?: string;
   serviceName: string;
   scopeId: string;
   isRiskScoreExist: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const useNavigateToServiceDetails = ({
+  entityId,
   serviceName,
   scopeId,
   isRiskScoreExist,
+  entityStoreEntityId,
 }: UseNavigateToServiceDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -38,13 +42,21 @@ export const useNavigateToServiceDetails = ({
         params: {
           isRiskScoreExist,
           scopeId,
-          service: {
-            name: serviceName,
-          },
+          entityId,
+          serviceName,
+          entityStoreEntityId,
           path,
         },
       });
     },
-    [isRiskScoreExist, openLeftPanel, scopeId, serviceName, telemetry]
+    [
+      isRiskScoreExist,
+      openLeftPanel,
+      scopeId,
+      entityId,
+      serviceName,
+      entityStoreEntityId,
+      telemetry,
+    ]
   );
 };

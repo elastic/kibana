@@ -98,7 +98,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     expect(getAttachmentViewObject).toBeCalledWith(
       expect.objectContaining({
         ...viewProps,
-        attachmentId: attachment.id,
+        savedObjectId: attachment.id,
         caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
       })
     );

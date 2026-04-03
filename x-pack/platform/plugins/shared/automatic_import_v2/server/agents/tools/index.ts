@@ -6,7 +6,12 @@
  */
 
 export { ingestPipelineValidatorTool } from './ingest_pipeline_validator';
+export { modifyPipelineTool } from './modify_pipeline';
+export { testPipelineTool } from './test_pipeline';
 
 export { fetchSamplesTool } from './fetch_samples';
-export { fetchUniqueKeysTool } from './fetch_unique_keys';
 export { fetchCurrentPipelineTool } from './fetch_current_pipeline';
+export { getEcsInfoTool } from './get_ecs_info';
+export { submitAnalysisTool } from './submit_analysis';
+export { submitReviewTool } from './submit_review';
+export { BOILERPLATE_PIPELINE } from './pipeline_constants';

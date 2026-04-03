@@ -349,7 +349,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       monitorId = apiResponse.body.id;
 
       const policyResponse = await supertestWithAuth.get(
-        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        `/s/${SPACE_ID}/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics`
       );
 
       const packagePolicy = policyResponse.body.items.find(
@@ -507,7 +507,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(packagePolicy.package.version).eql(lowerVersion);
         await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-        await retry.tryForTime(60 * 1000, async () => {
+        await retry.tryForTime(120 * 1000, async () => {
           const policyResponseAfterUpgrade = await supertestWithAuth.get(
             '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
           );

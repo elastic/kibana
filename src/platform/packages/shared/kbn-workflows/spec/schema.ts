@@ -192,6 +192,9 @@ export type WaitStep = z.infer<typeof WaitStepSchema>;
 export const WaitForInputStepInputSchema = z
   .object({
     message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    schema: JsonModelSchema.optional().describe(
+      'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
+    ),
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({
@@ -924,7 +927,10 @@ export const EventTimestampSchema = z.object({
  * Full event schema (used for runtime validation of alert-triggered workflows).
  * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
  */
-export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
+export const AlertEventSchema = z.object({
+  ...BaseEventSchema.shape,
+  ...AlertEventPropsSchema.shape,
+});
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -940,7 +946,7 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 );
 
 export const WorkflowContextSchema = z.object({
-  event: EventSchema.optional(),
+  event: AlertEventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),

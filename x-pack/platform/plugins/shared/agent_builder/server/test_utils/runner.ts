@@ -171,7 +171,7 @@ export const createSkillServiceStartMock = (): SkillServiceStartMock => {
 
 export const createPluginsServiceStartMock = (): PluginsServiceStartMock => {
   return {
-    getScopedClient: jest.fn(),
+    getRegistry: jest.fn(),
     installPlugin: jest.fn(),
     deletePlugin: jest.fn(),
   };
