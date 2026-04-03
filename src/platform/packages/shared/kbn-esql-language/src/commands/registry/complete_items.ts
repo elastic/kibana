@@ -345,13 +345,14 @@ export const mmrLambdaValueSuggestion: ISuggestionItem = {
 // Map Expression Builders
 // ================================
 
-export type MapValueType = 'string' | 'number' | 'boolean' | 'map';
+export type MapValueType = 'string' | 'number' | 'boolean' | 'map' | 'array';
 
 export const MAP_VALUE_SNIPPETS: Record<MapValueType, string> = {
   string: '"$0"',
   number: '',
   boolean: '',
   map: '{ $0 }',
+  array: '[ $0 ]',
 };
 
 export interface MapKeySuggestionOptions {

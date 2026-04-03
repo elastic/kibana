@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstUserAgentCommand } from '@elastic/esql/types';
-import { isMap } from '@elastic/esql';
+import type { ESQLAstUserAgentCommand, ESQLList } from '@elastic/esql/types';
+import { isMap, isList, isStringLiteral } from '@elastic/esql';
 import { EDITOR_MARKER } from '../../definitions/constants';
 
 export enum UserAgentPosition {
@@ -18,7 +18,21 @@ export enum UserAgentPosition {
   AFTER_EXPRESSION = 'after_expression', // expression complete
   AFTER_WITH_KEYWORD = 'after_with_keyword',
   WITHIN_OPTIONS = 'within_options',
+  WITHIN_PROPERTIES_ARRAY = 'within_properties_array',
   AFTER_COMMAND = 'after_command',
+}
+
+/** Returns the list AST node for the `properties` map entry, if any. */
+export function getPropertiesList(command: ESQLAstUserAgentCommand): ESQLList | undefined {
+  const { namedParameters } = command;
+  if (!isMap(namedParameters)) return undefined;
+
+  const propertiesEntry = namedParameters.entries.find(
+    (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === 'properties'
+  );
+  if (!propertiesEntry) return undefined;
+
+  return isList(propertiesEntry.value) ? propertiesEntry.value : undefined;
 }
 
 export function getPosition(
@@ -30,12 +44,26 @@ export function getPosition(
   if (namedParameters !== undefined) {
     const map = isMap(namedParameters) ? namedParameters : undefined;
     if (!map || (map.incomplete && !map.text)) return UserAgentPosition.AFTER_WITH_KEYWORD;
-    if (map.incomplete) {
-      const cursorIsAfterMap =
-        map.text.trimEnd().endsWith('}') && cursorPosition > map.location.max;
-      return cursorIsAfterMap ? UserAgentPosition.AFTER_COMMAND : UserAgentPosition.WITHIN_OPTIONS;
+
+    const isWithinMap = map.incomplete
+      ? !(map.text.trimEnd().endsWith('}') && cursorPosition > map.location.max)
+      : cursorPosition <= map.location.max;
+
+    if (!isWithinMap) return UserAgentPosition.AFTER_COMMAND;
+
+    // Check if cursor is inside the `properties` entry value (handles empty [] too)
+    const propertiesEntry = map.entries.find(
+      (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === 'properties'
+    );
+    if (
+      propertiesEntry &&
+      cursorPosition >= propertiesEntry.value.location.min &&
+      cursorPosition <= propertiesEntry.value.location.max
+    ) {
+      return UserAgentPosition.WITHIN_PROPERTIES_ARRAY;
     }
-    return UserAgentPosition.AFTER_COMMAND;
+
+    return UserAgentPosition.WITHIN_OPTIONS;
   }
 
   if (expression !== undefined) {

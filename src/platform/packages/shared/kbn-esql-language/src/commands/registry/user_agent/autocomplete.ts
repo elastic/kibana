@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstUserAgentCommand } from '@elastic/esql/types';
+import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
+import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
   getFieldsSuggestions,
   getFunctionsSuggestions,
@@ -15,13 +18,15 @@ import {
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import {
   assignCompletionItem,
+  buildAddValuePlaceholder,
+  buildMapValueCompleteItem,
   getNewUserDefinedColumnSuggestion,
   pipeCompleteItem,
   withCompleteItem,
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
-import { getPosition, UserAgentPosition } from './utils';
+import { getPosition, getPropertiesList, UserAgentPosition } from './utils';
 
 export async function autocomplete(
   query: string,
@@ -66,10 +71,47 @@ export async function autocomplete(
       return [withCompleteItem, pipeCompleteItem];
 
     case UserAgentPosition.AFTER_WITH_KEYWORD:
-      return [];
+      return [buildAddValuePlaceholder('config')];
 
-    case UserAgentPosition.WITHIN_OPTIONS:
-      return [];
+    case UserAgentPosition.WITHIN_OPTIONS: {
+      const availableParameters: MapParameters = {
+        regex_file: {
+          type: 'string',
+          description: i18n.translate(
+            'kbn-esql-language.commands.userAgent.autocomplete.regexFileDescription',
+            { defaultMessage: 'Parser configuration file name' }
+          ),
+          suggestions: [buildMapValueCompleteItem('_default_')],
+        },
+        extract_device_type: {
+          type: 'boolean',
+          description: i18n.translate(
+            'kbn-esql-language.commands.userAgent.autocomplete.extractDeviceTypeDescription',
+            { defaultMessage: 'Extract device type (Desktop, Phone, Tablet)' }
+          ),
+          suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],
+        },
+        properties: {
+          type: 'array',
+          description: i18n.translate(
+            'kbn-esql-language.commands.userAgent.autocomplete.propertiesDescription',
+            { defaultMessage: 'List of properties to extract' }
+          ),
+        },
+      };
+      return getCommandMapExpressionSuggestions(
+        query.substring(0, cursorPosition),
+        availableParameters
+      );
+    }
+
+    case UserAgentPosition.WITHIN_PROPERTIES_ARRAY: {
+      const propertiesList = getPropertiesList(userAgentCommand);
+      const usedValues = new Set(propertiesList?.values.map((v) => v.name) ?? []);
+      return ['name', 'version', 'os', 'device']
+        .filter((v) => !usedValues.has(`"${v}"`))
+        .map((v) => buildMapValueCompleteItem(`"${v}"`));
+    }
 
     case UserAgentPosition.AFTER_COMMAND:
       return [pipeCompleteItem];
