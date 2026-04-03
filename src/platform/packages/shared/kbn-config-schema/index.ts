@@ -153,6 +153,202 @@ function recordOf<K extends string, V>(
   return new RecordOfType(keyType, valueType, options);
 }
 
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>,
+    Type<R>,
+    Type<S>,
+    Type<T>,
+    Type<U>,
+    Type<V>,
+    Type<W>,
+    Type<X>
+  ],
+  options?: UnionTypeOptions<
+    A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X
+  >
+): Type<
+  A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X
+>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>,
+    Type<R>,
+    Type<S>,
+    Type<T>,
+    Type<U>,
+    Type<V>,
+    Type<W>
+  ],
+  options?: UnionTypeOptions<
+    A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W
+  >
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>,
+    Type<R>,
+    Type<S>,
+    Type<T>,
+    Type<U>,
+    Type<V>
+  ],
+  options?: UnionTypeOptions<
+    A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V
+  >
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>,
+    Type<R>,
+    Type<S>,
+    Type<T>,
+    Type<U>
+  ],
+  options?: UnionTypeOptions<
+    A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U
+  >
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>,
+    Type<R>,
+    Type<S>,
+    Type<T>
+  ],
+  options?: UnionTypeOptions<
+    A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T
+  >
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>,
+    Type<R>,
+    Type<S>
+  ],
+  options?: UnionTypeOptions<
+    A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S
+  >
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>,
+    Type<R>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R>;
 function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(
   types: [
     Type<A>,
