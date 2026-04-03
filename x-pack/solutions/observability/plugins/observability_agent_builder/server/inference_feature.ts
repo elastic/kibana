@@ -30,7 +30,7 @@ const observabilityAiInsightsChatCompletionFeature: InferenceFeatureConfig = {
   featureId: OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
   parentFeatureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
   featureName: i18n.translate('xpack.observabilityAgentBuilder.inferenceFeature.aiSettingsName', {
-    defaultMessage: 'Observability AI Settings',
+    defaultMessage: 'AI Assistant and Insights',
   }),
   featureDescription: i18n.translate(
     'xpack.observabilityAgentBuilder.inferenceFeature.aiSettingsDescription',
