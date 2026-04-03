@@ -154,6 +154,24 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async clickSaveDiscoverTableToDashboard(title: string, existing?: string) {
+    await this.testSubjects.click('saveDiscoverTableToDashboardButton');
+    await this.retry.waitFor('Save Discover session table modal', () =>
+      this.testSubjects.exists('savedObjectSaveModal')
+    );
+    await this.inputSavedSearchTitle(title);
+    if (!existing) {
+      await this.find.clickByCssSelector('#new-dashboard-option');
+    } else {
+      await this.find.clickByCssSelector('#existing-dashboard-option');
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.click(`dashboard-picker-option-${existing}`);
+    }
+    await this.clickConfirmSavedSearch();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async inputSavedSearchTitle(searchName: string) {
     await this.testSubjects.setValue('savedObjectTitle', searchName);
   }

@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 describe('StateTransitionTimeframeField', () => {
   it('renders the breached-for-duration timeframe input', () => {
@@ -90,6 +90,15 @@ describe('StateTransitionTimeframeField', () => {
 
     expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toHaveValue(15);
     expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toHaveValue('m');
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<StateTransitionTimeframeField numberPrependLabel="Active for" />, {
+      wrapper: createFormWrapper({ kind: 'alert' }, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeInTheDocument();
+    expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toBeInTheDocument();
   });
 
   describe('variant="recovering"', () => {
