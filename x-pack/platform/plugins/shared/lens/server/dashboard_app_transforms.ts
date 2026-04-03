@@ -9,6 +9,7 @@ import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { isByRefLensConfig } from '../common/transforms/utils';
 import { LENS_DASHBOARD_APP_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
@@ -32,7 +33,9 @@ export function registerLensEmbeddableTransformsForDashboardApp(
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
 
-      const chartType = builder.getType(config.attributes);
+      if (!isLensAPIFormat(config)) return;
+
+      const chartType = builder.getType(config);
 
       if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);

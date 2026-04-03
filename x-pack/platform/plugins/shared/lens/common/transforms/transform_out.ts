@@ -75,9 +75,10 @@ export const getTransformOut = (
       visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });
 
+    const { attributes: _, ...panelState } = state;
     return {
-      ...state,
-      attributes: apiConfig,
+      ...panelState,
+      ...apiConfig,
     } satisfies LensByValueTransformOutResult;
   };
 };

@@ -32,35 +32,6 @@ export const labelSharedProp = {
 };
 
 export const sharedPanelInfoSchema = {
-  /**
-   * The title of the chart displayed in the panel.
-   *
-   * Optional. If not provided, the chart will not have a title.
-   *
-   * Possible values: Any string value, or undefined if omitted.
-   */
-  title: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'The title of the chart displayed in the panel. Optional. Any string value or undefined.',
-      },
-    })
-  ),
-  /**
-   * The description of the chart, providing additional context or information.
-   *
-   * Optional. If not provided, the chart will not have a description.
-   *
-   * Possible values: Any string value, or undefined if omitted.
-   */
-  description: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'The description of the chart. Optional. Any string value or undefined.',
-      },
-    })
-  ),
   filters: schema.maybe(
     schema.arrayOf(asCodeFilterSchema, {
       maxSize: 100,

@@ -25,6 +25,6 @@ export function isByRefLensState(state: LensSerializedState): state is LensByRef
 
 export function isByRefLensConfig(
   config: LensSerializedAPIConfig
-): config is LensByRefSerializedAPIConfig {
-  return !config.attributes;
+): config is LensByRefSerializedAPIConfig & { ref_id: string } {
+  return !!config.ref_id;
 }

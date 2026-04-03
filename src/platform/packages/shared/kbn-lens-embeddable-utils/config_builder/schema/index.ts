@@ -7,37 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { NullableProps, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { MetricState } from './charts/metric';
-import { metricStateSchema } from './charts/metric';
+import { metricStateSchema, metricStateSchemaNoESQL, esqlMetricState } from './charts/metric';
 import type { LegacyMetricState } from './charts/legacy_metric';
-import { legacyMetricStateSchema } from './charts/legacy_metric';
+import { legacyMetricStateSchema, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
 import type { GaugeState } from './charts/gauge';
-import { gaugeStateSchema } from './charts/gauge';
+import { gaugeStateSchema, gaugeStateSchemaNoESQL, gaugeStateSchemaESQL } from './charts/gauge';
 import type { HeatmapState } from './charts/heatmap';
-import { heatmapStateSchema } from './charts/heatmap';
+import {
+  heatmapStateSchema,
+  heatmapStateSchemaNoESQL,
+  heatmapStateSchemaESQL,
+} from './charts/heatmap';
 import type { TagcloudState } from './charts/tagcloud';
-import { tagcloudStateSchema } from './charts/tagcloud';
+import {
+  tagcloudStateSchema,
+  tagcloudStateSchemaNoESQL,
+  tagcloudStateSchemaESQL,
+} from './charts/tagcloud';
 import type { XYState } from './charts/xy';
-import { xyStateSchema } from './charts/xy';
+import { xyStateSchema, xyStateSchemaESQL } from './charts/xy';
 import type { RegionMapState } from './charts/region_map';
-import { regionMapStateSchema } from './charts/region_map';
+import {
+  regionMapStateSchema,
+  regionMapStateSchemaNoESQL,
+  regionMapStateSchemaESQL,
+} from './charts/region_map';
 import type { DatatableState } from './charts/datatable';
-import { datatableStateSchema } from './charts/datatable';
+import {
+  datatableStateSchema,
+  datatableStateSchemaNoESQL,
+  datatableStateSchemaESQL,
+} from './charts/datatable';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 import type { MosaicState } from './charts/mosaic';
-import { mosaicStateSchema } from './charts/mosaic';
+import { mosaicStateSchema, mosaicStateSchemaNoESQL, mosaicStateSchemaESQL } from './charts/mosaic';
 import type { TreemapState } from './charts/treemap';
-import { treemapStateSchema } from './charts/treemap';
+import {
+  treemapStateSchema,
+  treemapStateSchemaNoESQL,
+  treemapStateSchemaESQL,
+} from './charts/treemap';
 import type { WaffleState } from './charts/waffle';
-import { waffleStateSchema } from './charts/waffle';
+import { waffleStateSchema, waffleStateSchemaNoESQL, waffleStateSchemaESQL } from './charts/waffle';
 import type { PieState } from './charts/pie';
-import { pieStateSchema } from './charts/pie';
+import { pieStateSchema, pieStateSchemaNoESQL, pieStateSchemaESQL } from './charts/pie';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -80,6 +100,42 @@ export type LensApiState =
   | WaffleState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
+
+/**
+ * Extends the lensApiStateSchema with the given panel-level properties (titles, time range, drilldowns, etc.)
+ */
+export const extendLensApiStateSchemas = <P extends NullableProps>(
+  extraProps: P,
+  options?: { meta?: Record<string, unknown> }
+) =>
+  schema.oneOf(
+    [
+      metricStateSchemaNoESQL.extends(extraProps),
+      esqlMetricState.extends(extraProps),
+      legacyMetricStateSchemaNoESQL.extends(extraProps),
+      xyStateSchema.extends(extraProps),
+      xyStateSchemaESQL.extends(extraProps),
+      gaugeStateSchemaNoESQL.extends(extraProps),
+      gaugeStateSchemaESQL.extends(extraProps),
+      heatmapStateSchemaNoESQL.extends(extraProps),
+      heatmapStateSchemaESQL.extends(extraProps),
+      tagcloudStateSchemaNoESQL.extends(extraProps),
+      tagcloudStateSchemaESQL.extends(extraProps),
+      regionMapStateSchemaNoESQL.extends(extraProps),
+      regionMapStateSchemaESQL.extends(extraProps),
+      datatableStateSchemaNoESQL.extends(extraProps),
+      datatableStateSchemaESQL.extends(extraProps),
+      pieStateSchemaNoESQL.extends(extraProps),
+      pieStateSchemaESQL.extends(extraProps),
+      mosaicStateSchemaNoESQL.extends(extraProps),
+      mosaicStateSchemaESQL.extends(extraProps),
+      treemapStateSchemaNoESQL.extends(extraProps),
+      treemapStateSchemaESQL.extends(extraProps),
+      waffleStateSchemaNoESQL.extends(extraProps),
+      waffleStateSchemaESQL.extends(extraProps),
+    ],
+    options
+  );
 
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';

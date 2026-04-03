@@ -15,6 +15,7 @@ import type {
   LensByValueTransformInResult,
   LensTransformIn,
 } from './types';
+import { splitFlattenedApiConfig } from './helpers';
 import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensConfig } from './utils';
 import type { LensSerializedState } from '../../public';
 
@@ -53,22 +54,25 @@ export const getTransformIn = (
       } satisfies LensByValueTransformInResult;
     }
 
-    const chartType = builder.getType(config.attributes);
-    // should be filtered out my unmapped panel check
+    const { panelState, chartConfig } = splitFlattenedApiConfig(storedConfig);
+
+    if (!isLensAPIFormat(chartConfig)) {
+      const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
+      return {
+        state,
+        references: [...references, ...drilldownReferences],
+      } satisfies LensByValueTransformInResult;
+    }
+
+    const chartType = builder.getType(chartConfig);
     if (!builder.isSupported(chartType)) {
       throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
-    if (!config.attributes) {
-      // Not sure if this is possible
-      throw new Error('attributes are missing');
-    }
+    const attributes = builder.fromAPIFormat(chartConfig);
 
-    const attributes = isLensAPIFormat(config.attributes)
-      ? builder.fromAPIFormat(config.attributes)
-      : config.attributes;
     const { state, references } = extractLensReferences({
-      ...storedConfig,
+      ...panelState,
       attributes,
     });
 

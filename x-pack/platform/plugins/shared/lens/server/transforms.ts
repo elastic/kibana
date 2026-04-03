@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { extendLensApiStateSchemas, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
@@ -23,6 +23,7 @@ import {
   ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { isByRefLensConfig } from '../common/transforms/utils';
 import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
@@ -61,7 +62,9 @@ export function registerLensEmbeddableTransforms(
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
 
-      const chartType = builder.getType(config.attributes);
+      if (!isLensAPIFormat(config)) return;
+
+      const chartType = builder.getType(config);
 
       if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);
@@ -78,15 +81,9 @@ const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
 });
 
 const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.object(
-    {
-      attributes: lensApiStateSchema,
-      ...getSharedPanelSchema(getDrilldownsSchema),
-    },
-    {
-      meta: BY_VALUE_SCHEMA_META,
-    }
-  );
+  extendLensApiStateSchemas(getSharedPanelSchema(getDrilldownsSchema), {
+    meta: BY_VALUE_SCHEMA_META,
+  });
 
 const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   schema.object(

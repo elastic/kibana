@@ -79,9 +79,11 @@ export function initializeDashboardServices(
   titleManager: ReturnType<typeof initializeTitleManager>,
   { attributeService, uiActions }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
-  // For some legacy reason the title and description default value is picked differently
-  // ( based on existing FTR tests ).
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState.attributes.title);
+  // For by-ref panels, the saved object document title/description serve as defaults.
+  // For by-value panels, title/description live at the panel config level only.
+  const defaultTitle$ = new BehaviorSubject<string | undefined>(
+    initialState.ref_id ? initialState.attributes.title : initialState.title
+  );
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
     initialState.ref_id
       ? internalApi.attributes$.getValue().description || initialState.description
@@ -131,7 +133,7 @@ export function initializeDashboardServices(
         !getLatestState().ref_id && !isTextBasedLanguage(getLatestState()),
       canUnlinkFromLibrary: async () => Boolean(getLatestState().ref_id),
       getSerializedStateByReference: (newId: string) => {
-        const currentState = getLatestState();
+        const { attributes: _, ...currentState } = getLatestState();
         return {
           ...currentState,
           ref_id: newId,

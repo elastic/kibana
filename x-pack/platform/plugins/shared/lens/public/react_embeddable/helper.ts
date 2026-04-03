@@ -40,6 +40,8 @@ import { BehaviorSubject } from 'rxjs';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 
+import { isByRefLensConfig } from '../../common/transforms/utils';
+import { splitFlattenedApiConfig } from '../../common/transforms/helpers';
 import type { StrippedLensState } from '../../common/transforms/helpers';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
@@ -85,15 +87,14 @@ export async function deserializeState(
   state: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
-  const refId = 'ref_id' in state ? state.ref_id : undefined;
 
-  if (refId) {
+  if (isByRefLensConfig(state)) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(refId);
+        await attributeService.loadFromLibrary(state.ref_id);
       return {
         ...state,
-        ref_id: refId,
+        ref_id: state.ref_id,
         attributes,
         managed,
         sharingSavedObjectProps,
@@ -104,7 +105,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state as LensSerializedAPIConfig) as LensRuntimeState;
+  const newState = transformFromApiConfig(state) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -179,9 +180,10 @@ export function getStructuredDatasourceStates(
 
 export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
   const builder = getLensBuilder();
+  const { panelState, chartConfig } = splitFlattenedApiConfig(state);
 
   if (!builder?.isEnabled) {
-    if (isLensAPIFormat(state.attributes)) {
+    if (isLensAPIFormat(chartConfig)) {
       // This mean the dashboard is giving us an in-memory state
       // This could be either the new or old state so we need to try to convert below
     } else {
@@ -192,26 +194,19 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
 
   if (!builder) return state as LensSerializedState; // no other option
 
-  const chartType = builder.getType(state.attributes);
+  if (!isLensAPIFormat(chartConfig)) {
+    return state as LensSerializedState;
+  }
+
+  const chartType = builder.getType(chartConfig);
 
   if (!builder.isSupported(chartType)) {
     return state as LensSerializedState;
   }
 
-  if (!state.attributes) {
-    // Not sure if this is possible
-    throw new Error('attributes are missing');
-  }
-
-  // check if already converted
-  if (!isLensAPIFormat(state.attributes)) {
-    return state as LensSerializedState;
-  }
-
-  const attributes = builder.fromAPIFormat(state.attributes);
-
+  const attributes = builder.fromAPIFormat(chartConfig);
   return {
-    ...state,
+    ...panelState,
     attributes,
   };
 }
@@ -252,9 +247,10 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
 
+  const { attributes: _, ...panelState } = state;
   return {
-    ...state,
-    attributes: apiConfigAttributes,
+    ...panelState,
+    ...apiConfigAttributes,
   };
 }
 
