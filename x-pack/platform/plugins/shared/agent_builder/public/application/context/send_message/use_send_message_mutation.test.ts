@@ -17,7 +17,12 @@ const mockServices = {
 describe('buildScreenContextData', () => {
   beforeEach(() => {
     Object.defineProperty(window, 'location', {
-      value: { pathname: '/app/agent_builder', search: '', hash: '', href: 'http://proxy.example.com/app/agent_builder' },
+      value: {
+        pathname: '/app/agent_builder',
+        search: '',
+        hash: '',
+        href: 'http://proxy.example.com/app/agent_builder',
+      },
       writable: true,
     });
   });
