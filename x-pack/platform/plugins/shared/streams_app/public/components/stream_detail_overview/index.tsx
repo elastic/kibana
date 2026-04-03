@@ -12,7 +12,6 @@ import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { AboutPanel } from './about_panel';
 import { DataQualityCard } from './data_quality_card';
 import { IngestRateChart } from './ingest_rate_chart';
-import { OverviewTimeFilter } from './overview_time_filter';
 
 interface OverviewSection {
   id: string;
@@ -46,7 +45,6 @@ export function StreamOverview() {
   ];
 
   const sidebarSections: OverviewSection[] = [
-    { id: 'time-filter', node: <OverviewTimeFilter />, show: true },
     { id: 'about', node: <AboutPanel />, show: true },
     // Ticket 2
     // { id: 'suggestions', node: <SuggestionsPanel />, show: true },
@@ -59,9 +57,9 @@ export function StreamOverview() {
       direction={isStackedOverviewLayout ? 'columnReverse' : 'row'}
       responsive={false}
     >
-      <EuiFlexItem grow={!isStackedOverviewLayout} style={mainColumnStyle}>
+      <EuiFlexItem grow={false} style={sidebarColumnStyle}>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {mainSections
+          {sidebarSections
             .filter((s) => s.show)
             .map((s) => (
               <EuiFlexItem key={s.id} grow={false}>
@@ -71,9 +69,9 @@ export function StreamOverview() {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={sidebarColumnStyle}>
+      <EuiFlexItem grow={!isStackedOverviewLayout} style={mainColumnStyle}>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {sidebarSections
+          {mainSections
             .filter((s) => s.show)
             .map((s) => (
               <EuiFlexItem key={s.id} grow={false}>

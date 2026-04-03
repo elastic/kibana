@@ -5,27 +5,34 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+  EuiIconTip,
+  EuiStat,
+  EuiSpacer,
+  formatNumber,
+} from '@elastic/eui';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { Streams } from '@kbn/streams-schema';
 import React, { type ReactNode } from 'react';
 import type { AsyncState } from 'react-use/lib/useAsync';
+import { i18n } from '@kbn/i18n';
 import { useDataStreamStats } from '../stream_management/data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
 import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
+import { PhasesLegend } from '../stream_management/data_management/stream_detail_lifecycle/common/chart_components';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { OverviewStatWithTotal } from './overview_stat';
 import {
-  chartEmbeddedDocCountDescription,
-  chartEmbeddedEstimatedStorageLabel,
-  chartEmbeddedEstimatedStorageTooltip,
-  chartEmbeddedTotalDocsLine,
   chartEmbeddedTotalStorageLine,
   fetchEsqlTotalDocCount,
-  histogramDocCountStatIsLoading,
-  histogramRangeDocCountTitle,
 } from './chart_embedded_stats_helpers';
+
+export type ViewMode = 'documents' | 'ingestion_rate';
 
 interface ChartEmbeddedStatsProps {
   definition: Streams.ingest.all.GetResponse;
@@ -33,6 +40,52 @@ interface ChartEmbeddedStatsProps {
   statsHistogramResult: AsyncState<ESQLSearchResponse>;
   /** Sum of `doc_count` over the histogram series for the selected range (from parent `allTimeseries`). */
   docCountInRange: number;
+  viewMode: ViewMode;
+  /** Peak docs/sec across all histogram buckets in the selected range. */
+  peakRate: number;
+  /** Average docs/sec across the selected time range. */
+  avgRate: number;
+}
+
+const formatRate = (rate: number) =>
+  i18n.translate('xpack.streams.chartEmbeddedStats.rateFormat', {
+    defaultMessage: '{rate} /s',
+    values: { rate: formatNumber(rate, rate < 1 ? '0.00' : '0,0.0') },
+  });
+
+function RateStats({
+  peakRate,
+  avgRate,
+  isLoading,
+}: {
+  peakRate: number;
+  avgRate: number;
+  isLoading: boolean;
+}) {
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <OverviewStatWithTotal
+          description={i18n.translate('xpack.streams.chartEmbeddedStats.peakRateLabel', {
+            defaultMessage: 'Peak rate',
+          })}
+          rangeTitle={formatRate(peakRate)}
+          isLoading={isLoading}
+          dataTestSubj="streamsOverviewPeakRate"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <OverviewStatWithTotal
+          description={i18n.translate('xpack.streams.chartEmbeddedStats.avgRateLabel', {
+            defaultMessage: 'Average rate',
+          })}
+          rangeTitle={formatRate(avgRate)}
+          isLoading={isLoading}
+          dataTestSubj="streamsOverviewAvgRate"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
 
 function ChartStatsAside({ children }: { children: ReactNode }) {
@@ -58,13 +111,36 @@ function DocCountStatRow({
   totalLine: string;
 }) {
   return (
-    <OverviewStatWithTotal
-      description={chartEmbeddedDocCountDescription()}
-      rangeTitle={histogramRangeDocCountTitle(statsHistogramResult, docCountInRange)}
-      totalLine={totalLine}
-      isLoading={histogramDocCountStatIsLoading(statsHistogramResult)}
-      dataTestSubj="streamsOverviewDocCount"
-    />
+    <>
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('xpack.streams.docCountStatRow.statsLabel', { defaultMessage: 'Stats' })}{' '}
+        <EuiIconTip
+          type="question"
+          color="subdued"
+          size="s"
+          content="Stats"
+          aria-label={i18n.translate(
+            'xpack.streams.streamOverview.overviewStat.euiIconTip.statsLabel',
+            {
+              defaultMessage: 'Stats',
+            }
+          )}
+        />
+      </EuiText>
+      <EuiFlexGroup direction="row" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiStat title={totalLine} description="" />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false} alignItems="bottom">
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.streams.docCountStatRow.docsTotalTextLabel', {
+              defaultMessage: 'Docs total',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 
@@ -95,11 +171,15 @@ export function ChartEmbeddedQueryDocStats({
     { withRefresh: true }
   );
 
-  const totalDocsLine = totalDocsResult.loading
-    ? '—'
-    : totalDocsResult.error
-    ? '—'
-    : chartEmbeddedTotalDocsLine(totalDocsResult.value ?? 0);
+  let totalDocsLine = '';
+
+  if (totalDocsResult.loading) {
+    totalDocsLine = '—';
+  } else if (totalDocsResult.error) {
+    totalDocsLine = '—';
+  } else if (typeof totalDocsResult.value === 'number' && !isNaN(totalDocsResult.value)) {
+    totalDocsLine = String(totalDocsResult.value);
+  }
 
   return (
     <ChartStatsAside>
@@ -120,11 +200,17 @@ export function ChartEmbeddedSideStats({
   esqlSource,
   statsHistogramResult,
   docCountInRange,
+  viewMode = 'documents',
+  peakRate = 0,
+  avgRate = 0,
 }: {
   definition: Streams.all.GetResponse;
   esqlSource: string;
   statsHistogramResult: AsyncState<ESQLSearchResponse>;
   docCountInRange: number;
+  viewMode?: ViewMode;
+  peakRate?: number;
+  avgRate?: number;
 }) {
   if (Streams.ingest.all.GetResponse.is(definition)) {
     return (
@@ -132,6 +218,9 @@ export function ChartEmbeddedSideStats({
         definition={definition}
         statsHistogramResult={statsHistogramResult}
         docCountInRange={docCountInRange}
+        viewMode={viewMode}
+        peakRate={peakRate}
+        avgRate={avgRate}
       />
     );
   }
@@ -144,6 +233,19 @@ export function ChartEmbeddedSideStats({
   );
 }
 
+const ALL_TIER_PHASES = Object.fromEntries(
+  (['hot', 'warm', 'cold', 'frozen'] as const).map((name) => [name, { name }])
+);
+
+/**
+ * Color legend for the four storage tiers. Shown for all ingest streams since data always
+ * resides in one or more tiers regardless of lifecycle type (DSL, ILM, inherited).
+ */
+function StorageTiersLegend() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return <PhasesLegend phases={ALL_TIER_PHASES as any} />;
+}
+
 /**
  * Time-range document count + estimated storage, with all-time totals — shown beside the overview chart (ingest streams).
  */
@@ -151,6 +253,9 @@ export function ChartEmbeddedStats({
   definition,
   statsHistogramResult,
   docCountInRange,
+  viewMode,
+  peakRate,
+  avgRate,
 }: ChartEmbeddedStatsProps) {
   const { timeState } = useTimefilter();
 
@@ -183,7 +288,7 @@ export function ChartEmbeddedStats({
     !isStorageLoading && !statsHistogramResult.error ? formatBytes(estimatedSizeBytesInRange) : '—';
 
   const showTotals = stats !== undefined && !isStatsLoading;
-  const totalDocsLine = showTotals ? chartEmbeddedTotalDocsLine(totalDocsForStorageAvg) : '—';
+  const totalDocsLine = showTotals ? String(totalDocsForStorageAvg) : '—';
   const totalStorageLine = showTotals
     ? chartEmbeddedTotalStorageLine(totalSizeBytesForStorage)
     : '—';
@@ -192,21 +297,31 @@ export function ChartEmbeddedStats({
     <ChartStatsAside>
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
         <EuiFlexItem grow={false}>
-          <DocCountStatRow
-            statsHistogramResult={statsHistogramResult}
-            docCountInRange={docCountInRange}
-            totalLine={totalDocsLine}
-          />
+          {viewMode === 'ingestion_rate' ? (
+            <RateStats
+              peakRate={peakRate}
+              avgRate={avgRate}
+              isLoading={statsHistogramResult.loading}
+            />
+          ) : (
+            <>
+              <DocCountStatRow
+                statsHistogramResult={statsHistogramResult}
+                docCountInRange={docCountInRange}
+                totalLine={totalDocsLine}
+              />
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.streams.chartEmbeddedStats.docsInSelectedTimeTextLabel', {
+                  defaultMessage: '{docCount} docs in selected time range',
+                  values: { docCount: docCountInRange },
+                })}
+              </EuiText>
+            </>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <OverviewStatWithTotal
-            description={chartEmbeddedEstimatedStorageLabel()}
-            rangeTitle={rangeStorageTitle}
-            totalLine={totalStorageLine}
-            isLoading={isStorageLoading}
-            descriptionInfoTooltip={chartEmbeddedEstimatedStorageTooltip()}
-            dataTestSubj="streamsOverviewStorageSize"
-          />
+          <StorageTiersLegend />
         </EuiFlexItem>
       </EuiFlexGroup>
     </ChartStatsAside>

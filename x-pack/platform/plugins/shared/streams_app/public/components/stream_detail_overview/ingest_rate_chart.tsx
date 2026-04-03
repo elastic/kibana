@@ -9,6 +9,8 @@ import {
   Axis,
   BarSeries,
   Chart,
+  CurveType,
+  LineSeries,
   Position,
   ScaleType,
   Settings,
@@ -18,13 +20,13 @@ import {
 } from '@elastic/charts';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
@@ -34,7 +36,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
@@ -45,9 +47,10 @@ import {
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import { ChartEmbeddedSideStats } from './chart_embedded_stats';
+import { ChartEmbeddedSideStats, type ViewMode } from './chart_embedded_stats';
+import { OverviewTimeFilter } from './overview_time_filter';
 
-const CHART_HEIGHT = 150;
+const CHART_HEIGHT = 300;
 
 function getChartTimeZone(uiSettings: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
@@ -116,6 +119,35 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
     [allTimeseries]
   );
 
+  const intervalSeconds = minInterval / 1000;
+
+  const rateTimeseries = useMemo(
+    () =>
+      allTimeseries.map((series) => ({
+        ...series,
+        data: series.data.map((point) => ({
+          ...point,
+          rate: intervalSeconds > 0 ? (point.doc_count ?? 0) / intervalSeconds : 0,
+        })),
+      })),
+    [allTimeseries, intervalSeconds]
+  );
+
+  const peakRate = useMemo(
+    () =>
+      rateTimeseries.reduce(
+        (peak, series) =>
+          Math.max(peak, ...series.data.map((p) => (p.rate as number | undefined) ?? 0)),
+        0
+      ),
+    [rateTimeseries]
+  );
+
+  const avgRate = useMemo(() => {
+    const timeRangeSeconds = (timeState.end - timeState.start) / 1000;
+    return timeRangeSeconds > 0 ? docCountInRange / timeRangeSeconds : 0;
+  }, [docCountInRange, timeState]);
+
   const { updateTimeRange } = useTimeRangeUpdate();
   const onBrushEnd = useCallback<BrushEndListener>(
     (brushEvent) => {
@@ -133,6 +165,11 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
   const documentsSeriesName = i18n.translate(
     'xpack.streams.streamOverview.timeSeriesChart.legend.documents',
     { defaultMessage: 'Documents' }
+  );
+
+  const averageSeriesName = i18n.translate(
+    'xpack.streams.streamOverview.timeSeriesChart.legend.average',
+    { defaultMessage: 'Average' }
   );
 
   const chartHeaderCountDisplay =
@@ -157,15 +194,47 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
     }
   );
 
+  const toggleButtons = [
+    {
+      id: 'documents',
+      label: 'Documents',
+    },
+    {
+      id: 'ingestion_rate',
+      label: 'Ingestion rate',
+    },
+    {
+      id: 'storage',
+      label: 'Storage',
+    },
+  ];
+
+  const [toggleIdSelected, setToggleIdSelected] = useState(toggleButtons[0].id);
+
+  const onChange = useCallback((id: string) => {
+    setToggleIdSelected(id);
+  }, []);
+
+  const viewMode: ViewMode = toggleIdSelected === 'ingestion_rate' ? 'ingestion_rate' : 'documents';
+  const activeSeriesName = viewMode === 'ingestion_rate' ? averageSeriesName : documentsSeriesName;
+
   const chartHeader = (
     <div data-test-subj="streamsAppStreamOverviewChartHeader">
-      <EuiTitle size="s">
-        <h3>{chartHeaderTitle}</h3>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
-        {chartHeaderSubtitle}
-      </EuiText>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem>
+          {' '}
+          <EuiButtonGroup
+            legend="Default single select button group"
+            options={toggleButtons}
+            idSelected={toggleIdSelected}
+            onChange={onChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <OverviewTimeFilter />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
     </div>
   );
 
@@ -233,23 +302,44 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
                   id="y-axis"
                   ticks={3}
                   position={Position.Left}
-                  tickFormat={(value) => (value === null ? '' : String(value))}
+                  tickFormat={(value) => {
+                    if (value === null) return '';
+                    return viewMode === 'ingestion_rate'
+                      ? `${formatNumber(value as number, '0,0.0')}/s`
+                      : String(value);
+                  }}
                 />
-                {allTimeseries.map((serie) => (
-                  <BarSeries
-                    key={serie.id}
-                    id={serie.id}
-                    timeZone={barSeriesTimeZone}
-                    name={documentsSeriesName}
-                    color={euiTheme.colors.success}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="x"
-                    yAccessors={['doc_count']}
-                    data={serie.data}
-                    enableHistogramMode
-                  />
-                ))}
+                {viewMode === 'ingestion_rate'
+                  ? rateTimeseries.map((serie) => (
+                      <LineSeries
+                        key={serie.id}
+                        id={serie.id}
+                        timeZone={barSeriesTimeZone}
+                        name={averageSeriesName}
+                        color={euiTheme.colors.vis.euiColorVis2}
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor="x"
+                        yAccessors={['rate']}
+                        data={serie.data}
+                        curve={CurveType.LINEAR}
+                      />
+                    ))
+                  : allTimeseries.map((serie) => (
+                      <BarSeries
+                        key={serie.id}
+                        id={serie.id}
+                        timeZone={barSeriesTimeZone}
+                        name={documentsSeriesName}
+                        color={euiTheme.colors.vis.euiColorVis0}
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor="x"
+                        yAccessors={['doc_count']}
+                        data={serie.data}
+                        enableHistogramMode
+                      />
+                    ))}
               </Chart>
             )}
             <EuiSpacer size="s" />
@@ -261,23 +351,13 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
               data-test-subj="streamsAppStreamOverviewChartLegend"
             >
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate(
-                    'xpack.streams.streamOverview.timeSeriesChart.rangeLegendPrefix',
-                    {
-                      defaultMessage: 'For the selected time-range',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
                 <span
                   aria-hidden
                   css={{
                     width: euiTheme.size.s,
                     height: euiTheme.size.s,
                     borderRadius: '50%',
-                    backgroundColor: euiTheme.colors.success,
+                    backgroundColor: euiTheme.colors.vis.euiColorVis0,
                     display: 'inline-block',
                     flexShrink: 0,
                   }}
@@ -285,7 +365,7 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {documentsSeriesName}
+                  {activeSeriesName}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -296,6 +376,9 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
           esqlSource={esqlSource}
           statsHistogramResult={histogramResult}
           docCountInRange={docCountInRange}
+          viewMode={viewMode}
+          peakRate={peakRate}
+          avgRate={avgRate}
         />
       </EuiFlexGroup>
     </EuiPanel>

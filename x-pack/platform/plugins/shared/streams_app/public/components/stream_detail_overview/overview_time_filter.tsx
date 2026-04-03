@@ -20,10 +20,13 @@ export function OverviewTimeFilter() {
     <EuiSuperDatePicker
       start={rangeFrom}
       end={rangeTo}
-      onTimeChange={({ start, end }) => updateTimeRange({ from: start, to: end })}
+      compressed
       onRefresh={() => refresh()}
       width="full"
       showUpdateButton="iconOnly"
+      showTimeWindowButtons
+      updateButtonProps={{ size: 's', color: 'primary' }}
+      onTimeChange={({ start, end }) => updateTimeRange({ from: start, to: end })}
     />
   );
 }

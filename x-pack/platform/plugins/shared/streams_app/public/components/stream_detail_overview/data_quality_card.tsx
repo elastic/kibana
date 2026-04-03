@@ -247,7 +247,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         responsive
         gutterSize="none"
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow>
           <OverviewStat
             title={formatPct(degradedPercentage)}
             description={i18n.translate(
@@ -260,7 +260,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow>
           <OverviewStat
             title={canReadFailureStore ? formatPct(failedPercentage) : <FailedDocsNoPrivilege />}
             description={i18n.translate('xpack.streams.streamOverview.dataQualityCard.failedDocs', {
@@ -272,7 +272,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
           />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow>
           <OverviewStat
             title={formatNumber(ignoredFieldsResult.value ?? 0, '0,0')}
             description={i18n.translate(

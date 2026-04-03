@@ -40,11 +40,7 @@ export function OverviewStat({
   return (
     <EuiStat
       title={title}
-      description={
-        <EuiText size="s" color="subdued">
-          {description}
-        </EuiText>
-      }
+      description={description}
       isLoading={isLoading}
       titleSize={titleSize}
       titleColor={titleColor}
