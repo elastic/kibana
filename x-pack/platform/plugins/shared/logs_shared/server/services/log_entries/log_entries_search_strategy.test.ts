@@ -11,7 +11,6 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
-  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
@@ -288,8 +287,8 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
 });
 
 const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => ({
-  uiSettingsClient: uiSettingsServiceMock.createClient(),
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
+  getSearchSettings: () => ({ includeFrozen: false, maxConcurrentShardRequests: 0 }),
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
   request: httpServerMock.createKibanaRequest(),
