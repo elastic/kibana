@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useFormContext } from 'react-hook-form';
 import { TagsField } from './tags_field';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 /** Helper that triggers form submission so react-hook-form runs validation. */
 const SubmitButton = () => {
@@ -28,6 +28,12 @@ describe('TagsField', () => {
 
     expect(screen.getByText('Tags')).toBeInTheDocument();
     expect(screen.getByText('optional')).toBeInTheDocument();
+  });
+
+  it('renders the combo box', () => {
+    render(<TagsField />, { wrapper: createFormWrapper() });
+
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 
   it('renders existing tags as selected options', () => {
@@ -107,5 +113,13 @@ describe('TagsField', () => {
         screen.queryByText('Each tag must be no longer than 64 characters.')
       ).not.toBeInTheDocument();
     });
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<TagsField />, {
+      wrapper: createFormWrapper({}, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 });

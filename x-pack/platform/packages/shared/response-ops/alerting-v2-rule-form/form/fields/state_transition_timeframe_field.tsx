@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { DurationInput } from './duration_input';
+import { useRuleFormMeta } from '../contexts';
 
 const TIMEFRAME_UNIT_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.ruleForm.stateTransition.timeframeUnitAriaLabel',
@@ -43,6 +44,7 @@ export const StateTransitionTimeframeField = ({
   variant = 'pending',
 }: StateTransitionTimeframeFieldProps) => {
   const { control } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
   const fieldName = FIELD_NAMES[variant];
 
   return (
@@ -80,6 +82,7 @@ export const StateTransitionTimeframeField = ({
           unitAriaLabel={TIMEFRAME_UNIT_ARIA_LABEL}
           dataTestSubj={TEST_SUBJ_PREFIXES[variant]}
           idPrefix={TEST_SUBJ_PREFIXES[variant]}
+          compressed={layout === 'flyout'}
         />
       )}
     />

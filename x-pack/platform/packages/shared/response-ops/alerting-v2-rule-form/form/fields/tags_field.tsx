@@ -11,9 +11,11 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
+import { useRuleFormMeta } from '../contexts';
 
 export const TagsField = () => {
   const { control } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
 
   return (
     <Controller
@@ -56,6 +58,7 @@ export const TagsField = () => {
               isClearable={true}
               isInvalid={!!error}
               fullWidth
+              compressed={layout === 'flyout'}
             />
           </EuiFormRow>
         );
