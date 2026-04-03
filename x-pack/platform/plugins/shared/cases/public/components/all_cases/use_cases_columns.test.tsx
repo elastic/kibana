@@ -304,13 +304,11 @@ describe('useCasesColumns ', () => {
             "width": "15%",
           },
           Object {
-            "className": "eui-textNoWrap",
             "field": "status",
-            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "6.5em",
+            "width": "100px",
           },
           Object {
             "field": "severity",
@@ -364,13 +362,11 @@ describe('useCasesColumns ', () => {
             "width": "15%",
           },
           Object {
-            "className": "eui-textNoWrap",
             "field": "status",
-            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "6.5em",
+            "width": "100px",
           },
           Object {
             "field": "severity",
@@ -424,13 +420,11 @@ describe('useCasesColumns ', () => {
             "width": "15%",
           },
           Object {
-            "className": "eui-textNoWrap",
             "field": "status",
-            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "6.5em",
+            "width": "100px",
           },
           Object {
             "field": "severity",
@@ -469,7 +463,7 @@ describe('useCasesColumns ', () => {
       Object {
         "align": "right",
         "render": [Function],
-        "width": "8em",
+        "width": "120px",
       }
     `);
   });
