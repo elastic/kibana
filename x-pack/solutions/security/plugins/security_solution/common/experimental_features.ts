@@ -117,15 +117,14 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables gap reason detection and display in the gaps table.
-   * When off, gap_reason is not calculated or passed to rule metrics/telemetry.
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
   gapReasonDetectionEnabled: false,
 
   /**
    * Enables the redesigned execution results table on the rule details page
    */
-  newExecutionResultsTableEnabled: false,
+  newExecutionResultsTableEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps

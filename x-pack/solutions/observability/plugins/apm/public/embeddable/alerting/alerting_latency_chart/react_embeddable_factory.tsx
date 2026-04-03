@@ -43,7 +43,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      function serializeState() {
+      function serializeState(): EmbeddableApmAlertingLatencyVizProps {
         return {
           ...titleManager.getLatestState(),
           serviceName: serviceName$.getValue(),
@@ -60,7 +60,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<EmbeddableApmAlertingLatencyVizProps>({
         parentApi,
         uuid,
         serializeState,

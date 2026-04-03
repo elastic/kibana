@@ -13,12 +13,13 @@ import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
 import { firstFieldOption, getTimeFieldOptions } from '../utils';
 import { useDataFields } from '../hooks/use_data_fields';
-import { useRuleFormServices } from '../contexts';
+import { useRuleFormServices, useRuleFormMeta } from '../contexts';
 
 const PREFERRED_TIME_FIELD = '@timestamp';
 
 export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
+  const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });
 
@@ -84,6 +85,7 @@ export const TimeFieldSelect = () => {
               isInvalid={!!error}
               isLoading={isLoading}
               fullWidth
+              compressed={layout === 'flyout'}
             />
           </EuiFormRow>
         );

@@ -297,7 +297,7 @@ export const useTopNavLinks = ({
                     ? TransferAction.SaveSession
                     : TransferAction.SaveByValue;
 
-                  services.embeddableEditor.transferBackToEditor(action, saveState);
+                  services.embeddableEditor.transferBackToEditor(action, { state: saveState });
                 }
               : undefined,
           });
