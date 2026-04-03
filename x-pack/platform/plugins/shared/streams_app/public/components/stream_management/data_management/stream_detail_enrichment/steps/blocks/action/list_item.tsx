@@ -98,9 +98,12 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === 'Escape') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       saveDescription();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsEditingDescription(false);
     }
   };
 
