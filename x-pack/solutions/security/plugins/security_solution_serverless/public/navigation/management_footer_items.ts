@@ -131,7 +131,7 @@ export const createManagementFooterItemsTree = (
           breadcrumbStatus: 'hidden',
           children: [
             {
-              link: 'management:query_activity',
+              link: 'management:queryActivity',
               breadcrumbStatus: 'hidden',
               badgeType: 'new',
             },

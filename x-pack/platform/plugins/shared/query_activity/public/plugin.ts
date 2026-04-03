@@ -29,7 +29,7 @@ export class QueryActivityPlugin
     plugins: QueryActivitySetupDependencies
   ): QueryActivityPluginSetup {
     plugins.management.sections.section.clusterPerformance.registerApp({
-      id: 'query_activity',
+      id: 'queryActivity',
       title: PLUGIN_NAME,
       order: 99,
       async mount(params: ManagementAppMountParams) {

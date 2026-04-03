@@ -47,7 +47,7 @@ export const QueryActivityAppContextProvider: React.FC<
   const capabilities = useMemo<QueryActivityCapabilities>(
     () => ({
       canCancelTasks:
-        Boolean(data?.canCancelTasks) && kibanaCapabilities.query_activity?.save !== false,
+        Boolean(data?.canCancelTasks) && kibanaCapabilities.queryActivity?.save !== false,
       canViewTasks: Boolean(data?.canViewTasks),
       isLoading,
       missingClusterPrivileges: data?.missingClusterPrivileges ?? [],

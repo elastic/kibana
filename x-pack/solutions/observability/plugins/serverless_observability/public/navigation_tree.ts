@@ -520,7 +520,7 @@ export const createNavigationTree = ({
               }
             ),
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:query_activity', badgeType: 'new' }],
+            children: [{ link: 'management:queryActivity', badgeType: 'new' }],
           },
           ...filterForFeatureAvailability(
             {

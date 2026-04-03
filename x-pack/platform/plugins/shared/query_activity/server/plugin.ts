@@ -44,7 +44,7 @@ export class QueryActivityPlugin
     core.capabilities.registerProvider(() => ({
       management: {
         clusterPerformance: {
-          query_activity: true,
+          queryActivity: true,
         },
       },
     }));

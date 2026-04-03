@@ -270,7 +270,7 @@ export const getNavigationTreeDefinition = ({
                       id: 'monitoring',
                       link: 'monitoring',
                     },
-                    { badgeType: 'new', link: 'management:query_activity' },
+                    { badgeType: 'new', link: 'management:queryActivity' },
                   ],
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.management.clusterPerformance',

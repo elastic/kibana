@@ -83,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const clusterPerformanceSection = sections.find(
           (section) => section.sectionId === 'clusterPerformance'
         );
-        expect(clusterPerformanceSection?.sectionLinks).to.eql(['query_activity']);
+        expect(clusterPerformanceSection?.sectionLinks).to.eql(['queryActivity']);
         const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
         expect(kibanaSection?.sectionLinks).to.eql([
           'dataViews',

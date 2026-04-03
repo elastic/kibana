@@ -573,7 +573,7 @@ function createNavTree({
             children: [
               { link: 'monitoring' },
               {
-                link: 'management:query_activity',
+                link: 'management:queryActivity',
                 badgeType: 'new',
               },
             ],

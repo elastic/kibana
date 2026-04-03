@@ -208,7 +208,7 @@ export const createNavigationTree = (
           title: i18nStrings.clusterPerformance.title,
           children: [
             { link: 'monitoring' },
-            { link: 'management:query_activity', badgeType: 'new' },
+            { link: 'management:queryActivity', badgeType: 'new' },
           ],
         },
         {
