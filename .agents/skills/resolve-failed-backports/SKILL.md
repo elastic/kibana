@@ -58,10 +58,30 @@ Run the backport from the **Kibana repo root**:
 node scripts/backport --pr <SOURCE_PR> -b <branch1> <branch2> ... --editor true
 ```
 
+- If you want the backport tool to keep running while you resolve conflicts in
+  a separate shell, use any detached-session tool or second-terminal workflow
+  available on that machine. Do not assume `tmux` is installed.
+- Optional `tmux` example:
+  ```bash
+  tmux new-session -d -s backport_<SOURCE_PR> \
+    'cd <repo-root> && node scripts/backport --pr <SOURCE_PR> -b <branch1> <branch2> ... --editor true'
+  ```
+- Optional `screen` example:
+  ```bash
+  screen -dmS backport_<SOURCE_PR> bash -lc \
+    'cd <repo-root> && node scripts/backport --pr <SOURCE_PR> -b <branch1> <branch2> ... --editor true'
+  ```
+- If you launched the tool in a detached session, reattach to inspect the
+  prompt and continue interacting with it:
+  ```bash
+  tmux attach-session -t backport_<SOURCE_PR>
+  screen -r backport_<SOURCE_PR>
+  ```
 - `--editor true` is a no-op editor so the tool falls through immediately to
   its interactive confirm prompt on conflict.
-- Run this in a **foreground** terminal. The tool will halt when it encounters
-  a conflict and print the confirm prompt.
+- Run this in a **foreground** terminal or a detached session available on the
+  machine. The tool will halt when it encounters a conflict and print the
+  confirm prompt.
 
 The backport tool operates in its own clone at `~/.backport/repositories/elastic/kibana`.
 All conflict resolution work happens in that directory. If an in progress merge conflict
@@ -96,12 +116,21 @@ For each conflicting file:
 3. **Resolve the conflict** by editing the file to remove conflict markers with
    the correct content.
 4. Stage resolved files with `git add <file>` or `git rm <file>` for deletions.
+5. NEVER continue unless you have verified all merge conflicts are resolved.
 
 ### Step 4: Continue the backport
 
 After all conflicting files are resolved and staged, press ENTER in the
 backport tool terminal to continue. The tool will verify all conflicts are
 resolved (it loops if any remain) and then proceed to create the backport PR.
+
+If you started the tool in a detached session and want to send ENTER
+non-interactively:
+
+```bash
+tmux send-keys -t backport_<SOURCE_PR> Enter
+screen -S backport_<SOURCE_PR> -X stuff $'\n'
+```
 
 ### Step 5: Repeat for additional branches
 
