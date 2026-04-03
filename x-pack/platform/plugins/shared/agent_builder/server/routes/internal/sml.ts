@@ -109,14 +109,10 @@ export function registerInternalSmlRoutes({
       validate: {
         body: schema.object({
           conversation_id: schema.string(),
-          items: schema.arrayOf(
-            schema.object({
-              chunk_id: schema.string(),
-              attachment_id: schema.string(),
-              attachment_type: schema.string(),
-            }),
-            { minSize: 1, maxSize: SML_HTTP_ATTACH_ITEMS_MAX }
-          ),
+          chunk_ids: schema.arrayOf(schema.string(), {
+            minSize: 1,
+            maxSize: SML_HTTP_ATTACH_ITEMS_MAX,
+          }),
         }),
       },
       options: { access: 'internal' },
@@ -129,7 +125,7 @@ export function registerInternalSmlRoutes({
           conversations: conversationsService,
           attachments: attachmentsService,
         } = getInternalServices();
-        const { conversation_id: conversationId, items } = request.body;
+        const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
         const [coreStart] = await coreSetup.getStartServices();
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
@@ -146,7 +142,7 @@ export function registerInternalSmlRoutes({
         }
 
         const resolvedItems = await resolveSmlAttachItems({
-          items,
+          chunkIds,
           sml,
           esClient,
           request,

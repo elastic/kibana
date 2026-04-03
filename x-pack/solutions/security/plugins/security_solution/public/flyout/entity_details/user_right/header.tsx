@@ -26,12 +26,14 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 import type { ManagedUserData } from '../shared/hooks/use_managed_user';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 interface UserPanelHeaderProps {
   userName: string;
   managedUser: ManagedUserData;
   lastSeen: FirstLastSeenData;
   entityId?: string;
+  identityFields?: IdentityFields;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
@@ -42,6 +44,7 @@ export const UserPanelHeader = ({
   managedUser,
   lastSeen,
   entityId,
+  identityFields,
 }: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
@@ -88,7 +91,15 @@ export const UserPanelHeader = ({
             <EuiFlexItem grow={false}>
               <SecuritySolutionLinkAnchor
                 deepLinkId={SecurityPageName.users}
-                path={getTabsOnUsersDetailsUrl(userName, UsersTableType.events, undefined)}
+                path={getTabsOnUsersDetailsUrl(
+                  userName,
+                  UsersTableType.events,
+                  undefined,
+                  entityId,
+                  identityFields && Object.keys(identityFields).length > 0
+                    ? identityFields
+                    : undefined
+                )}
                 target={'_blank'}
                 external={false}
                 css={linkTitleCSS}

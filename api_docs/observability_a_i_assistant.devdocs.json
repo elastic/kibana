@@ -11344,7 +11344,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 782,
@@ -11402,7 +11402,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; role: ",
+                      "{ id: string; text: string; user?: { name: string; } | undefined; title?: string | undefined; role: ",
                       {
                         "pluginId": "observabilityAIAssistant",
                         "scope": "common",
@@ -11410,7 +11410,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 819,

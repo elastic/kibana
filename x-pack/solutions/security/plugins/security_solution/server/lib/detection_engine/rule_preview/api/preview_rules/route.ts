@@ -114,9 +114,14 @@ export const previewRulesRoute = (
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
         try {
-          const [, { data, security: securityService, share, dataViews }] =
+          const [coreStart, { data, security: securityService, share, dataViews }] =
             await getStartServices();
-          const searchSourceClient = await data.search.searchSource.asScoped(request);
+          const searchSourceClientWithCps = await data.search.searchSource.asScoped(request, {
+            projectRouting: 'space',
+          });
+          const scopedClusterClientWithCps = coreStart.elasticsearch.client.asScoped(request, {
+            projectRouting: 'space',
+          });
           const savedObjectsClient = coreContext.savedObjects.client;
           const siemClient = (await context.securitySolution).getAppClient();
           const actionsClient = (await context.actions).getActionsClient();
@@ -274,12 +279,12 @@ export const previewRulesRoute = (
                   savedObjectsClient: coreContext.savedObjects.client,
                   scopedClusterClient: wrapScopedClusterClient({
                     abortController,
-                    scopedClusterClient: coreContext.elasticsearch.client,
+                    scopedClusterClient: scopedClusterClientWithCps,
                   }),
                   getSearchSourceClient: async () =>
                     wrapSearchSourceClient({
                       abortController,
-                      searchSourceClient,
+                      searchSourceClient: searchSourceClientWithCps,
                     }),
                   getMaintenanceWindowIds: async () => [],
                   getMaintenanceWindowNames: async () => [],
@@ -287,7 +292,9 @@ export const previewRulesRoute = (
                   getDataViews: async () => dataViewsService,
                   share,
                   getAsyncSearchClient: (strategy) => {
-                    const client = data.search.asScoped(request);
+                    const clientWithCps = data.search.asScoped(request, {
+                      projectRouting: 'space',
+                    });
                     return wrapAsyncSearchClient({
                       rule: {
                         name: rule.name,
@@ -297,7 +304,7 @@ export const previewRulesRoute = (
                       },
                       logger,
                       strategy,
-                      client,
+                      client: clientWithCps,
                       abortController,
                     });
                   },
