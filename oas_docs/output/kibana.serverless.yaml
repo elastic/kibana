@@ -64898,6 +64898,7 @@ paths:
                 - pending
                 - waiting
                 - waiting_for_input
+                - waiting_for_child
                 - running
                 - completed
                 - failed
@@ -64905,7 +64906,7 @@ paths:
                 - timed_out
                 - skipped
               type: string
-            maxItems: 9
+            maxItems: 10
             type: array
         - description: Filter by execution type.
           in: query
