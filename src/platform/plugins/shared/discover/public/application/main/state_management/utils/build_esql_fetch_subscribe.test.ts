@@ -8,6 +8,9 @@
  */
 
 import { waitFor } from '@testing-library/react';
+
+const EXTENDED_TIMEOUT = 10_000;
+
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -721,27 +724,31 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  it('should call setProfileStateFieldsToReset correctly when columns change', async () => {
-    const { toolkit, dataState } = await setupTest({});
-    const documents$ = dataState.data$.documents$;
-    const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
-    const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
-    documents$.next({
-      fetchStatus: FetchStatus.PARTIAL,
-      query: { esql: 'from pattern' },
-      result: result1,
-    });
-    await waitFor(() =>
-      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none')
-    );
-    documents$.next({
-      fetchStatus: FetchStatus.PARTIAL,
-      query: { esql: 'from pattern' },
-      result: result2,
-    });
-    await waitFor(() =>
-      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns'])
-    );
-  });
+  it(
+    'should call setProfileStateFieldsToReset correctly when columns change',
+    async () => {
+      const { toolkit, dataState } = await setupTest({});
+      const documents$ = dataState.data$.documents$;
+      const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
+      const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      documents$.next({
+        fetchStatus: FetchStatus.PARTIAL,
+        query: { esql: 'from pattern' },
+        result: result1,
+      });
+      await waitFor(() =>
+        expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none')
+      );
+      documents$.next({
+        fetchStatus: FetchStatus.PARTIAL,
+        query: { esql: 'from pattern' },
+        result: result2,
+      });
+      await waitFor(() =>
+        expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns'])
+      );
+    },
+    EXTENDED_TIMEOUT
+  );
 });

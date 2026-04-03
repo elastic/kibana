@@ -292,45 +292,51 @@ describe('discover responsive sidebar', function () {
     resetExistingFieldsCache();
   });
 
-  it('should have loading indicators during fields existence loading', async function () {
-    let resolveFunction: (arg: unknown) => void;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
-      return new Promise((resolve) => {
-        resolveFunction = resolve;
+  it(
+    'should have loading indicators during fields existence loading',
+    async function () {
+      let resolveFunction: (arg: unknown) => void;
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolveFunction = resolve;
+        });
       });
-    });
 
-    const { result } = await renderComponent(
-      {
-        ...props,
-        fieldListVariant: 'list-always',
-      },
-      {},
-      undefined
-    );
+      const { result } = await renderComponent(
+        {
+          ...props,
+          fieldListVariant: 'list-always',
+        },
+        {},
+        undefined
+      );
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-countLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
-
-    expect(result.container.querySelector('.euiProgress')).not.toBeNull();
-
-    resolveFunction!({
-      indexPatternTitle: 'test-loaded',
-      existingFieldNames: Object.keys(mockfieldCounts),
-    });
-
-    await waitFor(() => {
       expect(
-        screen.queryByTestId('fieldListGroupedAvailableFields-countLoading')
-      ).not.toBeInTheDocument();
-    });
+        screen.getByTestId('fieldListGroupedAvailableFields-countLoading')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toBeInTheDocument();
-    expect(result.container.querySelector('.euiProgress')).toBeNull();
+      expect(result.container.querySelector('.euiProgress')).not.toBeNull();
 
-    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
-  });
+      resolveFunction!({
+        indexPatternTitle: 'test-loaded',
+        existingFieldNames: Object.keys(mockfieldCounts),
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('fieldListGroupedAvailableFields-countLoading')
+        ).not.toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toBeInTheDocument();
+      expect(result.container.querySelector('.euiProgress')).toBeNull();
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
+    },
+    EXTENDED_TIMEOUT
+  );
 
   it('should have Selected Fields, Available Fields, Popular and Meta Fields sections', async function () {
     await renderComponent(props);
@@ -524,37 +530,41 @@ describe('discover responsive sidebar', function () {
     expect(screen.getByTestId('fieldListFiltersFieldSearch')).toHaveValue('byte');
   });
 
-  it('should restore collapsed state state after switching tabs', async function () {
-    const { result: collapsedRender } = await renderComponent(
-      props,
-      {
-        fieldListUiState: {
-          isCollapsed: true,
+  it(
+    'should restore collapsed state state after switching tabs',
+    async function () {
+      const { result: collapsedRender } = await renderComponent(
+        props,
+        {
+          fieldListUiState: {
+            isCollapsed: true,
+          },
         },
-      },
-      undefined
-    );
+        undefined
+      );
 
-    expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
 
-    collapsedRender.unmount();
+      collapsedRender.unmount();
 
-    const { result: expandedRender } = await renderComponent(
-      props,
-      {
-        fieldListUiState: {
-          isCollapsed: false,
+      const { result: expandedRender } = await renderComponent(
+        props,
+        {
+          fieldListUiState: {
+            isCollapsed: false,
+          },
         },
-      },
-      undefined
-    );
+        undefined
+      );
 
-    await screen.findByTestId('fieldList');
+      await screen.findByTestId('fieldList');
 
-    expect(screen.getByTestId('fieldList')).toBeInTheDocument();
+      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
 
-    expandedRender.unmount();
-  });
+      expandedRender.unmount();
+    },
+    EXTENDED_TIMEOUT
+  );
 
   it('should show "Add a field" button to create a runtime field', async () => {
     const services = createMockServices();

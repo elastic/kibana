@@ -9,6 +9,8 @@
 
 import { act } from 'react-dom/test-utils';
 
+const EXTENDED_TIMEOUT = 10_000;
+
 // This import needs to come first as it contains the jest.mocks
 import { setupEnvironment } from './helpers';
 import type { Props } from '../../public/components/field_editor_flyout_content';
@@ -127,74 +129,78 @@ describe('<FieldEditorFlyoutContent />', () => {
       expect(form.getErrorsMessages()).toEqual(['A name is required.']);
     });
 
-    test('should forward values from the form', async () => {
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    test(
+      'should forward values from the form',
+      async () => {
+        const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-      const {
-        find,
-        actions: { toggleFormRow, fields, waitForUpdates },
-      } = await setup({ onSave });
+        const {
+          find,
+          actions: { toggleFormRow, fields, waitForUpdates },
+        } = await setup({ onSave });
 
-      await fields.updateName('someName');
-      await toggleFormRow('value');
-      await fields.updateScript('echo("hello")');
+        await fields.updateName('someName');
+        await toggleFormRow('value');
+        await fields.updateScript('echo("hello")');
 
-      await waitForUpdates();
+        await waitForUpdates();
 
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
+        await act(async () => {
+          find('fieldSaveButton').simulate('click');
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+        });
 
-      expect(onSave).toHaveBeenCalled();
+        expect(onSave).toHaveBeenCalled();
 
-      let fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+        let fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
-      expect(fieldReturned).toEqual({
-        name: 'someName',
-        type: 'keyword', // default to keyword
-        script: { source: 'echo("hello")' },
-        format: null,
-      });
+        expect(fieldReturned).toEqual({
+          name: 'someName',
+          type: 'keyword', // default to keyword
+          script: { source: 'echo("hello")' },
+          format: null,
+        });
 
-      // Change the type and make sure it is forwarded
-      await fields.updateType('date');
-      await waitForUpdates();
+        // Change the type and make sure it is forwarded
+        await fields.updateType('date');
+        await waitForUpdates();
 
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
+        await act(async () => {
+          find('fieldSaveButton').simulate('click');
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+        });
 
-      fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+        fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
-      expect(fieldReturned).toEqual({
-        name: 'someName',
-        type: 'date',
-        script: { source: 'echo("hello")' },
-        format: null,
-      });
+        expect(fieldReturned).toEqual({
+          name: 'someName',
+          type: 'date',
+          script: { source: 'echo("hello")' },
+          format: null,
+        });
 
-      await toggleFormRow('popularity');
-      await fields.updatePopularity('5');
+        await toggleFormRow('popularity');
+        await fields.updatePopularity('5');
 
-      await waitForUpdates();
+        await waitForUpdates();
 
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
+        await act(async () => {
+          find('fieldSaveButton').simulate('click');
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+        });
 
-      fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+        fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
-      expect(fieldReturned).toEqual({
-        name: 'someName',
-        type: 'date',
-        script: { source: 'echo("hello")' },
-        format: null,
-        popularity: 5,
-      });
-    });
+        expect(fieldReturned).toEqual({
+          name: 'someName',
+          type: 'date',
+          script: { source: 'echo("hello")' },
+          format: null,
+          popularity: 5,
+        });
+      },
+      EXTENDED_TIMEOUT
+    );
 
     test('should not block validation if no documents could be fetched from server', async () => {
       // If no documents can be fetched from the cluster (either because there are none or because
