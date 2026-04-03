@@ -22,7 +22,7 @@ import {
   getApmTracesEsqlLink,
   navigateToApmTracesEsqlLink,
 } from '../../utils/discover_links/get_apm_traces_esql_link';
-import type { EventType } from './good_bad_events_chart';
+import type { SloEventType } from '../../types';
 import type { TimeRange } from '@kbn/es-query';
 
 jest.mock('../../../../hooks/use_kibana');
@@ -31,10 +31,10 @@ jest.mock('../../../../hooks/use_get_preview_data');
 jest.mock('../../utils/discover_links/get_discover_link');
 jest.mock('../../utils/discover_links/get_apm_traces_esql_link');
 
-let capturedOnBarClick: ((timeRange: TimeRange, eventType: EventType) => void) | undefined;
+let capturedOnBarClick: ((timeRange: TimeRange, eventType: SloEventType) => void) | undefined;
 jest.mock('./good_bad_events_chart', () => ({
   GoodBadEventsChart: (props: {
-    onBarClick?: (timeRange: TimeRange, eventType: EventType) => void;
+    onBarClick?: (timeRange: TimeRange, eventType: SloEventType) => void;
   }) => {
     capturedOnBarClick = props.onBarClick;
     return <div />;
@@ -159,7 +159,7 @@ describe('EventsChartPanel', () => {
       act(() => capturedOnBarClick?.(barTimeRange, 'Good'));
 
       expect(navigateToApmTracesEsqlLinkMock).toHaveBeenCalledWith(
-        expect.objectContaining({ selectedEventType: 'Good', timeRange: barTimeRange })
+        expect.objectContaining({ selectedSloEventType: 'Good', timeRange: barTimeRange })
       );
       expect(openInDiscoverMock).not.toHaveBeenCalled();
     });
@@ -171,7 +171,7 @@ describe('EventsChartPanel', () => {
       act(() => capturedOnBarClick?.(barTimeRange, 'Bad'));
 
       expect(navigateToApmTracesEsqlLinkMock).toHaveBeenCalledWith(
-        expect.objectContaining({ selectedEventType: 'Bad', timeRange: barTimeRange })
+        expect.objectContaining({ selectedSloEventType: 'Bad', timeRange: barTimeRange })
       );
       expect(openInDiscoverMock).not.toHaveBeenCalled();
     });
