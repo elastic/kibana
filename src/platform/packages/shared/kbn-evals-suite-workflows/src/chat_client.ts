@@ -79,6 +79,10 @@ export class WorkflowsEvalsChatClient {
     agentId = agentBuilderDefaultAgentId,
     attachments,
   }: ConverseParams): Promise<ConverseResponse> => {
+    if (messages.length === 0) {
+      throw new Error('messages array cannot be empty');
+    }
+
     this.log.info('Calling converse for workflow eval');
 
     const callApi = async (): Promise<ConverseResponse> => {

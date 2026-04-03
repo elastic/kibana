@@ -62,8 +62,8 @@ const evaluate = base.extend<
   {}
 >({
   evaluateEditDataset: [
-    ({ chatClient, evaluators, executorClient }, use) => {
-      use(async ({ dataset }) => {
+    async ({ chatClient, evaluators, executorClient }, use) => {
+      await use(async ({ dataset }) => {
         await executorClient.runExperiment(
           {
             dataset,

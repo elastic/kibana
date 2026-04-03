@@ -141,6 +141,10 @@ async function showSummary(client: Client, runId: string) {
     console.log('\nEvaluator scores:');
     for (const [evalName, evalDocs] of Object.entries(byEval)) {
       const scores = evalDocs.map((d) => d.evaluator.score).filter((s): s is number => s !== null);
+      if (scores.length === 0) {
+        console.log(`  ${evalName.padEnd(25)} no scores`);
+        continue;
+      }
       const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
       const min = Math.min(...scores);
       const failures = scores.filter((s) => s < 1).length;

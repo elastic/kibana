@@ -55,16 +55,33 @@ const mockWorkflowConnectors = {
   },
 };
 
+const preconfiguredArgPrefix = '--xpack.actions.preconfigured=';
+
+function getMergedPreconfiguredArg(): string {
+  const parentArgs = evalsTracingConfig.kbnTestServer.serverArgs;
+  const existingArg = parentArgs.find((arg) => arg.startsWith(preconfiguredArgPrefix));
+  const existingConnectors = existingArg
+    ? JSON.parse(existingArg.slice(preconfiguredArgPrefix.length))
+    : {};
+
+  return `${preconfiguredArgPrefix}${JSON.stringify({
+    ...existingConnectors,
+    ...mockWorkflowConnectors,
+  })}`;
+}
+
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
   kbnTestServer: {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsTracingConfig.kbnTestServer.serverArgs.filter(
+        (arg) => !arg.startsWith(preconfiguredArgPrefix)
+      ),
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
-      `--xpack.actions.preconfigured=${JSON.stringify(mockWorkflowConnectors)}`,
+      getMergedPreconfiguredArg(),
     ],
   },
 };
