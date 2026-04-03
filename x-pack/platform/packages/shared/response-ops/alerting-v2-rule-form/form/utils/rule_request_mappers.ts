@@ -25,30 +25,14 @@ type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
 /**
  * Builds the `recovery_policy.query` portion of the API payload.
  *
- * Two modes:
- * 1. **Condition mode** – The user specified an evaluation condition (WHERE clause)
- *    and wrote a recovery condition. The base query for recovery is the same
- *    evaluation base query.
- * 2. **Full-query mode** – The user wrote a standalone recovery base query
- *    (no evaluation condition was split out).
+ * Only full-query mode is supported: the user provides a standalone recovery
+ * base query.
  */
 const buildRecoveryQuery = (
-  recoveryPolicy: NonNullable<FormValues['recoveryPolicy']>,
-  evaluation: FormValues['evaluation']
-): { query: { base: string; condition?: string } } | Record<string, never> => {
+  recoveryPolicy: NonNullable<FormValues['recoveryPolicy']>
+): { query: { base: string } } | Record<string, never> => {
   const { query } = recoveryPolicy;
 
-  // Condition-only mode: recovery WHERE clause applied to the evaluation base query
-  if (query?.condition) {
-    return {
-      query: {
-        base: query.base || evaluation.query.base,
-        condition: query.condition,
-      },
-    };
-  }
-
-  // Full-query mode: user provided a standalone recovery base query
   if (query?.base) {
     return { query: { base: query.base } };
   }
@@ -71,21 +55,17 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
 const mapEvaluation = (evaluation: FormValues['evaluation']) => ({
   query: {
     base: evaluation.query.base,
-    ...(evaluation.query.condition ? { condition: evaluation.query.condition } : {}),
   },
 });
 
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
 
-const mapRecoveryPolicy = (
-  recoveryPolicy: FormValues['recoveryPolicy'],
-  evaluation: FormValues['evaluation']
-) => {
+const mapRecoveryPolicy = (recoveryPolicy: FormValues['recoveryPolicy']) => {
   if (!recoveryPolicy) return undefined;
   return {
     type: recoveryPolicy.type,
-    ...(recoveryPolicy.type === 'query' ? buildRecoveryQuery(recoveryPolicy, evaluation) : {}),
+    ...(recoveryPolicy.type === 'query' ? buildRecoveryQuery(recoveryPolicy) : {}),
   };
 };
 
@@ -160,9 +140,9 @@ export interface RuleRequestCommon {
   metadata: { name: string; description?: string; owner?: string; labels?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
-  evaluation: { query: { base: string; condition?: string } };
+  evaluation: { query: { base: string } };
   grouping?: { fields: string[] };
-  recovery_policy?: { type: RecoveryPolicyType; query?: { base?: string; condition?: string } };
+  recovery_policy?: { type: RecoveryPolicyType; query?: { base?: string } };
   state_transition?: {
     pending_count?: number;
     pending_timeframe?: string;
@@ -217,7 +197,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     schedule: mapSchedule(schedule),
     evaluation: mapEvaluation(evaluation),
     grouping: mapGrouping(grouping),
-    recovery_policy: mapRecoveryPolicy(recoveryPolicy, evaluation),
+    recovery_policy: mapRecoveryPolicy(recoveryPolicy),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
@@ -285,7 +265,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     evaluation: {
       query: {
         base: rule.evaluation.query.base,
-        condition: rule.evaluation.query.condition,
       },
     },
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
@@ -297,7 +276,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
               ? {
                   query: {
                     base: rule.recovery_policy.query.base,
-                    condition: rule.recovery_policy.query.condition,
                   },
                 }
               : {}),
