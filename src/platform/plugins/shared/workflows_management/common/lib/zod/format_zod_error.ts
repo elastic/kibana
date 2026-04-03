@@ -47,9 +47,17 @@ export function formatZodError(
   const context = { schema, yamlDocument };
 
   const formattedIssues = error.issues.map((issue) => {
+    // Build a message that includes 'received' when available, so enrichment
+    // can extract the actual value (e.g. for invalid_literal connector types)
+    const issueWithReceived = issue as typeof issue & { received?: unknown };
+    const messageForEnrichment =
+      issueWithReceived.received !== undefined
+        ? `${issue.message} (received: "${issueWithReceived.received}")`
+        : issue.message;
+
     const { message: enrichedMessage } = enrichErrorMessage(
       issue.path ?? [],
-      issue.message,
+      messageForEnrichment,
       issue.code,
       context
     );

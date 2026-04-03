@@ -58,7 +58,14 @@ export function enrichErrorMessage(
   // TODO: remove the field name, it's in the path, and could be nested; also default fieldback doesn't make sense
   const fieldName = path.length > 0 ? String(path[path.length - 1]) : 'field';
 
-  // Try schema-aware enrichment first (requires schema)
+  // 1. Domain-specific messages (e.g. "No triggers found", "Invalid trigger type")
+  //    always more helpful than schema-derived descriptions
+  const domainEnriched = tryDomainSpecificEnrichment(path, fieldName, errorCode, originalMessage);
+  if (domainEnriched) {
+    return { message: domainEnriched, enriched: true };
+  }
+
+  // 2. Schema-aware enrichment (e.g. "field should be an object with properties: …")
   if (schema && path.length > 0) {
     const schemaEnriched = trySchemaAwareEnrichment(path, fieldName, errorCode, context);
     if (schemaEnriched) {
@@ -66,13 +73,13 @@ export function enrichErrorMessage(
     }
   }
 
-  // Try code-specific enrichment (works without schema)
-  const codeEnriched = tryCodeSpecificEnrichment(path, fieldName, errorCode, originalMessage);
-  if (codeEnriched) {
-    return { message: codeEnriched, enriched: true };
+  // 3. Generic code-based fallback (e.g. "field has an invalid value")
+  const genericEnriched = tryGenericFallbackEnrichment(path, fieldName, errorCode);
+  if (genericEnriched) {
+    return { message: genericEnriched, enriched: true };
   }
 
-  // Fallback: original message with path
+  // 4. Raw message with path appended
   const fallbackMessage =
     path.length > 0 ? `${originalMessage} at ${path.join('.')}` : originalMessage;
   return { message: fallbackMessage, enriched: false };
@@ -166,7 +173,11 @@ function tryWorkflowSchemaEnrichment(
 // Code-Specific Enrichment (no schema required)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function tryCodeSpecificEnrichment(
+/**
+ * Specific domain messages that are always more helpful than schema-derived
+ * descriptions. Runs before schema-aware enrichment.
+ */
+function tryDomainSpecificEnrichment(
   path: PropertyKey[],
   fieldName: string,
   errorCode: string,
@@ -206,7 +217,18 @@ function tryCodeSpecificEnrichment(
     return 'No steps found. Add at least one step.';
   }
 
-  // Generic fallback for union errors with a field name
+  return null;
+}
+
+/**
+ * Generic fallback for error codes that didn't match domain-specific or
+ * schema-aware enrichment. Runs last.
+ */
+function tryGenericFallbackEnrichment(
+  path: PropertyKey[],
+  fieldName: string,
+  errorCode: string
+): string | null {
   if (errorCode === 'invalid_union' && path.length > 0) {
     return `${fieldName} has an invalid value. Please check the expected format for this field.`;
   }
@@ -414,6 +436,8 @@ function isOptionalSchema(schema: z.ZodType): boolean {
 /**
  * Generates a user-friendly error message for any schema type.
  * Handles unions, objects, arrays, and primitives uniformly.
+ * When the schema is an array, peeks at the element schema to give
+ * richer hints like "should be a list of objects with properties: …".
  */
 function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): string | null {
   try {
@@ -428,6 +452,11 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
     // Handle objects with property list
     if (unwrappedSchema instanceof z.ZodObject) {
       return `${fieldName} should be ${getObjectPropertiesDescription(unwrappedSchema)}`;
+    }
+
+    // Handle arrays — peek at the element schema for a richer hint
+    if (unwrappedSchema instanceof z.ZodArray) {
+      return generateArrayErrorMessage(fieldName, unwrappedSchema);
     }
 
     // For all other types, use the type description
@@ -447,6 +476,28 @@ function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<an
 
   const optionsList = unionOptions.map((opt) => `  - ${opt.description}`).join('\n');
   return `${fieldName} should be oneOf:\n${optionsList}`;
+}
+
+/**
+ * Generates error message for array types by peeking at the element schema.
+ * e.g. "fields should be a list of objects with properties: type, name, description"
+ */
+function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<any>): string {
+  const elementSchema = unwrapSchema(arraySchema.element);
+
+  if (elementSchema instanceof z.ZodObject) {
+    return `${fieldName} should be a list of ${getObjectPropertiesDescription(elementSchema)}`;
+  }
+
+  if (elementSchema instanceof z.ZodUnion) {
+    const unionMsg = generateUnionErrorMessage('each item', elementSchema);
+    if (unionMsg) {
+      return `${fieldName} should be a list where ${unionMsg}`;
+    }
+  }
+
+  const elementType = getTypeDescriptionForError(elementSchema);
+  return `${fieldName} should be an array of ${elementType}`;
 }
 
 /**

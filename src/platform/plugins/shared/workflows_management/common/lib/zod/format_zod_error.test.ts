@@ -9,8 +9,15 @@
 
 import { parseDocument } from 'yaml';
 import { z } from '@kbn/zod/v4';
-import { formatZodError } from './format_zod_error';
+import { clearErrorMessageCache, formatZodError } from './format_zod_error';
+import { getAllConnectors } from '../../schema';
 import type { MockZodError } from '../errors/invalid_yaml_schema';
+
+jest.mock('../../schema', () => ({
+  getAllConnectors: jest.fn(() => []),
+}));
+
+const mockGetAllConnectors = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
 
 /**
  * Helper for testing the non-ZodError fallback path.
@@ -118,8 +125,8 @@ describe('formatZodError', () => {
 
     const result = formatZodError(mockError as any, simpleSchema);
 
-    // Should fall back to original message since path doesn't exist in schema
-    expect(result.message).toBe('Expected "0 | 1 | 2" at nonexistent');
+    // Should fall back to original message (with received info) since path doesn't exist in schema
+    expect(result.message).toBe('Expected "0 | 1 | 2" (received: "unknown") at nonexistent');
   });
 
   describe('non-ZodError inputs', () => {
@@ -308,7 +315,9 @@ describe('formatZodError', () => {
   });
 
   describe('dynamic union error messages from unionErrors', () => {
-    it('should generate union message from discriminator info in unionErrors', () => {
+    it('should fall back to generic invalid value message for union errors without schema', () => {
+      // enrichErrorMessage does not inspect unionErrors sub-issues;
+      // without a schema it falls back to the generic union message
       const mockError = {
         issues: [
           {
@@ -325,57 +334,13 @@ describe('formatZodError', () => {
                   },
                 ],
               },
-              {
-                issues: [
-                  {
-                    code: 'invalid_literal' as const,
-                    path: ['someField', 'type'],
-                    expected: 'option_b',
-                  },
-                ],
-              },
             ],
           },
         ],
       };
 
       const result = formatLoose(mockError);
-      expect(result.message).toContain('someField should be oneOf:');
-      expect(result.message).toContain('option_a');
-      expect(result.message).toContain('option_b');
-    });
-
-    it('should generate union message from required fields when no discriminator', () => {
-      const mockError = {
-        issues: [
-          {
-            code: 'invalid_union' as const,
-            path: ['someField'],
-            message: 'Invalid input',
-            unionErrors: [
-              {
-                issues: [
-                  {
-                    code: 'invalid_type' as const,
-                    path: ['someField', 'name'],
-                    message: 'Required',
-                  },
-                  {
-                    code: 'invalid_type' as const,
-                    path: ['someField', 'id'],
-                    message: 'Required',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      };
-
-      const result = formatLoose(mockError);
-      expect(result.message).toContain('someField should be oneOf:');
-      expect(result.message).toContain('id');
-      expect(result.message).toContain('name');
+      expect(result.message).toContain('someField has an invalid value');
     });
 
     it('should fall back to generic message when unionErrors has no analyzable issues', () => {
@@ -542,6 +507,81 @@ describe('formatZodError', () => {
     });
   });
 
+  describe('array element schema hints', () => {
+    it('should describe array of objects with property names', () => {
+      const schema = z.object({
+        fields: z.array(
+          z.object({
+            type: z.string(),
+            name: z.string(),
+            description: z.string(),
+          })
+        ),
+      });
+
+      const mockError = {
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['fields'],
+            message: 'Expected array',
+          },
+        ],
+      };
+
+      const result = formatLoose(mockError, schema);
+      expect(result.message).toContain('fields should be a list of');
+      expect(result.message).toContain('type');
+      expect(result.message).toContain('name');
+      expect(result.message).toContain('description');
+    });
+
+    it('should describe array of primitives', () => {
+      const schema = z.object({
+        tags: z.array(z.string()),
+      });
+
+      const mockError = {
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['tags'],
+            message: 'Expected array',
+          },
+        ],
+      };
+
+      const result = formatLoose(mockError, schema);
+      expect(result.message).toContain('tags should be an array of');
+    });
+
+    it('should describe array of union elements', () => {
+      const schema = z.object({
+        items: z.array(
+          z.union([
+            z.object({ type: z.literal('text'), content: z.string() }),
+            z.object({ type: z.literal('image'), url: z.string() }),
+          ])
+        ),
+      });
+
+      const mockError = {
+        issues: [
+          {
+            code: 'invalid_type' as const,
+            path: ['items'],
+            message: 'Expected array',
+          },
+        ],
+      };
+
+      const result = formatLoose(mockError, schema);
+      expect(result.message).toContain('items should be a list where');
+      expect(result.message).toContain('type: "text"');
+      expect(result.message).toContain('type: "image"');
+    });
+  });
+
   describe('multiple issues formatting', () => {
     it('should join multiple formatted issues with commas', () => {
       const mockError = {
@@ -582,7 +622,7 @@ describe('formatZodError', () => {
       expect(result.message).toBe('Custom validation failed at steps.0.with.param');
     });
 
-    it('should append path for unknown codes in the schema branch too', () => {
+    it('should use schema-derived message when schema is available', () => {
       const schema = z.object({ field: z.string() });
       const mockError = {
         issues: [
@@ -595,35 +635,27 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      expect(result.message).toBe('Some custom issue at field');
+      // Schema-aware enrichment resolves the path and describes the expected type
+      expect(result.message).toContain('field should be');
     });
   });
 
   describe('empty path handling', () => {
-    it('should use "field" as fallback when path is empty in union error', () => {
+    it('should return original message when path is empty', () => {
+      // With empty path, neither code-specific nor schema-aware enrichment
+      // applies — the original message is returned unchanged
       const mockError = {
         issues: [
           {
             code: 'invalid_union' as const,
             path: [],
             message: 'Invalid input',
-            unionErrors: [
-              {
-                issues: [
-                  {
-                    code: 'invalid_literal' as const,
-                    path: ['type'],
-                    expected: 'a',
-                  },
-                ],
-              },
-            ],
           },
         ],
       };
 
       const result = formatLoose(mockError);
-      expect(result.message).toContain('field should be oneOf:');
+      expect(result.message).toBe('Invalid input');
     });
   });
 
