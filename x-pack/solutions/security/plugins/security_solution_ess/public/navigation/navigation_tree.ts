@@ -231,6 +231,14 @@ export const createNavigationTree = (
             ],
           },
           {
+            title: i18nStrings.modelManagement.title,
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
+            ],
+          },
+          {
             title: i18nStrings.stackManagement.ai.title,
             children: [
               { link: 'management:genAiSettings' },

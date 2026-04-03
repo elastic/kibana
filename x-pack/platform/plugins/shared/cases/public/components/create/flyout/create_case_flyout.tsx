@@ -50,6 +50,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
         <ReactQueryDevtools initialIsOpen={false} />
         <EuiFlyout
           onClose={handleCancel}
+          session="never"
           tour-step="create-case-flyout"
           aria-label={i18n.CREATE_CASE_LABEL}
           data-test-subj="create-case-flyout"

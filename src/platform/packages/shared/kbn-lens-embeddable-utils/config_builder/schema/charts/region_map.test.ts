@@ -69,8 +69,8 @@ describe('Region Map Schema', () => {
           filters: [
             {
               filter: {
-                language: 'kuery',
-                query: 'location: "US"',
+                language: 'kql',
+                expression: 'location: "US"',
               },
               label: 'US',
             },
@@ -121,8 +121,8 @@ describe('Region Map Schema', () => {
           filters: [
             {
               filter: {
-                language: 'kuery',
-                query: 'location: "US"',
+                language: 'kql',
+                expression: 'location: "US"',
               },
               label: 'US',
             },
