@@ -92,8 +92,8 @@ describe('Bucket Operation Schemas', () => {
           type: 'significant' as const,
         },
         {
-          type: 'column' as const,
-          metric: 1,
+          type: 'metric' as const,
+          metric_index: 1,
           direction: 'desc' as const,
         },
         {
