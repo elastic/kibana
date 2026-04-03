@@ -57,6 +57,17 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('authc.setCurrentUser', () => {
+    it('properly delegates to the service', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const user = securityMock.createMockAuthenticatedUser();
+      api.authc.setCurrentUser(request, user);
+
+      expect(authc.setCurrentUser).toHaveBeenCalledTimes(1);
+      expect(authc.setCurrentUser).toHaveBeenCalledWith(request, user);
+    });
+  });
+
   describe('audit.asScoped', () => {
     let auditLogger: AuditLogger;
     it('properly delegates to the service', () => {

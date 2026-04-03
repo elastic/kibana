@@ -11,7 +11,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 
-import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
 import type {
   CheckUserProfilesPrivilegesResponse,
@@ -68,6 +69,7 @@ export interface UserProfileServiceSetupParams {
 export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 function parseUserProfile<D extends UserProfileData>(
@@ -116,10 +118,10 @@ export class UserProfileService {
     this.license = license;
   }
 
-  start({ clusterClient, session }: UserProfileServiceStartParams) {
+  start({ clusterClient, session, getCurrentUser }: UserProfileServiceStartParams) {
     return {
       activate: this.activate.bind(this, clusterClient),
-      getCurrent: this.getCurrent.bind(this, clusterClient, session),
+      getCurrent: this.getCurrent.bind(this, clusterClient, session, getCurrentUser),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -337,12 +339,31 @@ export class UserProfileService {
     });
   }
 
+  private async getUserProfile<D extends UserProfileData>(
+    clusterClient: IClusterClient,
+    profileId: string,
+    dataPath?: string
+  ): Promise<UserProfileWithSecurity<D>> {
+    const body = await clusterClient.asInternalUser.security.getUserProfile({
+      uid: profileId,
+      data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
+    });
+
+    if (body.profiles.length === 0) {
+      this.logger.error(`User profile ${profileId} is not found.`);
+      throw new Error('User profile is not found.');
+    }
+
+    return parseUserProfileWithSecurity<D>(body.profiles[0]);
+  }
+
   /**
    * See {@link UserProfileServiceStart} for documentation.
    */
   private async getCurrent<D extends UserProfileData>(
     clusterClient: IClusterClient,
     session: PublicMethodsOf<Session>,
+    getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
     if (!this.license?.isEnabled()) {
@@ -354,6 +375,16 @@ export class UserProfileService {
 
     if (request.auth.isAuthenticated === false) {
       throw new Error('Request to get current user profile is not authenticated.');
+    }
+
+    // When the authenticated user already has a profile_uid (e.g. enriched fake request from
+    // Task Manager), use it directly to avoid expensive session/API-key resolution round-trips.
+    const currentUser = getCurrentUser(request);
+    if (currentUser?.profile_uid) {
+      this.logger.debug(
+        `Resolving current user profile directly from profile_uid on the authenticated user.`
+      );
+      return this.getUserProfile<D>(clusterClient, currentUser.profile_uid, dataPath);
     }
 
     let profileId: string | undefined;

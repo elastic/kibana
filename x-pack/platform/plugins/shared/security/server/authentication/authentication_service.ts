@@ -97,6 +97,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  setCurrentUser: (request: KibanaRequest, user: AuthenticatedUser) => void;
 }
 
 export class AuthenticationService {
@@ -430,8 +431,17 @@ export class AuthenticationService {
       return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
     };
 
-    const getCurrentUser = (request: KibanaRequest) =>
-      http.auth.get<AuthenticatedUser>(request).state ?? null;
+    const fakeRequestUsers = new WeakMap<KibanaRequest, AuthenticatedUser>();
+
+    const getCurrentUser = (request: KibanaRequest) => {
+      const override = fakeRequestUsers.get(request);
+      if (override) return override;
+      return http.auth.get<AuthenticatedUser>(request).state ?? null;
+    };
+
+    const setCurrentUser = (request: KibanaRequest, user: AuthenticatedUser) => {
+      fakeRequestUsers.set(request, user);
+    };
 
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
@@ -534,6 +544,12 @@ export class AuthenticationService {
        * @param request
        */
       getCurrentUser,
+
+      /**
+       * Associates an authenticated user with a request so that {@link getCurrentUser}
+       * returns it. Intended for fake requests where the normal auth flow does not run.
+       */
+      setCurrentUser,
     };
   }
 }

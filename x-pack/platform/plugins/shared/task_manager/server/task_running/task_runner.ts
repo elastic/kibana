@@ -138,6 +138,7 @@ type Opts = {
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  enrichFakeRequest?: (request: KibanaRequest, userProfileId: string) => Promise<void>;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -195,6 +196,10 @@ export class TaskManagerRunner implements TaskRunner {
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
+  private readonly enrichFakeRequest?: (
+    request: KibanaRequest,
+    userProfileId: string
+  ) => Promise<void>;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -223,6 +228,7 @@ export class TaskManagerRunner implements TaskRunner {
     getPollInterval,
     apiKeyStrategy,
     eventLogger,
+    enrichFakeRequest,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -245,6 +251,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
+    this.enrichFakeRequest = enrichFakeRequest;
   }
 
   /**
@@ -436,10 +443,29 @@ export class TaskManagerRunner implements TaskRunner {
           const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
             modifiedContext.taskInstance
           );
+          const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
           const fakeRequest = this.getFakeKibanaRequest(
             apiKeyForRequest,
-            modifiedContext.taskInstance.userScope?.spaceId
+            modifiedContext.taskInstance.userScope?.spaceId,
+            userProfileId
           );
+
+          if (fakeRequest && userProfileId && this.enrichFakeRequest) {
+            try {
+              await this.enrichFakeRequest(fakeRequest, userProfileId);
+            } catch (err) {
+              this.logger.warn(
+                `Failed to enrich fake request with user profile for task ${this.taskType} ${this.instance.task.id}: ${err.message}`
+              );
+            }
+          }
+
+          const enrichRequest =
+            fakeRequest && userProfileId && this.enrichFakeRequest
+              ? async (request: KibanaRequest) => {
+                  await this.enrichFakeRequest!(request, userProfileId);
+                }
+              : undefined;
 
           const abortController = new AbortController();
 
@@ -447,6 +473,7 @@ export class TaskManagerRunner implements TaskRunner {
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
             abortController,
+            enrichRequest,
           });
 
           const originalTaskCancel = this.task.cancel;
@@ -1025,7 +1052,11 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 
-  private getFakeKibanaRequest(apiKey?: string, spaceId?: string): KibanaRequest | undefined {
+  private getFakeKibanaRequest(
+    apiKey?: string,
+    spaceId?: string,
+    userProfileId?: string
+  ): KibanaRequest | undefined {
     if (apiKey) {
       const requestHeaders: Headers = {};
 

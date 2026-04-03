@@ -17,6 +17,7 @@ import {
   taskSchemaV8,
   taskSchemaV9,
   taskSchemaV10,
+  taskSchemaV11,
 } from '../schemas/task';
 
 import { InstanceTaskCost } from '../../task';
@@ -159,6 +160,24 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
         };
       },
       create: taskSchemaV10,
+    },
+  },
+  '11': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          userScope: {
+            properties: {
+              userProfileId: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV11.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV11,
     },
   },
 };

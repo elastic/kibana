@@ -134,6 +134,8 @@ export const getApiKeyAndUserScope = async (
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
   const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
 
+  const user = security.authc.getCurrentUser(request);
+
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
 
   taskInstances.forEach((task) => {
@@ -147,6 +149,7 @@ export const getApiKeyAndUserScope = async (
           // Set apiKeyCreatedByUser to true if the request includes its own API key, since we do
           // not want to invalidate a specific API key that was not created by the task manager
           apiKeyCreatedByUser: requestHasApiKey(security, request),
+          userProfileId: user?.profile_uid,
         },
       });
     }

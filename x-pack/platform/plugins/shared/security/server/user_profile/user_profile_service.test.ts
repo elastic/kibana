@@ -39,6 +39,7 @@ describe('UserProfileService', () => {
   let mockStartParams: {
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     session: ReturnType<typeof sessionMock.create>;
+    getCurrentUser: jest.Mock;
   };
   let mockAuthz: ReturnType<typeof authorizationMock.create>;
   let userProfileService: UserProfileService;
@@ -46,6 +47,7 @@ describe('UserProfileService', () => {
     mockStartParams = {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       session: sessionMock.create(),
+      getCurrentUser: jest.fn().mockReturnValue(null),
     };
     mockAuthz = authorizationMock.create();
 
@@ -465,6 +467,59 @@ describe('UserProfileService', () => {
         ).not.toHaveBeenCalled();
 
         expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('with enriched fake request (profile_uid on authenticated user)', () => {
+      it('resolves the profile directly via profile_uid without session or API key lookup', async () => {
+        const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+          profile_uid: 'enriched-profile-uid',
+        });
+        mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(startContract.getCurrent({ request: mockRequest })).resolves.toMatchObject({
+          uid: 'UID',
+        });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({ uid: 'enriched-profile-uid', data: undefined });
+        expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
+      });
+
+      it('passes dataPath when resolving profile via profile_uid', async () => {
+        const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+          profile_uid: 'enriched-profile-uid',
+        });
+        mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: mockRequest, dataPath: 'some.path' })
+        ).resolves.toMatchObject({ uid: 'UID' });
+
+        expect(
+          mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        ).toHaveBeenCalledWith({
+          uid: 'enriched-profile-uid',
+          data: 'kibana.some.path',
+        });
+      });
+
+      it('throws if profile is not found', async () => {
+        const mockCurrentUser = securityMock.createMockAuthenticatedUser({
+          profile_uid: 'missing-uid',
+        });
+        mockStartParams.getCurrentUser.mockReturnValue(mockCurrentUser);
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+          profiles: [],
+        } as unknown as SecurityGetUserProfileResponse);
+
+        const startContract = userProfileService.start(mockStartParams);
+        await expect(
+          startContract.getCurrent({ request: mockRequest })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"User profile is not found."`);
       });
     });
 

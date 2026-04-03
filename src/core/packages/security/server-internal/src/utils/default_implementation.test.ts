@@ -24,6 +24,12 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.setCurrentUser', () => {
+    it('is a no-op', () => {
+      expect(() => implementation.authc.setCurrentUser({} as any, {} as any)).not.toThrow();
+    });
+  });
+
   describe('authc.getRedactedSessionId', () => {
     it('returns undefined', async () => {
       const sessionId = await implementation.authc.getRedactedSessionId({} as any);

@@ -20,7 +20,9 @@ import type {
   CoreSetup,
   Logger,
   CoreStart,
+  KibanaRequest,
 } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -447,6 +449,18 @@ export class TaskManagerPlugin
         kibanasPerPartition: this.config.kibanas_per_partition,
       });
 
+      const enrichFakeRequest = async (request: KibanaRequest, userProfileId: string) => {
+        const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+        const esUser = await esClient.security.authenticate();
+        const authenticatedUser = {
+          ...esUser,
+          authentication_provider: { type: '__taskManager', name: '__taskManager' },
+          elastic_cloud_user: false,
+          profile_uid: userProfileId,
+        } as unknown as AuthenticatedUser;
+        security.authc.setCurrentUser(request, authenticatedUser);
+      };
+
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -460,6 +474,7 @@ export class TaskManagerPlugin
         startingCapacity,
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
+        enrichFakeRequest,
       });
     }
 

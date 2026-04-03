@@ -93,6 +93,14 @@ export interface RunContext {
    */
   fakeRequest?: KibanaRequest;
   abortController: AbortController;
+
+  /**
+   * If the task was scheduled on behalf of a user with a known profile, this callback
+   * can be used to enrich additional KibanaRequest objects with the same user context.
+   * After enrichment, `security.authc.getCurrentUser(request)` will return the
+   * originating user (including `profile_uid`).
+   */
+  enrichRequest?: (request: KibanaRequest) => Promise<void>;
 }
 
 /**
@@ -292,6 +300,7 @@ export interface TaskUserScope {
   uiamApiKeyId?: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
+  userProfileId?: string;
 }
 
 /*

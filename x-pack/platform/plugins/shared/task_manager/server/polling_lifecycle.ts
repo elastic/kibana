@@ -12,7 +12,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart } from '@kbn/core/server';
+import type { Logger, ExecutionContextStart, KibanaRequest } from '@kbn/core/server';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -69,6 +69,8 @@ export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;
 }
 
+export type EnrichFakeRequest = (request: KibanaRequest, userProfileId: string) => Promise<void>;
+
 export interface TaskPollingLifecycleOpts {
   logger: Logger;
   definitions: TaskTypeDictionary;
@@ -82,6 +84,7 @@ export interface TaskPollingLifecycleOpts {
   startingCapacity: number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  enrichFakeRequest?: EnrichFakeRequest;
 }
 
 export type TaskLifecycleEvent =
@@ -123,6 +126,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private currentPollInterval: number;
   private apiKeyStrategy: ApiKeyStrategy;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
+  private enrichFakeRequest?: EnrichFakeRequest;
 
   private eventLogger: TaskEventLogger;
 
@@ -145,6 +149,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     startingCapacity,
     apiKeyStrategy,
     eventLogger,
+    enrichFakeRequest,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -154,6 +159,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.usageCounter = usageCounter;
     this.config = config;
     this.apiKeyStrategy = apiKeyStrategy;
+    this.enrichFakeRequest = enrichFakeRequest;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
@@ -281,6 +287,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       getPollInterval: () => this.currentPollInterval,
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
+      enrichFakeRequest: this.enrichFakeRequest,
     });
   };
 
