@@ -206,11 +206,13 @@ describe('AttachmentStateManager', () => {
     it('sets hidden flag when provided', async () => {
       const attachment = await manager.add({
         type: 'screen_context',
-        data: { url: 'http://example.com' },
+        data: { url: '/app/agent_builder' },
         hidden: true,
       });
 
       expect(attachment.hidden).toBe(true);
+      // URL should be stored as-is (relative paths are valid screen context URLs)
+      expect(attachment.versions[0].data).toEqual({ url: '/app/agent_builder' });
     });
 
     it('marks state as dirty', async () => {
@@ -376,7 +378,7 @@ describe('AttachmentStateManager', () => {
       await manager.add({
         id: 'test-1',
         type: 'screen_context',
-        data: { url: 'http://example.com' },
+        data: { url: '/app/agent_builder' },
       });
       await expect(manager.update('test-1', { data: {} as any })).rejects.toThrow(
         'Invalid attachment data for type "screen_context"'
