@@ -9,7 +9,6 @@
 import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
@@ -108,14 +107,6 @@ export function LensWrapper({
       : undefined,
   });
 
-  const handleOnLoad = useCallback(
-    (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => {
-      // Forward to the consumer's onLoad callback (e.g. for Discover inspector integration)
-      lensProps.onLoad?.(isLoading, adapters);
-    },
-    [lensProps]
-  );
-
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
   return (
@@ -133,7 +124,7 @@ export function LensWrapper({
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
-          onLoad={handleOnLoad}
+          onLoad={lensProps.onLoad}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />
