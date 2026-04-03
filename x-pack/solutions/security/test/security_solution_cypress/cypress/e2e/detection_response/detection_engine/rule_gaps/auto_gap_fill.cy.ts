@@ -74,7 +74,7 @@ const ensureAutoGapFillEnabledViaUi = () => {
 
       cy.get(RULE_SETTINGS_ENABLE_SWITCH).click();
       cy.get(RULE_SETTINGS_SAVE_BUTTON).click();
-      cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
+      cy.contains(TOASTER_BODY, 'Rule settings updated successfully');
       cy.get(RULE_SETTINGS_MODAL).should('not.exist');
       cy.waitUntil(() =>
         getGapAutoFillSchedulerApi().then(
@@ -117,7 +117,7 @@ describe(
         cy.get(RULE_SETTINGS_MODAL).should('exist');
         cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('have.attr', 'aria-checked', 'true').click();
         cy.get(RULE_SETTINGS_SAVE_BUTTON).should('not.be.disabled').click();
-        cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
+        cy.contains(TOASTER_BODY, 'Rule settings updated successfully');
         cy.get(RULE_SETTINGS_MODAL).should('not.exist');
 
         cy.waitUntil(() =>
