@@ -120,6 +120,8 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/react-hooks'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/content-management-plugin'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod
