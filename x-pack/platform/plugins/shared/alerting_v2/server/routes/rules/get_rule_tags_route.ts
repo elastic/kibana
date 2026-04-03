@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
-import { inject, injectable } from 'inversify';
-import { Response } from '@kbn/core-di-server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { inject, injectable } from 'inversify';
 import { ruleTagsResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 
 @injectable()
-export class GetRuleTagsRoute {
+export class GetRuleTagsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
   static path = `${ALERTING_V2_RULE_API_PATH}/_tags`;
   static security: RouteSecurity = {
@@ -25,11 +24,8 @@ export class GetRuleTagsRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Get rule tags',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {},
@@ -44,21 +40,17 @@ export class GetRuleTagsRoute {
     },
   };
 
-  constructor(
-    @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  protected readonly routeName = 'get rule tags';
 
-  async handle() {
-    try {
-      const tags = await this.rulesClient.getTags();
-      return this.response.ok({ body: { tags } });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(RulesClient) private readonly rulesClient: RulesClient
+  ) {
+    super(ctx);
+  }
+
+  protected async execute() {
+    const tags = await this.rulesClient.getTags();
+    return this.ctx.response.ok({ body: { tags } });
   }
 }
