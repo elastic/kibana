@@ -19,6 +19,7 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
+import { SuiteRunner } from './lib/suite_runner';
 
 export class EvalsPlugin
   implements
@@ -26,11 +27,14 @@ export class EvalsPlugin
 {
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
+  private readonly repoRoot: string;
   private datasetService?: DatasetService;
+  private suiteRunner?: SuiteRunner;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.repoRoot = process.cwd();
   }
 
   setup(
@@ -90,7 +94,23 @@ export class EvalsPlugin
     });
 
     const router = coreSetup.http.createRouter<EvalsRequestHandlerContext>();
-    registerRoutes({ router, logger: this.logger });
+
+    try {
+      this.suiteRunner = new SuiteRunner(this.repoRoot, this.logger);
+    } catch (err) {
+      this.logger.warn(
+        `[Evals] Failed to initialize SuiteRunner: ${err instanceof Error ? err.message : err}`
+      );
+    }
+
+    registerRoutes({
+      router,
+      logger: this.logger,
+      suiteRouteDeps: {
+        suiteRunner: this.suiteRunner,
+        repoRoot: this.repoRoot,
+      },
+    });
 
     return {};
   }

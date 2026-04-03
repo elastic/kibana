@@ -15,6 +15,7 @@ import { RunsListPage } from './pages/runs_list';
 import { RunDetailPage } from './pages/run_detail';
 import { DatasetsListPage } from './pages/datasets_list';
 import { DatasetDetailPage } from './pages/dataset_detail';
+import { SuitesListPage } from './pages/suites_list';
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
@@ -28,12 +29,20 @@ const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
   defaultMessage: 'Datasets',
 });
 
+const suitesTabLabel = i18n.translate('xpack.evals.navigation.suites', {
+  defaultMessage: 'Suites',
+});
+
 const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
   defaultMessage: 'Run details',
 });
 
 const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetDetail', {
   defaultMessage: 'Dataset details',
+});
+
+const suitesBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.suites', {
+  defaultMessage: 'Suites',
 });
 
 const EvalsHeader: React.FC = () => {
@@ -78,6 +87,10 @@ const getBreadcrumbs = ({
     return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
   }
 
+  if (pathname === '/suites') {
+    return [{ text: suitesBreadcrumbLabel }];
+  }
+
   return [{ text: runsTabLabel }];
 };
 
@@ -85,15 +98,20 @@ const EvalsNavigation: React.FC = () => {
   const history = useHistory();
   const { pathname } = useLocation();
   const isDatasetsSelected = pathname.startsWith('/datasets');
+  const isSuitesSelected = pathname === '/suites';
+  const isRunsSelected = !isDatasetsSelected && !isSuitesSelected;
 
   return (
     <div style={{ flex: '0 0 auto' }}>
       <EuiTabs size="s">
-        <EuiTab isSelected={!isDatasetsSelected} onClick={() => history.push('/')}>
+        <EuiTab isSelected={isRunsSelected} onClick={() => history.push('/')}>
           {runsTabLabel}
         </EuiTab>
         <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push('/datasets')}>
           {datasetsTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isSuitesSelected} onClick={() => history.push('/suites')}>
+          {suitesTabLabel}
         </EuiTab>
       </EuiTabs>
     </div>
@@ -136,6 +154,7 @@ export const EvalsApp: React.FC<{
             <Route exact path="/datasets" component={DatasetsListPage} />
             <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
             <Route path="/runs/:runId" component={RunDetailPage} />
+            <Route exact path="/suites" component={SuitesListPage} />
           </Routes>
         </div>
       </div>
