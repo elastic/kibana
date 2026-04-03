@@ -191,6 +191,8 @@ export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
 export const SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
   'securitySolution:suppressionBehaviorOnAlertClosure' as const;
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
+export const SECURITY_SOLUTION_EXCLUDED_GAP_REASONS_KEY =
+  'securitySolution:excludedGapReasons' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
