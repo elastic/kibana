@@ -8,35 +8,35 @@
 import type { InferenceFeatureConfig } from '@kbn/search-inference-endpoints/server';
 import { i18n } from '@kbn/i18n';
 import {
-  OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
-  OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
+  OBSERVABILITY_AI_ASSISTANT_INFERENCE_PARENT_FEATURE_ID,
+  OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
 } from '../common/feature';
 
 export const observabilityParentFeature: InferenceFeatureConfig = {
-  featureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
+  featureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_PARENT_FEATURE_ID,
   featureName: i18n.translate(
     'xpack.observabilityAiAssistant.inferenceFeature.observabilityParentName',
-    { defaultMessage: 'Observability' }
+    { defaultMessage: 'Observability AI Assistant' }
   ),
   featureDescription: i18n.translate(
     'xpack.observabilityAiAssistant.inferenceFeature.observabilityParentDescription',
-    { defaultMessage: 'Parent feature for Observability' }
+    { defaultMessage: 'Parent feature for Observability AI Assistant' }
   ),
   taskType: 'chat_completion',
   recommendedEndpoints: [],
 };
 
 const observabilityAIAssistantChatCompletionFeature: InferenceFeatureConfig = {
-  featureId: OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
-  parentFeatureId: OBSERVABILITY_INFERENCE_PARENT_FEATURE_ID,
+  featureId: OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
+  parentFeatureId: OBSERVABILITY_AI_ASSISTANT_INFERENCE_PARENT_FEATURE_ID,
   featureName: i18n.translate('xpack.observabilityAiAssistant.inferenceFeature.aiSettingsName', {
-    defaultMessage: 'AI Assistant and Insights',
+    defaultMessage: 'AI Assistant and Contextual Insights',
   }),
   featureDescription: i18n.translate(
     'xpack.observabilityAiAssistant.inferenceFeature.aiSettingsDescription',
     {
       defaultMessage:
-        'Inference endpoint configuration for Observability AI Assistant + Contextual Insights, AI Insights (Observability Agent is configured separately in the Agent Builder feature)',
+        'Inference endpoint configuration for Observability AI Assistant and Contextual Insights',
     }
   ),
   taskType: 'chat_completion',

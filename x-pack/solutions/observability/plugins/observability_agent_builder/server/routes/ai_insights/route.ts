@@ -18,7 +18,7 @@ import {
   type AlertDocForInsight,
 } from './alert_ai_insights/generate_alert_ai_insight';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
-import { OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID } from '../../../common/constants';
+import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -43,7 +43,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { inference, ruleRegistry } = startDeps;
 
       const resolved = await startDeps.searchInferenceEndpoints?.endpoints.getForFeature(
-        OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
+        OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
         request
       );
       resolved?.warnings.forEach((w) => logger.warn(w));
@@ -110,7 +110,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { inference } = startDeps;
 
       const resolved = await startDeps.searchInferenceEndpoints?.endpoints.getForFeature(
-        OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
+        OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
         request
       );
       resolved?.warnings.forEach((w) => logger.warn(w));
@@ -186,7 +186,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const { inference } = startDeps;
 
       const resolved = await startDeps.searchInferenceEndpoints?.endpoints.getForFeature(
-        OBSERVABILITY_AI_SETTINGS_SUBFEATURE_ID,
+        OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
         request
       );
       resolved?.warnings.forEach((w) => logger.warn(w));
