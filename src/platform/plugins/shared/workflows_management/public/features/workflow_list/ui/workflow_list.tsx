@@ -142,11 +142,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             notifications?.toasts.addSuccess('Workflow run started', {
               toastLifeTimeMs: 3000,
             });
-            application.navigateToUrl(
-              application.getUrlForApp('workflows', {
-                path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
-              })
-            );
+            application.navigateToApp('workflows', {
+              path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
+            });
           },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {

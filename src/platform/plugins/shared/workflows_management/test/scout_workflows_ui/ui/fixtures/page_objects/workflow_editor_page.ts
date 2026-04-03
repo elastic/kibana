@@ -37,6 +37,12 @@ export class WorkflowEditorPage {
     this.bulkBar = this.page.testSubj.locator('wfDiffBulkBar');
   }
 
+  private get leaveWithoutSavingModal(): Locator {
+    return this.page
+      .getByRole('alertdialog')
+      .filter({ hasText: 'Your changes have not been saved. Are you sure you want to leave?' });
+  }
+
   /**
    * Navigate to the workflow editor for a new workflow
    */
@@ -277,12 +283,57 @@ export class WorkflowEditorPage {
     );
   }
 
+  private async confirmLeaveWithoutSavingModalIfPresent() {
+    if (await this.leaveWithoutSavingModal.isVisible().catch(() => false)) {
+      await this.leaveWithoutSavingModal.getByRole('button', { name: 'Confirm' }).click();
+    }
+  }
+
+  private async waitForHeaderOverlayToClear() {
+    await this.page.waitForFunction(
+      () => {
+        return !document.querySelector('.euiOverlayMask[data-relative-to-header="above"]');
+      },
+      null,
+      { timeout: 30_000 }
+    );
+  }
+
+  private async waitForSaveToSettle() {
+    const timeoutAt = Date.now() + 30_000;
+
+    while (Date.now() < timeoutAt) {
+      await this.confirmLeaveWithoutSavingModalIfPresent();
+
+      const hasSavedBadge = await this.page.testSubj
+        .locator('workflowSavedChangesBadge')
+        .isVisible()
+        .catch(() => false);
+      const leaveModalVisible = await this.leaveWithoutSavingModal.isVisible().catch(() => false);
+      const headerOverlayVisible = await this.page
+        .locator('.euiOverlayMask[data-relative-to-header="above"]')
+        .isVisible()
+        .catch(() => false);
+      const isCreateRoute = await this.page
+        .evaluate(() => window.location.pathname.endsWith('/create'))
+        .catch(() => true);
+
+      if (hasSavedBadge && !leaveModalVisible && !headerOverlayVisible && !isCreateRoute) {
+        return;
+      }
+
+      await this.page.waitForTimeout(250);
+    }
+
+    throw new Error('Timed out waiting for workflow save navigation to settle');
+  }
+
   /**
    * Save the workflow
    */
   async saveWorkflow() {
     await this.saveButton.click();
-    await this.page.testSubj.waitForSelector('workflowSavedChangesBadge');
+    await this.waitForSaveToSettle();
     await this.runButton.waitFor({ state: 'visible' });
     await this.waitForRunButtonToBeEnabled();
   }
@@ -291,6 +342,8 @@ export class WorkflowEditorPage {
    * Click the run button (opens execute modal or unsaved changes confirmation)
    */
   async clickRunButton() {
+    await this.confirmLeaveWithoutSavingModalIfPresent();
+    await this.waitForHeaderOverlayToClear();
     await this.waitForRunButtonToBeEnabled();
     await this.runButton.click();
     await Promise.race([

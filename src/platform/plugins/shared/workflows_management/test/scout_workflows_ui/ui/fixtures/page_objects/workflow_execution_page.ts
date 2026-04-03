@@ -9,6 +9,8 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
+const EXECUTION_VIEW_TIMEOUT = 30_000;
+
 /**
  * Page object for the workflow execution detail view.
  *
@@ -26,14 +28,32 @@ export class WorkflowExecutionPage {
   }
 
   /**
-   * Wait for the execution view to load (URL contains executionId and panel is visible).
+   * Wait for the execution view to load.
+   *
+   * The executions UI is shown via client-side state updates, so waiting on
+   * Playwright's navigation lifecycle is brittle under concurrent rendering.
+   * Instead, wait for either the executionId query param to land or the
+   * execution panel itself to appear, then require the panel to be visible.
    * Useful after triggering a workflow execution from any entry point.
    */
   async waitForExecutionView() {
-    await this.page.waitForURL((url) => {
-      return url.pathname.includes('/workflows/') && url.searchParams.has('executionId');
-    });
-    await this.executionPanel.waitFor({ state: 'visible' });
+    const executionIdInUrl = this.waitForExecutionIdInUrl();
+
+    await Promise.race([
+      executionIdInUrl,
+      this.executionPanel.waitFor({ state: 'visible', timeout: EXECUTION_VIEW_TIMEOUT }),
+    ]);
+    await this.executionPanel.waitFor({ state: 'visible', timeout: EXECUTION_VIEW_TIMEOUT });
+  }
+
+  private async waitForExecutionIdInUrl() {
+    await this.page.waitForFunction(
+      () => {
+        return new URL(window.location.href).searchParams.has('executionId');
+      },
+      null,
+      { timeout: EXECUTION_VIEW_TIMEOUT }
+    );
   }
 
   /**
