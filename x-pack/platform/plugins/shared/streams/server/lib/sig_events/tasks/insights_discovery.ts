@@ -19,9 +19,9 @@ import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
+import { resolveConnectorForFeature } from '../../../routes/utils/resolve_connector_for_feature';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -45,6 +45,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
               const { streamNames, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsDiscoveryTaskParams>;
@@ -56,21 +57,16 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 queryClient,
                 insightClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('insights_discovery');
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorIdAndCheckAllowlist({
-                connectorId: settings.connectorIdDiscovery,
-                uiSettingsClient,
-                logger: taskLogger,
-                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+              const connectorId = await resolveConnectorForFeature({
                 searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                request: runContext.fakeRequest,
+                featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+                featureName: 'discovery',
+                request: fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
@@ -111,9 +107,9 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                     );
                   } catch (persistError) {
                     taskContext.logger.error(
-                      `Failed to persist ${result.insights.length} insights: ${getErrorMessage(
-                        persistError
-                      )}`
+                      `Failed to persist ${result.insights.length} insights: ${
+                        parseError(persistError).message
+                      }`
                     );
                   }
                 }
@@ -124,12 +120,16 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   { insights, tokensUsed: result.tokens_used }
                 );
               } catch (error) {
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                // Get connector info for error enrichment, preserving the original error if lookup fails
+                let errorMessage = parseError(error).message;
+                try {
+                  const connector = await inferenceClient.getConnectorById(connectorId);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Connector lookup failed — use the original error message
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

@@ -12,6 +12,7 @@ import type {
 } from '@kbn/saved-search-plugin/common';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 /**
  * Specifies the action to be taken for navigating back to an editor.
@@ -31,12 +32,26 @@ export enum TransferAction {
   SaveByValue,
 }
 
+interface TransferOptions {
+  state?: SavedSearchByValueAttributes;
+  path?: string;
+  app?: string;
+}
+
 export class EmbeddableEditorService {
   private embeddableState?: EmbeddableEditorState;
 
-  constructor(private embeddableStateTransfer: EmbeddableStateTransfer) {
+  constructor(
+    private embeddableStateTransfer: EmbeddableStateTransfer,
+    private application: ApplicationStart
+  ) {
     this.embeddableState = embeddableStateTransfer.getIncomingEditorState('discover', true);
   }
+
+  public canSaveToDashboard = (): boolean =>
+    !this.isEmbeddedEditor() &&
+    Boolean(this.application.capabilities.dashboard_v2.show) &&
+    Boolean(this.application.capabilities.dashboard_v2.createNew);
 
   public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
 
@@ -55,39 +70,40 @@ export class EmbeddableEditorService {
     }
   };
 
-  public transferBackToEditor(action: TransferAction.Cancel | TransferAction.SaveSession): void;
+  public transferBackToEditor(
+    action: TransferAction.Cancel | TransferAction.SaveSession,
+    options?: Omit<TransferOptions, 'state'>
+  ): void;
   public transferBackToEditor(
     action: TransferAction.SaveByValue,
-    state: SavedSearchByValueAttributes
+    options: Required<Pick<TransferOptions, 'state'>> & Omit<TransferOptions, 'state'>
   ): void;
-  public transferBackToEditor(action: TransferAction, state?: SavedSearchByValueAttributes): void;
+  public transferBackToEditor(action: TransferAction, options?: TransferOptions): void;
   /**
    * Initiates a navigation back to the editing application, either cancelling the current action to return
    * or passing a state for an embeddable to receive an updated view.
    *
    * **NOTE**: Cancelling will never pass an updated state, so the state param is ignored for cancel actions.
    */
-  public transferBackToEditor(action: TransferAction, state?: SavedSearchByValueAttributes) {
-    if (this.embeddableState) {
-      const app = this.embeddableState.originatingApp;
-      const path = this.embeddableState.originatingPath;
+  public transferBackToEditor(action: TransferAction, options?: TransferOptions) {
+    const app = options?.app || this.embeddableState?.originatingApp;
+    const path = options?.path || this.embeddableState?.originatingPath;
 
-      if (app && path) {
-        this.embeddableStateTransfer.clearEditorState('discover');
-        this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
-          path,
-          state:
-            action !== TransferAction.Cancel
-              ? [
-                  {
-                    type: SEARCH_EMBEDDABLE_TYPE,
-                    serializedState: { attributes: state },
-                    embeddableId: this.embeddableState?.embeddableId,
-                  },
-                ]
-              : [],
-        });
-      }
+    if (app && path) {
+      this.embeddableStateTransfer.clearEditorState('discover');
+      this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
+        path,
+        state:
+          action !== TransferAction.Cancel
+            ? [
+                {
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  serializedState: { attributes: options?.state },
+                  embeddableId: this.embeddableState?.embeddableId,
+                },
+              ]
+            : [],
+      });
     }
   }
 }

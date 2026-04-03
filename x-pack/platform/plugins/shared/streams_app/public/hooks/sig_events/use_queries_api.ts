@@ -12,6 +12,7 @@ import { useKibana } from '../use_kibana';
 
 interface QueriesApi {
   promote: ({ queryIds }: { queryIds: string[] }) => Promise<{ promoted: number }>;
+  demote: ({ queryIds }: { queryIds: string[] }) => Promise<{ demoted: number }>;
   promoteAll: () => Promise<{ promoted: number }>;
   upsertQuery: ({ query, streamName }: { query: StreamQuery; streamName: string }) => Promise<void>;
   removeQuery: ({ queryId, streamName }: { queryId: string; streamName: string }) => Promise<void>;
@@ -41,6 +42,13 @@ export function useQueriesApi(): QueriesApi {
       promote: async ({ queryIds }: { queryIds: string[] }) => {
         const params = { body: { queryIds } };
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
+          params,
+          signal,
+        });
+      },
+      demote: async ({ queryIds }: { queryIds: string[] }) => {
+        const params = { body: { queryIds } };
+        return streamsRepositoryClient.fetch('POST /internal/streams/queries/_demote', {
           params,
           signal,
         });

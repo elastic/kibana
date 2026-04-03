@@ -133,6 +133,8 @@
     "@kbn/synthtrace-client",
     "@kbn/alerting-v2-plugin",
     "@kbn/cps-utils",
+    "@kbn/as-code-data-views-schema",
+    "@kbn/presentation-util-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/as-code-filters-constants",
   ],
