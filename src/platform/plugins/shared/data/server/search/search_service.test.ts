@@ -720,8 +720,7 @@ describe('Search service', () => {
         mockGlobalClient.get.mockClear();
 
         // some time passes, but less than the refresh interval
-        currentTime =
-          initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS - 1000;
+        currentTime = initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS - 1000;
 
         const initSpy = jest.spyOn(plugin as any, 'initializeSearchSettingsCache');
 
