@@ -148,8 +148,8 @@ export function DiscoverLayout() {
   }, [dataView]);
 
   const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false, isEsqlMode),
-    [dataState.fetchStatus, dataState.foundDocuments, isEsqlMode]
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
+    [dataState.fetchStatus, dataState.foundDocuments]
   );
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
