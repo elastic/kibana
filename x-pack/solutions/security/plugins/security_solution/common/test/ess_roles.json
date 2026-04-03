@@ -682,5 +682,46 @@
         "base": []
       }
     ]
+  },
+  "rules_all_preview_index": {
+    "name": "rules_all_preview_index",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            ".preview.alerts-security.alerts-*",
+            ".internal.preview.alerts-security.alerts-*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [".alerts-security*", ".siem-signals-*"],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "securitySolutionRulesV4": ["all"],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
   }
 }

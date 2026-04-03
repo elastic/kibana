@@ -45,6 +45,7 @@ export enum ROLES {
   rules_all_manual_run_none = 'rules_all_manual_run_none',
   rules_all_rules_management_settings_none = 'rules_all_rules_management_settings_none',
   rules_read_subfeatures_all = 'rules_read_subfeatures_all',
+  rules_all_preview_index = 'rules_all_preview_index',
 }
 
 /**
