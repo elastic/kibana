@@ -122,11 +122,19 @@ export type LensApi = Simplify<
 export type LensEmbeddableOutput = LensApi;
 
 /**
+ * Panel-level state extracted from a flat Lens API config
+ */
+export type LensPanelState = LensPersistableState & { ref_id?: string };
+
+/**
  * Splits a flat API config into panel-level state and chart config.
  * Panel-level keys (title, description, etc.) go into `panelState`,
  * everything else goes into `chartConfig`.
  */
-export function splitFlattenedApiConfig(config: LensSerializedAPIConfig) {
+export function splitFlattenedApiConfig(config: LensSerializedAPIConfig): {
+  panelState: LensPanelState;
+  chartConfig: Record<string, unknown>;
+} {
   const {
     title,
     description,
@@ -139,7 +147,15 @@ export function splitFlattenedApiConfig(config: LensSerializedAPIConfig) {
   } = config;
 
   return {
-    panelState: { title, description, hide_title, hide_border, time_range, drilldowns, ref_id },
+    panelState: {
+      title,
+      description,
+      hide_title,
+      hide_border,
+      time_range,
+      drilldowns,
+      ref_id,
+    } satisfies Record<keyof LensPanelState, unknown>,
     chartConfig,
   };
 }
