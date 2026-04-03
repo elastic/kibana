@@ -392,7 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('created_by attribution', () => {
-      it('user-created pack has current user as created_by', async () => {
+      it('user-created pack records the creating user', async () => {
         const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
           .send({
             name: `Attribution-UserPack-${Date.now()}`,
@@ -444,15 +444,14 @@ export default function ({ getService }: FtrProviderContext) {
           (p: { read_only: boolean }) => p.read_only
         );
 
-        if (prebuiltPacks.length > 0) {
-          for (const pack of prebuiltPacks) {
-            expect(pack.created_by).to.be('elastic');
-            expect(pack.updated_by).to.be('elastic');
-          }
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        for (const pack of prebuiltPacks) {
+          expect(pack.created_by).to.be('elastic');
+          expect(pack.updated_by).to.be('elastic');
         }
       });
 
-      it('duplicating a prebuilt pack attributes to the current user, not "elastic"', async () => {
+      it('duplicating a prebuilt pack produces a mutable copy with valid attribution', async () => {
         // Trigger asset install
         await supertest
           .post('/internal/osquery/assets/update')
@@ -465,30 +464,32 @@ export default function ({ getService }: FtrProviderContext) {
           supertest.get('/api/osquery/packs?pageSize=100')
         ).expect(200);
 
-        const prebuiltPack = findResponse.body.data.find(
+        const prebuiltPacks = findResponse.body.data.filter(
           (p: { read_only: boolean }) => p.read_only
         );
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        const prebuiltPack = prebuiltPacks[0];
 
-        if (prebuiltPack) {
-          // Copy the prebuilt pack
-          const copyResponse = await withOsqueryHeaders(
-            supertest.post(`/api/osquery/packs/${prebuiltPack.saved_object_id}/copy`)
-          ).expect(200);
+        // Copy the prebuilt pack
+        const copyResponse = await withOsqueryHeaders(
+          supertest.post(`/api/osquery/packs/${prebuiltPack.saved_object_id}/copy`)
+        ).expect(200);
 
-          const copy = copyResponse.body.data;
+        const copy = copyResponse.body.data;
 
-          // The copy should belong to the current user, not 'elastic'
-          expect(copy.created_by).to.be.ok();
-          expect(copy.updated_by).to.be.ok();
+        // The copy uses getUserInfo() (dynamic resolution), not hardcoded 'elastic'.
+        // In FTR the test user is 'elastic', so we can only verify attribution is present.
+        expect(copy.created_by).to.be.a('string');
+        expect(copy.updated_by).to.be.a('string');
+        expect(copy.created_by).to.not.be.empty();
 
-          // The copy should NOT be read_only
-          expect(copy.read_only).to.not.be(true);
+        // The copy should NOT be read_only
+        expect(copy.read_only).to.not.be(true);
 
-          // Clean up
-          await withOsqueryHeaders(
-            supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
-          ).expect(200);
-        }
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
+        ).expect(200);
       });
 
       it('users endpoint does not produce duplicate entries', async () => {

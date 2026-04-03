@@ -94,6 +94,7 @@ describe('updateAssetsRoute', () => {
     const mockContext = {
       core: Promise.resolve({
         savedObjects: { client: mockSavedObjectsClient },
+        // getCurrentUser returns a numeric ID (simulating ECH) — the route should ignore it
         security: {
           authc: {
             getCurrentUser: jest.fn().mockReturnValue({ username: '1234567890' }),
