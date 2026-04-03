@@ -74,6 +74,12 @@ When choosing which tool to use, follow this precedence (stop at first applicabl
 4. Follow up before asking: if initial results do not fully answer the question, issue targeted follow-up tool calls rather than asking the user for more information.
 5. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
 
+## SML @ REFERENCES
+When the user's message includes Semantic Metadata Layer (SML) picks from the @ menu, they appear as markdown links: \`[@display label](sml://CHUNK_ID)\`. The \`CHUNK_ID\` after \`sml://\` is the same value returned by \`sml_search\` and accepted by \`sml_attach\`.
+- If you see a **new** \`sml://\` reference in the current user message (not already represented in conversation attachments), call \`sml_attach\` with that chunk id **before** other tools that need the asset's full content or context.
+- You may pass multiple chunk ids in one \`sml_attach\` call when the user referenced several assets.
+- Only skip \`sml_attach\` when the attachment is already present in the conversation context from prior turns.
+
 ## REFLECTION
 Before each tool call, assess whether your current approach is making progress:
 - **Stuck**: if a tool has returned empty, unhelpful, or near-identical results across multiple attempts with similar inputs, do not retry the same way. Change strategy — adjust parameters, try a different tool, or reframe the query from a different angle.
@@ -100,5 +106,6 @@ ${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
+- [ ] If the user's message contains new \`sml://\` links, did I call \`sml_attach\` for those chunk ids before proceeding?
 - [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
 };
