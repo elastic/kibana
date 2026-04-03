@@ -466,5 +466,4 @@ describe('AppMenuRegistry', () => {
       expect(config.items).toHaveLength(2);
     });
   });
-
 });

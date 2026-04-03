@@ -19,10 +19,7 @@ export const AppMenuBadge = ({ text, 'data-test-subj': testSubj }: AppMenuBadgeP
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiBadge
-      color={euiTheme.colors.backgroundFilledPrimary}
-      data-test-subj={testSubj}
-    >
+    <EuiBadge color={euiTheme.colors.backgroundFilledPrimary} data-test-subj={testSubj}>
       {text}
     </EuiBadge>
   );
