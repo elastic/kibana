@@ -1103,6 +1103,8 @@ export class DiscoverPageObject extends FtrService {
       await this.retry.waitFor('row to be collapsed', async () => {
         return !(await this.isCascadeLayoutRowExpanded(rowId));
       });
+      // State persistence is throttled
+      await this.common.sleep(500);
     } else {
       await this.retry.waitFor('row to be expanded', async () => {
         return await this.isCascadeLayoutRowExpanded(rowId);
