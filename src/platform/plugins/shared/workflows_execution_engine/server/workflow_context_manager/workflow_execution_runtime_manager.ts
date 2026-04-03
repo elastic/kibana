@@ -11,6 +11,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import agent from 'elastic-apm-node';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import {
@@ -353,8 +354,9 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowTransaction = workflowTransaction;
 
-        // Add workflow-specific labels
-        workflowTransaction.addLabels({
+        (agent as any).setCurrentTransaction(workflowTransaction);
+
+        addTransactionLabels({
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
@@ -362,9 +364,6 @@ export class WorkflowExecutionRuntimeManager {
           triggered_by: 'alerting',
           parent_alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
         });
-
-        // Make the workflow transaction the current transaction for subsequent spans
-        (agent as any).setCurrentTransaction(workflowTransaction);
 
         // Store the workflow transaction ID (not the alerting transaction ID)
         const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
@@ -417,8 +416,7 @@ export class WorkflowExecutionRuntimeManager {
           taskManagerLabels.event_trigger_id = triggeredBy;
         }
 
-        // Add workflow-specific labels to the existing transaction (additive; keep triggered_by: task_manager)
-        existingTransaction.addLabels(taskManagerLabels);
+        addTransactionLabels(taskManagerLabels);
 
         // Store the task transaction ID in the workflow execution
         const taskTransactionId = existingTransaction.ids?.['transaction.id'];

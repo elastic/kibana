@@ -75,7 +75,7 @@ export async function setupDependencies(
   if (eventChainDepth !== undefined) {
     setWorkflowEventChainContext(fakeRequest, {
       depth: eventChainDepth,
-      sourceWorkflowId: workflowExecution.workflowId,
+      sourceExecutionId: workflowExecution.id,
     });
   }
 
