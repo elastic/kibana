@@ -62,19 +62,20 @@ export const startMetadataTransforms = usageTracker.track(
     /** The version of the Endpoint Package */
     version: string
   ): Promise<void> => {
-    const transformIds = await getMetadataTransformIds(esClient, version);
     const isV2 = isEndpointPackageV2(version);
     const currentTransformPrefix = isV2 ? METADATA_CURRENT_TRANSFORM_V2 : metadataTransformPrefix;
-    const currentTransformId = transformIds.find((transformId) =>
-      transformId.startsWith(currentTransformPrefix)
-    );
     const unitedTransformPrefix = isV2 ? METADATA_UNITED_TRANSFORM_V2 : METADATA_UNITED_TRANSFORM;
-    const unitedTransformId = transformIds.find((transformId) =>
-      transformId.startsWith(unitedTransformPrefix)
+
+    const { currentTransformId, unitedTransformId } = await waitForTransformsToBeCreated(
+      esClient,
+      version,
+      currentTransformPrefix,
+      unitedTransformPrefix
     );
+
     if (!currentTransformId || !unitedTransformId) {
       // eslint-disable-next-line no-console
-      console.warn('metadata transforms not found, skipping transform start');
+      console.warn('metadata transforms not found after waiting, skipping transform start');
       return;
     }
 
@@ -87,6 +88,31 @@ export const startMetadataTransforms = usageTracker.track(
     await startTransformWithRetry(esClient, unitedTransformId);
   }
 );
+
+async function waitForTransformsToBeCreated(
+  esClient: Client,
+  version: string,
+  currentTransformPrefix: string,
+  unitedTransformPrefix: string,
+  maxAttempts = 10,
+  interval = 3000
+): Promise<{ currentTransformId: string | undefined; unitedTransformId: string | undefined }> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const transformIds = await getMetadataTransformIds(esClient, version);
+    const currentTransformId = transformIds.find((id) => id.startsWith(currentTransformPrefix));
+    const unitedTransformId = transformIds.find((id) => id.startsWith(unitedTransformPrefix));
+
+    if (currentTransformId && unitedTransformId) {
+      return { currentTransformId, unitedTransformId };
+    }
+
+    if (attempt < maxAttempts) {
+      await new Promise((res) => setTimeout(res, interval));
+    }
+  }
+
+  return { currentTransformId: undefined, unitedTransformId: undefined };
+}
 
 async function startTransformWithRetry(
   esClient: Client,
@@ -153,11 +179,6 @@ async function getMetadataTransformIds(
 
 async function areMetadataTransformsReady(esClient: Client, version: string): Promise<boolean> {
   const transforms = await getMetadataTransformStats(esClient, version);
-
-  if (transforms.length === 0) {
-    return false;
-  }
-
   return !transforms.some(
     // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
     (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
