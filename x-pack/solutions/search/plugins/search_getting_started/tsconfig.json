@@ -38,7 +38,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/deeplinks-search",
     "@kbn/scout-search",
-    "@kbn/search-agent"
+    "@kbn/search-agent",
+    "@kbn/shared-ux-ai-components"
   ],
   "exclude": [
     "target/**/*"
