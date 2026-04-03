@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export * from './labels';
+export function millisToNanos(millis: number): string {
+  const roundedMillis = Math.round(millis);
+  if (roundedMillis === 0) {
+    return '0';
+  }
+  return `${roundedMillis}000000`;
+}

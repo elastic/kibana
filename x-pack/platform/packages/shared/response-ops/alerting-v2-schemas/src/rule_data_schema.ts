@@ -10,6 +10,7 @@ import {
   DEFAULT_ARTIFACT_VALUE_LIMIT,
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
+  MAX_TAG_LENGTH,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration } from './validation';
 import { durationSchema } from './common';
@@ -45,7 +46,11 @@ const metadataSchema = z
       .optional()
       .describe('Optional human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
-    labels: z.array(z.string().max(64)).max(100).optional().describe('Labels for categorization.'),
+    labels: z
+      .array(z.string().max(MAX_TAG_LENGTH))
+      .max(100)
+      .optional()
+      .describe('Labels for categorization.'),
   })
   .strict()
   .describe('Rule metadata.');

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export * from './labels';
+/** Maximum length of a single tag (label) */
+export const MAX_TAG_LENGTH = 64;
