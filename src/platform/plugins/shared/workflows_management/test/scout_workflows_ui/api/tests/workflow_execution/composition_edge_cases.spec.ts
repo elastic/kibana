@@ -152,13 +152,12 @@ spaceTest.describe('Workflow composition edge cases', { tag: tags.deploymentAgno
 
     const childExecutions = await workflowsApi.getExecutions(child.id);
     const childExec = childExecutions.results[0];
-    if (childExec) {
-      const terminalChild = await workflowsApi.waitForTermination({
-        workflowExecutionId: childExec.id,
-        timeout: 30_000,
-      });
-      expect(terminalChild?.status).not.toBe(ExecutionStatus.COMPLETED);
-    }
+    expect(childExec).toBeDefined();
+    const terminalChild = await workflowsApi.waitForTermination({
+      workflowExecutionId: childExec.id,
+      timeout: 30_000,
+    });
+    expect(terminalChild?.status).not.toBe(ExecutionStatus.COMPLETED);
   });
 
   spaceTest('self-calling workflow hits depth limit and fails', async () => {
