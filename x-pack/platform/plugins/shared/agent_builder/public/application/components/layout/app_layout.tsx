@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -17,6 +17,7 @@ import {
   SIDEBAR_WIDTH,
   UnifiedSidebar,
 } from './unified_sidebar/unified_sidebar';
+import { useLayoutContext } from '../../context/layout_context';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -24,14 +25,20 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
-  const [isCondensed, setIsCondensed] = useState(false);
+  const { isCondensed, toggleCondensed } = useLayoutContext();
 
-  const onKeyDown = useCallback((event: KeyboardEvent) => {
-    if ((event.code === 'Period' || event.key === '.') && (isMac ? event.metaKey : event.ctrlKey)) {
-      event.preventDefault();
-      setIsCondensed((v) => !v);
-    }
-  }, []);
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (
+        (event.code === 'Period' || event.key === '.') &&
+        (isMac ? event.metaKey : event.ctrlKey)
+      ) {
+        event.preventDefault();
+        toggleCondensed();
+      }
+    },
+    [toggleCondensed]
+  );
 
   const sidebarStyles = css`
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
@@ -40,8 +47,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   `;
 
   const contentStyles = css`
-    overflow: auto;
+    overflow: hidden;
     background-color: ${euiTheme.colors.backgroundBasePlain};
+    > div {
+      overflow: hidden;
+      height: 100%;
+    }
   `;
 
   return (
@@ -52,10 +63,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         restrictWidth={false}
         responsive={[]}
         pageSideBar={
-          <UnifiedSidebar
-            isCondensed={isCondensed}
-            onToggleCondensed={() => setIsCondensed((v) => !v)}
-          />
+          <UnifiedSidebar isCondensed={isCondensed} onToggleCondensed={toggleCondensed} />
         }
         pageSideBarProps={{
           minWidth: isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH,

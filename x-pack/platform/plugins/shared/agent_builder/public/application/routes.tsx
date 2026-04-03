@@ -13,6 +13,7 @@ import { RootRedirect } from './components/redirects/root_redirect';
 import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
 import { getEnabledRoutes } from './route_config';
 import { useFeatureFlags } from './hooks/use_feature_flags';
+import { LayoutContextProvider } from './context/layout_context';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
   const featureFlags = useFeatureFlags();
@@ -20,6 +21,7 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
   const enabledRoutes = useMemo(() => getEnabledRoutes(featureFlags), [featureFlags]);
 
   return (
+    <LayoutContextProvider>
     <AppLayout>
       <Routes>
         {enabledRoutes.map((route) => (
@@ -44,5 +46,6 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
         </Route>
       </Routes>
     </AppLayout>
+    </LayoutContextProvider>
   );
 };

@@ -94,7 +94,7 @@ export function AgentBuilderNavControl() {
         if (chrome.sidebar.isOpen()) {
           agentBuilder.toggleChat();
         }
-        application.navigateToApp(AGENTBUILDER_APP_ID, { path: '/conversations/new' });
+        application.navigateToApp(AGENTBUILDER_APP_ID, { path: '/workspace' });
       } else if (experience === AIChatExperience.Off) {
         // Use toggleChat (not chrome.sidebar.close) so the plugin clears its internal
         // activeSidebarRef — otherwise subsequent openChat() calls won't reopen the sidebar.
@@ -183,7 +183,7 @@ export function AgentBuilderNavControl() {
     }
     if (selectedExperience === AIChatExperience.Agent) {
       didAutoOpen.current = true;
-      application.navigateToApp(AGENTBUILDER_APP_ID, { path: '/conversations' });
+      application.navigateToApp(AGENTBUILDER_APP_ID, { path: '/workspace' });
     } else if (selectedExperience === AIChatExperience.Classic) {
       didAutoOpen.current = true;
       agentBuilder.openChat();

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { RouteDisplay } from './components/common/route_display';
 import { AgentBuilderConversationsPage } from './pages/conversations';
+import { WorkspacePage } from './pages/workspace';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
 import { AgentBuilderAgentsEdit } from './pages/agent_edit';
@@ -66,6 +67,14 @@ const navLabels = {
     defaultMessage: 'Agents',
   }),
 };
+
+export const workspaceRoutes: RouteDefinition[] = [
+  {
+    path: '/workspace',
+    sidebarView: 'conversation',
+    element: <WorkspacePage />,
+  },
+];
 
 // Routes ordered from most specific to least specific for correct matching
 export const agentRoutes: RouteDefinition[] = [
@@ -190,7 +199,7 @@ export const manageRoutes: RouteDefinition[] = [
   },
 ];
 
-export const allRoutes: RouteDefinition[] = [...agentRoutes, ...manageRoutes];
+export const allRoutes: RouteDefinition[] = [...workspaceRoutes, ...agentRoutes, ...manageRoutes];
 
 export const getSidebarViewForRoute = (pathname: string): SidebarView => {
   for (const route of allRoutes) {
