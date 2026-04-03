@@ -368,7 +368,7 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   );
 }
 
-export function isEsqlTableTypeDataset(
+export function isEsqlTableTypeDataSource(
   dataSource: DataSourceType
 ): dataSource is Extract<DataSourceType, { type: 'esql' | 'table' }> {
   return dataSource.type === 'esql' || dataSource.type === 'table';

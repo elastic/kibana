@@ -39,7 +39,7 @@ import type {
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
 import type { DataSourceType } from '../../../schema/data_source';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
-import { isEsqlTableTypeDataset } from '../../../utils';
+import { isEsqlTableTypeDataSource } from '../../../utils';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
 import { getValueApiColumn } from '../../columns/esql_column';
 import {
@@ -206,7 +206,7 @@ export function buildAPIDataLayer(
       adhocReferences
     );
     const baseLayer = convertDataLayerToAPI(visualization, layer);
-    if (isEsqlTableTypeDataset(dataSource)) {
+    if (isEsqlTableTypeDataSource(dataSource)) {
       return {
         type,
         data_source: dataSource,
@@ -224,7 +224,7 @@ export function buildAPIDataLayer(
     adhocReferences
   );
 
-  if (isEsqlTableTypeDataset(dataSource)) {
+  if (isEsqlTableTypeDataSource(dataSource)) {
     // this should be a never as schema should ensure this scenario never happens
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
@@ -339,7 +339,7 @@ export function buildAPIReferenceLinesLayer(
     adhocReferences
   );
   if (isTextBasedLayer(layer)) {
-    if (isEsqlTableTypeDataset(dataSource)) {
+    if (isEsqlTableTypeDataSource(dataSource)) {
       return {
         type: 'referenceLines',
         data_source: dataSource,
@@ -348,7 +348,7 @@ export function buildAPIReferenceLinesLayer(
     }
     throw new Error('Text based layers can only be used with ESQL or Table datasets');
   }
-  if (isEsqlTableTypeDataset(dataSource)) {
+  if (isEsqlTableTypeDataSource(dataSource)) {
     throw new Error('Form based layers cannot be used with ESQL or Table datasets');
   }
   return {

@@ -11,13 +11,6 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import { dataViewSchema } from '@kbn/as-code-data-views-schema';
 
 export const dataSourceSchema = {
-  /**
-   * The data source configuration. Can be one of the following types:
-   * - `data_view_reference`: Use a Kibana data view as the data source. Requires a `name` property with the name of the data view.
-   * - `data_view_spec`: Use a Elasticsearch index as the data source. Requires an `index` property with the name of the index, and optionally a `time_field` property with the name of the time field in the index.
-   * - `esql`: Use an ESQL query string as the data source. Requires a `query` property with the ESQL query string.
-   * - `table`: Use a Kibana datatable object as the data source. Requires a `table` property with the Kibana datatable object, which should match the Kibana Datatable contract.
-   */
   data_source: dataViewSchema,
 };
 

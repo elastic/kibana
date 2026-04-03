@@ -44,7 +44,7 @@ import {
   stripUndefined,
 } from './utils';
 import { legendSizeCompat } from './legend_sizes';
-import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataset } from '../../utils';
+import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataSource } from '../../utils';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -89,7 +89,7 @@ function isAPIPartitionLayer(layer: unknown): layer is PartitionState {
 }
 
 function isESQLPartitionLayer(layer: PartitionState): layer is PartitionStateESQL {
-  return isEsqlTableTypeDataset(layer.data_source);
+  return isEsqlTableTypeDataSource(layer.data_source);
 }
 
 function isAPIPieChartLayer(layer: PartitionState): layer is PieState {

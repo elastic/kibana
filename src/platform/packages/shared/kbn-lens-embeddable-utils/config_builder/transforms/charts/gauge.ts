@@ -42,7 +42,7 @@ import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { isEsqlTableTypeDataset } from '../../utils';
+import { isEsqlTableTypeDataSource } from '../../utils';
 
 const ACCESSOR = 'gauge_accessor';
 
@@ -118,7 +118,7 @@ function reverseBuildVisualizationState(
         : {
             type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
           },
-    metric: isEsqlTableTypeDataset(dataSource)
+    metric: isEsqlTableTypeDataSource(dataSource)
       ? {
           ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
           ...(visualization.minAccessor

@@ -47,7 +47,7 @@ import {
   fromColorByValueLensStateToAPI,
   isColorByValueAbsolute,
 } from '../coloring';
-import { isEsqlTableTypeDataset } from '../../utils';
+import { isEsqlTableTypeDataSource } from '../../utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
 
@@ -96,7 +96,7 @@ function reverseBuildVisualizationState(
 
   const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
     ...generateApiLayer(layer),
-    metric: isEsqlTableTypeDataset(dataSource)
+    metric: isEsqlTableTypeDataSource(dataSource)
       ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
       : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
   } as LegacyMetricState;
