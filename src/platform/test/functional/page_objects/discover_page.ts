@@ -1079,47 +1079,53 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getCascadeLayoutRowIds() {
-    const container = await this.testSubjects.find('dataCascadeScrollContainer');
-    const ids = await this.browser.execute(
-      `
-      const container = arguments[0];
-      const containerRect = container.getBoundingClientRect();
-      const rows = container.querySelectorAll('[data-row-type="root"]');
-      const visibleIds = [];
-      for (let i = 0; i < rows.length; i++) {
-        const rowRect = rows[i].getBoundingClientRect();
-        if (rowRect.top >= containerRect.bottom) break;
-        if (rowRect.bottom > containerRect.top) {
-          visibleIds.push(rows[i].id || '');
+    return await this.retry.try(async () => {
+      const ids = await this.browser.execute(`
+        const container = document.querySelector('[data-test-subj="dataCascadeScrollContainer"]');
+        if (!container) return [];
+        const containerRect = container.getBoundingClientRect();
+        const rows = container.querySelectorAll('[data-row-type="root"]');
+        const visibleIds = [];
+        for (let i = 0; i < rows.length; i++) {
+          const rowRect = rows[i].getBoundingClientRect();
+          if (rowRect.top >= containerRect.bottom) break;
+          if (rowRect.bottom > containerRect.top) {
+            visibleIds.push(rows[i].id || '');
+          }
         }
+        return visibleIds;
+      `);
+
+      if (!Array.isArray(ids) || ids.length === 0) {
+        throw new Error(
+          `Expected cascade row ids to be a non-empty array but got ${JSON.stringify(ids)}`
+        );
       }
-      return visibleIds;
-      `,
-      container._webElement
-    );
 
-    if (!Array.isArray(ids)) {
-      throw new Error(`Expected cascade row ids to be an array but got ${typeof ids}`);
-    }
-
-    return ids as string[];
+      return ids as string[];
+    });
   }
 
   public async isCascadeLayoutRowExpanded(rowId: string) {
-    const row = await this.find.byCssSelector(`[id="${rowId}"]`);
-    return ((await row.getAttribute('aria-expanded')) ?? 'false') === 'true';
+    return await this.retry.try(async () => {
+      const row = await this.find.byCssSelector(`[id="${rowId}"]`);
+      return ((await row.getAttribute('aria-expanded')) ?? 'false') === 'true';
+    });
   }
 
   public async toggleCascadeLayoutRow(rowId: string) {
     const isTargetRowExpanded = await this.isCascadeLayoutRowExpanded(rowId);
-    const toggleButtons = await this.testSubjects.findAll(`toggle-row-${rowId}-button`);
-    const targetButton = toggleButtons[0];
 
-    if (!targetButton) {
-      throw new Error(`Toggle button for row ${rowId} not found`);
-    }
+    await this.retry.try(async () => {
+      const toggleButtons = await this.testSubjects.findAll(`toggle-row-${rowId}-button`);
+      const targetButton = toggleButtons[0];
 
-    await targetButton.click();
+      if (!targetButton) {
+        throw new Error(`Toggle button for row ${rowId} not found`);
+      }
+
+      await targetButton.click();
+    });
 
     if (isTargetRowExpanded) {
       await this.retry.waitFor('row to be collapsed', async () => {
