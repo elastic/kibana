@@ -60,6 +60,36 @@ import type { PieState } from './charts/pie';
 import { pieStateSchema, pieStateSchemaNoESQL, pieStateSchemaESQL } from './charts/pie';
 
 /**
+ * All chart-type schemas
+ */
+const ALL_CHART_SCHEMAS = [
+  metricStateSchemaNoESQL,
+  esqlMetricState,
+  legacyMetricStateSchemaNoESQL,
+  // esqlLegacyMetricState, Not supported yet
+  xyStateSchema,
+  xyStateSchemaESQL,
+  gaugeStateSchemaNoESQL,
+  gaugeStateSchemaESQL,
+  heatmapStateSchemaNoESQL,
+  heatmapStateSchemaESQL,
+  tagcloudStateSchemaNoESQL,
+  tagcloudStateSchemaESQL,
+  regionMapStateSchemaNoESQL,
+  regionMapStateSchemaESQL,
+  datatableStateSchemaNoESQL,
+  datatableStateSchemaESQL,
+  pieStateSchemaNoESQL,
+  pieStateSchemaESQL,
+  mosaicStateSchemaNoESQL,
+  mosaicStateSchemaESQL,
+  treemapStateSchemaNoESQL,
+  treemapStateSchemaESQL,
+  waffleStateSchemaNoESQL,
+  waffleStateSchemaESQL,
+] as const;
+
+/**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
  *
  * This requires:
@@ -102,40 +132,13 @@ export type LensApiState =
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
 /**
- * Extends the lensApiStateSchema with the given panel-level properties (titles, time range, drilldowns, etc.)
+ * Extends each chart-type schema with the given panel-level properties (titles, time range, drilldowns, etc.)
  */
 export const extendLensApiStateSchemas = <P extends NullableProps>(
   extraProps: P,
   options?: { meta?: Record<string, unknown> }
-) =>
-  schema.oneOf(
-    [
-      metricStateSchemaNoESQL.extends(extraProps),
-      esqlMetricState.extends(extraProps),
-      legacyMetricStateSchemaNoESQL.extends(extraProps),
-      xyStateSchema.extends(extraProps),
-      xyStateSchemaESQL.extends(extraProps),
-      gaugeStateSchemaNoESQL.extends(extraProps),
-      gaugeStateSchemaESQL.extends(extraProps),
-      heatmapStateSchemaNoESQL.extends(extraProps),
-      heatmapStateSchemaESQL.extends(extraProps),
-      tagcloudStateSchemaNoESQL.extends(extraProps),
-      tagcloudStateSchemaESQL.extends(extraProps),
-      regionMapStateSchemaNoESQL.extends(extraProps),
-      regionMapStateSchemaESQL.extends(extraProps),
-      datatableStateSchemaNoESQL.extends(extraProps),
-      datatableStateSchemaESQL.extends(extraProps),
-      pieStateSchemaNoESQL.extends(extraProps),
-      pieStateSchemaESQL.extends(extraProps),
-      mosaicStateSchemaNoESQL.extends(extraProps),
-      mosaicStateSchemaESQL.extends(extraProps),
-      treemapStateSchemaNoESQL.extends(extraProps),
-      treemapStateSchemaESQL.extends(extraProps),
-      waffleStateSchemaNoESQL.extends(extraProps),
-      waffleStateSchemaESQL.extends(extraProps),
-    ],
-    options
-  );
+): Type<LensApiState> =>
+  schema.oneOf(ALL_CHART_SCHEMAS.map((s) => s.extends(extraProps)) as any, options);
 
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
