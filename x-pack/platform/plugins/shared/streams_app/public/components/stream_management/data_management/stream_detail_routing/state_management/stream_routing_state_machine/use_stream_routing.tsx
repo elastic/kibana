@@ -207,9 +207,7 @@ export const useStreamSamplesSelector = <T,>(
   const routingSamplesRef = useStreamSamplesRef();
 
   if (!routingSamplesRef) {
-    throw new Error(
-      'useStreamSamplesSelector must be used within a StreamRoutingContextProvider'
-    );
+    throw new Error('useStreamSamplesSelector must be used within a StreamRoutingContextProvider');
   }
 
   return useSelector(routingSamplesRef, selector);
