@@ -11,10 +11,8 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import {
   STREAMS_API_PRIVILEGES,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
@@ -105,12 +103,12 @@ const eligibleStreamsRoute = createServerRoute({
 
     const [connectorId, sortedTasks, allStreams] = await Promise.all([
       'gemini-3-flash',
-      //resolveConnectorForFeature({
+      // resolveConnectorForFeature({
       //  searchInferenceEndpoints: server.searchInferenceEndpoints,
       //  featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
       //  featureName: 'knowledge indicator extraction',
       //  request,
-      //}),
+      // }),
       taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
         sort: [
           {
