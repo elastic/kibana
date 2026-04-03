@@ -105,9 +105,9 @@ components:
               type: string
               enum: [live]
             source:
-              description: 'Whether this was a manually run live query or triggered by a rule.'
+              description: 'Whether this was a manually run live query, triggered by a rule, or executed by a workflow.'
               type: string
-              enum: [Live, Rule]
+              enum: [Live, Rule, Workflows]
             actionId:
               description: 'The Fleet action ID for the live query.'
               type: string

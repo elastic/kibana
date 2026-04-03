@@ -25,6 +25,11 @@ export const allowedExperimentalValues = Object.freeze({
    * adding KQL search, document flyout, per-row actions, and column curation.
    */
   unifiedDataTable: false,
+  /**
+   * Registers osquery workflow steps (runQuery, runPack, getResults, getSavedQuery)
+   * with the Workflows Extensions plugin for use in Kibana Workflows.
+   */
+  workflowsExtensionsEnabled: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

@@ -34,7 +34,8 @@
       "cases",
       "spaces",
       "uiActions",
-      "unifiedSearch"
+      "unifiedSearch",
+      "workflowsExtensions"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -42,7 +43,8 @@
       "kibanaUtils",
       "kibanaReact",
       "lens",
-      "cases"
+      "cases",
+      "workflowsExtensions"
     ],
     "extraPublicDirs": [
       "common"

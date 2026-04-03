@@ -122,7 +122,7 @@ export const LiveHistoryRow = UnifiedHistoryRowBase.merge(
     /**
      * Whether this was a manually run live query or triggered by a rule.
      */
-    source: z.enum(['Live', 'Rule']),
+    source: z.enum(['Live', 'Rule', 'Workflows']),
     /**
      * The Fleet action ID for the live query.
      */

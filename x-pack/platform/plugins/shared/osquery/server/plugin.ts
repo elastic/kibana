@@ -50,6 +50,7 @@ import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
 import { SchemaService } from './lib/schema_service';
+import { registerOsqueryWorkflowExtensions } from './workflows';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
 
@@ -145,6 +146,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     });
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+
+    if (experimentalFeatures.workflowsExtensionsEnabled && plugins.workflowsExtensions) {
+      registerOsqueryWorkflowExtensions(
+        plugins.workflowsExtensions,
+        this.createActionService,
+        osqueryContext
+      );
+    }
 
     return {
       createActionService: this.createActionService,

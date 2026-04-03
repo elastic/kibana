@@ -57,7 +57,28 @@ interface ActionSource {
   alert_ids?: string[];
   tags?: string[];
   queries?: ActionQuery[];
+  metadata?: { source?: string };
+  action_source?: string;
 }
+
+const ACTION_SOURCE_MAP: Record<string, LiveHistoryRow['source']> = {
+  live: 'Live',
+  rule: 'Rule',
+  workflows: 'Workflows',
+};
+
+const deriveSourceFromAction = (
+  source: ActionSource,
+  hasAlertIds: boolean
+): LiveHistoryRow['source'] => {
+  // Prefer the explicit action_source field (new actions)
+  if (source.action_source && ACTION_SOURCE_MAP[source.action_source]) {
+    return ACTION_SOURCE_MAP[source.action_source];
+  }
+
+  // Fallback for old actions without action_source
+  return hasAlertIds ? 'Rule' : 'Live';
+};
 
 export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
   const hitFields = (hit.fields ?? {}) as Record<string, unknown>;
@@ -99,7 +120,7 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
     timestamp: get('@timestamp') as string,
     queryText,
     queryName: packName,
-    source: hasAlertIds ? ('Rule' as const) : ('Live' as const),
+    source: deriveSourceFromAction(source, hasAlertIds),
     packName,
     packId,
     spaceId: get('space_id') as string | undefined,

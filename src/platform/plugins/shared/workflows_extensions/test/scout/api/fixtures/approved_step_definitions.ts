@@ -172,4 +172,20 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'cases.setTitle',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
+  {
+    id: 'osquery.getResults',
+    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+  },
+  {
+    id: 'osquery.getSavedQuery',
+    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+  },
+  {
+    id: 'osquery.runPack',
+    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+  },
+  {
+    id: 'osquery.runQuery',
+    handlerHash: 'TODO_REPLACE_WITH_ACTUAL_HASH',
+  },
 ];

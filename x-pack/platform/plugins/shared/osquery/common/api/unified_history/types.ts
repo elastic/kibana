@@ -6,8 +6,8 @@
  */
 
 export type UnifiedHistorySourceType = 'live' | 'scheduled';
-export type UnifiedHistorySource = 'Live' | 'Scheduled' | 'Rule';
-export type SourceFilter = 'live' | 'rule' | 'scheduled';
+export type UnifiedHistorySource = 'Live' | 'Scheduled' | 'Rule' | 'Workflows';
+export type SourceFilter = 'live' | 'rule' | 'scheduled' | 'workflows';
 
 interface UnifiedHistoryRowBase {
   id: string;
@@ -25,7 +25,7 @@ interface UnifiedHistoryRowBase {
 
 export interface LiveHistoryRow extends UnifiedHistoryRowBase {
   sourceType: 'live';
-  source: 'Live' | 'Rule';
+  source: 'Live' | 'Rule' | 'Workflows';
   actionId?: string;
   userId?: string;
   userProfileUid?: string;

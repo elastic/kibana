@@ -20,6 +20,9 @@ const SOURCE_LABELS: Record<UnifiedHistorySource, string> = {
   Scheduled: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.scheduled', {
     defaultMessage: 'Scheduled',
   }),
+  Workflows: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.workflows', {
+    defaultMessage: 'Workflows',
+  }),
 };
 
 interface SourceBadgeProps {

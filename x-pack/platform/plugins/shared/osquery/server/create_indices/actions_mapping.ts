@@ -69,6 +69,10 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'object',
       enabled: false,
     },
+    action_source: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
     pack_id: {
       type: 'keyword',
       ignore_above: 1024,

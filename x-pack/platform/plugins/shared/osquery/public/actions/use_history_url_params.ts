@@ -13,7 +13,7 @@ import type { SourceFilter } from '../../common/api/unified_history/types';
 export const DEFAULT_START_DATE = 'now-24h';
 export const DEFAULT_END_DATE = 'now';
 
-const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'scheduled'];
+const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'scheduled', 'workflows'];
 
 export type SortDirection = 'asc' | 'desc';
 
