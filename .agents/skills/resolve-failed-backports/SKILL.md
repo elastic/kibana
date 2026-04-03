@@ -17,8 +17,10 @@ locally and resolving the conflicts.
 
 ## Prerequisites
 
-- `~/.backport/config.json` must contain a valid `accessToken`
-- `gh` CLI must be authenticated with access to `elastic/kibana`
+- `~/.backport/config.json` must contain a valid `accessToken`. If missing,
+  ask the user to create the file with `{ "accessToken": "<GitHub PAT>" }`.
+- `gh` CLI must be authenticated with access to `elastic/kibana`. If not
+  authenticated, ask the user to run `gh auth login`.
 
 ## Workflow
 
@@ -63,6 +65,10 @@ node scripts/backport --pr <SOURCE_PR> -b <branch1> <branch2> ... --editor true
 
 The backport tool operates in its own clone at `~/.backport/repositories/elastic/kibana`.
 All conflict resolution work happens in that directory.
+
+If the backport tool exits with an error (network failure, auth error, unknown
+flag, etc.), report the full error output to the user and stop. Do not attempt
+to retry or work around tool failures.
 
 ### Step 3: Resolve conflicts
 
