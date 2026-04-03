@@ -43,6 +43,21 @@ jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => ({ isLoading: false, hasAllRequiredPrivileges: true }),
 }));
 
+jest.mock('../../common/components/user_privileges', () => {
+  const { getUserPrivilegesMockDefaultValue } = jest.requireActual<
+    typeof import('../../common/components/user_privileges/__mocks__/index')
+  >('../../common/components/user_privileges/__mocks__');
+
+  return {
+    useUserPrivileges: jest.fn(() =>
+      getUserPrivilegesMockDefaultValue({
+        siemPrivileges: { read: true, crud: true },
+        alertsPrivileges: { alerts: { read: true, edit: true, legacyUpdate: false } },
+      })
+    ),
+  };
+});
+
 const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: (...args: unknown[]) =>

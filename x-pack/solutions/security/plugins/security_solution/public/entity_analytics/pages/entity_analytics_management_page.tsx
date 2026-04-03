@@ -19,6 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useParams } from 'react-router-dom';
 
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { EntityAnalyticsToggle } from '../components/entity_analytics_toggle';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
@@ -41,6 +42,10 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
 import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
 import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
+import {
+  ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_CALLOUT_BODY,
+  ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_CALLOUT_TITLE,
+} from '../translations';
 import {
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
@@ -100,13 +105,20 @@ export const EntityAnalyticsManagementPage = () => {
     useEntityEnginePrivileges();
   const deleteEntityStoreMutation = useDeleteEntityStoreMutation({ entityTypes });
 
+  const { siemPrivileges, alertsPrivileges } = useUserPrivileges();
+  const userHasDocumentedKibanaReadPrivileges = siemPrivileges.read && alertsPrivileges.alerts.read;
+
   const userHasRiskEnginePrivileges =
     !riskEnginePrivileges.isLoading &&
     'hasAllRequiredPrivileges' in riskEnginePrivileges &&
     riskEnginePrivileges.hasAllRequiredPrivileges;
 
   const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
-  const hasAllRequiredPrivileges = userHasRiskEnginePrivileges || userHasEntityStorePrivileges;
+  const hasAllRequiredPrivileges = isEntityStoreFeatureFlagDisabled
+    ? userHasRiskEnginePrivileges && userHasDocumentedKibanaReadPrivileges
+    : userHasRiskEnginePrivileges &&
+      userHasEntityStorePrivileges &&
+      userHasDocumentedKibanaReadPrivileges;
 
   const canRunEngine =
     (!riskEnginePrivileges.isLoading &&
@@ -160,6 +172,19 @@ export const EntityAnalyticsManagementPage = () => {
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
+      {!userHasDocumentedKibanaReadPrivileges && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_CALLOUT_TITLE}
+            color="warning"
+            iconType="iInCircle"
+          >
+            <p>{ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_CALLOUT_BODY}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiPageHeader
         data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID}
         pageTitle={
@@ -178,7 +203,7 @@ export const EntityAnalyticsManagementPage = () => {
                   onSaveSettings={handleSaveToggleSettings}
                   isSavingSettings={saveSelectedSettingsMutation.isLoading}
                   hasAllRequiredPrivileges={hasAllRequiredPrivileges}
-                  isPrivilegesLoading={riskEnginePrivileges.isLoading}
+                  isPrivilegesLoading={riskEnginePrivileges.isLoading || isLoadingPrivileges}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>

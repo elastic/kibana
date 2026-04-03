@@ -6,11 +6,20 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
+import { ALERTS_API_READ, APP_ID } from '@kbn/security-solution-features/constants';
 import { z } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
+};
+
+/**
+ * Install/start and maintainer init/start: Security + Entity Analytics API access plus
+ * Alerts read (alerts-read), per entity risk scoring / entity store Kibana requirements.
+ */
+export const ENTITY_STORE_ENABLEMENT_PERMISSIONS: AuthzEnabled = {
+  requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`, ALERTS_API_READ],
 };
 
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;

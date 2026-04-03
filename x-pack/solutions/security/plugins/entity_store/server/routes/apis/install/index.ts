@@ -7,7 +7,7 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { ENTITY_STORE_ENABLEMENT_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
@@ -20,7 +20,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
       path: ENTITY_STORE_ROUTES.public.INSTALL,
       access: 'public',
       security: {
-        authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
+        authz: ENTITY_STORE_ENABLEMENT_PERMISSIONS,
       },
       enableQueryVersion: true,
     })

@@ -9,6 +9,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { EnableRiskEngineResponse } from '../../../../../common/api/entity_analytics';
+import { ENTITY_ANALYTICS_ENABLEMENT_ALERTS_READ_API_PRIVILEGES } from '../../../../../common/entity_analytics/entity_analytics_enablement_kibana_api_privileges';
 import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
@@ -28,7 +29,11 @@ export const riskEngineEnableRoute = (
       path: RISK_ENGINE_ENABLE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+          requiredPrivileges: [
+            'securitySolution',
+            `${APP_ID}-entity-analytics`,
+            ...ENTITY_ANALYTICS_ENABLEMENT_ALERTS_READ_API_PRIVILEGES,
+          ],
         },
       },
     })

@@ -12,6 +12,7 @@ import type {
   InitRiskEngineResponse,
   InitRiskEngineResult,
 } from '../../../../../common/api/entity_analytics';
+import { ENTITY_ANALYTICS_ENABLEMENT_ALERTS_READ_API_PRIVILEGES } from '../../../../../common/entity_analytics/entity_analytics_enablement_kibana_api_privileges';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -31,7 +32,11 @@ export const riskEngineInitRoute = (
       path: RISK_ENGINE_INIT_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+          requiredPrivileges: [
+            'securitySolution',
+            `${APP_ID}-entity-analytics`,
+            ...ENTITY_ANALYTICS_ENABLEMENT_ALERTS_READ_API_PRIVILEGES,
+          ],
         },
       },
     })

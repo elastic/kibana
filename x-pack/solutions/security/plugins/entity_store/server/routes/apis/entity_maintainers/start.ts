@@ -8,7 +8,7 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
-import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { ENTITY_STORE_ENABLEMENT_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { maintainerIdParamsSchema } from './utils/validator';
@@ -19,7 +19,7 @@ export function registerStartMaintainer(router: EntityStorePluginRouter) {
       path: `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START}`,
       access: 'internal',
       security: {
-        authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
+        authz: ENTITY_STORE_ENABLEMENT_PERMISSIONS,
       },
       enableQueryVersion: true,
     })

@@ -24,6 +24,8 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_TOOLTIP } from '../../../translations';
 import { useInstallEntityStoreMutation } from '../hooks/use_entity_store';
 import {
   ENABLEMENT_INITIALIZING_RISK_ENGINE,
@@ -54,6 +56,8 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
   engines,
 }) => {
   const enabledEntityTypes = useEntityStoreTypes();
+  const { siemPrivileges, alertsPrivileges } = useUserPrivileges();
+  const canEnableEntityAnalytics = siemPrivileges.read && alertsPrivileges.alerts.read;
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -171,18 +175,27 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
         hasBorder
         layout="horizontal"
         actions={
-          <EuiToolTip content={title}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={enableUninstalledEntityStore}
-              data-test-subj={`entityStoreEnablementButton`}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
-                defaultMessage="Enable"
-              />
-            </EuiButton>
+          <EuiToolTip
+            content={
+              canEnableEntityAnalytics
+                ? title
+                : ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_TOOLTIP
+            }
+          >
+            <span>
+              <EuiButton
+                color="primary"
+                fill
+                onClick={enableUninstalledEntityStore}
+                data-test-subj={`entityStoreEnablementButton`}
+                disabled={!canEnableEntityAnalytics}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
+                  defaultMessage="Enable"
+                />
+              </EuiButton>
+            </span>
           </EuiToolTip>
         }
         icon={<EuiImage size="l" hasShadow src={dashboardEnableImg} alt={title} />}
@@ -219,18 +232,27 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
         title={<h2>{title}</h2>}
         body={<p>{body}</p>}
         actions={
-          <EuiToolTip content={title}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={() => setModalVisible(true)}
-              data-test-subj={`entityStoreEnablementButton`}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
-                defaultMessage="Enable"
-              />
-            </EuiButton>
+          <EuiToolTip
+            content={
+              canEnableEntityAnalytics
+                ? title
+                : ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_TOOLTIP
+            }
+          >
+            <span>
+              <EuiButton
+                color="primary"
+                fill
+                onClick={() => setModalVisible(true)}
+                data-test-subj={`entityStoreEnablementButton`}
+                disabled={!canEnableEntityAnalytics}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
+                  defaultMessage="Enable"
+                />
+              </EuiButton>
+            </span>
           </EuiToolTip>
         }
         icon={<EuiImage size="l" hasShadow src={dashboardEnableImg} alt={title} />}

@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildInitRequestBodyValidation } from './validation';
 import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
+import { ENTITY_ANALYTICS_ENABLEMENT_ALERTS_READ_API_PRIVILEGES } from '../../../../../common/entity_analytics/entity_analytics_enablement_kibana_api_privileges';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
@@ -34,7 +35,11 @@ export const enableEntityStoreRoute = (
       path: '/api/entity_store/enable',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+          requiredPrivileges: [
+            'securitySolution',
+            `${APP_ID}-entity-analytics`,
+            ...ENTITY_ANALYTICS_ENABLEMENT_ALERTS_READ_API_PRIVILEGES,
+          ],
         },
       },
     })

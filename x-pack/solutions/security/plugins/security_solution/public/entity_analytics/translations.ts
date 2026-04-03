@@ -49,6 +49,29 @@ export const ENTITY_ANALYTICS_STATUS_OFF = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.enablement.detectionsPrivilegesCalloutTitle',
+  {
+    defaultMessage: 'Security read and Alerts read required',
+  }
+);
+
+export const ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_CALLOUT_BODY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.enablement.detectionsPrivilegesCalloutBody',
+  {
+    defaultMessage:
+      'Turning on entity analytics requires read access to the Security and Alerts features. Ask an administrator to update your role.',
+  }
+);
+
+export const ENTITY_ANALYTICS_ENABLEMENT_DETECTIONS_PRIVILEGES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.enablement.detectionsPrivilegesTooltip',
+  {
+    defaultMessage:
+      'You need read access to the Security and Alerts features to enable entity analytics.',
+  }
+);
+
 export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection',
   {
