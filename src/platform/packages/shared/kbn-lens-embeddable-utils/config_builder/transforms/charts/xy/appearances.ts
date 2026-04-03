@@ -86,7 +86,7 @@ export function convertStylingToAPIFormat(
     // Chart-level (always present)
     overlays: {
       partial_buckets: {
-        visible: config.hideEndzones ?? DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+        visible: config.hideEndzones != null ? !config.hideEndzones : DEFAULT_PARTIAL_BUCKETS_VISIBLE,
       },
       current_time_marker: {
         visible: config.showCurrentTimeMarker ?? DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
@@ -141,7 +141,10 @@ function convertFittingToAPIFormat(
 
 export function convertStylingToStateFormat(config: XYStyling): XYLensAppearanceState {
   return stripUndefined<XYLensAppearanceState>({
-    hideEndzones: config.overlays?.partial_buckets?.visible,
+    hideEndzones:
+      config.overlays?.partial_buckets?.visible != null
+        ? !config.overlays.partial_buckets.visible
+        : undefined,
     showCurrentTimeMarker: config.overlays?.current_time_marker?.visible,
     valueLabels:
       config.bars?.data_labels != null

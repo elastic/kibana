@@ -111,6 +111,36 @@ describe('XY Appearances Transforms', () => {
     expect(result.points).toBeDefined();
   });
 
+  it('should negate hideEndzones when converting to partial_buckets.visible', () => {
+    const hidden = convertStylingToAPIFormat({ hideEndzones: true }, allLayersPresent);
+    expect(hidden.overlays?.partial_buckets?.visible).toBe(false);
+
+    const shown = convertStylingToAPIFormat({ hideEndzones: false }, allLayersPresent);
+    expect(shown.overlays?.partial_buckets?.visible).toBe(true);
+  });
+
+  it('should use DEFAULT_PARTIAL_BUCKETS_VISIBLE when hideEndzones is omitted', () => {
+    const result = convertStylingToAPIFormat({}, allLayersPresent);
+    expect(result.overlays?.partial_buckets?.visible).toBe(DEFAULT_PARTIAL_BUCKETS_VISIBLE);
+  });
+
+  it('should negate partial_buckets.visible when converting to hideEndzones', () => {
+    const hidden = convertStylingToStateFormat({
+      overlays: { partial_buckets: { visible: false } },
+    });
+    expect(hidden.hideEndzones).toBe(true);
+
+    const shown = convertStylingToStateFormat({
+      overlays: { partial_buckets: { visible: true } },
+    });
+    expect(shown.hideEndzones).toBe(false);
+  });
+
+  it('should omit hideEndzones when partial_buckets is absent', () => {
+    const result = convertStylingToStateFormat({});
+    expect(result.hideEndzones).toBeUndefined();
+  });
+
   it('should always include overlays regardless of layer types', () => {
     const result = convertStylingToAPIFormat(
       {},
