@@ -30,10 +30,17 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   /**
-   * Navigate to the AgentBuilder app
+   * Navigate to the AgentBuilder app.
+   * When landing on a new conversation, waits for `agentBuilderWelcomePage` — this
+   * confirms the app has finished loading and the connector has been fetched, so it
+   * is safe to call typeMessage/sendMessage. Without this guard, those calls can fire
+   * before the connector is ready and all LLM interceptors will time out.
    */
   async navigateToApp(path: string = `agents/${agentBuilderDefaultAgentId}/conversations/new`) {
     await this.common.navigateToApp(AGENT_BUILDER_APP_ID, { path });
+    if (path.includes('conversations/new')) {
+      await this.testSubjects.existOrFail('agentBuilderWelcomePage');
+    }
   }
 
   /**
@@ -46,11 +53,20 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   /**
-   * Send the current message
+   * Send the current message.
+   * Waits for the submit button to be enabled before clicking — the button can be
+   * temporarily disabled while the conversation is in a loading or error-transition
+   * state, and clicking it while disabled silently drops the submission.
    */
   async sendMessage() {
-    const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
-    await sendButton.click();
+    await this.retry.try(async () => {
+      const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
+      const isEnabled = await sendButton.isEnabled();
+      if (!isEnabled) {
+        throw new Error('Send button is not yet enabled');
+      }
+      await sendButton.click();
+    });
   }
 
   /**
@@ -155,6 +171,10 @@ export class AgentBuilderPageObject extends FtrService {
       continueConversation: true,
     });
 
+    // Snapshot round count before sending so we can detect when a new one appears
+    const existingRoundCount = (await this.testSubjects.findAll('agentBuilderRoundResponse'))
+      .length;
+
     // Type and send the message
     await this.typeMessage(userMessage);
     await this.sendMessage();
@@ -162,9 +182,15 @@ export class AgentBuilderPageObject extends FtrService {
     // Wait for all interceptors to be called (backend processing complete)
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-    // Wait for the response to appear in the UI
+    // Wait for a new response round to appear. Comparing against the pre-send count
+    // prevents a false-positive where an existing earlier round satisfies the find().
     await this.retry.try(async () => {
-      await this.testSubjects.find('agentBuilderRoundResponse');
+      const currentCount = (await this.testSubjects.findAll('agentBuilderRoundResponse')).length;
+      if (currentCount <= existingRoundCount) {
+        throw new Error(
+          `Waiting for new response round (have ${currentCount}, need more than ${existingRoundCount})`
+        );
+      }
     });
   }
 
@@ -243,7 +269,7 @@ export class AgentBuilderPageObject extends FtrService {
 
   /**
    * Rename a conversation by clicking the title button to open the popover,
-   * then selecting rename, entering the new name, and submitting.
+   * then selecting rename, entering the new name in the modal, and submitting.
    */
   async renameConversation(newTitle: string): Promise<string> {
     // Click the title button to open the popover
@@ -254,13 +280,13 @@ export class AgentBuilderPageObject extends FtrService {
     const renameButton = await this.testSubjects.find('agentBuilderConversationRenameButton');
     await renameButton.click();
 
-    // Wait for the inline edit input to appear and clear + type new name
-    const inputElement = await this.testSubjects.find('renameConversationInputField');
+    // Wait for the rename modal input, clear it, and type the new name
+    const inputElement = await this.testSubjects.find('renameConversationModalInput');
     await inputElement.clearValueWithKeyboard();
     await inputElement.type(newTitle);
 
-    // Click the save button (checkmark icon)
-    const saveButton = await this.testSubjects.find('renameConversationSaveButton');
+    // Click the save button in the modal
+    const saveButton = await this.testSubjects.find('renameConversationModalSave');
     await saveButton.click();
 
     // Wait for the title to update
@@ -357,9 +383,16 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async selectMcpTool(toolName: string) {
-    await this.testSubjects.click('agentBuilderMcpToolSelect');
-    await this.retry.try(async () => {
-      await this.testSubjects.click(`mcpToolOption-${toolName}`);
+    const optionSelector = `mcpToolOption-${toolName}`;
+    // Check whether the dropdown is already open before clicking, so we don't
+    // accidentally toggle it closed on retry.
+    await this.retry.tryForTime(30000, async () => {
+      const isOpen = await this.testSubjects.exists(optionSelector, { timeout: 0 });
+      if (!isOpen) {
+        await this.testSubjects.click('agentBuilderMcpToolSelect');
+      }
+      await this.testSubjects.existOrFail(optionSelector, { timeout: 2000 });
+      await this.testSubjects.click(optionSelector);
     });
   }
 
@@ -415,7 +448,9 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async setBulkImportNamespace(namespace: string) {
-    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace);
+    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace, {
+      clearWithKeyboard: true,
+    });
   }
 
   async clickBulkImportSubmit() {
@@ -494,6 +529,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async isToolInTable(toolId: string): Promise<boolean> {
+    await this.toolsSearch().type(toolId);
     try {
       await this.testSubjects.find(`agentBuilderToolsTableRow-${toolId}`);
       return true;
@@ -541,9 +577,16 @@ export class AgentBuilderPageObject extends FtrService {
       saveButton: 'agentFormSaveButton',
       labelsComboBox: 'agentSettingsLabelsComboBox',
     };
-    await this.testSubjects.append(selectors.inputs.id, id);
-    await this.testSubjects.append(selectors.inputs.displayName, name);
-    await this.testSubjects.append(selectors.inputs.description, `Agent for testing ${id}`);
+    // Use clearWithKeyboard so React Hook Form's controlled inputs receive proper
+    // keyboard events and don't restore a stale value after the JS clear.
+    const setValueOpts = { clearWithKeyboard: true };
+    await this.testSubjects.setValue(selectors.inputs.id, id, setValueOpts);
+    await this.testSubjects.setValue(selectors.inputs.displayName, name, setValueOpts);
+    await this.testSubjects.setValue(
+      selectors.inputs.description,
+      `Agent for testing ${id}`,
+      setValueOpts
+    );
     const labelsComboBox = await this.testSubjects.find(selectors.labelsComboBox);
     const labelsInput = await this.testSubjects.findDescendant(
       selectors.inputs.labels,
@@ -555,6 +598,8 @@ export class AgentBuilderPageObject extends FtrService {
       await labelsInput.pressKeys(this.browser.keys.ENTER);
     }
     await this.testSubjects.click(selectors.saveButton);
+    // Wait for the save to complete and navigation to the agents list to finish.
+    await this.testSubjects.existOrFail('agentBuilderAgentsListPageTitle');
   }
 
   /*
@@ -836,7 +881,11 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async setAgentFormDisplayName(name: string) {
-    await this.testSubjects.setValue('agentSettingsDisplayNameInput', name);
+    // clearWithKeyboard ensures React Hook Form's controlled input receives proper
+    // keyboard events and doesn't restore the stale value after the JS clear.
+    await this.testSubjects.setValue('agentSettingsDisplayNameInput', name, {
+      clearWithKeyboard: true,
+    });
   }
 
   agentFormSaveButton() {
@@ -848,6 +897,8 @@ export class AgentBuilderPageObject extends FtrService {
       },
       click: async () => {
         await this.testSubjects.click(saveButtonSelector);
+        // Wait for the save to complete and navigation back to the agents list.
+        await this.testSubjects.existOrFail('agentBuilderAgentsListPageTitle');
       },
     };
   }

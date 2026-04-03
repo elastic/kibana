@@ -45,7 +45,6 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
-import { getWatchlistName } from '../../../common/entity_analytics/watchlists/constants';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -76,13 +75,23 @@ export const EntityAnalyticsHomePage = () => {
     return params.get('watchlistId') || undefined;
   }, [location.search]);
 
-  const setSelectedWatchlistId = useCallback(
-    (id?: string) => {
+  const selectedWatchlistName = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('watchlistName') || undefined;
+  }, [location.search]);
+
+  const setSelectedWatchlist = useCallback(
+    (id?: string, name?: string) => {
       const params = new URLSearchParams(location.search);
       if (id) {
         params.set('watchlistId', id);
       } else {
         params.delete('watchlistId');
+      }
+      if (name) {
+        params.set('watchlistName', name);
+      } else {
+        params.delete('watchlistName');
       }
       history.replace({ ...location, search: params.toString() });
     },
@@ -126,7 +135,7 @@ export const EntityAnalyticsHomePage = () => {
           rightSideItems={[
             <WatchlistFilter
               selectedId={selectedWatchlistId ?? ''}
-              onChangeSelectedId={setSelectedWatchlistId}
+              onChangeSelectedId={setSelectedWatchlist}
             />,
           ]}
         />
@@ -143,7 +152,10 @@ export const EntityAnalyticsHomePage = () => {
               >
                 <EuiFlexItem grow={1}>
                   <EuiPanel hasBorder>
-                    <DynamicRiskLevelPanel watchlistId={selectedWatchlistId} />
+                    <DynamicRiskLevelPanel
+                      watchlistId={selectedWatchlistId}
+                      watchlistName={selectedWatchlistName}
+                    />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
@@ -155,7 +167,10 @@ export const EntityAnalyticsHomePage = () => {
             </EuiFlexItem>
 
             <EuiPanel hasBorder>
-              <EntityAnalyticsEntitiesTable watchlistId={selectedWatchlistId} />
+              <EntityAnalyticsEntitiesTable
+                watchlistId={selectedWatchlistId}
+                watchlistName={selectedWatchlistName}
+              />
             </EuiPanel>
           </EuiFlexGroup>
         )}
@@ -166,7 +181,13 @@ export const EntityAnalyticsHomePage = () => {
   );
 };
 
-const EntityAnalyticsEntitiesTable = ({ watchlistId }: { watchlistId?: string }) => {
+const EntityAnalyticsEntitiesTable = ({
+  watchlistId,
+  watchlistName,
+}: {
+  watchlistId?: string;
+  watchlistName?: string;
+}) => {
   const spaceId = useSpaceId();
   const { dataView: entityDataView, isLoading: entityDataViewLoading } =
     useEntityStoreDataView(spaceId);
@@ -190,7 +211,7 @@ const EntityAnalyticsEntitiesTable = ({ watchlistId }: { watchlistId?: string })
                 id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitleWithWatchlist"
                 defaultMessage="{watchlistName} entities"
                 values={{
-                  watchlistName: getWatchlistName(watchlistId),
+                  watchlistName: watchlistName ?? watchlistId,
                 }}
               />
             ) : (
@@ -217,8 +238,6 @@ const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: st
   const state = useMemo(() => {
     if (!watchlistId) return urlState;
 
-    const watchlistName = getWatchlistName(watchlistId);
-
     return {
       ...urlState,
       query: {
@@ -227,7 +246,7 @@ const EntityAnalyticsEntitiesTableContent = ({ watchlistId }: { watchlistId?: st
           ...urlState.query?.bool,
           filter: [
             ...(urlState.query?.bool?.filter ?? []),
-            { term: { 'entity.attributes.watchlists': watchlistName } },
+            { term: { 'entity.attributes.watchlists': watchlistId } },
           ],
         },
       },

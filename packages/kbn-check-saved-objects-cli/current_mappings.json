@@ -367,6 +367,17 @@
       "groupBy": {
         "type": "keyword"
       },
+      "groupingMode": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "type": "object",
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        }
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -1359,6 +1370,9 @@
       },
       "integration_id": {
         "type": "keyword"
+      },
+      "title": {
+        "type": "text"
       },
       "job_info": {
         "properties": {
@@ -4388,10 +4402,6 @@
     "properties": {}
   },
   "stream-prompts": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "streams-significant-events-settings": {
     "dynamic": false,
     "properties": {}
   },
