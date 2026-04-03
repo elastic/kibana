@@ -77,8 +77,8 @@ export const getTransformOut = (
 
     const { attributes: _, ...panelState } = state;
     return {
-      ...panelState,
       ...apiConfig,
+      ...panelState, // let the panel state (title, description) override the api config
     } satisfies LensByValueTransformOutResult;
   };
 };
