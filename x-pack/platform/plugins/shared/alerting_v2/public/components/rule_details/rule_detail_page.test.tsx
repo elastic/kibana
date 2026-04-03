@@ -45,15 +45,12 @@ jest.mock('./rule_header_description', () => ({
   RuleHeaderDescription: () => <div data-test-subj="ruleHeaderDescription" />,
 }));
 
-jest.mock('./rule_conditions', () => ({
-  RuleConditions: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleConditionsSection">conditions-{rule.id}</div>
-  ),
-}));
-
-jest.mock('./rule_metadata', () => ({
-  RuleMetadata: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="ruleMetadataSection">metadata-{rule.id}</div>
+jest.mock('./sidebar/rule_sidebar', () => ({
+  RuleSidebar: ({ rule }: { rule: RuleApiResponse }) => (
+    <div>
+      <div data-test-subj="ruleConditionsSection">conditions-{rule.id}</div>
+      <div data-test-subj="ruleMetadataSection">metadata-{rule.id}</div>
+    </div>
   ),
 }));
 
