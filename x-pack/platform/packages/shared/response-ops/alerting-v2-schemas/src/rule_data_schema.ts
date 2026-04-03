@@ -74,12 +74,6 @@ const scheduleSchema = z
 const evaluationQuerySchema = z
   .object({
     base: esqlQuerySchema.describe('Base ES|QL query.'),
-    condition: z
-      .string()
-      .min(1)
-      .max(5000)
-      .optional()
-      .describe('Trigger condition (WHERE clause). Required when no_data is configured.'),
   })
   .strict();
 
@@ -102,12 +96,6 @@ const recoveryPolicySchema = z
     query: z
       .object({
         base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
-        condition: z
-          .string()
-          .min(1)
-          .max(5000)
-          .optional()
-          .describe('Recovery condition (WHERE clause) applied to the base query.'),
       })
       .strict()
       .optional()
@@ -237,14 +225,6 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine((data) => data.kind === 'alert' || data.evaluation.query.condition == null, {
-    message: 'evaluation.query.condition is only allowed when kind is "alert".',
-    path: ['evaluation', 'query', 'condition'],
-  })
-  .refine((data) => !data.no_data || data.evaluation.query.condition != null, {
-    message: 'evaluation.query.condition is required when no_data is configured.',
-    path: ['evaluation', 'query', 'condition'],
-  })
   .refine(
     (data) =>
       data.recovery_policy?.type !== 'query' ||
@@ -269,7 +249,6 @@ export const updateRuleDataSchema = z
         query: z
           .object({
             base: esqlQuerySchema.optional(),
-            condition: z.string().min(1).max(5000).optional(),
           })
           .strict()
           .optional(),
