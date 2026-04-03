@@ -9,7 +9,13 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack, type Configuration, type Compiler, type RspackPluginInstance } from '@rspack/core';
+import {
+  rspack,
+  type Configuration,
+  type Compiler,
+  type RspackPluginInstance,
+  type Module,
+} from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -465,16 +471,99 @@ export async function createSingleCompileConfig(
       removeAvailableModules: dist,
       moduleIds: dist ? 'deterministic' : 'named',
       chunkIds: dist ? 'deterministic' : 'named',
-      // Match legacy webpack optimizer's more conservative chunk splitting
-      // Legacy uses maxAsyncRequests: 10 per plugin
-      // With unified compilation, we use slightly higher but still constrained
+      // Chunk splitting strategy for the single-compilation build.
+      //
+      // In single compilation, all 200+ plugins share one module graph.
+      // Without named cache groups, splitChunks fragments shared modules
+      // across thousands of consumer-combination chunks (e.g., kibana_utils
+      // duplicated 137 times). Named groups with `name` functions override
+      // this by consolidating modules by SOURCE origin instead.
+      //
+      // `chunks: 'async'` keeps kibana.bundle.js (the initial chunk)
+      // self-contained. Using 'all' would require bootstrap renderer
+      // changes to inject prerequisite <script> tags -- a future optimization.
+      //
+      // NOTE on tree shaking: 0 plugins and only ~29% of packages declare
+      // sideEffects:false. This limits rspack's ability to eliminate unused
+      // re-exports from barrel files. A per-package sideEffects audit is a
+      // high-impact future optimization (separate effort).
       splitChunks: {
         chunks: 'async',
-        minSize: 100000, // 100KB minimum - balanced for parse time vs requests
-        // No maxSize - don't force splitting
-        maxAsyncRequests: 30, // Balance between legacy (10) and HTTP/2 optimization
+        minSize: 20000, // 20KB - lowered from 100KB to catch long-tail shared modules
+        maxAsyncRequests: 30,
         maxInitialRequests: 30,
         cacheGroups: {
+          // ---------------------------------------------------------------
+          // Dynamic shared chunks for cross-plugin dependencies.
+          //
+          // PROBLEM: splitChunks groups modules by their exact consumer set.
+          // Modules from the same source plugin have different consumer sets
+          // (different plugins import different exports), causing massive
+          // fragmentation: kibana_utils (60 modules, 78 plugin consumers)
+          // ends up with 125 copies across 137 chunk files.
+          //
+          // FIX: The `name` function derives chunk name from SOURCE plugin
+          // folder, overriding consumer-set grouping. All kibana_utils modules
+          // go into one `shared-plugin-kibana_utils` chunk.
+          //
+          // `enforce: true` bypasses the global minSize/minChunks/maxAsync/
+          // maxInitialRequests constraints. The per-group `minChunks: 2` is
+          // a local override that may still be respected; worst case it is
+          // also bypassed, creating 1:1 shared chunks for single-consumer
+          // modules -- harmless (same bytes, no extra requests).
+          //
+          // `test` is a regex evaluated in Rust; only `name` crosses the
+          // Rust-JS boundary (for the ~few-thousand matching modules out of
+          // 50K+ total). Performance impact is negligible (see benchmark).
+          //
+          // `nameForCondition()` is used instead of `module.resource` because
+          // the `name` callback receives the base Module type, where
+          // `resource` is only available on NormalModule. nameForCondition()
+          // is on the base type and returns the file path for normal modules,
+          // undefined for non-file modules (context, external, concatenated).
+          //
+          // TRADEOFF: More shared chunks = more HTTP requests per plugin load.
+          // Kibana currently runs HTTP/1.1 (HTTP/2 disabled), so prerequisite
+          // chunks load with limited parallelism (~6 connections). Despite
+          // this, total bytes downloaded drop dramatically (e.g., 770KB ->
+          // 180KB for visTypeMarkdown), making this a net win. When HTTP/2 is
+          // enabled, parallel loading will further improve performance.
+          // ---------------------------------------------------------------
+          sharedPlugins: {
+            test: /[\\/]plugins[\\/](?:shared|private)[\\/]/,
+            name: (module: Module) => {
+              const resource = module.nameForCondition?.();
+              if (!resource) return 'shared-plugins';
+              const match = resource.match(/plugins[\\/](?:shared|private)[\\/]([^\\/]+)/);
+              return match ? `shared-plugin-${match[1]}` : 'shared-plugins';
+            },
+            chunks: 'async' as const,
+            priority: 35,
+            minChunks: 2,
+            enforce: true,
+          },
+
+          // Dynamic shared chunks for cross-package dependencies.
+          // Same strategy as sharedPlugins above: consolidate all modules
+          // from the same source package into one named chunk. Covers
+          // packages/(shared|private)/ which includes the most impactful
+          // sources (kbn-palettes, shared-ux, kbn-field-types). Packages
+          // under other paths (packages/, src/core/packages/, x-pack/packages/)
+          // are less commonly shared across plugins and can be added later.
+          sharedPackages: {
+            test: /[\\/]packages[\\/](?:shared|private)[\\/]/,
+            name: (module: Module) => {
+              const resource = module.nameForCondition?.();
+              if (!resource) return 'shared-packages';
+              const match = resource.match(/packages[\\/](?:shared|private)[\\/]([^\\/]+)/);
+              return match ? `shared-pkg-${match[1]}` : 'shared-packages';
+            },
+            chunks: 'async' as const,
+            priority: 30,
+            minChunks: 2,
+            enforce: true,
+          },
+
           // Heavy vendors NOT in ui-shared-deps - keep separate for lazy loading
           vendorsHeavy: {
             test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
