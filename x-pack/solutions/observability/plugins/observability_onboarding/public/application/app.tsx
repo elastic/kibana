@@ -15,7 +15,6 @@ import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
-import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import type {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
@@ -59,13 +58,7 @@ export function ObservabilityOnboardingAppRoot({
           <KibanaContextProvider services={services}>
             <Router history={history}>
               <PerformanceContextProvider>
-                <>
-                  <ObservabilityOnboardingHeaderActionMenu
-                    setHeaderActionMenu={setHeaderActionMenu}
-                    theme$={theme$}
-                  />
-                  <ObservabilityOnboardingFlow />
-                </>
+                <ObservabilityOnboardingFlow />
               </PerformanceContextProvider>
             </Router>
           </KibanaContextProvider>
