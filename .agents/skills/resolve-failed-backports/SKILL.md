@@ -64,7 +64,9 @@ node scripts/backport --pr <SOURCE_PR> -b <branch1> <branch2> ... --editor true
   a conflict and print the confirm prompt.
 
 The backport tool operates in its own clone at `~/.backport/repositories/elastic/kibana`.
-All conflict resolution work happens in that directory.
+All conflict resolution work happens in that directory. If an in progress merge conflict
+exists in that directory for an unrelated backport, ask the user if they want to stop or 
+overwrite it.
 
 If the backport tool exits with an error (network failure, auth error, unknown
 flag, etc.), report the full error output to the user and stop. Do not attempt
