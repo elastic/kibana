@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/es-query'
   - '@kbn/scout'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod
