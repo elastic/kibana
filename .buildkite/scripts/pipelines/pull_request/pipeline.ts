@@ -354,7 +354,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/automatic_import\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
@@ -370,12 +369,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', cancelable)
-      );
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/automatic_import.yml',
-          cancelable
-        )
       );
       pipeline.push(
         getPipeline(

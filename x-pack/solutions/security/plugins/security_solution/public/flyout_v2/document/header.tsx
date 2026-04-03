@@ -14,6 +14,7 @@ import { ALERT_RULE_UUID, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { HeaderTitle } from './components/header_title';
+import { HeaderStatus } from './components/header_status';
 import { DocumentSeverity } from './components/severity';
 import { RiskScore } from './components/risk_score';
 import { AlertHeaderBlock } from '../shared/components/alert_header_block';
@@ -21,81 +22,95 @@ import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
 } from '../shared/components/test_ids';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { noopCellActionRenderer } from '../shared/components/cell_actions';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
-
-const blockStyles = {
-  minWidth: 280,
-};
 
 export interface HeaderProps {
   /**
    * The document to display
    */
   hit: DataTableRecord;
+  /**
+   * Optional cell action renderer for status interactions.
+   */
+  renderCellActions?: CellActionRenderer;
+  /**
+   * Optional callback invoked after alert mutations to refresh flyout data.
+   */
+  onAlertUpdated?: () => void;
 }
 
 /**
  * Document header for the flyout_v2 document flyout.
  * Renders severity, timestamp, title (as a rule-details link for alerts),
- * and alert-only summary blocks (risk score).
+ * and alert-only summary blocks (status and risk score).
  */
-export const Header: FC<HeaderProps> = memo(({ hit }) => {
-  const { services } = useKibana();
+export const Header: FC<HeaderProps> = memo(
+  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }) => {
+    const { services } = useKibana();
+    const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
+    const ruleId = useMemo(
+      () => (getFieldValue(hit, ALERT_RULE_UUID) as string | null) ?? null,
+      [hit]
+    );
+    const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
 
-  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
-  const ruleId = useMemo(
-    () => (getFieldValue(hit, ALERT_RULE_UUID) as string | null) ?? null,
-    [hit]
-  );
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
+    const ruleDetailsHref = useMemo(() => {
+      if (!ruleId) return undefined;
+      const path = getRuleDetailsUrl(ruleId);
+      return services.application.getUrlForApp('securitySolutionUI', {
+        deepLinkId: SecurityPageName.rules,
+        path,
+      });
+    }, [ruleId, services.application]);
 
-  const ruleDetailsHref = useMemo(() => {
-    if (!ruleId) return undefined;
-    const path = getRuleDetailsUrl(ruleId);
-    return services.application.getUrlForApp('securitySolutionUI', {
-      deepLinkId: SecurityPageName.rules,
-      path,
-    });
-  }, [ruleId, services.application]);
-
-  return (
-    <>
-      <DocumentSeverity hit={hit} />
-      <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
-      <EuiSpacer size="xs" />
-      <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />
-      {isAlert && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="s"
-            responsive={false}
-            wrap
-            data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-          >
-            <EuiFlexItem css={blockStyles}>
-              <AlertHeaderBlock
-                hasBorder
-                title={
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.document.header.riskScoreTitle"
-                    defaultMessage="Risk score"
-                  />
-                }
-                data-test-subj={RISK_SCORE_TITLE_TEST_ID}
-              >
-                <RiskScore hit={hit} />
-              </AlertHeaderBlock>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-    </>
-  );
-});
+    return (
+      <>
+        <DocumentSeverity hit={hit} />
+        <EuiSpacer size="m" />
+        {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+        <EuiSpacer size="xs" />
+        <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />
+        {isAlert && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="s"
+              responsive={false}
+              wrap
+              data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+            >
+              <EuiFlexItem>
+                <HeaderStatus
+                  hit={hit}
+                  renderCellActions={renderCellActions}
+                  onAlertUpdated={onAlertUpdated}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AlertHeaderBlock
+                  hasBorder
+                  title={
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.document.header.riskScoreTitle"
+                      defaultMessage="Risk score"
+                    />
+                  }
+                  data-test-subj={RISK_SCORE_TITLE_TEST_ID}
+                >
+                  <RiskScore hit={hit} />
+                </AlertHeaderBlock>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </>
+    );
+  }
+);
 
 Header.displayName = 'Header';
