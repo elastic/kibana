@@ -33,6 +33,7 @@ import {
   MIN_EXTRACTION_INTERVAL_HOURS,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../../util/errors';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 
 export function SettingsTab() {
@@ -62,18 +63,15 @@ export function SettingsTab() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<Error | null>(null);
 
   const hasChanges = indexPatterns !== savedIndexPatterns || continuousExtraction.hasChanged;
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
     continuousExtraction.reset();
-    setSaveError(null);
   }, [savedIndexPatterns, continuousExtraction]);
 
   const handleSave = useCallback(async () => {
-    setSaveError(null);
     setIsSaving(true);
     try {
       if (indexPatterns !== savedIndexPatterns) {
@@ -88,11 +86,17 @@ export function SettingsTab() {
         await continuousExtraction.save();
       }
     } catch (err) {
-      setSaveError(err instanceof Error ? err : new Error(String(err)));
+      core.notifications.toasts.addDanger({
+        title: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.settings.saveErrorTitle',
+          { defaultMessage: 'Failed to save settings' }
+        ),
+        text: getFormattedError(err).message,
+      });
     } finally {
       setIsSaving(false);
     }
-  }, [core.settings.client, indexPatterns, savedIndexPatterns, continuousExtraction]);
+  }, [core.settings.client, core.notifications.toasts, indexPatterns, savedIndexPatterns, continuousExtraction]);
 
   return (
     <>
@@ -351,23 +355,6 @@ export function SettingsTab() {
           </EuiFlexGroup>
         </EuiPanel>
       </EuiPanel>
-
-      {saveError && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.saveErrorTitle',
-              { defaultMessage: 'Failed to save settings' }
-            )}
-            color="danger"
-            iconType="error"
-          >
-            <p>{saveError.message}</p>
-          </EuiCallOut>
-        </>
-      )}
 
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">
