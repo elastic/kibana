@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { AssetImage } from '../../../asset_image';
+import {
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+} from './state_management/stream_routing_state_machine';
+
+export const QueryModeEmptyPrompt = () => {
+  const { createQueryStream } = useStreamRoutingEvents();
+  const canManage = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.privileges.manage
+  );
+
+  return (
+    <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+      <EuiFlexItem grow={false}>
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>{titleText}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {descriptionText}
+                  </EuiText>
+                </EuiFlexItem>
+                {/* TODO: Add docs link back in when it's available */}
+                {/* <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <EuiLink
+                      href="https://www.elastic.co/docs/current/serverless/elasticsearch/query-streams"
+                      target="_blank"
+                      external
+                    >
+                      {docsLinkText}
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem> */}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                flex-shrink: 0;
+              `}
+            >
+              <AssetImage type="queryStreamsEmptyState" size={80} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="bottom"
+          content={
+            !canManage
+              ? i18n.translate('xpack.streams.queryModeEmptyPrompt.cannotCreateQueryStream', {
+                defaultMessage: "You don't have sufficient privileges to create query streams.",
+              })
+              : undefined
+          }
+        >
+          <EuiButton
+            size="s"
+            data-test-subj="streamsAppQueryModeEmptyPromptCreateButton"
+            onClick={createQueryStream}
+            disabled={!canManage}
+          >
+            {createButtonText}
+          </EuiButton>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const titleText = i18n.translate('xpack.streams.queryModeEmptyPrompt.title', {
+  defaultMessage: 'Create a virtual sub-set of your data',
+});
+
+const descriptionText = i18n.translate('xpack.streams.queryModeEmptyPrompt.description', {
+  defaultMessage:
+    'Use an ES|QL query to define a sub-stream for exploration and analysis without altering ingestion or changing your data.',
+});
+
+const docsLinkText = i18n.translate('xpack.streams.queryModeEmptyPrompt.docsLink', {
+  defaultMessage: 'Query streams docs',
+});
+
+const createButtonText = i18n.translate('xpack.streams.queryModeEmptyPrompt.createButton', {
+  defaultMessage: 'Create query sub-stream',
+});

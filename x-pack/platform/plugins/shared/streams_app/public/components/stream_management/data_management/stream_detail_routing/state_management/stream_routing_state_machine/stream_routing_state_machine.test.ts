@@ -106,3 +106,104 @@ describe('streamRoutingMachine condition editor validity', () => {
     expect(actor.getSnapshot().can({ type: 'routingRule.save' })).toBe(true);
   });
 });
+
+const classicDefinition = {
+  privileges: { manage: true, simulate: true, read_failure_store: true },
+  stream: {
+    name: 'logs-generic-default',
+    type: 'classic',
+    ingest: {
+      classic: {},
+    },
+    query_streams: [],
+  },
+  data_stream_exists: true,
+  effective_lifecycle: { type: 'dlm', data_retention: '30d' },
+  effective_failure_store: { enabled: false },
+  effective_settings: {},
+} as unknown as Streams.WiredStream.GetResponse;
+
+describe('classic stream partitioning', () => {
+  const createClassicActor = () => {
+    const actor = createActor(
+      streamRoutingMachine.provide({
+        actors: {
+          routingSamplesMachine: stubRoutingSamplesMachine,
+        },
+      }),
+      { input: { definition: classicDefinition } }
+    );
+    actor.start();
+    return actor;
+  };
+
+  it('starts directly in queryMode for classic streams', () => {
+    const actor = createClassicActor();
+    expect(actor.getSnapshot().value).toEqual({ ready: { queryMode: 'idle' } });
+  });
+
+  it('blocks changeToIngestMode for a classic stream', () => {
+    const actor = createClassicActor();
+
+    actor.send({ type: 'childStreams.mode.changeToIngestMode' });
+
+    expect(actor.getSnapshot().value).toEqual({ ready: { queryMode: 'idle' } });
+  });
+
+  it('has empty routing for a classic stream', () => {
+    const actor = createClassicActor();
+
+    expect(actor.getSnapshot().context.routing).toEqual([]);
+    expect(actor.getSnapshot().context.initialRouting).toEqual([]);
+  });
+
+  it('stays in queryMode after stream.received for a classic stream', async () => {
+    const actor = createClassicActor();
+    expect(actor.getSnapshot().value).toEqual({ ready: { queryMode: 'idle' } });
+
+    actor.send({ type: 'stream.received', definition: classicDefinition });
+    await Promise.resolve();
+
+    expect(actor.getSnapshot().value).toEqual({ ready: { queryMode: 'idle' } });
+  });
+});
+
+describe('wired stream mode switching', () => {
+  const wiredDefinition = {
+    privileges: { manage: true, simulate: true },
+    inherited_fields: {},
+    stream: {
+      name: 'logs.otel',
+      ingest: {
+        wired: {
+          fields: {},
+          routing: [],
+        },
+      },
+    },
+  } as unknown as Streams.WiredStream.GetResponse;
+
+  const createWiredActor = () => {
+    const actor = createActor(
+      streamRoutingMachine.provide({
+        actors: {
+          routingSamplesMachine: stubRoutingSamplesMachine,
+        },
+      }),
+      { input: { definition: wiredDefinition } }
+    );
+    actor.start();
+    return actor;
+  };
+
+  it('allows wired streams to switch from queryMode back to ingestMode', () => {
+    const actor = createWiredActor();
+    expect(actor.getSnapshot().value).toEqual({ ready: { ingestMode: 'idle' } });
+
+    actor.send({ type: 'childStreams.mode.changeToQueryMode' });
+    expect(actor.getSnapshot().value).toEqual({ ready: { queryMode: 'idle' } });
+
+    actor.send({ type: 'childStreams.mode.changeToIngestMode' });
+    expect(actor.getSnapshot().value).toEqual({ ready: { ingestMode: 'idle' } });
+  });
+});

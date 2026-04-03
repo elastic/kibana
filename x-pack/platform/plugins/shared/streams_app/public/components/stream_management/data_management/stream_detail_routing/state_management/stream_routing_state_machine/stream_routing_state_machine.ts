@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate';
-import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
+import { assign, and, not, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { Streams } from '@kbn/streams-schema';
-import { isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { Streams, isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
@@ -89,9 +88,9 @@ export const streamRoutingMachine = setup({
       isConditionEditorValid: true,
     })),
     setupRouting: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => {
-      const routing = params.definition.stream.ingest.wired.routing.map(
-        routingConverter.toUIDefinition
-      );
+      const routing = Streams.WiredStream.Definition.is(params.definition.stream)
+        ? params.definition.stream.ingest.wired.routing.map(routingConverter.toUIDefinition)
+        : [];
 
       return {
         currentRuleId: null,
@@ -199,6 +198,8 @@ export const streamRoutingMachine = setup({
 
       return isChildOf(currentStream.name, currentRule.destination);
     },
+    isClassicStream: ({ context }) =>
+      Streams.ClassicStream.Definition.is(context.definition.stream),
     allBulkForksProcessed: ({ context }) => {
       const { bulkFork } = context;
       return bulkFork !== null && bulkFork.results.length >= bulkFork.items.length;
@@ -222,7 +223,14 @@ export const streamRoutingMachine = setup({
   initial: 'initializing',
   states: {
     initializing: {
-      always: 'ready',
+      always: [
+        {
+          // Classic streams only support query mode — skip ingestMode entirely
+          target: '#queryMode',
+          guard: 'isClassicStream',
+        },
+        { target: 'ready' },
+      ],
     },
     ready: {
       id: 'ready',
@@ -234,14 +242,25 @@ export const streamRoutingMachine = setup({
         'routingRule.setConditionEditorValidity': {
           actions: [{ type: 'setConditionEditorValidity', params: ({ event }) => event }],
         },
-        'stream.received': {
-          target: '#ready',
-          actions: [
-            { type: 'storeDefinition', params: ({ event }) => event },
-            { type: 'clearRefreshing' },
-          ],
-          reenter: true,
-        },
+        'stream.received': [
+          {
+            // Classic streams must stay in queryMode after a definition refresh
+            guard: 'isClassicStream',
+            actions: [
+              { type: 'storeDefinition', params: ({ event }) => event },
+              { type: 'setupRouting', params: ({ event }) => ({ definition: event.definition }) },
+              { type: 'clearRefreshing' },
+            ],
+          },
+          {
+            target: '#ready',
+            actions: [
+              { type: 'storeDefinition', params: ({ event }) => event },
+              { type: 'clearRefreshing' },
+            ],
+            reenter: true,
+          },
+        ],
         'routingSamples.setDocumentMatchFilter': {
           actions: sendTo('routingSamplesMachine', ({ event }) => ({
             type: 'routingSamples.setDocumentMatchFilter',
@@ -792,7 +811,10 @@ export const streamRoutingMachine = setup({
           id: 'queryMode',
           initial: 'idle',
           on: {
-            'childStreams.mode.changeToIngestMode': '#ingestMode',
+            'childStreams.mode.changeToIngestMode': {
+              guard: not('isClassicStream'),
+              target: '#ingestMode',
+            },
           },
           states: {
             idle: {

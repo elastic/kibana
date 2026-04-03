@@ -158,6 +158,9 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const { cancelQueryStreamCreation, saveQueryStream } = useStreamRoutingEvents();
   const { executeQuery } = useQueryStreamCreation();
 
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const isClassicParent = !Streams.WiredStream.Definition.is(definition.stream);
+
   const isSaving = useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: { creating: 'saving' } } })
   );
@@ -186,10 +189,13 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
     [parentStreamName, saveQueryStream]
   );
 
+  // Classic streams use the raw stream name; wired/query streams use the $. prefixed view name
+  const initialFromSource = isClassicParent ? parentStreamName : getEsqlViewName(parentStreamName);
+
   return (
     <InlineQueryStreamForm
       parentStreamName={parentStreamName}
-      initialEsqlQuery={`FROM ${getEsqlViewName(parentStreamName)}`}
+      initialEsqlQuery={`FROM ${initialFromSource}`}
       onSave={handleSave}
       onCancel={cancelQueryStreamCreation}
       onQueryChange={debouncedExecuteQuery}

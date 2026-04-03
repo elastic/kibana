@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
+import { MAX_NESTING_LEVEL, getSegments, Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import type { DraggableProvided } from '@hello-pangea/dnd';
@@ -48,6 +48,7 @@ import { BulkCreateStreamsConfirmationModal } from './review_suggestions_form/bu
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
+import { QueryModeEmptyPrompt } from './query_mode_empty_prompt';
 import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
@@ -91,7 +92,7 @@ const IdleRoutingStreamEntryWithPermissions = ({
   );
 };
 
-export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
+export function ChildStreamList({ availableStreams = [] }: { availableStreams?: string[] }) {
   const { euiTheme } = useEuiTheme();
 
   const { features } = useStreamsPrivileges();
@@ -101,6 +102,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const { changeChildStreamsMode } = useStreamRoutingEvents();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const isWiredStream = Streams.WiredStream.Definition.is(definition.stream);
   const idSelected = useStreamsRoutingSelector((snapshot) => {
     if (!canUseQueryMode) {
       return 'ingestMode';
@@ -119,7 +121,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
       <CurrentStreamEntry definition={definition} />
 
       {canUseQueryMode && (
-        <EuiButtonGroup
+        <div
           className={css`
             display: flex;
             position: relative;
@@ -134,30 +136,40 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               height: ${euiTheme.size.s};
             }
           `}
-          legend={i18n.translate('xpack.streams.streamDetailRouting.childStreamList.legend', {
-            defaultMessage: 'Child streams type selector',
-          })}
-          options={[
-            {
-              id: 'ingestMode',
-              label: 'Index',
-            },
-            {
-              id: 'queryMode',
-              label: 'Query',
-            },
-          ]}
-          idSelected={idSelected}
-          onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
-          buttonSize="compressed"
-          color="primary"
-          data-test-subj="streamsAppChildStreamTypeSelector"
-        />
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.streams.streamDetailRouting.childStreamList.legend', {
+              defaultMessage: 'Child streams type selector',
+            })}
+            options={
+              isWiredStream
+                ? [
+                  { id: 'ingestMode', label: 'Index' },
+                  { id: 'queryMode', label: 'Query' },
+                ]
+                : [{ id: 'queryMode', label: 'Query' }]
+            }
+            idSelected={idSelected}
+            onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
+            buttonSize="compressed"
+            color="primary"
+            data-test-subj="streamsAppChildStreamTypeSelector"
+          />
+        </div>
       )}
-      {idSelected === 'ingestMode' && (
+      {isWiredStream && idSelected === 'ingestMode' && (
         <IngestModeChildrenList availableStreams={availableStreams} />
       )}
       {canUseQueryMode && idSelected === 'queryMode' && <QueryModeChildrenList />}
+      {canUseQueryMode && !isWiredStream && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" textAlign="center">
+            {i18n.translate('xpack.streams.streamDetailRouting.childStreamList.classicNotice', {
+              defaultMessage: 'Ingest-time partitioning is not available for classic streams.',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -476,6 +488,12 @@ function QueryModeChildrenList() {
     return queryStreams.map((ref) => ref.name);
   }, [definition.stream.query_streams]);
 
+  const showEmptyPrompt = childQueryStreamNames.length === 0 && !isCreating;
+
+  if (showEmptyPrompt) {
+    return <QueryModeEmptyPrompt />;
+  }
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -547,12 +565,12 @@ function QueryModeChildrenList() {
                 content={
                   !canManage
                     ? i18n.translate(
-                        'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
-                        {
-                          defaultMessage:
-                            "You don't have sufficient privileges to create query streams.",
-                        }
-                      )
+                      'xpack.streams.queryModeChildrenList.cannotCreateQueryStream',
+                      {
+                        defaultMessage:
+                          "You don't have sufficient privileges to create query streams.",
+                      }
+                    )
                     : undefined
                 }
               >

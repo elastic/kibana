@@ -9,7 +9,8 @@ import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xst
 import { setup, assign, fromObservable, fromEventObservable } from 'xstate';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { SampleDocument, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import { isEmpty, isNumber } from 'lodash';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -364,7 +365,9 @@ function collectDocuments({
             if (telemetryClient) {
               registerFetchLatency = telemetryClient.startTrackingPartitioningSamplesFetchLatency({
                 stream_name: input.definition.stream.name,
-                stream_type: 'wired',
+                stream_type: Streams.WiredStream.Definition.is(input.definition.stream)
+                  ? 'wired'
+                  : 'classic',
               });
             }
           },
