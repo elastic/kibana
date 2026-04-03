@@ -5,31 +5,31 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
-inputs:
-  - name: query
-    type: string
-    required: true
-    description: 'The search query to execute'
-  - name: max_results
-    type: number
-    required: false
-    default: 10
-    description: 'Maximum number of search results to return'
-  - name: search_depth
-    type: choice
-    options:
-      - basic
-      - advanced
-      - fast
-      - ultra-fast
-    required: false
-    default: 'basic'
-    description: 'Search depth: basic for generic results, advanced for thorough search, fast/ultra-fast for low latency'
-  - name: include_raw_content
-    type: boolean
-    required: false
-    default: false
-    description: 'Include the cleaned and parsed HTML content of each search result. Significantly increases response size.'
+    inputs:
+      - name: query
+        type: string
+        required: true
+        description: 'The search query to execute'
+      - name: max_results
+        type: number
+        required: false
+        default: 10
+        description: 'Maximum number of search results to return'
+      - name: search_depth
+        type: choice
+        options:
+          - basic
+          - advanced
+          - fast
+          - ultra-fast
+        required: false
+        default: 'basic'
+        description: 'Search depth: basic for generic results, advanced for thorough search, fast/ultra-fast for low latency'
+      - name: include_raw_content
+        type: boolean
+        required: false
+        default: false
+        description: 'Include the cleaned and parsed HTML content of each search result. Significantly increases response size.'
 steps:
   - name: tavily-search
     type: tavily_mcp.tavilySearch
