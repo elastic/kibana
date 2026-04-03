@@ -294,7 +294,7 @@ export const getManagementFilteredLinks = async (
     canReadTrustedApplications ||
     (trustedDevicesEnabled && canReadTrustedDevices) ||
     canReadEventFilters ||
-    (showHostIsolationExceptions && canReadHostIsolationExceptions) ||
+    showHostIsolationExceptions ||
     canReadBlocklist;
   if (!canReadAnyArtifact) {
     linksToExclude.push(SecurityPageName.artifacts);

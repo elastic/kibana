@@ -250,12 +250,17 @@ describe('ArtifactsPage', () => {
     expect(within(tabs).queryByRole('tab', { name: TRUSTED_DEVICES_TAB })).not.toBeInTheDocument();
   });
 
-  it('defaults to trusted apps path when URL does not match an artifact tab', async () => {
+  it('defaults to first visible tab when URL does not match an artifact tab', async () => {
     renderResult = renderArtifactsAtPath('/administration/unknown_artifact_path');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('artifacts-stub-trustedApps')).toBeInTheDocument();
+      expect(renderResult.getByTestId('artifacts-stub-endpointExceptions')).toBeInTheDocument();
     });
+
+    const tabs = renderResult.getByRole('tablist');
+    expect(within(tabs).getByRole('tab', { selected: true })).toHaveTextContent(
+      ENDPOINT_EXCEPTIONS_TAB
+    );
   });
 
   it('shows no privileges page when host isolation exceptions URL is visited without access', async () => {

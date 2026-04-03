@@ -117,17 +117,22 @@ function getPathForTab(
     case AdministrationSubTab.blocklist:
       return getBlocklistsListPath();
     default:
+      // visibleTabs[0] covers all reachable cases; the getTrustedAppsListPath fallback
+      // is unreachable because canReadAnyArtifact would be false and the link excluded
       return visibleTabs.length > 0 ? getPathForTab(visibleTabs[0]) : getTrustedAppsListPath();
   }
 }
 
-function getActiveTabFromPathname(pathname: string): AdministrationSubTab {
+function getActiveTabFromPathname(
+  pathname: string,
+  visibleTabs: AdministrationSubTab[]
+): AdministrationSubTab {
   for (const tab of ARTIFACT_SUB_TABS) {
     if (pathname.includes(`/${tab}`)) {
       return tab;
     }
   }
-  return AdministrationSubTab.trustedApps;
+  return visibleTabs[0] ?? AdministrationSubTab.trustedApps;
 }
 
 export const ArtifactsPage = memo(() => {
@@ -159,8 +164,6 @@ export const ArtifactsPage = memo(() => {
       canReadHostIsolationExceptions,
       getHostIsolationExceptionsApiClientInstance
     );
-
-  const activeTab = useMemo(() => getActiveTabFromPathname(location.pathname), [location.pathname]);
 
   const visibleTabs = useMemo(() => {
     return ARTIFACT_SUB_TABS.filter((tab) => {
@@ -199,6 +202,11 @@ export const ArtifactsPage = memo(() => {
     hasAccessToHostIsolationExceptions,
     canReadBlocklist,
   ]);
+
+  const activeTab = useMemo(
+    () => getActiveTabFromPathname(location.pathname, visibleTabs),
+    [location.pathname, visibleTabs]
+  );
 
   const selectedTabIndex = visibleTabs.findIndex((tab) => tab === activeTab);
   const effectiveSelectedIndex =
