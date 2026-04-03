@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -29,21 +29,34 @@ const KIND_ICONS: Record<string, string> = {
 };
 
 /**
- * Renders the tags row below the page title.
+ * Renders the description and tags row below the page title.
  */
 export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({ rule }) => {
-  if (!rule.metadata.labels || rule.metadata.labels.length === 0) {
+  const { description, labels } = rule.metadata;
+  const hasLabels = labels && labels.length > 0;
+
+  if (!description && !hasLabels) {
     return null;
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
-      {rule.metadata.labels.map((label) => (
-        <EuiFlexItem key={label} grow={false}>
-          <EuiBadge color="hollow">{label}</EuiBadge>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <>
+      {description && (
+        <EuiText size="s" color="subdued" data-test-subj="ruleDescription">
+          {description}
+        </EuiText>
+      )}
+      <EuiSpacer size="m" />
+      {hasLabels && (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
+          {labels!.map((label) => (
+            <EuiFlexItem key={label} grow={false}>
+              <EuiBadge color="hollow">{label}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      )}
+    </>
   );
 };
 
