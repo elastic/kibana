@@ -60,8 +60,21 @@ export const useContinuousExtractionSettings = ({
     await http.put('/internal/streams/_significant_events/settings', {
       body: JSON.stringify({ continuousKiExtraction: draft }),
     });
+
+    await Promise.all([
+      globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, draft.enabled),
+      globalClient.set(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+        draft.intervalHours
+      ),
+      globalClient.set(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
+        draft.excludedStreamPatterns
+      ),
+    ]);
+
     setSaved(draft);
-  }, [http, draft]);
+  }, [globalClient, http, draft]);
 
   return useMemo(
     () => ({ saved, draft, setDraft, hasChanged, reset, save }),
