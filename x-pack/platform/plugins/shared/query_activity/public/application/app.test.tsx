@@ -142,7 +142,7 @@ describe('QueryActivityApp', () => {
     renderWithKibanaRenderContext(<QueryActivityApp />);
 
     await user.click(await screen.findByLabelText('Cancel query'));
-    await user.click(await screen.findByRole('button', { name: 'Confirm' }));
+    await user.click(await screen.findByRole('button', { name: 'Cancel the query' }));
 
     await waitFor(() => {
       expect(context.notifications.toasts.addSuccess).toHaveBeenCalled();

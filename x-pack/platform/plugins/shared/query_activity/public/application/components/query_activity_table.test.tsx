@@ -143,11 +143,9 @@ describe('QueryActivityTable', () => {
     const { user } = await renderTable({ queries: [query], onCancelQuery });
 
     await user.click(await screen.findByLabelText('Cancel query'));
-    expect(
-      await screen.findByText('Are you sure you want to cancel this query?')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Cancel this query?')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel the query' }));
 
     await waitFor(() => {
       expect(onCancelQuery).toHaveBeenCalledWith(query.taskId);
