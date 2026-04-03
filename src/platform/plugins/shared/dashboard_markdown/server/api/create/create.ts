@@ -10,7 +10,7 @@
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownCreateRequestBody } from './types';
-import { getMarkdownCRUResponseBody } from '../../saved_object_utils';
+import { getMarkdownCRUResponseBody } from '../get_cru_response_body';
 import type { MarkdownCreateResponseBody } from './types';
 import type { MarkdownAttributes } from '../../markdown_saved_object';
 

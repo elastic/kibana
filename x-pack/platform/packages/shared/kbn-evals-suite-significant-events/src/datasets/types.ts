@@ -13,7 +13,7 @@ import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction/eva
 interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
   failure_domain: string;
-  failure_mode: string;
+  failure_mode?: string;
 }
 
 export interface SnapshotSourceOverride {
