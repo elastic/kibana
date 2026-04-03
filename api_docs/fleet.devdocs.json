@@ -2248,29 +2248,6 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-public.FleetStartServices.automaticImportVTwo",
-            "type": "Object",
-            "tags": [],
-            "label": "automaticImportVTwo",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "automaticImportVTwo",
-                "scope": "public",
-                "docId": "kibAutomaticImportVTwoPluginApi",
-                "section": "def-public.AutomaticImportV2PluginStart",
-                "text": "AutomaticImportV2PluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
-            "lineNumber": 158,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-public.FleetStartServices.cloud",
             "type": "CompoundType",
             "tags": [],
