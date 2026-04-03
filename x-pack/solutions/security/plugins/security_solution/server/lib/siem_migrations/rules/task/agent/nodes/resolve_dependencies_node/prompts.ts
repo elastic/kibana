@@ -6,6 +6,8 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { PACKET_RATE_PROMPT } from './qradar/packet_rate';
+import { FLOW_BIAS_PROMPT } from './qradar/flow_bias';
 
 export const QRADAR_DEPENDENCIES_RESOLVE_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -74,6 +76,19 @@ When you encounter a test that references another object, you must perform a **s
 - When flattening, you must preserve this logic. Use phrasing like: "AND satisfy the conditions of [Dependency Name], which are: (Condition A OR Condition B)."
 
 
+### General Terms
+
+### BOGON
+
+- “Bogon” is an informal name for an IP packet on the public Internet that claims to be from an area of the IP address space reserved, but not yet allocated or delegated by the Internet Assigned Numbers Authority (IANA) or a delegated Regional Internet Registry (RIR). The areas of unallocated address space are called “bogon space”.
+
+- Bogon IPs also include some address ranges from allocated space. For example, addresses reserved for private networks, such as those in 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 and fc00::/7, loopback interfaces like 127.0.0.0/8 and ::1, and link-local addresses like 169.254.0.0/16 and fe80::/64 can be bogon addresses. Addresses for Carrier-grade NAT, Teredo, and 6to4 and documentation prefixes also fall into this category.
+
+- Apply those CIDR ranges to the conditions directly. Nothing else need to be done.
+
+${FLOW_BIAS_PROMPT}
+
+${PACKET_RATE_PROMPT}
 
 ### Sequences, Double Sequences and CauseEffect
 
@@ -114,6 +129,77 @@ Event or Flow Payload tests check for certain strings, patterns within the compl
 #### How to resolve Event/Flow Payload test conditions:
 
 It is extremely important to be clear and precise, and mention that string or pattern needs to be searched in complete event payload and not in particular field. There is no single field exists for event/flow/source payload. You must add special note to mention the same.
+
+### ICMP Type Tests (com.q1labs.semsources.cre.tests.IcmpType)
+
+ICMP type codes identify the purpose of an ICMP message (e.g. Echo Request, Echo Reply,
+Destination Unreachable). In Elastic, the ICMP type code is stored as a numeric integer
+in a dedicated ICMP-specific field — it is completely separate from the network layer
+type field which holds string values like "ipv4" or "ipv6".
+
+#### How to identify ICMP Type test conditions:
+- Test class name: \`com.q1labs.semsources.cre.tests.IcmpType\`
+
+
+#### ICMP Type numeric reference (complete IANA list):
+
+> Deprecated types are marked with †.
+
+| Numeric | Name | Notes |
+|---------|------|-------|
+| 0 | Echo Reply | - |
+| 1 | Unassigned | — |
+| 2 | Unassigned | — |
+| 3 | Destination Unreachable | - |
+| 4 | Source Quench | † Deprecated (RFC 6633) |
+| 5 | Redirect | — |
+| 6 | Alternate Host Address | † Deprecated |
+| 7 | Unassigned | — |
+| 8 | Echo (Ping Request) | - |
+| 9 | Router Advertisement | — |
+| 10 | Router Solicitation | — |
+| 11 | Time Exceeded | - |
+| 12 | Parameter Problem | — |
+| 13 | Timestamp | — |
+| 14 | Timestamp Reply | — |
+| 15 | Information Request | † Deprecated |
+| 16 | Information Reply | † Deprecated |
+| 17 | Address Mask Request | † Deprecated |
+| 18 | Address Mask Reply | † Deprecated |
+| 19 | Reserved (Security) | — |
+| 20–29 | Reserved (Robustness Experiment) | — |
+| 30 | Traceroute | † Deprecated |
+| 31 | Datagram Conversion Error | † Deprecated |
+| 32 | Mobile Host Redirect | † Deprecated |
+| 33 | IPv6 Where-Are-You | † Deprecated |
+| 34 | IPv6 I-Am-Here | † Deprecated |
+| 35 | Mobile Registration Request | † Deprecated |
+| 36 | Mobile Registration Reply | † Deprecated |
+| 37 | Domain Name Request | † Deprecated |
+| 38 | Domain Name Reply | † Deprecated |
+| 39 | SKIP | † Deprecated |
+| 40 | Photuris | — |
+| 41 | ICMP for Seamoby | — |
+| 42 | Extended Echo Request | RFC 8335 |
+| 43 | Extended Echo Reply | RFC 8335 |
+| 44–252 | Unassigned | — |
+| 253 | RFC3692-style Experiment 1 | — |
+| 254 | RFC3692-style Experiment 2 | — |
+| 255 | Reserved | — |
+
+#### How to resolve ICMP Type test conditions:
+- Non-negated test: "Check if the ICMP type code (the numeric message type, NOT the
+  network layer type which holds values like 'ipv4' or 'ipv6') is any of
+  [code1 (Name1), code2 (Name2), ...]"
+
+- Negated test (negate="true"): "Check if the ICMP type code (the numeric message type,
+  NOT the network layer type which holds values like 'ipv4' or 'ipv6') is NOT any of
+  [code1 (Name1), code2 (Name2), ...]"
+
+**Example — "when the icmp type is any of Echo Reply, Echo, Destination Unreachable,
+Time Exceeded" with negate="true":**
+"Check if the ICMP type code (the numeric message type, not the network layer type field)
+is NOT any of: 0 (Echo Reply), 8 (Echo), 3 (Destination Unreachable), 11 (Time Exceeded)."
 
 ### Flow Type Tests (com.q1labs.semsources.cre.tests.FlowType)
 
@@ -410,6 +496,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
     - Bullet list of data source names.
     - Use only data sources that are clearly implied by the rule and its dependencies.
     - Pay special attention to Software Entity names as data sources. For example Cloudflare, Zcaler.
+    - Do not make up entity names such as Netflow/IPFIX unless they are explicitly mentioned in the rule.
     - Infer data sources from the rule's domains, log source types, event categories, software entities, and field references. Do not assume a particular network-flow or packet-capture pipeline unless the rule and its dependencies clearly imply it.
 
   #### Flattened Detection Logic ( including the negate attribute handling)
