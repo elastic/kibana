@@ -23,7 +23,6 @@ export const singleMetricESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
     },
   ],
@@ -43,31 +42,25 @@ export const multipleMetricRowSplitESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
     },
     {
-      operation: 'value',
       column: 'agent',
     },
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],
@@ -87,7 +80,6 @@ export const fullConfigESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
       alignment: 'center',
       apply_color_to: 'value',
@@ -126,20 +118,17 @@ export const fullConfigESQLDatatable: DatatableState = {
       },
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
       visible: false,
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
       visible: false,
       click_filter: true,
     },
     {
-      operation: 'value',
       column: 'agent',
       alignment: 'center',
       apply_color_to: 'value',
@@ -147,11 +136,9 @@ export const fullConfigESQLDatatable: DatatableState = {
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],
@@ -184,7 +171,6 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
       alignment: 'center',
       apply_color_to: 'value',
@@ -223,20 +209,17 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
       },
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
       visible: false,
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
       visible: false,
       click_filter: true,
     },
     {
-      operation: 'value',
       column: 'agent',
       alignment: 'center',
       apply_color_to: 'value',
@@ -244,11 +227,9 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],
@@ -287,7 +268,6 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
       alignment: 'center',
       apply_color_to: 'value',
@@ -326,20 +306,17 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
       },
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
       visible: false,
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
       visible: false,
       click_filter: true,
     },
     {
-      operation: 'value',
       column: 'agent',
       alignment: 'center',
       apply_color_to: 'value',
@@ -347,11 +324,9 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],

@@ -327,7 +327,6 @@ describe('Tagcloud Schema', () => {
             query: 'FROM my-index | LIMIT 100',
           },
           metric: {
-            operation: 'value',
             column: 'count',
           },
           tag_by: {
@@ -410,13 +409,11 @@ describe('Tagcloud Schema', () => {
             query: 'FROM my-index | STATS count() BY category | LIMIT 100',
           },
           metric: {
-            operation: 'value',
             column: 'count',
             label: 'Count',
           },
           caption: { visible: false },
           tag_by: {
-            operation: 'value',
             column: 'category',
             color: {
               mode: 'gradient',

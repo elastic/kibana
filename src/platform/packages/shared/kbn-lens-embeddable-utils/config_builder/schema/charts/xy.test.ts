@@ -126,9 +126,9 @@ describe('XY', () => {
               type,
               ignore_global_filters: false,
               sampling: 1,
-              x: { operation: 'value', column: 'order_date' },
-              y: [{ operation: 'value', column: 'count' }],
-              breakdown_by: { operation: 'value', column: 'product' },
+              x: { column: 'order_date' },
+              y: [{ column: 'count' }],
+              breakdown_by: { column: 'product' },
             },
           ],
         } satisfies XYState)
@@ -391,7 +391,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: { visible: true },
                     color: {
@@ -448,12 +448,9 @@ describe('XY', () => {
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: 'order_date' },
-                y: [
-                  { operation: 'value', column: 'value' },
-                  { operation: 'value', column: 'price' },
-                ],
-                breakdown_by: { operation: 'value', column: 'product' },
+                x: { column: 'order_date' },
+                y: [{ column: 'value' }, { column: 'price' }],
+                breakdown_by: { column: 'product' },
               },
               {
                 data_source: {
@@ -527,7 +524,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: {
                       visible: true,
