@@ -61,6 +61,6 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     steps.length > 0 && steps.some((step) => !isReasoningStep(step) || step.transient !== true);
 
   return (
-    <RoundThinkingTitle isLoading={isLoading} hasSteps={hasSteps} onShow={toggleThinkingPanel} />
+    <RoundThinkingTitle isLoading={isLoading} hasSteps={hasSteps} onShow={toggleThinkingPanel} steps={steps} />
   );
 };

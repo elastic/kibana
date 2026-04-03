@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useState } from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header/conversation_header';
+import { ToolsSidebar } from './tools_sidebar';
 import { AgentBuilderTourProvider } from '../../context/agent_builder_tour_context';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
 
+const SIDEBAR_WIDTH = 280;
+
 export const AgentBuilderConversationsView: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const mainStyles = css`
     border: none;
@@ -33,9 +37,27 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
     height: 100%;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight}px);
     display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
+  `;
+  const fullLayoutStyles = css`
+    width: 100%;
+    height: 100%;
+  `;
+  const sidebarWrapperStyles = css`
+    height: 100%;
+    position: relative;
+    width: ${isSidebarOpen ? SIDEBAR_WIDTH : 0}px;
+    transition: width 150ms ease-in-out;
+    flex-shrink: 0;
+  `;
+  const toggleStyles = css`
+    position: absolute;
+    top: ${euiTheme.size.m};
+    left: -${euiTheme.size.xl};
+    z-index: 2;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border: ${euiTheme.border.thin};
+    border-radius: ${euiTheme.border.radius.medium};
   `;
 
   const labels = {
@@ -79,7 +101,25 @@ export const AgentBuilderConversationsView: React.FC<{}> = () => {
               }}
               aria-label={labels.content}
             >
-              <Conversation />
+              <EuiFlexGroup gutterSize="none" css={fullLayoutStyles}>
+                <EuiFlexItem grow>
+                  <Conversation />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} css={sidebarWrapperStyles}>
+                  <EuiButtonIcon
+                    css={toggleStyles}
+                    iconType={isSidebarOpen ? 'menuRight' : 'menuLeft'}
+                    aria-label={i18n.translate(
+                      'xpack.agentBuilder.conversationsView.toggleSidebar',
+                      { defaultMessage: 'Toggle tools sidebar' }
+                    )}
+                    onClick={() => setIsSidebarOpen((v) => !v)}
+                    size="s"
+                    color="text"
+                  />
+                  {isSidebarOpen && <ToolsSidebar />}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </KibanaPageTemplate.Section>
           </KibanaPageTemplate>
         </AgentBuilderTourProvider>

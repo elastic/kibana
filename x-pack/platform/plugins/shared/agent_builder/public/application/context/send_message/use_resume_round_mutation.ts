@@ -47,7 +47,17 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
     browserToolExecutor,
   });
 
-  const resumeRound = async ({ promptId, confirm }: { promptId: string; confirm: boolean }) => {
+  const resumeRound = async ({
+    promptId,
+    confirm,
+    value,
+    selectedOptionId,
+  }: {
+    promptId: string;
+    confirm?: boolean;
+    value?: string | null;
+    selectedOptionId?: string | null;
+  }) => {
     const signal = resumeControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
@@ -57,10 +67,17 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
       return Promise.reject(new Error('Conversation ID is required to resume a round'));
     }
 
+    const promptResponse =
+      selectedOptionId !== undefined
+        ? { selectedOptionId }
+        : value !== undefined
+          ? { value }
+          : { allow: confirm ?? false };
+
     const events$ = chatService.resume({
       signal,
       prompts: {
-        [promptId]: { allow: confirm },
+        [promptId]: promptResponse,
       },
       conversationId,
       agentId,

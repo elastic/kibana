@@ -75,14 +75,31 @@ export const editableToolTypes: ToolType[] = [
   ToolType.mcp,
 ];
 
-export const defaultAgentToolIds = [
-  platformCoreTools.search,
-  platformCoreTools.listIndices,
-  platformCoreTools.getIndexMapping,
-  platformCoreTools.getDocumentById,
-  platformCoreTools.getWorkflowExecutionStatus,
-  platformCoreTools.smlSearch,
-  platformCoreTools.smlAttach,
+const workflowStepTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.workflows}.step.${TName}` => {
+  return `${internalNamespaces.workflows}.step.${toolName}`;
+};
+
+export const workflowStepTools = {
+  elasticsearchSearch: workflowStepTool('elasticsearch.search'),
+  elasticsearchRequest: workflowStepTool('elasticsearch.request'),
+  dataRegexReplace: workflowStepTool('data.regex-replace'),
+  aiPrompt: workflowStepTool('ai.prompt'),
+  aiSummarize: workflowStepTool('ai.summarize'),
+  slack: workflowStepTool('slack'),
+  http: workflowStepTool('http'),
+  discoverConnectors: workflowStepTool('discover_connectors'),
+} as const;
+
+export const defaultAgentToolIds: string[] = [
+  `${internalNamespaces.workflows}.get_connectors`,
+  `${internalNamespaces.workflows}.ask_user`,
+  `${internalNamespaces.workflows}.connect_connector`,
+];
+
+export const defaultAgentToolIdPatterns = [
+  `${internalNamespaces.workflows}.step.`,
 ];
 
 /**

@@ -83,11 +83,19 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
     try {
-      const response = await researcherModel.invoke(
-        await promptFactory.getMainPrompt({
-          actions: state.mainActions,
-        })
-      );
+      const mainPrompt = await promptFactory.getMainPrompt({
+        actions: state.mainActions,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log(`[agent-debug] Sending ${mainPrompt.length} messages to LLM. Tools available: ${toolManager.list().map((t: { name: string }) => t.name).join(', ')}`);
+
+      const response = await researcherModel.invoke(mainPrompt);
+
+      // eslint-disable-next-line no-console
+      const toolCalls = (response as { tool_calls?: Array<{ name: string; args: Record<string, unknown> }> }).tool_calls;
+      const reasoning = typeof response.content === 'string' ? response.content.slice(0, 200) : '';
+      console.log(`[agent-debug] LLM response: reasoning="${reasoning}", tool_calls=${JSON.stringify(toolCalls?.map((tc: { name: string; args: Record<string, unknown> }) => ({ name: tc.name, args: Object.keys(tc.args) })))}`);
 
       const action = processResearchResponse(response);
 

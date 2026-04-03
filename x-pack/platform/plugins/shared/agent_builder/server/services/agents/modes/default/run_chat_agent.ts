@@ -132,8 +132,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
 
   // Pass action so regenerate uses the last round's original input instead of request input
+  // When resuming a HITL round, preserve the original user message
+  const effectiveNextInput = pendingRound && !nextInput.message
+    ? { ...nextInput, message: pendingRound.input?.message || '' }
+    : nextInput;
+
   let processedConversation = await prepareConversation({
-    nextInput,
+    nextInput: effectiveNextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
     action,
@@ -275,7 +280,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   );
 
   const processedInput: RoundInput = {
-    message: processedConversation.nextInput.message,
+    message: processedConversation.nextInput.message || pendingRound?.input?.message || '',
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 

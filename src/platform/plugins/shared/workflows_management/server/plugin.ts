@@ -265,6 +265,7 @@ export class WorkflowsPlugin
             logger: this.logger,
             api,
             aiTelemetryClient,
+            coreSetup: core,
           });
         }
       })

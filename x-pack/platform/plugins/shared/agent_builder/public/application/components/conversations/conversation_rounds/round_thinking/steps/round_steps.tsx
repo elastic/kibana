@@ -25,6 +25,7 @@ import { ToolProgressDisplay } from './tool_progress_display';
 import { ToolResultDisplay } from './tool_result_display';
 import { FlyoutResultItem } from './flyout_result_item';
 import { CompactionDisplay } from './compaction_display';
+import { StepToolTerminal, isStepToolCall } from './step_tool_terminal';
 
 const labels = {
   roundThinkingSteps: i18n.translate('xpack.agentBuilder.conversation.thinking.stepsList', {
@@ -84,6 +85,20 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
     // First pass: build all item factories to determine total count
     steps.forEach((step, stepIndex) => {
       if (isToolCallStep(step)) {
+        // Step-tools: render as a single terminal block
+        if (isStepToolCall(step.tool_id)) {
+          itemFactories.push({
+            key: `step-${stepIndex}-terminal`,
+            factory: (icon) => (
+              <StepToolTerminal
+                key={`step-${stepIndex}-terminal`}
+                step={step}
+                icon={icon}
+              />
+            ),
+          });
+        } else {
+        // Non-step tools: original rendering
         itemFactories.push({
           key: `step-${stepIndex}-tool-call`,
           factory: (icon, textColor) => (
@@ -96,7 +111,6 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
           ),
         });
 
-        // Add progression items
         step.progression?.forEach((progress, progressIndex) => {
           itemFactories.push({
             key: `step-${stepIndex}-${step.tool_id}-progress-${progressIndex}`,
@@ -106,12 +120,12 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
                 progress={progress}
                 icon={icon}
                 textColor={textColor}
+                toolId={step.tool_id}
               />
             ),
           });
         });
 
-        // Add main thinking result items
         step.results
           .filter((result: ToolResult) => mainThinkingResultTypes.includes(result.type))
           .forEach((result: ToolResult, resultIndex) => {
@@ -132,7 +146,6 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
             });
           });
 
-        // Add flyout result items
         const flyoutResultItems = step.results.filter(
           (result: ToolResult) => !mainThinkingResultTypes.includes(result.type)
         );
@@ -152,6 +165,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
             ),
           });
         }
+        } // close else (non-step tools)
       } else if (isReasoningStep(step) && !step.transient) {
         itemFactories.push({
           key: `step-reasoning-${stepIndex}`,

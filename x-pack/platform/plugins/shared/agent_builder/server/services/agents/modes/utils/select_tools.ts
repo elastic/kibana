@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds, defaultAgentToolIdPatterns } from '@kbn/agent-builder-common';
 import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
 import type {
   ToolProvider,
@@ -87,7 +87,7 @@ export const selectTools = async ({
       attachmentToolSelection,
       ...agentConfiguration.tools,
       ...(agentConfiguration.enable_elastic_capabilities
-        ? [{ tool_ids: defaultAgentToolIds }]
+        ? [{ tool_ids: resolveDefaultToolIds(await toolProvider.list({ request })) }]
         : []),
     ],
     toolProvider,
@@ -251,6 +251,22 @@ const getToolsForAttachmentTypes = (
   }
 
   return [...tools];
+};
+
+const resolveDefaultToolIds = (allTools: Array<{ id: string }>): string[] => {
+  const staticIds = [...defaultAgentToolIds] as string[];
+  if (defaultAgentToolIdPatterns.length > 0) {
+    for (const tool of allTools) {
+      if (defaultAgentToolIdPatterns.some((pattern) => tool.id.startsWith(pattern))) {
+        if (!staticIds.includes(tool.id)) {
+          staticIds.push(tool.id);
+        }
+      }
+    }
+  }
+  // eslint-disable-next-line no-console
+  console.log(`[select-tools] Resolved ${staticIds.length} default tools from ${allTools.length} total (patterns: ${defaultAgentToolIdPatterns.join(', ')}). Step-tools: ${staticIds.filter(id => id.startsWith('platform.workflows.step.')).join(', ')}`);
+  return staticIds;
 };
 
 export const pickTools = async ({

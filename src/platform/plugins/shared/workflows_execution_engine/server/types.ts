@@ -22,6 +22,12 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
+import type {
+  ExecuteStepParams,
+  ExecuteStepResult,
+} from './step/standalone_step_executor';
+
+export type ExecuteStandaloneStep = (params: ExecuteStepParams) => Promise<ExecuteStepResult>;
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -38,6 +44,7 @@ export interface WorkflowsExecutionEnginePluginSetup {
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
+  executeStandaloneStep: ExecuteStandaloneStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
   resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;

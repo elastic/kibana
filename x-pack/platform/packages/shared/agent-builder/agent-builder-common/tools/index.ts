@@ -14,6 +14,7 @@ export {
   filestoreTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
+  defaultAgentToolIdPatterns,
   editableToolTypes,
   isInternalTool,
   isExcludedFromFilestore,

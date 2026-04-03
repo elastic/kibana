@@ -9,12 +9,15 @@ import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiLink, EuiText, EuiCode } from '@elastic/eui';
+import { EuiLink, EuiText, EuiCode, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { ThinkingItemLayout } from './thinking_item_layout';
+
+const STEP_TOOL_PREFIX = 'platform.workflows.step.';
 
 const labels = {
   toolCall: i18n.translate('xpack.agentBuilder.thinking.toolCallLabel', {
@@ -36,6 +39,32 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
   const { createAgentBuilderUrl } = useNavigation();
   const toolHref = createAgentBuilderUrl(appPaths.tools.details({ toolId }));
   const toolLinkId = `tool-link-${toolId}`;
+  const { euiTheme } = useEuiTheme();
+
+  if (toolId.startsWith(STEP_TOOL_PREFIX)) {
+    const stepName = toolId.replace(STEP_TOOL_PREFIX, '');
+    const paramsStr = step.params ? formatStepParams(stepName, step.params) : '';
+
+    return (
+      <ThinkingItemLayout icon={icon} textColor={textColor}>
+        <code
+          css={css`
+            font-size: 13px;
+          `}
+        >
+          <strong
+            css={css`
+              color: ${euiTheme.colors.successText};
+            `}
+          >
+            {'$ '}
+            {stepName}
+          </strong>
+          {paramsStr ? ` ${paramsStr}` : ''}
+        </code>
+      </ThinkingItemLayout>
+    );
+  }
 
   return (
     <ThinkingItemLayout icon={icon} accordionContent={step.params} textColor={textColor}>
@@ -67,3 +96,27 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
     </ThinkingItemLayout>
   );
 };
+
+function formatStepParams(stepName: string, params: Record<string, unknown>): string {
+  if (stepName.startsWith('elasticsearch.')) {
+    const method = (params.method as string) || 'GET';
+    const path = (params.path as string) || '';
+    const hasBody = params.body && Object.keys(params.body as object).length > 0;
+    return `${method} ${path}${hasBody ? ' --body {...}' : ''}`;
+  }
+  if (stepName === 'ai.prompt') {
+    const prompt = (params.prompt as string) || '';
+    const truncated = prompt.length > 80 ? prompt.slice(0, 77) + '...' : prompt;
+    return `"${truncated}"`;
+  }
+  if (stepName === 'data.regex-replace') {
+    const pattern = (params.pattern as string) || '';
+    return `--pattern '${pattern}'`;
+  }
+  if (stepName === 'slack') {
+    const sub = (params.subActionParams as Record<string, unknown>) || {};
+    const channels = (sub.channels as string[]) || [];
+    return channels.length > 0 ? `--channel ${channels[0]}` : '';
+  }
+  return '';
+}

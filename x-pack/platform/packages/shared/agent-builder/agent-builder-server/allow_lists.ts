@@ -67,6 +67,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.workflow_modify_property`,
   `${internalNamespaces.workflows}.workflow_delete_step`,
   `${internalNamespaces.workflows}.workflow_replace_yaml`,
+  `${internalNamespaces.workflows}.ask_user`,
+  `${internalNamespaces.workflows}.connect_connector`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -83,6 +85,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
+  if (toolName.startsWith(`${internalNamespaces.workflows}.step.`)) return true;
   return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);
 };
 
@@ -108,6 +111,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Workflows
   'workflow-authoring',
+  'step-execution',
 
   // Security Solution
   'find-security-ml-jobs',

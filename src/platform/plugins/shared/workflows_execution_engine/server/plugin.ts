@@ -54,6 +54,7 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 import { generateExecutionTaskScope } from './utils';
+import { createStandaloneStepExecutor } from './step/standalone_step_executor';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
@@ -886,10 +887,19 @@ export class WorkflowsExecutionEnginePlugin
       this.config.logging.console
     );
 
+    const executeStandaloneStep = createStandaloneStepExecutor({
+      getStepDefinition: (id) => plugins.workflowsExtensions.getStepDefinition(id),
+      hasStepDefinition: (id) => plugins.workflowsExtensions.hasStepDefinition(id),
+      getScopedEsClient: (request) => coreStart.elasticsearch.client.asScoped(request),
+      actions: plugins.actions,
+      logger: this.logger.get('standalone-step'),
+    });
+
     return {
       workflowEventLoggerService,
       executeWorkflow,
       executeWorkflowStep,
+      executeStandaloneStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
       resumeWorkflowExecution,

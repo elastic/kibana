@@ -6,3 +6,5 @@
  */
 
 export { ConfirmationPrompt, type ConfirmationPromptProps } from './confirmation_prompt';
+export { TextInputPrompt, type TextInputPromptProps } from './text_input_prompt';
+export { SelectionPrompt, type SelectionPromptProps } from './selection_prompt';

@@ -16,14 +16,15 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
+import { isConfirmationPrompt, isTextInputPrompt, isSelectionPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { RoundError } from './round_error/round_error';
-import { ConfirmationPrompt } from './round_prompt';
+import { ConfirmationPrompt, TextInputPrompt, SelectionPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
+import { SaveAsWorkflowButton } from './save_as_workflow_button';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -111,6 +112,28 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound({ promptId: pendingPrompt!.id, confirm: false });
   }, [resumeRound, pendingPrompt]);
 
+  const handleTextInputSubmit = useCallback(
+    (inputValue: string) => {
+      resumeRound({ promptId: pendingPrompt!.id, value: inputValue });
+    },
+    [resumeRound, pendingPrompt]
+  );
+
+  const handleTextInputCancel = useCallback(() => {
+    resumeRound({ promptId: pendingPrompt!.id, value: null });
+  }, [resumeRound, pendingPrompt]);
+
+  const handleSelectionSelect = useCallback(
+    (optionId: string) => {
+      resumeRound({ promptId: pendingPrompt!.id, selectedOptionId: optionId });
+    },
+    [resumeRound, pendingPrompt]
+  );
+
+  const handleSelectionCancel = useCallback(() => {
+    resumeRound({ promptId: pendingPrompt!.id, selectedOptionId: null });
+  }, [resumeRound, pendingPrompt]);
+
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
     if (isCurrentRound && isResponseLoading) {
@@ -183,6 +206,28 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiFlexItem>
       )}
 
+      {isAwaitingPrompt && isTextInputPrompt(pendingPrompt) && (
+        <EuiFlexItem grow={false}>
+          <TextInputPrompt
+            prompt={pendingPrompt}
+            onSubmit={handleTextInputSubmit}
+            onCancel={handleTextInputCancel}
+            isLoading={isResuming}
+          />
+        </EuiFlexItem>
+      )}
+
+      {isAwaitingPrompt && isSelectionPrompt(pendingPrompt) && (
+        <EuiFlexItem grow={false}>
+          <SelectionPrompt
+            prompt={pendingPrompt}
+            onSelect={handleSelectionSelect}
+            onCancel={handleSelectionCancel}
+            isLoading={isResuming}
+          />
+        </EuiFlexItem>
+      )}
+
       {/* Response Message - hidden when awaiting confirmation */}
       {!isAwaitingPrompt && (
         <EuiFlexItem grow={false}>
@@ -198,6 +243,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               conversationId={conversationId}
             />
           </EuiFlexItem>
+          <SaveAsWorkflowButton round={rawRound} isLoading={isLoadingCurrentRound} />
           <EuiSpacer />
           <RoundAttachmentReferences
             attachmentRefs={input.attachment_refs}

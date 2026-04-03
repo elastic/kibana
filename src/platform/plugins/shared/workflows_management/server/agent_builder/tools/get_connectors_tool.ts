@@ -21,16 +21,11 @@ export function registerGetConnectorsTool(
   agentBuilder.tools.register({
     id: workflowTools.getConnectors,
     type: ToolType.builtin,
-    description: `Get connector instances configured in the user's environment.
+    description: `Discover available connector-backed workflow steps. Workflow steps can be executed through connectors (GitHub, Jira, Slack, HTTP, etc.).
 
-**When to use:** To find connector IDs needed for the \`connector-id\` field in workflow steps (e.g., which Slack or Jira connectors are available).
-**When NOT to use:** To discover step types and their schemas (use get_step_definitions instead).
+**When to use:** ALWAYS call this first when the user wants to interact with an external service. This discovers which connector steps are available to execute.
 
-Returns connector instances with their ID and name, plus:
-- \`actionTypeId\`: the Kibana action type ID (e.g. ".slack")
-- \`stepTypes\`: workflow step types this connector supports (e.g. ["inference.completion", "inference.rerank"] for sub-action connectors, or ["slack"] for simple connectors)
-
-The connector \`id\` is what you put in the \`connector-id\` field of a workflow step.`,
+Returns configured connector instances (ready to use with step.connector-step) and unconfigured connector types (can be set up via connect_connector).`,
     schema: z.object({
       actionTypeId: z
         .string()
@@ -52,11 +47,15 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
       },
       cacheMode: 'space',
     },
-    handler: async ({ actionTypeId, stepType, search }, { spaceId, request }) => {
+    handler: async ({ actionTypeId, stepType, search }, context) => {
+      const { spaceId, request } = context;
       const { connectorTypes, totalConnectors } = await api.getAvailableConnectors(
         spaceId,
         request
       );
+
+      // eslint-disable-next-line no-console
+      console.log(`[get-connectors] Called with actionTypeId=${actionTypeId}, stepType=${stepType}, search=${search}. Available types: ${Object.keys(connectorTypes).join(', ')}`);
 
       const entries = actionTypeId
         ? connectorTypes[actionTypeId]
@@ -93,6 +92,66 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
         );
       }
 
+      // Also include unconfigured connector types so the agent knows what's available to set up
+      let unconfiguredTypes = entries
+        .filter(([, typeInfo]) => !typeInfo.instances || typeInfo.instances.length === 0)
+        .map(([type, typeInfo]) => ({
+          actionTypeId: type,
+          name: (typeInfo as { displayName?: string }).displayName ?? type.replace(/^\./, ''),
+        }));
+
+      if (search) {
+        const term = search.toLowerCase();
+        unconfiguredTypes = unconfiguredTypes.filter(
+          (t) => t.name.toLowerCase().includes(term) || t.actionTypeId.toLowerCase().includes(term)
+        );
+      }
+
+      // When searching and no configured connectors match but unconfigured types do, show HITL selection
+      if (connectors.length === 0 && unconfiguredTypes.length > 0) {
+        const promptId = 'connector-choice';
+
+        const selection = context.prompts.checkSelectionStatus(promptId);
+        if (selection.status === 'selected') {
+          return {
+            results: [{
+              type: 'other' as const,
+              data: {
+                userChoice: selection.selectedOptionId,
+                choiceType: selection.selectedOptionId === 'http_fallback' ? 'http' : 'dedicated',
+                connectorTypeId: selection.selectedOptionId !== 'http_fallback' ? selection.selectedOptionId : undefined,
+                connectorTypeName: unconfiguredTypes.find((t) => t.actionTypeId === selection.selectedOptionId)?.name,
+                instruction: selection.selectedOptionId === 'http_fallback'
+                  ? 'User chose generic HTTP. Use the http step to make the request.'
+                  : `User chose to configure connector type "${selection.selectedOptionId}". Call connect_connector to set it up, then use step.connectorStep to execute.`,
+              },
+            }],
+          };
+        }
+        if (selection.status === 'cancelled') {
+          return { results: [{ type: 'other' as const, data: { cancelled: true } }] };
+        }
+
+        return context.prompts.askForSelection({
+          id: promptId,
+          title: 'Choose a Connector',
+          message: `No configured connector found for "${search}". How would you like to proceed?`,
+          options: [
+            ...unconfiguredTypes.map((t) => ({
+              id: t.actionTypeId,
+              label: `Configure ${t.name} connector`,
+              description: 'Best integration. You will be asked for credentials.',
+            })),
+            {
+              id: 'http_fallback',
+              label: 'Use generic HTTP',
+              description: 'Direct HTTP request (may require authentication).',
+            },
+          ],
+          cancel_text: 'Skip',
+        });
+      }
+
       return {
         results: [
           {
@@ -101,6 +160,7 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
               count: connectors.length,
               totalAvailable: totalConnectors,
               connectors,
+              availableButUnconfigured: unconfiguredTypes,
             },
           },
         ],

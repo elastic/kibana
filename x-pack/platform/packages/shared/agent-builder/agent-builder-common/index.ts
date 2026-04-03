@@ -20,6 +20,7 @@ export {
   attachmentTools,
   filestoreTools,
   defaultAgentToolIds,
+  defaultAgentToolIdPatterns,
   editableToolTypes,
   isReservedToolId,
   type ByIdsToolSelection,

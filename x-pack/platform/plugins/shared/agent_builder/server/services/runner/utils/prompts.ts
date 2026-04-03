@@ -10,10 +10,16 @@ import type {
   PromptManager,
   ToolPromptManager,
   ConfirmationInfo,
+  TextInputInfo,
+  SelectionInfo,
 } from '@kbn/agent-builder-server/runner';
 import type {
   ConfirmationPrompt,
   ConfirmPromptDefinition,
+  TextInputPrompt,
+  TextInputPromptDefinition,
+  SelectionPrompt,
+  SelectionPromptDefinition,
   PromptResponseState,
   PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
@@ -60,6 +66,46 @@ export const createPromptManager = ({
     };
   };
 
+  const getTextInputPrompt = (definition: TextInputPromptDefinition): TextInputPrompt => {
+    return {
+      type: AgentPromptType.textInput,
+      ...definition,
+    };
+  };
+
+  const checkTextInputStatus = (promptId: string): TextInputInfo => {
+    const prompt = promptMap.get(promptId);
+    if (!prompt) {
+      return { status: 'unprompted' };
+    }
+    if (prompt.type === AgentPromptType.textInput) {
+      const { value } = prompt.response;
+      return value !== null ? { status: 'submitted', value } : { status: 'cancelled' };
+    }
+    throw new Error('Trying to check text input status of non-text-input prompt.');
+  };
+
+  const getSelectionPrompt = (definition: SelectionPromptDefinition): SelectionPrompt => {
+    return {
+      type: AgentPromptType.selection,
+      ...definition,
+    };
+  };
+
+  const checkSelectionStatus = (promptId: string): SelectionInfo => {
+    const prompt = promptMap.get(promptId);
+    if (!prompt) {
+      return { status: 'unprompted' };
+    }
+    if (prompt.type === AgentPromptType.selection) {
+      const { selectedOptionId } = prompt.response;
+      return selectedOptionId !== null
+        ? { status: 'selected', selectedOptionId }
+        : { status: 'cancelled' };
+    }
+    throw new Error('Trying to check selection status of non-selection prompt.');
+  };
+
   return {
     set: (promptId, interrupt) => {
       promptMap.set(promptId, interrupt);
@@ -70,6 +116,12 @@ export const createPromptManager = ({
     getConfirmationStatus: (promptId) => {
       return checkConfirmationStatus(promptId);
     },
+    getTextInputValue: (promptId) => {
+      return checkTextInputStatus(promptId);
+    },
+    getSelectionValue: (promptId) => {
+      return checkSelectionStatus(promptId);
+    },
     clear: () => {
       promptMap.clear();
     },
@@ -77,8 +129,16 @@ export const createPromptManager = ({
     forTool: ({ toolId, toolCallId, toolParams }): ToolPromptManager => {
       return {
         checkConfirmationStatus,
+        checkTextInputStatus,
+        checkSelectionStatus,
         askForConfirmation: (confirm) => {
           return { prompt: getConfirmationPrompt(confirm) };
+        },
+        askForTextInput: (definition) => {
+          return { prompt: getTextInputPrompt(definition) };
+        },
+        askForSelection: (definition) => {
+          return { prompt: getSelectionPrompt(definition) };
         },
       };
     },
@@ -99,10 +159,22 @@ export const getAgentPromptStorageState = ({
 
   if (input.prompts) {
     Object.entries(input.prompts).forEach(([promptId, response]) => {
-      state.responses[promptId] = {
-        type: AgentPromptType.confirmation,
-        response,
-      };
+      if ('selectedOptionId' in response) {
+        state.responses[promptId] = {
+          type: AgentPromptType.selection,
+          response: response as { selectedOptionId: string | null },
+        };
+      } else if ('value' in response) {
+        state.responses[promptId] = {
+          type: AgentPromptType.textInput,
+          response: response as { value: string | null },
+        };
+      } else {
+        state.responses[promptId] = {
+          type: AgentPromptType.confirmation,
+          response: response as { allow: boolean },
+        };
+      }
     });
   }
 

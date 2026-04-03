@@ -14,13 +14,12 @@
 
 import { z } from '@kbn/zod/v4';
 
-// Slack connector parameter schema
+// Slack webhook connector parameter schema
+// Matches the official schema from @kbn/connector-schemas/slack (ParamsSchema)
+// The .slack webhook connector only accepts message -- channel/username/icon fields
+// are NOT supported by the webhook type (they're Slack API features, not webhook features)
 export const SlackParamsSchema = z.object({
   message: z.string(),
-  channel: z.string().optional(),
-  username: z.string().optional(),
-  icon_emoji: z.string().optional(),
-  icon_url: z.string().optional(),
 });
 
 // Slack connector response schema

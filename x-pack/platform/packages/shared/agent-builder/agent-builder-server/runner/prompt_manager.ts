@@ -8,6 +8,8 @@
 import type {
   ConfirmPromptDefinition,
   ConfirmationStatus,
+  TextInputPromptDefinition,
+  SelectionPromptDefinition,
   PromptResponseState,
   PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
@@ -18,6 +20,8 @@ export interface PromptManager {
   get(promptId: string): PromptResponseState | undefined;
   dump(): PromptStorageState;
   getConfirmationStatus(promptId: string): ConfirmationInfo;
+  getTextInputValue(promptId: string): TextInputInfo;
+  getSelectionValue(promptId: string): SelectionInfo;
   clear(): void;
   forTool(opts: {
     toolId: string;
@@ -30,13 +34,21 @@ export interface ConfirmationInfo {
   status: ConfirmationStatus;
 }
 
+export interface TextInputInfo {
+  status: 'unprompted' | 'submitted' | 'cancelled';
+  value?: string;
+}
+
+export interface SelectionInfo {
+  status: 'unprompted' | 'selected' | 'cancelled';
+  selectedOptionId?: string;
+}
+
 export interface ToolPromptManager {
-  /**
-   * Get the status for the given confirmation prompt
-   */
   checkConfirmationStatus(promptId: string): ConfirmationInfo;
-  /**
-   * Creates a confirmation prompt which can be returned by the tool handler
-   */
+  checkTextInputStatus(promptId: string): TextInputInfo;
+  checkSelectionStatus(promptId: string): SelectionInfo;
   askForConfirmation(opts: ConfirmPromptDefinition): ToolHandlerPromptReturn;
+  askForTextInput(opts: TextInputPromptDefinition): ToolHandlerPromptReturn;
+  askForSelection(opts: SelectionPromptDefinition): ToolHandlerPromptReturn;
 }
