@@ -24,15 +24,29 @@ locally and resolving the conflicts.
 
 ### Step 1: Identify failed branches
 
-Fetch the backport failure comment from the source PR:
+Fetch the source PR merge SHA and the most recent backport failure comment from
+the source PR:
 
 ```bash
-gh api repos/elastic/kibana/issues/<PR>/comments \
-  --jq '.[] | select(.user.login == "kibanamachine") | select(.body | test("backport")) | .body'
+SOURCE_SHA=$(gh api repos/elastic/kibana/pulls/<PR> --jq '.merge_commit_sha')
+
+gh api --paginate --slurp repos/elastic/kibana/issues/<PR>/comments \
+  --jq 'add
+    | map(
+        select(.user.login == "kibanamachine")
+        | select(.body | test("Some backports could not be created|All backports failed"))
+      )
+    | sort_by(.created_at)
+    | last
+    | .body'
 ```
 
-Parse the markdown table to extract branches with status "failed because of
-merge conflicts". These are the target branches for the local backport.
+Parse the markdown table in the latest matching `kibanamachine` comment to
+extract branches with status "failed because of merge conflicts". These are the
+target branches for the local backport.
+
+If there is no matching failure comment, stop and tell the user the PR does not
+have a current backport failure comment to use.
 
 ### Step 2: Run the backport tool
 
@@ -63,10 +77,10 @@ git status
 For each conflicting file:
 
 1. **Read the file** to see the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`)
-2. **Consult context** from both the source branch (main) and target branch
-   to understand what the correct resolution is. Read the file on each branch:
+2. **Consult context** from both the source PR merge SHA and the target branch
+   to understand what the correct resolution is. Read the file on each side:
    ```bash
-   git show main:<filepath>
+   git show "${SOURCE_SHA}:<filepath>"
    git show <target-branch>:<filepath>
    ```
 3. **Resolve the conflict** by editing the file to remove conflict markers with
@@ -113,11 +127,14 @@ Report the created backport PR URLs to the user.
   and tell the user to handle it manually.
 - **NEVER resolve lock files manually.** Always use `yarn kbn bootstrap`
   after resolving `package.json`.
-- **NEVER run tests or checks** other than `node scripts/check_changes.ts`.
+- **NEVER run `node scripts/check_changes.ts` in the backport clone.** That
+  script exists on `main` and does NOT exist on older backport branches.
+- **NEVER run extra tests or checks** in the backport clone unless the user
+  explicitly asks for them.
 - **NEVER deviate from this workflow.** The backport tool handles
   cherry-picking, branch creation, and PR creation. Your job is only to
   resolve the merge conflicts.
-- **Always consult source and target branch files** before resolving a
+- **Always consult the source SHA and target branch files** before resolving a
   conflict. Do not rely on the conflict markers alone.
 
 ## Common patterns
