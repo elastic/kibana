@@ -22,13 +22,18 @@ import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
 import React from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import type { ActionBlockProps } from '.';
-import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useInteractiveModeSelector,
+  useStreamEnrichmentSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { ConditionDisplay } from '../../../../shared';
 import { getStepPanelColour } from '../../../utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { StepContextMenu } from '../context_menu';
+import { EditStepDescriptionModal } from './edit_step_description_modal';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
@@ -51,6 +56,9 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const hasValidationErrors = validationErrors.length > 0;
 
+  const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const [isEditDescriptionModalOpen, toggleEditDescriptionModal] = useToggle(false);
+
   // For the inner description we once again invert the colours
   const descriptionPanelColour = getStepPanelColour(level + 1);
 
@@ -61,6 +69,12 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
+  };
+
+  const handleDescriptionClick = () => {
+    if (!readOnly && canEdit) {
+      toggleEditDescriptionModal(true);
+    }
   };
 
   return (
@@ -205,6 +219,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                         stepUnderEdit={props.stepUnderEdit}
                         isFirstStepInLevel={props.isFirstStepInLevel}
                         isLastStepInLevel={props.isLastStepInLevel}
+                        onEditDescription={() => toggleEditDescriptionModal(true)}
                       />
                     </EuiFlexItem>
                   )}
@@ -238,10 +253,18 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   size="xs"
                   color="subdued"
                   tabIndex={0}
+                  role={!readOnly && canEdit ? 'button' : undefined}
+                  onClick={handleDescriptionClick}
                   data-test-subj="streamsAppProcessorDescription"
                   css={css`
                     font-family: ${euiTheme.font.familyCode};
                     ${euiTextTruncate()}
+                    ${!readOnly && canEdit
+                      ? `cursor: pointer;
+                      &:hover {
+                        text-decoration: underline;
+                      }`
+                      : ''}
                   `}
                 >
                   {stepDescription}
@@ -251,6 +274,16 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isEditDescriptionModalOpen && (
+        <EditStepDescriptionModal
+          step={step}
+          onCancel={() => toggleEditDescriptionModal(false)}
+          onSave={(description) => {
+            toggleEditDescriptionModal(false);
+            stepRef.send({ type: 'step.changeDescription', description });
+          }}
+        />
+      )}
     </>
   );
 };

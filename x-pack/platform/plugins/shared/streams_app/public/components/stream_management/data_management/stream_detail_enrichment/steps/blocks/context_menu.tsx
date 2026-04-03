@@ -27,7 +27,6 @@ import {
 import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
 import { collectDescendantStepIds } from '../../state_management/utils';
 import type { StepConfigurationProps } from '../steps_list';
-import { EditStepDescriptionModal } from './action/edit_step_description_modal';
 import { deleteProcessorPromptOptions } from './action/prompt_options';
 import {
   ADD_DESCRIPTION_MENU_LABEL,
@@ -81,13 +80,16 @@ const deleteItemText = i18n.translate(
 type StepContextMenuProps = Pick<
   StepConfigurationProps,
   'stepRef' | 'stepUnderEdit' | 'isFirstStepInLevel' | 'isLastStepInLevel'
->;
+> & {
+  onEditDescription?: () => void;
+};
 
 export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   stepRef,
   stepUnderEdit,
   isFirstStepInLevel,
   isLastStepInLevel,
+  onEditDescription,
 }) => {
   const {
     reorderStep,
@@ -124,7 +126,6 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     step.description.trim().length > 0;
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
-  const [isEditDescriptionModalOpen, toggleEditDescriptionModal] = useToggle(false);
 
   const menuPopoverId = useGeneratedHtmlId({
     prefix: 'stepContextMenuPopover',
@@ -214,7 +215,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
               disabled={!canEdit}
               onClick={() => {
                 togglePopover(false);
-                toggleEditDescriptionModal(true);
+                onEditDescription?.();
               }}
             >
               {EDIT_DESCRIPTION_MENU_LABEL}
@@ -240,7 +241,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
               disabled={!canEdit}
               onClick={() => {
                 togglePopover(false);
-                toggleEditDescriptionModal(true);
+                onEditDescription?.();
               }}
             >
               {ADD_DESCRIPTION_MENU_LABEL}
@@ -326,27 +327,15 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   );
 
   return (
-    <>
-      <EuiPopover
-        id={menuPopoverId}
-        data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuPopover"
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={() => togglePopover(false)}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel size="s" items={items} />
-      </EuiPopover>
-      {isEditDescriptionModalOpen && !isWhere && isActionBlock(step) && (
-        <EditStepDescriptionModal
-          step={step}
-          onCancel={() => toggleEditDescriptionModal(false)}
-          onSave={(description) => {
-            toggleEditDescriptionModal(false);
-            stepRef.send({ type: 'step.changeDescription', description });
-          }}
-        />
-      )}
-    </>
+    <EuiPopover
+      id={menuPopoverId}
+      data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuPopover"
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => togglePopover(false)}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel size="s" items={items} />
+    </EuiPopover>
   );
 };
