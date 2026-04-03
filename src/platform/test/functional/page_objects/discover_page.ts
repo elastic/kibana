@@ -32,6 +32,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly toasts = this.ctx.getService('toasts');
   private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
+  private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboardPanelActions = this.ctx.getService('dashboardPanelActions');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
@@ -180,6 +181,79 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  private async getHitCountState() {
+    return await this.browser.execute(() => {
+      const container = document.querySelector('[data-test-subj="discoverQueryTotalHits"]');
+      const hits = container?.querySelector('[data-test-subj="discoverQueryHits"]');
+      const partialHits = container?.querySelector('[data-test-subj="discoverQueryHitsPartial"]');
+
+      return {
+        exists: Boolean(hits),
+        text: hits?.textContent?.trim() ?? '',
+        isPartial: Boolean(partialHits),
+        isLoading: Boolean(container?.querySelector('.euiLoadingSpinner')),
+      };
+    });
+  }
+
+  private async waitUntilHitCountIsSettled({
+    allowPartial = true,
+  }: { allowPartial?: boolean } = {}) {
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+
+    await this.retry.waitFor('discover hit count to settle', async () => {
+      const state = await this.getHitCountState();
+
+      if (!state.exists || !state.text) {
+        return false;
+      }
+
+      if (!allowPartial && state.isPartial) {
+        return false;
+      }
+
+      if (state.isLoading) {
+        return false;
+      }
+
+      await this.common.sleep(100);
+
+      const nextState = await this.getHitCountState();
+
+      return (
+        nextState.exists &&
+        nextState.text === state.text &&
+        nextState.isPartial === state.isPartial &&
+        !nextState.isLoading
+      );
+    });
+  }
+
+  private async waitUntilHistogramHasRendered() {
+    if (!(await this.testSubjects.exists('unifiedHistogramRendered', { timeout: 1000 }))) {
+      return;
+    }
+
+    await this.retry.waitFor('discover histogram to render', async () => {
+      const hasChart = await this.testSubjects.exists('unifiedHistogramChart', { timeout: 1000 });
+      if (!hasChart) {
+        return false;
+      }
+
+      if (await this.testSubjects.exists('unifiedHistogramProgressBar', { timeout: 1000 })) {
+        return false;
+      }
+
+      await this.common.sleep(100);
+
+      return (
+        (await this.testSubjects.exists('unifiedHistogramChart', { timeout: 1000 })) &&
+        !(await this.testSubjects.exists('unifiedHistogramProgressBar', { timeout: 1000 }))
+      );
+    });
+  }
+
   public async waitUntilTabIsLoaded() {
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
@@ -190,6 +264,10 @@ export class DiscoverPageObject extends FtrService {
       const hasDocTable = await this.testSubjects.exists('discoverDocTable', { timeout: 1000 });
 
       if (hasDocTable) {
+        if (!(await this.testSubjects.exists('dataGridHeader', { timeout: 1000 }))) {
+          return false;
+        }
+
         const isRenderComplete = await this.testSubjects.getAttribute(
           'discoverDocTable',
           'data-render-complete',
@@ -213,12 +291,23 @@ export class DiscoverPageObject extends FtrService {
         );
       }
 
-      return (
-        (await this.testSubjects.exists('discoverNoResults', { timeout: 1000 })) ||
-        (await this.testSubjects.exists('discoverQueryHits', { timeout: 1000 })) ||
-        (await this.testSubjects.exists('discoverQueryHitsPartial', { timeout: 1000 }))
-      );
+      const hasNoResults = await this.testSubjects.exists('discoverNoResults', { timeout: 1000 });
+      if (hasNoResults) {
+        return true;
+      }
+
+      return await this.testSubjects.exists('discoverQueryHits', { timeout: 1000 });
     });
+
+    await this.waitUntilHistogramHasRendered();
+    await this.common.waitUntilDomIsStable({
+      idleMs: 100,
+      timeoutMs: this.defaultFindTimeout * 2,
+    });
+
+    if (await this.testSubjects.exists('discoverQueryTotalHits', { timeout: 1000 })) {
+      await this.waitUntilHitCountIsSettled({ allowPartial: false });
+    }
   }
 
   public async getColumnHeaders() {
@@ -337,19 +426,32 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickHistogramBar() {
-    await this.elasticChart.waitForRenderComplete(undefined, 5000);
-    const el = await this.elasticChart.getCanvas();
-    const size = await el.getSize();
+    await this.waitUntilChartIsVisible();
+    await this.common.waitUntilDomIsStable();
+    const previousTime = await this.timePicker.getTimeConfig();
 
-    await this.browser
-      .getActions()
-      .move({
-        origin: el._webElement,
-        x: Math.round(size.width / 2),
-        y: Math.round(size.height / 2),
-      })
-      .click()
-      .perform();
+    await this.retry.try(async () => {
+      await this.elasticChart.waitForRenderComplete(undefined, 5000);
+      const el = await this.elasticChart.getCanvas();
+      const size = await el.getSize();
+
+      await this.browser
+        .getActions()
+        .move({
+          origin: el._webElement,
+          x: Math.round(size.width / 2),
+          y: Math.round(size.height / 2),
+        })
+        .click()
+        .perform();
+
+      await this.header.waitUntilLoadingHasFinished();
+      await this.waitUntilSearchingHasFinished();
+      await this.waitUntilHistogramHasRendered();
+
+      const nextTime = await this.timePicker.getTimeConfig();
+      return nextTime.start !== previousTime.start || nextTime.end !== previousTime.end;
+    });
   }
 
   public async brushHistogram() {
@@ -425,8 +527,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   private async waitForBreakdownSelectorButton() {
-    await this.header.waitUntilLoadingHasFinished();
-    await this.waitUntilSearchingHasFinished();
+    await this.waitUntilChartIsVisible();
 
     await this.retry.waitFor('breakdown selector button to render', async () => {
       return await this.testSubjects.exists('unifiedHistogramBreakdownSelectorButton', {
@@ -522,11 +623,20 @@ export class DiscoverPageObject extends FtrService {
 
   public async waitUntilChartIsVisible() {
     await this.waitUntilTabIsLoaded();
+    await this.waitUntilHistogramHasRendered();
 
     await this.retry.waitFor('discover histogram to render', async () => {
-      return await this.testSubjects.exists('unifiedHistogramChart', {
-        timeout: this.defaultFindTimeout,
-      });
+      return (
+        (await this.testSubjects.exists('unifiedHistogramRendered', {
+          timeout: this.defaultFindTimeout,
+        })) &&
+        (await this.testSubjects.exists('unifiedHistogramChart', {
+          timeout: this.defaultFindTimeout,
+        })) &&
+        !(await this.testSubjects.exists('unifiedHistogramProgressBar', {
+          timeout: this.defaultFindTimeout,
+        }))
+      );
     });
   }
 
@@ -600,6 +710,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async getHitCount({ isPartial }: { isPartial?: boolean } = {}) {
     await this.waitUntilTabIsLoaded();
+    await this.waitUntilHitCountIsSettled({ allowPartial: isPartial === true });
 
     const queryHitsTestSubj = await this.retry.try(async () => {
       if (isPartial === true) {
@@ -607,24 +718,8 @@ export class DiscoverPageObject extends FtrService {
         return 'discoverQueryHitsPartial';
       }
 
-      if (isPartial === false) {
-        await this.testSubjects.existOrFail('discoverQueryHits');
-        return 'discoverQueryHits';
-      }
-
-      const hasQueryHits = await this.testSubjects.exists('discoverQueryHits', { timeout: 1000 });
-      if (hasQueryHits) {
-        return 'discoverQueryHits';
-      }
-
-      const hasPartialQueryHits = await this.testSubjects.exists('discoverQueryHitsPartial', {
-        timeout: 1000,
-      });
-      if (hasPartialQueryHits) {
-        return 'discoverQueryHitsPartial';
-      }
-
-      throw new Error('Discover query hits are not available yet');
+      await this.testSubjects.existOrFail('discoverQueryHits');
+      return 'discoverQueryHits';
     });
 
     return await this.testSubjects.getVisibleText(queryHitsTestSubj);
@@ -830,6 +925,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
+    await this.waitUntilTabIsLoaded();
     return await this.dataGrid.clickDocSortAsc(field, text);
   }
 
@@ -960,6 +1056,11 @@ export class DiscoverPageObject extends FtrService {
 
       return isRenderComplete === 'true';
     });
+
+    await this.common.waitUntilDomIsStable({
+      idleMs: 100,
+      timeoutMs: this.defaultFindTimeout * 2,
+    });
   }
   public async getNrOfFetches() {
     const el = await this.find.byCssSelector('[data-fetch-counter]');
@@ -1048,7 +1149,11 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async assertViewModeToggleExists() {
-    await this.testSubjects.existOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+    await this.waitUntilTabIsLoaded();
+
+    await this.retry.waitFor('discover view mode toggle to render', async () => {
+      return await this.testSubjects.exists('dscViewModeToggle', { timeout: 1000 });
+    });
   }
 
   public async assertFieldStatsTableNotExists() {
@@ -1203,7 +1308,7 @@ export class DiscoverPageObject extends FtrService {
         }
         await this.header.waitUntilLoadingHasFinished();
         await this.waitUntilSearchingHasFinished();
-        await this.elasticChart.canvasExists();
+        await this.waitUntilChartIsVisible();
         const requests = await this.browser.execute(() =>
           performance
             .getEntries()

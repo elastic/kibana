@@ -23,6 +23,38 @@ export class DataViewsService extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly header = this.ctx.getPageObjects(['header']).header;
 
+  private async waitForDiscoverDataViewSwitchToSettle() {
+    const isDiscoverPage = await this.testSubjects.exists('dscPage', { timeout: 1000 });
+    if (!isDiscoverPage) {
+      return;
+    }
+
+    await this.retry.waitFor('Discover data view switch to settle', async () => {
+      const hasLoadingSpinner = await this.testSubjects.exists('loadingSpinner', { timeout: 1000 });
+      const isUpdating = await this.testSubjects.exists('discoverDataGridUpdating', {
+        timeout: 1000,
+      });
+
+      if (hasLoadingSpinner || isUpdating) {
+        return false;
+      }
+
+      const hasDocTable = await this.testSubjects.exists('discoverDocTable', { timeout: 1000 });
+      if (hasDocTable) {
+        return (
+          (await this.testSubjects.getAttribute('discoverDocTable', 'data-render-complete')) ===
+          'true'
+        );
+      }
+
+      return (
+        (await this.testSubjects.exists('discoverQueryHits', { timeout: 1000 })) ||
+        (await this.testSubjects.exists('discoverQueryHitsPartial', { timeout: 1000 })) ||
+        (await this.testSubjects.exists('discoverNoResults', { timeout: 1000 }))
+      );
+    });
+  }
+
   private async create({
     name, // Data View title, * will be added automatically
     adHoc = false, // pass 'true' to have temporary Data View
@@ -161,7 +193,9 @@ export class DataViewsService extends FtrService {
    */
   public async switchToAndValidate(name: string) {
     await this.switchTo(name);
+    await this.header.waitUntilLoadingHasFinished();
     await this.waitForSwitcherToBe(name);
+    await this.waitForDiscoverDataViewSwitchToSettle();
   }
 
   /**

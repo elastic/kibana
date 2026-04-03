@@ -1472,12 +1472,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param count - expected count of metric
      */
     async assertLegacyMetric(title: string, count: string) {
-      await header.waitUntilLoadingHasFinished();
-      await retry.waitFor('legacy metric to render', async () => {
-        return (
-          (await testSubjects.exists('metric_label', { timeout: 1000 })) &&
-          (await testSubjects.exists('metric_value', { timeout: 1000 }))
-        );
+      await this.waitForVisualization('legacyMtrVis');
+      await retry.waitFor('legacy metric text to render', async () => {
+        const hasLabel = await testSubjects.exists('metric_label', { timeout: 1000 });
+        const hasValue = await testSubjects.exists('metric_value', { timeout: 1000 });
+
+        if (!hasLabel || !hasValue) {
+          return false;
+        }
+
+        const [metricLabel, metricValue] = await Promise.all([
+          testSubjects.getVisibleText('metric_label'),
+          testSubjects.getVisibleText('metric_value'),
+        ]);
+
+        return metricLabel.trim() === title && metricValue.trim() === count;
       });
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
@@ -1651,6 +1660,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForVisualization(visDataTestSubj?: string) {
+      let stableSince: number | undefined;
+
       const hasExpectedVisualization = async () => {
         if (visDataTestSubj) {
           return await testSubjects.exists(visDataTestSubj, { timeout: 1000 });
@@ -1686,22 +1697,29 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const hasVisualization = await hasExpectedVisualization();
 
         if (!hasVisualization) {
+          stableSince = undefined;
           return false;
         }
 
-        if (!(await hasWorkspaceContainer())) {
-          return true;
+        const workspaceReady =
+          !(await hasWorkspaceContainer()) || (await isWorkspaceRenderComplete());
+
+        if (!workspaceReady) {
+          stableSince = undefined;
+          return false;
         }
 
-        if (await isWorkspaceRenderComplete()) {
-          await common.sleep(250);
-
-          return await isWorkspaceRenderComplete();
+        if (!stableSince) {
+          stableSince = Date.now();
+          return false;
         }
 
-        await common.sleep(250);
+        return Date.now() - stableSince >= 250;
+      });
 
-        return await hasExpectedVisualization();
+      await common.waitUntilDomIsStable({
+        idleMs: 100,
+        timeoutMs: 2000,
       });
     },
 

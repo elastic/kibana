@@ -30,7 +30,9 @@ export class WorkflowExecutionPage {
    * Useful after triggering a workflow execution from any entry point.
    */
   async waitForExecutionView() {
-    await this.page.waitForURL('**/workflows/*?executionId=*');
+    await this.page.waitForURL((url) => {
+      return url.pathname.includes('/workflows/') && url.searchParams.has('executionId');
+    });
     await this.executionPanel.waitFor({ state: 'visible' });
   }
 

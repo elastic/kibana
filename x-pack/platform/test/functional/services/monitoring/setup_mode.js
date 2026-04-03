@@ -6,6 +6,7 @@
  */
 
 export function MonitoringSetupModeProvider({ getService }) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   const SUBJ_SETUP_MODE_BTN = 'monitoringSetupModeBtn';
@@ -21,6 +22,9 @@ export function MonitoringSetupModeProvider({ getService }) {
     }
 
     async clickSetupModeBtn() {
+      await retry.waitFor('monitoring setup mode button to be visible', async () => {
+        return await testSubjects.exists(SUBJ_SETUP_MODE_BTN, { timeout: 1000 });
+      });
       return await testSubjects.click(SUBJ_SETUP_MODE_BTN);
     }
 

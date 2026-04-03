@@ -292,8 +292,17 @@ export class WorkflowEditorPage {
    */
   async clickRunButton() {
     await this.waitForRunButtonToBeEnabled();
-    await this.runButton.focus();
-    await this.page.keyboard.press('Enter');
+    await this.runButton.click();
+    await Promise.race([
+      this.page.testSubj.waitForSelector('workflowExecuteModal', {
+        state: 'visible',
+        timeout: 10_000,
+      }),
+      this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
+        state: 'visible',
+        timeout: 10_000,
+      }),
+    ]);
   }
 
   /**

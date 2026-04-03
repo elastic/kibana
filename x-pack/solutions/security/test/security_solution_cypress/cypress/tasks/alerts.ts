@@ -375,7 +375,8 @@ export const groupAlertsBy = (field: string) => {
 };
 
 export const closeFirstGroupedAlerts = () => {
-  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click();
+  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().scrollIntoView();
+  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().should('be.visible').click({ force: true });
   cy.get(CLOSE_ALERT_BTN).click();
   selectAndConfirmClosingReason();
 };

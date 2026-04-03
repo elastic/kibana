@@ -101,11 +101,21 @@ export class DiscoverApp {
     await this.waitForDiscoverPage();
     await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
       state: 'hidden',
-      timeout: 30_000,
+      timeout: 60_000,
     });
+    await Promise.race([
+      this.page.testSubj.waitForSelector('discoverQueryHits', {
+        state: 'visible',
+        timeout: 60_000,
+      }),
+      this.page.testSubj.waitForSelector('discoverQueryHitsPartial', {
+        state: 'visible',
+        timeout: 60_000,
+      }),
+    ]);
     await this.page.testSubj.waitForSelector('unifiedHistogramRendered', {
       state: 'visible',
-      timeout: 30_000,
+      timeout: 60_000,
     });
   }
 

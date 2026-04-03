@@ -85,6 +85,21 @@ export class UnifiedFieldListPageObject extends FtrService {
     });
   }
 
+  private async waitUntilFieldActionIsVisible(field: string, actionTestSubj: string) {
+    await this.waitUntilSidebarHasLoaded();
+
+    await this.retry.waitFor(`${actionTestSubj} to render`, async () => {
+      const hasField = await this.testSubjects.exists(`field-${field}`, { timeout: 1000 });
+      if (!hasField) {
+        return false;
+      }
+
+      await this.testSubjects.moveMouseTo(`field-${field}`);
+
+      return await this.testSubjects.exists(actionTestSubj, { timeout: 1000 });
+    });
+  }
+
   public async waitUntilFieldlistHasCountOfFields(count: number) {
     await this.retry.waitFor('wait until fieldlist has updated number of fields', async () => {
       return (
@@ -176,6 +191,9 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async clickFieldListItem(field: string) {
     await this.waitUntilSidebarHasLoaded();
+    await this.retry.waitFor(`field ${field} to render`, async () => {
+      return await this.testSubjects.exists(`field-${field}`, { timeout: 1000 });
+    });
     await this.testSubjects.moveMouseTo(`field-${field}`);
     await this.testSubjects.click(`field-${field}`);
 
@@ -190,8 +208,14 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async clickFieldListItemToggle(field: string) {
-    await this.testSubjects.moveMouseTo(`field-${field}`);
-    await this.testSubjects.click(`fieldToggle-${field}`);
+    await this.waitUntilFieldActionIsVisible(field, `fieldToggle-${field}`);
+
+    await this.retry.try(async () => {
+      await this.testSubjects.moveMouseTo(`field-${field}`);
+      await this.testSubjects.click(`fieldToggle-${field}`);
+    });
+
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async pressEnterFieldListItemToggle(field: string) {

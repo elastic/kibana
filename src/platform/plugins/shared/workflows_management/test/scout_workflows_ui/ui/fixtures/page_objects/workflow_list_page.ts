@@ -15,6 +15,7 @@ export class WorkflowListPage {
   /** Navigates to the workflows list page. */
   async navigate() {
     await this.page.gotoApp(PLUGIN_ID);
+    await this.page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
   }
 
   /** Returns the table row locator for the specified workflow. */

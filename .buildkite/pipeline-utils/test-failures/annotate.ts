@@ -14,6 +14,7 @@ import { BuildkiteClient } from '..';
 import type { Artifact } from '../buildkite/types/artifact';
 
 const buildkite = new BuildkiteClient();
+const MAX_METADATA_BYTES = 60_000;
 
 export interface TestFailure {
   name: string;
@@ -136,6 +137,22 @@ export const getSlackMessage = (
   );
 };
 
+const truncateMetadataValue = (label: string, value: string): string => {
+  if (Buffer.byteLength(value, 'utf8') <= MAX_METADATA_BYTES) {
+    return value;
+  }
+
+  const suffix = `\n\n[truncated ${label}; full failure list remains in Buildkite annotations and artifacts]`;
+  const maxValueBytes = MAX_METADATA_BYTES - Buffer.byteLength(suffix, 'utf8');
+  let truncatedValue = value;
+
+  while (Buffer.byteLength(truncatedValue, 'utf8') > maxValueBytes) {
+    truncatedValue = truncatedValue.slice(0, -1024);
+  }
+
+  return `${truncatedValue.trimEnd()}${suffix}`;
+};
+
 export const annotateTestFailures = async () => {
   const exec = (cmd: string) => execSync(cmd, { stdio: 'inherit' });
 
@@ -177,14 +194,14 @@ export const annotateTestFailures = async () => {
   ) {
     buildkite.setMetadata(
       'pr_comment:test_failures:body',
-      getPrComment(failures, failureHtmlArtifacts)
+      truncateMetadataValue('PR comment', getPrComment(failures, failureHtmlArtifacts))
     );
   }
 
   if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
     buildkite.setMetadata(
       'slack:test_failures:body',
-      getSlackMessage(failures, failureHtmlArtifacts)
+      truncateMetadataValue('Slack message', getSlackMessage(failures, failureHtmlArtifacts))
     );
   }
 };
