@@ -90,46 +90,34 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 margin-right: ${euiTheme.size.s};
               `}
             >
-              <EuiToolTip
-                position="top"
-                content={i18n.translate(
-                  'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
-                  {
-                    defaultMessage: 'Edit {stepAction} processor',
-                    values: { stepAction: step.action },
-                  }
-                )}
-                display="block"
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                css={css`
+                  min-width: 0;
+                `}
               >
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="xs"
+                <EuiFlexItem
+                  grow={false}
                   css={css`
                     min-width: 0;
+                    max-width: 100%;
                   `}
                 >
-                  <EuiFlexItem
-                    grow={false}
+                  <EuiText
+                    size="s"
+                    component="span"
+                    style={{ fontWeight: euiTheme.font.weight.bold }}
+                    data-test-subj="streamsAppProcessorTitleEditButton"
                     css={css`
-                      min-width: 0;
-                      max-width: 100%;
+                      display: block;
+                      ${euiTextTruncate()}
                     `}
                   >
-                    <EuiText
-                      size="s"
-                      component="span"
-                      style={{ fontWeight: euiTheme.font.weight.bold }}
-                      data-test-subj="streamsAppProcessorTitleEditButton"
-                      css={css`
-                        display: block;
-                        ${euiTextTruncate()}
-                      `}
-                    >
-                      {actionDisplayName}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiToolTip>
+                    {actionDisplayName}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
               <EuiFlexItem grow={false} onClick={stopPropagation}>
@@ -207,20 +195,19 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 )}
               />
             ) : (
-              <EuiToolTip content={stepDescription} display="block">
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  tabIndex={0}
-                  data-test-subj="streamsAppProcessorDescription"
-                  css={css`
-                    font-family: ${euiTheme.font.familyCode};
-                    ${euiTextTruncate()}
-                  `}
-                >
-                  {stepDescription}
-                </EuiText>
-              </EuiToolTip>
+              <EuiText
+                size="xs"
+                color="subdued"
+                tabIndex={0}
+                title={stepDescription}
+                data-test-subj="streamsAppProcessorDescription"
+                css={css`
+                  font-family: ${euiTheme.font.familyCode};
+                  ${euiTextTruncate()}
+                `}
+              >
+                {stepDescription}
+              </EuiText>
             )}
           </EuiPanel>
         </EuiFlexItem>
