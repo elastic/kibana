@@ -98,7 +98,7 @@ export class ObservabilityAgentBuilderPlugin
           )}`
         );
       } else {
-        this.logger.debug('Registered Observability AI Insights inference features');
+        this.logger.debug('Successfully registered inference endpoints for Observability AI Insights');
       }
     }
 
