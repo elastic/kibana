@@ -15,6 +15,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { useKibana } from '../../../../../../../../hooks/use_kibana';
 import { useAIFeatures } from '../../../../../../../../hooks/use_ai_features';
 import type { ProcessorFormState } from '../../../../types';
+import { DissectPatternPreview } from '../../../../dissect_highlighting';
 
 const DissectPatternAISuggestions = dynamic(() =>
   import('./dissect_pattern_suggestion').then((mod) => ({
@@ -87,6 +88,12 @@ export const DissectPatternDefinition = () => {
           )}
         />
       </EuiFormRow>
+      {field.value && (
+        <>
+          <EuiSpacer size="s" />
+          <DissectPatternPreview pattern={field.value} />
+        </>
+      )}
       {aiFeatures && (
         <>
           <EuiSpacer size="s" />

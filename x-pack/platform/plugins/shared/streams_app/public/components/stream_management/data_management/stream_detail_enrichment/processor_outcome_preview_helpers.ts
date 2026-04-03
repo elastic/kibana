@@ -138,3 +138,27 @@ export function grokExpressionOverwritesSourceField(
     return Array.from(fields.values()).some((field) => field.name === sourceField);
   });
 }
+
+/**
+ * Gets the value to display for a dissect field, preferring the original (pre-transformation) value
+ * over the transformed value. This ensures highlighting works correctly even when the dissect pattern
+ * extracts into the same field it reads from.
+ */
+export function getDissectFieldDisplayValue(
+  document: SampleDocument | FlattenRecord,
+  columnId: string,
+  dissectField: string,
+  originalDissectFieldValues?: WeakMap<FlattenRecord, string | undefined>
+): string | undefined {
+  if (columnId !== dissectField) {
+    return undefined;
+  }
+
+  const originalValue = originalDissectFieldValues?.get(document as FlattenRecord);
+  if (typeof originalValue === 'string') {
+    return originalValue;
+  }
+
+  const value = document[columnId];
+  return typeof value === 'string' ? value : undefined;
+}
