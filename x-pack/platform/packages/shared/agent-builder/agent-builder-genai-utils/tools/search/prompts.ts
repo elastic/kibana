@@ -35,12 +35,6 @@ export const getSearchDispatcherPrompt = ({
 - Do NOT ask clarifying questions. Make your best judgment.
 - The \`index\` parameter MUST be the name of one of the available resources listed below.
 
-## Available Resources
-
-<available_resources>
-${resourceListing}
-</available_resources>
-
 ## Tool Selection Guidance
 
 ### '${relevanceTool}' (full-text search)
@@ -48,10 +42,15 @@ Use when the target resource has text or semantic_text fields AND the query is a
 Examples: "find information about our Q3 earnings report", "search for documents mentioning 'data privacy'"
 
 ### '${nlTool}' (structured/analytical search)
-Use for filtering by specific values, aggregations, calculations, sorting, counting, entity lookups by ID, or any structured data analysis. If the resource has no text or semantic_text fields, always use this tool.
+Use for filtering by specific values, aggregations, calculations, sorting, counting, entity lookups by ID, or any structured data analysis. If the resource's field metadata explicitly shows it has no text or semantic_text fields, always use this tool. If field metadata is missing or unknown (e.g. for aliases), use your best judgment based on the query intent.
 Examples: "what is the average order value?", "find the customer with ID 914255", "how many errors were logged in the past hour?"
 
 ${customInstructions ? `## Additional Instructions\n\n${customInstructions}\n` : ''}
+## Available Resources
+
+<available_resources>
+${resourceListing}
+</available_resources>
 `);
 
   const userPrompt = `Execute the following user query: "${nlQuery}"
