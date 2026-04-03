@@ -127,8 +127,7 @@ evaluate.describe(
           examples: [
             {
               input: {
-                instruction:
-                  'Add a step at the end that sends a Slack notification with the message "Data fetch complete".',
+                instruction: 'Add a Slack notification at the end saying the data fetch is done',
                 initialYaml: baseWorkflowYaml,
               },
               output: {
@@ -145,7 +144,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Add an Elasticsearch search step between the fetch_data and log_end steps that queries the "logs-*" index.',
+                  'Add a step between fetch_data and log_end that searches the logs-* index',
                 initialYaml: baseWorkflowYaml,
               },
               output: {
@@ -172,8 +171,7 @@ evaluate.describe(
           examples: [
             {
               input: {
-                instruction:
-                  'Change the fetch_data step to use POST instead of GET and add a JSON body with {"query": "test"}.',
+                instruction: 'Switch fetch_data to POST and add a body with a test query',
                 initialYaml: baseWorkflowYaml,
               },
               output: {
@@ -229,7 +227,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Rename the workflow to "Data Processing Pipeline" and update the description to "Fetches and processes external data on demand".',
+                  'Rename this workflow to "Data Processing Pipeline" and update the description to match',
                 initialYaml: baseWorkflowYaml,
               },
               output: {
@@ -257,7 +255,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Rename the workflow to "Enhanced Pipeline", remove the log_end step, and add error handling to the fetch_data step with a retry of 3 attempts.',
+                  'Rename workflow to "Enhanced Pipeline", drop the log_end step, and add retries to fetch_data',
                 initialYaml: baseWorkflowYaml,
               },
               output: {
@@ -325,7 +323,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Change the search_data step to use a term query filtering on status: "active" instead of match_all.',
+                  'Change search_data to only find documents where status is "active" instead of matching everything',
                 initialYaml: esBaseWorkflowYaml,
               },
               output: {
@@ -352,7 +350,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Add an ES|QL query step after the search_data step that runs "FROM my-data-index | WHERE status == \\"active\\" | STATS count = COUNT(*)" and logs the count.',
+                  'Add an ES|QL step after search_data that counts active documents in my-data-index and logs the result',
                 initialYaml: esBaseWorkflowYaml,
               },
               output: {
@@ -388,7 +386,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Change the index name from "my-data-index" to "production-data" in all steps, add an index existence check before create_index, and wrap the create_index step in a condition that only runs when the index does not exist.',
+                  'Rename the index to "production-data" everywhere, and add a check so the index only gets created if it doesn\'t already exist',
                 initialYaml: esBaseWorkflowYaml,
               },
               output: {
@@ -442,7 +440,7 @@ evaluate.describe(
           examples: [
             {
               input: {
-                instruction: 'Change the severity of the create_case step from "low" to "high".',
+                instruction: 'Bump the case severity to high',
                 initialYaml: casesBaseWorkflowYaml,
               },
               output: {
@@ -469,7 +467,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Add a step after create_case that adds the comment "Initial triage started" to the newly created case.',
+                  "Add a comment to the case after it's created saying triage has started",
                 initialYaml: casesBaseWorkflowYaml,
               },
               output: {
@@ -499,7 +497,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Add a loop after create_case that iterates over a list of comments ["Triage started", "Investigating root cause", "Escalated to team lead"] and adds each as a comment to the case. Then add a step at the end that updates the case title to "Triaged: {{ steps.create_case.output.case.title }}".',
+                  "After the case is created, loop through a few triage comments and add each one to the case. Then update the case title to show it's been triaged.",
                 initialYaml: casesBaseWorkflowYaml,
               },
               output: {
@@ -559,8 +557,7 @@ evaluate.describe(
           examples: [
             {
               input: {
-                instruction:
-                  'Update the notify_slack step message to include the alert count from the previous step: "Detected {{ steps.fetch_alerts.output.total }} new alerts".',
+                instruction: 'Update the Slack message to include how many alerts were found',
                 initialYaml: connectorBaseWorkflowYaml,
               },
               output: {
@@ -587,7 +584,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Add an email step after the notify_slack step that sends an email to "oncall@example.com" with subject "Alert Summary" and the message body "{{ steps.fetch_alerts.output.total }} alerts detected".',
+                  'Add an email to oncall@example.com after the Slack step with an alert summary',
                 initialYaml: connectorBaseWorkflowYaml,
               },
               output: {
@@ -618,7 +615,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Replace the notify_slack step with an email step that sends an email to "alerts@example.com" with subject "New Alerts" and the same message content.',
+                  'Replace the Slack notification with an email to alerts@example.com instead, keep the same message',
                 initialYaml: connectorBaseWorkflowYaml,
               },
               output: {

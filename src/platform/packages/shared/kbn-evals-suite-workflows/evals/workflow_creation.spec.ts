@@ -90,7 +90,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a new workflow called "Health Check" that runs every 5 minutes and pings https://api.example.com/health using an HTTP GET request.',
+                  'Create a "Health Check" workflow that pings https://api.example.com/health every 5 minutes',
               },
               output: {
                 criteria: [
@@ -106,7 +106,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow named "Alert Logger" that triggers manually and logs the message "Alert received" to the console.',
+                  'Make a simple "Alert Logger" workflow, manual trigger, just logs "Alert received" to console',
               },
               output: {
                 criteria: [
@@ -133,7 +133,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Conditional Router" with a manual trigger. It should call https://api.example.com/status, then check if the response status is "healthy" -- if so, log "System OK", otherwise log "System degraded".',
+                  'I need a "Conditional Router" workflow that checks https://api.example.com/status and logs whether the system is OK or degraded based on the response',
               },
               output: {
                 criteria: [
@@ -162,7 +162,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Batch Processor" that triggers manually. It should define a list of items ["item1", "item2", "item3"] and then loop over them, logging each one to the console.',
+                  'Create a "Batch Processor" workflow that loops over a list of items and logs each one to console, manual trigger',
               },
               output: {
                 criteria: [
@@ -191,7 +191,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Resilient Fetcher" that triggers on a schedule every 10 minutes. It should fetch data from https://api.example.com/data with retry on failure (3 attempts, 5 second delay). If all retries fail, log "Fetch failed after retries" as a fallback.',
+                  'Create a "Resilient Fetcher" workflow that fetches https://api.example.com/data every 10 minutes with retries, and logs a failure message if it still can\'t reach the endpoint',
               },
               output: {
                 criteria: [
@@ -220,7 +220,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Data Pipeline" with a manual trigger. Steps: 1) Log "Starting pipeline", 2) HTTP GET to https://api.example.com/users to fetch user data, 3) Store the number of users returned, 4) Log "Processed {user_count} users" at the end.',
+                  'Create a "Data Pipeline" workflow that fetches users from https://api.example.com/users, counts them, and logs the result. Should log start/end messages too. Manual trigger.',
               },
               output: {
                 criteria: [
@@ -257,7 +257,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Error Log Monitor" with a manual trigger. It should search the "logs-*" Elasticsearch index for entries where level is "error", then log the number of hits to the console.',
+                  'Create an "Error Log Monitor" workflow that searches logs-* for errors and prints how many were found. Manual trigger.',
               },
               output: {
                 criteria: [
@@ -287,7 +287,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Index Setup" with a manual trigger. Steps: 1) Check if an Elasticsearch index called "app-data" exists, 2) If it does not exist, create it with mappings for "name" (text), "timestamp" (date), and "status" (keyword), 3) Bulk-index three sample documents with different statuses.',
+                  'Create an "Index Setup" workflow that creates an "app-data" index with fields for name, timestamp, and status if it doesn\'t already exist, then indexes a few sample documents. Manual trigger.',
               },
               output: {
                 criteria: [
@@ -321,7 +321,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Host CPU Report" with a scheduled trigger every 10 minutes. It should run the ES|QL query "FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.pct) BY host.name | SORT avg_cpu DESC | LIMIT 10", then log the results to the console.',
+                  'Create a "Host CPU Report" workflow that runs every 10 minutes, gets average CPU usage from metrics-* grouped by host name using ES|QL, and prints the top results to console',
               },
               output: {
                 criteria: [
@@ -358,7 +358,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Incident Response" with a manual trigger. Steps: 1) Create a security case with title "Security Incident", description "Automated incident case", severity "high", and owner "securitySolution", 2) Add a comment "Investigation initiated" to the case, 3) Retrieve the case with comments using include_comments set to true.',
+                  'Create an "Incident Response" workflow with manual trigger that creates a high severity security case, adds an initial comment saying investigation has started, and then fetches the case back with its comments',
               },
               output: {
                 criteria: [
@@ -393,7 +393,7 @@ evaluate.describe(
               {
                 input: {
                   instruction:
-                    'Create a workflow called "Alert Case Creator" with a manual trigger. Steps: 1) Search for critical alerts in the ".alerts-security.alerts-default" Elasticsearch index where kibana.alert.severity is "critical", 2) Loop over the search hits and create a case for each alert using the alert\'s rule name as the case title, owner "securitySolution", and severity "critical".',
+                    'Create a workflow that finds critical security alerts and creates a security case for each one, using the alert\'s rule name as the case title. Call it "Alert Case Creator", manual trigger.',
                 },
                 output: {
                   criteria: [
@@ -434,7 +434,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "API Status Notifier" with a scheduled trigger every 5 minutes. It should make an HTTP GET request to https://api.example.com/status, then send a Slack message with the response status.',
+                  'Create an "API Status Notifier" workflow that checks https://api.example.com/status every 5 minutes and posts the result to Slack',
               },
               output: {
                 criteria: [
@@ -464,7 +464,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Alert Broadcaster" with a manual trigger. Steps: 1) Log "Broadcasting alert", 2) Send a Slack message "Critical alert detected", 3) Send an email to "oncall@example.com" with subject "Critical Alert" and message "A critical alert was detected, please investigate".',
+                  'Create an "Alert Broadcaster" workflow with manual trigger that logs a message, sends a Slack alert, and also emails oncall@example.com about the critical alert',
               },
               output: {
                 criteria: [
@@ -495,7 +495,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Bug Reporter" with a manual trigger. It should search Elasticsearch for error logs in the last hour, then create a Jira ticket with the error summary as the title and the log details in the description.',
+                  'Create a "Bug Reporter" workflow that searches for recent error logs in Elasticsearch and files a Jira ticket with the error details. Manual trigger.',
               },
               output: {
                 criteria: [
@@ -525,7 +525,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Critical Alert Pager" that runs every minute. It should check an API endpoint for critical status, and if the status is critical, trigger a PagerDuty alert with severity "critical" and a summary of the issue.',
+                  'Create a "Critical Alert Pager" workflow that checks an API endpoint every minute and pages PagerDuty if the status is critical',
               },
               output: {
                 criteria: [
@@ -556,7 +556,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Deploy Notifier" with a manual trigger. It should send a Microsoft Teams message announcing a deployment with the current timestamp.',
+                  'Create a "Deploy Notifier" workflow that sends a Teams message announcing a deployment with the timestamp. Manual trigger.',
               },
               output: {
                 criteria: [
@@ -591,7 +591,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Delayed Cleanup" with a manual trigger. It should log "Starting cleanup", wait 30 seconds, then delete an Elasticsearch index called "temp-data".',
+                  'Create a "Delayed Cleanup" workflow that logs a start message, waits 30 seconds, then deletes the "temp-data" index. Manual trigger.',
               },
               output: {
                 criteria: [
@@ -624,7 +624,7 @@ evaluate.describe(
               {
                 input: {
                   instruction:
-                    'Create a workflow called "Priority Router" with a manual trigger. It should route to different actions based on a priority level: for "critical" send a PagerDuty alert, for "high" send a Slack message, for "low" just log to console.',
+                    'Create a "Priority Router" workflow that routes alerts by priority -- PagerDuty for critical, Slack for high, console log for low. Manual trigger.',
                 },
                 output: {
                   criteria: [
@@ -662,7 +662,7 @@ evaluate.describe(
             {
               input: {
                 instruction:
-                  'Create a workflow called "Index Cleaner" that runs once a day. It should check if an Elasticsearch index called "temp-logs" exists, and if so, delete it and log "Cleanup complete".',
+                  'Create an "Index Cleaner" workflow that runs daily, checks if the "temp-logs" index exists, and deletes it if so. Log when done.',
               },
               output: {
                 criteria: [
