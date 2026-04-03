@@ -10,7 +10,7 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { QUERY_ACTIVITY_READ_PRIVILEGE, QUERY_ACTIVITY_WRITE_PRIVILEGE } from '../common/constants';
 
-export const QUERY_ACTIVITY_FEATURE_ID = 'query_activity';
+export const QUERY_ACTIVITY_FEATURE_ID = 'queryActivity';
 
 export const queryActivityFeature: KibanaFeatureConfig = {
   id: QUERY_ACTIVITY_FEATURE_ID,
