@@ -13,7 +13,7 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 import { transformDashboardIn } from '../transforms';
-import { getDashboardCRUResponseBody } from '../saved_object_utils';
+import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function update(

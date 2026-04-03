@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
 
 export const getChartTypeSelectionPromptContent = () =>
@@ -18,3 +19,16 @@ export const getChartTypeSelectionPromptContent = () =>
     ...Object.entries(chartTypeRegistry).map(([, { guidance }]) => `- ${guidance.guideline}`),
     "- Consider the user's intent and the nature of the data being visualized",
   ].join('\n');
+
+export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
+  const configPromptRules = chartTypeRegistry[chartType].configPromptRules;
+
+  if (!configPromptRules?.length) {
+    return '';
+  }
+
+  return [
+    `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
+    ...configPromptRules.map((rule) => `- ${rule}`),
+  ].join('\n');
+};

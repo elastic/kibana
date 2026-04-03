@@ -8,9 +8,11 @@
  */
 
 import { LRUCache } from 'lru-cache';
+import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from '../../server';
 import {
   DASHBOARD_API_PATH,
@@ -29,10 +31,21 @@ import { coreServices } from '../services/kibana_services';
 const CACHE_SIZE = 20; // only store a max of 20 dashboards
 const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
-const cache = new LRUCache<string, DashboardReadResponseBody>({
+export type ReadBodyWithResolve = DashboardReadResponseBody & {
+  resolve: {
+    outcome: SavedObjectsResolveResponse['outcome'] | undefined;
+    aliasTargetId: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose: SavedObjectsResolveResponse['alias_purpose'];
+  };
+};
+
+const cache = new LRUCache<string, ReadBodyWithResolve>({
   max: CACHE_SIZE,
   ttl: CACHE_TTL,
 });
+
+const buildDashboardPath = (id: string) => buildPath(`${DASHBOARD_API_PATH}/{id}`, { id });
+const buildDashboardAppPath = (id: string) => buildPath(`${DASHBOARD_APP_API_PATH}/{id}`, { id });
 
 export const dashboardClient = {
   create: async (
@@ -49,18 +62,19 @@ export const dashboardClient = {
   },
   delete: async (id: string): Promise<DeleteResult> => {
     cache.delete(id);
-    return coreServices.http.delete(`${DASHBOARD_API_PATH}/${id}`, {
+    return coreServices.http.delete(buildDashboardPath(id), {
       version: DASHBOARD_API_VERSION,
     });
   },
-  get: async (id: string): Promise<DashboardReadResponseBody> => {
+  get: async (id: string): Promise<ReadBodyWithResolve> => {
     if (cache.has(id)) {
       return cache.get(id)!;
     }
 
-    const result = await coreServices.http
-      .get<DashboardReadResponseBody>(`${DASHBOARD_APP_API_PATH}/${id}`, {
+    const { body, response } = await coreServices.http
+      .get<DashboardReadResponseBody>(buildDashboardAppPath(id), {
         version: DASHBOARD_API_VERSION,
+        asResponse: true,
       })
       .catch((e) => {
         if (e.response?.status === 404) {
@@ -70,7 +84,16 @@ export const dashboardClient = {
         throw new Error(message);
       });
 
-    if (result.meta.outcome !== 'aliasMatch') {
+    const result = {
+      ...body,
+      resolve: {
+        outcome: response?.headers.get('kbn-resolve-outcome') ?? undefined,
+        aliasTargetId: response?.headers.get('kbn-resolve-alias-target-id') ?? undefined,
+        aliasPurpose: response?.headers.get('kbn-resolve-purpose') ?? undefined,
+      },
+    } as ReadBodyWithResolve;
+
+    if (result.resolve.outcome !== 'aliasMatch') {
       /**
        * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
        * alias info gets cached and prevents the dashboard contents from being updated
@@ -91,7 +114,7 @@ export const dashboardClient = {
   },
   update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
-      `${DASHBOARD_APP_API_PATH}/${id}`,
+      buildDashboardAppPath(id),
       {
         version: DASHBOARD_API_VERSION,
         body: JSON.stringify(dashboardState),
