@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/config-schema'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

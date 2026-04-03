@@ -108,7 +108,8 @@
     "@kbn/core-chrome-layout-utils",
     "@kbn/cps",
     "@kbn/scout",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }

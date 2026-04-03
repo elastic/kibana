@@ -15,6 +15,7 @@
     "@kbn/embeddable-plugin",
     "@kbn/config-schema",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/core-http-browser",
   ],
   "exclude": ["target/**/*"]
 }
