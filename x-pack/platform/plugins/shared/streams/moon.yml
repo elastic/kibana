@@ -86,6 +86,8 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/datemath'
   - '@kbn/setup-node-env'
+  - '@kbn/synthtrace'
+  - '@kbn/tooling-log'
 tags:
   - plugin
   - prod
