@@ -203,9 +203,10 @@ export class WorkflowExecuteSyncStrategy {
         output = this.getWorkflowOutput(stepExecutionDtos);
       }
 
-      const stepOutput: Record<string, unknown> | undefined =
-        output === null ? undefined : (output as Record<string, unknown>);
-      return { status: 'completed', output: stepOutput };
+      return {
+        status: 'completed',
+        output: output === null ? undefined : output,
+      };
     } catch (error) {
       return { status: 'failed', error: error as Error };
     }
