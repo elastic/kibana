@@ -280,6 +280,7 @@ describe('workflowSmlType', () => {
             type: 'workflow',
             title: 'Alert Triage',
             content: expect.any(String),
+            permissions: ['api:workflowsManagement:read'],
           },
         ],
       });
@@ -358,6 +359,7 @@ describe('workflowSmlType', () => {
             type: 'workflow',
             title: 'Minimal Workflow',
             content: 'Minimal Workflow\nenabled: false',
+            permissions: ['api:workflowsManagement:read'],
           },
         ],
       });
