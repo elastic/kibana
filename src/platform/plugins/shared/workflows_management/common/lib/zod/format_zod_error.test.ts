@@ -279,7 +279,7 @@ describe('formatZodError', () => {
         issues: [
           {
             code: 'invalid_union' as const,
-            path: ['triggers', 0],
+            path: ['triggers', 0, 'type'],
             message: 'Invalid input',
           },
         ],

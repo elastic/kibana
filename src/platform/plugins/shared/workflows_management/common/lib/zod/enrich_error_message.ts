@@ -173,7 +173,7 @@ function tryCodeSpecificEnrichment(
   originalMessage: string
 ): string | null {
   // Handle trigger union errors
-  if (errorCode === 'invalid_union' && path.includes('triggers')) {
+  if (errorCode === 'invalid_union' && path[0] === 'triggers' && path.includes('type')) {
     return 'Invalid trigger type. Available: manual, alert, scheduled';
   }
 
