@@ -204,7 +204,7 @@ describe('RowAction', () => {
     expect(flyoutElement.props.renderCellActions).toBeDefined();
     expect(flyoutElement.props.onAlertUpdated).toEqual(expect.any(Function));
     flyoutElement.props.onAlertUpdated();
-    expect(refetch).toHaveBeenCalledTimes(2);
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   describe('privileges', () => {

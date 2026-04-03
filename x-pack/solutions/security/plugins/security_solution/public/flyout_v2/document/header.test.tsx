@@ -22,8 +22,8 @@ jest.mock('../../common/lib/kibana', () => ({
   }),
 }));
 
-jest.mock('./components/header_title', () => ({
-  HeaderTitle: ({ hit, titleHref }: { hit: DataTableRecord; titleHref?: string }) => (
+jest.mock('./components/title', () => ({
+  Title: ({ hit, titleHref }: { hit: DataTableRecord; titleHref?: string }) => (
     <div
       data-test-subj="mockHeaderTitle"
       data-hit-id={hit.id}
@@ -45,8 +45,8 @@ jest.mock('./components/risk_score', () => ({
   ),
 }));
 
-jest.mock('./components/header_status', () => ({
-  HeaderStatus: ({ hit }: { hit: DataTableRecord }) => (
+jest.mock('./components/status', () => ({
+  Status: ({ hit }: { hit: DataTableRecord }) => (
     <div data-test-subj="mockHeaderStatus" data-hit-id={hit.id} />
   ),
 }));

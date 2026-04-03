@@ -14,8 +14,8 @@ import { ALERT_RULE_UUID, EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { EventKind } from './constants/event_kinds';
 import { Assignees } from './components/assignees';
-import { HeaderTitle } from './components/header_title';
-import { HeaderStatus } from './components/header_status';
+import { Title } from './components/title';
+import { Status } from './components/status';
 import { Notes } from '../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
 import { RiskScore } from './components/risk_score';
@@ -83,7 +83,7 @@ export const Header: FC<HeaderProps> = memo(
         <EuiSpacer size="m" />
         {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
         <EuiSpacer size="xs" />
-        <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />
+        <Title hit={hit} titleHref={ruleDetailsHref} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />
@@ -97,7 +97,7 @@ export const Header: FC<HeaderProps> = memo(
               <EuiFlexItem css={blockStyles}>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                   <EuiFlexItem>
-                    <HeaderStatus
+                    <Status
                       hit={hit}
                       renderCellActions={renderCellActions}
                       onAlertUpdated={onAlertUpdated}

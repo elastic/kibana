@@ -23,8 +23,8 @@ import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { LeftPanelNotesTab } from '../../left';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
-import { HeaderTitle } from '../../../../flyout_v2/document/components/header_title';
-import { HeaderStatus } from '../../../../flyout_v2/document/components/header_status';
+import { Title } from '../../../../flyout_v2/document/components/title';
+import { Status } from '../../../../flyout_v2/document/components/status';
 import type { CellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -79,7 +79,7 @@ export const AlertHeaderTitle = memo(() => {
           {getEmptyTagValue()}
         </AlertHeaderBlock>
       ) : (
-        <HeaderStatus
+        <Status
           hit={hit}
           renderCellActions={renderStatusCellActions}
           onAlertUpdated={onAlertUpdated}
@@ -94,7 +94,7 @@ export const AlertHeaderTitle = memo(() => {
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
-      <HeaderTitle hit={hit} titleHref={href ?? undefined} />
+      <Title hit={hit} titleHref={href ?? undefined} />
       <EuiSpacer size="m" />
       <EuiFlexGroup
         direction="row"

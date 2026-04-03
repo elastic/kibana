@@ -42,19 +42,19 @@ import {
 } from './test_ids';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
-  'xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel',
+  'xpack.securitySolution.flyout.header.notes.fetchNotesErrorLabel',
   {
     defaultMessage: 'Error fetching notes',
   }
 );
 const ADD_NOTE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.right.notes.addNoteButtonLabel',
+  'xpack.securitySolution.flyout.header.notes.addNoteButtonLabel',
   {
     defaultMessage: 'Add note',
   }
 );
 const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.right.notes.viewNoteButtonAriaLabel',
+  'xpack.securitySolution.flyout.header.notes.viewNoteButtonAriaLabel',
   {
     defaultMessage: 'View notes',
   }
@@ -116,7 +116,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
         data-test-subj={NOTES_VIEW_NOTES_BUTTON_TEST_ID}
       >
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.notes.viewNoteButtonLabel"
+          id="xpack.securitySolution.flyout.header.notes.viewNoteButtonLabel"
           defaultMessage="View {count, plural, one {note} other {notes}}"
           values={{ count: notes.length }}
         />
@@ -162,7 +162,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
       hasBorder
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.header.notesTitle"
+          id="xpack.securitySolution.flyout.header.notesTitle"
           defaultMessage="Notes"
         />
       }

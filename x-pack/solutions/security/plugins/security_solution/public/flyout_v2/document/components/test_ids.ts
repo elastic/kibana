@@ -11,9 +11,9 @@ export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPr
 
 /* Header */
 
-export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
-export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
-export const HEADER_EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
+export const TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
+export const TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+export const EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
 export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 export const STATUS_TITLE_TEST_ID = `${PREFIX}HeaderStatusTitle` as const;
 export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;

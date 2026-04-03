@@ -19,12 +19,12 @@ import {
   ASSIGNEES_EMPTY_TEST_ID,
   ASSIGNEES_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
-  HEADER_TITLE_TEST_ID,
-  RISK_SCORE_VALUE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
+  RISK_SCORE_VALUE_TEST_ID,
+  SEVERITY_VALUE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
   STATUS_TITLE_TEST_ID,
-  SEVERITY_VALUE_TEST_ID,
+  TITLE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 import {
   ALERT_SUMMARY_PANEL_TEST_ID,
@@ -34,8 +34,8 @@ import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refe
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../flyout_v2/document/hooks/use_refetch_by_scope');
-jest.mock('../../../../flyout_v2/document/components/header_status', () => ({
-  HeaderStatus: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
+jest.mock('../../../../flyout_v2/document/components/status', () => ({
+  Status: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
     <>
       <div data-test-subj="securitySolutionFlyoutHeaderStatusTitle">{'Status'}</div>
       <button data-test-subj="rule-status-badge" onClick={onAlertUpdated} type="button" />
@@ -65,7 +65,7 @@ const mockContextValue = {
     'kibana.alert.severity': ['low'],
   }),
 } as unknown as DocumentDetailsContext;
-const HEADER_TEXT_TEST_ID = `${HEADER_TITLE_TEST_ID}Text`;
+const HEADER_TEXT_TEST_ID = `${TITLE_TEST_ID}Text`;
 
 const renderHeader = (contextValue: DocumentDetailsContext) =>
   render(

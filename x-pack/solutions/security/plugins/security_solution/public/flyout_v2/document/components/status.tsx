@@ -26,7 +26,7 @@ const WORKFLOW_STATUS_FIELD_DATA = {
   isObjectArray: false,
 } as const;
 
-interface HeaderStatusProps {
+interface StatusProps {
   /**
    * The document to display
    */
@@ -45,8 +45,8 @@ interface HeaderStatusProps {
  * Renders the alert status control in the document flyout header.
  * Supports inline status updates and optional cell actions for the status value.
  */
-export const HeaderStatus = memo(
-  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }: HeaderStatusProps) => {
+export const Status = memo(
+  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }: StatusProps) => {
     const eventId = hit.raw._id as string;
     const statusFieldInfo = useMemo<StatusPopoverButtonFieldInfo | null>(() => {
       const workflowStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
@@ -96,4 +96,4 @@ export const HeaderStatus = memo(
   }
 );
 
-HeaderStatus.displayName = 'HeaderStatus';
+Status.displayName = 'Status';

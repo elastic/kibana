@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { HeaderStatus } from './header_status';
+import { Status } from './status';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 jest.mock('./status_popover_button', () => ({
@@ -44,14 +44,14 @@ const alertHit = createMockHit({
   'kibana.alert.workflow_status': 'open',
 });
 
-const renderComponent = (props: Partial<Parameters<typeof HeaderStatus>[0]> = {}) =>
+const renderComponent = (props: Partial<Parameters<typeof Status>[0]> = {}) =>
   render(
     <IntlProvider locale="en">
-      <HeaderStatus hit={alertHit} {...props} />
+      <Status hit={alertHit} {...props} />
     </IntlProvider>
   );
 
-describe('<HeaderStatus />', () => {
+describe('<Status />', () => {
   it('renders the interactive status button by default', () => {
     const { getByTestId } = renderComponent();
 

@@ -187,13 +187,16 @@ describe('DocumentFlyoutWrapper', () => {
     );
   });
 
-  it('renders fallback error state when the document request returns found without a hit', () => {
+  it('renders nothing when the document request returns found without a hit', () => {
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, null, jest.fn()]);
 
-    const { getByTestId } = renderDocumentFlyoutWrapper();
+    const { queryByTestId } = renderDocumentFlyoutWrapper();
 
-    expect(getByTestId('document-overview-something-went-wrong')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
+    expect(queryByTestId('document-overview-fetch-error')).not.toBeInTheDocument();
+    expect(queryByTestId('document-overview-wrapper-not-found')).not.toBeInTheDocument();
   });
+
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
     const alertHit = createAlertHit();
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);

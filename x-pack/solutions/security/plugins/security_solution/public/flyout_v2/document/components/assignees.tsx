@@ -71,6 +71,9 @@ export interface AssigneesProps {
   showAssignees?: boolean;
 }
 
+/**
+ * Renders the assignees section in the document flyout header.
+ */
 export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: AssigneesProps) => {
   const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
   const initialAssignedUserIds = useMemo(() => {
@@ -149,7 +152,7 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
             toolTipMessage={
               upsellingMessage ??
               i18n.translate(
-                'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
+                'xpack.securitySolution.flyout.document.header.assignees.popoverTooltip',
                 {
                   defaultMessage: 'Assign alert',
                 }

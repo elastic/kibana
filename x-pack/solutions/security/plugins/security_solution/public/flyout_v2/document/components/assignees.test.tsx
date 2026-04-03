@@ -107,7 +107,7 @@ const renderAssignees = (
 
   return render(
     <TestProviders>
-      <Assignees hit={createMockHit(assignedUserIds)} {...props} />
+      <Assignees hit={createMockHit(assignedUserIds)} onAlertUpdated={jest.fn()} {...props} />
     </TestProviders>
   );
 };
