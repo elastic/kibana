@@ -36,16 +36,34 @@ export function getSourceField(
 ): string | undefined {
   const processorSourceField = (() => {
     switch (processor.action) {
-      case 'append':
-      case 'set':
-        return processor.to;
       case 'convert':
       case 'rename':
       case 'grok':
       case 'dissect':
       case 'date':
+      case 'replace':
+      case 'split':
+      case 'sort':
+      case 'redact':
+      case 'uppercase':
+      case 'lowercase':
+      case 'trim':
+      case 'remove':
+      case 'remove_by_prefix':
         return processor.from;
+      case 'json_extract':
+        return processor.field;
+      case 'network_direction':
+        return processor.source_ip;
+      case 'append':
+      case 'set':
+      case 'concat':
+      case 'join':
+      case 'math':
+      case 'enrich':
+        return processor.to;
       case 'manual_ingest_pipeline':
+      case 'drop_document':
         return undefined;
       default:
         return undefined;
@@ -54,6 +72,40 @@ export function getSourceField(
 
   const trimmedSourceField = processorSourceField?.trim();
   return trimmedSourceField && trimmedSourceField.length > 0 ? trimmedSourceField : undefined;
+}
+
+export function getDestinationField(
+  processor: StreamlangProcessorDefinitionWithUIAttributes
+): string | undefined {
+  const processorDestinationField = (() => {
+    switch (processor.action) {
+      case 'convert':
+      case 'rename':
+      case 'date':
+      case 'replace':
+      case 'split':
+      case 'sort':
+      case 'uppercase':
+      case 'lowercase':
+      case 'trim':
+      case 'set':
+      case 'append':
+      case 'concat':
+      case 'join':
+      case 'math':
+      case 'enrich':
+        return processor.to;
+      case 'network_direction':
+        return processor.target_field;
+      default:
+        return undefined;
+    }
+  })();
+
+  const trimmedDestinationField = processorDestinationField?.trim();
+  return trimmedDestinationField && trimmedDestinationField.length > 0
+    ? trimmedDestinationField
+    : undefined;
 }
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
@@ -140,24 +192,30 @@ export function getAllFieldsInOrder(
 
 export function getTableColumns({
   currentProcessorSourceField,
+  currentProcessorDestinationField,
   detectedFields = [],
   previewDocsFilter,
 }: {
   currentProcessorSourceField?: string;
+  currentProcessorDestinationField?: string;
   detectedFields?: DetectedField[];
   previewDocsFilter: PreviewDocsFilterOption;
 }) {
-  if (!currentProcessorSourceField) {
+  const baseFields = [currentProcessorSourceField, currentProcessorDestinationField].filter(
+    (f): f is string => Boolean(f)
+  );
+
+  if (baseFields.length === 0) {
     return [];
   }
 
   if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
-    return [currentProcessorSourceField];
+    return baseFields;
   }
 
   const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
 
-  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
+  return uniq([...baseFields, ...uniqueDetectedFields]);
 }
 
 type SimulationDocReport = Simulation['documents'][number];
