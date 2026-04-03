@@ -129,6 +129,9 @@ export const validateFieldMappings = async (
 
     return { valid: true, errors: [] };
   } catch (error) {
+    if (abortSignal?.aborted) {
+      throw error;
+    }
     const errorMessage = error instanceof Error ? error.message : 'Unknown validation error';
     logger.warn(`Field mapping validation failed: ${errorMessage}`);
     return { valid: false, errors: [errorMessage] };

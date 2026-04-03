@@ -140,6 +140,50 @@ describe('validateFieldMappings', () => {
       expect(result.errors[0]).toBe('Unknown validation error');
     });
 
+    it('re-throws when abortSignal is aborted', async () => {
+      const fields: FieldMappingEntry[] = [{ name: 'my_field', type: 'keyword', is_ecs: false }];
+      const abortController = new AbortController();
+      abortController.abort();
+
+      const abortError = new DOMException('The operation was aborted', 'AbortError');
+      esClient.indices.simulateTemplate.mockRejectedValueOnce(abortError);
+
+      await expect(
+        validateFieldMappings(esClient, fields, logger, abortController.signal)
+      ).rejects.toThrow();
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns validation error when ES fails without abort', async () => {
+      const fields: FieldMappingEntry[] = [{ name: 'my_field', type: 'keyword', is_ecs: false }];
+      const abortController = new AbortController();
+
+      esClient.indices.simulateTemplate.mockRejectedValueOnce(
+        new Error('mapper_parsing_exception')
+      );
+
+      const result = await validateFieldMappings(esClient, fields, logger, abortController.signal);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors[0]).toContain('mapper_parsing_exception');
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('passes abortSignal to ES client', async () => {
+      const fields: FieldMappingEntry[] = [{ name: 'my_field', type: 'keyword', is_ecs: false }];
+      const abortController = new AbortController();
+
+      esClient.indices.simulateTemplate.mockResolvedValueOnce({} as never);
+
+      await validateFieldMappings(esClient, fields, logger, abortController.signal);
+
+      expect(esClient.indices.simulateTemplate).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ signal: abortController.signal })
+      );
+    });
+
     it('builds nested ES properties from dotted field names', async () => {
       const fields: FieldMappingEntry[] = [
         { name: 'my_app.http.request.method', type: 'keyword', is_ecs: false },

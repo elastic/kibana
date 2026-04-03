@@ -1290,5 +1290,59 @@ describe('AutomaticImportSavedObjectService', () => {
       );
       await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
     });
+
+    it('should throw when abortSignal is aborted', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+
+      await expect(
+        savedObjectService.updateDataStreamSavedObjectAttributes(
+          {
+            integrationId: 'any-integration',
+            dataStreamId: 'any-ds',
+            status: TASK_STATUSES.completed,
+          },
+          abortController.signal
+        )
+      ).rejects.toThrow('Task was cancelled');
+    });
+
+    it('should succeed without abortSignal for cancellation/failure updates', async () => {
+      const integrationId = 'test-abort-no-signal-int';
+      const dataStreamId = 'test-abort-no-signal-ds';
+
+      await savedObjectService.insertIntegration(
+        { ...mockIntegrationParams, integrationId },
+        authenticatedUser
+      );
+      await savedObjectService.insertDataStream(
+        {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId,
+          jobInfo: {
+            jobId: 'test-job',
+            jobType: 'autoImport-dataStream-task',
+            status: TASK_STATUSES.processing,
+          },
+        },
+        authenticatedUser
+      );
+
+      await savedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId,
+        dataStreamId,
+        status: TASK_STATUSES.cancelled,
+      });
+
+      const updated = await savedObjectService.getDataStream(dataStreamId, integrationId);
+      expect(updated.attributes.job_info.status).toBe(TASK_STATUSES.cancelled);
+
+      await savedObjectsClient.delete(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        `${integrationId}-${dataStreamId}`
+      );
+      await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
+    });
   });
 });

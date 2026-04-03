@@ -274,6 +274,7 @@ export class TaskManagerService {
       );
 
       this.logger.debug(`Task ${taskId} completed successfully`);
+      this.throwIfAborted(abortSignal);
 
       if (!result.current_pipeline) {
         throw new Error('Agent did not produce a valid ingest pipeline');
@@ -286,15 +287,13 @@ export class TaskManagerService {
       this.logger.debug(
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
-      if (abortSignal.aborted) {
-        throw new Error(`Task ${taskId} was cancelled`);
-      }
 
       const fieldMapping = await generateFieldMappings(
         (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
         fieldsMetadataClient
       );
       this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
+      this.throwIfAborted(abortSignal);
 
       const validationResult = await validateFieldMappings(
         esClient,
@@ -309,16 +308,20 @@ export class TaskManagerService {
           )}`
         );
       }
+      this.throwIfAborted(abortSignal);
 
       // Update the data stream saved object with pipeline, field mappings, and task status
-      await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
-        integrationId,
-        dataStreamId,
-        ingestPipeline: pipelineObject,
-        pipelineDocs: pipelineGenerationResultsObjects,
-        fieldMapping,
-        status: TASK_STATUSES.completed,
-      });
+      await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes(
+        {
+          integrationId,
+          dataStreamId,
+          ingestPipeline: pipelineObject,
+          pipelineDocs: pipelineGenerationResultsObjects,
+          fieldMapping,
+          status: TASK_STATUSES.completed,
+        },
+        abortSignal
+      );
 
       this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
       this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
@@ -410,6 +413,12 @@ export class TaskManagerService {
       });
     } catch (telemetryError) {
       this.logger.warn(`Failed to report telemetry: ${telemetryError}`);
+    }
+  }
+
+  private throwIfAborted(abortSignal: AbortSignal) {
+    if (abortSignal.aborted) {
+      throw new Error('Task was cancelled');
     }
   }
 

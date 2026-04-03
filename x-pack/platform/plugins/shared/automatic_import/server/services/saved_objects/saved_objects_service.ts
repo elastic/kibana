@@ -581,8 +581,13 @@ export class AutomaticImportSavedObjectService {
   }
 
   public async updateDataStreamSavedObjectAttributes(
-    updateDataStreamParams: UpdateDataStreamParams
+    updateDataStreamParams: UpdateDataStreamParams,
+    abortSignal?: AbortSignal
   ): Promise<void> {
+    if (abortSignal?.aborted) {
+      throw new Error('Task was cancelled');
+    }
+
     const { integrationId, dataStreamId, ingestPipeline, pipelineDocs, fieldMapping, status } =
       updateDataStreamParams;
 
