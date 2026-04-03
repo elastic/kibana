@@ -78,33 +78,54 @@ export const startMetadataTransforms = usageTracker.track(
       return;
     }
 
-    try {
-      await esClient.transform.startTransform({
-        transform_id: currentTransformId,
-      });
-    } catch (err) {
-      // ignore if transform already started or temporarily not found (race with Fleet install)
-      if (err.statusCode !== 409 && err.statusCode !== 404) {
-        throw err;
-      }
-    }
+    await startTransformWithRetry(esClient, currentTransformId);
 
     if (agentIds.length > 0) {
       await waitForCurrentMetdataDocs(esClient, agentIds);
     }
 
+    await startTransformWithRetry(esClient, unitedTransformId);
+  }
+);
+
+async function startTransformWithRetry(
+  esClient: Client,
+  transformId: string,
+  maxAttempts = 3
+): Promise<void> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await esClient.transform.startTransform({
-        transform_id: unitedTransformId,
-      });
+      await esClient.transform.startTransform({ transform_id: transformId });
+      return;
     } catch (err) {
-      // ignore if transform already started or temporarily not found (race with Fleet install)
-      if (err.statusCode !== 409 && err.statusCode !== 404) {
+      // 409: transform already started — not an error
+      if (err.statusCode === 409) {
+        return;
+      }
+
+      const isRetryable = err.statusCode === 404 || err.name === 'TimeoutError';
+      if (!isRetryable) {
         throw err;
+      }
+
+      lastError = err;
+      if (attempt < maxAttempts) {
+        await new Promise((res) => setTimeout(res, 5000));
       }
     }
   }
-);
+
+  // Retries exhausted for 404/timeout — swallow since the transform may have been
+  // started by a prior timed-out attempt or will be started by Fleet reconciliation
+  if (lastError) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `startTransformWithRetry: failed to start transform [${transformId}] after ${maxAttempts} attempts: ${lastError.message}`
+    );
+  }
+}
 
 async function getMetadataTransformStats(
   esClient: Client,
