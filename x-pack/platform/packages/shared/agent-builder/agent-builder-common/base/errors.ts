@@ -21,6 +21,7 @@ export enum AgentBuilderErrorCode {
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
   pluginNotFound = 'pluginNotFound',
+  smlRuleNotFound = 'smlRuleNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
   hookExecutionError = 'hookExecutionError',
@@ -242,6 +243,35 @@ export const createPluginNotFoundError = ({
 };
 
 /**
+ * Error thrown when trying to retrieve an SML rule that does not exist.
+ */
+export type AgentBuilderSmlRuleNotFoundError =
+  AgentBuilderError<AgentBuilderErrorCode.smlRuleNotFound>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderSmlRuleNotFoundError}
+ */
+export const isSmlRuleNotFoundError = (err: unknown): err is AgentBuilderSmlRuleNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.smlRuleNotFound;
+};
+
+export const createSmlRuleNotFoundError = ({
+  ruleId,
+  customMessage,
+  meta = {},
+}: {
+  ruleId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderSmlRuleNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.smlRuleNotFound,
+    customMessage ?? `SML rule ${ruleId} not found`,
+    { ...meta, ruleId, statusCode: 404 }
+  );
+};
+
+/**
  * Represents an internal error
  */
 export type AgentBuilderRequestAbortedError =
@@ -387,6 +417,7 @@ export const AgentBuilderErrorUtils = {
   isAgentNotFoundError,
   isConversationNotFoundError,
   isPluginNotFoundError,
+  isSmlRuleNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
   isAgentExecutionError,
@@ -397,6 +428,7 @@ export const AgentBuilderErrorUtils = {
   createAgentNotFoundError,
   createConversationNotFoundError,
   createPluginNotFoundError,
+  createSmlRuleNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,
   createAgentExecutionError,
