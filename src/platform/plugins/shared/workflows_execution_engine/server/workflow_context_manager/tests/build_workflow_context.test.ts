@@ -34,9 +34,14 @@ describe('buildWorkflowContext', () => {
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      inputs: [] as any,
+
       consts: {},
-      triggers: [],
+      triggers: [
+        {
+          type: 'manual',
+          inputs: [] as any,
+        },
+      ],
       steps: [],
     },
     yaml: '',
@@ -114,15 +119,19 @@ describe('buildWorkflowContext', () => {
         name: 'Merge inputs into ctx',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'inputWithDefault',
+                type: 'string',
+                default: 'defaultValue',
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -146,15 +155,19 @@ describe('buildWorkflowContext', () => {
         name: 'Merge inputs into ctx',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'inputWithDefault',
+                type: 'string',
+                default: 'defaultValue',
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -180,20 +193,24 @@ describe('buildWorkflowContext', () => {
         name: 'Merge inputs into ctx',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-          {
-            name: 'anotherInput',
-            type: 'string',
-            default: 'anotherDefault',
-          },
-        ] as any,
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'inputWithDefault',
+                type: 'string',
+                default: 'defaultValue',
+              },
+              {
+                name: 'anotherInput',
+                type: 'string',
+                default: 'anotherDefault',
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -221,15 +238,19 @@ describe('buildWorkflowContext', () => {
         name: 'Merge inputs into ctx',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            // no default value
-          },
-        ] as any,
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'inputWithDefault',
+                type: 'string',
+                // no default value
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -255,15 +276,19 @@ describe('buildWorkflowContext', () => {
         name: 'Merge inputs into ctx',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            // no default value
-          },
-        ] as any,
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'inputWithDefault',
+                type: 'string',
+                // no default value
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -286,15 +311,19 @@ describe('buildWorkflowContext', () => {
         name: 'Merge inputs into ctx',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'inputWithDefault',
+                type: 'string',
+                default: 'defaultValue',
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -318,28 +347,33 @@ describe('buildWorkflowContext', () => {
         name: 'Test Workflow',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'count',
-            type: 'number',
-            required: false,
-            default: 42,
-          },
-          {
-            name: 'enabled',
-            type: 'boolean',
-            required: false,
-            default: true,
-          },
-          {
-            name: 'tags',
-            type: 'array',
-            required: false,
-            default: ['tag1', 'tag2'],
-          },
-        ] as any,
+
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'count',
+                type: 'number',
+                required: false,
+                default: 42,
+              },
+              {
+                name: 'enabled',
+                type: 'boolean',
+                required: false,
+                default: true,
+              },
+              {
+                name: 'tags',
+                type: 'array',
+                required: false,
+                default: ['tag1', 'tag2'],
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -365,15 +399,19 @@ describe('buildWorkflowContext', () => {
         name: 'Merge inputs into ctx',
         version: '1',
         enabled: true,
-        inputs: [
-          {
-            name: 'inputWithDefault',
-            type: 'string',
-            default: 'defaultValue',
-          },
-        ] as any,
         consts: {},
-        triggers: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: [
+              {
+                name: 'inputWithDefault',
+                type: 'string',
+                default: 'defaultValue',
+              },
+            ] as any,
+          },
+        ],
         steps: [],
       };
 
@@ -400,9 +438,13 @@ describe('buildWorkflowContext', () => {
           name: undefined as any,
           version: '1',
           enabled: undefined as any,
-          inputs: [] as any,
           consts: {},
-          triggers: [],
+          triggers: [
+            {
+              type: 'manual',
+              inputs: [] as any,
+            },
+          ],
           steps: [],
         },
         context: {},
@@ -422,9 +464,14 @@ describe('buildWorkflowContext', () => {
           name: 'Test Workflow',
           version: '1',
           enabled: true,
-          inputs: [] as any,
+
           consts: undefined as any,
-          triggers: [],
+          triggers: [
+            {
+              type: 'manual',
+              inputs: [] as any,
+            },
+          ],
           steps: [],
         },
         context: {},
@@ -548,9 +595,13 @@ describe('buildWorkflowContext', () => {
           name: 'Test Workflow',
           version: '1',
           enabled: true,
-          inputs: undefined as any,
           consts: {},
-          triggers: [],
+          triggers: [
+            {
+              type: 'manual',
+              inputs: undefined as any,
+            },
+          ],
           steps: [],
         },
         context: {

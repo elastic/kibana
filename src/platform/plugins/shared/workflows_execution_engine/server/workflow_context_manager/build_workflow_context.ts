@@ -13,6 +13,7 @@ import {
   applyInputDefaults,
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
+import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
@@ -28,9 +29,10 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
-  const normalizedInputsSchema = normalizeFieldsToJsonSchema(
-    workflowExecution.workflowDefinition.inputs
+  const manualTrigger = workflowExecution.workflowDefinition.triggers?.find((trigger) =>
+    isManualTrigger(trigger)
   );
+  const normalizedInputsSchema = normalizeFieldsToJsonSchema(manualTrigger?.inputs);
 
   // Extract parent workflow information from context if available
   const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;

@@ -12,6 +12,7 @@ import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers';
+import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
 import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
@@ -725,7 +726,7 @@ export const WorkflowSchema = WorkflowSchemaBase.extend({
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
   const mappedTriggers = (data.triggers ?? []).map((trigger) => {
-    if (!isManualTrigger(trigger)) {
+    if (!isManualTrigger(trigger) || !trigger.inputs) {
       return trigger;
     }
 
@@ -849,7 +850,7 @@ export const WorkflowContextSchema = z.object({
    * event.input values at execution time.
    */
   inputs: z.record(z.string(), z.unknown()).optional(),
-  event: z.unknown().optional(),
+  event: AlertEventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
