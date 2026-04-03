@@ -38,7 +38,6 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 - Ask the user whether the PR should `Closes #X` or `Addresses #X` before creating the PR.
 - If there is no existing issue, stop and ask whether to create one; do NOT create issues unless the user explicitly instructs you to.
 - PR title is a human-readable change summary (not necessarily the Conventional Commit header).
-- Proactively propose labels/assignees/milestone/projects before applying.
 
 ## Issue Workflow
 
