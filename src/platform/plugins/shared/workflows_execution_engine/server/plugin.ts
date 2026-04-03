@@ -46,6 +46,7 @@ import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
   ScheduleWorkflow,
   WorkflowsExecutionEnginePluginSetup,
@@ -824,13 +825,17 @@ export class WorkflowsExecutionEnginePlugin
 
       const cancelledAt = new Date().toISOString();
 
-      if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+      if (
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD
+      ) {
         await cancelWaitingWorkflow({
           workflowExecution,
           workflowExecutionRepository,
           stepExecutionRepository: new StepExecutionRepository(
             coreStart.elasticsearch.client.asInternalUser
           ),
+          cancelChildExecution: cancelWorkflowExecution,
         });
         return;
       }
@@ -871,10 +876,23 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: executionId,
-        context: { ...workflowExecution.context, resumeInput: input },
-      });
+      const resumeContext = { ...workflowExecution.context, resumeInput: input };
+
+      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
+    };
+
+    const internalResumeWorkflowExecution: InternalResumeWorkflowExecution = async (
+      executionId,
+      spaceId,
+      context,
+      request
+    ) => {
+      if (context) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: executionId,
+          context,
+        });
+      }
 
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
@@ -896,6 +914,7 @@ export class WorkflowsExecutionEnginePlugin
       scheduleWorkflow,
       cancelWorkflowExecution,
       resumeWorkflowExecution,
+      internalResumeWorkflowExecution,
       isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
       isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
       getMaxEventChainDepth: this.getMaxEventChainDepth.bind(this),

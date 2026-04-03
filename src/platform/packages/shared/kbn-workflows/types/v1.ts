@@ -19,6 +19,7 @@ export enum ExecutionStatus {
   PENDING = 'pending',
   WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
+  WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
 
   // Done
@@ -43,6 +44,7 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
   ExecutionStatus.RUNNING,
 ] as const;
 
@@ -111,7 +113,6 @@ export interface EsWorkflowExecution {
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
-  pendingResumeTaskId?: string; // ID of the scheduled workflow:resume task so a child can call runSoon directly
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions

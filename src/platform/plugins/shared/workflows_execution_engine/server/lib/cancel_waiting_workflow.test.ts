@@ -150,4 +150,95 @@ describe('cancelWaitingWorkflow', () => {
       { id: 's3', status: ExecutionStatus.CANCELLED },
     ]);
   });
+
+  describe('child workflow cancellation', () => {
+    it('should cancel child workflow execution when step is a sync workflow.execute', async () => {
+      const cancelChildExecution = jest.fn().mockResolvedValue(undefined);
+      const workflow = makeWorkflow({ status: ExecutionStatus.WAITING_FOR_CHILD });
+      const waitingStep = makeStep({
+        id: 'step-1',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.WAITING_FOR_CHILD,
+        state: { executionId: 'child-exec-1' },
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([waitingStep]);
+
+      await cancelWaitingWorkflow({
+        workflowExecution: workflow,
+        workflowExecutionRepository: workflowExecutionRepository as any,
+        stepExecutionRepository: stepExecutionRepository as any,
+        cancelChildExecution,
+      });
+
+      expect(cancelChildExecution).toHaveBeenCalledWith('child-exec-1', 'default');
+    });
+
+    it('should not cancel child for non-execute step types', async () => {
+      const cancelChildExecution = jest.fn().mockResolvedValue(undefined);
+      const workflow = makeWorkflow();
+      const waitingStep = makeStep({
+        id: 'step-1',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([waitingStep]);
+
+      await cancelWaitingWorkflow({
+        workflowExecution: workflow,
+        workflowExecutionRepository: workflowExecutionRepository as any,
+        stepExecutionRepository: stepExecutionRepository as any,
+        cancelChildExecution,
+      });
+
+      expect(cancelChildExecution).not.toHaveBeenCalled();
+    });
+
+    it('should tolerate child cancellation failure (best effort)', async () => {
+      const cancelChildExecution = jest.fn().mockRejectedValue(new Error('already cancelled'));
+      const workflow = makeWorkflow({ status: ExecutionStatus.WAITING_FOR_CHILD });
+      const waitingStep = makeStep({
+        id: 'step-1',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.WAITING_FOR_CHILD,
+        state: { executionId: 'child-exec-1' },
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([waitingStep]);
+
+      await expect(
+        cancelWaitingWorkflow({
+          workflowExecution: workflow,
+          workflowExecutionRepository: workflowExecutionRepository as any,
+          stepExecutionRepository: stepExecutionRepository as any,
+          cancelChildExecution,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+    });
+
+    it('should skip child cancellation when no cancelChildExecution callback provided', async () => {
+      const workflow = makeWorkflow({ status: ExecutionStatus.WAITING_FOR_CHILD });
+      const waitingStep = makeStep({
+        id: 'step-1',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.WAITING_FOR_CHILD,
+        state: { executionId: 'child-exec-1' },
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([waitingStep]);
+
+      await cancelWaitingWorkflow({
+        workflowExecution: workflow,
+        workflowExecutionRepository: workflowExecutionRepository as any,
+        stepExecutionRepository: stepExecutionRepository as any,
+      });
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+    });
+  });
 });

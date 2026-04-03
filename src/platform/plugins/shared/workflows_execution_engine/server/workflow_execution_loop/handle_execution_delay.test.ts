@@ -40,7 +40,7 @@ const makeStepRuntime = (
   } as unknown as jest.Mocked<StepExecutionRuntime>);
 
 describe('handleExecutionDelay', () => {
-  describe('WAITING_FOR_INPUT step', () => {
+  describe('WAITING_FOR_INPUT step (HITL)', () => {
     it('should set workflow status to WAITING_FOR_INPUT', async () => {
       const params = makeParams();
       const stepRuntime = makeStepRuntime({
@@ -62,6 +62,23 @@ describe('handleExecutionDelay', () => {
 
       await handleExecutionDelay(params, stepRuntime);
 
+      expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('WAITING_FOR_CHILD step (sync child workflow)', () => {
+    it('should set workflow status to WAITING_FOR_CHILD', async () => {
+      const params = makeParams();
+      const stepRuntime = makeStepRuntime({
+        node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+        stepExecution: { status: ExecutionStatus.WAITING_FOR_CHILD } as any,
+      });
+
+      await handleExecutionDelay(params, stepRuntime);
+
+      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.WAITING_FOR_CHILD,
+      });
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
     });
   });
@@ -105,7 +122,7 @@ describe('handleExecutionDelay', () => {
     });
   });
 
-  describe('non-sync step: short wait (< 5s) in-process', () => {
+  describe('short wait (< 5s) in-process', () => {
     it('sleeps in-process and sets RUNNING without TM task', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() + 100).toISOString();
@@ -147,58 +164,6 @@ describe('handleExecutionDelay', () => {
         status: ExecutionStatus.RUNNING,
       });
     });
-  });
-
-  describe('non-sync step: long wait (>= 5s) schedules TM + pendingResumeTaskId', () => {
-    it('schedules resume task and stores pendingResumeTaskId', async () => {
-      const params = makeParams();
-      const resumeAtDate = new Date(Date.now() + 8000);
-      const resumeAt = resumeAtDate.toISOString();
-      const stepRuntime = makeStepRuntime({
-        node: { stepType: 'wait' } as any,
-        stepExecution: {
-          status: ExecutionStatus.WAITING,
-          state: { resumeAt },
-        } as any,
-      });
-
-      await handleExecutionDelay(params, stepRuntime);
-
-      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
-      const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
-      expect(call.workflowExecution).toEqual({ id: 'exec-parent' });
-      expect(call.resumeAt.getTime()).toBe(resumeAtDate.getTime());
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        pendingResumeTaskId: 'resume-task-1',
-      });
-    });
-  });
-
-  describe('sync workflow.execute: always TM path (child can runSoon pendingResumeTaskId)', () => {
-    it('schedules TM even when resumeAt is within 5s (no in-process sleep)', async () => {
-      const params = makeParams();
-      (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mockResolvedValue({
-        taskId: 'sync-resume-99',
-      });
-      const resumeAtDate = new Date(Date.now() + 2000);
-      const stepRuntime = makeStepRuntime({
-        node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
-        stepExecution: {
-          status: ExecutionStatus.WAITING,
-          state: { resumeAt: resumeAtDate.toISOString() },
-        } as any,
-      });
-
-      await handleExecutionDelay(params, stepRuntime);
-
-      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        pendingResumeTaskId: 'sync-resume-99',
-      });
-      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith({
-        status: ExecutionStatus.RUNNING,
-      });
-    });
 
     it('workflow.executeAsync uses short in-process path like other steps', async () => {
       const params = makeParams();
@@ -220,8 +185,33 @@ describe('handleExecutionDelay', () => {
     });
   });
 
+  describe('long wait (>= 5s) schedules TM resume task', () => {
+    it('schedules resume task and sets workflow status to WAITING', async () => {
+      const params = makeParams();
+      const resumeAtDate = new Date(Date.now() + 8000);
+      const resumeAt = resumeAtDate.toISOString();
+      const stepRuntime = makeStepRuntime({
+        node: { stepType: 'wait' } as any,
+        stepExecution: {
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt },
+        } as any,
+      });
+
+      await handleExecutionDelay(params, stepRuntime);
+
+      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
+      const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
+      expect(call.workflowExecution).toEqual({ id: 'exec-parent' });
+      expect(call.resumeAt.getTime()).toBe(resumeAtDate.getTime());
+      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.WAITING,
+      });
+    });
+  });
+
   describe('resumeAt in the past', () => {
-    it('non-sync step: resumeAt in the past uses 0ms in-process sleep (no negative timeout)', async () => {
+    it('uses 0ms in-process sleep (no negative timeout)', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() - 5000).toISOString();
       const stepRuntime = makeStepRuntime({
@@ -237,25 +227,6 @@ describe('handleExecutionDelay', () => {
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
       expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
         status: ExecutionStatus.RUNNING,
-      });
-    });
-
-    it('sync execute step: resumeAt in the past still schedules TM (child needs task to runSoon)', async () => {
-      const params = makeParams();
-      const resumeAt = new Date(Date.now() - 2000).toISOString();
-      const stepRuntime = makeStepRuntime({
-        node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
-        stepExecution: {
-          status: ExecutionStatus.WAITING,
-          state: { resumeAt },
-        } as any,
-      });
-
-      await handleExecutionDelay(params, stepRuntime);
-
-      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        pendingResumeTaskId: 'resume-task-1',
       });
     });
   });
@@ -276,20 +247,20 @@ describe('handleExecutionDelay', () => {
 
       expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
       expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        pendingResumeTaskId: 'resume-task-1',
+        status: ExecutionStatus.WAITING,
       });
     });
   });
 
   describe('TM scheduling errors', () => {
-    it('propagates scheduleResumeTask failure (sync execute path)', async () => {
+    it('propagates scheduleResumeTask failure', async () => {
       const params = makeParams();
       (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mockRejectedValue(
         new Error('task manager unavailable')
       );
-      const resumeAt = new Date(Date.now() + 2000).toISOString();
+      const resumeAt = new Date(Date.now() + 8000).toISOString();
       const stepRuntime = makeStepRuntime({
-        node: { stepType: WORKFLOW_EXECUTE_STEP_TYPE } as any,
+        node: { stepType: 'wait' } as any,
         stepExecution: {
           status: ExecutionStatus.WAITING,
           state: { resumeAt },

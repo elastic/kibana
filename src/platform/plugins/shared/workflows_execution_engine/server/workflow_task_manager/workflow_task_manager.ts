@@ -75,10 +75,6 @@ export class WorkflowTaskManager {
     };
   }
 
-  async runTaskSoon(taskId: string): Promise<void> {
-    await this.taskManager.runSoon(taskId);
-  }
-
   async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
     const { docs: idleTasks } = await this.taskManager.fetch({
       query: {

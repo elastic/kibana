@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { isTerminalStatus } from '@kbn/workflows';
+import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
@@ -82,24 +83,14 @@ export async function resumeWorkflow({
     workflowTaskManager,
   });
 
-  // Report metering after execution completes and state is flushed.
-  // This is fire-and-forget: the metering service handles retries and
-  // will no-op for non-terminal states (e.g., WAITING for resume).
-  if (meteringService) {
-    try {
-      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowRunId,
-        spaceId
-      );
-      if (finalExecution) {
-        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
-      }
-    } catch (err) {
-      logger.warn(
-        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-  }
+  await handlePostExecutionLoop({
+    workflowRunId,
+    spaceId,
+    logger,
+    fakeRequest,
+    workflowExecutionRepository,
+    internalResumeWorkflowExecution: workflowsExecutionEngine?.internalResumeWorkflowExecution,
+    meteringService,
+    cloudSetup: dependencies.cloudSetup,
+  });
 }

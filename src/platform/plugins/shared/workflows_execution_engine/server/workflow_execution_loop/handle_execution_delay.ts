@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, isExecuteSyncStepType } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -20,11 +20,16 @@ export async function handleExecutionDelay(
 ) {
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
-  if (stepExecutionRuntime.stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT) {
-    // Propagate WAITING_FOR_INPUT to the workflow level so the execution loop exits.
-    // Resumption is triggered externally by the resume API; no task is scheduled here.
+  const stepStatus = stepExecutionRuntime.stepExecution?.status;
+  if (
+    stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
+    stepStatus === ExecutionStatus.WAITING_FOR_CHILD
+  ) {
+    // Propagate the indefinite-wait status to the workflow level so the execution loop exits.
+    // WAITING_FOR_INPUT: HITL — resumed externally via the resume API.
+    // WAITING_FOR_CHILD: sync child workflow — resumed by the child's completion callback.
     params.workflowExecutionState.updateWorkflowExecution({
-      status: ExecutionStatus.WAITING_FOR_INPUT,
+      status: stepStatus,
     });
     return;
   }
@@ -48,20 +53,13 @@ export async function handleExecutionDelay(
     status: ExecutionStatus.WAITING,
   });
 
-  // Sync nested workflow.execute waits always schedule a workflow:resume task so a completing
-  // child can runSoon that task; short in-process sleep would leave no task to wake.
-  const isSyncSubWorkflowPollWait = isExecuteSyncStepType(stepExecutionRuntime.node.stepType);
-
-  if (!isSyncSubWorkflowPollWait && diff < SHORT_DURATION_THRESHOLD) {
+  if (diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 
     try {
       await abortableTimeout(timeout, stepExecutionRuntime.abortController.signal);
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
-        // Delay was interrupted (e.g. by a timeout or cancellation).
-        // Reset status to RUNNING so the execution loop can continue
-        // after error handling (e.g. on-failure continue).
         params.workflowExecutionState.updateWorkflowExecution({
           status: ExecutionStatus.RUNNING,
         });
@@ -74,13 +72,10 @@ export async function handleExecutionDelay(
       status: ExecutionStatus.RUNNING,
     });
   } else {
-    const { taskId } = await params.workflowTaskManager.scheduleResumeTask({
+    await params.workflowTaskManager.scheduleResumeTask({
       workflowExecution,
       resumeAt,
       fakeRequest: params.fakeRequest,
-    });
-    params.workflowExecutionState.updateWorkflowExecution({
-      pendingResumeTaskId: taskId,
     });
   }
 }

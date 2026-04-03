@@ -85,7 +85,9 @@ describe('resumeWorkflow', () => {
       workflowExecutionGraph: {},
       esClient: {},
       workflowTaskManager: {},
-      workflowExecutionRepository: {},
+      workflowExecutionRepository: {
+        getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+      },
     } as any);
 
     await resumeWorkflow({
@@ -153,7 +155,9 @@ describe('resumeWorkflow', () => {
       workflowExecutionGraph: {},
       esClient: {},
       workflowTaskManager: {},
-      workflowExecutionRepository: {},
+      workflowExecutionRepository: {
+        getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+      },
     } as any);
 
     await resumeWorkflow({

@@ -230,23 +230,6 @@ describe('WorkflowTaskManager', () => {
     });
   });
 
-  describe('runTaskSoon', () => {
-    it('forwards to task manager runSoon', async () => {
-      mockTaskManager.runSoon.mockResolvedValue({ id: 'task-xyz', forced: false });
-
-      await workflowTaskManager.runTaskSoon('task-xyz');
-
-      expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('task-xyz');
-    });
-
-    it('propagates errors from task manager', async () => {
-      mockTaskManager.runSoon.mockRejectedValue(new Error('task not found'));
-
-      await expect(workflowTaskManager.runTaskSoon('missing')).rejects.toThrow('task not found');
-    });
-  });
-
   describe('forceRunIdleTasks', () => {
     const workflowExecutionId = 'test-execution-id';
 

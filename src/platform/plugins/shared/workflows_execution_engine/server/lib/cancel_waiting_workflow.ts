@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isExecuteSyncStepType } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -19,21 +19,44 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
  * execution loop handle it), WAITING_FOR_INPUT workflows have no active
  * task — so we must transition both the workflow *and* its paused step
  * executions to CANCELLED immediately.
+ *
+ * For steps that are waiting on a sync child workflow (workflow.execute),
+ * the child execution is also cancelled via the provided callback.
  */
 export const cancelWaitingWorkflow = async ({
   workflowExecution,
   workflowExecutionRepository,
   stepExecutionRepository,
+  cancelChildExecution,
 }: {
   workflowExecution: EsWorkflowExecution;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
+  cancelChildExecution?: (executionId: string, spaceId: string) => Promise<void>;
 }): Promise<void> => {
   if (workflowExecution.stepExecutionIds?.length) {
     const steps = await stepExecutionRepository.getStepExecutionsByIds(
       workflowExecution.stepExecutionIds
     );
-    const waitingSteps = steps.filter((s) => s.status === ExecutionStatus.WAITING_FOR_INPUT);
+    const waitingSteps = steps.filter(
+      (s) =>
+        s.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        s.status === ExecutionStatus.WAITING_FOR_CHILD
+    );
+
+    if (cancelChildExecution) {
+      for (const step of waitingSteps) {
+        const childExecId = step.state?.executionId;
+        if (isExecuteSyncStepType(step.stepType) && typeof childExecId === 'string') {
+          try {
+            await cancelChildExecution(childExecId, workflowExecution.spaceId);
+          } catch {
+            // Best effort — child may already be terminal
+          }
+        }
+      }
+    }
+
     if (waitingSteps.length > 0) {
       await stepExecutionRepository.bulkUpsert(
         waitingSteps.map((s) => ({ id: s.id, status: ExecutionStatus.CANCELLED }))

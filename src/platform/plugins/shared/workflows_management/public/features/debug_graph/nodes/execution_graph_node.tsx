@@ -44,6 +44,8 @@ const getNodeBorderColor = (status: ExecutionStatus | undefined, euiTheme: EuiTh
       return euiTheme.colors.borderBaseNeutral;
     case ExecutionStatus.WAITING_FOR_INPUT:
       return euiTheme.colors.borderBaseNeutral;
+    case ExecutionStatus.WAITING_FOR_CHILD:
+      return euiTheme.colors.borderBaseNeutral;
     default:
       return 'transparent';
   }

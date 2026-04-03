@@ -19,7 +19,6 @@ import type { WorkflowExecutionRepository } from '../../../repositories/workflow
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { getNextPollInterval } from '../constants';
 import type { StrategyResult } from '../types';
 import { toExecutionModel } from '../utils';
 
@@ -29,7 +28,6 @@ interface SubWorkflowWaitState extends Record<string, unknown> {
   workflowId: string;
   executionId: string;
   startedAt: string;
-  pollCount: number;
 }
 
 export class WorkflowExecuteSyncStrategy {
@@ -52,19 +50,17 @@ export class WorkflowExecuteSyncStrategy {
       | SubWorkflowWaitState
       | undefined;
 
-    // First execution: Schedule sub-workflow and enter wait state
     if (!currentState) {
       return this.initiateSubWorkflowExecution(workflow, inputs, spaceId, request, parentDepth);
     }
 
-    // Resume: Check sub-workflow status
-    return this.checkSubWorkflowStatus(currentState, spaceId);
+    return this.readChildExecutionFromEs(currentState, spaceId);
   }
 
   /**
-   * Returns true when the step has persisted wait state (e.g. after entering delay
-   * to poll). Used by the step impl to decide resume vs full run without coupling
-   * to node type or state shape.
+   * Returns true when the step has persisted wait state (e.g. after entering
+   * WAITING_FOR_CHILD). Used by the step impl to decide resume vs full run
+   * without coupling to node type or state shape.
    */
   canResume(): boolean {
     const state = this.stepExecutionRuntime.getCurrentStepState() as
@@ -86,9 +82,9 @@ export class WorkflowExecuteSyncStrategy {
   }
 
   /**
-   * Resume a sync workflow.execute step (poll iteration). Call only when the step
-   * already has wait state (e.g. after delay). Skips all initiation work; only
-   * checks sub-workflow status and updates wait state or completes.
+   * Resume after the child workflow completed. The step entered
+   * WAITING_FOR_CHILD on initiation and is now resumed by the child's
+   * completion callback; reads the child execution from ES.
    */
   async resume(spaceId: string): Promise<StrategyResult> {
     const currentState = this.stepExecutionRuntime.getCurrentStepState() as
@@ -102,7 +98,7 @@ export class WorkflowExecuteSyncStrategy {
       };
     }
 
-    return this.checkSubWorkflowStatus(currentState, spaceId);
+    return this.readChildExecutionFromEs(currentState, spaceId);
   }
 
   private async initiateSubWorkflowExecution(
@@ -113,7 +109,6 @@ export class WorkflowExecuteSyncStrategy {
     parentDepth: number
   ): Promise<StrategyResult> {
     try {
-      // Schedule sub-workflow execution
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
       const isTestRun = !!this.stepExecutionRuntime.workflowExecution.isTestRun;
       const { workflowExecutionId } = await this.workflowsExecutionEngine.executeWorkflow(
@@ -135,12 +130,10 @@ export class WorkflowExecuteSyncStrategy {
         `Started sync sub-workflow execution: ${workflowExecutionId}, entering wait state`
       );
 
-      // Save state with execution ID (pollCount 0 = first wait)
       const state: SubWorkflowWaitState = {
         workflowId: workflow.id,
         executionId: workflowExecutionId,
         startedAt: new Date().toISOString(),
-        pollCount: 0,
       };
 
       this.stepExecutionRuntime.setCurrentStepState(state);
@@ -149,103 +142,70 @@ export class WorkflowExecuteSyncStrategy {
         return { status: 'cancelled' };
       }
 
-      const firstPollInterval = getNextPollInterval(0);
-      if (this.stepExecutionRuntime.tryEnterDelay(firstPollInterval)) {
-        this.workflowLogger.logDebug(
-          `Entering wait state to poll sub-workflow ${workflowExecutionId} after ${firstPollInterval}`
-        );
-      }
+      this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_CHILD);
       return { status: 'waiting' };
     } catch (error) {
       return { status: 'failed', error: error as Error };
     }
   }
 
-  private async checkSubWorkflowStatus(
+  /**
+   * Read the child execution from ES and map its terminal state to a StrategyResult.
+   */
+  private async readChildExecutionFromEs(
     state: SubWorkflowWaitState,
     spaceId: string
   ): Promise<StrategyResult> {
     try {
-      // Fetch sub-workflow execution status
       const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
         state.executionId,
         spaceId
       );
 
       if (!execution) {
-        throw new Error(`Sub-workflow execution ${state.executionId} not found`);
+        return {
+          status: 'failed',
+          error: new Error(`Sub-workflow execution ${state.executionId} not found`),
+        };
       }
 
-      // Check if execution is complete
-      if (isTerminalStatus(execution.status)) {
-        this.workflowLogger.logInfo(
-          `Sub-workflow ${state.executionId} completed with status: ${execution.status}`
+      if (!isTerminalStatus(execution.status)) {
+        return {
+          status: 'failed',
+          error: new Error(
+            `Sub-workflow ${state.executionId} is still ${execution.status} (expected terminal)`
+          ),
+        };
+      }
+
+      if (execution.status !== ExecutionStatus.COMPLETED) {
+        const error = execution.error
+          ? new ExecutionError(execution.error)
+          : new ExecutionError({
+              type: 'Error',
+              message: `Sub-workflow execution ${execution.status}`,
+            });
+        return { status: 'failed', error };
+      }
+
+      let output: JsonValue;
+      if (execution.context?.output) {
+        output = execution.context.output as JsonValue;
+      } else {
+        const stepExecutions =
+          await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
+            state.executionId,
+            execution.stepExecutionIds
+          );
+        const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
+          omit(exec, ['spaceId'])
         );
-
-        // Only treat COMPLETED as success — all other terminal statuses
-        // (FAILED, CANCELLED, TIMED_OUT, SKIPPED) should propagate as failures
-        if (execution.status !== ExecutionStatus.COMPLETED) {
-          const error = execution.error
-            ? new ExecutionError(execution.error)
-            : new ExecutionError({
-                type: 'Error',
-                message: `Sub-workflow execution ${execution.status}`,
-              });
-          return { status: 'failed', error };
-        }
-
-        // Extract output only for successful completions
-        let output: JsonValue;
-        if (execution.context?.output) {
-          // If the child workflow used workflow.output step, use that output
-          output = execution.context.output as JsonValue;
-          this.workflowLogger.logDebug(
-            `Using workflow.output from child workflow execution ${state.executionId}`
-          );
-        } else {
-          // Fallback: Extract output from step executions (legacy behavior).
-          // Use getStepExecutionsByWorkflowExecution (mget by stepExecutionIds) for real-time
-          // data; search is only visible after refresh. See get_workflow_execution.ts.
-          const stepExecutions =
-            await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
-              state.executionId,
-              execution.stepExecutionIds
-            );
-          // Convert EsWorkflowStepExecution to WorkflowStepExecutionDto (omit spaceId)
-          const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
-            omit(exec, ['spaceId'])
-          );
-          output = this.getWorkflowOutput(stepExecutionDtos);
-          this.workflowLogger.logDebug(
-            `Using last step output from child workflow execution ${state.executionId}`
-          );
-        }
-
-        // Pass the output directly as the step output (not wrapped in an object)
-        const stepOutput: Record<string, unknown> | undefined =
-          output === null ? undefined : (output as Record<string, unknown>);
-        return { status: 'completed', output: stepOutput };
+        output = this.getWorkflowOutput(stepExecutionDtos);
       }
 
-      // Still running - enter wait state again with exponential backoff
-      const nextPollCount = state.pollCount + 1;
-      const nextInterval = getNextPollInterval(nextPollCount);
-      const { resumeAt: _prevResumeAt, ...stateWithoutResumeAt } = state;
-      this.stepExecutionRuntime.setCurrentStepState({
-        ...stateWithoutResumeAt,
-        pollCount: nextPollCount,
-      });
-
-      if (this.stepExecutionRuntime.abortController.signal.aborted) {
-        return { status: 'cancelled' };
-      }
-
-      this.workflowLogger.logDebug(
-        `Sub-workflow ${state.executionId} still ${execution.status}, polling again after ${nextInterval}`
-      );
-
-      this.stepExecutionRuntime.tryEnterDelay(nextInterval);
-      return { status: 'waiting' };
+      const stepOutput: Record<string, unknown> | undefined =
+        output === null ? undefined : (output as Record<string, unknown>);
+      return { status: 'completed', output: stepOutput };
     } catch (error) {
       return { status: 'failed', error: error as Error };
     }
@@ -262,7 +222,6 @@ export class WorkflowExecuteSyncStrategy {
       return null;
     }
 
-    // workflow execution do not necessarily start at depth 0
     let minDepth = stepExecutions[0].scopeStack.length;
     for (let i = 1; i < stepExecutions.length; i++) {
       minDepth = Math.min(minDepth, stepExecutions[i].scopeStack.length);
@@ -280,26 +239,20 @@ export class WorkflowExecuteSyncStrategy {
       return null;
     }
 
-    // Filter for steps at the current scope depth
     const stepsAtThisLevel = stepExecutions.filter((step) => step.scopeStack.length === scopeDepth);
     if (stepsAtThisLevel.length === 0) {
       return null;
     }
 
-    // At top-level (scopeDepth = minDepth), only consider the last step
-    // At nested levels (scopeDepth > minDepth), consider all steps
     const stepsToProcess =
       scopeDepth === minDepth ? [stepsAtThisLevel[stepsAtThisLevel.length - 1]] : stepsAtThisLevel;
 
-    // Find all children of the steps we're processing
     const children = stepExecutions.filter((step) => {
       if (step.scopeStack.length !== scopeDepth + 1) return false;
       const lastFrame = step.scopeStack[step.scopeStack.length - 1];
       return stepsToProcess.some((parentStep) => lastFrame.stepId === parentStep.stepId);
     });
 
-    // If there are children, recurse into them
-    // Pass only descendants (steps that have any of stepsToProcess in their scopeStack)
     if (children.length > 0) {
       const descendants = stepExecutions.filter((step) =>
         step.scopeStack.some((frame) =>
@@ -309,9 +262,6 @@ export class WorkflowExecuteSyncStrategy {
       return this.getWorkflowOutputRecursive(descendants, scopeDepth + 1, minDepth);
     }
 
-    // Else, return the output(s)
-    // At scopeDepth > minDepth, always return as array to aggregate sibling iterations
-    // At scopeDepth = minDepth with a single step, return the output directly
     if (scopeDepth === minDepth && stepsToProcess.length === 1) {
       return stepsToProcess[0].output ?? null;
     }
