@@ -42,8 +42,7 @@ import { axisLabelOrientationCompat } from '../common';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
-    visible: legend.isVisible,
-    position: legend.position,
+    visibility: legend.isVisible ? 'visible' : 'hidden',
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legendSizeCompat.toAPI(legend.legendSize),

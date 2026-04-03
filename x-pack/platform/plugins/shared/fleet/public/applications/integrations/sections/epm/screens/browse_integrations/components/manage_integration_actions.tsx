@@ -104,17 +104,13 @@ export const ManageIntegrationActions: React.FC<{
 
   const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
-    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
-      'aiv2_integration_delete_confirmed',
-      {}
-    );
     try {
       await onDelete(integration.integrationId);
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
-  }, [onDelete, integration.integrationId, automaticImportVTwo]);
+  }, [onDelete, integration.integrationId]);
 
   const openReviewModal = useCallback(() => {
     setIsPopoverOpen(false);
