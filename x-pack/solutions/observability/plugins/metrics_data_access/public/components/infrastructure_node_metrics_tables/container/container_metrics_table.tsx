@@ -138,7 +138,7 @@ function containerNodeColumns({
   ContainerMetricsTableProps,
   'timerange' | 'isOtel' | 'metricsIndices' | 'isK8sContainer'
 >): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
-  const memoryUnit = isOtel ? '%' : ' MB';
+  const memoryUnit = isOtel && !isK8sContainer ? '%' : ' MB';
   return [
     {
       name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {
