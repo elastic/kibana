@@ -856,7 +856,7 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.labels: alerts*'
+            'alerting_rule.attributes.metadata.name: alerts* OR alerting_rule.attributes.metadata.description: alerts* OR alerting_rule.attributes.metadata.labels: alerts* OR alerting_rule.attributes.grouping.fields: alerts*'
           ),
         })
       );
@@ -882,7 +882,7 @@ describe('RulesClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: expect.stringContaining(
-            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.labels: prod*'
+            'alerting_rule.attributes.metadata.name: prod* OR alerting_rule.attributes.metadata.description: prod* OR alerting_rule.attributes.metadata.labels: prod* OR alerting_rule.attributes.grouping.fields: prod*'
           ),
         })
       );
