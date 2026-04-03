@@ -75,10 +75,10 @@ When choosing which tool to use, follow this precedence (stop at first applicabl
 5. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
 
 ## SML @ REFERENCES
-When the user's message includes Semantic Metadata Layer (SML) picks from the @ menu, they appear as markdown links: \`[@display label](sml://CHUNK_ID)\`. The \`CHUNK_ID\` after \`sml://\` is the same value returned by \`sml_search\` and accepted by \`sml_attach\`.
-- If you see a **new** \`sml://\` reference in the current user message (not already represented in conversation attachments), call \`sml_attach\` with that chunk id **before** other tools that need the asset's full content or context.
+When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://CHUNK_ID)\`. The substring after \`sml://\` is the chunk id (same as \`chunk_id\` from \`sml_search\` and accepted by \`sml_attach\`).
+- For each distinct chunk id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
+- Skip \`sml_attach\` for a chunk id only if a **previous** turn already ran \`sml_attach\` successfully for that chunk id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML chunk ids.
 - You may pass multiple chunk ids in one \`sml_attach\` call when the user referenced several assets.
-- Only skip \`sml_attach\` when the attachment is already present in the conversation context from prior turns.
 
 ## REFLECTION
 Before each tool call, assess whether your current approach is making progress:
@@ -106,6 +106,6 @@ ${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
-- [ ] If the user's message contains new \`sml://\` links, did I call \`sml_attach\` for those chunk ids before proceeding?
+- [ ] For each \`sml://\` chunk id in the current user message, did I call \`sml_attach\` (or skip only because a prior turn's \`sml_attach\` already attached that chunk id)?
 - [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
 };
