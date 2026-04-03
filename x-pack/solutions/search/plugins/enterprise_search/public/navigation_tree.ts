@@ -51,9 +51,11 @@ function isEditingFromDashboard(
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
   isCloudEnabled,
+  showAlertingV2 = false,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
   isCloudEnabled?: boolean;
+  showAlertingV2?: boolean;
 }): AddSolutionNavigationArg => {
   return {
     icon,
@@ -154,19 +156,7 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return (
-                          pathNameSerialized.startsWith(
-                            prepend('/app/elasticsearch/index_management/indices')
-                          ) ||
-                          pathNameSerialized.startsWith(
-                            prepend('/app/management/data/index_management')
-                          )
-                        );
-                      },
-                      link: 'management:index_management',
-                    },
+                    { link: 'management:index_management' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -207,7 +197,7 @@ export const getNavigationTreeDefinition = ({
           ],
           footer: [
             {
-              icon: 'launch',
+              icon: 'rocket',
               id: 'search_getting_started',
               link: 'searchGettingStarted',
             },
@@ -255,6 +245,24 @@ export const getNavigationTreeDefinition = ({
                   id: 'stack_management_home',
                   title: '',
                 },
+                ...(showAlertingV2
+                  ? [
+                      {
+                        id: 'v2_alerting_preview',
+                        title: i18n.translate(
+                          'xpack.enterpriseSearch.searchNav.management.v2AlertingPreview',
+                          {
+                            defaultMessage: 'V2 Alerting Preview',
+                          }
+                        ),
+                        renderAs: 'panelOpener' as const,
+                        children: [
+                          { link: 'management:rules' as const },
+                          { link: 'management:notification_policies' as const },
+                        ],
+                      },
+                    ]
+                  : []),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
@@ -272,15 +280,6 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:trained_models' },
-                    {
-                      link: 'management:inference_endpoints',
-                    },
-                    {
-                      link: 'management:model_settings',
-                    },
-                    {
-                      link: 'management:elastic_inference_service',
-                    },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
@@ -288,6 +287,25 @@ export const getNavigationTreeDefinition = ({
                     'xpack.enterpriseSearch.searchNav.management.machineLearning',
                     {
                       defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                },
+                {
+                  children: [
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
+                    {
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
+                    },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.modelManagement',
+                    {
+                      defaultMessage: 'Model Management',
                     }
                   ),
                 },

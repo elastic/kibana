@@ -283,6 +283,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           panelPaddingSize="none"
           anchorPosition="leftUp"
           hasArrow={true}
+          aria-label={i18n.translate('xpack.maps.layerToc.actionsPopoverAriaLabel', {
+            defaultMessage: 'Layer actions',
+          })}
         >
           <EuiContextMenu
             initialPanelId={0}

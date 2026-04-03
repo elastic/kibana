@@ -43,7 +43,7 @@ jest.mock('./notes', () => ({
   Notes: () => <div data-test-subj="notes" />,
 }));
 
-jest.mock('../../shared/components/alert_header_block', () => ({
+jest.mock('../../../flyout_v2/shared/components/alert_header_block', () => ({
   AlertHeaderBlock: ({
     children,
     'data-test-subj': dataTestSubj,

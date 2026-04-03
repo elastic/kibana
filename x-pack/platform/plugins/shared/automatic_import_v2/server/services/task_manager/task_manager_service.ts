@@ -175,6 +175,7 @@ export class TaskManagerService {
       this.logger.debug(`Task deleted: ${taskId}`);
     } catch (error) {
       this.logger.error(`Failed to remove task ${taskId}:`, error);
+      throw error;
     }
   }
 

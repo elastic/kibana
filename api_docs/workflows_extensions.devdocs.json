@@ -467,7 +467,35 @@
             "\nRegister user-facing definition for a workflow step.\nThis should be called during the plugin's setup phase.\n"
           ],
           "signature": [
-            "<Input extends z.ZodType = z.ZodType, Output extends z.ZodType = z.ZodType, Config extends z.ZodObject = z.ZodObject>(definition: ",
+            "<Input extends ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>> = ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, Output extends ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>> = ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, Config extends ",
+            "ZodObject",
+            "<",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodLooseShape, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip> = ",
+            "ZodObject",
+            "<",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodLooseShape, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>>(definition: ",
             "PublicStepDefinitionOrLoader",
             "<Input, Output, Config>) => void"
           ],
@@ -512,7 +540,15 @@
             "\nRegister user-facing definition for a workflow trigger.\nThis should be called during the plugin's setup phase.\nMust be paired with server-side registration (registerTrigger) for the same trigger id.\n"
           ],
           "signature": [
-            "<EventSchema extends z.ZodType = z.ZodType>(definition: ",
+            "<EventSchema extends ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>> = ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>>(definition: ",
             "PublicTriggerDefinitionOrLoader",
             "<EventSchema>) => void"
           ],
@@ -568,7 +604,21 @@
           "section": "def-public.PublicStepDefinition",
           "text": "PublicStepDefinition"
         },
-        "<z.ZodType, z.ZodType, z.ZodObject>> & ",
+        "<",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodObject",
+        "<",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodLooseShape, ",
+        "node_modules/zod/v4/core/schemas",
+        "$strip>>> & ",
         "TriggerRegistryStartContract",
         " & { isReady(): Promise<void>; }"
       ],
@@ -618,7 +668,11 @@
                 "section": "def-server.ServerTriggerDefinition",
                 "text": "ServerTriggerDefinition"
               },
-              "<z.ZodType>) => void"
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>) => void"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
             "lineNumber": 48,
@@ -643,7 +697,11 @@
                     "section": "def-server.ServerTriggerDefinition",
                     "text": "ServerTriggerDefinition"
                   },
-                  "<z.ZodType>"
+                  "<",
+                  "ZodType",
+                  "<unknown, unknown, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodTypeInternals<unknown, unknown>>>"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
                 "lineNumber": 55,
@@ -693,7 +751,11 @@
                 "section": "def-server.ServerTriggerDefinition",
                 "text": "ServerTriggerDefinition"
               },
-              "<z.ZodType> | undefined"
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
             "lineNumber": 81,
@@ -785,7 +847,11 @@
                 "section": "def-server.ServerTriggerDefinition",
                 "text": "ServerTriggerDefinition"
               },
-              "<z.ZodType>[]"
+              "<",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>[]"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/trigger_registry/trigger_registry.ts",
             "lineNumber": 101,
@@ -1304,14 +1370,14 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerContext.input",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "input",
             "description": [
               "\nThe validated input provided to the step based on inputSchema"
             ],
             "signature": [
-              "z.infer<TInput>"
+              "TInput extends { _zod: { output: any; }; } ? TInput[\"_zod\"][\"output\"] : unknown"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 129,
@@ -1322,14 +1388,14 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerContext.config",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "config",
             "description": [
               "\nThe config provided to the step based on configSchema"
             ],
             "signature": [
-              "z.infer<TConfig>"
+              "TConfig extends { _zod: { output: any; }; } ? TConfig[\"_zod\"][\"output\"] : unknown"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 134,
@@ -1340,14 +1406,39 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerContext.rawInput",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "rawInput",
             "description": [
               "\nThe raw input configuration before template rendering.\nHas the same shape as input, but values may contain template strings."
             ],
             "signature": [
-              "any"
+              "output",
+              "<TInput> extends (infer U)[] ? string | ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.OrStringRecursive",
+                "text": "OrStringRecursive"
+              },
+              "<U>[] : ",
+              "output",
+              "<TInput> extends object ? { [K in keyof (object & ",
+              "output",
+              "<TInput>)]: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.OrStringRecursive",
+                "text": "OrStringRecursive"
+              },
+              "<(object & ",
+              "output",
+              "<TInput>)[K]>; } : string | ",
+              "output",
+              "<TInput>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 139,
@@ -1470,14 +1561,15 @@
           {
             "parentPluginId": "workflowsExtensions",
             "id": "def-server.StepHandlerResult.output",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "output",
             "description": [
               "\nOutput data from the step execution\nThis will be available to subsequent steps via template expressions"
             ],
             "signature": [
-              "any"
+              "output",
+              "<TOutput> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
             "lineNumber": 207,
@@ -2121,7 +2213,21 @@
               "section": "def-server.ServerStepDefinition",
               "text": "ServerStepDefinition"
             },
-            "<z.ZodType, z.ZodType, z.ZodObject>) => void"
+            "<",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, ",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>, ",
+            "ZodObject",
+            "<",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodLooseShape, ",
+            "node_modules/zod/v4/core/schemas",
+            "$strip>>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
           "lineNumber": 89,
@@ -2146,7 +2252,21 @@
                   "section": "def-server.ServerStepDefinition",
                   "text": "ServerStepDefinition"
                 },
-                "<z.ZodType, z.ZodType, z.ZodObject>"
+                "<",
+                "ZodType",
+                "<unknown, unknown, ",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodTypeInternals<unknown, unknown>>, ",
+                "ZodType",
+                "<unknown, unknown, ",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodTypeInternals<unknown, unknown>>, ",
+                "ZodObject",
+                "<",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodLooseShape, ",
+                "node_modules/zod/v4/core/schemas",
+                "$strip>>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
               "lineNumber": 96,
@@ -2178,7 +2298,11 @@
               "section": "def-server.ServerTriggerDefinition",
               "text": "ServerTriggerDefinition"
             },
-            "<z.ZodType>) => void"
+            "<",
+            "ZodType",
+            "<unknown, unknown, ",
+            "node_modules/zod/v4/core/schemas",
+            "$ZodTypeInternals<unknown, unknown>>>) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
           "lineNumber": 98,
@@ -2203,7 +2327,11 @@
                   "section": "def-server.ServerTriggerDefinition",
                   "text": "ServerTriggerDefinition"
                 },
-                "<z.ZodType>"
+                "<",
+                "ZodType",
+                "<unknown, unknown, ",
+                "node_modules/zod/v4/core/schemas",
+                "$ZodTypeInternals<unknown, unknown>>>"
               ],
               "path": "src/platform/plugins/shared/workflows_extensions/server/types.ts",
               "lineNumber": 105,
@@ -2280,7 +2408,21 @@
           "section": "def-server.ServerStepDefinition",
           "text": "ServerStepDefinition"
         },
-        "<z.ZodType, z.ZodType, z.ZodObject>> & { getAllTriggerDefinitions(): ",
+        "<",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>, ",
+        "ZodObject",
+        "<",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodLooseShape, ",
+        "node_modules/zod/v4/core/schemas",
+        "$strip>>> & { getAllTriggerDefinitions(): ",
         {
           "pluginId": "workflowsExtensions",
           "scope": "server",
@@ -2288,7 +2430,11 @@
           "section": "def-server.ServerTriggerDefinition",
           "text": "ServerTriggerDefinition"
         },
-        "<z.ZodType>[]; emitEvent: ",
+        "<",
+        "ZodType",
+        "<unknown, unknown, ",
+        "node_modules/zod/v4/core/schemas",
+        "$ZodTypeInternals<unknown, unknown>>>[]; emitEvent: ",
         {
           "pluginId": "workflowsExtensions",
           "scope": "server",

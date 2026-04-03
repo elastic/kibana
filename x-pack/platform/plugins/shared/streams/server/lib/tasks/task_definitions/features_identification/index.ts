@@ -34,10 +34,11 @@ import {
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
+import { STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import { parseError } from '../../../streams/errors/parse_error';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../../../routes/utils/resolve_connector_id';
+import { resolveConnectorForFeature } from '../../../../routes/utils/resolve_connector_for_feature';
 import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
 import { PromptsConfigService } from '../../../sig_events/saved_objects/prompts_config_service';
@@ -324,6 +325,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               if (!runContext.fakeRequest) {
                 throw new Error('Request is required to run this task');
               }
+              const { fakeRequest } = runContext;
 
               const { start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
@@ -360,18 +362,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 streamsClient,
                 inferenceClient,
                 soClient,
-                modelSettingsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
-              const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorId({
-                connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
-                uiSettingsClient,
-                logger: taskLogger,
+              const connectorId = await resolveConnectorForFeature({
+                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+                featureName: 'knowledge indicator extraction',
+                request: fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
@@ -478,12 +478,16 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   return getDeleteTaskRunResult();
                 }
 
-                // Get connector info for error enrichment
-                const connector = await inferenceClient.getConnectorById(connectorId);
-
-                const errorMessage = isInferenceProviderError(error)
-                  ? formatInferenceProviderError(error, connector)
-                  : parseError(error).message;
+                // Get connector info for error enrichment, preserving the original error if lookup fails
+                let errorMessage = parseError(error).message;
+                try {
+                  const connector = await inferenceClient.getConnectorById(connectorId);
+                  if (isInferenceProviderError(error)) {
+                    errorMessage = formatInferenceProviderError(error, connector);
+                  }
+                } catch {
+                  // Connector lookup failed — use the original error message
+                }
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

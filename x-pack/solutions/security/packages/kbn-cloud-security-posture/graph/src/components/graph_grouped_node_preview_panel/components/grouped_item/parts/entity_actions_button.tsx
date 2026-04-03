@@ -15,7 +15,11 @@ import {
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
-import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
+import {
+  getEntityExpandItems,
+  fieldForRole,
+} from '../../../../popovers/node_expand/get_entity_expand_items';
+import type { EntityFilterActions } from '../../../../popovers/node_expand/get_entity_expand_items';
 import {
   emitFilterToggle,
   isFilterActiveForScope,
@@ -23,6 +27,7 @@ import {
   isEntityRelationshipExpandedForScope,
 } from '../../../../filters/filter_store';
 import { GenericEntityPanelKey, GENERIC_ENTITY_PREVIEW_BANNER } from '../../../constants';
+import { RELATED_ENTITY } from '../../../../../common/constants';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -65,14 +70,33 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
     });
   }, [item.id, item.availableInEntityStore, openPreviewPanel, scopeId]);
 
+  const sourceFields = item.sourceFields ?? {};
+
+  const entityFilterActions: EntityFilterActions = {
+    toggleEntityFilter: (role, action) => {
+      for (const [field, value] of Object.entries(sourceFields)) {
+        // Flatten string | string[] to string[] so each value gets its own OR'd phrase filter
+        for (const v of ([] as string[]).concat(value)) {
+          emitFilterToggle(scopeId, fieldForRole(field, role), v, action);
+        }
+      }
+    },
+    isEntityFilterActive: (role) =>
+      Object.entries(sourceFields).some(([field, value]) =>
+        ([] as string[])
+          .concat(value)
+          .some((v) => isFilterActiveForScope(scopeId, fieldForRole(field, role), v))
+      ),
+    toggleRelatedEvents: (action) => emitFilterToggle(scopeId, RELATED_ENTITY, item.id, action),
+    isRelatedEventsActive: () => isFilterActiveForScope(scopeId, RELATED_ENTITY, item.id),
+  };
+
   // Generate items fresh on each render to reflect current filter state
   const items = getEntityExpandItems({
     nodeId: item.id,
-    sourceNamespace: item.ecsParentField,
+    entityFilterActions,
     onShowEntityDetails: handleShowEntityDetails,
     onClose: closePopover,
-    isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
-    toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
     shouldRender: {
       showEntityRelationships: true,
       showActionsByEntity: true,
