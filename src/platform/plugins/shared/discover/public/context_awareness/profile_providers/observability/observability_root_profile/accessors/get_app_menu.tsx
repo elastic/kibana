@@ -158,7 +158,7 @@ const registerCreateSLOAction = (
       label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
         defaultMessage: 'Create SLO',
       }),
-      iconType: 'visGauge',
+      iconType: 'chartGauge',
       testId: 'discoverAppMenuCreateSlo',
       run: ({ context: { onFinishAction } }: { context: { onFinishAction: () => void } }) => {
         const index = dataView?.getIndexPattern();

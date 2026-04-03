@@ -10,7 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { useFetchThreatIntelligence } from '../../threat_intelligence/hooks/use_fetch_threat_intelligence';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
@@ -28,7 +28,7 @@ import {
 } from '../../shared/components/test_ids';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../hooks/use_fetch_threat_intelligence');
+jest.mock('../../threat_intelligence/hooks/use_fetch_threat_intelligence');
 jest.mock('../../../common/lib/kibana');
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(

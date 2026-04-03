@@ -56,6 +56,7 @@ import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import { registerCaseWorkflowSteps } from './workflows';
+import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -101,6 +102,8 @@ export class CasePlugin
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
+
+    initUiSettings(core.uiSettings);
 
     registerInternalAttachments(
       this.externalReferenceAttachmentTypeRegistry,

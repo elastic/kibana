@@ -66,7 +66,7 @@ describe('StepIcon', () => {
 
     it('renders console icon for console step', () => {
       const { container } = render(<StepIcon stepType="console" executionStatus={undefined} />);
-      expect(container.querySelector('[data-euiicon-type="console"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="commandLine"]')).toBeInTheDocument();
     });
 
     it('renders branch icon for if step', () => {
@@ -81,7 +81,7 @@ describe('StepIcon', () => {
 
     it('renders email icon for email step', () => {
       const { container } = render(<StepIcon stepType="email" executionStatus={undefined} />);
-      expect(container.querySelector('[data-euiicon-type="email"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="mail"]')).toBeInTheDocument();
     });
 
     it('renders logoSlack icon for slack step', () => {
@@ -152,9 +152,7 @@ describe('StepIcon', () => {
       const { container } = render(
         <StepIcon stepType="__overview" executionStatus={ExecutionStatus.COMPLETED} />
       );
-      expect(
-        container.querySelector('[data-euiicon-type="checkInCircleFilled"]')
-      ).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="checkCircleFill"]')).toBeInTheDocument();
     });
 
     it('renders a loading spinner for __overview step with RUNNING status', () => {

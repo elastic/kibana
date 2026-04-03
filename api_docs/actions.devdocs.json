@@ -335,7 +335,11 @@
                 "label": "pushToServiceIncidentParamsSchema",
                 "description": [],
                 "signature": [
-                  "Record<string, z.ZodType<unknown>>"
+                  "Record<string, ",
+                  "ZodType",
+                  "<unknown, unknown, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodTypeInternals<unknown, unknown>>>"
                 ],
                 "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/case.ts",
                 "lineNumber": 52,

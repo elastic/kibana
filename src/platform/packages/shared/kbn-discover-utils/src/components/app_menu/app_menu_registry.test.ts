@@ -23,7 +23,7 @@ describe('AppMenuRegistry', () => {
         id: 'test-item',
         order: 1,
         label: 'Test Item',
-        iconType: 'search',
+        iconType: 'magnify',
         testId: 'testItem',
         run: jest.fn(),
       };
@@ -40,7 +40,7 @@ describe('AppMenuRegistry', () => {
         id: 'test-item',
         order: 1,
         label: 'Test Item 1',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -68,14 +68,14 @@ describe('AppMenuRegistry', () => {
           id: 'item-1',
           order: 1,
           label: 'Item 1',
-          iconType: 'search',
+          iconType: 'magnify',
           run: jest.fn(),
         },
         {
           id: 'item-2',
           order: 2,
           label: 'Item 2',
-          iconType: 'alert',
+          iconType: 'warning',
           run: jest.fn(),
         },
         {
@@ -156,7 +156,7 @@ describe('AppMenuRegistry', () => {
         id: 'parent',
         order: 1,
         label: 'Parent',
-        iconType: 'alert',
+        iconType: 'warning',
         items: [],
       };
 
@@ -186,7 +186,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-item',
         order: 1,
         label: 'Custom Item',
-        iconType: 'beaker',
+        iconType: 'flask',
         testId: 'customItem',
         run: jest.fn(),
       };
@@ -203,7 +203,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-item',
         order: 1,
         label: 'Custom Item 1',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 
@@ -228,7 +228,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-1',
         order: 1,
         label: 'Custom 1',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 
@@ -264,7 +264,7 @@ describe('AppMenuRegistry', () => {
         id: 'regular-item',
         order: 2,
         label: 'Regular Item',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -272,7 +272,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-item',
         order: 1,
         label: 'Custom Item',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 
@@ -290,7 +290,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-parent',
         order: 1,
         label: 'Custom Parent',
-        iconType: 'beaker',
+        iconType: 'flask',
         items: [],
       };
 
@@ -328,7 +328,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-parent',
         order: 1,
         label: 'Custom Parent',
-        iconType: 'beaker',
+        iconType: 'flask',
         items: [],
       };
 
@@ -347,7 +347,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-parent',
         order: 1,
         label: 'Custom Parent',
-        iconType: 'beaker',
+        iconType: 'flask',
         items: [],
       };
 
@@ -385,7 +385,7 @@ describe('AppMenuRegistry', () => {
         id: 'item-1',
         order: 1,
         label: 'Item 1',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -446,7 +446,7 @@ describe('AppMenuRegistry', () => {
         id: 'regular',
         order: 2,
         label: 'Regular',
-        iconType: 'search',
+        iconType: 'magnify',
         run: jest.fn(),
       };
 
@@ -454,7 +454,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom',
         order: 1,
         label: 'Custom',
-        iconType: 'beaker',
+        iconType: 'flask',
         run: jest.fn(),
       };
 

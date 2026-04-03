@@ -137,7 +137,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
-    // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsPreAgg)
+    // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsAfterStats)
     for (const hit of entities.hits.hits) {
       const source = hit._source as Record<string, unknown>;
       expect(source.entity).toBeDefined();
@@ -634,7 +634,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     'Should set entity.namespace to local and entity.name to user.name@host.name for non-IDP documents',
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
-      // Event must NOT be asset/iam so whenConditionTrueSetFieldsPreAgg sets entity.namespace = 'local'.
+      // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T10:00:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
@@ -865,6 +865,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       // Host: valid
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:01:00Z',
+        event: { module: 'okta', dataset: 'host.dataset' },
+        data_stream: { dataset: 'host.fallback' },
         host: { id: 'mixed-host-valid', name: 'mixed-server-01' },
       });
       // Host: invalid (no host.id, host.name, host.hostname)
@@ -894,12 +896,14 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       // Service: valid
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:06:00Z',
+        event: { dataset: 'aws.cloudtrail' },
         service: { name: 'mixed-service-valid' },
       });
 
       // Generic: valid
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:07:00Z',
+        data_stream: { dataset: 'custom.integration' },
         entity: { id: 'mixed-generic-valid', name: 'Mixed Generic' },
       });
 
@@ -919,6 +923,12 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       // Verify extracted entities
       const hostHit = await searchDocById(esClient, 'host:mixed-host-valid');
       expect(hostHit.hits.hits).toHaveLength(1);
+      expect(hostHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'host:mixed-host-valid',
+          source: 'okta',
+        },
+      });
 
       const userIdpHit = await searchDocById(esClient, 'user:mixed-all-idp@okta');
       expect(userIdpHit.hits.hits).toHaveLength(1);
@@ -926,6 +936,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         entity: {
           id: 'user:mixed-all-idp@okta',
           namespace: 'okta',
+          source: 'okta',
           confidence: ENTITY_CONFIDENCE.High,
         },
       });
@@ -949,9 +960,21 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       const serviceHit = await searchDocById(esClient, 'service:mixed-service-valid');
       expect(serviceHit.hits.hits).toHaveLength(1);
+      expect(serviceHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'service:mixed-service-valid',
+          source: 'aws.cloudtrail',
+        },
+      });
 
       const genericHit = await searchDocById(esClient, 'mixed-generic-valid');
       expect(genericHit.hits.hits).toHaveLength(1);
+      expect(genericHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'mixed-generic-valid',
+          source: 'custom.integration',
+        },
+      });
     }
   );
 

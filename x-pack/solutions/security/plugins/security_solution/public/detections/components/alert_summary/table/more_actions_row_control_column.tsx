@@ -56,7 +56,7 @@ export const MoreActionsRowControlColumn = memo(
         <EuiButtonIcon
           aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
           data-test-subj={MORE_ACTIONS_BUTTON_TEST_ID}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={togglePopover}
         />
       ),

@@ -21,7 +21,9 @@ describe('ModelCard', () => {
   };
 
   it('renders name, test-subj, task types, categories, and avatar for a known creator', () => {
-    const { getByText, getByTestId, container } = render(<ModelCard model={baseModel} />);
+    const { getByText, getByTestId, container } = render(
+      <ModelCard model={baseModel} onClick={jest.fn()} />
+    );
 
     expect(getByText('my-model', { exact: false })).toBeInTheDocument();
     expect(getByTestId('eisModelCard-my-model')).toBeInTheDocument();
@@ -36,7 +38,7 @@ describe('ModelCard', () => {
       ...baseModel,
       modelCreator: 'UnknownCorp',
     };
-    const { container } = render(<ModelCard model={unknownModel} />);
+    const { container } = render(<ModelCard model={unknownModel} onClick={jest.fn()} />);
 
     expect(container.querySelectorAll('.euiAvatar')).toHaveLength(1);
   });
@@ -47,7 +49,7 @@ describe('ModelCard', () => {
       taskTypes: ['some_future_type'],
       categories: [],
     } as unknown as GroupedModel;
-    const { getByText } = render(<ModelCard model={model} />);
+    const { getByText } = render(<ModelCard model={model} onClick={jest.fn()} />);
     expect(getByText('some_future_type', { exact: false })).toBeInTheDocument();
   });
 });

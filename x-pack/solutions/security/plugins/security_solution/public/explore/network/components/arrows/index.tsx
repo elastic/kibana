@@ -18,7 +18,7 @@ export const ArrowBody = styled.span<{ height: number }>`
 
 ArrowBody.displayName = 'ArrowBody';
 
-export type ArrowDirection = 'arrowLeft' | 'arrowRight';
+export type ArrowDirection = 'chevronSingleLeft' | 'chevronSingleRight';
 
 /** Renders the head of an arrow */
 export const ArrowHead = React.memo<{

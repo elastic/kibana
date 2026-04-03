@@ -46,7 +46,7 @@ export const SuccessSection = React.memo<SectionWrapperProps>(({ integrationName
           <EuiCard
             paddingSize="l"
             titleSize="xs"
-            icon={<EuiIcon type="launch" size="l" />}
+            icon={<EuiIcon type="rocket" size="l" />}
             title={i18n.ADD_TO_AGENT_TITLE}
             description={i18n.ADD_TO_AGENT_DESCRIPTION}
             footer={<EuiButton href={installIntegrationUrl}>{i18n.ADD_TO_AGENT_BUTTON}</EuiButton>}

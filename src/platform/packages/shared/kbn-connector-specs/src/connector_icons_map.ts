@@ -154,11 +154,30 @@ export const ConnectorIconsMap: Map<
     '.amazon_s3',
     lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
   ],
+
+  [
+    '.sharepoint-server',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconsharepointserver" */ './specs/sharepoint_server/icon'
+        )
+    ),
+  ],
   [
     '.microsoft-teams',
     lazy(
       () =>
         import(/* webpackChunkName: "connectorIconMicrosoftTeams" */ './specs/microsoft_teams/icon')
+    ),
+  ],
+  [
+    '.google_cloud_storage',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleCloudStorage" */ './specs/google_cloud_storage/icon'
+        )
     ),
   ],
 ]);

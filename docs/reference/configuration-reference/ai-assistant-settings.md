@@ -11,6 +11,10 @@ applies_to:
 
 The `xpack.productDocBase` settings configure how {{kib}} reaches [Elastic’s public artifact repository](https://kibana-knowledge-base-artifacts.elastic.co/), from which {{kib}} lists and downloads knowledge base artifacts for AI Assistants. Most deployments use the default base URL of the artifact repository and only need outbound access to Elastic’s CDN. 
 
+:::{note}
+When {{kib}} can't use Elastic’s public artifact URL, which is common for deployments in air-gapped or restricted networks, you must deploy the knowledge base artifact repository manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) to learn more.
+:::
+
 `xpack.productDocBase.artifactRepositoryUrl`
 :   The base URL of the artifact repository from which {{kib}} lists and downloads knowledge base artifacts for AI Assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`, Elastic’s public artifact host URL. Leave the default when {{kib}} can reach that base URL over the internet. 
 
@@ -28,9 +32,6 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches [Elastic’s p
     When `xpack.productDocBase.artifactRepositoryUrl` uses the `file://` scheme, this setting has no effect because {{kib}} reads artifacts from the filesystem on the {{kib}} host and does not issue HTTP or HTTPS requests to that repository base URL.
 
     Data type: `string` (URI)
-
-
-% When Kibana can't use Elastic’s public artifact URL, which is common for deployments in air-gapped or restricted networks, you must deploy the knowledge base artifact repository manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) to learn more.
 
 
 $$$configuring-product-doc-for-airgap$$$

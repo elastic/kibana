@@ -8,19 +8,21 @@
 import type { Logger } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistEntitySourceClient } from '../infra';
-import type { EntityStoreEntityIdsByType } from '../../entities/service';
+import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../entities/service';
 import type { CorrelationMap } from '../../entities/types';
 
 export interface SyncSourceEntry {
   sourceId: string;
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
   correlationMap?: CorrelationMap;
+  watchlistsByEuid: WatchlistsByEuid;
 }
 
 export type SourceProcessor = (
   source: MonitoringEntitySource,
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
-  correlationMap?: CorrelationMap
+  correlationMap: CorrelationMap | undefined,
+  watchlistsByEuid: WatchlistsByEuid
 ) => Promise<void>;
 
 export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
@@ -39,10 +41,15 @@ export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
     }
 
     // Process sources sequentially to avoid race conditions
-    for (const { sourceId, entityStoreEntityIdsByType, correlationMap } of sources) {
+    for (const {
+      sourceId,
+      entityStoreEntityIdsByType,
+      correlationMap,
+      watchlistsByEuid,
+    } of sources) {
       try {
         const source = await descriptorClient.get(sourceId);
-        await process(source, entityStoreEntityIdsByType, correlationMap);
+        await process(source, entityStoreEntityIdsByType, correlationMap, watchlistsByEuid);
       } catch (error) {
         logger.warn(`[WatchlistSync] Source processing failed for ${sourceId}: ${String(error)}`);
       }

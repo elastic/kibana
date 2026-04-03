@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getStepByNameFromNestedSteps } from './definition_utils';
+import { collectAllSteps, getStepByNameFromNestedSteps } from './definition_utils';
 import type { Step } from '../spec/schema';
 
 // Step is a discriminated union (foreach | if | while | switch | ...).
@@ -15,6 +15,122 @@ import type { Step } from '../spec/schema';
 // so we build minimal shapes and cast through `unknown` to satisfy the union.
 const waitStep = (name: string): Step =>
   ({ name, type: 'wait', duration: '1s' } as unknown as Step);
+
+describe('collectAllSteps', () => {
+  it('returns flat steps unchanged', () => {
+    const steps = [waitStep('a'), waitStep('b')];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['a', 'b']);
+  });
+
+  it('returns empty array for empty input', () => {
+    expect(collectAllSteps([])).toEqual([]);
+  });
+
+  it('collects steps inside foreach', () => {
+    const steps = [
+      { name: 'loop', type: 'foreach', foreach: '{{ items }}', steps: [waitStep('inner')] },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['loop', 'inner']);
+  });
+
+  it('collects steps inside while', () => {
+    const steps = [
+      { name: 'loop', type: 'while', condition: 'true', steps: [waitStep('inner')] },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['loop', 'inner']);
+  });
+
+  it('collects steps inside if/else', () => {
+    const steps = [
+      {
+        name: 'branch',
+        type: 'if',
+        condition: 'true',
+        steps: [waitStep('then_step')],
+        else: [waitStep('else_step')],
+      },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['branch', 'then_step', 'else_step']);
+  });
+
+  it('collects steps inside parallel branches', () => {
+    const steps = [
+      {
+        name: 'par',
+        type: 'parallel',
+        branches: [
+          { name: 'b1', steps: [waitStep('b1_step')] },
+          { name: 'b2', steps: [waitStep('b2_step'), waitStep('b2_step2')] },
+        ],
+      },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual([
+      'par',
+      'b1_step',
+      'b2_step',
+      'b2_step2',
+    ]);
+  });
+
+  it('collects steps inside merge', () => {
+    const steps = [
+      { name: 'mrg', type: 'merge', sources: ['b1'], steps: [waitStep('inner')] },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['mrg', 'inner']);
+  });
+
+  it('collects steps inside switch cases and default', () => {
+    const steps = [
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: '{{ x }}',
+        cases: [
+          { match: 'a', steps: [waitStep('case_a')] },
+          { match: 'b', steps: [waitStep('case_b')] },
+        ],
+        default: [waitStep('default_step')],
+      },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual([
+      'sw',
+      'case_a',
+      'case_b',
+      'default_step',
+    ]);
+  });
+
+  it('handles deeply nested control flow', () => {
+    const steps = [
+      {
+        name: 'outer_if',
+        type: 'if',
+        condition: 'true',
+        steps: [
+          {
+            name: 'inner_foreach',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [
+              {
+                name: 'inner_switch',
+                type: 'switch',
+                expression: '{{ y }}',
+                cases: [{ match: 'x', steps: [waitStep('deep')] }],
+              },
+            ],
+          },
+        ],
+      },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual([
+      'outer_if',
+      'inner_foreach',
+      'inner_switch',
+      'deep',
+    ]);
+  });
+});
 
 describe('getStepByNameFromNestedSteps', () => {
   it('finds a top-level step by name', () => {

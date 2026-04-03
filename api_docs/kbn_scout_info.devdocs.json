@@ -55,7 +55,7 @@
             "label": "location",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
             "lineNumber": 46,
@@ -71,7 +71,7 @@
             "label": "arch",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
             "lineNumber": 47,
@@ -87,7 +87,7 @@
             "label": "domain",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
             "lineNumber": 48,
@@ -370,7 +370,7 @@
             "label": "locations",
             "description": [],
             "signature": [
-              "z.infer<any>[]"
+              "any[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
             "lineNumber": 40,
@@ -386,7 +386,7 @@
             "label": "architectures",
             "description": [],
             "signature": [
-              "z.infer<any>[]"
+              "any[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
             "lineNumber": 41,
@@ -732,7 +732,7 @@
         "label": "ScoutTargetArch",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
         "lineNumber": 36,
@@ -766,7 +766,7 @@
         "label": "ScoutTargetDomain",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
         "lineNumber": 37,
@@ -800,7 +800,7 @@
         "label": "ScoutTargetLocation",
         "description": [],
         "signature": [
-          "z.infer<any>"
+          "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
         "lineNumber": 35,
@@ -828,23 +828,6 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
-        "id": "def-common.ScoutTestTargetSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "ScoutTestTargetSchema",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 29,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
         "type": "string",
         "tags": [],
@@ -865,7 +848,7 @@
         "label": "VALID_SCOUT_TEST_TARGET_DEFINITIONS",
         "description": [],
         "signature": [
-          "[z.infer<any>, ",
+          "[any, ",
           {
             "pluginId": "@kbn/scout-info",
             "scope": "common",
@@ -941,6 +924,26 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTestTargetSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ScoutTestTargetSchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ location: any; arch: any; domain: any; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX",
         "type": "Object",
         "tags": [],
@@ -1000,7 +1003,7 @@
             "label": "forLocation",
             "description": [],
             "signature": [
-              "(location: z.infer<any>) => ",
+              "(location: any) => ",
               {
                 "pluginId": "@kbn/scout-info",
                 "scope": "common",
@@ -1024,7 +1027,7 @@
                 "label": "location",
                 "description": [],
                 "signature": [
-                  "z.infer<any>"
+                  "any"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
                 "lineNumber": 191,

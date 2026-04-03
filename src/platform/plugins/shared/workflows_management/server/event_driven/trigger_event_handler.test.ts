@@ -79,8 +79,6 @@ describe('createTriggerEventHandler', () => {
     const triggerId = 'cases.updated';
     const spaceId = 'default';
     const payload = { caseId: 'case-123', status: 'open' as const };
-    const eventContext = { ...payload, timestamp, spaceId, eventChainDepth: 0 };
-
     const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
     const resolveMatchingWorkflowSubscriptions = jest
       .fn()
@@ -108,7 +106,12 @@ describe('createTriggerEventHandler', () => {
     expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledWith({
       triggerId,
       spaceId,
-      eventContext,
+      eventContext: expect.objectContaining({
+        ...payload,
+        timestamp,
+        spaceId,
+        eventChainDepth: 1,
+      }),
     });
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
 
@@ -126,7 +129,16 @@ describe('createTriggerEventHandler', () => {
     expect(event.spaceId).toBe(spaceId);
     expect(event.caseId).toBe('case-123');
     expect(event.status).toBe('open');
-    expect(event.eventChainDepth).toBe(0);
+    expect(event.eventChainDepth).toBe(1);
+    expect(event.eventId).toBeUndefined();
+    const scheduleMeta = scheduleWorkflow.mock.calls[0][5] as Record<string, unknown>;
+    expect(scheduleMeta).toEqual(
+      expect.objectContaining({
+        eventDispatchTimestamp: timestamp,
+        eventTriggerId: triggerId,
+        eventId: expect.any(String),
+      })
+    );
   });
 
   it('should skip scheduling workflow and log when event chain depth exceeds max', async () => {
@@ -155,7 +167,7 @@ describe('createTriggerEventHandler', () => {
       request: mockRequest,
       eventChainContext: {
         depth: maxEventChainDepth,
-        sourceWorkflowId: 'wf-1',
+        sourceExecutionId: 'exec-1',
       },
     });
 
@@ -189,17 +201,18 @@ describe('createTriggerEventHandler', () => {
       spaceId: 'default',
       payload: { id: '1' },
       request: mockRequest,
-      eventChainContext: { depth: 2, sourceWorkflowId: 'wf-other' },
+      eventChainContext: { depth: 2, sourceExecutionId: 'exec-other' },
     });
 
     expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventContext: expect.objectContaining({ eventChainDepth: 0 }),
+        eventContext: expect.objectContaining({ eventChainDepth: 1 }),
       })
     );
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
     const event = (scheduleWorkflow.mock.calls[0][2] as { event: Record<string, unknown> }).event;
     expect(event.eventChainDepth).toBe(3);
+    expect(event.eventId).toBeUndefined();
   });
 
   it('should pass incremented eventChainDepth when same workflow re-triggers (self-loop)', async () => {
@@ -224,17 +237,18 @@ describe('createTriggerEventHandler', () => {
       spaceId: 'default',
       payload: { id: '1' },
       request: mockRequest,
-      eventChainContext: { depth: 2, sourceWorkflowId: 'wf-1' },
+      eventChainContext: { depth: 2, sourceExecutionId: 'exec-1' },
     });
 
     expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventContext: expect.objectContaining({ eventChainDepth: 0 }),
+        eventContext: expect.objectContaining({ eventChainDepth: 1 }),
       })
     );
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
     const event = (scheduleWorkflow.mock.calls[0][2] as { event: Record<string, unknown> }).event;
     expect(event.eventChainDepth).toBe(3);
+    expect(event.eventId).toBeUndefined();
   });
 
   it('should not resolve or schedule when event-driven execution is disabled and logEvents is disabled', async () => {
@@ -275,7 +289,6 @@ describe('createTriggerEventHandler', () => {
     const triggerId = 'cases.updated';
     const spaceId = 'default';
     const payload = { caseId: 'case-123' };
-    const eventContext = { ...payload, timestamp, spaceId, eventChainDepth: 0 };
 
     const scheduleWorkflow = jest.fn();
     const resolveMatchingWorkflowSubscriptions = jest
@@ -307,13 +320,19 @@ describe('createTriggerEventHandler', () => {
     expect(resolveMatchingWorkflowSubscriptions).toHaveBeenCalledWith({
       triggerId,
       spaceId,
-      eventContext,
+      eventContext: expect.objectContaining({
+        ...payload,
+        timestamp,
+        spaceId,
+        eventChainDepth: 1,
+      }),
     });
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(createMock).toHaveBeenCalledWith({
       documents: [
         expect.objectContaining({
           '@timestamp': timestamp,
+          eventId: expect.any(String),
           triggerId,
           spaceId,
           subscriptions: ['wf-1'],
@@ -328,6 +347,7 @@ describe('createTriggerEventHandler', () => {
         executionEnabled: false,
         logEventsEnabled: true,
         eventChainDepth: 0,
+        eventId: expect.any(String),
         auditOnly: true,
         subscriberResolutionMs: expect.any(Number),
         matchedCount: 1,
@@ -379,6 +399,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: timestamp,
         eventTriggerId: triggerId,
+        eventId: expect.any(String),
       })
     );
     expect(telemetryClient.reportTriggerEventDispatched).toHaveBeenCalledWith(
@@ -387,6 +408,7 @@ describe('createTriggerEventHandler', () => {
         executionEnabled: true,
         logEventsEnabled: false,
         eventChainDepth: 0,
+        eventId: expect.any(String),
         auditOnly: false,
         subscriberResolutionMs: expect.any(Number),
         matchedCount: 1,
@@ -421,16 +443,99 @@ describe('createTriggerEventHandler', () => {
       spaceId,
       payload,
       request: mockRequest,
-      eventChainContext: { depth: 3, sourceWorkflowId: 'wf-parent' },
+      eventChainContext: { depth: 3, sourceExecutionId: 'exec-parent' },
     });
 
     expect(telemetryClient.reportTriggerEventDispatched).toHaveBeenCalledWith(
       expect.objectContaining({
         triggerId,
         eventChainDepth: 3,
+        sourceExecutionId: 'exec-parent',
+        eventId: expect.any(String),
         matchedCount: 1,
       })
     );
+  });
+
+  it('records enough data across two dispatches to reconstruct execution → event → execution → event', async () => {
+    const wf = createMockWorkflow({ id: 'wf-chain' });
+    const scheduleWorkflow = jest.fn().mockResolvedValue(undefined);
+    const resolveMatchingWorkflowSubscriptions = jest
+      .fn()
+      .mockResolvedValue(mockResolveResult([wf]));
+    const telemetryClient = { reportTriggerEventDispatched: jest.fn() };
+
+    const handler = createTriggerEventHandler({
+      api: { scheduleWorkflow } as any,
+      logger: mockLogger,
+      telemetryClient,
+      getTriggerEventsClient: () => null,
+      getWorkflowExecutionEngine: getEngineMock(true),
+      resolveMatchingWorkflowSubscriptions,
+    });
+
+    const spaceId = 'default';
+
+    // Dispatch 1: external / root emit — no workflow execution is in the chain yet.
+    await handler({
+      timestamp: '2025-01-01T12:00:00.000Z',
+      triggerId: 'cases.updated',
+      spaceId,
+      payload: { caseId: 'case-1' },
+      request: mockRequest,
+    });
+
+    const metaDispatch1 = scheduleWorkflow.mock.calls[0][5] as { eventId: string };
+    const eventForRunB = (scheduleWorkflow.mock.calls[0][2] as { event: Record<string, unknown> })
+      .event;
+    const telemetryDispatch1 = telemetryClient.reportTriggerEventDispatched.mock.calls[0][0] as {
+      eventId: string;
+      sourceExecutionId?: string;
+      eventChainDepth: number;
+    };
+
+    expect(eventForRunB.eventChainDepth).toBe(1);
+    expect(telemetryDispatch1.eventId).toBe(metaDispatch1.eventId);
+    expect(telemetryDispatch1.eventChainDepth).toBe(0);
+    expect(telemetryDispatch1.sourceExecutionId).toBeUndefined();
+
+    // Pretend workflow run B was created for dispatch 1 and persisted execution id `exec-b`.
+    const executionIdRunB = 'exec-b';
+
+    scheduleWorkflow.mockClear();
+    telemetryClient.reportTriggerEventDispatched.mockClear();
+    resolveMatchingWorkflowSubscriptions.mockClear();
+
+    // Dispatch 2: run B emits — chain context identifies which execution caused this hop.
+    await handler({
+      timestamp: '2025-01-01T12:00:05.000Z',
+      triggerId: 'cases.comment_added',
+      spaceId,
+      payload: { caseId: 'case-1', commentId: 'note-1' },
+      request: mockRequest,
+      eventChainContext: { depth: 1, sourceExecutionId: executionIdRunB },
+    });
+
+    const metaDispatch2 = scheduleWorkflow.mock.calls[0][5] as { eventId: string };
+    const eventForRunC = (scheduleWorkflow.mock.calls[0][2] as { event: Record<string, unknown> })
+      .event;
+    const telemetryDispatch2 = telemetryClient.reportTriggerEventDispatched.mock.calls[0][0] as {
+      eventId: string;
+      sourceExecutionId?: string;
+      eventChainDepth: number;
+    };
+
+    expect(eventForRunC.eventChainDepth).toBe(2);
+    expect(telemetryDispatch2.eventChainDepth).toBe(1);
+    expect(telemetryDispatch2.sourceExecutionId).toBe(executionIdRunB);
+    expect(telemetryDispatch2.eventId).toBe(metaDispatch2.eventId);
+
+    // Reconstruction narrative (what operators / tooling can infer):
+    // - Run C's execution document should carry dispatchEventId === metaDispatch2.eventId and
+    //   context.event.eventChainDepth === 2 (from eventForRunC).
+    // - Telemetry (and trigger-event audit when enabled) ties dispatch 2 to emitter executionIdRunB.
+    // - Run B was scheduled by dispatch 1 (dispatchEventId === metaDispatch1.eventId on exec-b).
+    expect(metaDispatch1.eventId).not.toBe(metaDispatch2.eventId);
   });
 
   it('should not call scheduleWorkflow when no workflows are subscribed', async () => {
@@ -461,7 +566,7 @@ describe('createTriggerEventHandler', () => {
       eventContext: expect.objectContaining({
         timestamp: '2025-01-01T12:00:00.000Z',
         spaceId: 'default',
-        eventChainDepth: 0,
+        eventChainDepth: 1,
       }),
     });
     expect(scheduleWorkflow).not.toHaveBeenCalled();
@@ -511,6 +616,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
@@ -522,6 +628,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
@@ -533,6 +640,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
 
@@ -583,6 +691,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
@@ -594,6 +703,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
   });
@@ -640,6 +750,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
     expect(scheduleWorkflow).toHaveBeenNthCalledWith(
@@ -652,6 +763,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
   });
@@ -698,6 +810,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
@@ -709,6 +822,7 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({
         eventDispatchTimestamp: '2025-01-01T12:00:00.000Z',
         eventTriggerId: 'cases.updated',
+        eventId: expect.any(String),
       })
     );
     expect(scheduleWorkflow).not.toHaveBeenCalledWith(
