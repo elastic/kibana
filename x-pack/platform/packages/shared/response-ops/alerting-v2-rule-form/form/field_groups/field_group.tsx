@@ -11,9 +11,11 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiTitle,
   EuiSplitPanel,
   useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useRuleFormMeta } from '../contexts';
@@ -94,20 +96,24 @@ export const FieldGroup = (props: FieldGroupProps) => {
       : { initialIsOpen: true };
 
     return (
-      <EuiAccordion
-        id={id}
-        buttonContent={
-          <EuiTitle size="xxs">
-            <h3>
-              <strong>{title}</strong>
-            </h3>
-          </EuiTitle>
-        }
-        paddingSize="s"
-        {...accordionProps}
-      >
-        {children}
-      </EuiAccordion>
+      <>
+        <EuiAccordion
+          id={id}
+          buttonContent={
+            <EuiTitle size="xxs">
+              <h3>
+                <strong>{title}</strong>
+              </h3>
+            </EuiTitle>
+          }
+          paddingSize="s"
+          {...accordionProps}
+        >
+          {children}
+        </EuiAccordion>
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="xs" />
+      </>
     );
   }
 
