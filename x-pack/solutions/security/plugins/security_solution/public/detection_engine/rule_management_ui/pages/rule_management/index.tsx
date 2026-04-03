@@ -82,7 +82,6 @@ const RulesPageContent = () => {
     });
     return null;
   }
-
   const isImportValueListDisabled =
     needsListsIndex || !canWriteListsIndex || !canEditRules || loading;
 

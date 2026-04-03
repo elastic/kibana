@@ -156,19 +156,7 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return (
-                          pathNameSerialized.startsWith(
-                            prepend('/app/elasticsearch/index_management/indices')
-                          ) ||
-                          pathNameSerialized.startsWith(
-                            prepend('/app/management/data/index_management')
-                          )
-                        );
-                      },
-                      link: 'management:index_management',
-                    },
+                    { link: 'management:index_management' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -292,15 +280,6 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:trained_models' },
-                    {
-                      link: 'management:inference_endpoints',
-                    },
-                    {
-                      link: 'management:model_settings',
-                    },
-                    {
-                      link: 'management:elastic_inference_service',
-                    },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
@@ -308,6 +287,25 @@ export const getNavigationTreeDefinition = ({
                     'xpack.enterpriseSearch.searchNav.management.machineLearning',
                     {
                       defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                },
+                {
+                  children: [
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
+                    {
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
+                    },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.modelManagement',
+                    {
+                      defaultMessage: 'Model Management',
                     }
                   ),
                 },
