@@ -44,6 +44,7 @@ import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification
 import { useSnoozeNotificationPolicy } from '../../hooks/use_snooze_notification_policy';
 import { useUnsnoozeNotificationPolicy } from '../../hooks/use_unsnooze_notification_policy';
 import { useUpdateNotificationPolicyApiKey } from '../../hooks/use_update_notification_policy_api_key';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { NotificationPoliciesBulkActions } from './components/notification_policies_bulk_actions';
 import { NotificationPoliciesSearchBar } from './components/notification_policies_search_bar';
 import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
@@ -61,6 +62,7 @@ const descriptionTextStyle = css`
 `;
 
 export const ListNotificationPoliciesPage = () => {
+  useBreadcrumbs('notification_policies_list');
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');

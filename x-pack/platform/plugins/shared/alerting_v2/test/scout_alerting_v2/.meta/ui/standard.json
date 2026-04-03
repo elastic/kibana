@@ -1,4 +1,131 @@
 {
-  "sha1": "",
-  "tests": []
+  "sha1": "b07b6881fb6bec39b439305f20645bd956432f31",
+  "tests": [
+    {
+      "id": "7aeb81062562639-a7d0ae7c38928c4",
+      "title": "Rule name validation — Discover flyout opens rule form flyout and displays default placeholder name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-a47285aef34cc43",
+      "title": "Rule name validation — Discover flyout shows validation error when saving flyout with empty default name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeb81062562639-f42d35dffb1ebce",
+      "title": "Rule name validation — Discover flyout error callout scrolls into view in flyout on failed submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-c1a09fa508f36f5",
+      "title": "Rule name validation — dedicated page displays \"Untitled rule\" as the default placeholder name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-342dc74d66cb7ac",
+      "title": "Rule name validation — dedicated page shows \"Name is required\" error when saving with empty default value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-2aa2ef5feef3e9c",
+      "title": "Rule name validation — dedicated page shows validation error when rule name is cleared after editing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-31f2fe98d8c1c90",
+      "title": "Rule name validation — dedicated page shows name validation error when saving after confirming the default placeholder text",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-2094fd68a6246c9",
+      "title": "Rule name validation — dedicated page error callout scrolls into view on failed submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "e12f6e30742fe83-64bddd0c59606c2",
+      "title": "Rule name validation — dedicated page no name validation error with a custom rule name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    }
+  ]
 }

@@ -11,11 +11,11 @@ export class RuleFormPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoCreate() {
-    await this.page.gotoApp('management/insightsAndAlerting/alerting_v2/create');
+    await this.page.gotoApp('management/alertingV2/rules/create');
   }
 
   async gotoRulesList() {
-    await this.page.gotoApp('management/insightsAndAlerting/alerting_v2');
+    await this.page.gotoApp('management/alertingV2/rules');
   }
 
   async gotoDiscover() {
