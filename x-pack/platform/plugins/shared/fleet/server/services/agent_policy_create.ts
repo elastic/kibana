@@ -19,7 +19,7 @@ import {
   FLEET_SERVER_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
 } from '../../common';
-import { FleetError } from '../../common/errors';
+import { PackagePolicyNameExistsError } from '../errors';
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
@@ -94,25 +94,34 @@ async function createPackagePolicy(
   }
 
   const spaceIds = agentPolicy.space_ids ?? [options.spaceId];
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 5;
   let succeeded = false;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
 
-    const created = await packagePolicyService.create(
-      soClient,
-      esClient,
-      newPackagePolicy,
-      {
-        spaceId: options.spaceId,
-        user: options.user,
-        bumpRevision: false,
-        force: options.force,
-      },
-      undefined,
-      options.request
-    );
+    let created;
+    try {
+      created = await packagePolicyService.create(
+        soClient,
+        esClient,
+        newPackagePolicy,
+        {
+          spaceId: options.spaceId,
+          user: options.user,
+          bumpRevision: false,
+          force: options.force,
+        },
+        undefined,
+        options.request
+      );
+    } catch (err) {
+      if (err instanceof PackagePolicyNameExistsError) {
+        // Name was taken by a concurrent create — retry with next incremented name
+        continue;
+      }
+      throw err;
+    }
 
     const isLoser = await isPackagePolicyNameCollisionLoser(
       soClient,
@@ -131,7 +140,7 @@ async function createPackagePolicy(
   }
 
   if (!succeeded) {
-    throw new FleetError(
+    throw new PackagePolicyNameExistsError(
       `Failed to create package policy for '${packageToInstall}': could not resolve name collision after ${MAX_RETRIES} attempts`
     );
   }

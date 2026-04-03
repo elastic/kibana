@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { createAppContextStartContractMock } from '../mocks';
-import { FleetError } from '../../common/errors';
+import { PackagePolicyNameExistsError } from '../errors';
 
 import type { AgentPolicy, PackagePolicy } from '../types';
 
@@ -104,11 +104,11 @@ describe('createAgentPolicyWithPackages', () => {
     appContextService.stop();
   });
 
-  it('should throw after exhausting all retries when collision persists', async () => {
+  it('should throw PackagePolicyNameExistsError after exhausting all retries via post-creation collision check', async () => {
     mockIsPackagePolicyNameCollisionLoser.mockResolvedValue(true);
     mockedPackagePolicyService.delete = jest.fn().mockResolvedValue([]);
 
-    let error: FleetError | undefined;
+    let error: PackagePolicyNameExistsError | undefined;
     try {
       await createAgentPolicyWithPackages({
         esClient: esClientMock,
@@ -122,9 +122,31 @@ describe('createAgentPolicyWithPackages', () => {
       error = err;
     }
 
-    expect(error).toBeInstanceOf(FleetError);
-    expect(error?.message).toMatch(/could not resolve name collision after 3 attempts/);
-    expect(mockedPackagePolicyService.delete).toHaveBeenCalledTimes(3);
+    expect(error).toBeInstanceOf(PackagePolicyNameExistsError);
+    expect(error?.message).toMatch(/could not resolve name collision after 5 attempts/);
+    expect(mockedPackagePolicyService.delete).toHaveBeenCalledTimes(5);
+  });
+
+  it('should retry without deleting when create throws PackagePolicyNameExistsError', async () => {
+    mockedPackagePolicyService.delete = jest.fn().mockResolvedValue([]);
+    jest
+      .mocked(mockedPackagePolicyService.create)
+      .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
+      .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
+      .mockResolvedValue({ id: 'mock-package-policy-id' } as PackagePolicy);
+
+    await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: { name: 'Agent policy 1', namespace: 'default' },
+      withSysMonitoring: true,
+      spaceId: 'default',
+    });
+
+    expect(mockedPackagePolicyService.create).toHaveBeenCalledTimes(3);
+    // No delete should be called — create-throws path skips the post-creation check
+    expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
   });
 
   it('should roll back agent policy if package policy creation failed', async () => {
