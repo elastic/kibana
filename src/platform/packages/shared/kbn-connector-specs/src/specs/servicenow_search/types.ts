@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 
 /**
  * Common ServiceNow tables and their purpose, for use in field descriptions.
- * Keep this in sync with the table descriptions in workflow YAML files.
+ * Keep this in sync with the table descriptions in the connector spec skill text.
  */
 const TABLE_DESCRIPTION =
   'The ServiceNow table to query. Common tables: ' +
@@ -22,7 +22,8 @@ const TABLE_DESCRIPTION =
   'problem (problem records linked to incidents), ' +
   'sc_task (service catalog tasks), ' +
   'cmdb_ci (CMDB configuration items — servers, apps, etc.), ' +
-  'sys_user (ServiceNow users). ' +
+  'sys_user (ServiceNow users), ' +
+  'sys_attachment (file attachments — query to find attachment sys_ids for a record). ' +
   'Custom tables are also supported.';
 
 // =============================================================================
@@ -36,7 +37,11 @@ export const SearchInputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional ServiceNow encoded query to combine with the full-text search for additional filtering (e.g., active=true^priority=1). Uses the same syntax as listRecords.'
+      'Optional ServiceNow encoded query to combine with the full-text search for additional filtering. ' +
+        'Syntax: AND conditions with ^ (field1=value1^field2=value2), OR with ^OR (field1=value1^ORfield2=value2). ' +
+        'Operators: = != < > LIKE STARTSWITH ENDSWITH ISEMPTY ISNOTEMPTY. ' +
+        'Date ranges: sys_created_on>2024-01-01^sys_created_on<2025-01-01. ' +
+        'Examples: active=true^priority=1 | state=1^ORstate=2 | assigned_toISEMPTY^active=true | short_descriptionLIKEnetwork^priority<=2'
     ),
   fields: z
     .string()
@@ -62,9 +67,11 @@ export const ListRecordsInputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'ServiceNow encoded query string for filtering (e.g., active=true^priority=1). ' +
-        'Use ^ to AND conditions, ^OR for OR. ' +
-        'Examples: number=INC0010023 | active=true^priority=1 | assignment_group.nameLIKEnetwork^state!=6'
+      'ServiceNow encoded query string for filtering. ' +
+        'Syntax: AND conditions with ^ (field1=value1^field2=value2), OR with ^OR (field1=value1^ORfield2=value2). ' +
+        'Operators: = != < > LIKE STARTSWITH ENDSWITH ISEMPTY ISNOTEMPTY. ' +
+        'Date ranges: sys_created_on>2024-01-01^sys_created_on<2025-01-01. ' +
+        'Examples: number=INC0010023 | active=true^priority=1 | state=1^ORstate=2 | assigned_toISEMPTY^active=true | assignment_group.nameLIKEnetwork^state!=6 | short_descriptionLIKEnetwork^priority<=2'
     ),
   fields: z.string().optional().describe('Comma-separated list of fields to return'),
   limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
