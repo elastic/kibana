@@ -27,7 +27,7 @@ describe('sanitizeSkillMarkdown', () => {
     it('should remove iframe tags', () => {
       const malicious = '<iframe src="http://evil.com"></iframe>';
       const sanitized = sanitizeSkillMarkdown(malicious);
-      expect(sanitized).not.toContain('<iframe>');
+      expect(sanitized).not.toContain('<iframe');
     });
 
     it('should remove event handlers', () => {

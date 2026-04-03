@@ -44,7 +44,7 @@ ${skill.markdown}
   if (lowScoreEvaluators.length > 0) {
     prompt += `### LOW SCORE Evaluators (should improve)\n`;
     for (const r of lowScoreEvaluators) {
-      prompt += `- **${r.evaluator}** (${r.kind}, score: ${r.score?.toFixed(2)}): ${
+      prompt += `- **${r.evaluator}** (${r.kind}, score: ${r.score != null ? r.score.toFixed(2) : 'null'}): ${
         r.explanation ?? 'No explanation'
       }\n`;
     }

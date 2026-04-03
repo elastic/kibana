@@ -77,8 +77,8 @@ export function sanitizeSkillMarkdown(markdown: string): string {
     .replace(/javascript:/gi, ''); // javascript: protocol
 
   // Validate YAML frontmatter if present
-  if (markdown.startsWith('---')) {
-    const parts = markdown.split('---');
+  if (sanitized.startsWith('---')) {
+    const parts = sanitized.split('---');
     if (parts.length < 3) {
       throw new Error('Invalid skill markdown: Missing closing --- for frontmatter');
     }

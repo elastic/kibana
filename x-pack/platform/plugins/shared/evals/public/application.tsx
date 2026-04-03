@@ -165,11 +165,11 @@ const getBreadcrumbs = ({
     return [{ text: evaluatorsBreadcrumbLabel }];
   }
 
-  if (pathname.startsWith('/comparison/')) {
+  if (pathname.startsWith('/comparison')) {
     return [{ text: comparisonBreadcrumbLabel }];
   }
 
-  if (pathname.startsWith('/monitoring/')) {
+  if (pathname.startsWith('/monitoring')) {
     return [{ text: monitoringBreadcrumbLabel }];
   }
 

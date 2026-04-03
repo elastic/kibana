@@ -30,7 +30,7 @@ export const evaluateCiGates = (
   // For strict thresholds (e.g., safety must be 1.0), use perEvaluator min instead.
   for (const required of config.requiredPass ?? []) {
     const result = evaluatorResults.find((r) => r.evaluator === required);
-    if (result && (result.score === null || result.score === 0)) {
+    if (!result || result.score === null || result.score === 0) {
       failedGates.push({
         gate: 'required-pass',
         evaluator: required,

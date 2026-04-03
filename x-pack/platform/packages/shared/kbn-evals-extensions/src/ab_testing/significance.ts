@@ -37,8 +37,14 @@ export const testSignificance = (
   const meanB = scoresB.reduce((s, v) => s + v, 0) / scoresB.length;
   const observedDelta = meanA - meanB;
 
+  if (scoresA.length !== scoresB.length) {
+    throw new Error(
+      `Cannot test significance: scoresA.length (${scoresA.length}) !== scoresB.length (${scoresB.length})`
+    );
+  }
+
   // Bootstrap confidence interval on the difference
-  const diffs = scoresA.map((a, i) => a - (scoresB[i] ?? 0));
+  const diffs = scoresA.map((a, i) => a - scoresB[i]);
   const ci = computeConfidenceInterval(diffs, 1 - alpha, nPermutations, seed);
 
   // Permutation test: under the null hypothesis (no difference), how often

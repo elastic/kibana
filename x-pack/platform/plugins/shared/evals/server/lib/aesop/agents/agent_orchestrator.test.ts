@@ -180,7 +180,7 @@ describe('AgentOrchestrator', () => {
       });
 
       expect(result).toEqual([]);
-      expect(agentBuilder.execution.executeAgent).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.execution.executeAgent).toHaveBeenCalledTimes(2);
     });
 
     it('returns empty array when pattern miner fails', async () => {

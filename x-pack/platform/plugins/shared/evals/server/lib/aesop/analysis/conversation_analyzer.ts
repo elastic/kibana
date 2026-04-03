@@ -193,7 +193,7 @@ export class ConversationAnalyzer {
 
       const seenInConversation = new Set<string>();
       for (let i = 0; i < toolSequence.length - 1; i++) {
-        const bigram = `${toolSequence[i]}::${toolSequence[i + 1]}`;
+        const bigram = `${toolSequence[i]}\0${toolSequence[i + 1]}`;
         seenInConversation.add(bigram);
       }
 
@@ -205,7 +205,7 @@ export class ConversationAnalyzer {
     return Array.from(globalBigramCounts.entries())
       .filter(([, count]) => count >= 2)
       .map(([key, frequency]) => ({
-        steps: key.split('::'),
+        steps: key.split('\0'),
         frequency,
       }))
       .sort((a, b) => b.frequency - a.frequency);

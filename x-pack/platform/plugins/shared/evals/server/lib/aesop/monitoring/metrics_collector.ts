@@ -456,7 +456,9 @@ export class MetricsCollectorService {
         : 0;
 
       const totalExecutions = result.hits.total;
-      const successRate = 100; // Only counting completed executions
+      // Query only returns completed executions; success rate requires a separate
+      // count of total (including failed) executions to be meaningful
+      const successRate = byExecution.length > 0 ? 100 : 0;
 
       return {
         by_execution: byExecution,

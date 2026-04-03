@@ -59,7 +59,7 @@ export const RateLimitStatus: React.FC<RateLimitStatusProps> = ({ operation, las
   const percentage = (rateLimit.remaining / rateLimit.limit) * 100;
 
   const color =
-    percentage > 50 ? 'success' : percentage > 20 ? 'warning' : percentage === 0 ? 'danger' : 'primary';
+    percentage > 50 ? 'success' : percentage > 20 ? 'warning' : 'danger';
 
   const resetTime = new Date(rateLimit.resetAt).toLocaleTimeString();
 

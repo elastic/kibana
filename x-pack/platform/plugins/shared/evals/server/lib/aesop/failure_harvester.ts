@@ -40,24 +40,37 @@ export const ensureFailuresIndex = async (esClient: ElasticsearchClient): Promis
   const exists = await esClient.indices.exists({ index: FAILURES_INDEX }).catch(() => false);
   if (exists) return;
 
-  await esClient.indices.create({
-    index: FAILURES_INDEX,
-    settings: { number_of_shards: 1, number_of_replicas: 0, refresh_interval: '5s' },
-    mappings: {
-      properties: {
-        skill_id: { type: 'keyword' },
-        evaluator_name: { type: 'keyword' },
-        input_hash: { type: 'keyword' },
-        input_query: { type: 'text' },
-        output_snippet: { type: 'text', index: false },
-        score: { type: 'float' },
-        label: { type: 'keyword' },
-        explanation: { type: 'text', index: false },
-        run_id: { type: 'keyword' },
-        '@timestamp': { type: 'date' },
+  try {
+    await esClient.indices.create({
+      index: FAILURES_INDEX,
+      settings: { number_of_shards: 1, number_of_replicas: 0, refresh_interval: '5s' },
+      mappings: {
+        properties: {
+          skill_id: { type: 'keyword' },
+          evaluator_name: { type: 'keyword' },
+          input_hash: { type: 'keyword' },
+          input_query: { type: 'text' },
+          output_snippet: { type: 'text', index: false },
+          score: { type: 'float' },
+          label: { type: 'keyword' },
+          explanation: { type: 'text', index: false },
+          run_id: { type: 'keyword' },
+          '@timestamp': { type: 'date' },
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    // Ignore resource_already_exists_exception from concurrent creation races
+    if (
+      error instanceof Error &&
+      'meta' in error &&
+      (error as { meta?: { statusCode?: number } }).meta?.statusCode === 400 &&
+      error.message.includes('resource_already_exists_exception')
+    ) {
+      return;
+    }
+    throw error;
+  }
 };
 
 /**

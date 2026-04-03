@@ -290,7 +290,7 @@ export async function withRetry<T>(
 ): Promise<T> {
   const { maxRetries = 3, retryDelay = 1000, operation } = options;
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error) {
@@ -302,7 +302,7 @@ export async function withRetry<T>(
       }
 
       // Wait before retry (exponential backoff)
-      await new Promise((resolve) => setTimeout(resolve, retryDelay * attempt));
+      await new Promise((r) => setTimeout(r, retryDelay * (attempt + 1)));
     }
   }
 

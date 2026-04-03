@@ -109,7 +109,11 @@ export const SkillAlertsPanel: React.FC<SkillAlertsPanelProps> = ({
             <EuiButtonEmpty
               size="s"
               onClick={() => acknowledgeAlert.mutate({ skillId, alertId: alert.id })}
-              isLoading={acknowledgeAlert.isLoading}
+              isLoading={
+                acknowledgeAlert.isLoading &&
+                (acknowledgeAlert as { variables?: { alertId?: string } }).variables?.alertId ===
+                  alert.id
+              }
             >
               {i18n.ACKNOWLEDGE_BUTTON}
             </EuiButtonEmpty>

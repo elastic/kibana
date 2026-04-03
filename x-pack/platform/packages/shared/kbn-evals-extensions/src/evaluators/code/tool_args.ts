@@ -114,10 +114,14 @@ export const createToolArgsEvaluator = (config?: ToolArgsConfig): Evaluator => (
       mismatches: string[];
     }> = [];
 
+    const consumedIndices = new Set<number>();
     for (const expectedTool of expectedToolArgs) {
-      const actualCall = toolCalls.find(
-        (tc: ToolCallRecord) => tc.toolName === expectedTool.toolName
+      const actualCallIndex = toolCalls.findIndex(
+        (tc: ToolCallRecord, idx: number) =>
+          tc.toolName === expectedTool.toolName && !consumedIndices.has(idx)
       );
+      const actualCall = actualCallIndex >= 0 ? toolCalls[actualCallIndex] : undefined;
+      if (actualCallIndex >= 0) consumedIndices.add(actualCallIndex);
 
       if (!actualCall) {
         const expectedKeyCount = Object.keys(expectedTool.args).length;

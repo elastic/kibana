@@ -230,7 +230,7 @@ describe('ChangeDetector', () => {
           'logs-app-2026.03.20': 1000,
         },
         index_mapping_fingerprints: {
-          'logs-app-2026.03.20': 'same-fingerprint',
+          'logs-app-2026.03.20': '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a',
         },
       });
 
@@ -264,7 +264,7 @@ describe('ChangeDetector', () => {
           'logs-app-2026.03.20': 1000,
         },
         index_mapping_fingerprints: {
-          'logs-app-2026.03.20': 'same-fingerprint',
+          'logs-app-2026.03.20': '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a',
         },
       });
 
