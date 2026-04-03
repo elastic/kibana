@@ -13,6 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { buildPath } from '@kbn/core-http-browser';
 import type { Annotation } from '../../../../common/annotations';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -31,7 +32,7 @@ export function useDeleteAnnotation() {
     ['deleteAnnotation'],
     async ({ annotations }) => {
       for (const annotation of annotations) {
-        await http.delete(`/api/observability/annotation/${annotation.id}`);
+        await http.delete(buildPath('/api/observability/annotation/{id}', { id: annotation.id }));
       }
       return Promise.resolve();
     },
