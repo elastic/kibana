@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
-import { Readable } from 'stream';
 import type { ActionContext } from '../../connector_spec';
 import { AzureBlob } from './azure_blob';
 
@@ -99,10 +97,10 @@ describe('AzureBlob', () => {
 
   describe('getBlob action', () => {
     it('should get blob and return base64 content', async () => {
-      const stream = Readable.from(Buffer.from('hello'));
+      const data = Buffer.from('hello');
       mockClient.get.mockResolvedValue({
-        data: stream,
-        headers: { 'content-type': 'text/plain', 'content-length': '5' },
+        data,
+        headers: { 'content-type': 'text/plain' },
       });
 
       const result = await AzureBlob.actions.getBlob.handler(mockContext, {
@@ -112,49 +110,11 @@ describe('AzureBlob', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         `${baseUrl}/mycontainer/file.txt`,
-        expect.objectContaining({ responseType: 'stream' })
+        expect.objectContaining({ responseType: 'arraybuffer' })
       );
-      expect(result.contentBase64).toBe(Buffer.from('hello').toString('base64'));
+      expect(result.contentBase64).toBe(data.toString('base64'));
       expect(result.contentType).toBe('text/plain');
       expect(result.contentLength).toBe(5);
-    });
-
-    it('should return tooLarge when Content-Length exceeds 128KB', async () => {
-      const stream = new Readable({ read() {} });
-      mockClient.get.mockResolvedValue({
-        data: stream,
-        headers: { 'content-type': 'video/mp4', 'content-length': '200000' },
-      });
-
-      const result = await AzureBlob.actions.getBlob.handler(mockContext, {
-        container: 'mycontainer',
-        blobName: 'large.mp4',
-      });
-
-      expect(result).toEqual({
-        tooLarge: true,
-        contentLength: 200000,
-        message: 'Blob size (200000 bytes) exceeds the maximum downloadable size (131072 bytes).',
-      });
-    });
-
-    it('should return tooLarge when streamed bytes exceed 128KB without Content-Length', async () => {
-      const bigChunk = Buffer.alloc(200000, 97);
-      const stream = Readable.from([bigChunk]);
-      mockClient.get.mockResolvedValue({
-        data: stream,
-        headers: { 'content-type': 'video/mp4' },
-      });
-
-      const result = await AzureBlob.actions.getBlob.handler(mockContext, {
-        container: 'mycontainer',
-        blobName: 'large.mp4',
-      });
-
-      expect(result).toMatchObject({
-        tooLarge: true,
-        contentLength: 200000,
-      });
     });
   });
 

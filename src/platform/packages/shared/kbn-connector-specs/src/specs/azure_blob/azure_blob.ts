@@ -17,9 +17,6 @@
  * @see https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api
  */
 
-/* eslint-disable import/no-nodejs-modules -- stream is used server-side only for streaming blob downloads */
-import type { Readable } from 'stream';
-/* eslint-enable import/no-nodejs-modules */
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
@@ -29,7 +26,6 @@ import listContainersWorkflow from './workflows/list_containers.yaml';
 import getBlobWorkflow from './workflows/get_blob.yaml';
 
 const AZURE_BLOB_API_VERSION = '2021-06-08';
-const MAX_BLOB_DOWNLOAD_SIZE_BYTES = 131072; // 128 KB
 
 function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
@@ -185,45 +181,15 @@ export const AzureBlob: ConnectorSpec = {
       handler: async (ctx, input) => {
         const baseUrl = getBaseUrl(ctx);
         const container = encodePathSegment(input.container);
-
         const response = await ctx.client.get(
           `${baseUrl}/${container}/${encodePathSegment(input.blobName)}`,
-          { responseType: 'stream' }
+          { responseType: 'arraybuffer' }
         );
-        const stream = response.data as Readable;
-        const contentType = response.headers['content-type'] as string | undefined;
-        const rawLength = response.headers['content-length'];
-        const contentLength = rawLength ? parseInt(String(rawLength), 10) : undefined;
-
-        if (contentLength !== undefined && contentLength > MAX_BLOB_DOWNLOAD_SIZE_BYTES) {
-          stream.destroy();
-          return {
-            tooLarge: true,
-            contentLength,
-            message: `Blob size (${contentLength} bytes) exceeds the maximum downloadable size (${MAX_BLOB_DOWNLOAD_SIZE_BYTES} bytes).`,
-          };
-        }
-
-        const chunks: Buffer[] = [];
-        let bytesRead = 0;
-        for await (const chunk of stream) {
-          const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array);
-          bytesRead += buf.length;
-          if (bytesRead > MAX_BLOB_DOWNLOAD_SIZE_BYTES) {
-            stream.destroy();
-            return {
-              tooLarge: true,
-              contentLength: bytesRead,
-              message: `Blob size (${bytesRead} bytes) exceeds the maximum downloadable size (${MAX_BLOB_DOWNLOAD_SIZE_BYTES} bytes).`,
-            };
-          }
-          chunks.push(buf);
-        }
-        const buffer = Buffer.concat(chunks);
+        const buffer = Buffer.from(response.data as ArrayBuffer);
         return {
           contentBase64: buffer.toString('base64'),
-          contentType,
-          contentLength: contentLength ?? buffer.length,
+          contentType: response.headers['content-type'] as string | undefined,
+          contentLength: buffer.length,
         };
       },
     },

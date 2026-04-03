@@ -13,9 +13,27 @@ inputs:
     type: string
     required: true
 steps:
-  - name: get-blob
-    type: azure-blob.getBlob
+  - name: get-blob-properties
+    type: azure-blob.getBlobProperties
     connector-id: <%= azure-blob-stack-connector-id %>
     with:
       container: "${{ inputs.container }}"
       blobName: "${{ inputs.blob_name }}"
+  - name: fetch-or-reject
+    type: if
+    condition: "${{ steps['get-blob-properties'].output.contentLength == nil or steps['get-blob-properties'].output.contentLength <= 131072 }}"
+    steps:
+      - name: get-blob
+        type: azure-blob.getBlob
+        connector-id: <%= azure-blob-stack-connector-id %>
+        with:
+          container: "${{ inputs.container }}"
+          blobName: "${{ inputs.blob_name }}"
+    else:
+      - name: set-too-large
+        type: data.set
+        with:
+          result:
+            tooLarge: true
+            contentLength: "${{ steps['get-blob-properties'].output.contentLength }}"
+            message: "Blob size (${{ steps['get-blob-properties'].output.contentLength }} bytes) exceeds the maximum downloadable size (131072 bytes)."
