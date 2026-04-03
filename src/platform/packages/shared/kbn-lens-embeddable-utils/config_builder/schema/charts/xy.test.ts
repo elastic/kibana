@@ -388,7 +388,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: { visible: true },
                     color: {
@@ -520,7 +520,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: {
                       visible: true,
