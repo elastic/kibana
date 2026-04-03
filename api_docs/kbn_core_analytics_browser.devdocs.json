@@ -966,8 +966,8 @@
                 "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/services/telemetry/service.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.ts"
               },
               {
                 "plugin": "datasetQuality",
@@ -1090,12 +1090,12 @@
                 "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_service.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_service.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/request_context_factory.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/request_context_factory.ts"
               },
               {
                 "plugin": "osquery",
@@ -2670,24 +2670,24 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/services/telemetry/service.test.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/services/task_manager/task_manager_telemetry.test.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
               },
               {
                 "plugin": "securitySolution",
