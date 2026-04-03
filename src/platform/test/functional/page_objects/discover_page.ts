@@ -1084,20 +1084,24 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isCascadeLayoutRowExpanded(rowId: string) {
-    const row = await this.find.byCssSelector(`[id="${rowId}"]`);
-    return ((await row.getAttribute('aria-expanded')) ?? 'false') === 'true';
+    return await this.retry.try(async () => {
+      const row = await this.find.byCssSelector(`[id="${rowId}"]`);
+      return ((await row.getAttribute('aria-expanded')) ?? 'false') === 'true';
+    });
   }
 
   public async toggleCascadeLayoutRow(rowId: string) {
     const isTargetRowExpanded = await this.isCascadeLayoutRowExpanded(rowId);
-    const toggleButtons = await this.testSubjects.findAll(`toggle-row-${rowId}-button`);
-    const targetButton = toggleButtons[0];
+    await this.retry.try(async () => {
+      const toggleButtons = await this.testSubjects.findAll(`toggle-row-${rowId}-button`);
+      const targetButton = toggleButtons[0];
 
-    if (!targetButton) {
-      throw new Error(`Toggle button for row ${rowId} not found`);
-    }
+      if (!targetButton) {
+        throw new Error(`Toggle button for row ${rowId} not found`);
+      }
 
-    await targetButton.click();
+      await targetButton.click();
+    });
 
     if (isTargetRowExpanded) {
       await this.retry.waitFor('row to be collapsed', async () => {
