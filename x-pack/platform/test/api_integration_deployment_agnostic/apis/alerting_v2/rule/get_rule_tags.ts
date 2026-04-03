@@ -18,11 +18,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  async function createRule(
-    roleAuthc: RoleCredentials,
-    name: string,
-    labels?: string[]
-  ) {
+  async function createRule(roleAuthc: RoleCredentials, name: string, labels?: string[]) {
     return supertestWithoutAuth
       .post(RULE_API_PATH)
       .set(roleAuthc.apiKeyHeader)
