@@ -56,9 +56,11 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     const { continuousKiExtraction } = params.body;
 
     if (continuousKiExtractionWorkflowService) {
-      const enabled = continuousKiExtraction.enabled ?? await globalUiSettingsClient.get<boolean>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-      );
+      const enabled =
+        continuousKiExtraction.enabled ??
+        (await globalUiSettingsClient.get<boolean>(
+          OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+        ));
       await continuousKiExtractionWorkflowService.ensureWorkflow({
         enabled,
         request,

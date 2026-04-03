@@ -105,10 +105,10 @@ const eligibleStreamsRoute = createServerRoute({
 
     const [connectorId, sortedTasks, allStreams] = await Promise.all([
       resolveConnectorForFeature({
-       searchInferenceEndpoints: server.searchInferenceEndpoints,
-       featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-       featureName: 'knowledge indicator extraction',
-       request,
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+        featureName: 'knowledge indicator extraction',
+        request,
       }),
       taskClient.findByType<FeaturesIdentificationTaskParams>(FEATURES_IDENTIFICATION_TASK_TYPE, {
         sort: [

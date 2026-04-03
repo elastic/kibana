@@ -87,16 +87,21 @@ export function SettingsTab() {
       }
     } catch (err) {
       core.notifications.toasts.addDanger({
-        title: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.settings.saveErrorTitle',
-          { defaultMessage: 'Failed to save settings' }
-        ),
+        title: i18n.translate('xpack.streams.significantEventsDiscovery.settings.saveErrorTitle', {
+          defaultMessage: 'Failed to save settings',
+        }),
         text: getFormattedError(err).message,
       });
     } finally {
       setIsSaving(false);
     }
-  }, [core.settings.client, core.notifications.toasts, indexPatterns, savedIndexPatterns, continuousExtraction]);
+  }, [
+    core.settings.client,
+    core.notifications.toasts,
+    indexPatterns,
+    savedIndexPatterns,
+    continuousExtraction,
+  ]);
 
   return (
     <>
