@@ -16,6 +16,13 @@ import { classicIngestHasEsLevelChanges } from '../../../lib/streams/state_manag
 import { readStream } from './read_stream';
 import { createClassicStreamRoute } from './create_classic_stream_route';
 import { validateClassicStreamRoute } from './validate_classic_stream_route';
+import {
+  createWiredStreamRequest,
+  updateClassicStreamRequest,
+  createQueryStreamRequest,
+  getWiredStreamResponse,
+  listStreamsResponse,
+} from '../../../oas_examples';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name} 2023-10-31',
@@ -27,6 +34,19 @@ export const readStreamRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          content: {
+            'application/json': {
+              examples: {
+                getWiredStream: { value: getWiredStreamResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -71,6 +91,19 @@ export const listStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          content: {
+            'application/json': {
+              examples: {
+                listStreams: { value: listStreamsResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -100,6 +133,19 @@ export const editStreamRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              createWiredStream: { value: createWiredStreamRequest },
+              updateClassicStream: { value: updateClassicStreamRequest },
+              createQueryStream: { value: createQueryStreamRequest },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
