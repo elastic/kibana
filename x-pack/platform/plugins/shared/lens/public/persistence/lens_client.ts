@@ -6,6 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { Reference } from '@kbn/content-management-utils';
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
@@ -54,9 +55,12 @@ export class LensClient {
       data,
       meta,
       id: responseId,
-    } = await this.http.get<LensGetResponseBody>(`${LENS_INTERNAL_VIS_API_PATH}/${id}`, {
-      version: LENS_INTERNAL_API_VERSION,
-    });
+    } = await this.http.get<LensGetResponseBody>(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
 
     const chartType = this.builder?.getType(data);
 
@@ -181,7 +185,7 @@ export class LensClient {
           };
 
     const { data, meta, ...rest } = await this.http.put<LensUpdateResponseBody>(
-      `${LENS_INTERNAL_VIS_API_PATH}/${id}`,
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
       {
         body: JSON.stringify(body),
         query: options,
@@ -216,10 +220,13 @@ export class LensClient {
   }
 
   async delete(id: string): Promise<{ success: boolean }> {
-    const response = await this.http.delete(`${LENS_INTERNAL_VIS_API_PATH}/${id}`, {
-      asResponse: true,
-      version: LENS_INTERNAL_API_VERSION,
-    });
+    const response = await this.http.delete(
+      buildPath(`${LENS_INTERNAL_VIS_API_PATH}/{id}`, { id }),
+      {
+        asResponse: true,
+        version: LENS_INTERNAL_API_VERSION,
+      }
+    );
     const success = response.response?.ok ?? false;
 
     return { success };

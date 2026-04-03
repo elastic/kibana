@@ -275,7 +275,15 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; permissions: ",
+          "> | undefined; attachments?: ",
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.CaseAttachmentsWithoutOwner",
+            "text": "CaseAttachmentsWithoutOwner"
+          },
+          " | undefined; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -285,14 +293,6 @@
           },
           "; onClose?: (() => void) | undefined; owner: string[]; observables?: { typeKey: string; value: string; description: string | null; }[] | undefined; basePath?: string | undefined; releasePhase?: ",
           "ReleasePhase",
-          " | undefined; attachments?: ",
-          {
-            "pluginId": "cases",
-            "scope": "public",
-            "docId": "kibCasesPluginApi",
-            "section": "def-public.CaseAttachmentsWithoutOwner",
-            "text": "CaseAttachmentsWithoutOwner"
-          },
           " | undefined; afterCaseCreated?: ((theCase: ",
           {
             "pluginId": "cases",
