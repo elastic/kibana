@@ -100,15 +100,7 @@ function formatDurationMs(ms: number): string {
 }
 
 function formatRuleEvaluationEsql(rule: RuleResponse): string {
-  const base = rule.evaluation.query.base;
-  const condition = rule.evaluation.query.condition?.trim();
-  if (!condition) {
-    return base;
-  }
-  if (condition.startsWith('|')) {
-    return `${base}\n${condition}`;
-  }
-  return `${base}\n| ${condition}`;
+  return rule.evaluation.query.base;
 }
 
 interface EpisodeRouteParams {
