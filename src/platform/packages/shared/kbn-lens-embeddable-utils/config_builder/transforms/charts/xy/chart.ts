@@ -26,7 +26,7 @@ import {
 } from './api_layers';
 import { stripUndefined } from '../utils';
 import { axisLabelOrientationCompat } from '../common';
-import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
+import { convertStylingToAPIFormat, convertStylingToStateFormat } from './appearances';
 
 function convertFittingToStateFormat(fitting: XYState['fitting']) {
   return {
@@ -170,7 +170,7 @@ export function buildVisualizationState(
     ...convertLegendToStateFormat(config.legend),
     ...convertFittingToStateFormat(config.fitting),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.decorations ? convertAppearanceToStateFormat(config.decorations) : {}),
+    ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
     layers,
   };
 }
@@ -191,13 +191,13 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
-  const decorations = convertAppearanceToAPIFormat(config);
+  const decorations = convertStylingToAPIFormat(config);
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
     ...convertFittingToAPIFormat(config),
     ...convertAxisSettingsToAPIFormat(config, layers),
-    ...(decorations ? { decorations } : {}),
+    ...(decorations ? { styling: decorations } : {}),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
 }

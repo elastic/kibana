@@ -32,6 +32,15 @@ import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
 import { cornerPositionSchema } from '../alignments';
+import {
+  DEFAULT_AREAS_FILL_OPACITY,
+  DEFAULT_BARS_MINIMUM_HEIGHT,
+  DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
+  DEFAULT_DATA_LABELS_VISIBLE,
+  DEFAULT_LINES_INTERPOLATION,
+  DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+  DEFAULT_POINTS_VISIBILITY,
+} from '../../transforms/charts/xy/defaults';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -229,59 +238,146 @@ const XY_API_LINE_INTERPOLATION = {
 
 export type XYApiLineInterpolation = typeof XY_API_LINE_INTERPOLATION;
 
-const decorationsSchema = schema.object(
+const xyStylingSchema = schema.object(
   {
-    end_zones: schema.maybe(
+    overlays: schema.maybe(
       schema.object(
         {
-          visible: schema.boolean({ meta: { description: 'Show end zones' } }),
+          partial_buckets: schema.maybe(
+            schema.object(
+              {
+                visible: schema.boolean({
+                  defaultValue: DEFAULT_PARTIAL_BUCKETS_VISIBLE,
+                  meta: { description: 'Show partial bucket indicators at time range edges' },
+                }),
+              },
+              { meta: { description: 'Partial (incomplete) bucket indicator configuration' } }
+            )
+          ),
+          current_time_marker: schema.maybe(
+            schema.object(
+              {
+                visible: schema.boolean({
+                  defaultValue: DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
+                  meta: { description: 'Show current time marker line' },
+                }),
+              },
+              { meta: { description: 'Current time marker configuration' } }
+            )
+          ),
+          data_labels: schema.maybe(
+            schema.object(
+              {
+                visible: schema.boolean({
+                  defaultValue: DEFAULT_DATA_LABELS_VISIBLE,
+                  meta: {
+                    description:
+                      'Display value labels on data points, only available for bar series.',
+                  },
+                }),
+              },
+              { meta: { description: 'Data label configuration' } }
+            )
+          ),
         },
-        { meta: { description: 'End zones (partial buckets) configuration' } }
+        {
+          meta: {
+            id: 'xyStylingOverlays',
+            description: 'Visual overlays drawn on top of the chart canvas',
+          },
+        }
       )
     ),
-    current_time_marker: schema.maybe(
+    points: schema.maybe(
       schema.object(
         {
-          visible: schema.boolean({ meta: { description: 'Show current time marker line' } }),
+          visibility: schema.maybe(
+            schema.oneOf(
+              [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
+              {
+                defaultValue: DEFAULT_POINTS_VISIBILITY,
+                meta: { description: 'Data point marker visibility on line and area series' },
+              }
+            )
+          ),
         },
-        { meta: { description: 'Current time marker configuration' } }
+        {
+          meta: {
+            id: 'xyStylingPoints',
+            description: 'Data point marker settings for line and area series',
+          },
+        }
       )
     ),
-    point_visibility: schema.maybe(
-      schema.oneOf([schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')], {
-        meta: { description: 'Show data points on lines' },
-      })
-    ),
-    line_interpolation: schema.maybe(
-      schema.oneOf([
-        schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
-        schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
-        schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
-      ])
-    ),
-    minimum_bar_height: schema.maybe(
-      schema.number({ min: 0, meta: { description: 'Minimum bar height in pixels' } })
-    ),
-    values: schema.maybe(
+    lines: schema.maybe(
       schema.object(
         {
-          visible: schema.boolean({ meta: { description: 'Display value labels on data points' } }),
+          interpolation: schema.maybe(
+            schema.oneOf(
+              [
+                schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
+                schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
+                schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
+              ],
+              {
+                defaultValue: DEFAULT_LINES_INTERPOLATION,
+                meta: { description: 'Curve interpolation method for line and area series' },
+              }
+            )
+          ),
         },
-        { meta: { description: 'Value label configuration' } }
+        {
+          meta: {
+            id: 'xyStylingLines',
+            description: 'Line rendering settings for line and area series',
+          },
+        }
       )
     ),
-    fill_opacity: schema.maybe(
-      schema.number({
-        min: 0,
-        max: 2,
-        meta: { description: 'Area chart fill opacity (0-1 typical, max 2 for legacy)' },
-      })
+    bars: schema.maybe(
+      schema.object(
+        {
+          minimum_height: schema.maybe(
+            schema.number({
+              defaultValue: DEFAULT_BARS_MINIMUM_HEIGHT,
+              min: 0,
+              meta: { description: 'Minimum bar height in pixels' },
+            })
+          ),
+        },
+        {
+          meta: {
+            id: 'xyStylingBars',
+            description: 'Bar-specific rendering settings',
+          },
+        }
+      )
+    ),
+    areas: schema.maybe(
+      schema.object(
+        {
+          fill_opacity: schema.maybe(
+            schema.number({
+              defaultValue: DEFAULT_AREAS_FILL_OPACITY,
+              min: 0,
+              max: 2,
+              meta: { description: 'Area fill opacity (0-1 typical, max 2 for legacy)' },
+            })
+          ),
+        },
+        {
+          meta: {
+            id: 'xyStylingAreas',
+            description: 'Area-specific rendering settings',
+          },
+        }
+      )
     ),
   },
   {
     meta: {
-      id: 'xyDecorations',
-      description: 'Visual enhancements and styling options for the chart',
+      id: 'xyStyling',
+      description: 'Visual styling options for the chart',
     },
   }
 );
@@ -435,7 +531,7 @@ const xySharedSettings = {
       }
     )
   ),
-  decorations: schema.maybe(decorationsSchema),
+  styling: schema.maybe(xyStylingSchema),
 };
 
 /**
@@ -878,4 +974,4 @@ export type LayerTypeNoESQL =
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
 
-export type XYDecorations = TypeOf<typeof decorationsSchema>;
+export type XYStyling = TypeOf<typeof xyStylingSchema>;
