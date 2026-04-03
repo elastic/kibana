@@ -252,8 +252,8 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
 
   const { attributes: _, ...panelState } = state;
   return {
-    ...panelState,
     ...apiConfigAttributes,
+    ...panelState, // let the panel state (title, description) override the api config
   };
 }
 
