@@ -175,9 +175,15 @@ export const validateRuleResponseActions = async <
     } else if (isOsqueryResponseAction(actionData)) {
       if (checkOsqueryResponseActionAuthz) {
         const params = actionData.params;
+        // Params may be snake_case (from API payload: OsqueryResponseAction) or
+        // camelCase (from existing rule in ES: RuleResponseOsqueryAction)
         await checkOsqueryResponseActionAuthz({
-          saved_query_id: 'saved_query_id' in params ? params.saved_query_id : undefined,
-          pack_id: 'pack_id' in params ? params.pack_id : undefined,
+          saved_query_id:
+            ('saved_query_id' in params ? params.saved_query_id : undefined) ??
+            ('savedQueryId' in params ? params.savedQueryId : undefined),
+          pack_id:
+            ('pack_id' in params ? params.pack_id : undefined) ??
+            ('packId' in params ? params.packId : undefined),
         });
       } else {
         logger.debug(

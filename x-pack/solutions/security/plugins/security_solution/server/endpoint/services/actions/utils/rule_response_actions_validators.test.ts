@@ -587,6 +587,38 @@ describe('Rules Endpoint response actions validators', () => {
       await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
     });
 
+    it('should handle camelCase params from existing rule (savedQueryId)', async () => {
+      // Existing rule stores params in camelCase (RuleResponseOsqueryAction).
+      // When the action is modified, the old camelCase version appears in the xor diff.
+      options.rulePayload = { response_actions: [] };
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: 'existing-saved-query',
+        pack_id: undefined,
+      });
+    });
+
+    it('should handle camelCase params from existing rule (packId)', async () => {
+      options.rulePayload = { response_actions: [] };
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { packId: 'existing-pack' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: undefined,
+        pack_id: 'existing-pack',
+      });
+    });
+
     it('should not validate unchanged osquery actions on update', async () => {
       const osqueryAction = {
         action_type_id: '.osquery' as const,
