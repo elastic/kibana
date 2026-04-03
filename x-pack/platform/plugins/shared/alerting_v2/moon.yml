@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/discover-utils'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/core-http-browser'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

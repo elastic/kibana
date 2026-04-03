@@ -91,7 +91,8 @@
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/utility-types"
   ],
   "exclude": ["target/**/*"]
 }
