@@ -42,7 +42,7 @@ interface SendMessageParams {
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
-const buildScreenContextData = async ({
+export const buildScreenContextData = async ({
   services,
 }: {
   services: StartServices;
