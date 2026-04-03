@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -51,6 +51,7 @@ import type { NLPSettings } from '../../../common/constants/app';
 import {
   isModelDownloadItem,
   isNLPModelItem,
+  isRerankModelItem,
   type TrainedModelDeploymentStatsResponse,
 } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
@@ -78,6 +79,8 @@ interface DeploymentSetupProps {
   showNodeInfo: boolean;
   disableAdaptiveResourcesControl?: boolean;
   deploymentParamsMapper: DeploymentParamsMapper;
+  /** When true, hides ingest/search optimization (always search-optimized) and shows rerank warnings */
+  isRerank?: boolean;
 }
 
 /**
@@ -148,6 +151,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   deploymentParamsMapper,
   cloudInfo,
   showNodeInfo,
+  isRerank = false,
 }) => {
   const deploymentIdUpdated = useRef(false);
 
@@ -487,58 +491,86 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow hasChildLabel={true} fullWidth>
-        <EuiFormFieldset
-          legend={{
-            children: (
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
-                defaultMessage="Optimize this model deployment for your use case:"
-              />
-            ),
-          }}
-        >
-          {optimizedOptions.map((v) => {
-            return (
-              <Fragment key={v.value}>
-                <EuiCheckableCard
-                  id={v.value}
-                  disabled={isUpdate}
-                  label={
-                    <EuiText size={'s'}>
-                      <EuiFlexGroup alignItems={'baseline'} gutterSize={'s'}>
-                        <EuiFlexItem grow={false}>
-                          <strong>{v.label}</strong>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>{v.description}</EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiText>
-                  }
-                  value={v.value}
-                  checked={config.optimized === v.value}
-                  onChange={() => {
-                    onConfigChange({
-                      ...config,
-                      ...(deploymentIdUpdated.current
-                        ? {}
-                        : {
-                            // rename deployment ID based on the optimized value
-                            deploymentId: config.deploymentId?.replace(
-                              /_[a-zA-Z]+$/,
-                              v.value === 'optimizedForIngest' ? '_ingest' : '_search'
-                            ),
-                          }),
-                      optimized: v.value,
-                    });
-                  }}
-                  data-test-subj={`mlModelsStartDeploymentModalOptimized_${v.value}`}
+      {!isRerank ? (
+        <EuiFormRow hasChildLabel={true} fullWidth>
+          <EuiFormFieldset
+            legend={{
+              children: (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
+                  defaultMessage="Optimize this model deployment for your use case:"
                 />
-                <EuiSpacer size="m" />
-              </Fragment>
-            );
-          })}
-        </EuiFormFieldset>
-      </EuiFormRow>
+              ),
+            }}
+          >
+            {optimizedOptions.map((v) => {
+              return (
+                <Fragment key={v.value}>
+                  <EuiCheckableCard
+                    id={v.value}
+                    disabled={isUpdate}
+                    label={
+                      <EuiText size={'s'}>
+                        <EuiFlexGroup alignItems={'baseline'} gutterSize={'s'}>
+                          <EuiFlexItem grow={false}>
+                            <strong>{v.label}</strong>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{v.description}</EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiText>
+                    }
+                    value={v.value}
+                    checked={config.optimized === v.value}
+                    onChange={() => {
+                      onConfigChange({
+                        ...config,
+                        ...(deploymentIdUpdated.current
+                          ? {}
+                          : {
+                              // rename deployment ID based on the optimized value
+                              deploymentId: config.deploymentId?.replace(
+                                /_[a-zA-Z]+$/,
+                                v.value === 'optimizedForIngest' ? '_ingest' : '_search'
+                              ),
+                            }),
+                        optimized: v.value,
+                      });
+                    }}
+                    data-test-subj={`mlModelsStartDeploymentModalOptimized_${v.value}`}
+                  />
+                  <EuiSpacer size="m" />
+                </Fragment>
+              );
+            })}
+          </EuiFormFieldset>
+        </EuiFormRow>
+      ) : null}
+
+      {isRerank ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningTitle',
+              {
+                defaultMessage: 'High resource requirements',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+            size="s"
+            data-test-subj="mlModelsStartDeploymentModalRerankWarning"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningDescription"
+                defaultMessage="Rerank models are resource intensive and require a minimum of 8 GB of memory on the ML node."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
 
       <EuiAccordion
         id={'modelDeploymentAdvancedSettings'}
@@ -703,8 +735,19 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const isModelNotDownloaded = model ? isModelDownloadItem(model) : true;
 
+  const isRerank = model ? isRerankModelItem(model) : false;
+
   const getDefaultParams = useCallback((): DeploymentParamsUI => {
     const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
+
+    const rerankDefaultParams: DeploymentParamsUI = {
+      deploymentId: `${modelId}_search`,
+      optimized: 'optimizedForSearch',
+      vCPUUsage: defaultVCPUUsage,
+      adaptiveResources: true,
+    };
+
+    if (isRerank) return rerankDefaultParams;
 
     const defaultParams = {
       deploymentId: `${modelId}_ingest`,
@@ -731,11 +774,28 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           adaptiveResources: true,
         }
       : defaultParams;
-  }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo]);
+  }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo, isRerank]);
 
   const modalTitleId = useGeneratedHtmlId();
 
   const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
+
+  useEffect(() => {
+    if (initialParams !== undefined || model === undefined || !isRerank) {
+      return;
+    }
+
+    setConfig((prev) => {
+      if (prev.optimized === 'optimizedForIngest' && prev.deploymentId === `${modelId}_ingest`) {
+        return {
+          ...prev,
+          deploymentId: `${modelId}_search`,
+          optimized: 'optimizedForSearch',
+        };
+      }
+      return prev;
+    });
+  }, [initialParams, model, modelId, isRerank]);
 
   const deploymentIdValidator = useMemo(() => {
     if (isUpdate || !isNLPModelItem(model)) {
@@ -825,6 +885,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           onConfigChange={setConfig}
           errors={errors}
           isUpdate={isUpdate}
+          isRerank={isRerank}
           disableAdaptiveResourcesControl={
             !showNodeInfo || nlpSettings.modelDeployment?.allowStaticAllocations === false
           }

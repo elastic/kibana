@@ -432,13 +432,6 @@ export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDown
 
 /**
  * Identifies rerank (text_similarity) trained models.
- *
- * Start and Update deployment actions are disabled for rerank models as a short-term fix:
- * the deployment modal surfaces an ingest optimization option that is not applicable to the
- * reranking task, and allowing it leads to a confusing UX.
- *
- * TODO: Remove this guard once the deployment modal properly handles rerank models.
- * See: https://github.com/elastic/kibana/issues/258373
  */
 export function isRerankModelItem(item: TrainedModelUIItem): boolean {
   if (Array.isArray(item.type) && item.type.includes('text_similarity')) {

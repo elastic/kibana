@@ -29,7 +29,6 @@ import {
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
-  isRerankModelItem,
 } from '../../../common/types/trained_models';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
@@ -235,8 +234,6 @@ export function useModelActions({
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
-          if (isRerankModelItem(item)) return false;
-
           return (
             isNLPModelItem(item) ||
             (canCreateTrainedModels &&
@@ -277,7 +274,6 @@ export function useModelActions({
         isPrimary: false,
         available: (item) =>
           isNLPModelItem(item) &&
-          !isRerankModelItem(item) &&
           canStartStopTrainedModels &&
           !isLoading &&
           !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),
