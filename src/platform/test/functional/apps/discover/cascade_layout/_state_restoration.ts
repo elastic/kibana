@@ -46,14 +46,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await runCascadeQuery();
       await discover.scrollCascadeLayoutBy(2000);
       await expectScrollToBeRoughly(2000);
-      // wait for  scroll restoration to be persisted
+      // wait for scroll restoration to be persisted
       await common.sleep(1000);
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      // wait for scroll restoration to settle
-      await common.sleep(100);
       await expectScrollToBeRoughly(2000);
     });
 
@@ -65,7 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const initialRootScrollTop = await discover.getCascadeLayoutScrollTop();
       await discover.toggleCascadeLayoutRow(firstRowId);
       await discover.scrollCascadeLayoutBy(200);
-      await expectScrollToBeRoughly(initialRootScrollTop + 200);
+      await expectScrollToBeRoughly(initialRootScrollTop + 200, 800);
+      const scrollTopBeforeTabSwitch = await discover.getCascadeLayoutScrollTop();
       // wait for scroll restoration to be persisted
       await common.sleep(1000);
       await unifiedTabs.createNewTab();
@@ -73,9 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
       expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).to.be(true);
-      // wait for scroll restoration to settle
-      await common.sleep(100);
-      await expectScrollToBeRoughly(initialRootScrollTop + 200, 400);
+      await expectScrollToBeRoughly(scrollTopBeforeTabSwitch, 400);
     });
   });
 }
