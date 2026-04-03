@@ -65,6 +65,7 @@ export function ActionBlock(props: StepConfigurationProps) {
       data-test-subj="streamsAppProcessorBlock"
       data-stream-type={streamType}
       hasShadow={false}
+      grow={false}
       color={isUnderEdit && isRootStepValue ? undefined : panelColour}
       onClick={isClickable ? handlePanelClick : undefined}
       css={
@@ -79,7 +80,14 @@ export function ActionBlock(props: StepConfigurationProps) {
               border-radius: ${euiTheme.size.s};
               padding: ${euiTheme.size.m};
               ${isClickable
-                ? `cursor: pointer;`
+                ? `
+                  cursor: pointer;
+                  &:hover {
+                    background-color: ${euiTheme.colors.lightestShade};
+                    box-shadow: none;
+                    transform: none;
+                  }
+                `
                 : ''}
             `
       }
