@@ -18,5 +18,7 @@ export default createStatefulTestConfig({
     `--logging.loggers=${JSON.stringify([
       { name: 'plugins.agentBuilder', level: 'debug', appenders: ['console'] },
     ])}`,
+    '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
+    '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
   ],
 });

@@ -169,6 +169,11 @@ export const i18nStrings = {
       ),
     },
   },
+  modelManagement: {
+    title: i18n.translate('securitySolutionPackages.navLinks.modelManagement', {
+      defaultMessage: 'Model Management',
+    }),
+  },
   entityRiskScore: i18n.translate('securitySolutionPackages.navLinks.entityRiskScore', {
     defaultMessage: 'Entity risk score',
   }),
@@ -321,6 +326,12 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
         defaultMessage: 'Kibana',
       }),
+    },
+    v2AlertingPreview: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.stackManagement_v2.v2AlertingPreview',
+        { defaultMessage: 'V2 Alerting Preview' }
+      ),
     },
     // serverless only
     access: {

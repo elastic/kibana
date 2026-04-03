@@ -250,12 +250,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         await underTest.start();
 
-        expect(mockTransaction.addLabels).toHaveBeenCalledWith(
-          expect.objectContaining({
-            triggered_by: 'task_manager',
-            event_trigger_id: 'cases.caseCreated',
-          })
-        );
+        expect(mockTransaction.addLabels.mock.calls[0][0]).toMatchObject({
+          triggered_by: 'task_manager',
+          event_trigger_id: 'cases.caseCreated',
+        });
         expect(mockTransaction.addLabels.mock.calls[0][0]).not.toHaveProperty('event_chain_depth');
       });
 
@@ -265,12 +263,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
         await underTest.start();
 
-        expect(mockTransaction.addLabels).toHaveBeenCalledWith(
-          expect.objectContaining({
-            triggered_by: 'task_manager',
-            event_trigger_id: 'my.custom.trigger',
-          })
-        );
+        expect(mockTransaction.addLabels.mock.calls[0][0]).toMatchObject({
+          triggered_by: 'task_manager',
+          event_trigger_id: 'my.custom.trigger',
+        });
         expect(mockTransaction.addLabels.mock.calls[0][0]).not.toHaveProperty('event_chain_depth');
       });
 

@@ -110,5 +110,6 @@
     "@kbn/std",
     "@kbn/streams-ai",
     "@kbn/cps",
+    "@kbn/deeplinks-management",
   ]
 }

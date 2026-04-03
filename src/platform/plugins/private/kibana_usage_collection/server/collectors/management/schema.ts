@@ -45,6 +45,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:excludedGapReasons': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Array of excluded gap reasons.' },
+    },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -715,6 +722,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Display the incremental id of a case in the relevant pages',
     },
   },
+  'cases:maxOpenCasesPerRuleRun': {
+    type: 'integer',
+    _meta: {
+      description: 'Maximum number of cases the Cases connector can open during a single rule run.',
+    },
+  },
   'observability:streamsEnableSignificantEvents': {
     type: 'boolean',
     _meta: {
@@ -755,6 +768,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the Streams management Overview tab',
+    },
+  },
+  'observability:streamsSigEventsIndexPatterns': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
   'observability:enableDiagnosticMode': {

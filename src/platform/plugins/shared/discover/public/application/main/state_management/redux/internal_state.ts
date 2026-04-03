@@ -105,6 +105,17 @@ const withTab = <TPayload extends TabActionPayload>(
   }
 };
 
+const normalizeVisiblePanelsState = (appState: TabState['appState']) => {
+  if (appState.hideChart && appState.hideTable) {
+    return {
+      ...appState,
+      hideTable: false,
+    };
+  }
+
+  return appState;
+};
+
 const setProfileStateSnapshotField = <TField extends DefaultProfileStateField>(
   snapshot: ProfileStateSnapshot,
   field: TField,
@@ -296,7 +307,7 @@ export const internalStateSlice = createSlice({
      */
     setAppState: (state, action: TabAction<RawAppStatePayload & { profileId: string }>) =>
       withTab(state, action.payload, (tab) => {
-        let appState = action.payload.appState;
+        let appState = normalizeVisiblePanelsState(action.payload.appState);
 
         // When updating to an ES|QL query, sync the data source
         if (isOfAggregateQueryType(appState.query)) {
