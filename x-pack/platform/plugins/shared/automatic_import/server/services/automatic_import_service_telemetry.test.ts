@@ -956,11 +956,13 @@ describe('AutomaticImportSetupService', () => {
         invokeAutomaticImportAgent: mockInvokeAgent,
       };
 
+      const abortController = new AbortController();
+
       // Create task runner
       const taskRunner = createTaskRunner({
         taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
         fakeRequest: {} as unknown as KibanaRequest,
-        abortController: new AbortController(),
+        abortController,
       });
 
       // Replace runTask to inject our mock core setup
@@ -993,14 +995,17 @@ describe('AutomaticImportSetupService', () => {
 
       // Verify that updateDataStreamSavedObjectAttributes was called
       expect(mockUpdateDataStream).toHaveBeenCalledTimes(1);
-      expect(mockUpdateDataStream).toHaveBeenCalledWith({
-        integrationId: 'test-integration',
-        dataStreamId: 'test-datastream',
-        ingestPipeline: expect.any(Object),
-        pipelineDocs: expect.any(Array),
-        fieldMapping: expect.any(Array),
-        status: 'completed',
-      });
+      expect(mockUpdateDataStream).toHaveBeenCalledWith(
+        {
+          integrationId: 'test-integration',
+          dataStreamId: 'test-datastream',
+          ingestPipeline: expect.any(Object),
+          pipelineDocs: expect.any(Array),
+          fieldMapping: expect.any(Array),
+          status: 'completed',
+        },
+        abortController.signal
+      );
     });
 
     it('should mark data stream as failed when task execution errors', async () => {
