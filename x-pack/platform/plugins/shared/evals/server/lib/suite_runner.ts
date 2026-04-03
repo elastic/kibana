@@ -71,7 +71,7 @@ const resolveMainRepoRoot = (worktreeRoot: string): string | undefined => {
   const match = content.match(/^gitdir:\s+(.+)$/);
   if (!match) return undefined;
 
-  return resolve(resolve(match[1]), '..', '..', '..');
+  return resolve(resolve(worktreeRoot, match[1]), '..', '..', '..');
 };
 
 export class SuiteRunner {
@@ -291,7 +291,7 @@ export class SuiteRunner {
           run.exitCode = code ?? undefined;
           run.status = code === 0 ? 'completed' : 'failed';
           run.completedAt = new Date().toISOString();
-          if (code !== 0) {
+          if (code !== 0 && !run.error) {
             run.error = `Process exited with code ${code}`;
           }
           this.logger.info(
