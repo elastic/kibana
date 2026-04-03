@@ -48,7 +48,10 @@ jest.mock('@kbn/dev-proc-runner', () => ({
 
 jest.mock('@kbn/tooling-log', () => ({
   ToolingLog: jest.fn().mockImplementation(() => ({
-    setWriters: jest.fn(),
+    writers: [] as Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>,
+    setWriters: jest.fn(function (this: { writers: unknown[] }, writers: unknown[]) {
+      this.writers = writers;
+    }),
   })),
 }));
 
@@ -414,5 +417,26 @@ describe('run_check', () => {
     expect(process.exitCode).toBe(1);
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('node scripts/jest --config jest.config.js');
+  });
+
+  it('uses the repo root tsconfig in the tsc rerun command when no nearer config exists', async () => {
+    mockExistsSync.mockImplementation(
+      (p: string) => p === '/repo/packages/foo/jest.config.js' || p === '/repo/tsconfig.json'
+    );
+    mockExecuteTypeCheckValidation.mockImplementation(async ({ log }) => {
+      log.writers[0].write({
+        args: ['proc [tsc] src/dev/run_check.ts(852,13): error TS1234: broken'],
+        type: 'error',
+      });
+      throw new Error('tsc error');
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('src/dev/run_check.ts:852:13: error TS1234: broken');
+    expect(output).toContain('node scripts/type_check --project tsconfig.json');
+    expect(output).not.toContain('node scripts/type_check --profile quick');
   });
 });

@@ -849,9 +849,12 @@ run(
           let tsconfig = '';
           if (fileMatch) {
             let dir = Path.dirname(Path.resolve(REPO_ROOT, fileMatch[1]));
-            while (dir !== REPO_ROOT && dir !== Path.dirname(dir)) {
+            while (true) {
               if (existsSync(Path.join(dir, 'tsconfig.json'))) {
                 tsconfig = Path.relative(REPO_ROOT, Path.join(dir, 'tsconfig.json'));
+                break;
+              }
+              if (dir === REPO_ROOT || dir === Path.dirname(dir)) {
                 break;
               }
               dir = Path.dirname(dir);
