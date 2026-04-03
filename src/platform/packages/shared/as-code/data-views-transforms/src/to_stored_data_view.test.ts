@@ -19,7 +19,7 @@ describe('toStoredDataView', () => {
   it('converts data_view_reference data_source to string id', () => {
     const dataView: AsCodeDataViewReference = {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-      id: 'my-data-view-id',
+      ref_id: 'my-data-view-id',
     };
     const result = toStoredDataView(dataView);
     expect(result).toBe('my-data-view-id');
