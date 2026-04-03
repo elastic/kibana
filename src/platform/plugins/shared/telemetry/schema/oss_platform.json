@@ -11684,7 +11684,7 @@
         "query_activity:minRunningTime": {
           "type": "long",
           "_meta": {
-            "description": "Non-default value of setting."
+            "description": "Minimum runtime threshold (in ms) for queries to be surfaced in Query Activity."
           }
         }
       }
