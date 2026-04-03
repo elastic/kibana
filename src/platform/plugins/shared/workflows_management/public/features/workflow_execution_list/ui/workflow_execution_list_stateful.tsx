@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, type ExecutionType } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
-import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -38,7 +38,7 @@ interface WorkflowExecutionListProps {
 }
 
 export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps) {
-  const { uiSettings, application, notifications } = useKibana().services;
+  const { uiSettings, notifications } = useKibana().services;
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
   const showExecutor =
@@ -47,7 +47,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
 
-  const canCancel = Boolean(application?.capabilities.workflowsManagement.cancelWorkflowExecution);
+  const { canCancelWorkflowExecution } = useWorkflowsCapabilities();
 
   const {
     data: workflowExecutions,
@@ -151,7 +151,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
       showExecutor={showExecutor}
-      canCancel={canCancel}
+      canCancel={canCancelWorkflowExecution}
       isCancelInProgress={isCancelInProgress}
       onConfirmCancel={onConfirmCancel}
     />

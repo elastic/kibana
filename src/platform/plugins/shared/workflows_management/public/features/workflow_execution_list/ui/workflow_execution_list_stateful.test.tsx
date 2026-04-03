@@ -10,21 +10,23 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
+import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionList } from './workflow_execution_list_stateful';
 import { useKibana } from '../../../hooks/use_kibana';
 import { createUseKibanaMockValue } from '../../../mocks';
 import { TestWrapper } from '../../../shared/test_utils';
 
 const mockSetSelectedExecution = jest.fn();
-const mockCancelAllWorkflowExecutions = jest.fn().mockResolvedValue(undefined);
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
+
+const mockWorkflowApi = createMockWorkflowApi();
+const mockUseWorkflowsCapabilities = jest.fn(() => createMockWorkflowsCapabilities());
 
 jest.mock('../../../hooks/use_kibana');
 
 jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: jest.fn(() => ({
-    cancelAllWorkflowExecutions: (...args: unknown[]) => mockCancelAllWorkflowExecutions(...args),
-  })),
+  useWorkflowsApi: () => mockWorkflowApi,
+  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
 }));
 
 jest.mock('../../../hooks/use_telemetry', () => ({
@@ -88,22 +90,9 @@ jest.mock('../../../entities/workflows/model/use_workflow_executions', () => ({
 describe('WorkflowExecutionList (stateful)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    const base = createUseKibanaMockValue();
-    (useKibana as jest.Mock).mockReturnValue({
-      ...base,
-      services: {
-        ...base.services,
-        application: {
-          ...base.services.application,
-          capabilities: {
-            ...base.services.application.capabilities,
-            workflowsManagement: {
-              cancelWorkflowExecution: true,
-            },
-          },
-        },
-      },
-    } as ReturnType<typeof createUseKibanaMockValue>);
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
+    mockWorkflowApi.cancelAllWorkflowExecutions.mockResolvedValue(undefined);
+    (useKibana as jest.Mock).mockReturnValue(createUseKibanaMockValue());
 
     mockUseWorkflowExecutions.mockReturnValue({
       data: mockWorkflowExecutions,
@@ -186,7 +175,27 @@ describe('WorkflowExecutionList (stateful)', () => {
     fireEvent.click(screen.getByTestId('cancelAllActiveExecutionsButton'));
     const dialog = await screen.findByTestId('cancelAllActiveExecutionsConfirmationModal');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel all' }));
-    await waitFor(() => expect(mockCancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1'));
+    await waitFor(() =>
+      expect(mockWorkflowApi.cancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1')
+    );
     await waitFor(() => expect(mockRefetch).toHaveBeenCalled());
+  });
+
+  it('disables bulk cancel when the user lacks cancel capability', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...createMockWorkflowsCapabilities(),
+      canCancelWorkflowExecution: false,
+    });
+    mockUseWorkflowExecutions.mockReturnValue({
+      data: mockWorkflowExecutionsWithRunning,
+      isInitialLoading: false,
+      isLoadingMore: false,
+      error: null,
+      setPaginationObserver: jest.fn(),
+      refetch: mockRefetch,
+    });
+    renderComponent();
+    expect(screen.getByTestId('cancelAllActiveExecutionsButton')).toBeDisabled();
+    expect(mockWorkflowApi.cancelAllWorkflowExecutions).not.toHaveBeenCalled();
   });
 });
