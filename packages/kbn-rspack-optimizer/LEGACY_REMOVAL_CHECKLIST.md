@@ -30,9 +30,11 @@ with `[rspack-transition]` comments for easy discovery via `grep -r 'rspack-tran
 - [ ] `.buildkite/scripts/steps/build_kibana.sh`: Remove the `[rspack-transition]` cache type validation block. Restore the simple 3-line script (bootstrap + build + post_build).
 - [ ] `.buildkite/pipelines/pull_request/base.yml`: Restore the `if:` condition from the comment. Remove the `[rspack-transition]` comment.
 - [ ] `.buildkite/scripts/download_build_artifacts.sh`: Remove the `kibana-effective-build-id` metadata lookup. Revert to `${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}`.
-- [ ] `.buildkite/scripts/post_build_kibana.sh`: Remove the `kibana-build-type.txt` upload block. Remove `KBN_USE_RSPACK` references. Remove the metrics TODO comment (metrics should be real by then).
+- [ ] `.buildkite/scripts/post_build_kibana.sh`: Remove the `kibana-build-type.txt` upload block. Remove `KBN_USE_RSPACK` references.
 - [ ] `.buildkite/scripts/build_kibana.sh`: Remove the `is_pr_with_label "ci:build-with-rspack-optimizer"` line (no longer conditional).
 - [ ] `.buildkite/pipeline-utils/pr_labels.ts`: Remove the `ci:build-with-rspack-optimizer` mapping from `LABEL_MAPPING`.
+- [ ] `.buildkite/scripts/steps/checks/bundle_limits.sh`: Remove the legacy `node scripts/build_kibana_platform_plugins --validate-limits` line and the `[rspack-transition]` comment.
+- [ ] `packages/kbn-ci-stats-shipper-cli/ship_ci_stats_cli.ts`: Remove the `[rspack-transition]` conditional in the update command, keep only the rspack command.
 
 ## Dev mode
 

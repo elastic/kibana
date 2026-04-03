@@ -48,6 +48,15 @@ export { RspackOptimizer, type RspackOptimizerOptions, type OptimizerPhase } fro
 // Plugin discovery
 export { discoverPlugins, type PluginEntry } from './utils/plugin_discovery';
 
+// Limits
+export {
+  readLimits,
+  validateLimitsForAllBundles,
+  updateBundleLimits,
+  DEFAULT_LIMITS_PATH,
+} from './limits';
+export type { Limits } from './limits';
+
 // Types
 export type { ThemeTag } from './types';
 

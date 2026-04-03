@@ -36,6 +36,8 @@ export interface BuildOptions {
   hmr?: boolean;
   /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
   basePath?: string;
+  /** Override the limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml) */
+  limitsPath?: string;
 }
 
 export interface BuildResult {
@@ -117,6 +119,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       profileStatsOnly,
       hmr,
       hmrPort,
+      limitsPath: options.limitsPath,
     });
 
     log?.info('Starting RSPack compilation...');

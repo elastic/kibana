@@ -29,6 +29,8 @@ import {
 } from './shared_config';
 import type { ThemeTag } from '../types';
 import { XPackBannerPlugin } from '../plugins/xpack_banner_plugin';
+import { BundleMetricsPlugin, type PluginMetricsInfo } from '../plugins/bundle_metrics_plugin';
+import { readLimits, DEFAULT_LIMITS_PATH } from '../limits';
 
 /**
  * Plugin to emit stats.json file for bundle analysis.
@@ -124,6 +126,8 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
   'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
   'packages/kbn-rspack-optimizer/src/plugins/xpack_banner_plugin.ts',
+  'packages/kbn-rspack-optimizer/src/plugins/bundle_metrics_plugin.ts',
+  'packages/kbn-rspack-optimizer/limits.yml',
   'packages/kbn-swc-config/src/browser.ts',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
@@ -298,6 +302,8 @@ export interface SingleCompileConfigOptions {
   hmr?: boolean;
   /** Port the HMR SSE server is listening on (required when hmr=true) */
   hmrPort?: number;
+  /** Override the limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml) */
+  limitsPath?: string;
 }
 
 /**
@@ -328,6 +334,7 @@ export async function createSingleCompileConfig(
     profileStatsOnly = false,
     hmr = false,
     hmrPort,
+    limitsPath = DEFAULT_LIMITS_PATH,
   } = options;
 
   // Discover all plugins
@@ -577,6 +584,30 @@ export async function createSingleCompileConfig(
 
       // Elastic License 2.0 banner for x-pack plugin chunks
       new XPackBannerPlugin(repoRoot, plugins),
+
+      // Bundle metrics -- collects per-plugin sizes and module counts, emits metrics.json
+      ...(dist
+        ? (() => {
+            const limits = readLimits(limitsPath);
+            const metricsInfos: PluginMetricsInfo[] = [
+              {
+                id: 'core',
+                chunkName: 'kibana',
+                limit: limits.pageLoadAssetSize?.core,
+                ignoreMetrics: false,
+              },
+              ...plugins
+                .filter((p) => !p.ignoreMetrics)
+                .map((p) => ({
+                  id: p.id,
+                  chunkName: `plugin-${p.id}`,
+                  limit: limits.pageLoadAssetSize?.[p.id],
+                  ignoreMetrics: false,
+                })),
+            ];
+            return [new BundleMetricsPlugin(metricsInfos, limitsPath)];
+          })()
+        : []),
 
       // HMR plugins -- enabled in watch dev mode
       ...(hmr

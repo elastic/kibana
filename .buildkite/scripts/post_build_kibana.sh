@@ -2,10 +2,6 @@
 
 set -euo pipefail
 
-# [rspack-transition] TODO: post_build_kibana.sh currently accepts an empty
-# metrics file without error. Once rspack metrics collection is implemented,
-# this script should validate the file is non-empty and fail on an empty array
-# to prevent silent regressions.
 if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   cmd=(
     "node" "scripts/ship_ci_stats"

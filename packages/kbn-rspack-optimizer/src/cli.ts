@@ -15,6 +15,12 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { runBuild } from './run_build';
 import type { ThemeTag } from './types';
+import {
+  validateLimitsForAllBundles,
+  updateBundleLimits,
+  DEFAULT_LIMITS_PATH,
+} from './limits';
+import { discoverPlugins } from './utils/plugin_discovery';
 
 export interface CliOptions {
   defaultLimitsPath?: string;
@@ -61,6 +67,36 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --profile-stats-only to have no value');
       }
 
+      const updateLimits = flags['update-limits'] ?? false;
+      if (typeof updateLimits !== 'boolean') {
+        throw createFlagError('expected --update-limits to have no value');
+      }
+
+      const validateLimits = flags['validate-limits'] ?? false;
+      if (typeof validateLimits !== 'boolean') {
+        throw createFlagError('expected --validate-limits to have no value');
+      }
+
+      const limitsPath =
+        typeof flags.limits === 'string' && flags.limits.length > 0
+          ? Path.resolve(flags.limits)
+          : DEFAULT_LIMITS_PATH;
+
+      // --validate-limits: quick check, no build needed
+      if (validateLimits) {
+        const allPlugins = await discoverPlugins({
+          repoRoot: REPO_ROOT,
+          examples: false,
+          testPlugins: false,
+        });
+        const pluginIds = [
+          'core',
+          ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id),
+        ];
+        validateLimitsForAllBundles(log, pluginIds, limitsPath);
+        return;
+      }
+
       const filter =
         typeof flags.filter === 'string' && flags.filter.length > 0
           ? flags.filter.split(',').map((s: string) => s.trim())
@@ -90,22 +126,30 @@ export function runRspackCli(options: CliOptions = {}): void {
 
       const startTime = Date.now();
 
+      // --update-limits forces a full dist build, ignoring --plugins/--filter
+      const effectiveDist = updateLimits || dist;
+      const effectiveExamples = updateLimits ? false : examples;
+      const effectiveTestPlugins = updateLimits ? false : testPlugins;
+      const effectivePlugins = updateLimits ? undefined : plugins;
+      const effectiveFilter = updateLimits ? undefined : filter;
+
       log.info('Building with RSPack unified compilation...');
 
       const result = await runBuild({
         repoRoot: REPO_ROOT,
         outputRoot,
-        watch,
-        dist,
+        watch: updateLimits ? false : watch,
+        dist: effectiveDist,
         cache,
-        examples,
-        testPlugins,
+        examples: effectiveExamples,
+        testPlugins: effectiveTestPlugins,
         themeTags: themes,
-        filter,
-        plugins,
+        filter: effectiveFilter,
+        plugins: effectivePlugins,
         log,
         profile: false,
         hmr: hmr ? undefined : false,
+        limitsPath,
       });
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -114,6 +158,11 @@ export function runRspackCli(options: CliOptions = {}): void {
         log.success(`RSPack build completed in ${duration}s`);
       } else {
         throw new Error(`RSPack build failed after ${duration}s`);
+      }
+
+      if (updateLimits) {
+        const metricsPath = Path.resolve(outputRoot, 'target/public/bundles/metrics.json');
+        updateBundleLimits(log, metricsPath, limitsPath);
       }
 
       await result.done;
@@ -131,8 +180,10 @@ export function runRspackCli(options: CliOptions = {}): void {
           'hmr',
           'profile',
           'profile-stats-only',
+          'update-limits',
+          'validate-limits',
         ],
-        string: ['filter', 'themes', 'output-root', 'plugins'],
+        string: ['filter', 'themes', 'output-root', 'plugins', 'limits'],
         alias: {
           w: 'watch',
           p: 'plugins',
@@ -160,6 +211,11 @@ export function runRspackCli(options: CliOptions = {}): void {
             --no-cache            Disable filesystem caching
             --no-hmr              Disable Hot Module Replacement in watch mode
 
+          Bundle Limits:
+            --update-limits       Build in dist mode and update limits.yml (always full build)
+            --validate-limits     Validate limits.yml against discovered plugins (no build)
+            --limits <path>       Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
+
           Profile Mode (one-time build with bundle analysis):
             --profile             Full profiling with stats.json + RsDoctor report
             --profile-stats-only  Fast profiling with stats.json only (skips RsDoctor)
@@ -185,6 +241,12 @@ export function runRspackCli(options: CliOptions = {}): void {
 
           # Profile production build
           node scripts/build_rspack_bundles.js --dist --profile
+
+          # Validate limits.yml (CI check, no build)
+          node scripts/build_rspack_bundles.js --validate-limits
+
+          # Update limits.yml from a full dist build
+          node scripts/build_rspack_bundles.js --dist --update-limits
         `,
       },
     }
