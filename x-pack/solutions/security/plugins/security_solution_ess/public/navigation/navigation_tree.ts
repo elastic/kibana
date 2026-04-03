@@ -6,7 +6,6 @@
  */
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
