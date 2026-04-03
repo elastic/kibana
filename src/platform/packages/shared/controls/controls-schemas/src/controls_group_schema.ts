@@ -34,73 +34,76 @@ export const controlWidthSchema = schema.oneOf(
   }
 );
 
-export const pinnedControlSchema = {
+export const pinnedControlSchema = schema.object({
   uid: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
   width: controlWidthSchema,
   grow: schema.boolean({
     defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
     meta: { description: 'Expand width of the control panel to fit available space.' },
   }),
-};
+});
 
-export const controlsGroupSchema = schema.arrayOf(
-  /**
-   * - keep types in alphabetical order for the sake of documentation
-   * - control order will be determined by the array
-   */
-  schema.discriminatedUnion('type', [
-    schema.object(
-      {
-        type: schema.literal(ESQL_CONTROL),
-        config: optionsListESQLControlSchema,
-        ...pinnedControlSchema,
-      },
-      {
-        meta: {
-          title: ESQL_CONTROL,
+export const getControlsGroupSchema = () => {
+  const pinnedControl = pinnedControlSchema.getPropSchemas();
+  return schema.arrayOf(
+    /**
+     * - keep types in alphabetical order for the sake of documentation
+     * - control order will be determined by the array
+     */
+    schema.discriminatedUnion('type', [
+      schema.object(
+        {
+          type: schema.literal(ESQL_CONTROL),
+          config: optionsListESQLControlSchema,
+          ...pinnedControl,
         },
-      }
-    ),
-    schema.object(
-      {
-        type: schema.literal(OPTIONS_LIST_CONTROL),
-        config: optionsListDSLControlSchema,
-        ...pinnedControlSchema,
-      },
-      {
-        meta: {
-          title: OPTIONS_LIST_CONTROL,
+        {
+          meta: {
+            title: ESQL_CONTROL,
+          },
+        }
+      ),
+      schema.object(
+        {
+          type: schema.literal(OPTIONS_LIST_CONTROL),
+          config: optionsListDSLControlSchema,
+          ...pinnedControl,
         },
-      }
-    ),
-    schema.object(
-      {
-        type: schema.literal(RANGE_SLIDER_CONTROL),
-        config: rangeSliderControlSchema,
-        ...pinnedControlSchema,
-      },
-      {
-        meta: {
-          title: RANGE_SLIDER_CONTROL,
+        {
+          meta: {
+            title: OPTIONS_LIST_CONTROL,
+          },
+        }
+      ),
+      schema.object(
+        {
+          type: schema.literal(RANGE_SLIDER_CONTROL),
+          config: rangeSliderControlSchema,
+          ...pinnedControl,
         },
-      }
-    ),
-    schema.object(
-      {
-        type: schema.literal(TIME_SLIDER_CONTROL),
-        config: timeSliderControlSchema,
-        ...pinnedControlSchema,
-      },
-      {
-        meta: {
-          title: TIME_SLIDER_CONTROL,
+        {
+          meta: {
+            title: RANGE_SLIDER_CONTROL,
+          },
+        }
+      ),
+      schema.object(
+        {
+          type: schema.literal(TIME_SLIDER_CONTROL),
+          config: timeSliderControlSchema,
+          ...pinnedControl,
         },
-      }
-    ),
-  ]),
-  {
-    defaultValue: [],
-    maxSize: 100,
-    meta: { description: 'An array of control panels and their state in the control group.' },
-  }
-);
+        {
+          meta: {
+            title: TIME_SLIDER_CONTROL,
+          },
+        }
+      ),
+    ]),
+    {
+      defaultValue: [],
+      maxSize: 100,
+      meta: { description: 'An array of control panels and their state in the control group.' },
+    }
+  );
+};

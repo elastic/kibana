@@ -9,11 +9,10 @@
 
 import type React from 'react';
 
-import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import { controlTitleSchema, dataControlSchema } from './control_schema';
+import type { controlTitleSchema, dataControlSchema } from './control_schema';
 import type {
-  controlsGroupSchema,
+  getControlsGroupSchema,
   controlWidthSchema,
   pinnedControlSchema,
 } from './controls_group_schema';
@@ -28,30 +27,14 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 import type { timeSliderControlSchema } from './time_slider_schema';
 
-/**
-  Converts { key: value | undefined } to { key?: value } 
- */
-type OptionalIfUndefined<T> = {
-  [K in keyof T as undefined extends T[K] ? K : never]?: T[K];
-} & {
-  [K in keyof T as undefined extends T[K] ? never : K]: T[K];
-};
-
-export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
+export type ControlsGroupState = TypeOf<ReturnType<typeof getControlsGroupSchema>>;
 export type PinnedControlState = ControlsGroupState[number];
-export type PinnedControlLayoutState = OptionalIfUndefined<{
-  [K in keyof typeof pinnedControlSchema]: TypeOf<(typeof pinnedControlSchema)[K]>;
-}> & {
-  order: number;
-  type: string;
-};
+export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema>;
 
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
-const controlStateSchema = schema.object(controlTitleSchema);
-export type ControlState = TypeOf<typeof controlStateSchema>;
+export type ControlState = TypeOf<typeof controlTitleSchema>;
 
-const dataControlStateSchema = schema.object(dataControlSchema);
-export type DataControlState = TypeOf<typeof dataControlStateSchema>;
+export type DataControlState = TypeOf<typeof dataControlSchema>;
 
 export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
 

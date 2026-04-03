@@ -40,13 +40,13 @@ export const optionsListSortSchema = schema.object(
 
 export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.number()]);
 
-const optionsListControlBaseParameters = {
+const optionsListControlBaseParameters = schema.object({
   display_settings: schema.maybe(optionsListDisplaySettingsSchema),
-};
+});
 
 export const optionsListDSLControlSchema = schema.object({
-  ...optionsListControlBaseParameters,
-  ...dataControlSchema,
+  ...optionsListControlBaseParameters.getPropSchemas(),
+  ...dataControlSchema.getPropSchemas(),
   exclude: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exclude }),
   exists_selected: schema.boolean({
     defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected,
@@ -64,8 +64,8 @@ export const optionsListDSLControlSchema = schema.object({
 });
 
 const baseEsqlControl = {
-  ...controlTitleSchema,
-  ...optionsListControlBaseParameters,
+  ...controlTitleSchema.getPropSchemas(),
+  ...optionsListControlBaseParameters.getPropSchemas(),
   selected_options: schema.arrayOf(schema.string(), { maxSize: SELECTIONS_MAX }),
   single_select: schema.boolean({ defaultValue: DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select }),
   variable_name: schema.string(),

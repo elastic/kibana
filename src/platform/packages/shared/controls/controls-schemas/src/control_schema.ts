@@ -10,14 +10,14 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
-export const controlTitleSchema = {
+export const controlTitleSchema = schema.object({
   title: schema.maybe(
     schema.string({ meta: { description: 'A human-readable title for the control' } })
   ),
-};
+});
 
-export const dataControlSchema = {
-  ...controlTitleSchema,
+export const dataControlSchema = schema.object({
+  ...controlTitleSchema.getPropSchemas(),
   data_view_id: schema.string({
     meta: { description: 'The ID of the data view that the control is tied to' }, // this will generate a reference
   }),
@@ -30,4 +30,4 @@ export const dataControlSchema = {
   ignore_validations: schema.boolean({
     defaultValue: DEFAULT_DATA_CONTROL_STATE.ignore_validations,
   }),
-};
+});
