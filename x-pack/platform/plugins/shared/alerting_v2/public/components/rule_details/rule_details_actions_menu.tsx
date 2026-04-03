@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { paths } from '../../constants';
@@ -89,10 +89,15 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.alertingV2.ruleDetails.actionsMenuPopoverAriaLabel', {
+        defaultMessage: 'Rule actions',
+      })}
       button={
-        <EuiButtonEmpty
+        <EuiButtonIcon
           data-test-subj="ruleDetailsActionsButton"
           iconType="boxesHorizontal"
+          color="text"
+          size="m"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           aria-label={i18n.translate('xpack.alertingV2.ruleDetails.actionsMenuAriaLabel', {
             defaultMessage: 'Actions',
