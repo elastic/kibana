@@ -197,7 +197,6 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
         name: i18n.translate('xpack.queryActivity.table.actionsColumn', {
           defaultMessage: 'Actions',
         }),
-        width: '240px',
         align: 'right' as const,
         render: (value: unknown, record?: TableRunningQuery) => {
           const query = (record ?? value) as TableRunningQuery | undefined;
