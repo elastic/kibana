@@ -31,6 +31,17 @@ function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
 }
 
+function decodeXmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(Number(dec)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
 function extractNextMarker(xml: string): string | undefined {
   const match = xml.match(/<NextMarker>([^<]*)<\/NextMarker>/);
   return match?.[1] || undefined;
@@ -70,7 +81,7 @@ function parseListBlobsXml(xml: string): {
     const lengthMatch = block.match(/<Content-Length>([^<]*)<\/Content-Length>/);
     const lastModMatch = block.match(/<Last-Modified>([^<]*)<\/Last-Modified>/);
     blobs.push({
-      name: nameMatch?.[1] ?? '',
+      name: decodeXmlEntities(nameMatch?.[1] ?? ''),
       contentLength: lengthMatch?.[1] ? parseInt(lengthMatch[1], 10) : undefined,
       lastModified: lastModMatch?.[1],
     });
