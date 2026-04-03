@@ -19,6 +19,7 @@ import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
+import type { EntityStoreCRUDClient as EntityStoreUpdateClient } from '@kbn/entity-store/server';
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -80,6 +81,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getEntityStoreCrudClient: () => EntityStoreCrudClient;
+  getEntityStoreUpdateClient: () => EntityStoreUpdateClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
