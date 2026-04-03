@@ -28,10 +28,7 @@ interface XYRendererProps {
   data: EsqlData;
 }
 
-const resolveXScaleType = (
-  layer: XYLayerESQL,
-  data: EsqlData
-): ScaleType => {
+const resolveXScaleType = (layer: XYLayerESQL, data: EsqlData): ScaleType => {
   const xCol = colName(layer.x);
   if (!xCol) return ScaleType.Ordinal;
 
@@ -56,14 +53,11 @@ const seriesTypeToComponent = (type: string) => {
   return LineSeries;
 };
 
-const isStacked = (type: string): boolean =>
-  type.includes('stacked');
+const isStacked = (type: string): boolean => type.includes('stacked');
 
-const isPercentage = (type: string): boolean =>
-  type.includes('percentage');
+const isPercentage = (type: string): boolean => type.includes('percentage');
 
-const isHorizontal = (type: string): boolean =>
-  type.includes('horizontal');
+const isHorizontal = (type: string): boolean => type.includes('horizontal');
 
 const getCurveType = (spec: XYState): CurveType | undefined => {
   const interpolation = spec.decorations?.line_interpolation;
@@ -79,8 +73,10 @@ const resolveRotation = (spec: XYState): 0 | 90 => {
 
 const legendIsVisible = (spec: XYState): boolean => {
   if (!spec.legend) return false;
-  return spec.legend.visibility === 'visible' ||
-    (spec.legend.visibility === 'auto' && spec.layers.some((l) => l.breakdown_by || l.y.length > 1));
+  return (
+    spec.legend.visibility === 'visible' ||
+    (spec.legend.visibility === 'auto' && spec.layers.some((l) => l.breakdown_by || l.y.length > 1))
+  );
 };
 
 const legendPosition = (spec: XYState): Position => {

@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import {
-  Chart,
-  Settings,
-  Goal,
-} from '@elastic/charts';
+import { Chart, Settings, Goal } from '@elastic/charts';
 
 import type { GaugeState, EsqlData } from '../types';
 import { toRowObjects, colName, colLabel } from './data_utils';
@@ -30,13 +26,9 @@ export const GaugeRenderer: React.FC<GaugeRendererProps> = ({ spec, data }) => {
   const max = spec.metric.max ? Number(row[colName(spec.metric.max)] ?? 100) : 100;
   const goal = spec.metric.goal ? Number(row[colName(spec.metric.goal)] ?? max) : undefined;
 
-  const bands = goal !== undefined
-    ? [min, goal, max]
-    : [min, max];
+  const bands = goal !== undefined ? [min, goal, max] : [min, max];
 
-  const bandColors = isDarkMode
-    ? ['#3c6e71', '#284b63']
-    : ['#d6e4ff', '#a3c4f3'];
+  const bandColors = isDarkMode ? ['#3c6e71', '#284b63'] : ['#d6e4ff', '#a3c4f3'];
 
   return (
     <Chart>
@@ -44,7 +36,9 @@ export const GaugeRenderer: React.FC<GaugeRendererProps> = ({ spec, data }) => {
       <Goal
         id="gauge"
         subtype={
-          spec.shape?.type === 'arc' || spec.shape?.type === 'semi_circle' || spec.shape?.type === 'circle'
+          spec.shape?.type === 'arc' ||
+          spec.shape?.type === 'semi_circle' ||
+          spec.shape?.type === 'circle'
             ? 'goal'
             : 'horizontalBullet'
         }

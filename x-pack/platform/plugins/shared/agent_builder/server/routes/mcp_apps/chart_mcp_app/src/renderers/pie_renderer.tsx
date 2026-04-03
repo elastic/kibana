@@ -6,15 +6,10 @@
  */
 
 import React from 'react';
-import {
-  Chart,
-  Settings,
-  Partition,
-  PartitionLayout,
-} from '@elastic/charts';
+import { Chart, Settings, Partition, PartitionLayout } from '@elastic/charts';
 
 import type { PieState, EsqlData } from '../types';
-import { toRowObjects, colName, colLabel } from './data_utils';
+import { toRowObjects, colName } from './data_utils';
 import { baseTheme, transparentBackground, partitionFillColor } from './chart_theme';
 
 interface PieRendererProps {
@@ -30,15 +25,18 @@ export const PieRenderer: React.FC<PieRendererProps> = ({ spec, data }) => {
   const metricCol = colName(metric);
   const groupCols = (spec.group_by ?? []).map((g) => colName(g));
 
-  const isDonut = spec.type === 'donut' ||
-    (spec.donut_hole && spec.donut_hole !== 'none');
+  const isDonut = spec.type === 'donut' || (spec.donut_hole && spec.donut_hole !== 'none');
 
   const emptySize =
-    spec.donut_hole === 'large' ? 0.6 :
-    spec.donut_hole === 'medium' ? 0.45 :
-    spec.donut_hole === 'small' ? 0.3 :
-    isDonut ? 0.45 :
-    0;
+    spec.donut_hole === 'large'
+      ? 0.6
+      : spec.donut_hole === 'medium'
+      ? 0.45
+      : spec.donut_hole === 'small'
+      ? 0.3
+      : isDonut
+      ? 0.45
+      : 0;
 
   const layers = groupCols.map((groupCol) => ({
     groupByRollup: (d: Record<string, unknown>) => d[groupCol] ?? 'Other',

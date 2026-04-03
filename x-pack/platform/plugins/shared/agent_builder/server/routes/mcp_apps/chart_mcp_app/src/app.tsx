@@ -46,9 +46,7 @@ export const App = () => {
   }
 
   if (!isConnected) {
-    return (
-      <div style={{ padding: '1rem', textAlign: 'center' }}>Connecting…</div>
-    );
+    return <div style={{ padding: '1rem', textAlign: 'center' }}>Connecting…</div>;
   }
 
   if (error) {
@@ -61,9 +59,7 @@ export const App = () => {
 
   if (!payload) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center' }}>
-        Waiting for visualization data…
-      </div>
+      <div style={{ padding: '1rem', textAlign: 'center' }}>Waiting for visualization data…</div>
     );
   }
 

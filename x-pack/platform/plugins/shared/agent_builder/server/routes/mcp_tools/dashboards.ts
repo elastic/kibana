@@ -91,9 +91,11 @@ interface LensSavedObjectItem {
  * This mirrors the public API response format without requiring the full
  * dashboard state schema validation pipeline.
  */
-const transformDashboardSoToResponse = (
-  so: { id: string; attributes: unknown; references?: Array<{ name: string; type: string; id: string }> },
-) => {
+const transformDashboardSoToResponse = (so: {
+  id: string;
+  attributes: unknown;
+  references?: Array<{ name: string; type: string; id: string }>;
+}) => {
   const attrs = (so.attributes ?? {}) as Record<string, unknown>;
   const refs = so.references ?? [];
 
@@ -104,8 +106,7 @@ const transformDashboardSoToResponse = (
   const timeRestore = attrs.timeRestore as boolean | undefined;
   const timeFrom = attrs.timeFrom as string | undefined;
   const timeTo = attrs.timeTo as string | undefined;
-  const timeRange =
-    timeRestore && timeFrom && timeTo ? { from: timeFrom, to: timeTo } : undefined;
+  const timeRange = timeRestore && timeFrom && timeTo ? { from: timeFrom, to: timeTo } : undefined;
 
   const result: {
     id: string;
@@ -139,10 +140,7 @@ const transformDashboardSoToResponse = (
 // Lens helpers using Content Management client
 // ---------------------------------------------------------------------------
 
-const getLensResponseItem = (
-  builder: LensConfigBuilder,
-  item: LensSavedObjectItem
-) => {
+const getLensResponseItem = (builder: LensConfigBuilder, item: LensSavedObjectItem) => {
   const { id, references, attributes } = item;
 
   // Use type assertion to bridge our minimal type to the full Lens type
@@ -169,10 +167,7 @@ const getLensResponseItem = (
   };
 };
 
-const getLensRequestConfig = (
-  builder: LensConfigBuilder,
-  config: Record<string, unknown>
-) => {
+const getLensRequestConfig = (builder: LensConfigBuilder, config: Record<string, unknown>) => {
   // The builder.fromAPIFormat expects specific Lens config types, but the MCP tool
   // receives arbitrary JSON from the user. The builder handles validation internally.
   return builder.fromAPIFormat(config as Parameters<LensConfigBuilder['fromAPIFormat']>[0]);
@@ -242,7 +237,16 @@ export const registerDashboardsMcpTools = (
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -312,7 +316,16 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -378,11 +391,25 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
         });
 
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ id: savedObject.id, success: true }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ id: savedObject.id, success: true }, null, 2),
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -408,7 +435,16 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -440,13 +476,26 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify({ dashboards, total: soResponse.total, page: soResponse.page }, null, 2),
+              text: JSON.stringify(
+                { dashboards, total: soResponse.total, page: soResponse.page },
+                null,
+                2
+              ),
             },
           ],
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -482,13 +531,26 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
           content: [
             {
               type: 'text' as const,
-              text: JSON.stringify({ dashboards, total: soResponse.total, page: soResponse.page }, null, 2),
+              text: JSON.stringify(
+                { dashboards, total: soResponse.total, page: soResponse.page },
+                null,
+                2
+              ),
             },
           ],
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -518,7 +580,15 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
       page: z.number().optional().describe('Page number (default: 1)'),
       per_page: z.number().optional().describe('Results per page (default: 100)'),
     },
-    async ({ query: q, page, per_page: perPage }: { query?: string; page?: number; per_page?: number }) => {
+    async ({
+      query: q,
+      page,
+      per_page: perPage,
+    }: {
+      query?: string;
+      page?: number;
+      per_page?: number;
+    }) => {
       try {
         const client = getLensClient();
         const searchQuery = {
@@ -538,7 +608,10 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
             {
               type: 'text' as const,
               text: JSON.stringify(
-                { data, meta: { page: page ?? 1, per_page: perPage ?? 100, total: pagination.total } },
+                {
+                  data,
+                  meta: { page: page ?? 1, per_page: perPage ?? 100, total: pagination.total },
+                },
                 null,
                 2
               ),
@@ -547,7 +620,16 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -573,7 +655,16 @@ Example: { "title": "My Dashboard", "panels": [{ "type": "lens", "uid": "panel1"
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -631,7 +722,16 @@ XY example: { "type": "xy", "layers": [{ "type": "bar", "dataset": { "type": "es
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -683,7 +783,16 @@ XY example: { "type": "xy", "layers": [{ "type": "bar", "dataset": { "type": "es
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }
@@ -713,7 +822,16 @@ XY example: { "type": "xy", "layers": [{ "type": "bar", "dataset": { "type": "es
         };
       } catch (error) {
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }, null, 2) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                { success: false, error: error instanceof Error ? error.message : String(error) },
+                null,
+                2
+              ),
+            },
+          ],
           isError: true,
         };
       }

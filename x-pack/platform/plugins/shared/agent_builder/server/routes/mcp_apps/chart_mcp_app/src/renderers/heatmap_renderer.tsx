@@ -9,7 +9,7 @@ import React from 'react';
 import { Chart, Heatmap, Settings, ScaleType } from '@elastic/charts';
 
 import type { HeatmapState, EsqlData } from '../types';
-import { toRowObjects, colName, colLabel } from './data_utils';
+import { toRowObjects, colName } from './data_utils';
 import { baseTheme, transparentBackground } from './chart_theme';
 
 interface HeatmapRendererProps {

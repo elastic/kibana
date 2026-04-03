@@ -47,8 +47,17 @@ export interface EsqlColumn {
 
 export interface XYLayerESQL {
   dataset: Dataset;
-  type: 'line' | 'bar' | 'bar_stacked' | 'bar_horizontal' | 'bar_horizontal_stacked'
-    | 'bar_percentage' | 'bar_horizontal_percentage' | 'area' | 'area_stacked' | 'area_percentage';
+  type:
+    | 'line'
+    | 'bar'
+    | 'bar_stacked'
+    | 'bar_horizontal'
+    | 'bar_horizontal_stacked'
+    | 'bar_percentage'
+    | 'bar_horizontal_percentage'
+    | 'area'
+    | 'area_stacked'
+    | 'area_percentage';
   x?: EsqlColumn;
   y: EsqlColumn[];
   breakdown_by?: EsqlColumn & { color?: unknown; collapse_by?: string };
@@ -139,8 +148,9 @@ export interface GaugeState {
     max?: EsqlColumn;
     goal?: EsqlColumn;
   };
-  shape?: { type: 'bullet'; direction?: 'horizontal' | 'vertical' } |
-    { type: 'circle' | 'semi_circle' | 'arc' };
+  shape?:
+    | { type: 'bullet'; direction?: 'horizontal' | 'vertical' }
+    | { type: 'circle' | 'semi_circle' | 'arc' };
 }
 
 // ---------------------------------------------------------------------------

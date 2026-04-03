@@ -64,8 +64,7 @@ export const colName = (col: EsqlColumn | undefined): string => col?.column ?? '
 /**
  * Returns the display label for a column — uses `label` if set, falls back to `column`.
  */
-export const colLabel = (col: EsqlColumn | undefined): string =>
-  col?.label ?? col?.column ?? '';
+export const colLabel = (col: EsqlColumn | undefined): string => col?.label ?? col?.column ?? '';
 
 /**
  * Finds the ES|QL column type for a given column name.

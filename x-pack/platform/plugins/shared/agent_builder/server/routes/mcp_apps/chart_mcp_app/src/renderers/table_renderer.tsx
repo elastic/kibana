@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { DatatableState, LegacyMetricState, RegionMapState, EsqlData, EsqlColumn } from '../types';
+import type { DatatableState, LegacyMetricState, RegionMapState, EsqlData } from '../types';
 import { colName, colLabel } from './data_utils';
 import { isDarkMode } from './chart_theme';
 

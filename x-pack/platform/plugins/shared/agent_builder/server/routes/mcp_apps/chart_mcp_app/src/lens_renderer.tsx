@@ -84,7 +84,16 @@ export const LensRenderer: React.FC<LensRendererProps> = ({ payload }) => {
           {title}
         </h1>
       )}
-      <div style={{ height: spec.type === 'data_table' || spec.type === 'legacy_metric' || spec.type === 'region_map' ? 'auto' : 300 }}>
+      <div
+        style={{
+          height:
+            spec.type === 'data_table' ||
+            spec.type === 'legacy_metric' ||
+            spec.type === 'region_map'
+              ? 'auto'
+              : 300,
+        }}
+      >
         {renderChart()}
       </div>
     </div>
