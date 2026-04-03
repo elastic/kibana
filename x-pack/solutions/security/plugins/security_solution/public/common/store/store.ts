@@ -58,9 +58,6 @@ export const createStoreFactory = async (
   const { kibanaDataViews, defaultDataView, signal } = await createDefaultDataView({
     application: coreStart.application,
     http: coreStart.http,
-    dataViewService: startPlugins.data.dataViews,
-    uiSettings: coreStart.uiSettings,
-    spaces: startPlugins.spaces,
     // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
     skip: enableExperimental.newDataViewPickerEnabled,
   });
