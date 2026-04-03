@@ -111,6 +111,8 @@ import {
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../styles/use_workflows_monaco_theme';
 
+const hiddenButtonStyles = css({ display: 'none' });
+
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   automaticLayout: true,
