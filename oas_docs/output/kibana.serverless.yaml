@@ -43326,9 +43326,8 @@ paths:
                         - type: string
                         - type: number
                         - type: boolean
-                        - enum:
-                            - null
                         - {}
+                      nullable: true
                     maxItems: 2
                     type: array
                   total:
@@ -45329,15 +45328,13 @@ paths:
                                     - id
                                 - type: string
                     shipper:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+                      nullable: true
                     ssl:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+                      nullable: true
                     type:
                       enum:
                         - elasticsearch
@@ -45434,15 +45431,13 @@ paths:
                       nullable: true
                       type: string
                     shipper:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+                      nullable: true
                     ssl:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+                      nullable: true
                     sync_integrations:
                       type: boolean
                     sync_uninstalled_integrations:
@@ -45513,15 +45508,13 @@ paths:
                                     - id
                                 - type: string
                     shipper:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+                      nullable: true
                     ssl:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+                      nullable: true
                     type:
                       enum:
                         - logstash
@@ -45688,15 +45681,13 @@ paths:
                           required:
                             - key
                     shipper:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+                      nullable: true
                     ssl:
-                      anyOf:
-                        - enum:
-                            - null
+                      allOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+                      nullable: true
                     timeout:
                       type: number
                     topic:
@@ -70371,15 +70362,13 @@ components:
                         - id
                     - type: string
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         type:
           enum:
             - elasticsearch
@@ -70555,15 +70544,13 @@ components:
               required:
                 - key
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         timeout:
           type: number
         topic:
@@ -70645,15 +70632,13 @@ components:
                         - id
                     - type: string
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         type:
           enum:
             - logstash
@@ -70755,15 +70740,13 @@ components:
           nullable: true
           type: string
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         sync_integrations:
           type: boolean
         sync_uninstalled_integrations:
@@ -70851,15 +70834,13 @@ components:
                         - id
                     - type: string
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         type:
           enum:
             - elasticsearch
@@ -71035,15 +71016,13 @@ components:
               required:
                 - key
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         timeout:
           type: number
         topic:
@@ -71125,15 +71104,13 @@ components:
                         - id
                     - type: string
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         type:
           enum:
             - logstash
@@ -71235,15 +71212,13 @@ components:
           nullable: true
           type: string
         shipper:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
+          nullable: true
         ssl:
-          anyOf:
-            - enum:
-                - null
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_ssl'
+          nullable: true
         sync_integrations:
           type: boolean
         sync_uninstalled_integrations:
