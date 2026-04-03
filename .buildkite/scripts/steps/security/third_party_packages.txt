@@ -41,3 +41,7 @@ tar-fs
 browserslist
 react-day-picker
 jszip
+@modelcontextprotocol/ext-apps
+@vitejs/plugin-react
+vite
+vite-plugin-singlefile
