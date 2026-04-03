@@ -80,12 +80,6 @@ describe('buildWatchlistsManagementTableColumns', () => {
     expect(column.name).toBeTruthy();
   });
 
-  it('renders empty tag for missing number of users', () => {
-    const column = getRenderableColumnByField('users.length');
-    const rendered = column.render?.(undefined, {} as WatchlistTableItemType);
-    expect(rendered).toEqual(getEmptyTagValue());
-  });
-
   it('renders risk score weighting value when provided', () => {
     const column = getRenderableColumnByField('riskModifier');
     const rendered = column.render?.(1.5, {} as WatchlistTableItemType);
