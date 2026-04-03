@@ -57,7 +57,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
                   schema.boolean({
                     meta: {
                       description:
-                        'When enabled, the API returns any spaces the user is authorized to access in any capacity, each including the purposes for which the user is authorized. This is useful for identifying spaces the user can read but is not authorized for a given purpose. Without the security plugin, this parameter has no effect, because no authorization checks are performed. This parameter can't be used together with the `purpose` parameter.'
+                        'When enabled, the API returns any spaces the user is authorized to access in any capacity, each including the purposes for which the user is authorized. This is useful for identifying spaces the user can read but is not authorized for a given purpose. Without the security plugin, this parameter has no effect, because no authorization checks are performed. This parameter cannot be used together with the `purpose` parameter.',
                     },
                   })
                 ),
