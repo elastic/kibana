@@ -8,12 +8,17 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
+import { telemetryHandler } from '../telemetry_handler';
 
-export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
+export function registerDeleteRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined
+) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
     path: `${basePath}/{id}`,
@@ -47,34 +52,25 @@ export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestH
         },
       },
     },
-    async (ctx, req, res) => {
-      const { dashboardApi } = await ctx.resolve(['dashboardApi']);
-      const telemetry = dashboardApi.getTelemetryClient();
-      try {
-        await deleteDashboard(ctx, req.params.id);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          const response = res.notFound({
-            body: {
-              message: `A dashboard with ID [${req.params.id}] was not found.`,
-            },
-          });
-          telemetry?.incrementCounter(response);
-          return response;
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          await deleteDashboard(ctx, req.params.id);
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 404) {
+            return res.notFound({
+              body: {
+                message: `A dashboard with ID [${req.params.id}] was not found.`,
+              },
+            });
+          }
+          if (e.isBoom && e.output.statusCode === 403) {
+            return res.forbidden({ body: { message: e.message } });
+          }
+          return res.badRequest({ body: { message: e.message } });
         }
-        if (e.isBoom && e.output.statusCode === 403) {
-          const response = res.forbidden({ body: { message: e.message } });
-          telemetry?.incrementCounter(response);
-          return response;
-        }
-        const response = res.badRequest({ body: { message: e.message } });
-        telemetry?.incrementCounter(response);
-        return response;
-      }
 
-      const response = res.noContent();
-      telemetry?.incrementCounter(response);
-      return response;
-    }
+        return res.noContent();
+      })
   );
 }

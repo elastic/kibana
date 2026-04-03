@@ -8,15 +8,18 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
 import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
+import { telemetryHandler } from '../telemetry_handler';
 
 export function registerCreateRoute(
-  router: VersionedRouter<DashboardApiRequestHandlerContext>,
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
@@ -54,30 +57,23 @@ export function registerCreateRoute(
         },
       }),
     },
-    async (ctx, req, res) => {
-      const { dashboardApi } = await ctx.resolve(['dashboardApi']);
-      const telemetry = dashboardApi.getTelemetryClient();
-      try {
-        const result = await create(
-          ctx,
-          getCachedDashboardStateSchema(),
-          req.body,
-          isDashboardAppRequest
-        );
-        const response = res.created({ body: result });
-        telemetry?.incrementCounter(response);
-        return response;
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          const response = res.forbidden({ body: { message: e.message } });
-          telemetry?.incrementCounter(response);
-          return response;
-        }
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await create(
+            ctx,
+            getCachedDashboardStateSchema(),
+            req.body,
+            isDashboardAppRequest
+          );
+          return res.created({ body: result });
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 403) {
+            return res.forbidden({ body: { message: e.message } });
+          }
 
-        const response = res.badRequest({ body: { message: e.message } });
-        telemetry?.incrementCounter(response);
-        return response;
-      }
-    }
+          return res.badRequest({ body: { message: e.message } });
+        }
+      })
   );
 }

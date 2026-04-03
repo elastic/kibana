@@ -24,6 +24,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -49,10 +50,6 @@ import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
-import {
-  type DashboardApiRequestHandlerContext,
-  createRouteHandlerContext,
-} from './api/request_handler_context';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -132,11 +129,7 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    core.http.registerRouteHandlerContext(
-      'dashboardApi',
-      createRouteHandlerContext(this.apiUsageCounter)
-    );
-    registerRoutes(core.http);
+    registerRoutes(core.http, this.apiUsageCounter);
 
     void registerAccessControl({
       http: core.http,
@@ -190,7 +183,7 @@ export class DashboardPlugin
     return {
       scanDashboards,
       client: {
-        read: async (requestCtx: DashboardApiRequestHandlerContext, id: string) =>
+        read: async (requestCtx: RequestHandlerContext, id: string) =>
           (await read(requestCtx, getCachedDashboardStateSchema(), id)).body,
       },
     };
