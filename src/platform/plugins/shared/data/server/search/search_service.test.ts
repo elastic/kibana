@@ -721,7 +721,7 @@ describe('Search service', () => {
 
         // some time passes, but less than the refresh interval
         currentTime =
-          initialTime + initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS - 1000;
+          initialTime + (plugin as any).MIN_SETTINGS_REFRESH_INTERVAL_MS - 1000;
 
         const initSpy = jest.spyOn(plugin as any, 'initializeSearchSettingsCache');
 
