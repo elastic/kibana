@@ -18,6 +18,14 @@ export class RuleFormPage {
     await this.page.gotoApp('management/alertingV2/rules');
   }
 
+  async gotoRuleDetails(ruleId: string) {
+    await this.page.gotoApp(`management/alertingV2/rules/${ruleId}`);
+  }
+
+  breadcrumb(text: string) {
+    return this.page.locator(`nav.euiBreadcrumbs a:has-text("${text}")`);
+  }
+
   async gotoDiscover() {
     await this.page.gotoApp('discover');
   }
