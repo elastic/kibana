@@ -75,6 +75,7 @@ export class WorkflowsApiService {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'GET',
       path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}`,
+      ignoreErrors: [404],
     });
     return response;
   }
@@ -114,6 +115,36 @@ export class WorkflowsApiService {
         body: { ids },
       });
     }
+  }
+
+  /** DELETE /api/workflows — delete workflows by IDs, with response status and body. */
+  async rawBulkDelete(ids: string[]): Promise<{
+    data: { total: number; deleted: number; failures: Array<{ id: string; error: string }> };
+    status: number;
+  }> {
+    const response = await this.kbnClient.request<{
+      total: number;
+      deleted: number;
+      failures: Array<{ id: string; error: string }>;
+    }>({
+      method: 'DELETE',
+      path: `/s/${this.spaceId}/api/workflows`,
+      body: { ids },
+      ignoreErrors: [404],
+    });
+    return response;
+  }
+
+  /** GET /api/workflows — list workflows in the space. */
+  async list(): Promise<{ results: Array<{ id: string; name: string }>; total: number }> {
+    const response = await this.kbnClient.request<{
+      results: Array<{ id: string; name: string }>;
+      total: number;
+    }>({
+      method: 'GET',
+      path: `/s/${this.spaceId}/api/workflows?size=10000&page=1`,
+    });
+    return response.data;
   }
 
   /** GET /api/workflows + DELETE — delete all workflows in a space. */
@@ -170,17 +201,26 @@ export class WorkflowsApiService {
     return response.data;
   }
 
+  async cancel(workflowExecutionId: string): Promise<void> {
+    await this.kbnClient.request({
+      method: 'POST',
+      path: `/s/${this.spaceId}/api/workflows/executions/${workflowExecutionId}/cancel`,
+    });
+  }
+
   async waitForTermination({
     workflowExecutionId,
+    timeout = 20_000,
   }: {
     workflowExecutionId: string;
+    timeout?: number;
   }): Promise<WorkflowExecutionDto | undefined> {
     return waitForConditionOrThrow({
       action: () => this.getExecution(workflowExecutionId),
       condition: (execution) => !!execution && isTerminalStatus(execution.status ?? ''),
       interval: 1000,
-      timeout: 20_000,
-      errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status`,
+      timeout,
+      errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status within ${timeout}ms`,
     });
   }
 }
