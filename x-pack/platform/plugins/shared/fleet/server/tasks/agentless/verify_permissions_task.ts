@@ -216,7 +216,7 @@ async function runPermissionVerifierTask(abortController: AbortController) {
       break;
     }
 
-    logger.info(`${VERIFY_PERMISSIONS_TASK} Task run completed`);
+    logger.debug(`${VERIFY_PERMISSIONS_TASK} Task run completed`);
   } catch (error) {
     if (abortController.signal.aborted) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} Task was aborted`);

@@ -18,7 +18,7 @@ import {
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-  LENS_TERMS_SIZE_DEFAULT,
+  LENS_TERMS_LIMIT_DEFAULT,
 } from './constants';
 
 describe('Bucket Operation Schemas', () => {
@@ -52,14 +52,14 @@ describe('Bucket Operation Schemas', () => {
         fields: ['category'],
       };
       const validated = bucketTermsOperationSchema.validate(input);
-      expect(validated).toEqual({ ...input, size: LENS_TERMS_SIZE_DEFAULT });
+      expect(validated).toEqual({ ...input, limit: LENS_TERMS_LIMIT_DEFAULT });
     });
 
     it('validates a valid terms configuration', () => {
       const input = {
         operation: 'terms',
         fields: ['category'],
-        size: 10,
+        limit: 10,
         increase_accuracy: true,
         includes: {
           values: ['value1', 'value2'],
@@ -201,7 +201,7 @@ describe('Bucket Operation Schemas', () => {
         {
           operation: 'terms',
           fields: ['category'],
-          size: LENS_TERMS_SIZE_DEFAULT,
+          limit: LENS_TERMS_LIMIT_DEFAULT,
         },
         {
           operation: 'histogram',

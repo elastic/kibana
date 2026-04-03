@@ -198,7 +198,7 @@ export const CreateIndexPanel = ({
                 <EuiButtonEmpty
                   color="text"
                   iconSide="right"
-                  iconType="popout"
+                  iconType="external"
                   data-test-subj="analyzeLogsBtn"
                   href={docLinks.analyzeLogs}
                   target="_blank"
@@ -233,7 +233,7 @@ export const CreateIndexPanel = ({
                 <EuiButtonEmpty
                   color="text"
                   iconSide="right"
-                  iconType="popout"
+                  iconType="external"
                   data-test-subj="startO11yTrialBtn"
                   href={o11yTrialLink}
                   target="_blank"

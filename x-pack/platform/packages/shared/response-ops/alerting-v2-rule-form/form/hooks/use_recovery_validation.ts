@@ -102,7 +102,7 @@ export const useRecoveryValidation = ({ search }: UseRecoveryValidationProps) =>
       required: i18n.translate('xpack.alertingV2.ruleForm.recoveryQueryRequired', {
         defaultMessage: 'Recovery query is required when using a custom recovery condition.',
       }),
-      validate: (value: string | undefined) => {
+      validate: (value: string | null | undefined) => {
         if (!value) return true;
 
         // ES|QL syntax validation
@@ -124,7 +124,7 @@ export const useRecoveryValidation = ({ search }: UseRecoveryValidationProps) =>
   // Split mode: optional recovery base query rules (syntax only)
   const splitBaseQueryRules = useMemo(
     () => ({
-      validate: (value: string | undefined) => {
+      validate: (value: string | null | undefined) => {
         if (!value) return true;
         const syntaxError = validateEsqlQuery(value);
         if (syntaxError) return syntaxError;

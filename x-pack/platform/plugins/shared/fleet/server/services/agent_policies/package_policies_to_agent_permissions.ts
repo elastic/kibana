@@ -31,7 +31,6 @@ import { PackagePolicyRequestError, PackagePolicyValidationError } from '../../e
 
 import type { FullAgentPolicyInput, PackagePolicy, TemplateAgentPolicyInput } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
-import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 
 import { extractSignalTypesFromPipelines } from './otel_collector';
@@ -117,9 +116,13 @@ export function storedPackagePoliciesToAgentPermissions(
       return connectorServicePermissions(packagePolicy.id);
     }
 
-    // For packages that have any dynamic_signal_types input (input-only or composable integration),
-    // skip the dataStreams check — permissions will be determined dynamically from OTel pipelines.
-    const isDynamicInput = hasDynamicSignalTypes(pkg);
+    // If any enabled input in this package policy has dynamic_signal_types, permissions are
+    // determined dynamically from OTel pipelines rather than from static data stream definitions.
+    // We check per-input (not package-level) so that a non-dynamic input in a package that also
+    // has a dynamic input template gets normal data-stream-based permissions.
+    const isDynamicInput = packagePolicy.inputs.some(
+      (input) => input.enabled && packagePolicyInputAllowsUndefinedDataStreamType(pkg, input)
+    );
 
     const dataStreams = getNormalizedDataStreams(pkg);
     if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {

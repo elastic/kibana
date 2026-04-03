@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const getCascadeRequestTimestamp = async () => {
-      await inspector.open();
+      await discover.openInspectorFromTabMenu();
       try {
         const requestNames = await inspector.getRequestNames();
 
