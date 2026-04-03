@@ -130,7 +130,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         const engineType = item.entity?.engine_type;
         const panelId =
           engineType && engineType in EntityPanelKeyByType
-            ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType]
+            ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType] ??
+              GenericEntityPanelKey
             : GenericEntityPanelKey;
 
         if (!panelId) {
@@ -209,12 +210,9 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
               .slice(0, MAX_DOCUMENTS_TO_LOAD)
               .map((doc) => ({
                 itemType: DOCUMENT_TYPE_ENTITY,
+                entity: doc.entity,
                 id: doc.id,
-                type: doc.entity?.type,
-                subType: doc.entity?.sub_type,
                 icon: node.icon,
-                availableInEntityStore: !!doc.entity?.availableInEntityStore,
-                sourceFields: doc.entity?.sourceFields,
               })),
           },
         });
