@@ -18,10 +18,10 @@ import {
   type QueryLink,
   type QueryLinkRequest,
   type QueryUnlinkRequest,
+  type SearchMode,
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
-import type { QUERY_FEATURE_TYPE } from '../fields';
 import {
   ASSET_ID,
   ASSET_TYPE,
@@ -32,6 +32,7 @@ import {
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
   QUERY_KQL_BODY,
+  QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
   RULE_BACKED,
@@ -39,14 +40,39 @@ import {
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
+import { parseError } from '../../errors/parse_error';
 import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
 
+/**
+ * Minimum raw ELSER score threshold for semantic search results.
+ *
+ * We apply min_score directly on the raw ELSER scores rather than using
+ * `minmax` normalization because minmax is relative to the current result set:
+ * the top result always normalizes to 1.0, so irrelevant queries (e.g.,
+ * "test-keyword" against security documents) still return hits. A raw score
+ * threshold avoids this — ELSER produces very low scores (typically < 1.0)
+ * for nonsensical or completely unrelated queries, while genuinely relevant
+ * matches score much higher (5–30+).
+ *
+ * This threshold may need tuning as the dataset evolves. If legitimate
+ * matches are being excluded, lower it; if noise creeps back in, raise it.
+ */
+const SEMANTIC_MIN_SCORE = 10;
+
+const SEARCH_SIZE_LIMIT = 10_000;
+
+const LEGACY_RUNTIME_MAPPINGS = {
+  [QUERY_FEATURE_NAME]: { type: 'keyword' as const },
+  [QUERY_FEATURE_FILTER]: { type: 'keyword' as const },
+};
+
 export interface QueryLinkFilters {
   ruleUnbacked?: RuleUnbackedFilter;
+  queryIds?: string[];
 }
 
 interface TermQueryOpts {
@@ -100,15 +126,49 @@ function termsQuery<T extends string>(
   return [{ terms: { [field]: filteredValues } }];
 }
 
+function escapeWildcard(input: string): string {
+  return input.replace(/[\\*?]/g, '\\$&');
+}
+
 function wildcardQuery<T extends string>(
   field: T,
-  value: TermQueryFieldValue | undefined
+  value: TermQueryFieldValue | undefined,
+  opts: { boost?: number } = {}
 ): QueryDslQueryContainer[] {
   if (value === null || value === undefined || value === '') {
     return [];
   }
 
-  return [{ wildcard: { [field]: { value: `*${value}*`, case_insensitive: true } } }];
+  return [
+    {
+      wildcard: {
+        [field]: {
+          value: `*${escapeWildcard(String(value))}*`,
+          case_insensitive: true,
+          ...(opts.boost !== undefined && { boost: opts.boost }),
+        },
+      },
+    },
+  ];
+}
+
+function buildKeywordQuery(
+  query: string,
+  filter: QueryDslQueryContainer[]
+): QueryDslQueryContainer {
+  return {
+    bool: {
+      filter,
+      should: [
+        ...wildcardQuery(QUERY_TITLE, query, { boost: 3 }),
+        ...wildcardQuery(QUERY_DESCRIPTION, query, { boost: 2 }),
+        ...wildcardQuery(QUERY_KQL_BODY, query),
+        ...wildcardQuery(QUERY_FEATURE_NAME, query),
+        ...wildcardQuery(QUERY_FEATURE_FILTER, query),
+      ],
+      minimum_should_match: 1,
+    },
+  };
 }
 
 export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id' | 'asset.type'>) {
@@ -151,39 +211,53 @@ interface QueryBulkDeleteOperation {
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
 function fromStorage(link: StoredQueryLink): QueryLink {
-  const storageFields: QueryLinkStorageFields & {
-    [QUERY_FEATURE_NAME]: string;
-    [QUERY_FEATURE_FILTER]: string;
-    [QUERY_FEATURE_TYPE]: 'system';
-    [QUERY_EVIDENCE]?: string[];
-  } = link as StoredQueryLink & {
-    [QUERY_FEATURE_NAME]: string;
-    [QUERY_FEATURE_FILTER]: string;
-    [QUERY_FEATURE_TYPE]: 'system';
-    [QUERY_EVIDENCE]?: string[];
-  };
   return {
-    ...storageFields,
+    [ASSET_UUID]: link[ASSET_UUID],
+    [ASSET_ID]: link[ASSET_ID],
+    [ASSET_TYPE]: link[ASSET_TYPE],
     stream_name: link[STREAM_NAME],
-    rule_backed: storageFields[RULE_BACKED],
-    rule_id: storageFields[RULE_ID],
+    rule_backed: link[RULE_BACKED],
+    rule_id: link[RULE_ID],
     query: {
-      id: storageFields[ASSET_ID],
-      title: storageFields[QUERY_TITLE],
-      description: storageFields[QUERY_DESCRIPTION],
-      /**
-       * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
-       */
+      id: link[ASSET_ID],
+      title: link[QUERY_TITLE],
+      description: link[QUERY_DESCRIPTION],
       esql: {
-        query: storageFields[QUERY_ESQL_QUERY],
+        query: link[QUERY_ESQL_QUERY],
       },
-      severity_score: storageFields[QUERY_SEVERITY_SCORE],
-      evidence: storageFields[QUERY_EVIDENCE],
+      severity_score: link[QUERY_SEVERITY_SCORE],
+      // QUERY_EVIDENCE ('experimental.query.evidence') lives under the dynamic-disabled
+      // 'experimental' object, so it can't be added to QueryLinkStorageFields without
+      // breaking the IStorageClient Exact type check.
+      evidence: (link as Record<string, unknown>)[QUERY_EVIDENCE] as string[] | undefined,
     },
-  } satisfies QueryLink;
+  };
 }
 
-function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest): StoredQueryLink {
+function mapSearchHits(response: { hits: { hits: Array<{ _source: StoredQueryLink }> } }) {
+  return response.hits.hits.map((hit) => fromStorage(hit._source));
+}
+
+export function buildSearchEmbeddingText(
+  query: Pick<StreamQuery, 'title' | 'description'>,
+  streamName?: string
+): string {
+  const parts: string[] = [];
+  if (streamName) {
+    parts.push(`Stream: ${streamName}`);
+  }
+  parts.push(`Title: ${query.title}`);
+  if (query.description) {
+    parts.push(`Description: ${query.description}`);
+  }
+  return parts.join('\n');
+}
+
+function toStorage(
+  definition: Streams.all.Definition,
+  request: QueryLinkRequest,
+  inferenceAvailable: boolean
+): StoredQueryLink {
   const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
   return {
@@ -196,6 +270,9 @@ function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
+    ...(inferenceAvailable
+      ? { [QUERY_SEARCH_EMBEDDING]: buildSearchEmbeddingText(query, definition.name) }
+      : {}),
   } as StoredQueryLink;
 }
 
@@ -232,7 +309,8 @@ export class QueryClient {
       rulesClient: RulesClient;
       logger: Logger;
     },
-    private readonly isSignificantEventsEnabled: boolean = false
+    private readonly isSignificantEventsEnabled: boolean = false,
+    private readonly inferenceAvailable: boolean = false
   ) {}
 
   // ==================== Storage Operations ====================
@@ -243,7 +321,7 @@ export class QueryClient {
   ): Promise<{ deleted: QueryLink[]; indexed: QueryLink[] }> {
     const name = definition.name;
     const assetsResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
+      size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       query: {
         bool: {
@@ -252,9 +330,7 @@ export class QueryClient {
       },
     });
 
-    const existingQueryLinks = assetsResponse.hits.hits.map((hit) => {
-      return fromStorage(hit._source);
-    });
+    const existingQueryLinks = mapSearchHits(assetsResponse);
 
     const nextQueryLinks = links.map((link) => {
       return { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
@@ -295,7 +371,7 @@ export class QueryClient {
     const filters = [...termsQuery(STREAM_NAME, names), ...termQuery(ASSET_TYPE, 'query')];
 
     const assetsResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
+      size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       query: {
         bool: {
@@ -326,11 +402,12 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
+      ...termsQuery(ASSET_ID, filters?.queryIds),
       ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
+      size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       query: {
         bool: {
@@ -339,7 +416,7 @@ export class QueryClient {
       },
     });
 
-    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return mapSearchHits(queriesResponse);
   }
 
   /**
@@ -379,7 +456,7 @@ export class QueryClient {
 
   async bulkGetByIds(name: string, ids: string[]) {
     const assetsResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
+      size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       query: {
         bool: {
@@ -395,10 +472,49 @@ export class QueryClient {
       },
     });
 
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return mapSearchHits(assetsResponse);
   }
 
   async findQueries(
+    streamNames: string[],
+    query: string,
+    filters?: QueryLinkFilters,
+    searchMode?: SearchMode
+  ): Promise<QueryLink[]> {
+    const effectiveMode = this.resolveSearchMode(searchMode);
+
+    try {
+      return await this.executeFindQueries(effectiveMode, streamNames, query, filters);
+    } catch (error) {
+      // Only fall back silently when the mode was auto-resolved (no explicit
+      // searchMode from the caller). If the caller explicitly requested a
+      // non-keyword mode, propagate the error so they know their request failed.
+      if (effectiveMode !== 'keyword' && !searchMode) {
+        const { message } = parseError(error);
+        this.dependencies.logger.warn(
+          `Search mode "${effectiveMode}" failed, falling back to keyword: ${message}`
+        );
+        return await this.executeFindQueries('keyword', streamNames, query, filters);
+      }
+      throw error;
+    }
+  }
+
+  private resolveSearchMode(searchMode?: SearchMode): SearchMode {
+    if (searchMode) {
+      if (searchMode !== 'keyword' && !this.inferenceAvailable) {
+        this.dependencies.logger.debug(
+          `Search mode "${searchMode}" requested but inference is unavailable, falling back to keyword`
+        );
+        return 'keyword';
+      }
+      return searchMode;
+    }
+    return this.inferenceAvailable ? 'hybrid' : 'keyword';
+  }
+
+  private async executeFindQueries(
+    mode: SearchMode,
     streamNames: string[],
     query: string,
     filters?: QueryLinkFilters
@@ -409,39 +525,101 @@ export class QueryClient {
       ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
+    if (mode === 'keyword') {
+      return this.findQueriesByKeyword(filter, query);
+    }
+
+    if (mode === 'semantic') {
+      return this.findQueriesBySemantic(filter, query);
+    }
+
+    return this.findQueriesByHybrid(filter, query);
+  }
+
+  private async findQueriesByKeyword(
+    filter: QueryDslQueryContainer[],
+    query: string
+  ): Promise<QueryLink[]> {
     const assetsResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
+      size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
-      runtime_mappings: {
-        [QUERY_FEATURE_NAME]: { type: 'keyword' },
-        [QUERY_FEATURE_FILTER]: { type: 'keyword' },
-      },
-      query: {
-        bool: {
-          filter,
-          should: [
-            ...wildcardQuery(QUERY_TITLE, query),
-            ...wildcardQuery(QUERY_DESCRIPTION, query),
-            ...wildcardQuery(QUERY_KQL_BODY, query),
-            ...wildcardQuery(QUERY_FEATURE_NAME, query),
-            ...wildcardQuery(QUERY_FEATURE_FILTER, query),
-          ],
-          minimum_should_match: 1,
+      runtime_mappings: LEGACY_RUNTIME_MAPPINGS,
+      query: buildKeywordQuery(query, filter),
+    });
+
+    return mapSearchHits(assetsResponse);
+  }
+
+  private async findQueriesBySemantic(
+    filter: QueryDslQueryContainer[],
+    query: string
+  ): Promise<QueryLink[]> {
+    const assetsResponse = await this.dependencies.storageClient.search({
+      size: SEARCH_SIZE_LIMIT,
+      track_total_hits: false,
+      retriever: {
+        standard: {
+          query: {
+            match: { [QUERY_SEARCH_EMBEDDING]: query },
+          },
+          filter: { bool: { filter } },
+          min_score: SEMANTIC_MIN_SCORE,
         },
       },
     });
 
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return mapSearchHits(assetsResponse);
+  }
+
+  private async findQueriesByHybrid(
+    filter: QueryDslQueryContainer[],
+    query: string
+  ): Promise<QueryLink[]> {
+    const assetsResponse = await this.dependencies.storageClient.search({
+      size: SEARCH_SIZE_LIMIT,
+      track_total_hits: false,
+      runtime_mappings: LEGACY_RUNTIME_MAPPINGS,
+      retriever: {
+        rrf: {
+          retrievers: [
+            {
+              standard: {
+                // Keyword leg uses empty filter — stream/asset filters are
+                // applied at the RRF level to avoid double-filtering.
+                query: buildKeywordQuery(query, []),
+              },
+            },
+            {
+              standard: {
+                query: {
+                  match: { [QUERY_SEARCH_EMBEDDING]: query },
+                },
+                // See SEMANTIC_MIN_SCORE for rationale.
+                min_score: SEMANTIC_MIN_SCORE,
+              },
+            },
+          ],
+          filter: {
+            bool: {
+              filter,
+            },
+          },
+          rank_window_size: SEARCH_SIZE_LIMIT,
+          // Lower than the ES default (60) to give more weight to top-ranked
+          // results from each retriever, improving precision for small catalogs.
+          rank_constant: 20,
+        },
+      },
+    });
+
+    return mapSearchHits(assetsResponse);
   }
 
   private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
-          const document = toStorage(
-            definition,
-            Object.values(operation)[0].asset as QueryLinkRequest
-          );
+          const document = toStorage(definition, operation.index.asset, this.inferenceAvailable);
           return {
             index: {
               document,
@@ -689,27 +867,68 @@ export class QueryClient {
 
     await this.installQueries(toPromote, [], definition);
 
-    const bulkOperations = toPromote.map((link) => {
-      const document = toStorage(definition, {
-        [ASSET_ID]: link[ASSET_ID],
-        [ASSET_TYPE]: link[ASSET_TYPE],
-        query: link.query,
-        rule_backed: true,
-        rule_id: link.rule_id,
-      });
-      return {
+    await this.bulkStorage(
+      definition,
+      toPromote.map((link) => ({
         index: {
-          document,
-          _id: document[ASSET_UUID],
+          asset: {
+            [ASSET_ID]: link[ASSET_ID],
+            [ASSET_TYPE]: link[ASSET_TYPE],
+            query: link.query,
+            rule_backed: true,
+            rule_id: link.rule_id,
+          },
         },
-      };
-    });
-    await this.dependencies.storageClient.bulk({
-      operations: bulkOperations,
-      throwOnFail: true,
-    });
+      }))
+    );
 
     return { promoted: toPromote.length };
+  }
+
+  /**
+   * Removes backing Kibana rules for stored rule-backed queries, then marks them as unbacked.
+   */
+  public async demoteQueries(
+    definition: Streams.all.Definition,
+    queryIds: string[]
+  ): Promise<{ demoted: number }> {
+    const streamName = definition.name;
+
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping demoteQueries because significant events feature is disabled.`
+      );
+      return { demoted: 0 };
+    }
+
+    const { [streamName]: currentQueryLinks } = await this.getStreamToQueryLinksMap([streamName]);
+    const idSet = new Set(queryIds);
+    const toDemote = currentQueryLinks.filter(
+      (link) => link.rule_backed && idSet.has(link.query.id)
+    );
+
+    if (toDemote.length === 0) {
+      return { demoted: 0 };
+    }
+
+    await this.bulkStorage(
+      definition,
+      toDemote.map((link) => ({
+        index: {
+          asset: {
+            [ASSET_ID]: link[ASSET_ID],
+            [ASSET_TYPE]: link[ASSET_TYPE],
+            query: link.query,
+            rule_backed: false,
+            rule_id: link.rule_id,
+          },
+        },
+      }))
+    );
+
+    await this.uninstallQueries(toDemote);
+
+    return { demoted: toDemote.length };
   }
 
   private async installQueries(

@@ -53,9 +53,9 @@ describe('RuleTitleWithBadges', () => {
     expect(screen.getByTestId('kindBadge')).toHaveTextContent('Detect only');
   });
 
-  it('renders kind as Alert for alert rules', () => {
+  it('renders kind as Alerting for alert rules', () => {
     wrap(<RuleTitleWithBadges rule={{ ...baseRule, kind: 'alert' }} />);
-    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alert');
+    expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alerting');
   });
 
   it('renders enabled badge when rule is enabled', () => {
