@@ -499,9 +499,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('elastic-api-version', '1')
           .expect(200);
 
-        const usernames = response.body.data.map(
-          (c: { created_by: string }) => c.created_by
-        );
+        const usernames = response.body.data.map((c: { created_by: string }) => c.created_by);
         const uniqueUsernames = [...new Set(usernames)];
         expect(uniqueUsernames.length).to.be(usernames.length);
       });
