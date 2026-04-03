@@ -221,7 +221,10 @@ export class WorkflowExecutionState {
         const staleIds = executionIds.slice(0, -1);
         for (const execId of staleIds) {
           const stepExec = this.stepExecutions.get(execId);
-          if (stepExec?.stepType && !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType)) {
+          if (
+            stepExec &&
+            (stepExec.stepType == null || !EVICTION_EXEMPT_STEP_TYPES.has(stepExec.stepType))
+          ) {
             // Replace with a shallow copy so any pending stepDocumentsChanges entry
             // for this execution is not mutated (it shares the same object reference
             // when the step was first created via createStep).

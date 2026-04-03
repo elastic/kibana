@@ -506,19 +506,19 @@ describe('WorkflowExecutionState', () => {
         stepId: 'innerStep',
         output: { data: 'iteration-0' },
         input: { idx: 0 },
-      } as unknown as EsWorkflowStepExecution);
+      });
       underTest.upsertStep({
         id: 'exec-2',
         stepId: 'innerStep',
         output: { data: 'iteration-1' },
         input: { idx: 1 },
-      } as unknown as EsWorkflowStepExecution);
+      });
       underTest.upsertStep({
         id: 'exec-3',
         stepId: 'innerStep',
         output: { data: 'iteration-2' },
         input: { idx: 2 },
-      } as unknown as EsWorkflowStepExecution);
+      });
 
       underTest.evictStaleLoopOutputs(['innerStep']);
 
