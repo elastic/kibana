@@ -13,6 +13,7 @@ import type {
   StoredScript,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Owner } from '../../common/constants/types';
 
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import {
@@ -39,6 +40,8 @@ interface AnalyticsIndexParams {
   sourceQuery: QueryDslQueryContainer;
   taskId: string;
   taskManager: TaskManagerStartContract;
+  spaceId: string;
+  owner: Owner;
 }
 
 interface MappingMeta {
@@ -61,6 +64,8 @@ export class AnalyticsIndex {
   private readonly taskId: string;
   private readonly sourceIndex: string;
   private readonly sourceQuery: QueryDslQueryContainer;
+  private readonly spaceId: string;
+  private readonly owner: Owner;
 
   constructor({
     logger,
@@ -76,6 +81,8 @@ export class AnalyticsIndex {
     taskId,
     sourceIndex,
     sourceQuery,
+    spaceId,
+    owner,
   }: AnalyticsIndexParams) {
     this.logger = logger;
     this.esClient = esClient;
@@ -92,6 +99,8 @@ export class AnalyticsIndex {
     this.taskId = taskId;
     this.sourceIndex = sourceIndex;
     this.sourceQuery = sourceQuery;
+    this.spaceId = spaceId;
+    this.owner = owner;
     this.indexSettings = {
       hidden: true,
       // settings are not supported on serverless ES
@@ -258,6 +267,8 @@ export class AnalyticsIndex {
       sourceIndex: this.sourceIndex,
       sourceQuery: this.sourceQuery,
       destIndex: this.indexName,
+      spaceId: this.spaceId,
+      owner: this.owner,
       taskManager: this.taskManager,
       logger: this.logger,
     });

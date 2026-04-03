@@ -32,6 +32,7 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
@@ -64,6 +65,7 @@ export interface CasesServerStartDependencies {
   spaces?: SpacesPluginStart;
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  dataViews?: DataViewsPluginStart;
 }
 
 export interface CaseRequestContext {

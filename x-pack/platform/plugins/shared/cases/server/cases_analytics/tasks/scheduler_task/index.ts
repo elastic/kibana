@@ -12,8 +12,13 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SavedObjectsClientContract, CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ConfigType } from '../../../config';
-import { ANALYTICS_SCHEDULER_TASK_TYPE, CASE_SAVED_OBJECT } from '../../../../common/constants';
+import {
+  ANALYTICS_SCHEDULER_TASK_TYPE,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+} from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSchedulerTaskFactory } from './scheduler_task_factory';
 import { CAI_SCHEDULER_TASK_ID } from './constants';
@@ -23,16 +28,19 @@ export function registerCAISchedulerTask({
   logger,
   core,
   analyticsConfig,
+  isServerless,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
   analyticsConfig: ConfigType['analytics'];
+  isServerless: boolean;
 }) {
   const getUnsecureSavedObjectsClient = async (): Promise<SavedObjectsClientContract> => {
     const [{ savedObjects }] = await core.getStartServices();
     const internalSavedObjectsRepository = savedObjects.createInternalRepository([
       CASE_SAVED_OBJECT,
+      CASE_CONFIGURE_SAVED_OBJECT,
     ]);
     return new SavedObjectsClient(internalSavedObjectsRepository);
   };
@@ -49,19 +57,33 @@ export function registerCAISchedulerTask({
     const [{ elasticsearch }] = await core.getStartServices();
     return elasticsearch.client.asInternalUser;
   };
+  const getDataViewsService = async (): Promise<DataViewsService | undefined> => {
+    const [{ savedObjects, elasticsearch }, pluginsStart] = await core.getStartServices();
+    if (!pluginsStart.dataViews) {
+      return undefined;
+    }
+    const soClient = new SavedObjectsClient(
+      savedObjects.createInternalRepository([CASE_SAVED_OBJECT, CASE_CONFIGURE_SAVED_OBJECT])
+    );
+    return pluginsStart.dataViews
+      .dataViewsServiceFactory(soClient, elasticsearch.client.asInternalUser, undefined, true)
+      .catch(() => undefined);
+  };
 
   taskManager.registerTaskDefinitions({
     [ANALYTICS_SCHEDULER_TASK_TYPE]: {
       title: 'Schedules cases analytics synchronization tasks.',
       maxAttempts: 3,
-      createTaskRunner: () => {
+      createTaskRunner: (context) => {
         return new AnalyticsIndexSchedulerTaskFactory({
           getUnsecureSavedObjectsClient,
           getTaskManager,
           logger,
           analyticsConfig,
           getESClient,
-        }).create();
+          getDataViewsService,
+          isServerless,
+        }).create(context);
       },
     },
   });
@@ -81,7 +103,7 @@ export async function scheduleCAISchedulerTask({
       params: {},
       runAt: new Date(Date.now() + 60 * 1000),
       schedule: {
-        interval: '1h',
+        interval: '5m',
       },
       state: {},
     });

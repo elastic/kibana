@@ -15,6 +15,8 @@ describe('config validation', () => {
           "analytics": Object {
             "index": Object {
               "enabled": false,
+              "maxAnalyticsEnabledSpaces": 100,
+              "reindexConcurrency": 3,
             },
           },
           "attachments": Object {

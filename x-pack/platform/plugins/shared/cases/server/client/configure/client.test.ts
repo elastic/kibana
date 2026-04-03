@@ -1212,6 +1212,156 @@ describe('client', () => {
         });
       });
     });
+
+    describe('analytics_enabled', () => {
+      it('throws when enabling analytics beyond the configured maximum', async () => {
+        // Build a clientArgs with the cap forced to 2
+        const cappedArgs = {
+          ...clientArgs,
+          config: {
+            ...clientArgs.config,
+            analytics: {
+              ...clientArgs.config.analytics,
+              index: { ...clientArgs.config.analytics.index, maxAnalyticsEnabledSpaces: 2 },
+            },
+          },
+        };
+
+        cappedArgs.services.caseConfigureService.get.mockResolvedValueOnce({
+          attributes: { customFields: [], owner: 'cases', analytics_enabled: false },
+          version: 'test-version',
+        } as any);
+
+        // getSpacesWithAnalyticsEnabled calls unsecuredSavedObjectsClient.find
+        cappedArgs.unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'cfg-1',
+              type: 'cases-configure',
+              score: 0,
+              references: [],
+              attributes: { owner: 'cases' },
+              namespaces: ['default'],
+            },
+            {
+              id: 'cfg-2',
+              type: 'cases-configure',
+              score: 0,
+              references: [],
+              attributes: { owner: 'securitySolution' },
+              namespaces: ['default'],
+            },
+          ],
+          total: 2,
+          page: 1,
+          per_page: 10000,
+        });
+
+        await expect(
+          update(
+            'test-id',
+            { version: 'test-version', analytics_enabled: true },
+            cappedArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow('Analytics cannot be enabled');
+      });
+
+      it('does not check the cap when analytics is already enabled on this configure SO', async () => {
+        // Build clientArgs with a cap of 0 — any cap check would throw immediately
+        const zeroCappedArgs = {
+          ...clientArgs,
+          config: {
+            ...clientArgs.config,
+            analytics: {
+              ...clientArgs.config.analytics,
+              index: { ...clientArgs.config.analytics.index, maxAnalyticsEnabledSpaces: 0 },
+            },
+          },
+        };
+
+        zeroCappedArgs.services.caseConfigureService.get.mockResolvedValueOnce({
+          attributes: { customFields: [], owner: 'cases', analytics_enabled: true },
+          version: 'test-version',
+        } as any);
+
+        // Proceed regardless of downstream errors — the key assertion is that
+        // find was never called (cap check was skipped because it's already enabled).
+        try {
+          await update(
+            'test-id',
+            { version: 'test-version', analytics_enabled: true },
+            zeroCappedArgs,
+            casesClientInternal
+          );
+        } catch {
+          // downstream errors (connector mapping, decode, etc.) are irrelevant here
+        }
+
+        expect(zeroCappedArgs.unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+      });
+
+      it('resets analytics_sync_status to active when transitioning from disabled to enabled', async () => {
+        /*
+         * FAILURE SCENARIO: analytics was previously enabled then disabled; the SO still
+         * holds analytics_sync_status = 'idle' from the prior period. Without explicitly
+         * writing 'active' on re-enable, the idle callout appears in the configure UI
+         * immediately after toggling analytics back on.
+         */
+        clientArgs.services.caseConfigureService.get.mockResolvedValueOnce({
+          // @ts-ignore: partial attributes sufficient for this test
+          attributes: {
+            customFields: [],
+            owner: 'cases',
+            analytics_enabled: false,
+            analytics_sync_status: 'idle',
+            connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+          },
+          version: 'test-version',
+        });
+
+        // Cap check: find returns 0 enabled pairs so the cap is not exceeded
+        clientArgs.unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 10000,
+        });
+
+        // getMappings returns null → no connector mapping update needed
+        casesClientInternal.configuration.getMappings.mockResolvedValueOnce(null);
+
+        clientArgs.services.caseConfigureService.patch.mockResolvedValueOnce({
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version-2',
+          namespaces: ['default'],
+          references: [],
+          // @ts-ignore
+          attributes: { analytics_enabled: true, analytics_sync_status: 'active' },
+        });
+
+        try {
+          await update(
+            'test-id',
+            { version: 'test-version', analytics_enabled: true },
+            clientArgs,
+            casesClientInternal
+          );
+        } catch {
+          // downstream decode errors are irrelevant — we only care about the patch call
+        }
+
+        expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            updatedAttributes: expect.objectContaining({
+              analytics_sync_status: 'active',
+            }),
+          })
+        );
+      });
+
+    });
   });
 
   describe('create', () => {

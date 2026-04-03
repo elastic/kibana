@@ -20,6 +20,7 @@ export interface UseCasesFeatures {
   metricsFeatures: SingleCaseMetricsFeature[];
   isObservablesFeatureEnabled: boolean;
   isExtractObservablesEnabled: boolean;
+  isAnalyticsAuthorized: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
@@ -28,6 +29,9 @@ export const useCasesFeatures = (): UseCasesFeatures => {
     permissions: { assign },
   } = useCasesContext();
   const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
+  // isAtLeastPlatinum() returns true for Platinum AND above (including Enterprise).
+  // The variable name "hasLicenseGreaterThanPlatinum" is a historical misnomer —
+  // Platinum users DO have access to the features gated by this flag.
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
   const hasLicenseWithAtLeastGold = isAtLeastGold();
   const casesFeatures = useMemo(
@@ -51,6 +55,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       isObservablesFeatureEnabled: !!features.observables.enabled,
       isExtractObservablesEnabled:
         !!features.observables.enabled && !!features.observables.autoExtract,
+      isAnalyticsAuthorized: hasLicenseGreaterThanPlatinum,
     }),
     [
       features.alerts.enabled,

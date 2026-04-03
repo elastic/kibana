@@ -135,6 +135,7 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
     getConnectors: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
+    ensureUpdateAuthorized: jest.fn(),
   });
 };
 

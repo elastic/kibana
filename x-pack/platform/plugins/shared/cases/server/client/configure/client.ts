@@ -21,6 +21,7 @@ import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
 } from '../../../common/types/domain';
+import type { Owner } from '../../../common/constants/types';
 import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
@@ -42,6 +43,7 @@ import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
+import { getSpacesWithAnalyticsEnabled } from '../../cases_analytics/utils';
 
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter, transformTemplateCustomFields } from '../utils';
@@ -98,6 +100,14 @@ export interface ConfigureSubClient {
    * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
    */
   create(configuration: ConfigurationRequest): Promise<Configuration>;
+
+  /**
+   * Verifies that the current user has settings-level (write) access for the
+   * given owner's configuration. Throws a 403 Boom error if the user only has
+   * read access. Used by internal routes that perform operations equivalent to
+   * updateConfiguration (e.g. triggering an analytics reindex).
+   */
+  ensureUpdateAuthorized(owner: Owner, id: string): Promise<void>;
 }
 
 /**
@@ -180,8 +190,35 @@ export const createConfigurationSubClient = (
       update(configurationId, configuration, clientArgs, casesInternalClient),
     create: (configuration: ConfigurationRequest) =>
       create(configuration, clientArgs, casesInternalClient),
+    ensureUpdateAuthorized: (owner: Owner, id: string) =>
+      ensureUpdateAuthorized(owner, id, clientArgs),
   });
 };
+
+/**
+ * Verifies the current user has write (updateConfiguration) access for the
+ * given owner's configuration.  Used by internal routes that must gate on
+ * settings-level privileges without performing an actual SO update.
+ */
+export async function ensureUpdateAuthorized(
+  owner: Owner,
+  id: string,
+  clientArgs: CasesClientArgs
+): Promise<void> {
+  const { authorization, logger } = clientArgs;
+  try {
+    await authorization.ensureAuthorized({
+      operation: Operations.updateConfiguration,
+      entities: [{ owner, id }],
+    });
+  } catch (error) {
+    throw createCaseError({
+      message: `Not authorized to perform analytics sync for owner ${owner}: ${error}`,
+      error,
+      logger,
+    });
+  }
+}
 
 export async function get(
   params: GetConfigurationFindRequest = {},
@@ -301,6 +338,7 @@ export async function update(
     unsecuredSavedObjectsClient,
     user,
     authorization,
+    config,
   } = clientArgs;
 
   try {
@@ -349,6 +387,26 @@ export async function update(
       );
     }
 
+    // Enforce the analytics space cap when transitioning from disabled → enabled.
+    // Uses unsecuredSavedObjectsClient with namespaces: ['*'] to count all enabled
+    // (space, owner) pairs cluster-wide.  The check is best-effort: concurrent PATCH
+    // requests may both pass, causing a small overshoot that is bounded in practice.
+    if (request.analytics_enabled === true && configuration.attributes.analytics_enabled !== true) {
+      const maxSpaces = config.analytics.index.maxAnalyticsEnabledSpaces;
+      const enabledPairs = await getSpacesWithAnalyticsEnabled(unsecuredSavedObjectsClient);
+      if (enabledPairs.length >= maxSpaces) {
+        throw Boom.badRequest(
+          `Analytics cannot be enabled: the cluster already has analytics enabled for ` +
+            `${enabledPairs.length} owner-space pair(s), which meets or exceeds the configured ` +
+            `maximum of ${maxSpaces}. Each pair creates 3 Elasticsearch indices (content, activity, ` +
+            `lifecycle) costing ~3 shards single-node or ~6 shards on multi-node clusters. ` +
+            `To raise the limit, increase 'xpack.cases.analytics.index.maxAnalyticsEnabledSpaces' ` +
+            `and ensure 'cluster.max_shards_per_node' allows it ` +
+            `(required: maxSpaces × 3 ≤ max_shards_per_node × data_node_count / 2).`
+        );
+      }
+    }
+
     let error = null;
     const updateDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
@@ -395,6 +453,13 @@ export async function update(
         ...queryWithoutVersionAndConnector,
         ...(updatedTemplates && { templates: updatedTemplates }),
         ...(connector != null && { connector }),
+        // When analytics transitions from disabled → enabled, reset the sync
+        // status to 'active' so the idle callout doesn't linger from a prior
+        // enabled period where the space had drifted into idle mode.
+        ...(request.analytics_enabled === true &&
+          configuration.attributes.analytics_enabled !== true && {
+            analytics_sync_status: 'active',
+          }),
         updated_at: updateDate,
         updated_by: user,
       },

@@ -36,6 +36,53 @@ export const CAI_ACTIVITY_INDEX_MAPPINGS: MappingTypeMapping = {
         severity: {
           type: 'keyword',
         },
+        assignees: {
+          properties: {
+            uid: {
+              type: 'keyword',
+            },
+          },
+        },
+        pushed: {
+          properties: {
+            connector_id: {
+              type: 'keyword',
+            },
+            connector_name: {
+              type: 'keyword',
+            },
+            external_id: {
+              type: 'keyword',
+            },
+            external_title: {
+              type: 'keyword',
+            },
+            external_url: {
+              type: 'keyword',
+            },
+            pushed_at: {
+              type: 'date',
+            },
+          },
+        },
+        title: {
+          type: 'keyword',
+        },
+        description: {
+          type: 'text',
+        },
+        custom_fields: {
+          type: 'flattened',
+        },
+        comment: {
+          type: 'text',
+        },
+        comment_type: {
+          type: 'keyword',
+        },
+        comment_id: {
+          type: 'keyword',
+        },
       },
     },
     created_at: {

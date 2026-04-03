@@ -10,7 +10,7 @@ import { initialConfiguration } from './utils';
 import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
 
 const transformConfiguration = (data: CasesConfigurationUI[] | null): CasesConfigurationUI[] => {
-  if (data) {
+  if (data?.length) {
     return data;
   }
 

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import { type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { CancellableTask } from '@kbn/task-manager-plugin/server/task';
 import type { Owner } from '../../../../common/constants/types';
 import type { ConfigType } from '../../../config';
@@ -18,10 +19,13 @@ import {
   destinationIndexBySyncType,
 } from '../../constants';
 import { SynchronizationSubTaskRunner } from './synchronization_sub_task';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../../common/constants';
+import type { ConfigurationPersistedAttributes } from '../../../common/types/configure';
 
 interface SynchronizationTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
   getESClient: () => Promise<ElasticsearchClient>;
+  getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   logger: Logger;
   analyticsConfig: ConfigType['analytics'];
 }
@@ -38,6 +42,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
   private readonly owner: Owner;
   private readonly spaceId: string;
   private readonly getESClient: () => Promise<ElasticsearchClient>;
+  private readonly getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   private readonly previousTaskState?: SynchronizationTaskStateBySyncType;
   private readonly logger: Logger;
 
@@ -46,6 +51,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
   constructor({
     taskInstance,
     getESClient,
+    getUnsecureSavedObjectsClient,
     logger,
     analyticsConfig,
   }: SynchronizationTaskRunnerFactoryConstructorParams) {
@@ -54,20 +60,37 @@ export class SynchronizationTaskRunner implements CancellableTask {
     this.owner = taskInstance.params.owner;
     this.spaceId = taskInstance.params.spaceId;
     this.getESClient = getESClient;
+    this.getUnsecureSavedObjectsClient = getUnsecureSavedObjectsClient;
     this.logger = logger;
     this.analyticsConfig = analyticsConfig;
   }
 
   public async run() {
+    const executionId = uuidv4();
+    const startMs = Date.now();
+
     if (!this.analyticsConfig.index.enabled) {
       this.logger.debug(
-        `[synchronization-task-runner] Analytics index is disabled, skipping synchronization task.`,
+        `[synchronization-task-runner][${this.owner}/${this.spaceId}] Analytics index is disabled, skipping synchronization task.`,
         {
+          owner: this.owner,
+          spaceId: this.spaceId,
+          executionId,
           tags: ['cai-synchronization', 'synchronization-task-runner'],
         }
       );
       return;
     }
+
+    this.logger.info(
+      `[synchronization-task-runner][${this.owner}/${this.spaceId}] Starting synchronization task run`,
+      {
+        owner: this.owner,
+        spaceId: this.spaceId,
+        executionId,
+        tags: ['cai-synchronization', 'synchronization-task-runner'],
+      }
+    );
 
     const esClient = await this.getESClient();
     const subTasks = CAISyncTypes.map((syncType) => {
@@ -103,12 +126,69 @@ export class SynchronizationTaskRunner implements CancellableTask {
       {}
     );
 
+    // If any sync type completed successfully, update analytics_last_sync_at on the configure SO
+    const lastSyncSuccessTimes = results
+      .map((r) => r?.lastSyncSuccess)
+      .filter((t): t is Date => t instanceof Date);
+
+    if (lastSyncSuccessTimes.length > 0) {
+      const maxLastSyncSuccess = new Date(
+        Math.max(...lastSyncSuccessTimes.map((d) => d.getTime()))
+      );
+      this.updateConfigureLastSyncAt(maxLastSyncSuccess.toISOString()).catch((err) => {
+        this.logger.warn(
+          `[synchronization-task-runner][${this.owner}/${this.spaceId}] Failed to update analytics_last_sync_at`,
+          {
+            owner: this.owner,
+            spaceId: this.spaceId,
+            executionId,
+            error: err,
+            tags: ['cai-synchronization', 'synchronization-task-runner'],
+          }
+        );
+      });
+    }
+
+    this.logger.info(
+      `[synchronization-task-runner][${this.owner}/${this.spaceId}] Synchronization task run complete`,
+      {
+        owner: this.owner,
+        spaceId: this.spaceId,
+        executionId,
+        durationMs: Date.now() - startMs,
+        tags: ['cai-synchronization', 'synchronization-task-runner'],
+      }
+    );
+
     return {
       state: {
         ...this.previousTaskState,
         ...newTaskState,
       },
     };
+  }
+
+  private async updateConfigureLastSyncAt(timestamp: string): Promise<void> {
+    const soClient = await this.getUnsecureSavedObjectsClient();
+
+    const results = await soClient.find<ConfigurationPersistedAttributes>({
+      type: CASE_CONFIGURE_SAVED_OBJECT,
+      namespaces: [this.spaceId],
+      filter: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.owner: "${this.owner}"`,
+      perPage: 1,
+    });
+
+    if (results.saved_objects.length === 0) {
+      return;
+    }
+
+    const so = results.saved_objects[0];
+    await soClient.update<ConfigurationPersistedAttributes>(
+      CASE_CONFIGURE_SAVED_OBJECT,
+      so.id,
+      { analytics_last_sync_at: timestamp },
+      { namespace: this.spaceId === 'default' ? undefined : this.spaceId }
+    );
   }
 
   public async cancel() {}

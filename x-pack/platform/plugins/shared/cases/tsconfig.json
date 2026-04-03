@@ -106,7 +106,8 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/resizable-layout",
     "@kbn/css-utils",
-    "@kbn/shared-ux-column-presets"
+    "@kbn/shared-ux-column-presets",
+    "@kbn/data-views-plugin"
   ],
   "exclude": ["target/**/*"]
 }

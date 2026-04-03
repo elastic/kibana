@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { ConfigType } from '../../../config';
 import { BackfillTaskRunner } from './backfill_task_runner';
@@ -13,21 +13,25 @@ import { BackfillTaskRunner } from './backfill_task_runner';
 interface CaseAnalyticsIndexBackfillTaskFactoryParams {
   logger: Logger;
   getESClient: () => Promise<ElasticsearchClient>;
+  getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   analyticsConfig: ConfigType['analytics'];
 }
 
 export class CaseAnalyticsIndexBackfillTaskFactory {
   private readonly logger: Logger;
   private readonly getESClient: () => Promise<ElasticsearchClient>;
+  private readonly getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   private readonly analyticsConfig: ConfigType['analytics'];
 
   constructor({
     logger,
     getESClient,
+    getUnsecureSavedObjectsClient,
     analyticsConfig,
   }: CaseAnalyticsIndexBackfillTaskFactoryParams) {
     this.logger = logger;
     this.getESClient = getESClient;
+    this.getUnsecureSavedObjectsClient = getUnsecureSavedObjectsClient;
     this.analyticsConfig = analyticsConfig;
   }
 
@@ -36,6 +40,7 @@ export class CaseAnalyticsIndexBackfillTaskFactory {
       taskInstance: context.taskInstance,
       logger: this.logger,
       getESClient: this.getESClient,
+      getUnsecureSavedObjectsClient: this.getUnsecureSavedObjectsClient,
       analyticsConfig: this.analyticsConfig,
     });
   }

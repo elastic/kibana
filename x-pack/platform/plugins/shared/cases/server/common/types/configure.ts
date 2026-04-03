@@ -33,6 +33,9 @@ export interface ConfigurationPersistedAttributes {
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
+  analytics_enabled?: boolean;
+  analytics_last_sync_at?: string;
+  analytics_sync_status?: 'active' | 'idle';
 }
 
 type PersistedObservableTypesConfiguration = Array<{
@@ -77,6 +80,9 @@ export const ConfigurationPartialAttributesRt = rt.intersection([
   rt.exact(
     rt.partial({
       owner: rt.string,
+      analytics_enabled: rt.boolean,
+      analytics_last_sync_at: rt.string,
+      analytics_sync_status: rt.union([rt.literal('active'), rt.literal('idle')]),
     })
   ),
 ]);

@@ -22,7 +22,11 @@ import type {
 } from '../../../common/types/domain';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
 import { getCaseConfigurationDetailsUrl } from '../../../common/api';
-import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
+import {
+  CASE_CONFIGURE_CONNECTORS_URL,
+  CASE_CONFIGURE_URL,
+  INTERNAL_ANALYTICS_SYNC_URL,
+} from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
 import type { ApiProps, CasesConfigurationUI } from '../types';
@@ -103,6 +107,13 @@ export const patchCaseConfigure = async (
   return convertConfigureResponseToCasesConfigure(configuration);
 };
 
+export const triggerAnalyticsSync = async (owner: string): Promise<void> => {
+  await KibanaServices.get().http.fetch(INTERNAL_ANALYTICS_SYNC_URL, {
+    method: 'POST',
+    body: JSON.stringify({ owner }),
+  });
+};
+
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
   const response = await KibanaServices.get().http.fetch<ActionTypeConnector[]>(
     getAllConnectorTypesUrl(),
@@ -125,6 +136,9 @@ const convertConfigureResponseToCasesConfigure = (
     connector,
     owner,
     observableTypes,
+    analyticsEnabled,
+    analyticsLastSyncAt,
+    analyticsSyncStatus,
   } = configuration;
 
   return {
@@ -137,5 +151,8 @@ const convertConfigureResponseToCasesConfigure = (
     connector,
     owner,
     observableTypes,
+    analyticsEnabled,
+    analyticsLastSyncAt,
+    analyticsSyncStatus,
   };
 };

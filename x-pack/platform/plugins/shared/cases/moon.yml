@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/resizable-layout'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod

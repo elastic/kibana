@@ -89,6 +89,8 @@ describe('AnalyticsIndex', () => {
       sourceQuery,
       taskId,
       taskManager,
+      spaceId: 'default',
+      owner: 'securitySolution',
     });
   });
 
@@ -132,6 +134,8 @@ describe('AnalyticsIndex', () => {
       sourceIndex,
       sourceQuery,
       destIndex: indexName,
+      spaceId: 'default',
+      owner: 'securitySolution',
       taskManager,
       logger,
     });
@@ -167,6 +171,8 @@ describe('AnalyticsIndex', () => {
       sourceIndex,
       sourceQuery,
       destIndex: indexName,
+      spaceId: 'default',
+      owner: 'securitySolution',
       taskManager,
       logger,
     });
@@ -249,6 +255,8 @@ describe('AnalyticsIndex', () => {
         sourceIndex,
         sourceQuery,
         destIndex: indexName,
+        spaceId: 'default',
+        owner: 'securitySolution',
         taskManager,
         logger,
       });
@@ -292,6 +300,8 @@ describe('AnalyticsIndex', () => {
         sourceIndex,
         sourceQuery,
         destIndex: indexName,
+        spaceId: 'default',
+        owner: 'securitySolution',
         taskManager,
         logger,
       });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import {
   createTaskRunError,
@@ -13,18 +14,22 @@ import {
   throwUnrecoverableError,
   type ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { CancellableTask } from '@kbn/task-manager-plugin/server/task';
 import type {
   IndicesGetMappingResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
+import type { Owner } from '../../../../common/constants/types';
 import type { ConfigType } from '../../../config';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../../common/constants';
+import type { ConfigurationPersistedAttributes } from '../../../common/types/configure';
 
 interface BackfillTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
   getESClient: () => Promise<ElasticsearchClient>;
+  getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   logger: Logger;
   analyticsConfig: ConfigType['analytics'];
 }
@@ -33,7 +38,10 @@ export class BackfillTaskRunner implements CancellableTask {
   private readonly sourceIndex: string;
   private readonly destIndex: string;
   private readonly sourceQuery: QueryDslQueryContainer;
+  private readonly spaceId: string;
+  private readonly owner: Owner;
   private readonly getESClient: () => Promise<ElasticsearchClient>;
+  private readonly getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   private readonly logger: Logger;
   private readonly errorSource = TaskErrorSource.FRAMEWORK;
   private readonly analyticsConfig: ConfigType['analytics'];
@@ -41,42 +49,83 @@ export class BackfillTaskRunner implements CancellableTask {
   constructor({
     taskInstance,
     getESClient,
+    getUnsecureSavedObjectsClient,
     logger,
     analyticsConfig,
   }: BackfillTaskRunnerFactoryConstructorParams) {
     this.sourceIndex = taskInstance.params.sourceIndex;
     this.destIndex = taskInstance.params.destIndex;
     this.sourceQuery = taskInstance.params.sourceQuery;
+    this.spaceId = taskInstance.params.spaceId;
+    this.owner = taskInstance.params.owner;
     this.getESClient = getESClient;
+    this.getUnsecureSavedObjectsClient = getUnsecureSavedObjectsClient;
     this.logger = logger;
     this.analyticsConfig = analyticsConfig;
   }
 
   public async run() {
+    const executionId = uuidv4();
+    const startMs = Date.now();
+
     if (!this.analyticsConfig.index.enabled) {
-      this.logDebug('Analytics index is disabled, skipping backfill task.');
+      this.logDebug('Analytics index is disabled, skipping backfill task.', executionId);
       return;
     }
+
+    this.logger.info(`[backfill-task][${this.destIndex}] Starting backfill reindex`, {
+      destIndex: this.destIndex,
+      sourceIndex: this.sourceIndex,
+      executionId,
+      tags: ['cai-backfill', this.destIndex],
+    });
 
     const esClient = await this.getESClient();
     try {
       await this.waitForDestIndex(esClient);
       await this.backfillReindex(esClient);
 
+      this.logger.info(`[backfill-task][${this.destIndex}] Backfill reindex complete`, {
+        destIndex: this.destIndex,
+        executionId,
+        durationMs: Date.now() - startMs,
+        tags: ['cai-backfill', this.destIndex],
+      });
+
+      // Update analytics_last_sync_at so the UI reflects that data is available.
+      // Best-effort: a failure here must not fail the task itself.
+      if (this.spaceId && this.owner) {
+        this.updateLastSyncAt(executionId).catch((err: Error) => {
+          this.logger.warn(
+            `[backfill-task][${this.destIndex}] Failed to update analytics_last_sync_at after backfill`,
+            {
+              destIndex: this.destIndex,
+              executionId,
+              error: err,
+              tags: ['cai-backfill', this.destIndex],
+            }
+          );
+        });
+      }
+
       return {
-        // one time only tasks get deleted so this state is not enough
-        // for the periodic tasks to know the backfill was complete
-        state: {}, // ?
+        state: {},
       };
     } catch (e) {
       if (isRetryableEsClientError(e)) {
-        throwRetryableError(
-          createTaskRunError(new Error(this.getErrorMessage(e.message)), this.errorSource),
-          true
-        );
+        this.logger.warn(`[backfill-task][${this.destIndex}] Transient ES error — will retry`, {
+          destIndex: this.destIndex,
+          executionId,
+          error: e,
+          tags: ['cai-backfill', 'cai-backfill-error', this.destIndex],
+        });
+        throwRetryableError(createTaskRunError(e, this.errorSource), true);
       }
 
-      this.logger.error(`[${this.destIndex}] Backfill reindex failed. Error: ${e.message}`, {
+      this.logger.error(`[backfill-task][${this.destIndex}] Backfill reindex failed`, {
+        destIndex: this.destIndex,
+        executionId,
+        error: e,
         tags: ['cai-backfill', 'cai-backfill-error', this.destIndex],
       });
       throwUnrecoverableError(createTaskRunError(e, this.errorSource));
@@ -112,6 +161,39 @@ export class BackfillTaskRunner implements CancellableTask {
         this.errorSource
       );
     }
+  }
+
+  private async updateLastSyncAt(executionId: string): Promise<void> {
+    const timestamp = new Date().toISOString();
+    const soClient = await this.getUnsecureSavedObjectsClient();
+
+    const results = await soClient.find<ConfigurationPersistedAttributes>({
+      type: CASE_CONFIGURE_SAVED_OBJECT,
+      namespaces: [this.spaceId],
+      filter: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.owner: "${this.owner}"`,
+      perPage: 1,
+    });
+
+    if (results.saved_objects.length === 0) {
+      this.logger.debug(
+        `[backfill-task][${this.destIndex}] No configure SO found for owner=${this.owner} spaceId=${this.spaceId}; skipping analytics_last_sync_at update`,
+        { executionId, tags: ['cai-backfill', this.destIndex] }
+      );
+      return;
+    }
+
+    const so = results.saved_objects[0];
+    await soClient.update<ConfigurationPersistedAttributes>(
+      CASE_CONFIGURE_SAVED_OBJECT,
+      so.id,
+      { analytics_last_sync_at: timestamp, analytics_sync_status: 'active' },
+      { namespace: this.spaceId === 'default' ? undefined : this.spaceId }
+    );
+
+    this.logger.debug(
+      `[backfill-task][${this.destIndex}] Updated analytics_last_sync_at to ${timestamp} and reset analytics_sync_status to active`,
+      { executionId, tags: ['cai-backfill', this.destIndex] }
+    );
   }
 
   private async getPainlessScript(esClient: ElasticsearchClient) {
@@ -155,8 +237,9 @@ export class BackfillTaskRunner implements CancellableTask {
     });
   }
 
-  public logDebug(message: string) {
+  public logDebug(message: string, executionId?: string) {
     this.logger.debug(`[${this.destIndex}] ${message}`, {
+      ...(executionId ? { executionId } : {}),
       tags: ['cai-backfill', this.destIndex],
     });
   }

@@ -49,4 +49,6 @@ export const createActivityAnalyticsIndex = ({
     taskId: getCAIActivityBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
     sourceQuery: getActivitySourceQuery(spaceId, owner),
+    spaceId,
+    owner,
   });

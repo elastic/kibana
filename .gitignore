@@ -21,6 +21,8 @@ target
 .idea
 .claude/*.local.json
 .claude/worktrees/
+.claude/settings.json
+.claude/settings.local.json
 .cursor
 !x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/

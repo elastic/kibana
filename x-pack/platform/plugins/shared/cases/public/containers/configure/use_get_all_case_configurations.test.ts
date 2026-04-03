@@ -43,6 +43,7 @@ describe('Use get all case configurations hook', () => {
         version: '',
         owner: '',
         observableTypes: [],
+        analyticsEnabled: false,
       },
     ]);
 
@@ -75,6 +76,36 @@ describe('Use get all case configurations hook', () => {
           version: '',
           owner: '',
           observableTypes: [],
+          analyticsEnabled: false,
+        },
+      ])
+    );
+  });
+
+  it('returns the initial configuration when the API returns null', async () => {
+    // transformConfiguration uses `data?.length` (not just `data`) so that both
+    // null and [] fall through to initialConfiguration rather than returning an
+    // empty array, which would leave the UI with no configuration to render.
+    const spy = jest.spyOn(api, 'getCaseConfigure');
+    spy.mockResolvedValue(null);
+
+    const { result } = renderHook(() => useGetAllCaseConfigurations(), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() =>
+      expect(result.current.data).toEqual([
+        {
+          closureType: 'close-by-user',
+          connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+          customFields: [],
+          templates: [],
+          id: '',
+          mappings: [],
+          version: '',
+          owner: '',
+          observableTypes: [],
+          analyticsEnabled: false,
         },
       ])
     );

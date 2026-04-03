@@ -17,8 +17,45 @@ export const ConfigSchema = schema.object({
   analytics: schema.object({
     index: schema.object({
       enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: true }),
+      }),
+      /**
+       * Maximum number of concurrent ES _reindex operations the owner sync task may
+       * start in a single run.  Keeping this low prevents coordinating-node OOM
+       * (each in-flight reindex holds a full bulk batch in memory on the node that
+       * received the API call).
+       *
+       * Serverless is capped at 1 and cannot be overridden — the single search-tier
+       * node coordinates all requests and saturates at ~3-5 simultaneous reindexes.
+       * On traditional deployments the safe upper bound depends on cluster size;
+       * the default of 3 is conservative enough for a single-node dev cluster.
+       */
+      reindexConcurrency: offeringBasedSchema({
+        serverless: schema.number({ defaultValue: 1, min: 1, max: 1 }),
+        traditional: schema.number({ defaultValue: 3, min: 1, max: 10 }),
+      }),
+      /**
+       * Hard cap on the number of (space, owner) pairs that may have analytics
+       * enabled simultaneously.  Each pair creates 3 hidden ES indices (content,
+       * activity, lifecycle) with 1 primary shard each.  With auto_expand_replicas
+       * '0-1' the shard count doubles to 6 per pair on multi-node clusters.
+       *
+       * Per-space cost (3 owners fully enabled):
+       *   single-node  → 9 shards / space
+       *   multi-node   → 18 shards / space
+       *
+       * Required headroom formula:
+       *   maxAnalyticsEnabledSpaces × 3 ≤ max_shards_per_node × data_node_count / 2
+       *
+       * Default 100 is safe for a single-node dev cluster at the ES default of
+       * max_shards_per_node=1000 (100 × 3 × 3 owners = 900 shards).  Operators
+       * running large multi-space deployments should increase this value together
+       * with cluster.max_shards_per_node.
+       */
+      maxAnalyticsEnabledSpaces: offeringBasedSchema({
+        serverless: schema.number({ defaultValue: 100, min: 1 }),
+        traditional: schema.number({ defaultValue: 100, min: 1 }),
       }),
     }),
   }),

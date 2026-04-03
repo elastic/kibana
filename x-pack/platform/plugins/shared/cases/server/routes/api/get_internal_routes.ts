@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup } from '@kbn/core/server';
 import type { UserProfileService } from '../../services';
 import { getConnectorsRoute } from './internal/get_connectors';
 import { getCaseUserActionStatsRoute } from './internal/get_case_user_actions_stats';
@@ -29,8 +31,16 @@ import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
+import type { CasesServerStartDependencies } from '../../types';
+import { createTriggerAnalyticsSyncRoute } from './internal/trigger_analytics_sync';
 
-export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
+export const getInternalRoutes = (
+  userProfileService: UserProfileService,
+  config: ConfigType,
+  core: CoreSetup<CasesServerStartDependencies>,
+  logger: Logger,
+  isServerless: boolean
+) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -53,4 +63,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
     ...getTemplateRoutes(config),
+    createTriggerAnalyticsSyncRoute({ core, logger, isServerless }),
   ] as CaseRoute[];

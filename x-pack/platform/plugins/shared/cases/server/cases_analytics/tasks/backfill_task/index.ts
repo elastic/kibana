@@ -11,10 +11,20 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Owner } from '../../../../common/constants/types';
 import type { ConfigType } from '../../../config';
-import { ANALYTICS_BACKFILL_TASK_TYPE } from '../../../../common/constants';
+import {
+  ANALYTICS_BACKFILL_TASK_TYPE,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+} from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
 import { CaseAnalyticsIndexBackfillTaskFactory } from './backfill_task_factory';
 import { BACKFILL_RUN_AT } from './constants';
@@ -35,6 +45,15 @@ export function registerCAIBackfillTask({
     return elasticsearch.client.asInternalUser;
   };
 
+  const getUnsecureSavedObjectsClient = async (): Promise<SavedObjectsClientContract> => {
+    const [{ savedObjects }] = await core.getStartServices();
+    const internalRepository = savedObjects.createInternalRepository([
+      CASE_SAVED_OBJECT,
+      CASE_CONFIGURE_SAVED_OBJECT,
+    ]);
+    return new SavedObjectsClient(internalRepository);
+  };
+
   taskManager.registerTaskDefinitions({
     [ANALYTICS_BACKFILL_TASK_TYPE]: {
       title: 'Backfill cases analytics indexes.',
@@ -42,6 +61,7 @@ export function registerCAIBackfillTask({
       createTaskRunner: (context: RunContext) => {
         return new CaseAnalyticsIndexBackfillTaskFactory({
           getESClient,
+          getUnsecureSavedObjectsClient,
           logger,
           analyticsConfig,
         }).create(context);
@@ -55,6 +75,8 @@ export async function scheduleCAIBackfillTask({
   sourceIndex,
   sourceQuery,
   destIndex,
+  spaceId,
+  owner,
   taskManager,
   logger,
 }: {
@@ -62,6 +84,8 @@ export async function scheduleCAIBackfillTask({
   sourceIndex: string;
   sourceQuery: QueryDslQueryContainer;
   destIndex: string;
+  spaceId: string;
+  owner: Owner;
   taskManager: TaskManagerStartContract;
   logger: Logger;
 }) {
@@ -69,7 +93,7 @@ export async function scheduleCAIBackfillTask({
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ANALYTICS_BACKFILL_TASK_TYPE,
-      params: { sourceIndex, destIndex, sourceQuery },
+      params: { sourceIndex, destIndex, sourceQuery, spaceId, owner },
       runAt: new Date(Date.now() + BACKFILL_RUN_AT),
       state: {},
     });

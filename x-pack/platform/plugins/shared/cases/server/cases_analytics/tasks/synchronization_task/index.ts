@@ -12,9 +12,13 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { ConfigType } from '../../../config';
-import { ANALYTICS_SYNCHRONIZATION_TASK_TYPE } from '../../../../common/constants';
+import {
+  ANALYTICS_SYNCHRONIZATION_TASK_TYPE,
+  CASE_CONFIGURE_SAVED_OBJECT,
+} from '../../../../common/constants';
 import type { Owner } from '../../../../common/constants/types';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
@@ -37,12 +41,21 @@ export function registerCAISynchronizationTask({
     return elasticsearch.client.asInternalUser;
   };
 
+  const getUnsecureSavedObjectsClient = async (): Promise<SavedObjectsClientContract> => {
+    const [{ savedObjects }] = await core.getStartServices();
+    const internalSavedObjectsRepository = savedObjects.createInternalRepository([
+      CASE_CONFIGURE_SAVED_OBJECT,
+    ]);
+    return new SavedObjectsClient(internalSavedObjectsRepository);
+  };
+
   taskManager.registerTaskDefinitions({
     [ANALYTICS_SYNCHRONIZATION_TASK_TYPE]: {
       title: 'Synchronization for the cases analytics index',
       createTaskRunner: (context: RunContext) => {
         return new AnalyticsIndexSynchronizationTaskFactory({
           getESClient,
+          getUnsecureSavedObjectsClient,
           logger,
           analyticsConfig,
         }).create(context);
