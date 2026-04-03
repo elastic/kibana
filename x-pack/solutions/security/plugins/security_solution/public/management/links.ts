@@ -245,10 +245,8 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins,
   experimentalFeatures: ExperimentalFeatures
 ): Promise<LinkItem> => {
-  const {
-    endpointExceptionsMovedUnderManagement,
-    trustedDevices: trustedDevicesEnabled,
-  } = experimentalFeatures;
+  const { endpointExceptionsMovedUnderManagement, trustedDevices: trustedDevicesEnabled } =
+    experimentalFeatures;
 
   const fleetAuthz = plugins.fleet?.authz;
   const currentUser = await plugins.security.authc.getCurrentUser();
