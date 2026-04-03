@@ -104,18 +104,31 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                     max-width: 100%;
                   `}
                 >
-                  <EuiText
-                    size="s"
-                    component="span"
-                    style={{ fontWeight: euiTheme.font.weight.bold }}
-                    data-test-subj="streamsAppProcessorTitleEditButton"
-                    css={css`
-                      display: block;
-                      ${euiTextTruncate()}
-                    `}
+                  <EuiToolTip
+                    position="top"
+                    content={i18n.translate(
+                      'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
+                      {
+                        defaultMessage: 'Edit {stepAction} processor',
+                        values: {
+                          stepAction: step.action,
+                        },
+                      }
+                    )}
                   >
-                    {actionDisplayName}
-                  </EuiText>
+                    <EuiText
+                      size="s"
+                      component="span"
+                      style={{ fontWeight: euiTheme.font.weight.bold }}
+                      data-test-subj="streamsAppProcessorTitleEditButton"
+                      css={css`
+                        display: block;
+                        ${euiTextTruncate()}
+                      `}
+                    >
+                      {actionDisplayName}
+                    </EuiText>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
