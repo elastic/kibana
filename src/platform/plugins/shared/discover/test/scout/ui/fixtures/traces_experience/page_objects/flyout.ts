@@ -72,6 +72,11 @@ export interface TracesFlyout {
       readonly spanLinks: {
         readonly openInDiscoverButton: Locator;
       };
+      readonly similarErrors: {
+        readonly section: Locator;
+        readonly occurrencesChart: Locator;
+        readonly errorCallout: Locator;
+      };
       close(): Promise<void>;
     };
   };
@@ -175,6 +180,15 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
           spanLinks: {
             openInDiscoverButton: childDocContainer.locator(
               '[data-test-subj="docViewerSpanLinksOpenInDiscoverButton"]'
+            ),
+          },
+          similarErrors: {
+            section: childDocContainer.locator('[data-test-subj="docViewerSimilarErrorsSection"]'),
+            occurrencesChart: childDocContainer.locator(
+              '[data-test-subj="docViewerSimilarErrorsOccurrencesChart"]'
+            ),
+            errorCallout: childDocContainer.locator(
+              '[data-test-subj="docViewerSimilarErrorsOccurrencesChart"] [data-test-subj="embeddable-lens-failure"]'
             ),
           },
           async close() {

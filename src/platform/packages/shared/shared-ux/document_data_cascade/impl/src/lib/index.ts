@@ -14,7 +14,10 @@ export {
   getLeafIdFromCacheKey,
 } from './utils';
 export { useCascadeVirtualizer } from './core/virtualizer';
-export type { CascadeVirtualizerReturnValue } from './core/virtualizer';
+export type {
+  CascadeVirtualizerReturnValue,
+  CascadeRootVirtualizerReturnValue,
+} from './core/virtualizer';
 export type {
   ChildVirtualizerController,
   ChildVirtualizerConfig,
