@@ -22,7 +22,7 @@ export function getContentDestinationIndexAlias(spaceId: string, owner: Owner) {
   return `${CAI_CONTENT_INDEX_ALIAS_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
-export const CAI_CONTENT_INDEX_VERSION = 1;
+export const CAI_CONTENT_INDEX_VERSION = 2;
 
 export const CAI_CONTENT_SYNC_TYPE = 'cai_content_sync';
 

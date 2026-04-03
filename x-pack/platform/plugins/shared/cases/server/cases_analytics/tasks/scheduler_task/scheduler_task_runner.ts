@@ -20,6 +20,7 @@ import { createCasesAnalyticsIndexesForOwnerAndSpace, getIndicesForOwnerAndSpace
 import { scheduleOwnerSyncTasks } from '../owner_sync_task';
 import { getSynchronizationTaskId } from '../synchronization_task';
 import { createAnalyticsDataViews } from '../../data_views';
+import { provisionAnalyticsDashboard } from '../../dashboard';
 import type { Owner } from '../../../../common/constants/types';
 
 interface SchedulerTaskRunnerFactoryConstructorParams {
@@ -185,6 +186,26 @@ export class SchedulerTaskRunner implements CancellableTask {
           .catch((err: Error) => {
             this.logger.warn(
               '[scheduler-task] Failed to obtain DataViewsService for data view provisioning',
+              { error: err, executionId, tags: ['cai-scheduler'] }
+            );
+          });
+
+        // Provision the analytics dashboard for each newly-enabled space.
+        // Best-effort: failure must not abort the scheduler run.
+        this.getUnsecureSavedObjectsClient()
+          .then((soClient) => {
+            for (const spaceId of spacesNeedingDataViews) {
+              provisionAnalyticsDashboard(soClient, this.logger, spaceId).catch((err: Error) => {
+                this.logger.warn(
+                  `[scheduler-task] Failed to provision analytics dashboard in space ${spaceId}`,
+                  { error: err, executionId, tags: ['cai-scheduler'] }
+                );
+              });
+            }
+          })
+          .catch((err: Error) => {
+            this.logger.warn(
+              '[scheduler-task] Failed to obtain SO client for dashboard provisioning',
               { error: err, executionId, tags: ['cai-scheduler'] }
             );
           });

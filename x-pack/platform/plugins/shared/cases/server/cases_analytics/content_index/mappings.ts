@@ -26,6 +26,7 @@ export const CAI_CONTENT_INDEX_MAPPINGS: MappingTypeMapping = {
 
     // --- Common fields (present on all doc_types) ---
     case_id: { type: 'keyword' },
+    comment_id: { type: 'keyword' }, // set for comment and attachment docs; null for case docs
     owner: { type: 'keyword' },
     space_ids: { type: 'keyword' },
     created_at: { type: 'date' },
@@ -71,7 +72,14 @@ export const CAI_CONTENT_INDEX_MAPPINGS: MappingTypeMapping = {
         email: { type: 'keyword' },
       },
     },
-    assignees: { type: 'keyword' },
+    assignees: {
+      properties: {
+        uid: { type: 'keyword' },
+        username: { type: 'keyword' },
+        email: { type: 'keyword' },
+        full_name: { type: 'keyword' },
+      },
+    },
     total_assignees: { type: 'integer' },
     total_alerts: { type: 'integer' },
     total_comments: { type: 'integer' },
@@ -89,6 +97,7 @@ export const CAI_CONTENT_INDEX_MAPPINGS: MappingTypeMapping = {
       properties: {
         type: { type: 'keyword' },
         value: { type: 'keyword' },
+        label: { type: 'keyword' },
       },
     },
 

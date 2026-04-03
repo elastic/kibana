@@ -497,6 +497,7 @@ export async function create(
     logger,
     user,
     authorization,
+    config,
   } = clientArgs;
 
   try {
@@ -517,6 +518,25 @@ export async function create(
     validateDuplicatedObservableTypesInRequest({
       requestFields: validatedConfigurationRequest.observableTypes,
     });
+
+    // Enforce the analytics space cap when creating a configuration with
+    // analytics_enabled: true.  Mirrors the same guard in update() so that
+    // the cap cannot be bypassed by deleting and re-creating a configuration.
+    if (validatedConfigurationRequest.analytics_enabled === true) {
+      const maxSpaces = config.analytics.index.maxAnalyticsEnabledSpaces;
+      const enabledPairs = await getSpacesWithAnalyticsEnabled(unsecuredSavedObjectsClient);
+      if (enabledPairs.length >= maxSpaces) {
+        throw Boom.badRequest(
+          `Analytics cannot be enabled: the cluster already has analytics enabled for ` +
+            `${enabledPairs.length} owner-space pair(s), which meets or exceeds the configured ` +
+            `maximum of ${maxSpaces}. Each pair creates 3 Elasticsearch indices (content, activity, ` +
+            `lifecycle) costing ~3 shards single-node or ~6 shards on multi-node clusters. ` +
+            `To raise the limit, increase 'xpack.cases.analytics.index.maxAnalyticsEnabledSpaces' ` +
+            `and ensure 'cluster.max_shards_per_node' allows it ` +
+            `(required: maxSpaces × 3 ≤ max_shards_per_node × data_node_count / 2).`
+        );
+      }
+    }
 
     let error = null;
 
@@ -598,6 +618,12 @@ export async function create(
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        // When creating with analytics_enabled: true, initialise sync status to
+        // 'active' so the UI doesn't briefly show an incorrect idle callout
+        // before the first scheduler run overwrites the field.
+        ...(validatedConfigurationRequest.analytics_enabled === true && {
+          analytics_sync_status: 'active' as const,
+        }),
       },
       id: savedObjectID,
     });

@@ -19,7 +19,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { Owner } from '../../../../common/constants/types';
-import { type CAISyncType, SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
+import {
+  type CAISyncType,
+  SYNCHRONIZATION_QUERIES_DICTIONARY,
+} from '../../constants';
+import { CAI_CONTENT_SYNC_TYPE } from '../../content_index/constants';
+import { enrichAssigneesInContentIndex } from '../../utils/enrich_assignees';
 
 const LOOKBACK_WINDOW = 5 * 60 * 1000;
 
@@ -118,6 +123,19 @@ export class SynchronizationSubTaskRunner {
          * with a new time window.
          **/
         await this.isIndexAvailable(esClient);
+
+        // Enrich assignees with human-readable names after a content reindex completes.
+        // Best-effort: failure must not block the sync cycle.
+        if (this.syncType === CAI_CONTENT_SYNC_TYPE) {
+          await enrichAssigneesInContentIndex({
+            esClient,
+            logger: this.logger,
+            destIndex: this.destIndex,
+            spaceId: this.spaceId,
+            owner: this.owner,
+            executionId: `${this.syncType}-${this.spaceId}-${this.owner}`,
+          });
+        }
 
         this.updateLastSyncTimes({ updateSuccessTime: true });
 

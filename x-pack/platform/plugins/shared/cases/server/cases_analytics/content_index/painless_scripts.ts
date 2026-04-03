@@ -111,14 +111,18 @@ export const CAI_CONTENT_INDEX_SCRIPT: StoredScript = {
       ctx._source.assignees = [];
       if (source.cases.assignees != null) {
         for (item in source.cases.assignees) {
-          ctx._source.assignees.add(item.uid);
+          Map assignee = new HashMap();
+          assignee.uid = item.uid;
+          ctx._source.assignees.add(assignee);
         }
         ctx._source.total_assignees = source.cases.assignees.size();
       }
 
       ctx._source.custom_fields = [];
       if (source.cases.customFields != null) {
-        for (item in source.cases.customFields) {
+        List sortedFields = new ArrayList(source.cases.customFields);
+        Collections.sort(sortedFields, (a, b) -> a.key.compareTo(b.key));
+        for (item in sortedFields) {
           Map customField = new HashMap();
           customField.type  = item.type;
           customField.value = item.value;
@@ -195,6 +199,9 @@ export const CAI_CONTENT_INDEX_SCRIPT: StoredScript = {
         }
       }
 
+      // comment_id is the SO id of the comment document itself
+      ctx._source.comment_id = ctx._id;
+
     } else if (
       source.type == "cases-comments" &&
       (source["cases-comments"].type == "alert" || source["cases-comments"].type == "externalReference")
@@ -215,6 +222,13 @@ export const CAI_CONTENT_INDEX_SCRIPT: StoredScript = {
       ctx._source.type      = source["cases-comments"].type;
       ctx._source.owner     = source["cases-comments"].owner;
       ctx._source.space_ids = source.namespaces;
+
+      // comment_id is the SO id of the attachment document itself
+      ctx._source.comment_id = ctx._id;
+
+      if (source["cases-comments"].created_at != null) {
+        ctx._source.created_at = source["cases-comments"].created_at;
+      }
 
       if (
         ctx._source.type == "alert" &&

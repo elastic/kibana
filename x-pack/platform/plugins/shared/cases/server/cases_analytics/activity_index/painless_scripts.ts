@@ -108,16 +108,46 @@ export const CAI_ACTIVITY_INDEX_SCRIPT: StoredScript = {
           }
           if (source["cases-user-actions"].payload.customFields != null
               && source["cases-user-actions"].payload.customFields.size() > 0) {
-            def cf = new HashMap();
-            for (field in source["cases-user-actions"].payload.customFields) {
-              if (field.key != null && field.value != null) {
-                cf[field.key] = field.value;
-              }
+            def cfList = new ArrayList();
+            List sortedCF = new ArrayList(source["cases-user-actions"].payload.customFields);
+            Collections.sort(sortedCF, (a, b) -> a.key.compareTo(b.key));
+            for (field in sortedCF) {
+              Map cf = new HashMap();
+              cf.key   = field.key;
+              cf.type  = field.type;
+              cf.value = field.value != null ? field.value.toString() : null;
+              cfList.add(cf);
             }
-            if (!cf.isEmpty()) {
-              ctx._source.payload.custom_fields = cf;
+            if (!cfList.isEmpty()) {
+              ctx._source.payload.custom_fields = cfList;
             }
           }
+        }
+
+        if (source["cases-user-actions"].type == "customFields"
+            && source["cases-user-actions"].payload.customFields != null
+            && source["cases-user-actions"].payload.customFields.size() > 0) {
+          def cfList = new ArrayList();
+          List sortedCF = new ArrayList(source["cases-user-actions"].payload.customFields);
+          Collections.sort(sortedCF, (a, b) -> a.key.compareTo(b.key));
+          for (field in sortedCF) {
+            Map cf = new HashMap();
+            cf.key   = field.key;
+            cf.type  = field.type;
+            cf.value = field.value != null ? field.value.toString() : null;
+            cfList.add(cf);
+          }
+          if (!cfList.isEmpty()) {
+            ctx._source.payload.custom_fields = cfList;
+          }
+        }
+
+        if (source["cases-user-actions"].type == "observables"
+            && source["cases-user-actions"].payload.observables != null) {
+          def obs = new HashMap();
+          obs.count       = source["cases-user-actions"].payload.observables.count;
+          obs.action_type = source["cases-user-actions"].payload.observables.actionType;
+          ctx._source.payload.observables = obs;
         }
 
         if (source["cases-user-actions"].type == "comment" && source["cases-user-actions"].payload.comment != null) {

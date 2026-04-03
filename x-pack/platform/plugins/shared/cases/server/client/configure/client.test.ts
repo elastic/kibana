@@ -1766,6 +1766,122 @@ describe('client', () => {
           );
         });
       });
+
+      describe('analytics_enabled', () => {
+        it('throws when enabling analytics beyond the configured maximum', async () => {
+          const cappedArgs = {
+            ...clientArgs,
+            config: {
+              ...clientArgs.config,
+              analytics: {
+                ...clientArgs.config.analytics,
+                index: { ...clientArgs.config.analytics.index, maxAnalyticsEnabledSpaces: 2 },
+              },
+            },
+          };
+
+          // getSpacesWithAnalyticsEnabled calls unsecuredSavedObjectsClient.find
+          cappedArgs.unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+            saved_objects: [
+              {
+                id: 'cfg-1',
+                type: 'cases-configure',
+                score: 0,
+                references: [],
+                attributes: { owner: 'cases' },
+                namespaces: ['default'],
+              },
+              {
+                id: 'cfg-2',
+                type: 'cases-configure',
+                score: 0,
+                references: [],
+                attributes: { owner: 'securitySolution' },
+                namespaces: ['default'],
+              },
+            ],
+            total: 2,
+            page: 1,
+            per_page: 10000,
+          });
+
+          await expect(
+            create({ ...baseRequest, analytics_enabled: true }, cappedArgs, casesClientInternal)
+          ).rejects.toThrow('Analytics cannot be enabled');
+        });
+
+        it('does not check the cap when analytics_enabled is absent', async () => {
+          // Cap set to 0 — any cap check would throw immediately
+          const zeroCappedArgs = {
+            ...clientArgs,
+            config: {
+              ...clientArgs.config,
+              analytics: {
+                ...clientArgs.config.analytics,
+                index: { ...clientArgs.config.analytics.index, maxAnalyticsEnabledSpaces: 0 },
+              },
+            },
+          };
+
+          try {
+            await create({ ...baseRequest }, zeroCappedArgs, casesClientInternal);
+          } catch {
+            // downstream errors are irrelevant — we only care that find was never called
+          }
+
+          expect(zeroCappedArgs.unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+        });
+
+        it('sets analytics_sync_status to active when creating with analytics_enabled: true', async () => {
+          // Cap check: find returns 0 enabled pairs so cap is not exceeded
+          clientArgs.unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+            saved_objects: [],
+            total: 0,
+            page: 1,
+            per_page: 10000,
+          });
+
+          // No existing configs to delete
+          clientArgs.services.caseConfigureService.find.mockResolvedValueOnce({
+            saved_objects: [],
+            total: 0,
+            page: 1,
+            per_page: 10000,
+          });
+
+          clientArgs.services.caseConfigureService.post.mockResolvedValueOnce({
+            id: 'new-config-id',
+            type: 'cases-configure',
+            version: 'v1',
+            namespaces: ['default'],
+            references: [],
+            // @ts-ignore: partial attributes sufficient for this test
+            attributes: {
+              analytics_enabled: true,
+              analytics_sync_status: 'active',
+            },
+          });
+
+          try {
+            await create(
+              { ...baseRequest, analytics_enabled: true },
+              clientArgs,
+              casesClientInternal
+            );
+          } catch {
+            // decode errors on the partial SO response are irrelevant
+          }
+
+          expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledWith(
+            expect.objectContaining({
+              attributes: expect.objectContaining({
+                analytics_enabled: true,
+                analytics_sync_status: 'active',
+              }),
+            })
+          );
+        });
+      });
     });
   });
 });

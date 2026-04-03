@@ -72,7 +72,17 @@ export const CAI_ACTIVITY_INDEX_MAPPINGS: MappingTypeMapping = {
           type: 'text',
         },
         custom_fields: {
-          type: 'flattened',
+          properties: {
+            type: { type: 'keyword' },
+            key: { type: 'keyword' },
+            value: { type: 'keyword' },
+          },
+        },
+        observables: {
+          properties: {
+            count: { type: 'integer' },
+            action_type: { type: 'keyword' },
+          },
         },
         comment: {
           type: 'text',

@@ -20,7 +20,7 @@ export function getActivityDestinationIndexAlias(spaceId: string, owner: Owner) 
   return `${CAI_ACTIVITY_INDEX_ALIAS_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
-export const CAI_ACTIVITY_INDEX_VERSION = 1;
+export const CAI_ACTIVITY_INDEX_VERSION = 2;
 
 export const CAI_ACTIVITY_SYNC_TYPE = 'cai_activity_sync';
 
@@ -90,6 +90,16 @@ export const getActivitySourceQuery = (spaceId: string, owner: Owner) => ({
             {
               term: {
                 'cases-user-actions.type': 'comment',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'customFields',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'observables',
               },
             },
           ],

@@ -41,6 +41,7 @@ export function registerCAISchedulerTask({
     const internalSavedObjectsRepository = savedObjects.createInternalRepository([
       CASE_SAVED_OBJECT,
       CASE_CONFIGURE_SAVED_OBJECT,
+      'dashboard',
     ]);
     return new SavedObjectsClient(internalSavedObjectsRepository);
   };
