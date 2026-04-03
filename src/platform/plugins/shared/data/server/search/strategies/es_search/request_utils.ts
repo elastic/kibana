@@ -8,8 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
-import { UI_SETTINGS } from '../../../../common';
+import type { SharedGlobalConfig } from '@kbn/core/server';
 
 export function getShardTimeout(
   config: SharedGlobalConfig
@@ -18,21 +17,19 @@ export function getShardTimeout(
   return timeout ? { timeout: `${timeout}ms` } : {};
 }
 
-export async function getDefaultSearchParams(
-  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
+export function getDefaultSearchParams(
+  searchSettings: { maxConcurrentShardRequests: number },
   options = { isPit: false }
-): Promise<{
+): {
   max_concurrent_shard_requests?: number;
   ignore_unavailable?: boolean;
   track_total_hits: boolean;
-}> {
-  const maxConcurrentShardRequests = await uiSettingsClient.get<number>(
-    UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
-  );
-
-  const defaults: Awaited<ReturnType<typeof getDefaultSearchParams>> = {
+} {
+  const defaults: ReturnType<typeof getDefaultSearchParams> = {
     max_concurrent_shard_requests:
-      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined,
+      searchSettings.maxConcurrentShardRequests > 0
+        ? searchSettings.maxConcurrentShardRequests
+        : undefined,
     track_total_hits: true,
   };
 

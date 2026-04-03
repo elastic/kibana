@@ -86,6 +86,7 @@ import {
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
 } from '../../common/search';
+import { UI_SETTINGS } from '../../common';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
   getShardDelayBucketAgg,
@@ -100,7 +101,6 @@ import {
 } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
-import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
 import { esqlSearchStrategyProvider } from './strategies/esql_search';
@@ -126,6 +126,11 @@ export interface SearchRouteDependencies {
   globalConfig$: Observable<SharedGlobalConfig>;
 }
 
+const searchSettingsDefaults = {
+  includeFrozen: false, // Deprecated setting, use false as default
+  maxConcurrentShardRequests: 0, // use Elasticsearch default by setting to 0
+};
+
 export class SearchService {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
@@ -135,6 +140,12 @@ export class SearchService {
   private searchAsInternalUser!: ISearchStrategy;
   private rollupsEnabled: boolean = false;
   private readonly isServerless: boolean;
+  private searchSettingsCache: {
+    includeFrozen: boolean;
+    maxConcurrentShardRequests: number;
+  } | null = null;
+  private refreshInterval: NodeJS.Timeout | undefined;
+  private readonly REFRESH_INTERVAL_MS = 60_000;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -278,6 +289,14 @@ export class SearchService {
 
     this.sessionService.start(core, {});
 
+    // Initialize settings cache at startup
+    this.initializeSearchSettingsCache(uiSettings, savedObjects).catch((error) => {
+      this.logger.error('Failed to initialize search settings cache on startup', error);
+    });
+
+    // Start background refresh
+    this.startSearchSettingsRefresh(uiSettings, savedObjects);
+
     const aggs = this.aggsService.start({
       fieldFormats,
       uiSettings,
@@ -328,7 +347,66 @@ export class SearchService {
   }
 
   public stop() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = undefined;
+    }
+    this.searchSettingsCache = null;
+    this.sessionService.stop();
     this.aggsService.stop();
+  }
+
+  private async initializeSearchSettingsCache(
+    uiSettings: CoreStart['uiSettings'],
+    savedObjects: CoreStart['savedObjects']
+  ): Promise<void> {
+    try {
+      const internalClient = savedObjects.createInternalRepository();
+      const globalClient = uiSettings.globalAsScopedToClient(internalClient);
+
+      const [includeFrozen, maxConcurrentShardRequests] = await Promise.all([
+        globalClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+        globalClient.get<number>(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS),
+      ]);
+
+      this.searchSettingsCache = {
+        includeFrozen,
+        maxConcurrentShardRequests,
+      };
+
+      this.logger.info(
+        `Search settings cache initialized: includeFrozen=${includeFrozen}, maxConcurrentShardRequests=${maxConcurrentShardRequests}`
+      );
+    } catch (error) {
+      this.logger.error('Failed to initialize search settings cache', error);
+      // Fallback to defaults
+      this.searchSettingsCache = {
+        includeFrozen: searchSettingsDefaults.includeFrozen,
+        maxConcurrentShardRequests: searchSettingsDefaults.maxConcurrentShardRequests,
+      };
+    }
+  }
+
+  private startSearchSettingsRefresh(
+    uiSettings: CoreStart['uiSettings'],
+    savedObjects: CoreStart['savedObjects']
+  ): void {
+    this.refreshInterval = setInterval(() => {
+      this.initializeSearchSettingsCache(uiSettings, savedObjects).catch((error) => {
+        this.logger.error('Failed to refresh search settings cache', error);
+      });
+    }, this.REFRESH_INTERVAL_MS);
+  }
+
+  public getSearchSettings(): { includeFrozen: boolean; maxConcurrentShardRequests: number } {
+    if (!this.searchSettingsCache) {
+      // Fallback if cache not initialized yet
+      return {
+        includeFrozen: searchSettingsDefaults.includeFrozen,
+        maxConcurrentShardRequests: searchSettingsDefaults.maxConcurrentShardRequests,
+      };
+    }
+    return this.searchSettingsCache;
   }
 
   private registerSearchStrategy = <
@@ -538,7 +616,7 @@ export class SearchService {
   };
 
   private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
-    const { elasticsearch, savedObjects, uiSettings } = core;
+    const { elasticsearch, savedObjects } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest, opts?: AsScopedOptions): IScopedSearchClient => {
       const savedObjectsClient = savedObjects.getScopedClient(request);
@@ -547,9 +625,7 @@ export class SearchService {
         searchSessionsClient,
         savedObjectsClient,
         esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
-        uiSettingsClient: new CachedUiSettingsClient(
-          uiSettings.asScopedToClient(savedObjectsClient)
-        ),
+        getSearchSettings: () => this.getSearchSettings(),
         request,
         rollupsEnabled,
       };

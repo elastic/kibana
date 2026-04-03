@@ -50,7 +50,7 @@ export const esSearchStrategyProvider = (
    * @throws `KbnSearchError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
-  search: (request, { abortSignal, transport, ...options }, { esClient, uiSettingsClient }) => {
+  search: (request, { abortSignal, transport, ...options }, { esClient, getSearchSettings }) => {
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
@@ -64,7 +64,8 @@ export const esSearchStrategyProvider = (
         const config = await firstValueFrom(config$);
         // @ts-expect-error params fall back to any, but should be valid SearchRequest params
         const { terminateAfter, ...requestParams } = request.params ?? {};
-        const defaults = await getDefaultSearchParams(uiSettingsClient, { isPit });
+        const searchSettings = getSearchSettings();
+        const defaults = getDefaultSearchParams(searchSettings, { isPit });
 
         const params = {
           ...defaults,

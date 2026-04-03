@@ -24,7 +24,7 @@ export const esqlSearchStrategyProvider = (
    * @throws `KbnSearchError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
-  search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
+  search: (request, { abortSignal, ...options }, { esClient }) => {
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {

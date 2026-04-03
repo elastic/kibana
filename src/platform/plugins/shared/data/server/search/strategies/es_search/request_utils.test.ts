@@ -8,7 +8,7 @@
  */
 
 import { getShardTimeout, getDefaultSearchParams } from './request_utils';
-import type { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
+import type { SharedGlobalConfig } from '@kbn/core/server';
 
 describe('request utils', () => {
   describe('getShardTimeout', () => {
@@ -48,33 +48,33 @@ describe('request utils', () => {
 
   describe('getDefaultSearchParams', () => {
     describe('max_concurrent_shard_requests', () => {
-      test('returns value if > 0', async () => {
-        const result = await getDefaultSearchParams({
-          get: jest.fn().mockResolvedValue(1),
-        } as unknown as IUiSettingsClient);
+      test('returns value if > 0', () => {
+        const result = getDefaultSearchParams({
+          maxConcurrentShardRequests: 1,
+        });
         expect(result).toHaveProperty('max_concurrent_shard_requests', 1);
       });
 
-      test('returns undefined if === 0', async () => {
-        const result = await getDefaultSearchParams({
-          get: jest.fn().mockResolvedValue(0),
-        } as unknown as IUiSettingsClient);
+      test('returns undefined if === 0', () => {
+        const result = getDefaultSearchParams({
+          maxConcurrentShardRequests: 0,
+        });
         expect(result.max_concurrent_shard_requests).toBe(undefined);
       });
 
-      test('returns undefined if undefined', async () => {
-        const result = await getDefaultSearchParams({
-          get: jest.fn(),
-        } as unknown as IUiSettingsClient);
+      test('returns undefined if negative', () => {
+        const result = getDefaultSearchParams({
+          maxConcurrentShardRequests: -1,
+        });
         expect(result.max_concurrent_shard_requests).toBe(undefined);
       });
     });
 
     describe('other defaults', () => {
-      test('returns ignore_unavailable and track_total_hits', async () => {
-        const result = await getDefaultSearchParams({
-          get: jest.fn(),
-        } as unknown as IUiSettingsClient);
+      test('returns ignore_unavailable and track_total_hits', () => {
+        const result = getDefaultSearchParams({
+          maxConcurrentShardRequests: 0,
+        });
         expect(result).toHaveProperty('ignore_unavailable', true);
         expect(result).toHaveProperty('track_total_hits', true);
       });

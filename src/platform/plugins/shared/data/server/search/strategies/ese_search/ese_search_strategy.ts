@@ -97,14 +97,15 @@ export const enhancedEsSearchStrategyProvider = (
   async function submitAsyncSearch(
     request: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient }: SearchStrategyDependencies
+    { esClient, getSearchSettings }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const searchSettings = getSearchSettings();
     const params = {
-      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, {
+      ...getDefaultAsyncSubmitParams(searchSettings, searchConfig, options, {
         isServerless,
         isPit: request.params?.pit != null,
-      })),
+      }),
       ...request.params,
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
@@ -156,14 +157,15 @@ export const enhancedEsSearchStrategyProvider = (
   async function rollupSearch(
     request: IEsSearchRequest,
     options: ISearchOptions,
-    { esClient, uiSettingsClient }: SearchStrategyDependencies
+    { esClient, getSearchSettings }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await firstValueFrom(legacyConfig$);
+    const searchSettings = getSearchSettings();
     const querystring = {
       ...getShardTimeout(legacyConfig),
-      ...(await getIgnoreThrottled(uiSettingsClient)),
-      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...getIgnoreThrottled(searchSettings),
+      ...getDefaultSearchParams(searchSettings),
     };
 
     // Custom 400 error here because the client tries to run `index.toString()` and we no-longer can rely on ES 400

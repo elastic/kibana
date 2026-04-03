@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IUiSettingsClient } from '@kbn/core/server';
 import type { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchOptions } from '@kbn/search-types';
-import { UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import type { SearchConfigSchema } from '../../../config';
 import {
@@ -22,35 +20,33 @@ import {
 /**
  * @internal
  */
-export async function getIgnoreThrottled(
-  uiSettingsClient: Pick<IUiSettingsClient, 'get'>
-): Promise<{ ignore_throttled?: boolean }> {
-  const includeFrozen = await uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-  return includeFrozen ? { ignore_throttled: false } : {};
+export function getIgnoreThrottled(searchSettings: { includeFrozen: boolean }): {
+  ignore_throttled?: boolean;
+} {
+  // DEPRECATED: search:includeFrozen will be removed in 9.1
+  return searchSettings.includeFrozen ? { ignore_throttled: false } : {};
 }
 
 /**
  @internal
  */
-export async function getDefaultAsyncSubmitParams(
-  uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
+export function getDefaultAsyncSubmitParams(
+  searchSettings: { includeFrozen: boolean; maxConcurrentShardRequests: number },
   searchConfig: SearchConfigSchema,
   options: ISearchOptions,
   { isServerless = false, isPit = false } = {}
-): Promise<
-  Pick<
-    AsyncSearchSubmitRequest,
-    | 'batched_reduce_size'
-    | 'ccs_minimize_roundtrips'
-    | 'keep_alive'
-    | 'wait_for_completion_timeout'
-    | 'ignore_throttled'
-    | 'max_concurrent_shard_requests'
-    | 'ignore_unavailable'
-    | 'track_total_hits'
-    | 'keep_on_completion'
-  > & { project_routing?: string }
-> {
+): Pick<
+  AsyncSearchSubmitRequest,
+  | 'batched_reduce_size'
+  | 'ccs_minimize_roundtrips'
+  | 'keep_alive'
+  | 'wait_for_completion_timeout'
+  | 'ignore_throttled'
+  | 'max_concurrent_shard_requests'
+  | 'ignore_unavailable'
+  | 'track_total_hits'
+  | 'keep_on_completion'
+> & { project_routing?: string } {
   return {
     // TODO: adjust for partial results
     batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
@@ -59,8 +55,8 @@ export async function getDefaultAsyncSubmitParams(
     // If PIT is used, this setting is ignored as well since its not supported.
     ...(isServerless || isPit ? {} : { ccs_minimize_roundtrips: true }),
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
-    ...(await getIgnoreThrottled(uiSettingsClient)),
-    ...(await getDefaultSearchParams(uiSettingsClient, { isPit })),
+    ...getIgnoreThrottled(searchSettings),
+    ...getDefaultSearchParams(searchSettings, { isPit }),
   };
 }
 

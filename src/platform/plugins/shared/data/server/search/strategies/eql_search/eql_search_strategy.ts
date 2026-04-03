@@ -44,21 +44,20 @@ export const eqlSearchStrategyProvider = (
       }
     },
 
-    search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
+    search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, getSearchSettings }) => {
       logger.debug(() => `_eql/search ${JSON.stringify(request.params) || id}`);
 
       const client = esClient.asCurrentUser.eql;
 
       const search = async () => {
-        const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
-          uiSettingsClient
-        );
+        const searchSettings = getSearchSettings();
+        const { track_total_hits: _, ...defaultParams } = getDefaultSearchParams(searchSettings);
         const params = id
           ? getCommonDefaultAsyncGetParams(searchConfig, options, {
               /* disable until full eql support */ disableSearchSessions: true,
             })
           : {
-              ...(await getIgnoreThrottled(uiSettingsClient)),
+              ...getIgnoreThrottled(searchSettings),
               ...defaultParams,
               ...getCommonDefaultAsyncGetParams(searchConfig, options, {
                 /* disable until full eql support */ disableSearchSessions: true,

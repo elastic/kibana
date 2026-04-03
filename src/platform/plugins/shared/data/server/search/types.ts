@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import type {
+  CustomRequestHandlerContext,
   IRouter,
   IScopedClusterClient,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
   KibanaRequest,
-  CustomRequestHandlerContext,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type {
-  ISearchClient,
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptions,
-  IEsSearchResponse,
   IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchClient,
+  ISearchOptions,
 } from '@kbn/search-types';
+import type { Observable } from 'rxjs';
 
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import type { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
@@ -34,8 +33,8 @@ import type { IScopedSearchSessionsClient } from './session';
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
-  uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
+  getSearchSettings: () => { includeFrozen: boolean; maxConcurrentShardRequests: number };
   request: KibanaRequest;
   rollupsEnabled?: boolean;
 }
