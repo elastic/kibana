@@ -121,6 +121,7 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
