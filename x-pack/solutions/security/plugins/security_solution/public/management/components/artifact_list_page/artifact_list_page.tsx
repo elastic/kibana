@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,6 +16,10 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
+import type {
+  BulkErrorSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
@@ -60,6 +63,7 @@ import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ArtifactImportFlyout } from './components/artifact_import_flyout';
 import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
+import { ArtifactImportErrorsModal } from './components/artifact_import_errors_modal';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -125,6 +129,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const isImportFlyoutOpened =
       useIsImportFlyoutOpened(allowCardCreateAction) &&
       areEndpointExceptionsMovedUnderManagementFFEnabled;
+
+    const [importErrors, setImportErrors] = useState<BulkErrorSchema[] | undefined>(undefined);
 
     const setUrlParams = useSetUrlParams();
     const {
@@ -306,6 +312,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       refetchListData();
     }, [closeImportFlyout, refetchListData]);
 
+    const handleImportFlyoutOnShowErrors = useCallback((errors: BulkErrorSchema[]) => {
+      setImportErrors(errors);
+    }, []);
+
+    const handleCloseImportErrorsModal = useCallback(() => setImportErrors(undefined), []);
+
     const description = useMemo(() => {
       const subtitleText = labels.pageAboutInfo ? (
         <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
@@ -392,9 +404,14 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           <ArtifactImportFlyout
             onCancel={closeImportFlyout}
             onSuccess={handleImportFlyoutOnSuccess}
+            onShowErrors={handleImportFlyoutOnShowErrors}
             apiClient={apiClient}
             labels={labels}
           />
+        )}
+
+        {importErrors && (
+          <ArtifactImportErrorsModal errors={importErrors} onClose={handleCloseImportErrorsModal} />
         )}
 
         {selectedItemForDelete && (

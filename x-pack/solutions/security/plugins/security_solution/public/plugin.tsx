@@ -74,6 +74,7 @@ import { generateIndicatorAttachmentType } from './cases/attachments/indicator/u
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
+import { registerRuleAttachment } from './agent_builder/attachment_types/rule_attachment';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -283,8 +284,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
     if (plugins.agentBuilder?.attachments) {
-      registerAttachmentUiDefinitions({
+      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerRuleAttachment({
         attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        aiRuleCreation: this.services.aiRuleCreation,
       });
     }
 
