@@ -118,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
             'savedObjectsTagging',
             'ml',
             'apm',
+            'automatic_import',
             'stackAlerts',
             'canvas',
             'generalCasesV3',
