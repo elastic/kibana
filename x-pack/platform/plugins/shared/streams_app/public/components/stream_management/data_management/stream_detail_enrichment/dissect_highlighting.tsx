@@ -252,7 +252,7 @@ export function getDissectColourPaletteStyles(
   return styles;
 }
 
-function colourToClassName(colour: string) {
+export function colourToClassName(colour: string) {
   return `dissect-field-match-${colour}`;
 }
 
@@ -397,74 +397,6 @@ function renderHighlightedSample(
 
   return parts;
 }
-
-// --- Pattern preview (for source-side color sync) ---
-
-interface DissectPatternPreviewProps {
-  pattern: string;
-}
-
-/**
- * Renders a read-only colored preview of the dissect pattern,
- * showing %{field} tokens with their assigned highlight colors.
- */
-export const DissectPatternPreview = ({ pattern }: DissectPatternPreviewProps) => {
-  const eui = useEuiTheme();
-  const tokens = useMemo(() => parseDissectTokens(pattern), [pattern]);
-
-  const colourPaletteStyles = useMemo(
-    () => getDissectColourPaletteStyles(eui.euiTheme),
-    [eui.euiTheme]
-  );
-
-  if (tokens.length === 0) {
-    return null;
-  }
-
-  return (
-    <div
-      css={css`
-        ${colourPaletteStyles}
-        white-space: pre-wrap;
-        font-family: ${eui.euiTheme.font.familyCode};
-        font-size: ${eui.euiTheme.size.m};
-        padding: ${eui.euiTheme.size.xs} ${eui.euiTheme.size.s};
-        border-radius: ${eui.euiTheme.border.radius.small};
-        background-color: ${eui.euiTheme.colors.backgroundBaseSubdued};
-        line-height: 1.5;
-      `}
-    >
-      {tokens.map((token, i) => {
-        if (token.type === 'literal') {
-          return <span key={`lit-${i}`}>{token.value}</span>;
-        }
-
-        // Reconstruct the original %{...} syntax for display
-        let prefix = '';
-        if (token.isSkip && token.name) {
-          prefix = '?';
-        }
-        const suffix = token.hasRightPadding ? '->' : '';
-        const display = `%{${prefix}${token.name}${suffix}}`;
-
-        return (
-          <EuiToolTip
-            key={`field-${i}`}
-            position="top"
-            content={
-              <p>
-                {token.isSkip ? 'Skip field: ' : 'Field: '}
-                {token.name || '(anonymous)'}
-              </p>
-            }
-          >
-            <span className={colourToClassName(token.color)}>{display}</span>
-          </EuiToolTip>
-        );
-      })}
-    </div>
-  );
-};
 
 // --- Helpers for integration ---
 
