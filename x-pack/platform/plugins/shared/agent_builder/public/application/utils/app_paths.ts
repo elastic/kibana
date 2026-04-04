@@ -9,6 +9,7 @@ import { newConversationId } from './new_conversation';
 
 export const appPaths = {
   root: '/',
+  workspace: '/workspace',
 
   // Agent-scoped routes (all under /agents/:agentId)
   agent: {

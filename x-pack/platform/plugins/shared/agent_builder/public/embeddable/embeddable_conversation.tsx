@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
@@ -18,12 +18,50 @@ import {
 } from '../application/components/conversations/conversation.styles';
 import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
 import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
+import { useSendMessage } from '../application/context/send_message/send_message_context';
+import { useConversationContext } from '../application/context/conversation/conversation_context';
+import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+
+/**
+ * Null-render component that reports loading state and title changes upward via callbacks.
+ * Must be rendered inside SendMessageProvider and ConversationContext.
+ */
+const LoadingStateReporter: React.FC<{
+  onLoadingStateChange?: (isLoading: boolean) => void;
+  onTitleChange?: (title: string) => void;
+}> = ({ onLoadingStateChange, onTitleChange }) => {
+  const { isResponseLoading } = useSendMessage();
+  const { conversationId } = useConversationContext();
+  const { conversationsService } = useAgentBuilderServices();
+  const prevConversationIdRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    onLoadingStateChange?.(isResponseLoading);
+  }, [isResponseLoading, onLoadingStateChange]);
+
+  // When this tab's conversation ID is set or changes, fetch and report its title.
+  // Using conversationId from context is per-tab — no cross-tab correlation needed.
+  useEffect(() => {
+    if (!conversationId || !onTitleChange) return;
+    if (prevConversationIdRef.current === conversationId) return;
+    prevConversationIdRef.current = conversationId;
+
+    conversationsService
+      .get({ conversationId })
+      .then((conv) => {
+        if (conv?.title) onTitleChange(conv.title);
+      })
+      .catch(() => {});
+  }, [conversationId, conversationsService, onTitleChange]);
+
+  return null;
+};
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
 ) => {
   const { euiTheme } = useEuiTheme();
-  const { onClose, ariaLabelledBy } = props;
+  const { onClose, ariaLabelledBy, onLoadingStateChange, onTitleChange } = props;
 
   const wrapperStyles = css`
     display: flex;
@@ -70,6 +108,10 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
           </EuiFlyoutHeader>
           <EmbeddableWelcomeMessage />
           <EuiFlyoutBody css={bodyStyles}>
+            <LoadingStateReporter
+              onLoadingStateChange={onLoadingStateChange}
+              onTitleChange={onTitleChange}
+            />
             <Conversation />
           </EuiFlyoutBody>
         </EmbeddableAccessBoundary>

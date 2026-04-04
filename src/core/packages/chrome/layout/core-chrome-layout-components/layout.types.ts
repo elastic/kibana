@@ -39,6 +39,8 @@ export interface LayoutState extends LayoutDimensions {
   hasNavigation: boolean;
   hasApplicationTopBar: boolean;
   hasApplicationBottomBar: boolean;
+  /** Which side the sidebar is rendered on. Defaults to 'right'. */
+  sidebarSide: 'left' | 'right';
 }
 
 /**

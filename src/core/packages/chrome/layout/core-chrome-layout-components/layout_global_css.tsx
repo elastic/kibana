@@ -29,14 +29,19 @@ export const LayoutGlobalCSS = () => {
     applicationMarginTop,
     applicationMarginBottom,
     applicationMarginRight,
+    sidebarSide,
   } = useLayoutState();
+
+  const isSidebarLeft = sidebarSide === 'left';
 
   // Pre-calculate composite values for simplified CSS expressions
   const headerAndBannerHeight = bannerHeight + headerHeight;
   const applicationTop = headerAndBannerHeight + applicationMarginTop;
   const applicationBottom = footerHeight + applicationMarginBottom;
-  const applicationRight = applicationMarginRight + sidebarWidth;
-  const applicationHorizontalOffset = navigationWidth + applicationRight;
+  // When sidebar is on the left, it contributes to the left offset, not the right
+  const applicationRight = isSidebarLeft ? applicationMarginRight : applicationMarginRight + sidebarWidth;
+  const applicationLeft = isSidebarLeft ? navigationWidth + sidebarWidth : navigationWidth;
+  const applicationHorizontalOffset = applicationLeft + applicationRight;
   const contentTop = applicationTop + applicationTopBarHeight;
   const contentBottom = applicationBottom + applicationBottomBarHeight;
 
@@ -76,11 +81,16 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('navigation.width')}: ${navigationWidth}px;
   `;
 
+  const sidebarLeft = isSidebarLeft ? navigationWidth : undefined;
+  const sidebarRight = isSidebarLeft ? undefined : 0;
+  const sidebarLeftValue = sidebarLeft !== undefined ? `${sidebarLeft}px` : `calc(100vw - ${sidebarWidth}px)`;
+  const sidebarRightValue = sidebarRight !== undefined ? `${sidebarRight}` : `calc(100vw - ${navigationWidth + sidebarWidth}px)`;
+
   const sidebar = css`
     ${layoutVarName('sidebar.top')}: ${headerAndBannerHeight}px;
     ${layoutVarName('sidebar.bottom')}: ${footerHeight}px;
-    ${layoutVarName('sidebar.right')}: 0;
-    ${layoutVarName('sidebar.left')}: calc(100vw - ${sidebarWidth}px);
+    ${layoutVarName('sidebar.right')}: ${sidebarRightValue};
+    ${layoutVarName('sidebar.left')}: ${sidebarLeftValue};
     ${layoutVarName('sidebar.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
     ${layoutVarName('sidebar.width')}: ${sidebarWidth}px;
   `;
@@ -91,7 +101,7 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
     ${layoutVarName('application.top')}: ${applicationTop}px;
     ${layoutVarName('application.bottom')}: ${applicationBottom}px;
-    ${layoutVarName('application.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.left')}: ${applicationLeft}px;
     ${layoutVarName('application.right')}: ${applicationRight}px;
     ${layoutVarName('application.height')}: calc(100vh - ${applicationTop + applicationBottom}px);
     ${layoutVarName('application.width')}: calc(100vw - ${applicationHorizontalOffset}px);

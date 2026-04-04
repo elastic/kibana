@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export enum AIChatExperience {
-  Classic = 'classic',
-  Agent = 'agent',
-  Off = 'off',
-}
+import React from 'react';
+import { SplitPaneWorkspace } from '../components/workspace/split_pane_workspace';
+
+export const WorkspacePage: React.FC = () => {
+  return <SplitPaneWorkspace />;
+};

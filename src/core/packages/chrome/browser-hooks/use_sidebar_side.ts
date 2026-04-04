@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useChromeStyle } from './use_chrome_style';
-export { useActiveSolutionNavId } from './use_active_solution_nav_id';
-export { useIsChromeVisible } from './use_is_chrome_visible';
-export { useSidebarWidth } from './use_sidebar_width';
-export { useSideNavCollapsed } from './use_side_nav_collapsed';
-export { useSideNavWidth } from './use_side_nav_width';
-export { useSidebarSide } from './use_sidebar_side';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+import type { SidebarSide } from '@kbn/core-chrome-sidebar';
+
+/**
+ * Returns the current sidebar side ('left' | 'right').
+ */
+export function useSidebarSide(): SidebarSide {
+  const chrome = useChromeService();
+  return useObservable(chrome.sidebar.getSidebarSide$(), chrome.sidebar.getSidebarSide());
+}

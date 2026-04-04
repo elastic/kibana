@@ -16,6 +16,7 @@ import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useSidebarSide } from '@kbn/core-chrome-browser-hooks/use_sidebar_side';
 import type { SidebarPanelContextValue } from '@kbn/core-chrome-sidebar-context';
 import { SidebarPanelContext } from '@kbn/core-chrome-sidebar-context';
 import { PanelResizeHandle } from './panel_resize_handle';
@@ -88,11 +89,24 @@ const useFocusRescue = () => {
  */
 export const SidebarPanel: FC<SidebarPanelProps> = ({ children }) => {
   const chromeStyle = useChromeStyle();
+  const sidebarSide = useSidebarSide();
   const headingId = useId();
   const { asideRef, setOnFocusRescue } = useFocusRescue();
   const contextValue = useMemo<SidebarPanelContextValue>(
     () => ({ headingId, setOnFocusRescue }),
     [headingId, setOnFocusRescue]
+  );
+
+  const panel = (
+    <EuiPanel
+      paddingSize="none"
+      css={panelContainerStyles(chromeStyle === 'project')}
+      hasBorder={false}
+      hasShadow={false}
+      borderRadius={'none'}
+    >
+      {children}
+    </EuiPanel>
   );
 
   return (
@@ -104,16 +118,17 @@ export const SidebarPanel: FC<SidebarPanelProps> = ({ children }) => {
         aria-labelledby={headingId}
         aria-label={defaultAriaLabel}
       >
-        <PanelResizeHandle />
-        <EuiPanel
-          paddingSize="none"
-          css={panelContainerStyles(chromeStyle === 'project')}
-          hasBorder={false}
-          hasShadow={false}
-          borderRadius={'none'}
-        >
-          {children}
-        </EuiPanel>
+        {sidebarSide === 'left' ? (
+          <>
+            {panel}
+            <PanelResizeHandle />
+          </>
+        ) : (
+          <>
+            <PanelResizeHandle />
+            {panel}
+          </>
+        )}
       </aside>
     </SidebarPanelContext.Provider>
   );

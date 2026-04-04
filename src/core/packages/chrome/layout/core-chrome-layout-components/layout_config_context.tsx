@@ -30,6 +30,7 @@ export type LayoutConfig = Pick<
   | 'applicationMarginRight'
 > & {
   chromeStyle?: ChromeStyle;
+  sidebarSide?: 'left' | 'right';
 };
 
 /** Update function type for layout config */

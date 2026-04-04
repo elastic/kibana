@@ -138,6 +138,9 @@ export interface SidebarApp<TState = undefined, TActions = undefined> {
   getStatus$: () => Observable<SidebarAppStatus>;
 }
 
+/** Which side of the application the sidebar is rendered on. */
+export type SidebarSide = 'left' | 'right';
+
 /** Sidebar start contract */
 export interface SidebarStart {
   /** Observable of open state */
@@ -152,6 +155,18 @@ export interface SidebarStart {
   getWidth: () => number;
   /** Set width */
   setWidth: (width: number) => void;
+  /** Enable or disable full-width mode (sidebar covers the full page width) */
+  setFullWidth: (value: boolean) => void;
+  /** Whether the sidebar is in full-width mode */
+  isFullWidth: () => boolean;
+  /** Observable of full-width mode */
+  isFullWidth$: () => Observable<boolean>;
+  /** Set which side of the page the sidebar appears on */
+  setSidebarSide: (side: SidebarSide) => void;
+  /** Get the current sidebar side */
+  getSidebarSide: () => SidebarSide;
+  /** Observable of the sidebar side */
+  getSidebarSide$: () => Observable<SidebarSide>;
   /** Observable of current app ID */
   getCurrentAppId$: () => Observable<SidebarAppId | null>;
   /** Get current app ID */
