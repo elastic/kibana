@@ -244,6 +244,15 @@ describe('resolveConflictingFieldTypes', () => {
       const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DOUBLE]);
       expect(result).toBeUndefined();
     });
+
+    it('should return undefined for mixed numeric + non-numeric (double + long + keyword)', () => {
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.DOUBLE,
+        ES_FIELD_TYPES.LONG,
+        ES_FIELD_TYPES.KEYWORD,
+      ]);
+      expect(result).toBeUndefined();
+    });
   });
 });
 

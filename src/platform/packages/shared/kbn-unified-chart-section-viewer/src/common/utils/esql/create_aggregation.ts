@@ -53,14 +53,9 @@ export function resolveConflictingFieldTypes(
     return 'long' as ES_FIELD_TYPES;
   }
 
-  // Mixed numeric: if we have both float and integer families, prefer double
-  const hasFloatTypes = uniqueTypes.some(
-    (type) => type === 'double' || FLOAT_FAMILY.includes(type as string)
-  );
-  const hasIntTypes = uniqueTypes.some(
-    (type) => type === 'long' || INT_FAMILY.includes(type as string)
-  );
-  if (hasFloatTypes && hasIntTypes) {
+  // Mixed numeric: if all types are numeric, prefer double
+  const ALL_NUMERIC = ['double', ...FLOAT_FAMILY, 'long', ...INT_FAMILY];
+  if (uniqueTypes.every((type) => ALL_NUMERIC.includes(type as string))) {
     return 'double' as ES_FIELD_TYPES;
   }
 
