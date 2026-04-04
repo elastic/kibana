@@ -25,6 +25,27 @@ steps:
       message: "hello"
 `;
 
+const MULTI_STEP_WORKFLOW_YAML = `
+name: OOM Multi-Step Workflow
+description: Multi-step workflow to stress schema materialisation with varied step types
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: log_start
+    type: console
+    with:
+      message: "start"
+  - name: wait_step
+    type: wait
+    with:
+      seconds: 0
+  - name: log_end
+    type: console
+    with:
+      message: "end"
+`;
+
 /**
  * These tests run against a memory-constrained Kibana (1 GB heap via the
  * workflows_oom_testing server config set). Each endpoint triggers full
@@ -50,20 +71,52 @@ spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnos
 
   spaceTest('create workflow succeeds under 1 GB heap', async () => {
     const created = await workflowsApi.create(WORKFLOW_YAML);
-    expect(created.id).toBeTruthy();
+    expect(created.id).toBeDefined();
     expect(created.valid).toBe(true);
+    expect(created.name).toBe('OOM Prevention Test Workflow');
     workflowId = created.id;
   });
 
   spaceTest('update workflow succeeds under 1 GB heap', async () => {
+    expect(workflowId, 'workflowId must be set by the create test').toBeDefined();
+
     const updated = await workflowsApi.update(workflowId, {
       yaml: WORKFLOW_YAML.replace('hello', 'updated'),
     });
     expect(updated.id).toBe(workflowId);
+    expect(updated.valid).toBe(true);
+    expect(updated.yaml).toContain('updated');
   });
 
   spaceTest('validate workflow succeeds under 1 GB heap', async () => {
     const result = await workflowsApi.validate(WORKFLOW_YAML);
     expect(result.valid).toBe(true);
+  });
+
+  spaceTest('validate invalid workflow returns errors under 1 GB heap', async () => {
+    const invalidYaml = `
+name: Invalid Workflow
+triggers:
+  - type: nonexistent_trigger
+steps:
+  - name: bad_step
+    type: nonexistent_step_type
+`;
+    const result = await workflowsApi.validate(invalidYaml);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toBeDefined();
+  });
+
+  spaceTest('create multi-step workflow succeeds under 1 GB heap', async () => {
+    const created = await workflowsApi.create(MULTI_STEP_WORKFLOW_YAML);
+    expect(created.id).toBeDefined();
+    expect(created.valid).toBe(true);
+    expect(created.name).toBe('OOM Multi-Step Workflow');
+  });
+
+  spaceTest('bulk create workflows succeeds under 1 GB heap', async () => {
+    const result = await workflowsApi.bulkCreate([WORKFLOW_YAML, MULTI_STEP_WORKFLOW_YAML]);
+    expect(result.created).toHaveLength(2);
+    expect(result.failed).toHaveLength(0);
   });
 });
