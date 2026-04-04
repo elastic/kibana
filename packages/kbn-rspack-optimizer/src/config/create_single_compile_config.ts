@@ -509,8 +509,8 @@ export async function createSingleCompileConfig(
       //   30: vendorsHeavy    - specific heavy node_modules (reuseExistingChunk)
       //   29: solutionPackages - /solutions/*/packages/  (wins over rootPackages for kbn-*)
       //   28: rootPackages    - /packages/kbn-/  (repo root + x-pack/packages)
-      //   20: vendors         - /node_modules/ (minChunks: 5)
-      //  -20: default         - catch-all (minChunks: 3)
+      //   20: vendors         - /node_modules/ (minChunks: 3)
+      //  -20: default         - catch-all (minChunks: 3, name: 'shared-misc')
       //
       // Directories NOT covered (intentionally):
       //   x-pack/packages/ only has 3 packages, caught by rootPackages via /packages/kbn-/
@@ -636,18 +636,20 @@ export async function createSingleCompileConfig(
             chunks: 'async',
             reuseExistingChunk: true,
           },
-          // Shared vendors - extract if used by 5+ chunks
+          // Shared vendors - extract if used by 3+ chunks
           vendors: {
             test: /[\\/]node_modules[\\/]/,
             priority: 20,
-            minChunks: 5,
+            minChunks: 3,
             reuseExistingChunk: true,
           },
-          // Catch-all for shared async code not matched by named groups above
+          // Catch-all for shared async code not matched by named groups above.
+          // Static name merges all remaining modules into a single chunk.
           default: {
             minChunks: 3,
             priority: -20,
             reuseExistingChunk: true,
+            name: 'shared-misc',
           },
         },
       },
