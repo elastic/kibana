@@ -57,6 +57,7 @@ async function main() {
     await listRecentRuns(client);
     console.log('\nUsage: npx ts-node scripts/inspect_eval_run.ts <run_id> [mode]');
     console.log('Modes: summary (default), failures, compare, conversations, efficiency');
+    await client.close();
     return;
   }
 
@@ -386,10 +387,12 @@ async function showEfficiency(client: Client, runId: string) {
   const allScores = efficiencyDocs
     .map((d) => d.evaluator.score)
     .filter((s): s is number => s !== null);
-  const mean = allScores.reduce((a, b) => a + b, 0) / allScores.length;
-  const imperfect = allScores.filter((s) => s < 1).length;
 
-  console.log(`\n  Overall: mean=${mean.toFixed(3)}  imperfect=${imperfect}/${allScores.length}`);
+  if (allScores.length > 0) {
+    const mean = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+    const imperfect = allScores.filter((s) => s < 1).length;
+    console.log(`\n  Overall: mean=${mean.toFixed(3)}  imperfect=${imperfect}/${allScores.length}`);
+  }
 
   if (trajectoryDocs.length > 0) {
     const trajScores = trajectoryDocs
