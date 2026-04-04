@@ -30,7 +30,7 @@ export async function resolveConnectorForFeature({
   const resolved = await searchInferenceEndpoints?.endpoints.getForFeature(featureId, request);
   resolved?.warnings.forEach((w) => logger.warn(w));
 
-  if (resolved?.endpoints.length > 0) {
+  if (resolved && resolved.endpoints.length > 0) {
     const connector = resolved.endpoints[0];
     return { connectorId: connector.connectorId, connector };
   }
