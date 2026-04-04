@@ -32,7 +32,8 @@ const NEGATIVE_CASE_NA = {
   explanation: 'Not applicable: negative case — model should reject this request',
 };
 
-const INFRA_ERROR_PATTERN = /timeout|ECONNREFUSED|503|502|401|ENOTFOUND|socket hang up/i;
+const INFRA_ERROR_PATTERN =
+  /timeout|ECONNREFUSED|503|502|500|401|ENOTFOUND|socket hang up|ERR_BAD_RESPONSE/i;
 
 /**
  * Wraps an evaluator so it returns N/A when the conversation encountered an
@@ -499,7 +500,12 @@ export function createEditPreservationEvaluator() {
   };
 }
 
-const LOOKUP_TOOL_PATTERNS = ['get_step_definitions', 'get_connectors', 'get_examples'];
+const LOOKUP_TOOL_PATTERNS = [
+  'get_step_definitions',
+  'get_connectors',
+  'get_examples',
+  'get_trigger_definitions',
+];
 
 const isLookupCall = (toolId: string | undefined): boolean =>
   LOOKUP_TOOL_PATTERNS.some((p) => toolId?.includes(p));
