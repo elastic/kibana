@@ -115,10 +115,6 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.ex
 );
 
 const esqlColumn = {
-  /**
-   * Value
-   */
-  operation: schema.literal('value'),
   column: schema.string({
     meta: {
       description: 'Column to use',

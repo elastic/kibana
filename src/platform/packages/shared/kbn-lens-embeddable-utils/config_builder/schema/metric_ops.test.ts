@@ -35,7 +35,6 @@ describe('Metric Operations Schemas', () => {
   describe('columnValueOperationSchema', () => {
     it('validates a valid metric operation configuration', () => {
       const input = {
-        operation: 'value',
         column: 'sum' as const,
       };
 
@@ -86,8 +85,8 @@ describe('Metric Operations Schemas', () => {
         empty_as_null: true,
         time_scale: 's' as const,
         filter: {
-          language: 'kuery' as const,
-          query: 'status:active',
+          language: 'kql' as const,
+          expression: 'status:active',
         },
       };
 
