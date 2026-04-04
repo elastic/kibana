@@ -18,7 +18,8 @@ import {
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-const UNSEEN_FALLBACK = { hasSeenModal: true, markAsSeen: () => {} };
+/** While active space is not yet available, do not flash the modal (treat as already handled). */
+const PENDING_SPACE_FALLBACK = { hasSeenModal: true, markAsSeen: () => {} };
 
 export function AgentBuilderAnnouncementModalController() {
   const { services } = useKibana<{
@@ -31,7 +32,7 @@ export function AgentBuilderAnnouncementModalController() {
   const activeSpace$ = useMemo(() => spacesService?.getActiveSpace$() ?? EMPTY, [spacesService]);
   const space = useObservable(activeSpace$);
   const { hasSeenModal, markAsSeen } = useMemo(
-    () => (space ? getAgentBuilderAnnouncementState(space.id) : UNSEEN_FALLBACK),
+    () => (space ? getAgentBuilderAnnouncementState(space.id) : PENDING_SPACE_FALLBACK),
     [space]
   );
   const [isDismissed, setIsDismissed] = useState(false);
