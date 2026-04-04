@@ -101,7 +101,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
   const isClickable =
     item.itemType === DOCUMENT_TYPE_EVENT ||
     item.itemType === DOCUMENT_TYPE_ALERT ||
-    (item.itemType === DOCUMENT_TYPE_ENTITY && (item as EntityItem).entity.availableInEntityStore);
+    (item.itemType === DOCUMENT_TYPE_ENTITY && (item as EntityItem).entity?.availableInEntityStore);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

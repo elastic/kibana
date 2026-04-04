@@ -143,11 +143,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
         await networkEventsPage.flyout.expandVisualizations();
         await networkEventsPage.flyout.assertGraphPreviewVisible();
-        await networkEventsPage.flyout.assertGraphNodesNumber(3);
+        await networkEventsPage.flyout.assertGraphNodesNumber(4);
 
         await expandedFlyoutGraph.expandGraph();
         await expandedFlyoutGraph.waitGraphIsLoaded();
-        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+        await expandedFlyoutGraph.assertGraphNodesNumber(4);
 
         // Click on the entity node to show entity details
         await expandedFlyoutGraph.showEntityDetails('mv-expand-target-storage');
@@ -169,18 +169,18 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
         await networkEventsPage.flyout.expandVisualizations();
         await networkEventsPage.flyout.assertGraphPreviewVisible();
-        await networkEventsPage.flyout.assertGraphNodesNumber(3);
+        await networkEventsPage.flyout.assertGraphNodesNumber(4);
 
         await expandedFlyoutGraph.expandGraph();
         await expandedFlyoutGraph.waitGraphIsLoaded();
-        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+        await expandedFlyoutGraph.assertGraphNodesNumber(4);
 
         // Click on the entity node to show entity details
         await expandedFlyoutGraph.showEntityDetails('user:mv-expand-test-actor@example.com@gcp');
 
         // Verify entity preview panel is open
         await entityFlyout.assertEntityPanelIsOpen('user');
-        await entityFlyout.assertEntityPanelHeader('user', 'MV Expand Test Actor');
+        await entityFlyout.assertEntityPanelHeader('user', 'MvExpandTestActor');
       });
 
       it('expanded flyout - show service entity details', async () => {

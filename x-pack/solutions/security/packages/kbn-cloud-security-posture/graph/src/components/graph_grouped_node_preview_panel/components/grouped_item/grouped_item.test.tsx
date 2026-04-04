@@ -179,6 +179,7 @@ describe('<GroupedItem />', () => {
               itemType: 'entity',
               id: 'e1',
               label: 'entity-1',
+              entity: {},
               actor: { id: 'a1', label: 'actor' },
               target: { id: 't1', label: 'target' },
             } as any // eslint-disable-line @typescript-eslint/no-explicit-any
