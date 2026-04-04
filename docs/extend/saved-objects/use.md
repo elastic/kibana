@@ -19,7 +19,7 @@ Core exposes the Saved Objects service to plugins as `core.savedObjects`:
 
 You need the **start** contract to create, read, update, or delete Saved Object documents. Typically you obtain a client (or repository) per request inside a route handler using the request from the handler.
 
-## Start contract: clients and repositories
+## Start contract: clients and repositories [saved-objects-service-start]
 
 **SavedObjectsServiceStart** (contracts.ts) exposes four methods. The first two return an object that implements **SavedObjectsClientContract** (defined in `src/core/packages/saved-objects/api-server/src/saved_objects_client.ts`). The other two return an object that implements **ISavedObjectsRepository** (defined in `src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts`).
 
@@ -44,6 +44,17 @@ Creates a **Saved Objects client** that uses the **internal** Kibana user. It do
 * **Options:** `SavedObjectsClientProviderOptions` — `includedHiddenTypes?: string[]`, `excludedExtensions?: string[]`. The security extension is excluded regardless.
 * **When to use:** When you must perform Saved Object operations without a request or with system privileges. Do not use with a fake request to bypass security.
 
+::::{important}
+The internal client operates in the `default` space by default. To query Saved Objects across **all** spaces (for example, during a background cleanup job), pass `namespaces: ['*']` in the `find` options:
+
+```ts
+const client = savedObjectsStart.getUnsafeInternalClient();
+const result = await client.find({ type: 'my-type', namespaces: ['*'] });
+```
+
+Without `namespaces: ['*']`, the query is silently restricted to the `default` space and will miss objects in other spaces.
+::::
+
 ### createScopedRepository
 
 Creates a **repository** scoped to the given request. The repository has all client methods plus a few extra operations (see [Working with the SavedObjectsRepository](#working-with-the-savedobjectsrepository)). Use only when you need those repository-only methods with request context.
@@ -67,6 +78,24 @@ Creates a **repository** using the internal user, with no request context. Same 
   * **`find` with internal options** — Advanced cases where you need to run find with extensions disabled (internal use; rarely needed by plugins).
 
 If you are not sure, use the client. Prefer the **scoped** client for request handlers and the **internal** client for background or system operations.
+
+::::{warning}
+Do not manually instantiate `SavedObjectsClient` (or `SavedObjectsRepository`) by passing a non-default or custom repository directly. Clients obtained this way bypass the wrappers that provide security, spaces isolation, and encrypted saved object protections. Always obtain a client or repository through the methods exposed by [`SavedObjectsServiceStart`](#saved-objects-service-start).
+::::
+
+---
+
+## Security considerations [saved-objects-use-security]
+
+### Aggregation security [saved-objects-use-aggregation-security]
+
+When using `find` or `search` with aggregations, be aware that certain {{es}} aggregation types (for example, `terms` on a field that is only partially visible to the user) can bypass query restrictions and return data from documents the user should not be able to see.
+
+To avoid exposing data unintentionally:
+
+* Prefer aggregations on fields that are directly filterable in the current query.
+* Avoid `terms` aggregations on fields whose values could come from documents outside the user's access scope.
+* Review the {{es}} documentation on [document-level security and aggregations](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/controlling-access-at-document-field-level.md#document-level-security) before using aggregations in a security-sensitive context.
 
 ---
 
