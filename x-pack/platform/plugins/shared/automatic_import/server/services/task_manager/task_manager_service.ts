@@ -115,9 +115,6 @@ export class TaskManagerService {
             }
           },
           cancel: async () => {
-            if (!abortController.signal.aborted) {
-              abortController.abort();
-            }
             return this.cancelTask(taskInstance);
           },
         }),
