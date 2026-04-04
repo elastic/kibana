@@ -61,7 +61,6 @@ export const esqlGauge: GaugeState = {
     query: 'FROM test-index | STATS count = COUNT(*)',
   },
   metric: {
-    operation: 'value',
     column: 'count',
   },
   sampling: 1,
@@ -154,9 +153,8 @@ export const comprehensiveEsqlGauge: GaugeState = {
     query: 'FROM test-index | STATS countA = COUNT(*) WHERE a > 1, countB = COUNT(*) WHERE b > 1',
   },
   metric: {
-    operation: 'value',
     column: 'countA',
-    min: { operation: 'value', column: 'countB' },
+    min: { column: 'countB' },
     title: { visible: false },
     sub_title: 'Bytes Subtitle',
     ticks: {
