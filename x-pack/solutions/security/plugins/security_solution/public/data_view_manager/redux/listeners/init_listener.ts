@@ -63,12 +63,8 @@ export const createInitListener = (
 
         // Initialize default data views first
         const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
-          dataViewService: dependencies.dataViews,
-          uiSettings: dependencies.uiSettings,
-          spaces: dependencies.spaces,
           application: dependencies.application,
           http: dependencies.http,
-          enableAlertsAndAttacksAlignment,
         });
 
         logger.debug(`Default data views created:

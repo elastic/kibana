@@ -14,6 +14,7 @@ import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/
 const MODULE_ID = 'temporal_state_analysis';
 const MODULE_NAME = 'Temporal State Analysis';
 const MODULE_PRIORITY = 9;
+const MODULE_WEIGHT = 0.25;
 
 const SUPPORTED_ENTITY_TYPES: EntityTypeOpenAPI[] = ['user', 'host'];
 
@@ -32,7 +33,12 @@ export const createTemporalStateModule = ({
   logger,
   spaceId,
 }: TemporalStateModuleDeps): ObservationModule => ({
-  config: { id: MODULE_ID, name: MODULE_NAME, priority: MODULE_PRIORITY },
+  config: {
+    id: MODULE_ID,
+    name: MODULE_NAME,
+    priority: MODULE_PRIORITY,
+    weight: MODULE_WEIGHT,
+  },
 
   isEnabled: () => true,
 

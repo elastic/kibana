@@ -277,11 +277,14 @@ export const getSearchEmbeddableFactory = ({
         },
         canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
         saveToLibrary: async (title: string) => {
+          const description = titleManager.api.description$.getValue();
           const savedObjectId = await save({
             ...api.savedSearch$.getValue(),
             title,
+            ...(description && { description }),
           });
           defaultTitle$.next(title);
+          defaultDescription$.next(description);
           return savedObjectId!;
         },
         checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>

@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       const refs = references.references.flatMap((ref: RuleReferencesSchema) => Object.keys(ref));
-      expect(refs.sort()).to.eql(['i_exist', 'i_exist_2', 'endpoint_list'].sort());
+      expect(refs.sort()).to.eql(['i_exist', 'i_exist_2'].sort());
     });
   });
 };

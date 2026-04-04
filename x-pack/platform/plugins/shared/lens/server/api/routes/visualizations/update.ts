@@ -20,7 +20,9 @@ import {
   LENS_API_TAG,
 } from '../../../../common/constants';
 import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
-import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
+
+import type { RegisterAPIRouteFn } from '../../types';
+import type { LensUpdateResponseBody } from './types';
 import {
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
@@ -119,11 +121,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
       try {
         const { result } = await client.update(req.params.id, data, options);
-
-        if (result.item.error) {
-          throw result.item.error;
-        }
-
         const responseItem = getLensResponseItem(builder, result.item);
 
         if (createdNew) {
