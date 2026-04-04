@@ -1084,6 +1084,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   },
   axis: {
     x: {
+      type: 'x',
       title: {
         visible: true,
       },
@@ -1094,18 +1095,10 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
     },
     left: {
+      type: 'y',
+      anchor: 'start',
       title: {
         visible: false,
-      },
-      ticks: { visible: true },
-      grid: { visible: true },
-      labels: {
-        orientation: 'horizontal',
-      },
-    },
-    right: {
-      title: {
-        visible: true,
       },
       ticks: { visible: true },
       grid: { visible: true },
@@ -1180,6 +1173,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   },
   axis: {
     x: {
+      type: 'x',
       title: {
         visible: true,
       },
@@ -1190,18 +1184,10 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
     left: {
+      type: 'y',
+      anchor: 'start',
       title: {
         visible: false,
-      },
-      ticks: { visible: true },
-      grid: { visible: true },
-      labels: {
-        orientation: 'horizontal',
-      },
-    },
-    right: {
-      title: {
-        visible: true,
       },
       ticks: { visible: true },
       grid: { visible: true },
@@ -1271,6 +1257,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   },
   axis: {
     x: {
+      type: 'x',
       title: {
         visible: true,
       },
@@ -1281,18 +1268,10 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
     },
     left: {
+      type: 'y',
+      anchor: 'start',
       title: {
         visible: false,
-      },
-      ticks: { visible: true },
-      grid: { visible: true },
-      labels: {
-        orientation: 'horizontal',
-      },
-    },
-    right: {
-      title: {
-        visible: true,
       },
       ticks: { visible: true },
       grid: { visible: true },

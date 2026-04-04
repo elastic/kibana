@@ -558,6 +558,7 @@ describe('XY', () => {
             title: 'XY Chart with Temporal Scale',
             axis: {
               x: {
+                type: 'x',
                 scale: 'temporal',
               },
             },
@@ -587,6 +588,7 @@ describe('XY', () => {
             title: 'XY Chart with Linear Scale',
             axis: {
               x: {
+                type: 'x',
                 scale: 'linear',
               },
             },
@@ -637,6 +639,8 @@ describe('XY', () => {
             title: 'XY Chart with Y-Axis Only',
             axis: {
               left: {
+                type: 'y',
+                anchor: 'start',
                 ticks: { visible: true },
                 grid: { visible: true },
               },

@@ -20,10 +20,11 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
 import { toLensStateFilterLanguage } from '../../columns/filter';
-import type {
-  DataLayerType,
-  ReferenceLineLayerType,
-  AnnotationLayerByValueType,
+import {
+  type DataLayerType,
+  type ReferenceLineLayerType,
+  type AnnotationLayerByValueType,
+  type XYState,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -76,15 +77,20 @@ export function getValueColumns(
   ];
 }
 
-function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
+function buildDataLayer(config: XYState, layer: DataLayerType, i: number): XYDataLayerConfig {
   const seriesTypeLabel = (
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
-  const yConfig = layer.y.map<YConfig>((yMetric, index) => ({
-    ...(yMetric.color?.color ? { color: yMetric.color?.color } : {}),
-    ...(yMetric.axis ? { axisMode: yMetric.axis } : {}),
-    forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
-  }));
+
+  const yConfig = layer.y.map<YConfig>((yMetric, index) => {
+    const anchor = yMetric?.axis_id ? config.axis?.[yMetric?.axis_id]?.anchor : undefined;
+    const axisMode = anchor === 'end' ? 'right' : 'left'; // default to left
+    return {
+      ...(yMetric.color?.color ? { color: yMetric.color?.color } : {}),
+      ...{ axisMode },
+      forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
+    };
+  });
   const meaningFulYConfig = yConfig.filter((y) => Object.values(y).length > 1);
   return {
     layerId: getIdForLayer(layer, i),
@@ -202,6 +208,7 @@ function buildReferenceLineLayer(
 }
 
 export function buildXYLayer(
+  config: XYState,
   layer: unknown,
   i: number,
   dataViewId: string,
@@ -238,7 +245,7 @@ export function buildXYLayer(
   if (isAPIReferenceLineLayer(layer)) {
     return buildReferenceLineLayer(layer, i);
   }
-  return buildDataLayer(layer, i);
+  return buildDataLayer(config, layer, i);
 }
 
 export function buildFormBasedXYLayer(layer: unknown, i: number) {

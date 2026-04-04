@@ -58,6 +58,7 @@ import {
   operationFromColumn,
 } from '../../utils';
 import { stripUndefined } from '../utils';
+import { getYAccessorsAxisPosition } from './chart';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
@@ -72,6 +73,11 @@ function convertDataLayerToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
 ): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'> | Omit<DataLayerTypeESQL, 'type' | 'dataset'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
+  const yAccessorToAxisPositionMap = getYAccessorsAxisPosition(
+    visualization,
+    (accessor) => accessor
+  );
+
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
       ? operationFromColumn(visualization.xAccessor, layer)
@@ -103,6 +109,7 @@ function convertDataLayerToAPI(
             return undefined;
           }
           const yConfig = yConfigMap.get(accessor);
+
           return {
             ...apiOperation,
             ...(visualization.colorMapping
@@ -112,6 +119,7 @@ function convertDataLayerToAPI(
                   color: fromStaticColorLensStateToAPI(yConfig.color),
                 }
               : {}),
+            axis_id: yAccessorToAxisPositionMap.get(accessor),
           };
         })
         .filter(nonNullable) ?? [];
