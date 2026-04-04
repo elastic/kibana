@@ -505,9 +505,12 @@ export async function createSingleCompileConfig(
       //
       // `minChunks: 2` ensures only modules shared by 2+ async chunks are
       // extracted (no single-consumer shared chunks). `enforce` is NOT used
-      // so that minSize and minChunks are respected -- A/B testing confirmed
-      // this has negligible impact on build speed while preventing unnecessary
-      // chunk fragmentation.
+      // so that minChunks is respected -- A/B testing confirmed this has
+      // negligible impact on build speed while preventing unnecessary chunk
+      // fragmentation. Named groups use `minSize: 0` to extract ALL shared
+      // modules regardless of size, preventing small-module duplication
+      // across consuming plugins. The global `minSize: 20000` still applies
+      // to `vendors`, `vendorsHeavy`, and `default` catch-all groups.
       //
       // `test` regexes run in Rust; only `name` functions cross the Rust-JS
       // boundary (~0.3s overhead for ~few-thousand matching modules out of
@@ -563,6 +566,7 @@ export async function createSingleCompileConfig(
             chunks: 'async' as const,
             priority: 35,
             minChunks: 2,
+            minSize: 0,
           },
 
           // --- Core packages cache group ---
@@ -579,6 +583,7 @@ export async function createSingleCompileConfig(
             chunks: 'async' as const,
             priority: 32,
             minChunks: 2,
+            minSize: 0,
           },
 
           // --- Platform packages cache group ---
@@ -595,6 +600,7 @@ export async function createSingleCompileConfig(
             chunks: 'async' as const,
             priority: 30,
             minChunks: 2,
+            minSize: 0,
           },
 
           // --- Solution packages cache group ---
@@ -611,6 +617,7 @@ export async function createSingleCompileConfig(
             chunks: 'async' as const,
             priority: 29,
             minChunks: 2,
+            minSize: 0,
           },
 
           // --- Root packages cache group ---
@@ -631,6 +638,7 @@ export async function createSingleCompileConfig(
             chunks: 'async' as const,
             priority: 28,
             minChunks: 2,
+            minSize: 0,
           },
 
           // Heavy vendors NOT in ui-shared-deps - keep separate for lazy loading
