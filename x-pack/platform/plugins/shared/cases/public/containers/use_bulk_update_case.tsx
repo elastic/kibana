@@ -38,7 +38,7 @@ export const useUpdateCases = () => {
     (request: MutationArgs) =>
       rebaseCaseMutationOnConflict({
         request,
-        staleCases: request.originalCases.filter(({ id }) =>
+        preRequestServerState: request.originalCases.filter(({ id }) =>
           request.cases.some((caseToUpdate) => caseToUpdate.id === id)
         ),
         executeRequest: ({ cases }) => updateCases({ cases }),

@@ -937,7 +937,7 @@
         "tags": [],
         "label": "getEventChainContext",
         "description": [
-          "\nReturns the event-chain context from the request if it was set by a workflow run.\nUsed inside emitEvent to infer depth when the emitter is in a workflow-triggered path.\nReads from: (1) the request's symbol (execution-engine fakeRequest path), or\n(2) the x-kibana-event-chain-depth and x-kibana-event-chain-source-workflow headers (HTTP path)."
+          "\nReturns the event-chain context from the request if it was set by a workflow run.\nUsed inside emitEvent to infer depth when the emitter is in a workflow-triggered path.\nReads from: (1) the request's symbol (execution-engine fakeRequest path), or\n(2) the x-kibana-event-chain-depth and x-kibana-event-chain-source-execution-id headers (HTTP path)."
         ],
         "signature": [
           "(request: ",
@@ -1029,7 +1029,7 @@
         "tags": [],
         "label": "setWorkflowEventChainContext",
         "description": [
-          "\nSets the event-chain context on the request. Called by the execution engine\nat the start of a workflow run so that any emitEvent call using this request\n(e.g. in-process with the fakeRequest) will have the correct depth and sourceWorkflowId."
+          "\nSets the event-chain context on the request. Called by the execution engine\nat the start of a workflow run so that any emitEvent call using this request\n(e.g. in-process with the fakeRequest) will have the correct depth and sourceExecutionId."
         ],
         "signature": [
           "(request: ",
@@ -1204,10 +1204,10 @@
           },
           {
             "parentPluginId": "workflowsExtensions",
-            "id": "def-server.EventChainContext.sourceWorkflowId",
+            "id": "def-server.EventChainContext.sourceExecutionId",
             "type": "string",
             "tags": [],
-            "label": "sourceWorkflowId",
+            "label": "sourceExecutionId",
             "description": [],
             "signature": [
               "string | undefined"
@@ -2015,15 +2015,15 @@
       },
       {
         "parentPluginId": "workflowsExtensions",
-        "id": "def-server.EVENT_CHAIN_SOURCE_WORKFLOW_HEADER",
+        "id": "def-server.EVENT_CHAIN_SOURCE_EXECUTION_HEADER",
         "type": "string",
         "tags": [],
-        "label": "EVENT_CHAIN_SOURCE_WORKFLOW_HEADER",
+        "label": "EVENT_CHAIN_SOURCE_EXECUTION_HEADER",
         "description": [
-          "\nHTTP header name for the workflow id associated with the current chain hop. Set on outbound\nrequests so the server can restore `sourceWorkflowId` on the incoming request (logging and attribution)."
+          "\nHTTP header for the workflow execution id associated with the current chain hop. Set on outbound\nrequests so the server can restore `sourceExecutionId` on the incoming request."
         ],
         "signature": [
-          "\"x-kibana-event-chain-source-workflow\""
+          "\"x-kibana-event-chain-source-execution-id\""
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts",
         "lineNumber": 35,
