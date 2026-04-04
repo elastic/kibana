@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
+const { createRequire } = require('module');
+
+require('@kbn/babel-register').install();
+
+const requireFromHere = createRequire(__filename);
+const { executeTypeCheckValidation, TSC_LABEL } = requireFromHere(
+  '../../packages/kbn-ts-type-check-cli'
+);
+
+module.exports = {
   executeTypeCheckValidation,
   TSC_LABEL,
-  type ExecuteTypeCheckValidationOptions,
-  type TscValidationResult,
-} from './execute_type_check_validation';
-export { runLegacyTypeCheckCli } from './run_type_check_legacy_cli';
-export { runTypeCheckContractCli } from './run_type_check_contract_cli';
+};
