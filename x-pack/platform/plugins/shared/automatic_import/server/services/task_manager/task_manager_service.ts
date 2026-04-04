@@ -115,6 +115,7 @@ export class TaskManagerService {
             }
           },
           cancel: async () => {
+            abortController.abort();
             return this.cancelTask(taskInstance);
           },
         }),
@@ -412,7 +413,6 @@ export class TaskManagerService {
   }
 
   private async cancelTask(taskInstance: ConcreteTaskInstance) {
-    // Cancel the AI task here
     this.logger.debug(`Cancelling task ${taskInstance.id}`);
     return { state: { task_status: TASK_STATUSES.cancelled } };
   }
