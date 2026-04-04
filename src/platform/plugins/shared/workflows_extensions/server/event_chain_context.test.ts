@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   EVENT_CHAIN_DEPTH_HEADER,
-  EVENT_CHAIN_SOURCE_WORKFLOW_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
   getEventChainContext,
   getOutboundEventChainHeaders,
   setWorkflowEventChainContext,
@@ -24,20 +24,20 @@ describe('event_chain_context', () => {
 
   it('returns context after setWorkflowEventChainContext', () => {
     const request = {} as KibanaRequest;
-    setWorkflowEventChainContext(request, { depth: 0, sourceWorkflowId: 'wf-1' });
+    setWorkflowEventChainContext(request, { depth: 0, sourceExecutionId: 'exec-1' });
     expect(getEventChainContext(request)).toEqual({
       depth: 0,
-      sourceWorkflowId: 'wf-1',
+      sourceExecutionId: 'exec-1',
     });
   });
 
   it('overwrites context when set again', () => {
     const request = {} as KibanaRequest;
     setWorkflowEventChainContext(request, { depth: 0 });
-    setWorkflowEventChainContext(request, { depth: 1, sourceWorkflowId: 'wf-2' });
+    setWorkflowEventChainContext(request, { depth: 1, sourceExecutionId: 'exec-2' });
     expect(getEventChainContext(request)).toEqual({
       depth: 1,
-      sourceWorkflowId: 'wf-2',
+      sourceExecutionId: 'exec-2',
     });
   });
 
@@ -55,29 +55,29 @@ describe('event_chain_context', () => {
     expect(getEventChainContext(request)).toEqual({ depth: 1 });
   });
 
-  it('returns context with sourceWorkflowId from headers (HTTP path)', () => {
+  it('returns context with sourceExecutionId from headers (HTTP path)', () => {
     const request = {
       headers: {
         [EVENT_CHAIN_DEPTH_HEADER]: '2',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: 'wf-loop',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'exec-loop',
       },
     } as unknown as KibanaRequest;
     expect(getEventChainContext(request)).toEqual({
       depth: 2,
-      sourceWorkflowId: 'wf-loop',
+      sourceExecutionId: 'exec-loop',
     });
   });
 
-  it('returns context with sourceWorkflowId with case-insensitive source-workflow header', () => {
+  it('returns context with sourceExecutionId with case-insensitive source-execution header', () => {
     const request = {
       headers: {
         [EVENT_CHAIN_DEPTH_HEADER]: '1',
-        'X-Kibana-Event-Chain-Source-Workflow': 'my-workflow-id',
+        'X-Kibana-Event-Chain-Source-Execution-Id': 'exec-parent',
       },
     } as unknown as KibanaRequest;
     expect(getEventChainContext(request)).toEqual({
       depth: 1,
-      sourceWorkflowId: 'my-workflow-id',
+      sourceExecutionId: 'exec-parent',
     });
   });
 
@@ -85,10 +85,10 @@ describe('event_chain_context', () => {
     const request = {
       headers: { [EVENT_CHAIN_DEPTH_HEADER]: '2' },
     } as unknown as KibanaRequest;
-    setWorkflowEventChainContext(request, { depth: 0, sourceWorkflowId: 'wf-1' });
+    setWorkflowEventChainContext(request, { depth: 0, sourceExecutionId: 'exec-1' });
     expect(getEventChainContext(request)).toEqual({
       depth: 0,
-      sourceWorkflowId: 'wf-1',
+      sourceExecutionId: 'exec-1',
     });
   });
 
@@ -140,32 +140,43 @@ describe('event_chain_context', () => {
       expect(getOutboundEventChainHeaders(request)).toEqual({});
     });
 
-    it('returns both headers when context is set on request (sourceWorkflowId empty when not set)', () => {
+    it('returns depth header only when sourceExecutionId is not set', () => {
       const request = {} as KibanaRequest;
       setWorkflowEventChainContext(request, { depth: 3 });
       expect(getOutboundEventChainHeaders(request)).toEqual({
         [EVENT_CHAIN_DEPTH_HEADER]: '3',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: '',
       });
     });
 
-    it('returns both headers when context comes from depth header only', () => {
+    it('returns depth header only when context comes from depth header only', () => {
       const request = {
         headers: { [EVENT_CHAIN_DEPTH_HEADER]: '0' },
       } as unknown as KibanaRequest;
       expect(getOutboundEventChainHeaders(request)).toEqual({
         [EVENT_CHAIN_DEPTH_HEADER]: '0',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: '',
       });
     });
 
-    it('returns depth and sourceWorkflowId headers when context has both', () => {
+    it('returns depth and sourceExecutionId headers when context has both', () => {
       const request = {} as KibanaRequest;
-      setWorkflowEventChainContext(request, { depth: 1, sourceWorkflowId: 'wf-emit-loop' });
+      setWorkflowEventChainContext(request, { depth: 1, sourceExecutionId: 'exec-emit-loop' });
       expect(getOutboundEventChainHeaders(request)).toEqual({
         [EVENT_CHAIN_DEPTH_HEADER]: '1',
-        [EVENT_CHAIN_SOURCE_WORKFLOW_HEADER]: 'wf-emit-loop',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'exec-emit-loop',
       });
+    });
+  });
+
+  describe('outbound HTTP header round-trip (kibana.request path)', () => {
+    it('restores depth and sourceExecutionId on a new request from headers (no in-process Symbol)', () => {
+      const engineRequest = {} as KibanaRequest;
+      const original = { depth: 2, sourceExecutionId: 'parent-exec-uuid' };
+      setWorkflowEventChainContext(engineRequest, original);
+
+      const outbound = getOutboundEventChainHeaders(engineRequest);
+      const inboundRequest = { headers: outbound } as unknown as KibanaRequest;
+
+      expect(getEventChainContext(inboundRequest)).toEqual(original);
     });
   });
 });

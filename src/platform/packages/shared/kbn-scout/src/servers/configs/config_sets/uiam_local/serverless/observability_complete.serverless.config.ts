@@ -9,7 +9,7 @@
 
 import { MOCK_IDP_UIAM_SERVICE_URL, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
+import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 // Indicates whether the config is used on CI or locally.
@@ -29,6 +29,14 @@ export const servers: ScoutServerConfig = {
       `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
       `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
       '--xpack.security.uiam.ssl.verificationMode=none',
+      // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
+      // CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)
+      // Local: decodes to https://host.docker.internal:9220 (ES is on the host, reached via Docker bridge)
+      `--xpack.cloud.id=${
+        isRunOnCI
+          ? 'ci:ZXMwMTo5MjIwJDo5MjIwJGtpYmFuYTo5MjIw'
+          : 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw'
+      }`,
     ],
   },
 };

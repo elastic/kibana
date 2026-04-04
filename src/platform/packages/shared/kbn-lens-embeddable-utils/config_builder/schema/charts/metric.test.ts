@@ -570,7 +570,6 @@ describe('Metric Schema', () => {
         metrics: [
           {
             type: 'primary',
-            operation: 'value',
             column: 'unique_count',
             fit: false,
             labels: { alignment: 'left' },
