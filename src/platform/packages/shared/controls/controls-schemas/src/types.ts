@@ -29,7 +29,10 @@ import type { timeSliderControlSchema } from './time_slider_schema';
 
 export type ControlsGroupState = TypeOf<ReturnType<typeof getControlsGroupSchema>>;
 export type PinnedControlState = ControlsGroupState[number];
-export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema>;
+export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
+  order: number;
+  type: string;
+};
 
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
 export type ControlState = TypeOf<typeof controlTitleSchema>;
