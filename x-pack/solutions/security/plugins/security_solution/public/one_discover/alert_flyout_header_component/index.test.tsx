@@ -36,6 +36,14 @@ jest.mock('../../common/components/discover_in_timeline/provider', () => ({
   ),
 }));
 
+jest.mock('../../cases/components/provider/provider', () => ({
+  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../assistant/provider', () => ({
+  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 describe('AlertFlyoutHeader', () => {
   beforeEach(() => {
     mockDocumentHeader.mockClear();
@@ -71,6 +79,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={servicesPromise}
           storePromise={storePromise}
+          onAlertUpdated={jest.fn()}
         />
       );
     });
@@ -101,6 +110,7 @@ describe('AlertFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
         />
       </Router>
     );
@@ -119,6 +129,7 @@ describe('AlertFlyoutHeader', () => {
         hit={hit}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAlertUpdated={jest.fn()}
       />
     );
 

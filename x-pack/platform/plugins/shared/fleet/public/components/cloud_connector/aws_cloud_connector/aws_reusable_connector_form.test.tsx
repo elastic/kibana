@@ -205,6 +205,8 @@ describe('AWSReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: undefined,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -214,6 +216,8 @@ describe('AWSReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: 'single-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -225,6 +229,8 @@ describe('AWSReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: 'organization-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 

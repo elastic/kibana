@@ -6,9 +6,10 @@
  */
 
 import {
+  otelDatasetFilter,
   SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
   SEMCONV_SYSTEM_CPU_UTILIZATION,
-  SEMCONV_SYSTEM_MEMORY_LIMIT,
+  SEMCONV_SYSTEM_MEMORY_TOTAL,
   SEMCONV_SYSTEM_MEMORY_UTILIZATION,
   SYSTEM_CPU_CORES,
   SYSTEM_CPU_TOTAL_NORM_PCT,
@@ -81,16 +82,113 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `event.dataset: "hostmetricsreceiver.otel" AND (${kuery})`,
+          kuery: `${otelDatasetFilter('hostmetricsreceiver.otel')} AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT }),
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_UTILIZATION }),
-            expect.objectContaining({ field: SEMCONV_SYSTEM_MEMORY_LIMIT }),
+            expect.objectContaining({ field: SEMCONV_SYSTEM_MEMORY_TOTAL }),
             expect.objectContaining({ field: SEMCONV_SYSTEM_MEMORY_UTILIZATION }),
           ]),
         }),
       })
     );
+  });
+
+  it('should transform OTel rows into populated host metrics', () => {
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
+
+    useInfrastructureNodeMetricsMock.mockClear();
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
+    });
+
+    renderHook(() =>
+      useHostMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery,
+        metricsClient: createMetricsClientMock({}),
+        isOtel: true,
+      })
+    );
+
+    const lastCallArgs = useInfrastructureNodeMetricsMock.mock.calls.at(-1);
+    const { transform, metricsExplorerOptions } = lastCallArgs?.[0] ?? {};
+    expect(transform).toBeDefined();
+
+    const metrics = metricsExplorerOptions?.metrics ?? [];
+    const metricIndexByField = new Map(metrics.map((metric, index) => [metric.field, index]));
+
+    const row = transform!({
+      id: 'otel-host-1',
+      columns: [],
+      rows: [
+        {
+          timestamp: Date.now(),
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_CPU_LOGICAL_COUNT)}`]: 8,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_CPU_UTILIZATION)}`]: 0.42,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_MEMORY_TOTAL)}`]: 16_000_000_000,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_MEMORY_UTILIZATION)}`]: 0.25,
+        },
+      ],
+    });
+
+    expect(row).toEqual({
+      name: 'otel-host-1',
+      cpuCount: 8,
+      averageCpuUsagePercent: 42,
+      totalMemoryMegabytes: 16000,
+      averageMemoryUsagePercent: 25,
+    });
+  });
+
+  it('should return null totalMemoryMegabytes when memory total metric is absent (B=0 in equation)', () => {
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
+
+    useInfrastructureNodeMetricsMock.mockClear();
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
+    });
+
+    renderHook(() =>
+      useHostMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery,
+        metricsClient: createMetricsClientMock({}),
+        isOtel: true,
+      })
+    );
+
+    const lastCallArgs = useInfrastructureNodeMetricsMock.mock.calls.at(-1);
+    const { transform, metricsExplorerOptions } = lastCallArgs?.[0] ?? {};
+    expect(transform).toBeDefined();
+
+    const metrics = metricsExplorerOptions?.metrics ?? [];
+    const metricIndexByField = new Map(metrics.map((metric, index) => [metric.field, index]));
+
+    const row = transform!({
+      id: 'otel-host-2',
+      columns: [],
+      rows: [
+        {
+          timestamp: Date.now(),
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_CPU_LOGICAL_COUNT)}`]: 4,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_CPU_UTILIZATION)}`]: 0.1,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_MEMORY_UTILIZATION)}`]: 0.5,
+        },
+      ],
+    });
+
+    expect(row).toEqual({
+      name: 'otel-host-2',
+      cpuCount: 4,
+      averageCpuUsagePercent: 10,
+      totalMemoryMegabytes: null,
+      averageMemoryUsagePercent: 50,
+    });
   });
 
   it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {

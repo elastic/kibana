@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -22,6 +23,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
 } from '@elastic/eui';
@@ -30,6 +32,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
+
+const labelsContainerStyle = css`
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow: hidden;
+`;
+
+const labelBadgeStyle = css`
+  min-width: 0;
+  flex-shrink: 1;
+`;
+
+const overflowTooltipStyle = css`
+  flex-shrink: 0;
+  line-height: 0;
+`;
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -292,7 +311,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
         ),
-        width: '12%',
+        width: '20%',
         render: (_metadata: RuleApiResponse['metadata']) => {
           const labels = _metadata?.labels;
           if (!labels || labels.length === 0) {
@@ -300,14 +319,35 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
             );
           }
+          const overflowCount = labels.length - 1;
           return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {labels.map((label) => (
-                <EuiFlexItem key={label} grow={false}>
-                  <EuiBadge color="hollow">{label}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <EuiBadgeGroup
+              gutterSize="xs"
+              css={labelsContainerStyle}
+              data-test-subj="labelsContainer"
+            >
+              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
+                {labels[0]}
+              </EuiBadge>
+              {overflowCount > 0 && (
+                <span css={overflowTooltipStyle}>
+                  <EuiToolTip content={labels.slice(1).join(', ')}>
+                    <EuiBadge
+                      tabIndex={0}
+                      color="hollow"
+                      data-test-subj="overflowLabelsBadge"
+                      iconType="tag"
+                      title=""
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.labels.overflow', {
+                        defaultMessage: '+{count}',
+                        values: { count: overflowCount },
+                      })}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </span>
+              )}
+            </EuiBadgeGroup>
           );
         },
       },
@@ -316,7 +356,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
         ),
-        width: '12%',
+        width: '10%',
         render: (kind: string) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -343,7 +383,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
         ),
-        width: '10%',
+        width: '8%',
         render: (enabled: boolean) =>
           enabled ? (
             <EuiBadge color="success" data-test-subj="ruleStatusEnabled">

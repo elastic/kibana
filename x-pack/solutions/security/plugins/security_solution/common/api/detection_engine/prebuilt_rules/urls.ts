@@ -24,3 +24,4 @@ export const PERFORM_RULE_UPGRADE_URL = `${BASE_URL}/upgrade/_perform` as const;
 export const REVIEW_RULE_INSTALLATION_URL = `${BASE_URL}/installation/_review` as const;
 export const PERFORM_RULE_INSTALLATION_URL = `${BASE_URL}/installation/_perform` as const;
 export const REVERT_PREBUILT_RULES_URL = `${BASE_URL}/revert` as const;
+export const REVIEW_RULE_DEPRECATION_URL = `${BASE_URL}/deprecation/_review` as const;
