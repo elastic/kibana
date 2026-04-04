@@ -29,6 +29,34 @@ const mockRules = [
   },
 ];
 
+const mockRulesWithManyLabels = [
+  {
+    id: 'rule-many-labels',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Many Labels',
+      labels: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
+    },
+    schedule: { every: '1m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  },
+];
+
+const mockRulesWithLongLabels = [
+  {
+    id: 'rule-long-labels',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Long Labels',
+      labels: ['this-is-a-very-long-label-name-that-should-be-truncated'],
+    },
+    schedule: { every: '1m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  },
+];
+
 const defaultProps: RulesListTableProps = {
   items: mockRules as any,
   totalItemCount: 2,
@@ -128,6 +156,34 @@ describe('RulesListTable', () => {
       renderTable();
 
       expect(screen.getByText('prod')).toBeInTheDocument();
+    });
+
+    it('truncates labels to show only the first 1 and a +N badge for overflow', () => {
+      renderTable({
+        items: mockRulesWithManyLabels as any,
+        totalItemCount: 1,
+      });
+
+      // First label should be visible
+      expect(screen.getByText('new')).toBeInTheDocument();
+
+      // Remaining 8 labels should be hidden behind +8 badge
+      expect(screen.getByTestId('overflowLabelsBadge')).toHaveTextContent('+8');
+
+      // Overflow labels should not be directly visible
+      expect(screen.queryByText('rna')).not.toBeInTheDocument();
+    });
+
+    it('renders long label text with native EuiBadge truncation', () => {
+      renderTable({
+        items: mockRulesWithLongLabels as any,
+        totalItemCount: 1,
+      });
+
+      // The full label text is in the DOM; CSS handles visual truncation
+      expect(
+        screen.getByText('this-is-a-very-long-label-name-that-should-be-truncated')
+      ).toBeInTheDocument();
     });
   });
 
