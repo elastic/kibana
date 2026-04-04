@@ -23,6 +23,7 @@ import {
 } from '@testing-library/react';
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
@@ -135,6 +136,12 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+
+const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
@@ -363,6 +370,14 @@ describe('rules_list ', () => {
     jest.clearAllMocks();
     queryClient.clear();
     cleanup();
+  });
+
+  it('sets the CPS picker access to DISABLED', () => {
+    renderWithProviders(<RulesList />);
+    expect(mockUseRouteBasedCpsPickerAccess).toHaveBeenCalledWith(
+      ProjectRoutingAccess.DISABLED,
+      expect.any(Object)
+    );
   });
 
   it('can filter by rule states', async () => {

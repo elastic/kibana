@@ -32,7 +32,7 @@ const NewSavedQueryPageComponent = () => {
 
   const backLink = useMemo(
     () => (
-      <EuiButtonEmpty iconType="arrowLeft" {...savedQueryListProps} flush="left" size="xs">
+      <EuiButtonEmpty iconType="chevronSingleLeft" {...savedQueryListProps} flush="left" size="xs">
         <FormattedMessage
           id="xpack.osquery.addSavedQuery.viewSavedQueriesListTitle"
           defaultMessage="View all saved queries"

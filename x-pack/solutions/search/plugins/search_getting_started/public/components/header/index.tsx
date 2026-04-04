@@ -49,7 +49,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem style={{ alignSelf: 'center' }}>
           <EuiPanel color="transparent" paddingSize="none">
-            <SearchGettingStartedSectionHeading title={PLUGIN_NAME} icon="launch" />
+            <SearchGettingStartedSectionHeading title={PLUGIN_NAME} icon="rocket" />
             <EuiSpacer size="s" />
             <EuiTitle size="l">
               <h1>

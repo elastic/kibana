@@ -21,6 +21,7 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsRow } from './utils/get_columns';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../common/constants';
@@ -143,6 +144,18 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
     },
   });
 
+  const euidApi = useEntityStoreEuidApi();
+  const documentHostEntityIdentifiers = useMemo(
+    () =>
+      hit.flattened ? euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) : null,
+    [hit.flattened, euidApi?.euid]
+  );
+  const documentUserEntityIdentifiers = useMemo(
+    () =>
+      hit.flattened ? euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) : null,
+    [hit.flattened, euidApi?.euid]
+  );
+
   // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns
   const items = useMemo(
     () =>
@@ -153,8 +166,19 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
         isPlatinumPlus,
         scopeId,
         canUseTimeline,
+        documentHostEntityIdentifiers,
+        documentUserEntityIdentifiers,
       })),
-    [data, absoluteStart, absoluteEnd, canUseTimeline, isPlatinumPlus, scopeId]
+    [
+      data,
+      absoluteStart,
+      absoluteEnd,
+      canUseTimeline,
+      isPlatinumPlus,
+      scopeId,
+      documentHostEntityIdentifiers,
+      documentUserEntityIdentifiers,
+    ]
   );
 
   const upsell = (

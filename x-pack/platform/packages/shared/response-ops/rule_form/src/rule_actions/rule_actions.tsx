@@ -120,7 +120,7 @@ export const RuleActions = () => {
         <EuiFlexItem grow={0}>
           <EuiButton
             data-test-subj="ruleActionsAddActionButton"
-            iconType="push"
+            iconType="send"
             iconSide="left"
             onClick={onModalOpen}
           >

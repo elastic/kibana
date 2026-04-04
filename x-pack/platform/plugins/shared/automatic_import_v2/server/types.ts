@@ -79,6 +79,7 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
     eventData: Record<string, unknown>
   ) => void;
   fieldsMetadataClient: IFieldsMetadataClient;
+  isAvailable: () => boolean;
 }
 
 /**

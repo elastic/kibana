@@ -280,10 +280,13 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     );
 
     const currentState = getState();
-    const appState = selectTab(currentState, tabId).appState;
+    const tabState = selectTab(currentState, tabId);
+    const { appState } = tabState;
     const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, filterQuery);
+
+    const allFilters = [...(appState.filters ?? []), ...(tabState.globalState?.filters ?? [])];
+    const queryString = getInitialESQLQuery(dataView, filterQuery, allFilters);
     const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     dispatch(

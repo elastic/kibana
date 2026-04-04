@@ -7,10 +7,14 @@
 
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
+export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPrivilege` as const;
+
 /* Header */
 
 export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
 export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+export const HEADER_EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
+export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 
 /* About */
 
@@ -109,3 +113,7 @@ export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTest
 export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
 export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
+
+/* Footer */
+
+export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID = `${PREFIX}FooterDropdownButton` as const;

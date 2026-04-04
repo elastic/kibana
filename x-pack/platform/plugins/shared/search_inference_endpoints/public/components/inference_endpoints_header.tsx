@@ -30,7 +30,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
       bottomBorder={true}
       rightSideItems={[
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           fill
           data-test-subj="add-inference-endpoint-header-button"
           onClick={onFlyoutOpen}

@@ -40,8 +40,12 @@ describe('WaitForInputStepImpl', () => {
     mockStepExecutionRuntime = {
       tryEnterWaitUntil: jest.fn().mockReturnValue(true),
       finishStep: jest.fn(),
+      setInput: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
+      contextManager: {
+        renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
+      },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
@@ -75,6 +79,58 @@ describe('WaitForInputStepImpl', () => {
       );
     });
 
+    it('should call setInput with the step with config on first run', async () => {
+      await underTest.run();
+      expect(
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith('Please approve');
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
+        message: 'Please approve',
+      });
+    });
+
+    it('should render message with the workflow context and persist schema verbatim', async () => {
+      const schema = {
+        type: 'object',
+        properties: { approved: { type: 'boolean', title: '{{ do not touch }}' } },
+      };
+      node.configuration.with = {
+        message: '{{inputs.message}}',
+        schema,
+      } as WaitForInputStep['with'];
+      (
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockImplementation((v: unknown) => (v === '{{inputs.message}}' ? 'hello world' : v));
+
+      underTest = new WaitForInputStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger
+      );
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
+        message: 'hello world',
+        schema,
+      });
+    });
+
+    it('should not call setInput when the with block is absent', async () => {
+      node.configuration = {
+        name: 'wait-for-input-step',
+        type: 'waitForInput',
+      } as WaitForInputStep;
+      underTest = new WaitForInputStepImpl(
+        node,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        workflowLogger
+      );
+      await underTest.run();
+      expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
+    });
+
     it('should not finish the step on first run', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
@@ -104,6 +160,11 @@ describe('WaitForInputStepImpl', () => {
     it('should call finishStep with the resumeInput from context', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(resumeInput);
+    });
+
+    it('should not call setInput on resume run', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
     });
 
     it('should clear resumeInput from context while preserving other keys', async () => {

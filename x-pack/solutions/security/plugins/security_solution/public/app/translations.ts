@@ -54,13 +54,6 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_WATCHLISTS = i18n.translate(
-  'xpack.securitySolution.navigation.watchlists',
-  {
-    defaultMessage: 'Watchlists Management',
-  }
-);
-
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -219,13 +212,6 @@ export const PROTECTION_UPDATES = i18n.translate(
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
-
-export const AI_RULE_CREATE = i18n.translate(
-  'xpack.securitySolution.navigation.aiRuleCreationTitle',
-  {
-    defaultMessage: 'AI rule creation',
-  }
-);
 
 export const DE_SPACE_RULES_HEALTH = i18n.translate(
   'xpack.securitySolution.navigation.spaceRulesHealthTitle',

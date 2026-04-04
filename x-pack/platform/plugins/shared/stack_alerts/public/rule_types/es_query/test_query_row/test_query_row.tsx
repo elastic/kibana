@@ -67,7 +67,7 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
               data-test-subj="testQuery"
               color="primary"
               iconSide="left"
-              iconType="playFilled"
+              iconType="play"
               onClick={() => {
                 setCopyQueryError(null);
                 onTestQuery();
@@ -94,7 +94,7 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
                   data-test-subj="copyQuery"
                   color="primary"
                   iconSide="left"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   onClick={() => {
                     setCopyQueryError(null);
                     resetTestQueryResponse();

@@ -20,18 +20,21 @@ import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
+import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 import type { AgentBuilderPluginSetupContract } from '../types';
 
 interface RegisterWorkflowAgentBuilderIntegrationParams {
   agentBuilder: AgentBuilderPluginSetupContract;
   logger: Logger;
   api: WorkflowsManagementApi;
+  aiTelemetryClient: WorkflowsAiTelemetryClient;
 }
 
 export function registerWorkflowAgentBuilderIntegration({
   agentBuilder,
   logger,
   api,
+  aiTelemetryClient,
 }: RegisterWorkflowAgentBuilderIntegrationParams): void {
   logger.debug('Registering workflow Agent Builder integration components');
 
@@ -43,7 +46,7 @@ export function registerWorkflowAgentBuilderIntegration({
   registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
 
-  registerWorkflowEditTools(agentBuilder, api);
+  registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
   registerWorkflowYamlAttachment(agentBuilder, api);
   registerWorkflowYamlDiffAttachment(agentBuilder);

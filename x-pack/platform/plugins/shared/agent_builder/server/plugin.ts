@@ -242,6 +242,9 @@ export class AgentBuilderPlugin
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
+      plugins: {
+        register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
+      },
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
       },
@@ -270,7 +273,8 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, skills, runnerFactory, execution } = startServices;
+    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
+      startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -308,6 +312,9 @@ export class AgentBuilderPlugin
         getRegistry: skills.getRegistry.bind(skills),
         register: skills.registerSkill.bind(skills),
       },
+      plugins: {
+        getRegistry: ({ request }) => plugins.getRegistry({ request }),
+      },
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
         getExecution: execution.getExecution.bind(execution),
@@ -315,6 +322,15 @@ export class AgentBuilderPlugin
       },
       runtime: {
         createModelProvider: modelProviderFactory,
+      },
+      conversations: {
+        getScopedClient: async ({ request }) => {
+          const client = await conversations.getScopedClient({ request });
+          return {
+            get: client.get.bind(client),
+            list: client.list.bind(client),
+          };
+        },
       },
       sml: {
         indexAttachment: async (params) => {

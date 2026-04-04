@@ -148,6 +148,7 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteComments(es),
     deleteConfiguration(es),
     deleteMappings(es),
+    deleteTemplates(es),
   ]);
 };
 
@@ -199,6 +200,17 @@ export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-connector-mappings',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteTemplates = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-templates',
     wait_for_completion: true,
     refresh: true,
     body: {},

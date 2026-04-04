@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { buildRequestPreviewCodeContent } from '../data_management/shared/utils';
+import { buildRequestPreviewCodeContent } from '../stream_management/data_management/shared/utils';
 import { getFormattedError } from '../../util/errors';
 
 export function StreamDeleteModal({
@@ -147,7 +147,7 @@ export function StreamDeleteModal({
                 <EuiButtonEmpty
                   data-test-subj="streamsAppDeleteStreamModalCopyCodeButton"
                   size="s"
-                  iconType="editorCodeBlock"
+                  iconType="code"
                   onClick={copy}
                 >
                   {copyCodeButtonText}

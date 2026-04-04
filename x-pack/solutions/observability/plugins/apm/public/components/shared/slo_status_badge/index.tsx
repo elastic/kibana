@@ -142,7 +142,7 @@ export function SloStatusBadge({
       >
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="visGauge" aria-hidden={true} />
+            <EuiIcon type="chartGauge" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>

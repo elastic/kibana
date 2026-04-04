@@ -17,8 +17,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { UISchemas, type ActionContext, type ConnectorSpec } from '../../connector_spec';
-import { withMcpClient } from '../../lib/mcp';
+import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   CallToolInput,
   GetCommitInput,
@@ -39,6 +39,10 @@ import type {
   SearchRepositoriesInput,
   SearchUsersInput,
 } from './types';
+import getWorkflow from './workflows/get.yaml';
+import listWorkflow from './workflows/list.yaml';
+import searchWorkflow from './workflows/search.yaml';
+import whoAmIWorkflow from './workflows/who_am_i.yaml';
 import {
   GetMeInputSchema,
   ListToolsInputSchema,
@@ -64,43 +68,6 @@ import {
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 
-const parseJsonTextFromContentParts = (
-  content: Array<{ type: string; text?: string }>
-): unknown => {
-  const text = content
-    .filter((part) => part.type === 'text' && typeof part.text === 'string')
-    .map((part) => part.text)
-    .join('\n');
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-};
-
-const callToolContent = async (
-  ctx: ActionContext,
-  toolName: string,
-  args?: Record<string, unknown>
-) => {
-  return withMcpClient(ctx, async (mcp) => {
-    const result = await mcp.callTool({ name: toolName, arguments: args ?? {} });
-    return result.content;
-  });
-};
-
-const callToolJson = async (
-  ctx: ActionContext,
-  toolName: string,
-  args: Record<string, unknown> = {}
-): Promise<unknown> => {
-  return withMcpClient(ctx, async (mcp) => {
-    const result = await mcp.callTool({ name: toolName, arguments: args });
-    return parseJsonTextFromContentParts(result.content);
-  });
-};
-
 export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
@@ -110,6 +77,7 @@ export const GithubConnector: ConnectorSpec = {
         'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
@@ -463,4 +431,6 @@ export const GithubConnector: ConnectorSpec = {
       });
     },
   },
+
+  agentBuilderWorkflows: [getWorkflow, listWorkflow, searchWorkflow, whoAmIWorkflow],
 };

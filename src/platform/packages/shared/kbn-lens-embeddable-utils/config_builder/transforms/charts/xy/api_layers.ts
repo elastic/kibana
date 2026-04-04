@@ -42,6 +42,7 @@ import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataset } from '../../../utils';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
 import { getValueApiColumn } from '../../columns/esql_column';
+import { toApiFilterLanguage } from '../../columns/filter';
 import {
   isAPIColumnOfBucketType,
   isAPIColumnOfReferenceType,
@@ -247,21 +248,14 @@ function convertReferenceLinesDecorationsToAPIFormat(
   yConfig: Omit<YConfig, 'forAccessor'>
 ): Pick<
   ReferenceLineDef,
-  | 'color'
-  | 'stroke_dash'
-  | 'stroke_width'
-  | 'icon'
-  | 'decoration_position'
-  | 'fill'
-  | 'axis'
-  | 'text'
+  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
 > {
   return stripUndefined({
     color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
     icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
-    decoration_position: yConfig.iconPosition,
+    position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
     text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
@@ -454,11 +448,12 @@ export function buildAPIAnnotationsLayer(
           label: annotation.label,
           query: annotation.filter
             ? {
-                language: annotation.filter.language as 'kuery' | 'lucene',
+                language: toApiFilterLanguage(annotation.filter.language),
                 // it should never be a non-string here as schema ensures that
-                query: typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
+                expression:
+                  typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
               }
-            : { language: 'kuery', query: '' },
+            : { language: 'kql', expression: '' },
 
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),

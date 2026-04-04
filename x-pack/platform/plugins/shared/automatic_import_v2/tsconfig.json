@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
     "@kbn/actions-plugin",
     "@kbn/inference-plugin",
     "@kbn/spaces-plugin",

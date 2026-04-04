@@ -29,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ price: 10, quantity: 5 }];
       await testBed.ingest(indexName, docs);
@@ -55,7 +55,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ a: 15, b: 25 }];
       await testBed.ingest(indexName, docs);
@@ -81,7 +81,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ a: 100, b: 30 }];
       await testBed.ingest(indexName, docs);
@@ -107,7 +107,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ total: 100, count: 4 }];
       await testBed.ingest(indexName, docs);
@@ -134,7 +134,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { price: 25, quantity: 4 } }];
       await testBed.ingest(indexName, docs);
@@ -161,7 +161,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       // log(e) = 1, using e ≈ 2.718281828459045
       const docs = [{ value: 2.718281828459045 }];
@@ -187,7 +187,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 5, b: 3 },
@@ -221,7 +221,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 10, b: 5 },
@@ -251,7 +251,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 3, b: 7 },
@@ -281,7 +281,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, a: 5, b: 5 },
@@ -316,7 +316,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { order_id: 1, price: 0, quantity: 0, active: true, total: 0 }, // Mapping doc
@@ -358,7 +358,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           { order_id: 1, price: 0, quantity: 0, total: 0 }, // Mapping doc
@@ -401,7 +401,7 @@ apiTest.describe(
         const streamlangDSL: StreamlangDSL = {
           steps: [{ action: 'math', expression, to: 'result' } as MathProcessor],
         };
-        expect(() => transpile(streamlangDSL)).toThrow(pattern);
+        await expect(transpile(streamlangDSL)).rejects.toThrow(pattern);
       }
     });
   }

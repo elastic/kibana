@@ -12,6 +12,11 @@ import type { XYState, XYStateESQL } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
 
 describe('XY', () => {
+  const minimalLayer = {
+    dataset: { type: 'dataView', id: 'myDataView' as const },
+    type: 'bar' as const,
+    y: [{ operation: 'count' as const }],
+  };
   const universalTypes = [
     'bar',
     'line',
@@ -67,7 +72,7 @@ describe('XY', () => {
               ignore_global_filters: false,
               sampling: 1,
               y: [{ operation: 'count', empty_as_null: false }],
-              breakdown_by: { operation: 'terms', fields: ['product'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product'], limit: 5 },
             },
           ],
         } satisfies XYState)
@@ -95,7 +100,7 @@ describe('XY', () => {
                   include_empty_rows: false,
                 },
                 y: [{ operation: 'count', empty_as_null: false }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
           } satisfies XYState)
@@ -118,9 +123,9 @@ describe('XY', () => {
               type,
               ignore_global_filters: false,
               sampling: 1,
-              x: { operation: 'value', column: 'order_date' },
-              y: [{ operation: 'value', column: 'count' }],
-              breakdown_by: { operation: 'value', column: 'product' },
+              x: { column: 'order_date' },
+              y: [{ column: 'count' }],
+              breakdown_by: { column: 'product' },
             },
           ],
         } satisfies XYState)
@@ -149,7 +154,7 @@ describe('XY', () => {
               breakdown_by: {
                 operation: 'terms',
                 fields: ['product', 'category'],
-                size: 5,
+                limit: 5,
               },
             },
             {
@@ -191,7 +196,7 @@ describe('XY', () => {
                 include_empty_rows: false,
               },
               y: [{ operation: 'count', empty_as_null: false }],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
             {
               type: 'annotations',
@@ -247,7 +252,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
@@ -265,7 +270,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
           } satisfies XYState)
@@ -297,7 +302,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'companyBIndex' },
@@ -315,7 +320,7 @@ describe('XY', () => {
                   { operation: 'count', empty_as_null: false },
                   { operation: 'average', field: 'price' },
                 ],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+                breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
               {
                 dataset: { type: 'dataView', id: 'myDataView' },
@@ -383,7 +388,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: { visible: true },
                     color: {
@@ -427,7 +432,7 @@ describe('XY', () => {
                 breakdown_by: {
                   operation: 'terms',
                   fields: ['product', 'category'],
-                  size: 5,
+                  limit: 5,
                   rank_by: {
                     direction: 'desc',
                     metric: 0,
@@ -440,12 +445,9 @@ describe('XY', () => {
                 type: type2,
                 ignore_global_filters: false,
                 sampling: 1,
-                x: { operation: 'value', column: 'order_date' },
-                y: [
-                  { operation: 'value', column: 'value' },
-                  { operation: 'value', column: 'price' },
-                ],
-                breakdown_by: { operation: 'value', column: 'product' },
+                x: { column: 'order_date' },
+                y: [{ column: 'value' }, { column: 'price' }],
+                breakdown_by: { column: 'product' },
               },
               {
                 dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
@@ -515,7 +517,7 @@ describe('XY', () => {
                   {
                     type: 'query',
                     label: 'Bingo!',
-                    query: { language: 'kuery', query: 'order_amount > 1000' },
+                    query: { language: 'kql', expression: 'order_amount > 1000' },
                     time_field: 'order_date',
                     text: {
                       visible: true,
@@ -569,7 +571,7 @@ describe('XY', () => {
                 { operation: 'count', empty_as_null: false },
                 { operation: 'average', field: 'price' },
               ],
-              breakdown_by: { operation: 'terms', fields: ['product', 'category'], size: 5 },
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
           ],
         } satisfies XYState)
@@ -621,6 +623,83 @@ describe('XY', () => {
           ],
         } satisfies XYState | XYStateESQL)
       ).toThrow();
+    });
+
+    it('should reject list legend layout for left positions', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: 'Invalid list legend position',
+          legend: {
+            visibility: 'visible',
+            position: 'left',
+            layout: {
+              type: 'list',
+              truncate: {
+                max_pixels: 300,
+              },
+            },
+          },
+          layers: [minimalLayer],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[legend]: types that failed validation:
+        - [legend.0.position]: types that failed validation:
+         - [legend.position.0]: expected value to equal [top]
+         - [legend.position.1]: expected value to equal [bottom]
+        - [legend.1.layout.type]: expected value to equal [grid]
+        - [legend.2.placement]: expected value to equal [inside]"
+      `);
+    });
+
+    it('should not allow both truncation values at the same time', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: 'Valid list legend truncation',
+          legend: {
+            visibility: 'visible',
+            position: 'bottom',
+            layout: {
+              type: 'list',
+              truncate: {
+                max_lines: 2,
+                max_pixels: 320,
+              },
+            },
+          },
+          layers: [minimalLayer],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[legend]: types that failed validation:
+        - [legend.0.layout]: types that failed validation:
+         - [legend.layout.0.type]: expected value to equal [grid]
+         - [legend.layout.1.truncate.max_lines]: Additional properties are not allowed ('max_lines' was unexpected)
+        - [legend.1.layout.type]: expected value to equal [grid]
+        - [legend.2.placement]: expected value to equal [inside]"
+      `);
+    });
+  });
+
+  describe('legend layout schema', () => {
+    it('should allow list legend layout for top/bottom with truncate.max_pixels', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: 'Valid list legend',
+          legend: {
+            visibility: 'visible',
+            position: 'bottom',
+            layout: {
+              type: 'list',
+              truncate: {
+                max_pixels: 320,
+              },
+            },
+          },
+          layers: [minimalLayer],
+        })
+      ).not.toThrow();
     });
   });
 

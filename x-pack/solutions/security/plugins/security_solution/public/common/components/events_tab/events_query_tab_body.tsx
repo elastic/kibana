@@ -19,7 +19,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
-import { eventsDefaultModel } from '../events_viewer/default_model';
+import { getEventsDefaultModelForTable } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as i18n from './translations';
@@ -58,6 +58,11 @@ export type EventsQueryTabBodyComponentProps = Omit<QueryTabBodyProps, 'setQuery
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
   tableId: TableId;
+  /**
+   * When set (e.g. host details + Entity Store v2 identity filters), the events histogram uses this
+   * serialized query instead of {@link QueryTabBodyProps.filterQuery}, which may still reflect host.name-only scope.
+   */
+  histogramFilterQuery?: string;
 };
 
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
@@ -76,6 +81,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   deleteQuery,
   endDate,
   filterQuery,
+  histogramFilterQuery,
   startDate,
   tableId,
 }) => {
@@ -118,17 +124,22 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [defaultNumberFormat, showExternalAlerts]
   );
 
+  const eventsDefaultModelForTable = useMemo(
+    () => getEventsDefaultModelForTable(tableId),
+    [tableId]
+  );
+
   useEffect(() => {
     dispatch(
       dataTableActions.initializeDataTableSettings({
         id: tableId,
-        defaultColumns: eventsDefaultModel.columns,
+        defaultColumns: eventsDefaultModelForTable.columns,
         title: i18n.EVENTS_GRAPH_TITLE,
         showCheckboxes: true,
         selectAll: true,
       })
     );
-  }, [dispatch, showExternalAlerts, tableId]);
+  }, [dispatch, eventsDefaultModelForTable, tableId]);
 
   useEffect(() => {
     return () => {
@@ -155,16 +166,18 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   const defaultModel = useMemo(
     () => ({
-      ...eventsDefaultModel,
+      ...eventsDefaultModelForTable,
       excludedRowRendererIds: showExternalAlerts ? RowRendererValues : [],
     }),
-    [showExternalAlerts]
+    [eventsDefaultModelForTable, showExternalAlerts]
   );
 
   const composedPageFilters = useMemo(
     () => (showExternalAlerts ? [defaultAlertsFilters, ...additionalFilters] : additionalFilters),
     [additionalFilters, showExternalAlerts]
   );
+
+  const matrixHistogramFilterQuery = histogramFilterQuery ?? filterQuery;
 
   const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: composedPageFilters,
@@ -192,7 +205,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           id={ALERTS_EVENTS_HISTOGRAM_ID}
           startDate={startDate}
           endDate={endDate}
-          filterQuery={filterQuery}
+          filterQuery={matrixHistogramFilterQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
           sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}

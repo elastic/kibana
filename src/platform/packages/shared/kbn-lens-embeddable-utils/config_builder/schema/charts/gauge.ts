@@ -18,6 +18,7 @@ import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { builderEnums } from '../enums';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
@@ -26,7 +27,7 @@ const gaugeStateSharedOptionsSchema = {
         schema.object(
           {
             type: schema.literal('bullet'),
-            direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
+            orientation: builderEnums.simpleOrientation({
               defaultValue: 'horizontal',
             }),
           },
@@ -55,7 +56,7 @@ const gaugeStateSharedOptionsSchema = {
           }
         ),
       ],
-      { defaultValue: { type: 'bullet', direction: 'horizontal' } }
+      { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
     )
   ),
 };

@@ -6,8 +6,8 @@
  */
 
 import { omitBy } from 'lodash';
-import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import type {
   PublicRuleMonitoringService,
   PublicRuleResultService,
@@ -157,7 +157,7 @@ export function createRuleExecutionLogClientForExecutors(
         const correlationIds = baseCorrelationIds.withStatus(executionResult.status);
         const logMeta = correlationIds.getLogMeta();
 
-        agent.addLabels({ [SECURITY_RULE_STATUS]: executionResult.status });
+        addSpanLabels({ [SECURITY_RULE_STATUS]: executionResult.status });
 
         try {
           const normalizedExecutionResult: ExecutionResult = {
@@ -272,6 +272,7 @@ export function createRuleExecutionLogClientForExecutors(
         frozen_indices_queried_count: metrics.frozen_indices_queried_count,
         execution_gap_duration_s: metrics.gap_duration_s,
         gap_range: metrics.gap_range,
+        gap_reason: metrics.gap_reason,
       },
       ruleInfo: {
         ruleId,
