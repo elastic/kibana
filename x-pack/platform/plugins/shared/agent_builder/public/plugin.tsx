@@ -18,9 +18,16 @@ import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
+
+const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
+  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
+    default: m.AgentBuilderAnnouncementChromeInner,
+  }))
+);
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -267,6 +274,24 @@ export class AgentBuilderPlugin
     };
 
     if (hasAgentBuilder) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <LazyAgentBuilderAnnouncementChromeInner
+              coreStart={core}
+              pluginsStart={startDependencies}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        order: 1000,
+      });
+
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
