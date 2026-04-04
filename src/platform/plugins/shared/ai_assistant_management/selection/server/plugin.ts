@@ -102,7 +102,7 @@ export class AIAssistantManagementSelectionPlugin
               this.logger.error('Error getting active space:');
               this.logger.error(e);
             }
-            return this.config.preferredChatExperience ?? AIChatExperience.Classic;
+            return this.config.preferredChatExperience ?? AIChatExperience.Agent;
           },
         },
       });
