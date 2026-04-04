@@ -587,7 +587,10 @@ evaluate.describe(
                   'The Jira ticket title references the error summary from the search results.',
                   'Connector steps include a connector-id field (either a real connector ID or a descriptive placeholder).',
                 ],
-                expectedStepTypes: ['elasticsearch.search|elasticsearch.esql.query', 'jira'],
+                expectedStepTypes: [
+                  'elasticsearch.search|elasticsearch.esql.query',
+                  'jira|jira.pushToService',
+                ],
                 expectedStepCount: { min: 2, max: 4 },
                 expectedMaxToolCalls: 8,
                 expectedToolSequence: [

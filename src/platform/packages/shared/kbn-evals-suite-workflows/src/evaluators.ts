@@ -523,24 +523,25 @@ const calculateBudgetScore = (totalCalls: number, budget: number): number => {
 };
 
 /**
- * Penalizes redundant lookups: calling the same lookup tool more than once
- * (by tool_id) is wasteful. Score degrades proportionally to duplicates.
+ * Penalizes redundant lookups: calling the same lookup tool with the same
+ * params more than once is wasteful. Calls with different params (e.g.
+ * a broad search followed by a detailed schema fetch) are not redundant.
  */
 const calculateRedundantLookupScore = (
-  toolCalls: Array<{ tool_id?: string }>
+  toolCalls: Array<{ tool_id?: string; params?: Record<string, unknown> }>
 ): { score: number; redundantCount: number; uniqueLookups: number } => {
   const lookups = toolCalls.filter((t) => isLookupCall(t.tool_id));
   if (lookups.length === 0) {
     return { score: 1, redundantCount: 0, uniqueLookups: 0 };
   }
 
-  const lookupCounts = new Map<string, number>();
+  const seen = new Set<string>();
   for (const t of lookups) {
-    const id = t.tool_id ?? 'unknown';
-    lookupCounts.set(id, (lookupCounts.get(id) ?? 0) + 1);
+    const key = (t.tool_id ?? 'unknown') + '::' + JSON.stringify(t.params ?? {});
+    seen.add(key);
   }
 
-  const uniqueLookups = lookupCounts.size;
+  const uniqueLookups = seen.size;
   const redundantCount = lookups.length - uniqueLookups;
   const score = redundantCount === 0 ? 1.0 : Math.max(0, 1 - redundantCount / lookups.length);
 

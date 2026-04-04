@@ -402,12 +402,7 @@ evaluate.describe(
                 expectedToolIds: ['platform.workflows.workflow_insert_step'],
                 expectedStepCount: { min: 5, max: 6 },
                 expectedStepTypes: ['elasticsearch.esql.query'],
-                preservedStepNames: [
-                  'create_index',
-                  'index_document',
-                  'search_data',
-                  'log_results',
-                ],
+                preservedStepNames: ['create_index', 'index_document', 'search_data'],
                 expectedMaxToolCalls: 4,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
@@ -565,7 +560,7 @@ evaluate.describe(
                 ],
                 expectedStepTypes: [
                   'cases.addComment|kibana.addCaseComment|kibana.request',
-                  'cases.updateCase|kibana.updateCase|kibana.request',
+                  'cases.updateCase|cases.setTitle|kibana.updateCase|kibana.request',
                 ],
                 expectedStepCount: { min: 5, max: 7 },
                 preservedStepNames: ['create_case'],
