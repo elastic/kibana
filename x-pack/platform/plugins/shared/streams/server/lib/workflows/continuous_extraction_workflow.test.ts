@@ -8,7 +8,6 @@
 import {
   COORDINATOR_INTERVAL_MINUTES,
   MAX_SCHEDULED_STREAMS,
-  DEFAULT_EXTRACTION_INTERVAL_HOURS,
   POLL_DELAY_SECONDS,
 } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
@@ -36,10 +35,14 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     assertYamlContains(`name: lookbackHours\n    type: number\n    default: 24`);
   });
 
-  it('uses the correct extractionIntervalHours input', () => {
-    assertYamlContains(
-      `name: extractionIntervalHours\n    type: number\n    default: ${DEFAULT_EXTRACTION_INTERVAL_HOURS}`
-    );
+  it('declares extractionIntervalHours as an optional input without default', () => {
+    assertYamlContains('name: extractionIntervalHours\n    type: number\n    description:');
+    expect(WORKFLOW_YAML).not.toMatch(/name: extractionIntervalHours[\s\S]*?default:/m);
+  });
+
+  it('declares excludedStreamPatterns as an optional input without default', () => {
+    assertYamlContains('name: excludedStreamPatterns\n    type: string\n    description:');
+    expect(WORKFLOW_YAML).not.toMatch(/name: excludedStreamPatterns[\s\S]*?default:/m);
   });
 
   it('uses the correct poll delay duration', () => {
@@ -50,7 +53,12 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     assertYamlContains('_extraction/_eligible');
     assertYamlContains('maxScheduledStreams={{ inputs.maxScheduledStreams }}');
     assertYamlContains('lookbackHours={{ inputs.lookbackHours }}');
-    assertYamlContains('extractionIntervalHours={{ inputs.extractionIntervalHours }}');
+    assertYamlContains(
+      '{%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}'
+    );
+    assertYamlContains(
+      '{%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}'
+    );
   });
 
   it('calls the task scheduling endpoint', () => {

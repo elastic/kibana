@@ -26,6 +26,7 @@ import {
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import {
   classifyStreams,
+  parseExcludePatterns,
   type StreamCandidate,
   type StreamClassificationResult,
 } from './classify_streams';
@@ -70,6 +71,7 @@ const eligibleStreamsRoute = createServerRoute({
       maxScheduledStreams: z.coerce.number().min(0).optional(),
       extractionIntervalHours: z.coerce.number().min(0).optional(),
       lookbackHours: z.coerce.number().min(0).optional(),
+      excludedStreamPatterns: z.string().optional(),
     }),
   }),
   handler: async ({
@@ -125,17 +127,19 @@ const eligibleStreamsRoute = createServerRoute({
     ]);
 
     const intervalHours =
-      intervalHoursSetting ??
       params.query.extractionIntervalHours ??
+      intervalHoursSetting ??
       DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const { alreadyRunning, candidates, upToDate, excluded, unsupported, excludePatterns } =
-      classifyStreams({
-        allStreams,
-        sortedTasks,
-        excludedStreamPatterns: excludedStreamPatterns ?? '',
-        intervalHours,
-      });
+    const resolvedExcludedPatterns =
+      params.query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
+
+    const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
+      allStreams,
+      sortedTasks,
+      excludedStreamPatterns: resolvedExcludedPatterns,
+      intervalHours,
+    });
 
     const availableSlots = Math.max(0, maxStreams - alreadyRunning.length);
     const toSchedule = candidates.slice(0, availableSlots);
@@ -154,7 +158,7 @@ const eligibleStreamsRoute = createServerRoute({
       settings: {
         enabled,
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
-        excludePatterns,
+        excludePatterns: parseExcludePatterns(excludedStreamPatterns),
       },
       connectorId,
       timeRange: {
