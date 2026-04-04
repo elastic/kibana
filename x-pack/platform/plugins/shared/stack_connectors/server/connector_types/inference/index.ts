@@ -99,10 +99,9 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (!isUpdate && inferenceExists) {
-        logger.info(
-          `Inference endpoint ${config?.inferenceId} already exists, reusing it for connector creation.`
+        throw new Error(
+          `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
         );
-        return;
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
