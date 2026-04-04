@@ -327,19 +327,10 @@ function renderHighlightedSample(
   sample: string,
   highlights: DissectHighlightSpan[]
 ): React.ReactNode {
-  // Find the overall match bounds (from first highlight start to last highlight end)
-  const overallStart = highlights[0].startIndex;
-  const overallEnd = highlights[highlights.length - 1].endIndex;
-
   const parts: React.ReactNode[] = [];
 
-  // Text before any match
-  if (overallStart > 0) {
-    parts.push(<span key="pre">{sample.slice(0, overallStart)}</span>);
-  }
-
-  // The matched region with field highlights
-  let pos = overallStart;
+  // Start from the beginning — leading literals are part of the dissect pattern too
+  let pos = 0;
   for (let i = 0; i < highlights.length; i++) {
     const hl = highlights[i];
 
@@ -381,18 +372,13 @@ function renderHighlightedSample(
     pos = hl.endIndex;
   }
 
-  // Literal text after the last field but within the match
-  if (pos < overallEnd) {
+  // Trailing literal after the last field — still part of the dissect pattern
+  if (pos < sample.length) {
     parts.push(
       <span key={`lit-${pos}`} className="dissect-pattern-match">
-        {sample.slice(pos, overallEnd)}
+        {sample.slice(pos)}
       </span>
     );
-  }
-
-  // Text after the match
-  if (overallEnd < sample.length) {
-    parts.push(<span key="post">{sample.slice(overallEnd)}</span>);
   }
 
   return parts;
