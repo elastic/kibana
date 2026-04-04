@@ -547,13 +547,13 @@ describe('scheduleDataStreamCreationTask', () => {
 
   it('returns the scheduled task ID on success', async () => {
     const service = createService();
-    const schedule = jest.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
-    service.initialize({ schedule } as never, {} as never);
+    const ensureScheduled = jest.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
+    service.initialize({ ensureScheduled } as never, {} as never);
 
     const result = await service.scheduleDataStreamCreationTask(baseParams, fakeRequest);
 
     expect(result.taskId).toBe('data-stream-task-int-1-ds-1');
-    expect(schedule).toHaveBeenCalledWith(
+    expect(ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'data-stream-task-int-1-ds-1',
         taskType: DATA_STREAM_CREATION_TASK_TYPE,
@@ -565,47 +565,20 @@ describe('scheduleDataStreamCreationTask', () => {
     );
   });
 
-  it('returns the existing task ID on 409 version conflict', async () => {
+  it('returns the existing task ID when task already exists (ensureScheduled handles conflict)', async () => {
     const service = createService();
-    const conflictError = Object.assign(new Error('conflict'), { statusCode: 409 });
-    const schedule = jest.fn().mockRejectedValue(conflictError);
-    const get = jest.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
-    service.initialize({ schedule, get } as never, {} as never);
-
-    const result = await service.scheduleDataStreamCreationTask(baseParams, fakeRequest);
-
-    expect(result.taskId).toBe('data-stream-task-int-1-ds-1');
-    expect(get).toHaveBeenCalledWith('data-stream-task-int-1-ds-1');
-  });
-
-  it('returns the existing task ID on version conflict message', async () => {
-    const service = createService();
-    const conflictError = new Error('document version conflict');
-    const schedule = jest.fn().mockRejectedValue(conflictError);
-    const get = jest.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
-    service.initialize({ schedule, get } as never, {} as never);
+    const ensureScheduled = jest.fn().mockResolvedValue({ id: 'data-stream-task-int-1-ds-1' });
+    service.initialize({ ensureScheduled } as never, {} as never);
 
     const result = await service.scheduleDataStreamCreationTask(baseParams, fakeRequest);
 
     expect(result.taskId).toBe('data-stream-task-int-1-ds-1');
   });
 
-  it('re-throws original error when get() fails after a conflict', async () => {
+  it('propagates errors from ensureScheduled', async () => {
     const service = createService();
-    const conflictError = Object.assign(new Error('conflict'), { statusCode: 409 });
-    const schedule = jest.fn().mockRejectedValue(conflictError);
-    const get = jest.fn().mockRejectedValue(new Error('get failed'));
-    service.initialize({ schedule, get } as never, {} as never);
-
-    await expect(service.scheduleDataStreamCreationTask(baseParams, fakeRequest)).rejects.toThrow(
-      'conflict'
-    );
-  });
-
-  it('re-throws non-conflict errors directly', async () => {
-    const service = createService();
-    const schedule = jest.fn().mockRejectedValue(new Error('unauthorized'));
-    service.initialize({ schedule } as never, {} as never);
+    const ensureScheduled = jest.fn().mockRejectedValue(new Error('unauthorized'));
+    service.initialize({ ensureScheduled } as never, {} as never);
 
     await expect(service.scheduleDataStreamCreationTask(baseParams, fakeRequest)).rejects.toThrow(
       'unauthorized'
