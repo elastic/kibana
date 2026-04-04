@@ -440,27 +440,7 @@ export async function createSingleCompileConfig(
       // resolution of workspace packages by npm name would break.
       ...(dist ? {} : { symlinks: false }),
       // Additional fallbacks for node:-prefixed modules
-      fallback: {
-        ...getSharedResolveFallback(),
-        // Node:-prefixed modules (NodeLibsBrowserPlugin handles regular ones)
-        'node:fs': false,
-        'node:path': false,
-        'node:os': false,
-        'node:crypto': false,
-        'node:stream': false,
-        'node:buffer': false,
-        'node:util': false,
-        'node:url': false,
-        'node:http': false,
-        'node:https': false,
-        'node:events': false,
-        'node:process': false,
-        'node:querystring': false,
-        'node:assert': false,
-        'node:zlib': false,
-        'node:vm': false,
-        'node:tty': false,
-      },
+      fallback: getSharedResolveFallback(),
     },
 
     module: {

@@ -146,7 +146,7 @@ export async function createExternalPluginConfig(
     mode: dist ? 'production' : 'development',
     // Match legacy webpack optimizer: no sourcemaps in dist, cheap-source-map in dev
     devtool: dist ? false : 'cheap-source-map',
-    target: 'web',
+    target: ['web', 'es2020'],
     context: pluginDir,
 
     entry: {
