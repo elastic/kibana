@@ -105,7 +105,7 @@ const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 /**
  * Extract the resulting workflow YAML from tool call steps.
  *
- * For `replaceYaml` calls, the YAML is available in `params.yaml`.
+ * For `setYaml` calls, the YAML is available in `params.yaml`.
  * For granular edit tools (insert/modify/delete), the final YAML lives in
  * the attachment system — use {@link extractYamlFromAttachments} as a fallback.
  */
@@ -116,7 +116,7 @@ export const extractResultYaml = (output: WorkflowTaskOutput): string | undefine
     .reverse();
 
   for (const step of workflowToolSteps) {
-    if (step.tool_id?.includes('replace_yaml') && typeof step.params?.yaml === 'string') {
+    if (step.tool_id?.includes('set_yaml') && typeof step.params?.yaml === 'string') {
       const resultData = (step.results ?? []).map(unwrapToolResultData).filter(Boolean);
       const lastResult = resultData[resultData.length - 1];
       if (lastResult?.success === true) {

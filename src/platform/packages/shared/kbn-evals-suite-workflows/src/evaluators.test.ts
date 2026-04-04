@@ -87,7 +87,7 @@ describe('Efficiency evaluator', () => {
     const output = mockOutput([
       toolCall('get_step_definitions', {}),
       toolCall('get_connectors', {}),
-      toolCall('workflow_replace_yaml', { success: true }),
+      toolCall('workflow_set_yaml', { success: true }),
     ]);
     const result = await evaluator.evaluate({ output });
     expect(result.score).toBe(1);
