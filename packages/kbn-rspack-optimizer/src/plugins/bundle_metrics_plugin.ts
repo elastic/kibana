@@ -336,6 +336,29 @@ export class BundleMetricsPlugin {
             });
           }
 
+          // Produce 0-value metrics for registered plugins whose entry chunks
+          // were not found in the compilation. This happens when splitChunks
+          // extracts ALL of a plugin's modules into shared chunks (e.g., every
+          // module satisfies minChunks >= 2), leaving the entry chunk empty.
+          // Rspack does not emit empty chunks, so they're absent from
+          // compilation.chunks. The plugin still loads correctly (its shared
+          // chunks are loaded as prerequisites), but we need 0-value entries
+          // so that limits.yml stays in sync with discovered plugins.
+          const foundChunkNames = new Set(entryData.map((e) => e.chunkName));
+          for (const info of this.pluginInfos) {
+            if (info.ignoreMetrics || foundChunkNames.has(info.chunkName)) continue;
+            entryData.push({
+              id: info.id,
+              chunkName: info.chunkName,
+              limit: info.limit,
+              pageLoadSize: 0,
+              moduleCount: 0,
+              asyncSize: 0,
+              asyncCount: 0,
+              miscSize: 0,
+            });
+          }
+
           // Sort entries by id for deterministic output
           entryData.sort((a, b) => a.id.localeCompare(b.id));
 

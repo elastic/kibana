@@ -397,7 +397,10 @@ export async function createSingleCompileConfig(
     mode: dist ? 'production' : 'development',
     // Match legacy webpack optimizer: no sourcemaps in dist, cheap-source-map in dev
     devtool: dist ? false : 'cheap-source-map',
-    target: 'web',
+    // ES2020 target auto-sets output.environment for modern JS in rspack's
+    // generated runtime code (arrow functions, const, destructuring, etc.).
+    // Safe because SWC already targets ES2020 and .browserslistrc requires it.
+    target: ['web', 'es2020'],
     context: repoRoot,
 
     entry: {
@@ -429,6 +432,13 @@ export async function createSingleCompileConfig(
     // Use shared resolve config (same as external plugins)
     resolve: {
       ...getSharedResolveConfig(repoRoot),
+      // In dev mode, skip symlink resolution. All @kbn/* imports are resolved
+      // via tsConfig (tsconfig.base.json with 2600+ path aliases), so following
+      // symlinks adds redundant filesystem I/O for 50K+ modules.
+      // CAVEAT: If Kibana adopts Yarn workspaces with symlinked packages in
+      // node_modules/, this would need to be revisited since symlink-based
+      // resolution of workspace packages by npm name would break.
+      ...(dist ? {} : { symlinks: false }),
       // Additional fallbacks for node:-prefixed modules
       fallback: {
         ...getSharedResolveFallback(),
@@ -465,12 +475,22 @@ export async function createSingleCompileConfig(
           type: 'asset/resource',
         },
       ],
+      // In dev mode, cache ALL module resolution results (not just node_modules).
+      // Matches legacy webpack optimizer behavior (webpack.config.ts line 342).
+      // Default is /[\\/]node_modules[\\/]/ which re-validates all 50K+ source
+      // modules on each access. Dev-only: persistent cache handles cross-restart
+      // invalidation; within a single build, module resolution is deterministic.
+      ...(dist ? {} : { unsafeCache: true }),
     },
 
     optimization: {
       removeAvailableModules: dist,
       moduleIds: dist ? 'deterministic' : 'named',
       chunkIds: dist ? 'deterministic' : 'named',
+      // Skip sideEffects analysis in dev mode (matches legacy webpack optimizer).
+      // In dev, tree shaking overhead is wasted since bundles aren't minified.
+      // In dist, defaults to true (rspack default).
+      sideEffects: dist,
       // Chunk splitting strategy for the single-compilation build.
       //
       // In single compilation, all 200+ plugins share one module graph.
@@ -483,73 +503,87 @@ export async function createSingleCompileConfig(
       // self-contained. Using 'all' would require bootstrap renderer
       // changes to inject prerequisite <script> tags -- a future optimization.
       //
-      // NOTE on tree shaking: 0 plugins and only ~29% of packages declare
-      // sideEffects:false. This limits rspack's ability to eliminate unused
-      // re-exports from barrel files. A per-package sideEffects audit is a
-      // high-impact future optimization (separate effort).
+      // `minChunks: 2` ensures only modules shared by 2+ async chunks are
+      // extracted (no single-consumer shared chunks). `enforce` is NOT used
+      // so that minSize and minChunks are respected -- A/B testing confirmed
+      // this has negligible impact on build speed while preventing unnecessary
+      // chunk fragmentation.
+      //
+      // `test` regexes run in Rust; only `name` functions cross the Rust-JS
+      // boundary (~0.3s overhead for ~few-thousand matching modules out of
+      // 50K+ total, confirmed by A/B benchmarks).
+      //
+      // `nameForCondition()` is used instead of `module.resource` because
+      // the `name` callback receives the base Module type, where `resource`
+      // is only available on NormalModule.
+      //
+      // CACHE GROUP PRIORITY ORDER (highest wins):
+      //   35: sharedPlugins   - /plugins/  (broadest; catches platform + solution plugins)
+      //   32: corePackages    - /src/core/packages/
+      //   30: sharedPackages  - /packages/(shared|private)/  (platform packages)
+      //   30: vendorsHeavy    - specific heavy node_modules (reuseExistingChunk)
+      //   29: solutionPackages - /solutions/*/packages/  (wins over rootPackages for kbn-*)
+      //   28: rootPackages    - /packages/kbn-/  (repo root + x-pack/packages)
+      //   20: vendors         - /node_modules/ (minChunks: 5)
+      //  -20: default         - catch-all (minChunks: 3)
+      //
+      // Directories NOT covered (intentionally):
+      //   x-pack/packages/ only has 3 packages, caught by rootPackages via /packages/kbn-/
+      //   src/platform/test/**/plugins/** are test-only, filtered by minChunks: 2
       splitChunks: {
         chunks: 'async',
-        minSize: 20000, // 20KB - lowered from 100KB to catch long-tail shared modules
+        minSize: 20000,
         maxAsyncRequests: 30,
         maxInitialRequests: 30,
         cacheGroups: {
-          // ---------------------------------------------------------------
-          // Dynamic shared chunks for cross-plugin dependencies.
-          //
-          // PROBLEM: splitChunks groups modules by their exact consumer set.
-          // Modules from the same source plugin have different consumer sets
-          // (different plugins import different exports), causing massive
-          // fragmentation: kibana_utils (60 modules, 78 plugin consumers)
-          // ends up with 125 copies across 137 chunk files.
-          //
-          // FIX: The `name` function derives chunk name from SOURCE plugin
-          // folder, overriding consumer-set grouping. All kibana_utils modules
-          // go into one `shared-plugin-kibana_utils` chunk.
-          //
-          // `enforce: true` bypasses the global minSize/minChunks/maxAsync/
-          // maxInitialRequests constraints. The per-group `minChunks: 2` is
-          // a local override that may still be respected; worst case it is
-          // also bypassed, creating 1:1 shared chunks for single-consumer
-          // modules -- harmless (same bytes, no extra requests).
-          //
-          // `test` is a regex evaluated in Rust; only `name` crosses the
-          // Rust-JS boundary (for the ~few-thousand matching modules out of
-          // 50K+ total). Performance impact is negligible (see benchmark).
-          //
-          // `nameForCondition()` is used instead of `module.resource` because
-          // the `name` callback receives the base Module type, where
-          // `resource` is only available on NormalModule. nameForCondition()
-          // is on the base type and returns the file path for normal modules,
-          // undefined for non-file modules (context, external, concatenated).
-          //
-          // TRADEOFF: More shared chunks = more HTTP requests per plugin load.
-          // Kibana currently runs HTTP/1.1 (HTTP/2 disabled), so prerequisite
-          // chunks load with limited parallelism (~6 connections). Despite
-          // this, total bytes downloaded drop dramatically (e.g., 770KB ->
-          // 180KB for visTypeMarkdown), making this a net win. When HTTP/2 is
-          // enabled, parallel loading will further improve performance.
-          // ---------------------------------------------------------------
+          // Disable rspack's built-in defaultVendors group (test: /node_modules/i,
+          // priority: -10). Without this, node_modules shared by fewer than 5
+          // chunks bypass our custom `vendors` group (minChunks: 5) and create
+          // unnecessary small vendor chunks via the hidden default.
+          defaultVendors: false,
+
+          // --- Plugin cache groups ---
+          // Consolidate modules from the same source plugin into one named chunk.
+          // Covers all plugin directories:
+          //   - src/platform/plugins/(shared|private)/<name>/
+          //   - x-pack/platform/plugins/(shared|private)/<name>/
+          //   - x-pack/solutions/<solution>/plugins/<name>/
           sharedPlugins: {
-            test: /[\\/]plugins[\\/](?:shared|private)[\\/]/,
+            test: /[\\/]plugins[\\/]/,
             name: (module: Module) => {
               const resource = module.nameForCondition?.();
               if (!resource) return 'shared-plugins';
-              const match = resource.match(/plugins[\\/](?:shared|private)[\\/]([^\\/]+)/);
-              return match ? `shared-plugin-${match[1]}` : 'shared-plugins';
+              const platformMatch = resource.match(/plugins[\\/](?:shared|private)[\\/]([^\\/]+)/);
+              if (platformMatch) return `shared-plugin-${platformMatch[1]}`;
+              const solutionMatch = resource.match(/solutions[\\/][^\\/]+[\\/]plugins[\\/]([^\\/]+)/);
+              if (solutionMatch) return `shared-plugin-${solutionMatch[1]}`;
+              const genericMatch = resource.match(/plugins[\\/]([^\\/]+)/);
+              return genericMatch ? `shared-plugin-${genericMatch[1]}` : 'shared-plugins';
             },
             chunks: 'async' as const,
             priority: 35,
             minChunks: 2,
-            enforce: true,
           },
 
-          // Dynamic shared chunks for cross-package dependencies.
-          // Same strategy as sharedPlugins above: consolidate all modules
-          // from the same source package into one named chunk. Covers
-          // packages/(shared|private)/ which includes the most impactful
-          // sources (kbn-palettes, shared-ux, kbn-field-types). Packages
-          // under other paths (packages/, src/core/packages/, x-pack/packages/)
-          // are less commonly shared across plugins and can be added later.
+          // --- Core packages cache group ---
+          // src/core/packages/<domain>/<layer>/ (e.g., chrome/browser-internal/)
+          // ~122 browser-relevant packages.
+          corePackages: {
+            test: /[\\/]src[\\/]core[\\/]packages[\\/]/,
+            name: (module: Module) => {
+              const resource = module.nameForCondition?.();
+              if (!resource) return 'shared-core';
+              const match = resource.match(/src[\\/]core[\\/]packages[\\/]([^\\/]+)[\\/]([^\\/]+)/);
+              return match ? `shared-core-${match[1]}-${match[2]}` : 'shared-core';
+            },
+            chunks: 'async' as const,
+            priority: 32,
+            minChunks: 2,
+          },
+
+          // --- Platform packages cache group ---
+          // packages/(shared|private)/ -- the most impactful shared packages
+          // (kbn-palettes, shared-ux, kbn-field-types, etc.).
           sharedPackages: {
             test: /[\\/]packages[\\/](?:shared|private)[\\/]/,
             name: (module: Module) => {
@@ -561,7 +595,42 @@ export async function createSingleCompileConfig(
             chunks: 'async' as const,
             priority: 30,
             minChunks: 2,
-            enforce: true,
+          },
+
+          // --- Solution packages cache group ---
+          // x-pack/solutions/<solution>/packages/<name>/ (~47 browser-relevant).
+          // Priority 29 > rootPackages (28) to win for kbn-* packages under solutions/.
+          solutionPackages: {
+            test: /[\\/]solutions[\\/][^\\/]+[\\/]packages[\\/]/,
+            name: (module: Module) => {
+              const resource = module.nameForCondition?.();
+              if (!resource) return 'shared-solution-pkg';
+              const match = resource.match(/solutions[\\/][^\\/]+[\\/]packages[\\/]([^\\/]+)/);
+              return match ? `shared-solution-${match[1]}` : 'shared-solution-pkg';
+            },
+            chunks: 'async' as const,
+            priority: 29,
+            minChunks: 2,
+          },
+
+          // --- Root packages cache group ---
+          // packages/kbn-*/ at repo root (~46 shared-common packages).
+          // Also catches x-pack/packages/kbn-*/ (3 packages).
+          // Most root packages are tooling/build-only; minChunks: 2 filters
+          // out packages that aren't actually shared across browser bundles.
+          // Priority below sharedPackages (30) and solutionPackages (29) so
+          // packages/(shared|private)/ and solutions/*/packages/ win first.
+          rootPackages: {
+            test: /[\\/]packages[\\/]kbn-/,
+            name: (module: Module) => {
+              const resource = module.nameForCondition?.();
+              if (!resource) return 'shared-root-pkg';
+              const match = resource.match(/packages[\\/](kbn-[^\\/]+)/);
+              return match ? `shared-root-${match[1]}` : 'shared-root-pkg';
+            },
+            chunks: 'async' as const,
+            priority: 28,
+            minChunks: 2,
           },
 
           // Heavy vendors NOT in ui-shared-deps - keep separate for lazy loading
@@ -579,7 +648,7 @@ export async function createSingleCompileConfig(
             minChunks: 5,
             reuseExistingChunk: true,
           },
-          // Default for shared async code
+          // Catch-all for shared async code not matched by named groups above
           default: {
             minChunks: 3,
             priority: -20,
@@ -627,6 +696,12 @@ export async function createSingleCompileConfig(
       cache: cache
         ? {
             type: 'persistent',
+            // Treat node_modules/ as package-manager-managed. Rspack skips
+            // per-file stats during cache validation and relies on package.json
+            // changes (captured by buildDependencies below) instead.
+            snapshot: {
+              managedPaths: [Path.resolve(repoRoot, 'node_modules')],
+            },
             buildDependencies: CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
             // Version includes hash of this config file for reliable invalidation
             // RSPack's buildDependencies may not trigger on TypeScript file changes
@@ -800,7 +875,7 @@ export function findTargetEntry(contextDir: string, target: string = 'public'): 
  */
 // Entry file version - increment when changing the entry generation logic
 // This ensures the entry file is regenerated when config structure changes
-const ENTRY_VERSION = 'v4';
+const ENTRY_VERSION = 'v5';
 
 function createUnifiedEntry(
   wrapperDir: string,
@@ -809,12 +884,14 @@ function createUnifiedEntry(
 ): string {
   const unifiedEntryPath = Path.join(wrapperDir, 'kibana-unified-entry.js');
 
-  // Convert absolute paths to relative paths for cache portability
-  // Entry wrapper is at target/.rspack-entry-wrappers/, so we need ../../ to reach repo root
-  const toRelativePath = (absolutePath: string): string => {
-    const relativePath = Path.relative(wrapperDir, absolutePath);
-    // Ensure forward slashes for consistency across platforms
-    return relativePath.replace(/\\/g, '/');
+  // Convert absolute paths to relative paths for cache portability.
+  // Always ensures ./ prefix so rspack treats them as relative imports.
+  const toRelativePath = (absolutePath: string, fromDir: string = wrapperDir): string => {
+    let relativePath = Path.relative(fromDir, absolutePath).replace(/\\/g, '/');
+    if (!relativePath.startsWith('.')) {
+      relativePath = './' + relativePath;
+    }
+    return relativePath;
   };
 
   // Create a hash using RELATIVE paths so it's consistent across machines
@@ -838,6 +915,29 @@ function createUnifiedEntry(
     }
   }
 
+  // Generate thin entry wrappers for each plugin target.
+  //
+  // Each plugin import() points to a tiny wrapper module (in wrapperDir)
+  // that re-exports from the actual plugin source. This ensures every
+  // plugin chunk always has at least one unique module that can't be
+  // extracted by splitChunks:
+  //
+  //   - Wrapper paths are in target/.rspack-entry-wrappers/, which does NOT
+  //     match any cache group regex (plugins/, packages/, node_modules/).
+  //   - Each wrapper is imported by exactly 1 chunk, so minChunks: 2
+  //     prevents extraction.
+  //   - The actual plugin modules (public/index.ts, etc.) may still be
+  //     shared and extracted into shared-plugin-* chunks, but the entry
+  //     chunk retains the wrapper and is always emitted.
+  //
+  // Without these wrappers, plugins whose entire module set satisfies
+  // minChunks >= 2 (because other plugins import from them) end up with
+  // empty entry chunks that rspack doesn't emit.
+  const pluginWrapperDir = Path.join(wrapperDir, 'plugin-entries');
+  if (!Fs.existsSync(pluginWrapperDir)) {
+    Fs.mkdirSync(pluginWrapperDir, { recursive: true });
+  }
+
   // Separate core from other plugins
   const coreEntries = pluginEntries.filter((e) => e.id === 'core');
   const otherEntries = pluginEntries.filter((e) => e.id !== 'core');
@@ -856,16 +956,22 @@ function createUnifiedEntry(
     })
     .join('\n');
 
-  // Generate DIRECT async imports for each plugin target (no zone chunks).
+  // Generate wrapper files and async imports for each plugin target.
   // All targets for the same plugin share a webpackChunkName so rspack merges
-  // them into a single chunk. Each import() still resolves to its own module
-  // namespace. This avoids near-empty secondary chunks for extra targets
-  // (e.g., common/) whose modules are already pulled in by public/.
+  // them into a single chunk.
   const pluginImports = otherEntries
     .map((entry) => {
       const chunkName = `plugin-${entry.pluginId}`;
+      // Sanitize the entry id for use as a filename (replace / with __)
+      const wrapperFilename = `${entry.id.replace(/\//g, '__')}.js`;
+      const wrapperPath = Path.join(pluginWrapperDir, wrapperFilename);
+      const relativeSourcePath = toRelativePath(entry.path, pluginWrapperDir);
+
+      Fs.writeFileSync(wrapperPath, `export * from ${JSON.stringify(relativeSourcePath)};\n`);
+
+      const relativeWrapperPath = toRelativePath(wrapperPath);
       return `    import(/* webpackChunkName: ${JSON.stringify(chunkName)} */ ${JSON.stringify(
-        toRelativePath(entry.path)
+        relativeWrapperPath
       )}).then(m => registerPlugin('${entry.bundleId}', m))`;
     })
     .join(',\n');
