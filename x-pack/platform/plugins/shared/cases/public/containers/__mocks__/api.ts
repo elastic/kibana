@@ -55,6 +55,14 @@ import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from '../constants';
 export const resolveCase = async (caseId: string, signal: AbortSignal): Promise<ResolvedCase> =>
   Promise.resolve(basicResolvedCase);
 
+export const getCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => Promise.resolve(basicCase);
+
 export const getSingleCaseMetrics = async (
   caseId: string,
   signal: AbortSignal
