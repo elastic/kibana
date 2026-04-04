@@ -518,7 +518,7 @@ export async function createSingleCompileConfig(
       splitChunks: {
         chunks: 'async',
         minSize: 20000,
-        maxAsyncRequests: 50,
+        maxAsyncRequests: 30,
         maxInitialRequests: 30,
         cacheGroups: {
           // Disable rspack's built-in defaultVendors group (test: /node_modules/i,
