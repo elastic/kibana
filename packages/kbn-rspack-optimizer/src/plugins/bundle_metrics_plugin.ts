@@ -38,9 +38,16 @@ export interface PluginMetricsInfo {
  *    plugin gets a named async chunk via `webpackChunkName` magic comments in
  *    the unified entry (e.g. `plugin-discover`, `plugin-dashboard`). Core is
  *    loaded synchronously into the `kibana` entry chunk. Shared/split chunks
- *    produced by `splitChunks` (e.g. `vendors-heavy`, `default`) are NOT
+ *    produced by `splitChunks` (e.g. `vendors-heavy`, `shared-misc`) are NOT
  *    attributed to any single plugin -- they benefit all consumers and are
  *    tracked separately as aggregate metrics.
+ *
+ *    `pageLoadAssetSize` (the limit) tracks the synchronous page-load cost
+ *    of each plugin's named chunk -- the size of the chunk the browser must
+ *    download and parse as part of the initial page load sequence. Shared
+ *    chunks are loaded as prerequisites by the rspack runtime, but they are
+ *    tracked separately because they serve multiple consumers and their
+ *    cost is amortized.
  *
  * 2. CORE vs PLUGIN CHUNK NAMING
  *

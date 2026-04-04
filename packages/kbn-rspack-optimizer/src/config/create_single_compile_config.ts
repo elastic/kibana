@@ -873,15 +873,14 @@ export function findTargetEntry(contextDir: string, target: string = 'public'): 
  * Create a unified entry module with PROGRESSIVE LOADING:
  *
  * Phase 1 (Sync): Core - always needed, loads first
- * Phase 2 (Async): Platform - base functionality, separate chunk
- * Phase 3 (Async): Solutions - per-solution chunks, loaded in parallel
+ * Phase 2 (Async): All plugins loaded in parallel via dynamic import()
  *
  * This creates natural chunk boundaries via dynamic imports while
  * ensuring all plugins are registered before the app starts.
  */
 // Entry file version - increment when changing the entry generation logic
 // This ensures the entry file is regenerated when config structure changes
-const ENTRY_VERSION = 'v5';
+const ENTRY_VERSION = 'v8';
 
 function createUnifiedEntry(
   wrapperDir: string,
