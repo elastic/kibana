@@ -245,8 +245,7 @@ describe('Metric Schema', () => {
             type: 'secondary',
             operation: 'sum',
             field: 'cost',
-            prefix: '$',
-            placement: 'before',
+            caption: { type: 'custom', value: '$', placement: 'before' },
             compare: {
               to: 'primary',
             },
@@ -276,8 +275,7 @@ describe('Metric Schema', () => {
             type: 'secondary',
             operation: 'sum',
             field: 'profit',
-            prefix: '',
-            placement: 'before',
+            caption: { type: 'custom', value: '', placement: 'before' },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             color: {
               type: 'static',
@@ -490,7 +488,6 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-            placement: 'before',
           },
         ],
       } satisfies MetricInput;
@@ -539,8 +536,7 @@ describe('Metric Schema', () => {
             type: 'secondary',
             operation: 'sum',
             field: 'profit',
-            prefix: '$',
-            placement: 'before',
+            caption: { type: 'custom', value: '$', placement: 'before' },
             compare: {
               to: 'primary',
             },

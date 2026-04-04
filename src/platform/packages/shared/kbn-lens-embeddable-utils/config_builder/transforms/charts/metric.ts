@@ -155,11 +155,13 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     ...(secondaryMetric
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
-          ...('prefix' in secondaryMetric && secondaryMetric.prefix
-            ? { secondaryLabel: secondaryMetric.prefix }
-            : {}),
-          ...('placement' in secondaryMetric && secondaryMetric.placement
-            ? { secondaryLabelPosition: secondaryMetric.placement }
+          ...('caption' in secondaryMetric && secondaryMetric.caption
+            ? {
+                ...(secondaryMetric.caption.type === 'custom'
+                  ? { secondaryLabel: secondaryMetric.caption.value }
+                  : {}),
+                secondaryLabelPosition: secondaryMetric.caption.placement,
+              }
             : {}),
           secondaryAlign:
             ('value' in secondaryMetric && secondaryMetric.value?.alignment) ||
@@ -433,12 +435,20 @@ function enrichConfigurationWithVisualizationProperties(
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
-    if (visualization.secondaryLabel || visualization.secondaryPrefix) {
-      secondaryMetric.prefix = visualization.secondaryLabel ?? visualization.secondaryPrefix;
-    }
-
-    if (visualization.secondaryLabelPosition) {
-      secondaryMetric.placement = visualization.secondaryLabelPosition;
+    const captionValue = visualization.secondaryLabel ?? visualization.secondaryPrefix;
+    const secondaryLabelPosition =
+      visualization.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition;
+    if (captionValue != null) {
+      secondaryMetric.caption = {
+        type: 'custom',
+        value: captionValue,
+        placement: secondaryLabelPosition,
+      };
+    } else {
+      secondaryMetric.caption = {
+        type: 'auto',
+        placement: secondaryLabelPosition,
+      };
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {

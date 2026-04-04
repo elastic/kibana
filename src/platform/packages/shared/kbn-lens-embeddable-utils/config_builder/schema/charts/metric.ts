@@ -211,18 +211,56 @@ const metricStateSecondaryMetricOptionsSchema = {
   // to avoid default injection in the wrong type
   type: schema.literal('secondary'),
   /**
-   * Prefix
+   * Caption configuration for the secondary metric.
+   * Controls the label text and its placement relative to the value.
    */
-  prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
-  /**
-   * Label placement relative to the secondary metric value. Possible values:
-   * - 'before': Label appears before the value
-   * - 'after': Label appears after the value
-   */
-  placement: placementSchema({
-    meta: { description: 'Label placement relative to the secondary metric value' },
-    defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
-  }),
+  caption: schema.maybe(
+    schema.oneOf(
+      [
+        schema.object(
+          {
+            type: schema.literal('auto'),
+            /**
+             * Label placement relative to the secondary metric value. Possible values:
+             * - 'before': Label appears before the value
+             * - 'after': Label appears after the value
+             */
+            placement: placementSchema({
+              meta: { description: 'Label placement relative to the secondary metric value' },
+              defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+            }),
+          },
+          { meta: { id: 'metricLabelCaptionAuto', title: 'Auto Secondary Label Caption' } }
+        ),
+        schema.object(
+          {
+            type: schema.literal('custom'),
+            /**
+             * Custom label text for the secondary metric
+             */
+            value: schema.string({
+              meta: { description: 'Custom label text for the secondary metric' },
+            }),
+            /**
+             * Label placement relative to the secondary metric value. Possible values:
+             * - 'before': Label appears before the value
+             * - 'after': Label appears after the value
+             */
+            placement: placementSchema({
+              meta: { description: 'Label placement relative to the secondary metric value' },
+              defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+            }),
+          },
+          { meta: { id: 'metricLabelCaptionCustom', title: 'Custom Secondary Label Caption' } }
+        ),
+      ],
+      {
+        meta: {
+          description: 'Caption configuration for the secondary metric label text and placement',
+        },
+      }
+    )
+  ),
   /**
    * Compare to
    */
