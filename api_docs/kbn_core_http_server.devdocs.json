@@ -16484,20 +16484,20 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/integrations_route.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/integrations_route.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/integrations_route.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
@@ -17891,12 +17891,12 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/integrations_route.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
@@ -18590,12 +18590,12 @@
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/analyze_api_route.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/integrations_route.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
@@ -19809,8 +19809,8 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -20036,12 +20036,12 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/integrations_route.ts"
               },
               {
-                "plugin": "automaticImportVTwo",
-                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
