@@ -65,7 +65,7 @@ export const AgentBuilderAnnouncementModal: React.FC<AgentBuilderAnnouncementMod
         <EuiText size="s" css={textCss}>
           <p>
             <FormattedMessage
-              id="agentBuilderBrowser.agentBuilderAnnouncement.modalDescription"
+              id="xpack.agentBuilder.announcementModal.modalDescription"
               defaultMessage="We've set <strong>AI Agent</strong> as the default experience for this space to provide more powerful automation across your environment."
               values={{ strong: (chunks: React.ReactNode) => <strong>{chunks}</strong> }}
             />
