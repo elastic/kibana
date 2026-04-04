@@ -53,6 +53,14 @@ export interface EligibleStreamsResponse {
   };
 }
 
+const NumberFromString = z.string().transform(value => {
+  const trimmed = value.trim();
+  if (trimmed === '') {
+    return undefined;
+  }
+  return Number(trimmed);
+});
+
 const eligibleStreamsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_extraction/_eligible',
   options: {
@@ -68,11 +76,11 @@ const eligibleStreamsRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      maxScheduledStreams: z.coerce.number().min(0).optional(),
-      extractionIntervalHours: z.coerce.number().min(0).optional(),
-      lookbackHours: z.coerce.number().min(0).optional(),
+      maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
+      extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
+      lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
       excludedStreamPatterns: z.string().optional(),
-    }),
+    }).optional(),
   }),
   handler: async ({
     params,
@@ -84,6 +92,8 @@ const eligibleStreamsRoute = createServerRoute({
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const query = params?.query ?? {};
 
     const enabled = await globalUiSettingsClient.get<boolean>(
       OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
@@ -102,8 +112,8 @@ const eligibleStreamsRoute = createServerRoute({
       ),
     ]);
 
-    const maxStreams = params.query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
-    const lookbackHours = params.query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
+    const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
+    const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
     const [connectorId, sortedTasks, allStreams] = await Promise.all([
       resolveConnectorForFeature({
@@ -127,12 +137,12 @@ const eligibleStreamsRoute = createServerRoute({
     ]);
 
     const intervalHours =
-      params.query.extractionIntervalHours ??
+      query.extractionIntervalHours ??
       intervalHoursSetting ??
       DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
     const resolvedExcludedPatterns =
-      params.query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
+      query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
     const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
       allStreams,
