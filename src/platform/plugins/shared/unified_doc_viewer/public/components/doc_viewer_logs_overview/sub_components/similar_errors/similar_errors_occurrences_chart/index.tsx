@@ -132,8 +132,7 @@ export function SimilarErrorsOccurrencesChart({
       getSerializedStateForChild: () => ({
         attributes: lensAttributes,
         viewMode: 'view',
-        timeRange,
-        esqlVariables: [],
+        time_range: timeRange,
       }),
       noPadding: true,
     };
