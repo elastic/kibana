@@ -518,12 +518,12 @@ export async function createSingleCompileConfig(
       splitChunks: {
         chunks: 'async',
         minSize: 20000,
-        maxAsyncRequests: 30,
+        maxAsyncRequests: 50,
         maxInitialRequests: 30,
         cacheGroups: {
           // Disable rspack's built-in defaultVendors group (test: /node_modules/i,
-          // priority: -10). Without this, node_modules shared by fewer than 5
-          // chunks bypass our custom `vendors` group (minChunks: 5) and create
+          // priority: -10). Without this, node_modules shared by fewer than 3
+          // chunks bypass our custom `vendors` group (minChunks: 3) and create
           // unnecessary small vendor chunks via the hidden default.
           defaultVendors: false,
 
@@ -628,12 +628,21 @@ export async function createSingleCompileConfig(
             reuseExistingChunk: true,
           },
 
-          // Heavy vendors NOT in ui-shared-deps - keep separate for lazy loading
+          // Heavy vendors NOT in ui-shared-deps - split per package for lazy loading.
+          // Each matched package gets its own chunk (e.g., vendors-heavy-maplibre-gl)
+          // so pages only download the specific heavy vendor they need.
           vendorsHeavy: {
             test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
-            name: 'vendors-heavy',
+            name: (module: Module) => {
+              const resource = module.nameForCondition?.();
+              if (!resource) return 'vendors-heavy';
+              const match = resource.match(/node_modules[\\/](@[^\\/]+[\\/][^\\/]+|[^\\/]+)/);
+              return match ? `vendors-heavy-${match[1].replace(/[\\/]/g, '-')}` : 'vendors-heavy';
+            },
             priority: 30,
-            chunks: 'async',
+            chunks: 'async' as const,
+            minChunks: 2,
+            minSize: 0,
             reuseExistingChunk: true,
           },
           // Shared vendors - extract if used by 3+ chunks
