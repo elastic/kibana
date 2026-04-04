@@ -1308,10 +1308,10 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"profiling\" | \"streams\" | \"uptime\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
+          "\"profiling\" | \"streams\" | \"uptime\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"ingestHub\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
-        "lineNumber": 44,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1369,7 +1369,7 @@
           " | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:alerts_v2\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
-        "lineNumber": 107,
+        "lineNumber": 110,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1421,6 +1421,23 @@
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
         "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.INGEST_HUB_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INGEST_HUB_APP_ID",
+        "description": [],
+        "signature": [
+          "\"ingestHub\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
