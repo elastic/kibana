@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { default as React, useCallback, useMemo } from 'react';
+import React, { type ReactNode, useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { useEnrichmentFieldSuggestions } from '../../../../../../hooks/use_field_suggestions';
 import { useStreamDataViewFieldTypes } from '../../../../../../hooks/use_stream_data_view_field_types';
@@ -23,7 +23,7 @@ export interface ProcessorFieldSelectorProps {
   placeholder?: string;
   label?: string;
   onChange?: (value: string) => void;
-  labelAppend?: React.ReactNode;
+  labelAppend?: ReactNode;
   processorId?: string;
 }
 
