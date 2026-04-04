@@ -53,7 +53,7 @@ export interface EligibleStreamsResponse {
   };
 }
 
-const NumberFromString = z.string().transform(value => {
+const NumberFromString = z.string().transform((value) => {
   const trimmed = value.trim();
   if (trimmed === '') {
     return undefined;
@@ -75,12 +75,14 @@ const eligibleStreamsRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
-      extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
-      lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
-      excludedStreamPatterns: z.string().optional(),
-    }).optional(),
+    query: z
+      .object({
+        maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
+        extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
+        lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
+        excludedStreamPatterns: z.string().optional(),
+      })
+      .optional(),
   }),
   handler: async ({
     params,
@@ -137,12 +139,9 @@ const eligibleStreamsRoute = createServerRoute({
     ]);
 
     const intervalHours =
-      query.extractionIntervalHours ??
-      intervalHoursSetting ??
-      DEFAULT_EXTRACTION_INTERVAL_HOURS;
+      query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;
 
-    const resolvedExcludedPatterns =
-      query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
+    const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
     const { alreadyRunning, candidates, upToDate, excluded, unsupported } = classifyStreams({
       allStreams,
