@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { rspack, type Compiler, type Chunk, type ChunkGroup } from '@rspack/core';
+import { rspack, type Compiler } from '@rspack/core';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 /**
@@ -18,7 +18,7 @@ import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
  * CI stats, and user-facing logs (e.g. "core", "discover").
  *
  * `chunkName` is the internal rspack chunk name used to match against
- * `compilation.chunks` (e.g. "kibana" for core, "plugin-discover" for discover).
+ * `compilation.chunks` (e.g. "plugin-core" for core, "plugin-discover" for discover).
  */
 export interface PluginMetricsInfo {
   id: string;
@@ -35,12 +35,13 @@ export interface PluginMetricsInfo {
  * 1. SINGLE-COMPILATION METRIC ATTRIBUTION STRATEGY
  *
  *    The rspack optimizer produces a single compilation for all plugins. Each
- *    plugin gets a named async chunk via `webpackChunkName` magic comments in
- *    the unified entry (e.g. `plugin-discover`, `plugin-dashboard`). Core is
- *    loaded synchronously into the `kibana` entry chunk. Shared/split chunks
- *    produced by `splitChunks` (e.g. `vendors-heavy`, `shared-misc`) are NOT
- *    attributed to any single plugin -- they benefit all consumers and are
- *    tracked separately as aggregate metrics.
+ *    bundle (core + plugins) gets a named async chunk via `webpackChunkName`
+ *    magic comments in the unified entry (e.g. `plugin-core`, `plugin-discover`,
+ *    `plugin-dashboard`). The `kibana` entry chunk is just the rspack runtime
+ *    + the Promise.all orchestration shell. Shared/split chunks produced by
+ *    `splitChunks` (e.g. `vendors-heavy`, `shared-misc`) are NOT attributed
+ *    to any single plugin -- they benefit all consumers and are tracked
+ *    separately as aggregate metrics.
  *
  *    `pageLoadAssetSize` (the limit) tracks the synchronous page-load cost
  *    of each plugin's named chunk -- the size of the chunk the browser must
@@ -51,32 +52,25 @@ export interface PluginMetricsInfo {
  *
  * 2. CORE vs PLUGIN CHUNK NAMING
  *
- *    Core maps to `chunkName: 'kibana'` because it's imported synchronously
- *    into the entry, not via `import()`. Plugins map to `chunkName: 'plugin-{id}'`
- *    because each uses `import(/* webpackChunkName: "plugin-{id}" *​/)`. The
+ *    Core maps to `chunkName: 'plugin-core'` (loaded via dynamic import(),
+ *    same as plugins). Plugins map to `chunkName: 'plugin-{id}'`. The
  *    user-facing `id` (e.g. "core", "discover") differs from the internal
  *    `chunkName` to match legacy metrics format and limits.yml keys.
  *
  * 3. ASYNC CHUNK TRAVERSAL
  *
- *    For plugins: `chunk.getAllAsyncChunks()` walks child chunk groups
- *    recursively and returns all downstream async chunks. If `splitChunks`
- *    extracts shared code, that chunk appears in multiple plugins' results --
- *    semantically correct as it represents per-plugin download cost.
+ *    All bundles (core + plugins) use `chunk.getAllAsyncChunks()` which walks
+ *    child chunk groups recursively and returns all downstream async chunks.
+ *    If `splitChunks` extracts shared code, that chunk appears in multiple
+ *    bundles' results -- semantically correct as it represents per-bundle
+ *    download cost. No special traversal is needed for core since it is now
+ *    a regular async chunk like plugins.
  *
- *    For core: calling `getAllAsyncChunks()` on the `kibana` chunk would
- *    return everything (all plugins + their async children). Instead, we walk
- *    `entrypoint.childrenIterable`, skip groups named `plugin-*`, and
- *    recursively collect chunks from the remaining unnamed groups (core's own
- *    lazy imports like `@elastic/apm-rum`, `react-markdown`).
+ * 4. ENTRY CHUNK (kibana.bundle.js)
  *
- * 4. ENTRY WRAPPER OVERHEAD
- *
- *    `kibana.bundle.js` includes core's code, the rspack runtime, and the
- *    entry wrapper (~few hundred bytes minified, <0.02% of core's ~2.8MB).
- *    We do NOT discount it because it IS real download cost, the runtime IS
- *    necessary, and legacy also included each plugin's webpack runtime in
- *    page-load measurement.
+ *    `kibana.bundle.js` contains only the rspack runtime and the Promise.all
+ *    orchestration code. It does not match any `chunkNameToInfo` entry and is
+ *    counted as shared aggregate. Its size is negligible.
  *
  * 5. MISCELLANEOUS ASSETS
  *
@@ -147,18 +141,6 @@ function sumJsFileSize(
     total += asset ? asset.source.size() : 0;
   }
   return total;
-}
-
-/**
- * Recursively collect chunks from a chunk group and all its descendants.
- */
-function collectChunksRecursive(group: ChunkGroup, result: Set<Chunk>): void {
-  for (const chunk of group.chunks) {
-    result.add(chunk);
-  }
-  for (const child of group.childrenIterable) {
-    collectChunksRecursive(child, result);
-  }
 }
 
 /**
@@ -259,8 +241,6 @@ export class BundleMetricsPlugin {
           stage: rspack.Compilation.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         () => {
-          const pluginGroupNames = new Set(this.pluginInfos.map((p) => p.chunkName));
-
           const entryData: Array<{
             id: string;
             chunkName: string;
@@ -295,25 +275,9 @@ export class BundleMetricsPlugin {
             let asyncSize: number;
             let asyncCount: number;
 
-            if (info.chunkName === 'kibana') {
-              // Core: walk entry's child groups, skip plugin-loading groups
-              const entrypoint = compilation.entrypoints.get('kibana');
-              const coreAsyncChunks = new Set<Chunk>();
-              if (entrypoint) {
-                for (const childGroup of entrypoint.childrenIterable) {
-                  if (childGroup.name && pluginGroupNames.has(childGroup.name)) {
-                    continue;
-                  }
-                  collectChunksRecursive(childGroup, coreAsyncChunks);
-                }
-              }
-              asyncSize = sumJsFileSize(
-                [...coreAsyncChunks].flatMap((c) => [...c.files]),
-                compilation
-              );
-              asyncCount = coreAsyncChunks.size;
-            } else {
-              // Plugin: use getAllAsyncChunks(), dedup with Set
+            {
+              // All bundles (core + plugins) use getAllAsyncChunks(), dedup with Set.
+              // Core is now an async chunk like plugins, so no special traversal needed.
               const asyncChunks = new Set(chunk.getAllAsyncChunks());
               asyncSize = sumJsFileSize(
                 [...asyncChunks].flatMap((c) => [...c.files]),

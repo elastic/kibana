@@ -481,9 +481,11 @@ export async function createSingleCompileConfig(
       // duplicated 137 times). Named groups with `name` functions override
       // this by consolidating modules by SOURCE origin instead.
       //
-      // `chunks: 'async'` keeps kibana.bundle.js (the initial chunk)
-      // self-contained. Using 'all' would require bootstrap renderer
-      // changes to inject prerequisite <script> tags -- a future optimization.
+      // `chunks: 'async'` means splitChunks only operates on async chunks.
+      // kibana.bundle.js (the initial chunk) is just the rspack runtime +
+      // orchestration shell; core and all plugins are async chunks.
+      // Using 'all' would require bootstrap renderer changes to inject
+      // prerequisite <script> tags -- a future optimization.
       //
       // `minChunks: 2` ensures only modules shared by 2+ async chunks are
       // extracted (no single-consumer shared chunks). `enforce` is NOT used
@@ -553,15 +555,18 @@ export async function createSingleCompileConfig(
           },
 
           // --- Core packages cache group ---
-          // src/core/packages/<domain>/<layer>/ (e.g., chrome/browser-internal/)
-          // ~122 browser-relevant packages.
+          // src/core/packages/<domain>/ (e.g., chrome/, rendering/)
+          // ~122 browser-relevant packages merged by first-level domain.
+          // Uses single-level naming (shared-core-chrome, not shared-core-chrome-browser-internal)
+          // to keep chunk count low — critical for HTTP/1.1 where each file is a
+          // separate connection and core's async loading adds per-file overhead.
           corePackages: {
             test: /[\\/]src[\\/]core[\\/]packages[\\/]/,
             name: (module: Module) => {
               const resource = module.nameForCondition?.();
               if (!resource) return 'shared-core';
-              const match = resource.match(/src[\\/]core[\\/]packages[\\/]([^\\/]+)[\\/]([^\\/]+)/);
-              return match ? `shared-core-${match[1]}-${match[2]}` : 'shared-core';
+              const match = resource.match(/src[\\/]core[\\/]packages[\\/]([^\\/]+)/);
+              return match ? `shared-core-${match[1]}` : 'shared-core';
             },
             chunks: 'async' as const,
             priority: 32,
@@ -762,7 +767,7 @@ export async function createSingleCompileConfig(
             const metricsInfos: PluginMetricsInfo[] = [
               {
                 id: 'core',
-                chunkName: 'kibana',
+                chunkName: 'plugin-core',
                 limit: limits.pageLoadAssetSize?.core,
                 ignoreMetrics: false,
               },
@@ -870,17 +875,20 @@ export function findTargetEntry(contextDir: string, target: string = 'public'): 
 }
 
 /**
- * Create a unified entry module with PROGRESSIVE LOADING:
+ * Create a unified entry module with ALL-ASYNC loading:
  *
- * Phase 1 (Sync): Core - always needed, loads first
- * Phase 2 (Async): All plugins loaded in parallel via dynamic import()
+ * All bundles (core + plugins) are loaded in parallel via dynamic import().
+ * kibana.bundle.js becomes a tiny orchestration shell containing only the
+ * rspack runtime and the Promise.all that loads everything.
  *
- * This creates natural chunk boundaries via dynamic imports while
- * ensuring all plugins are registered before the app starts.
+ * Core gets webpackChunkName "plugin-core" and is treated identically
+ * to other plugins. Promise.all guarantees all .then() callbacks complete
+ * before window.__kbnPluginsLoaded resolves, ensuring core is registered
+ * before __kbnBootstrap__() runs.
  */
 // Entry file version - increment when changing the entry generation logic
 // This ensures the entry file is regenerated when config structure changes
-const ENTRY_VERSION = 'v8';
+const ENTRY_VERSION = 'v9';
 
 function createUnifiedEntry(
   wrapperDir: string,
@@ -943,28 +951,13 @@ function createUnifiedEntry(
     Fs.mkdirSync(pluginWrapperDir, { recursive: true });
   }
 
-  // Separate core from other plugins
-  const coreEntries = pluginEntries.filter((e) => e.id === 'core');
-  const otherEntries = pluginEntries.filter((e) => e.id !== 'core');
-
-  // Generate SYNC imports for core (always needed first)
-  // Use relative paths for cache portability across machines
-  const coreImports = coreEntries
-    .map((entry, i) => {
-      return `import * as core_${i} from ${JSON.stringify(toRelativePath(entry.path))};`;
-    })
-    .join('\n');
-
-  const coreRegistrations = coreEntries
-    .map((entry, i) => {
-      return `registerPlugin('${entry.bundleId}', core_${i});`;
-    })
-    .join('\n');
-
-  // Generate wrapper files and async imports for each plugin target.
+  // Generate wrapper files and async imports for ALL entries (core + plugins).
+  // Core is treated the same as plugins -- loaded via dynamic import() with
+  // webpackChunkName "plugin-core". This makes kibana.bundle.js a tiny
+  // orchestration shell and enables core to download in parallel with all plugins.
   // All targets for the same plugin share a webpackChunkName so rspack merges
   // them into a single chunk.
-  const pluginImports = otherEntries
+  const allImports = pluginEntries
     .map((entry) => {
       const chunkName = `plugin-${entry.pluginId}`;
       // Sanitize the entry id for use as a filename (replace / with __)
@@ -985,11 +978,11 @@ function createUnifiedEntry(
 // Plugin list hash: ${pluginListHash}
 // Generated at: ${new Date().toISOString()}
 //
-// DIRECT IMPORT STRATEGY (no zone chunks):
-// 1. Core loads synchronously (always needed)
-// 2. Each plugin target (public + extraPublicDirs) loaded via import()
-// 3. Targets sharing the same webpackChunkName merge into one chunk per plugin
-// 4. RSPack naturally splits based on dependencies; maxSize splits large chunks
+// ALL-ASYNC STRATEGY:
+// 1. Core + all plugins loaded in parallel via dynamic import()
+// 2. Each target gets a webpackChunkName; same-plugin targets merge into one chunk
+// 3. RSPack naturally splits shared code via splitChunks cache groups
+// 4. kibana.bundle.js is just the runtime + orchestration shell
 
 // Verify __kbnBundles__ is available
 if (typeof __kbnBundles__ === 'undefined' || typeof __kbnBundles__.define !== 'function') {
@@ -1002,26 +995,19 @@ function registerPlugin(bundleId, moduleExports) {
 }
 
 // ============================================
-// PHASE 1: Core (synchronous - always needed)
+// All bundles (core + plugins) loaded in parallel via async imports
 // ============================================
-${coreImports}
-${coreRegistrations}
-
-// ============================================
-// PHASE 2: All plugins (parallel async imports)
-// ============================================
-// Each plugin is imported directly - RSPack handles chunking
+// Core is loaded as "plugin-core" alongside all other plugins.
+// Promise.all ensures ALL .then() callbacks complete before resolving,
+// so core is guaranteed to be registered before __kbnBootstrap__() runs.
 window.__kbnPluginsLoaded = Promise.all([
-${pluginImports}
+${allImports}
 ]).then(() => {
   console.log('[@kbn/rspack-optimizer] All plugins loaded');
 }).catch(err => {
   console.error('[@kbn/rspack-optimizer] Failed to load plugins:', err);
   throw err;
 });
-
-// Export core for compatibility
-export { core_0 as core };
 `;
 
   Fs.writeFileSync(unifiedEntryPath, content);

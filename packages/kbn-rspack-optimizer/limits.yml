@@ -19,23 +19,23 @@ pageLoadAssetSize:
   cloudDataMigration: 1755
   cloudDefend: 9658
   cloudExperiments: 75153
-  cloudFullStory: 1373
+  cloudFullStory: 1541
   cloudLinks: 11800
   cloudSecurityPosture: 23016
   console: 48764
   contentConnectors: 3375
   contentManagement: 6725
   controls: 7448
-  core: 689933
+  core: 320
   cps: 5120
   crossClusterReplication: 7846
   customIntegrations: 636
   dashboard: 22999
-  dashboardAgent: 1382
-  dashboardMarkdown: 3246
+  dashboardAgent: 2074
+  dashboardMarkdown: 4820
   data: 34720
   dataQuality: 19504
-  datasetQuality: 464
+  datasetQuality: 631
   dataSources: 1147
   dataUsage: 4111
   dataViewEditor: 14357
@@ -43,11 +43,11 @@ pageLoadAssetSize:
   dataViewManagement: 1598
   dataViews: 18063
   dataVisualizer: 5868
-  developerToolbar: 1163
+  developerToolbar: 1345
   devTools: 437
   discover: 23373
   discoverEnhanced: 24026
-  discoverShared: 1070
+  discoverShared: 1237
   elasticAssistant: 160054
   elasticAssistantSharedState: 3353
   elasticConsole: 830
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   enterpriseSearch: 29208
   entityStore: 852
   esql: 23016
-  esqlDataGrid: 215
+  esqlDataGrid: 382
   esUiShared: 13205
   evals: 25465
   eventAnnotation: 40249
@@ -70,17 +70,17 @@ pageLoadAssetSize:
   expressions: 25610
   expressionTagcloud: 29396
   expressionXY: 23487
-  features: 1218
+  features: 1386
   feedback: 3110
   fieldFormats: 4195
-  fieldsMetadata: 1543
+  fieldsMetadata: 1710
   files: 20323
   filesManagement: 911
   fileUpload: 217
   fleet: 32851
-  genAiSettings: 1406
+  genAiSettings: 1588
   globalSearch: 5170
-  globalSearchBar: 18678
+  globalSearchBar: 23357
   globalSearchProviders: 2572
   graph: 26692
   grokdebugger: 1276
@@ -92,22 +92,22 @@ pageLoadAssetSize:
   infra: 56782
   ingestPipelines: 11134
   inputControlVis: 26178
-  inspectComponent: 1138
+  inspectComponent: 1320
   inspector: 7131
   interactiveSetup: 33155
-  intercepts: 14394
+  intercepts: 19074
   kibanaOverview: 1840
-  kibanaReact: 1225
+  kibanaReact: 1392
   kibanaUsageCollection: 515
   kibanaUtils: 25819
   kql: 23244
   kubernetesSecurity: 247
   lens: 28414
-  licenseManagement: 3307
+  licenseManagement: 4013
   licensing: 8317
-  links: 4248
+  links: 6404
   lists: 371
-  logsDataAccess: 1049
+  logsDataAccess: 1216
   logsShared: 24695
   logstash: 11698
   maintenanceWindows: 3741
@@ -119,13 +119,13 @@ pageLoadAssetSize:
   mockIdpPlugin: 3976
   monitoring: 22474
   navigation: 8671
-  newsfeed: 222
-  noDataPage: 630
+  newsfeed: 389
+  noDataPage: 797
   observability: 27828
-  observabilityAgentBuilder: 715
+  observabilityAgentBuilder: 882
   observabilityAIAssistant: 20396
   observabilityAIAssistantApp: 23461
-  observabilityAiAssistantManagement: 2197
+  observabilityAiAssistantManagement: 2889
   observabilityLogsExplorer: 1083
   observabilityOnboarding: 7727
   observabilityShared: 31719
@@ -133,24 +133,24 @@ pageLoadAssetSize:
   painlessLab: 2211
   presentationPanel: 442
   presentationUtil: 771
-  productDocBase: 322
+  productDocBase: 489
   productIntercept: 4738
   profiling: 37587
   reindexService: 12120
-  remoteClusters: 224
+  remoteClusters: 391
   reporting: 39044
   rollup: 24641
   runtimeFields: 11165
-  sampleDataIngest: 1084
-  savedObjects: 365
+  sampleDataIngest: 1251
+  savedObjects: 532
   savedObjectsFinder: 256
-  savedObjectsManagement: 849
+  savedObjectsManagement: 1016
   savedObjectsTagging: 18366
-  savedObjectsTaggingOss: 808
+  savedObjectsTaggingOss: 975
   savedSearch: 23617
-  screenshotMode: 979
+  screenshotMode: 1146
   screenshotting: 25847
-  searchAssistant: 1626
+  searchAssistant: 2318
   searchGettingStarted: 2250
   searchHomepage: 4049
   searchIndices: 5163
@@ -158,7 +158,7 @@ pageLoadAssetSize:
   searchNavigation: 3813
   searchNotebooks: 14382
   searchPlayground: 5542
-  searchprofiler: 2248
+  searchprofiler: 2968
   searchQueryRules: 2130
   searchSynonyms: 1897
   security: 215
@@ -169,11 +169,11 @@ pageLoadAssetSize:
   serverlessObservability: 12620
   serverlessSearch: 17287
   serverlessWorkplaceAI: 3440
-  sessionView: 379
+  sessionView: 546
   share: 21888
   slo: 49693
   snapshotRestore: 27828
-  spaces: 600
+  spaces: 767
   stackAlerts: 28677
   stackConnectors: 93837
   streams: 2571
@@ -187,7 +187,7 @@ pageLoadAssetSize:
   uiActions: 23001
   unifiedDocViewer: 23475
   unifiedSearch: 23417
-  upgradeAssistant: 1866
+  upgradeAssistant: 2587
   uptime: 62515
   urlDrilldown: 24202
   urlForwarding: 1412
@@ -206,9 +206,9 @@ pageLoadAssetSize:
   visTypeVega: 39744
   visTypeVislib: 30930
   visTypeXy: 47526
-  visualizationListing: 1486
+  visualizationListing: 2010
   visualizations: 24096
-  watcher: 5698
+  watcher: 6418
   workflowsExtensions: 4346
   workflowsManagement: 43274
   workplaceAIApp: 8759
