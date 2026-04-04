@@ -98,9 +98,10 @@ describe('links', () => {
 
   describe('getFirstAllowedArtifactPath', () => {
     const experimentalDefaults = {
+      ...allowedExperimentalValues,
       endpointExceptionsMovedUnderManagement: true,
       trustedDevices: true,
-    } as const;
+    };
 
     it('should return endpoint exceptions path when FF is on and user can read endpoint exceptions', () => {
       expect(
@@ -162,6 +163,7 @@ describe('links', () => {
             canReadBlocklist: false,
           },
           {
+            ...allowedExperimentalValues,
             endpointExceptionsMovedUnderManagement: false,
             trustedDevices: true,
           }
