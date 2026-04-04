@@ -471,6 +471,8 @@ export async function createSingleCompileConfig(
       // In dev, tree shaking overhead is wasted since bundles aren't minified.
       // In dist, defaults to true (rspack default).
       sideEffects: dist,
+      usedExports: dist,
+      concatenateModules: dist,
       // Chunk splitting strategy for the single-compilation build.
       //
       // In single compilation, all 200+ plugins share one module graph.
@@ -547,6 +549,7 @@ export async function createSingleCompileConfig(
             priority: 35,
             minChunks: 2,
             minSize: 0,
+            reuseExistingChunk: true,
           },
 
           // --- Core packages cache group ---
@@ -564,6 +567,7 @@ export async function createSingleCompileConfig(
             priority: 32,
             minChunks: 2,
             minSize: 0,
+            reuseExistingChunk: true,
           },
 
           // --- Platform packages cache group ---
@@ -581,6 +585,7 @@ export async function createSingleCompileConfig(
             priority: 30,
             minChunks: 2,
             minSize: 0,
+            reuseExistingChunk: true,
           },
 
           // --- Solution packages cache group ---
@@ -598,6 +603,7 @@ export async function createSingleCompileConfig(
             priority: 29,
             minChunks: 2,
             minSize: 0,
+            reuseExistingChunk: true,
           },
 
           // --- Root packages cache group ---
@@ -619,6 +625,7 @@ export async function createSingleCompileConfig(
             priority: 28,
             minChunks: 2,
             minSize: 0,
+            reuseExistingChunk: true,
           },
 
           // Heavy vendors NOT in ui-shared-deps - keep separate for lazy loading
