@@ -31,9 +31,5 @@ export const automaticImportInferenceFeature: InferenceFeatureConfig = {
   featureName: AUTOMATIC_IMPORT_FEATURE_NAME,
   featureDescription: AUTOMATIC_IMPORT_FEATURE_DESCRIPTION,
   taskType: 'completion',
-  recommendedEndpoints: [
-    '.anthropic-claude-4.6-opus-chat_completion',
-    '.openai-gpt-5.2-chat_completion',
-    '.anthropic-claude-4.6-sonnet-chat_completion',
-  ],
+  recommendedEndpoints: [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION],
 };
