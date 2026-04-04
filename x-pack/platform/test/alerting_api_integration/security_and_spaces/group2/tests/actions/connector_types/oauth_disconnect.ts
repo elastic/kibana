@@ -77,7 +77,7 @@ export default function oAuthDisconnectTest({ getService }: FtrProviderContext) 
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
 
-  describe.only('OAuth _oauth_disconnect', () => {
+  describe('OAuth _oauth_disconnect', () => {
     const objectRemover = new ObjectRemover(supertest);
     const space = Space1AllAtSpace1.space;
     let connectorId: string;

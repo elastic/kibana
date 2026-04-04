@@ -45,7 +45,7 @@ export default function oAuthStartFlowTest({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('OAuth _start_oauth_flow', () => {
+  describe('OAuth _start_oauth_flow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const space = Space1AllAtSpace1.space;
     let connectorId: string;
