@@ -47,7 +47,9 @@ export function skipInfraErrors<TExample extends Example>(
     ...evaluator,
     evaluate: async (args) => {
       const errors = (args.output as WorkflowTaskOutput)?.errors ?? [];
-      const isInfra = errors.some((e) => INFRA_ERROR_PATTERN.test(String(e)));
+      const isInfra = errors.some((e) =>
+        INFRA_ERROR_PATTERN.test(typeof e === 'string' ? e : JSON.stringify(e))
+      );
       if (isInfra) {
         return INFRA_ERROR_NA;
       }
