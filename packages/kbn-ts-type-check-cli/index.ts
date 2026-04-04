@@ -9,9 +9,9 @@
 
 export {
   executeTypeCheckValidation,
+  runLegacyTypeCheckCli,
+  runTypeCheckContractCli,
   TSC_LABEL,
   type ExecuteTypeCheckValidationOptions,
   type TscValidationResult,
-} from './execute_type_check_validation';
-export { runLegacyTypeCheckCli } from './run_type_check_legacy_cli';
-export { runTypeCheckContractCli } from './run_type_check_contract_cli';
+} from './run_type_check_cli';
