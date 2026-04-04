@@ -207,7 +207,7 @@
           "\nRegister a Zod schema so that the OAS converter emits it as a named\ncomponent (`$ref: '#/components/schemas/<name>'`) instead of inlining it.\n\nThese fields are merged verbatim into the generated OAS component schema,\nfilling the gap where Zod/JSON Schema cannot express OAS-native concepts.\n\nExample:\n```ts\nexport const StreamDefinition = z.union([...]).meta({\n  id: 'StreamDefinition',\n  openapi: {\n    discriminator: {\n      propertyName: 'type',\n      mapping: { wired: '#/components/schemas/WiredStreamDefinition' },\n    },\n  },\n});\n```"
         ],
         "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
-        "lineNumber": 394,
+        "lineNumber": 399,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -224,7 +224,7 @@
               ".DiscriminatorObject | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
-            "lineNumber": 415,
+            "lineNumber": 420,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -240,7 +240,7 @@
               "{ stability?: \"experimental\" | \"beta\" | \"stable\" | undefined; since?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
-            "lineNumber": 416,
+            "lineNumber": 421,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

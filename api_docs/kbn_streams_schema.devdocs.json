@@ -4950,7 +4950,7 @@
                 "section": "def-common.ProcessorMetrics",
                 "text": "ProcessorMetrics"
               },
-              "; }"
+              " | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
             "lineNumber": 85,
@@ -6226,7 +6226,7 @@
         "label": "ElasticsearchProcessorType",
         "description": [],
         "signature": [
-          "\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"pipeline\" | \"remove\" | \"json\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"csv\" | \"fail\" | \"grok\" | \"reroute\" | \"convert\" | \"fingerprint\" | \"dissect\" | \"redact\" | \"network_direction\" | \"cef\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\""
+          "\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"remove\" | \"json\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"csv\" | \"pipeline\" | \"fail\" | \"grok\" | \"reroute\" | \"convert\" | \"fingerprint\" | \"dissect\" | \"redact\" | \"network_direction\" | \"cef\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/ingest_pipeline_processors.ts",
         "lineNumber": 10,
@@ -7511,6 +7511,82 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID",
+        "description": [
+          "Discovery and significant event generation."
+        ],
+        "signature": [
+          "\"streams_sig_events_discovery\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID",
+        "description": [
+          "Knowledge Indicator feature extraction (KI extraction)."
+        ],
+        "signature": [
+          "\"streams_sig_events_ki_extraction\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID",
+        "description": [
+          "Knowledge Indicator query generation."
+        ],
+        "signature": [
+          "\"streams_sig_events_ki_query_generation\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID",
+        "description": [
+          "Parent feature for Streams Significant Events (Inference Feature Registry)."
+        ],
+        "signature": [
+          "\"streams_significant_events\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.StreamsOasDefinitions",
         "type": "Type",
         "tags": [],
@@ -8189,7 +8265,7 @@
             "section": "def-common.TaskStatus",
             "text": "TaskStatus"
           },
-          ".Completed | ",
+          ".Completed; } & TPayload) | ({ status: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
