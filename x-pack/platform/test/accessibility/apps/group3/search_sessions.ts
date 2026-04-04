@@ -115,7 +115,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       for (const { id } of SEARCH_SESSIONS) {
-        await kibanaServer.savedObjects.delete({ type: 'search-session', id }).catch(() => undefined);
+        await kibanaServer.savedObjects
+          .delete({ type: 'search-session', id })
+          .catch(() => undefined);
       }
     });
 
