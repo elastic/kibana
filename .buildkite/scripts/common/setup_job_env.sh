@@ -89,9 +89,6 @@ EOF
 
 # Set up misc keys
 {
-  KIBANA_CI_REPORTER_KEY=$(vault_get kibanamachine-reporter value)
-  export KIBANA_CI_REPORTER_KEY
-
   EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
   export EC_API_KEY
 
