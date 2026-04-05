@@ -113,7 +113,8 @@ export class ExplorationCache {
       total_entries: this.cache.size,
       expired_entries: entries.filter((e) => now > e.expiresAt).length,
       valid_entries: entries.filter((e) => now <= e.expiresAt).length,
-      oldest_entry_age_ms: entries.length > 0 ? Math.max(...entries.map((e) => now - e.createdAt)) : 0,
+      oldest_entry_age_ms:
+        entries.length > 0 ? Math.max(...entries.map((e) => now - e.createdAt)) : 0,
     };
   }
 }

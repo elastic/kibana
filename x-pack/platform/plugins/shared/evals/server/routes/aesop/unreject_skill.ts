@@ -64,7 +64,9 @@ export function registerUnrejectSkillRoute({ router, logger }: AESOPRouteDepende
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to restore skill: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to restore skill: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

@@ -56,8 +56,8 @@ export const ComparisonDashboard: React.FC = () => {
         <EuiText textAlign="center" color="subdued">
           <h3>Skill Comparison</h3>
           <p>
-            Compare two skill variants side-by-side. Select a comparison from the
-            AESOP skill review to see evaluator score deltas.
+            Compare two skill variants side-by-side. Select a comparison from the AESOP skill review
+            to see evaluator score deltas.
           </p>
         </EuiText>
       </EuiPageSection>

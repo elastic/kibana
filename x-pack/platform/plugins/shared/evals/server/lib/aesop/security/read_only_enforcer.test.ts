@@ -77,27 +77,25 @@ describe('ReadOnlyEnforcer', () => {
       });
 
       it('should block PATCH requests', () => {
-        expect(() => enforcer.validateReadOnlyRequest('PATCH', '/my-index')).toThrow(
-          SecurityError
-        );
+        expect(() => enforcer.validateReadOnlyRequest('PATCH', '/my-index')).toThrow(SecurityError);
       });
 
       it('should block POST /_create', () => {
-        expect(() =>
-          enforcer.validateReadOnlyRequest('POST', '/my-index/_create/123')
-        ).toThrow(SecurityError);
-        expect(() =>
-          enforcer.validateReadOnlyRequest('POST', '/my-index/_create/123')
-        ).toThrow('write operation');
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/my-index/_create/123')).toThrow(
+          SecurityError
+        );
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/my-index/_create/123')).toThrow(
+          'write operation'
+        );
       });
 
       it('should block POST /_update', () => {
-        expect(() =>
-          enforcer.validateReadOnlyRequest('POST', '/my-index/_update/123')
-        ).toThrow(SecurityError);
-        expect(() =>
-          enforcer.validateReadOnlyRequest('POST', '/my-index/_update/123')
-        ).toThrow('write operation');
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/my-index/_update/123')).toThrow(
+          SecurityError
+        );
+        expect(() => enforcer.validateReadOnlyRequest('POST', '/my-index/_update/123')).toThrow(
+          'write operation'
+        );
       });
 
       it('should block POST /_delete', () => {

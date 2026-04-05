@@ -47,7 +47,9 @@ export async function ensureAesopILMPolicy(
     logger.info(`[AESOP] Created ILM policy: ${AESOP_ILM_POLICY}`);
   } catch (error) {
     logger.warn(
-      `[AESOP] Failed to create ILM policy (non-fatal): ${error instanceof Error ? error.message : String(error)}`
+      `[AESOP] Failed to create ILM policy (non-fatal): ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
   }
 }

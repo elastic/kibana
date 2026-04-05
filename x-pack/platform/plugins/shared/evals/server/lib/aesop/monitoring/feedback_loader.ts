@@ -50,10 +50,7 @@ export interface FeedbackSummary {
 }
 
 export class FeedbackLoaderService {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private logger: Logger
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   /**
    * Load feedback from recent exploration cycles

@@ -11,7 +11,10 @@ import type { AESOPRouteDependencies } from './register_aesop_routes';
 
 const listProposedSkillsQuerySchema = z.object({
   status: z.enum(['all', 'pending_review', 'passed', 'failed']).optional().default('all'),
-  derived_from: z.enum(['all', 'patterns', 'relationships', 'conversations', 'llm', 'skill_improvement']).optional().default('all'),
+  derived_from: z
+    .enum(['all', 'patterns', 'relationships', 'conversations', 'llm', 'skill_improvement'])
+    .optional()
+    .default('all'),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0),
 });
@@ -101,7 +104,10 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
           return response.ok({
             body: {
               skills,
-              total: typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0,
+              total:
+                typeof result.hits.total === 'number'
+                  ? result.hits.total
+                  : result.hits.total?.value ?? 0,
               limit,
               offset,
             },

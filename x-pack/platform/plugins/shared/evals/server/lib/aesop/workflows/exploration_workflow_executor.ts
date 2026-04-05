@@ -581,7 +581,9 @@ export class ExplorationWorkflowExecutor {
               rationale: `Alert rule "${bucket.key}" fired ${bucket.doc_count} times in the last 7 days. Automating triage for this rule could save analyst time.`,
               sourceIndices: [schema.indexName],
               exampleQueries: [
-                `FROM ${schema.indexName} | WHERE kibana.alert.rule.name == "${escapeEsqlString(bucket.key)}" | SORT @timestamp DESC | LIMIT 20`,
+                `FROM ${schema.indexName} | WHERE kibana.alert.rule.name == "${escapeEsqlString(
+                  bucket.key
+                )}" | SORT @timestamp DESC | LIMIT 20`,
               ],
             });
           }
@@ -598,7 +600,9 @@ export class ExplorationWorkflowExecutor {
               rationale: `Event action "${bucket.key}" occurs ${bucket.doc_count} times per week. Understanding this pattern helps build proactive detection.`,
               sourceIndices: [schema.indexName],
               exampleQueries: [
-                `FROM ${schema.indexName} | WHERE event.action == "${escapeEsqlString(bucket.key)}" | STATS count = COUNT(*) BY host.name | SORT count DESC`,
+                `FROM ${schema.indexName} | WHERE event.action == "${escapeEsqlString(
+                  bucket.key
+                )}" | STATS count = COUNT(*) BY host.name | SORT count DESC`,
               ],
             });
           }
@@ -638,7 +642,9 @@ export class ExplorationWorkflowExecutor {
               rationale: `Data source "${bucket.key}" generates ${bucket.doc_count} events/week. A skill to monitor and correlate events from this source would improve coverage.`,
               sourceIndices: [schema.indexName],
               exampleQueries: [
-                `FROM ${schema.indexName} | WHERE event.dataset == "${escapeEsqlString(bucket.key)}" | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 hour)`,
+                `FROM ${schema.indexName} | WHERE event.dataset == "${escapeEsqlString(
+                  bucket.key
+                )}" | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 hour)`,
               ],
             });
           }
@@ -709,7 +715,9 @@ export class ExplorationWorkflowExecutor {
     // Agent-based skill discovery — agents have live ES tool access
     const agentBuilderStart = this.config.getAgentBuilderStart();
     if (!agentBuilderStart || !connectorId) {
-      this.logger.warn('[AESOP] Agent Builder or connector not available, skipping skill synthesis');
+      this.logger.warn(
+        '[AESOP] Agent Builder or connector not available, skipping skill synthesis'
+      );
       return;
     }
 
@@ -737,18 +745,40 @@ export class ExplorationWorkflowExecutor {
     let conversationContext: string | undefined;
     if (this.conversationInsights && this.conversationInsights.totalConversations > 0) {
       const ci = this.conversationInsights;
-      const parts = [`${ci.totalConversations} analyst conversations analyzed (${ci.totalMessages} messages).`];
+      const parts = [
+        `${ci.totalConversations} analyst conversations analyzed (${ci.totalMessages} messages).`,
+      ];
       if (ci.toolUsage.length > 0) {
-        parts.push(`Most used tools: ${ci.toolUsage.slice(0, 10).map((t) => `${t.tool} (${t.count}x)`).join(', ')}`);
+        parts.push(
+          `Most used tools: ${ci.toolUsage
+            .slice(0, 10)
+            .map((t) => `${t.tool} (${t.count}x)`)
+            .join(', ')}`
+        );
       }
       if (ci.esqlPatterns.length > 0) {
-        parts.push(`Common ES|QL patterns:\n${ci.esqlPatterns.slice(0, 8).map((q) => '```esql\n' + q + '\n```').join('\n')}`);
+        parts.push(
+          `Common ES|QL patterns:\n${ci.esqlPatterns
+            .slice(0, 8)
+            .map((q) => '```esql\n' + q + '\n```')
+            .join('\n')}`
+        );
       }
       if (ci.recurringFlows.length > 0) {
-        parts.push(`Recurring workflows: ${ci.recurringFlows.slice(0, 5).map((f) => f.steps.join(' → ') + ` (${f.frequency}x)`).join('; ')}`);
+        parts.push(
+          `Recurring workflows: ${ci.recurringFlows
+            .slice(0, 5)
+            .map((f) => f.steps.join(' → ') + ` (${f.frequency}x)`)
+            .join('; ')}`
+        );
       }
       if (ci.failureModes.length > 0) {
-        parts.push(`Common errors: ${ci.failureModes.slice(0, 5).map((f) => `${f.tool}: ${f.error.slice(0, 80)} (${f.count}x)`).join('; ')}`);
+        parts.push(
+          `Common errors: ${ci.failureModes
+            .slice(0, 5)
+            .map((f) => `${f.tool}: ${f.error.slice(0, 80)} (${f.count}x)`)
+            .join('; ')}`
+        );
       }
       conversationContext = parts.join('\n\n');
     }
@@ -772,9 +802,10 @@ export class ExplorationWorkflowExecutor {
           skillId: `skill-agent-${patternId}`,
           name: String(item.name || 'Untitled Skill'),
           description: String(item.description || ''),
-          confidence: item.confidence != null && !isNaN(Number(item.confidence))
-            ? Math.max(0, Math.min(1, Number(item.confidence)))
-            : 0.8,
+          confidence:
+            item.confidence != null && !isNaN(Number(item.confidence))
+              ? Math.max(0, Math.min(1, Number(item.confidence)))
+              : 0.8,
           markdown: String(item.markdown || ''),
           sourceIndices: indices,
           derivedFrom: 'llm',
@@ -782,7 +813,9 @@ export class ExplorationWorkflowExecutor {
           source: {
             patternId: `agent-${patternId}`,
             patternFrequency: 1,
-            rationale: String(item.source_rationale || item.rationale || 'Generated by AESOP agent with tool access'),
+            rationale: String(
+              item.source_rationale || item.rationale || 'Generated by AESOP agent with tool access'
+            ),
           },
         });
       }
@@ -926,19 +959,14 @@ export class ExplorationWorkflowExecutor {
    * validate → generate dataset → select evaluators → run eval sequence.
    * Each skill is processed independently; failures are isolated.
    */
-  private async runProactivePipeline(
-    agentBuilderStart: any,
-    connectorId: string
-  ): Promise<void> {
+  private async runProactivePipeline(agentBuilderStart: any, connectorId: string): Promise<void> {
     const { actionsClient } = this.config;
     if (!actionsClient) {
       this.logger.warn('[AESOP] No actions client — skipping proactive pipeline');
       return;
     }
 
-    this.logger.info(
-      `[AESOP] Starting proactive pipeline for ${this.skills.length} skills`
-    );
+    this.logger.info(`[AESOP] Starting proactive pipeline for ${this.skills.length} skills`);
 
     // Phase A: Validate all skills via agent
     if (agentBuilderStart) {
@@ -953,7 +981,9 @@ export class ExplorationWorkflowExecutor {
           await this.pipelineGenerateAndEval(skill, connectorId, actionsClient);
         } catch (error: unknown) {
           this.logger.warn(
-            `[AESOP] Pipeline failed for "${skill.name}": ${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Pipeline failed for "${skill.name}": ${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
         }
       }
@@ -965,10 +995,7 @@ export class ExplorationWorkflowExecutor {
   }
 
   /** Validate all skills using the agent-based validator */
-  private async pipelineValidate(
-    agentBuilderStart: any,
-    connectorId: string
-  ): Promise<void> {
+  private async pipelineValidate(agentBuilderStart: any, connectorId: string): Promise<void> {
     try {
       const { AgentOrchestrator } = await import('../agents/agent_orchestrator');
       const { ensureAesopAgents } = await import('../agents/ensure_agents');
@@ -1020,12 +1047,16 @@ export class ExplorationWorkflowExecutor {
               },
             });
             this.logger.info(
-              `[AESOP] Validated "${skill.name}": ${result.passed ? 'PASSED' : 'FAILED'} (score: ${result.score})`
+              `[AESOP] Validated "${skill.name}": ${result.passed ? 'PASSED' : 'FAILED'} (score: ${
+                result.score
+              })`
             );
           }
         } catch (error: unknown) {
           this.logger.warn(
-            `[AESOP] Validation failed for "${skill.name}": ${error instanceof Error ? error.message : String(error)}`
+            `[AESOP] Validation failed for "${skill.name}": ${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
           await this.esClient
             .update({
@@ -1045,7 +1076,9 @@ export class ExplorationWorkflowExecutor {
       }
     } catch (error: unknown) {
       this.logger.warn(
-        `[AESOP] Agent validation setup failed: ${error instanceof Error ? error.message : String(error)}`
+        `[AESOP] Agent validation setup failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
   }
@@ -1113,11 +1146,7 @@ export class ExplorationWorkflowExecutor {
 
     // Step 4: Run online eval
     const { SkillOnlineEvalService } = await import('../skill_online_eval_service');
-    const evalService = new SkillOnlineEvalService(
-      evaluatorRegistry,
-      datasetService,
-      this.logger
-    );
+    const evalService = new SkillOnlineEvalService(evaluatorRegistry, datasetService, this.logger);
 
     const evalResult = await evalService.runOnlineEval(
       {
@@ -1152,7 +1181,9 @@ export class ExplorationWorkflowExecutor {
     });
 
     this.logger.info(
-      `[AESOP] Eval complete for "${skill.name}": ${evalResult.examplesRan} examples, mean score ${(evalResult.summary.meanScore * 100).toFixed(0)}%, pass rate ${(evalResult.summary.passRate * 100).toFixed(0)}%`
+      `[AESOP] Eval complete for "${skill.name}": ${evalResult.examplesRan} examples, mean score ${(
+        evalResult.summary.meanScore * 100
+      ).toFixed(0)}%, pass rate ${(evalResult.summary.passRate * 100).toFixed(0)}%`
     );
   }
 
@@ -1352,7 +1383,10 @@ If no improvements are warranted, return an empty array: []`;
             skillId: `skill-improve-${patternId}`,
             name: String(item.name || `Improved: ${baseSkill.name}`),
             description: String(item.description || ''),
-            confidence: item.confidence != null && !isNaN(Number(item.confidence)) ? Math.max(0, Math.min(1, Number(item.confidence))) : 0.7,
+            confidence:
+              item.confidence != null && !isNaN(Number(item.confidence))
+                ? Math.max(0, Math.min(1, Number(item.confidence)))
+                : 0.7,
             markdown: String(item.markdown || ''),
             sourceIndices: this.schemas.map((s) => s.indexName),
             derivedFrom: 'skill_improvement' as const,
@@ -1384,8 +1418,6 @@ If no improvements are warranted, return an empty array: []`;
       return [];
     }
   }
-
-
 
   private buildLLMContext(): string {
     const sections: string[] = [];
@@ -1519,7 +1551,6 @@ If no improvements are warranted, return an empty array: []`;
       return [];
     }
   }
-
 
   // ---------------------------------------------------------------------------
   // Utilities

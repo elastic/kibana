@@ -41,10 +41,7 @@ interface DashboardPanel {
 }
 
 export class DashboardGeneratorService {
-  constructor(
-    private savedObjectsClient: SavedObjectsClientContract,
-    private logger: Logger
-  ) {}
+  constructor(private savedObjectsClient: SavedObjectsClientContract, private logger: Logger) {}
 
   /**
    * Creates the AESOP Performance Monitoring Dashboard
@@ -235,8 +232,7 @@ export class DashboardGeneratorService {
                         dataType: 'number',
                         operationType: 'formula',
                         params: {
-                          formula:
-                            'count(kql=\'status.code: "OK"\') / count() * 100',
+                          formula: 'count(kql=\'status.code: "OK"\') / count() * 100',
                           format: {
                             id: 'percent',
                             params: { decimals: 1 },
@@ -333,8 +329,7 @@ export class DashboardGeneratorService {
                         dataType: 'number',
                         operationType: 'formula',
                         params: {
-                          formula:
-                            'count(kql=\'review.status: "approved"\') / count() * 100',
+                          formula: 'count(kql=\'review.status: "approved"\') / count() * 100',
                           format: {
                             id: 'percent',
                             params: { decimals: 1 },
@@ -342,7 +337,12 @@ export class DashboardGeneratorService {
                         },
                       },
                     },
-                    columnOrder: ['cycle_number', 'total_skills', 'approved_skills', 'approval_rate'],
+                    columnOrder: [
+                      'cycle_number',
+                      'total_skills',
+                      'approved_skills',
+                      'approval_rate',
+                    ],
                     incompleteColumns: {},
                   },
                 },
@@ -495,8 +495,7 @@ export class DashboardGeneratorService {
                         dataType: 'number',
                         operationType: 'formula',
                         params: {
-                          formula:
-                            '(average(duration_ms) / 1000 / 60)',
+                          formula: '(average(duration_ms) / 1000 / 60)',
                           format: {
                             id: 'duration',
                             params: {

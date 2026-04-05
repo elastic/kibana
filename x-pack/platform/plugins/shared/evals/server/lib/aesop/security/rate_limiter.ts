@@ -49,10 +49,7 @@ export interface RateLimitResult {
 export class RateLimiterService {
   private attempts: Map<string, RateLimitState> = new Map();
 
-  constructor(
-    private limits: RateLimitConfig = DEFAULT_RATE_LIMITS,
-    private logger: Logger
-  ) {
+  constructor(private limits: RateLimitConfig = DEFAULT_RATE_LIMITS, private logger: Logger) {
     // Start cleanup job: remove stale entries every hour
     this.startCleanupJob();
   }
@@ -190,7 +187,10 @@ export class RateLimiterService {
    * Reset rate limit for a specific user and operation
    * (useful for testing or admin overrides)
    */
-  async resetRateLimit(userId: string, operation: 'exploration' | 'validation' | 'approval'): Promise<void> {
+  async resetRateLimit(
+    userId: string,
+    operation: 'exploration' | 'validation' | 'approval'
+  ): Promise<void> {
     const key = `${userId}:${operation}`;
     this.attempts.delete(key);
     this.logger.info(`[RateLimiter] Reset rate limit for ${key}`);

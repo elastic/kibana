@@ -91,11 +91,7 @@ describe('APMInstrumentationService', () => {
       esClient.index.mockRejectedValue(new Error('Elasticsearch down'));
       const mockOperation = jest.fn().mockResolvedValue('success');
 
-      const result = await apmService.instrumentWorkflowStep(
-        'test_step',
-        {},
-        mockOperation
-      );
+      const result = await apmService.instrumentWorkflowStep('test_step', {}, mockOperation);
 
       expect(result).toBe('success');
       expect(logger.error).toHaveBeenCalledWith(
@@ -164,9 +160,9 @@ describe('APMInstrumentationService', () => {
       const mockError = new Error('Agent timeout');
       const mockOperation = jest.fn().mockRejectedValue(mockError);
 
-      await expect(
-        apmService.instrumentAgentCall('test_agent', mockOperation)
-      ).rejects.toThrow('Agent timeout');
+      await expect(apmService.instrumentAgentCall('test_agent', mockOperation)).rejects.toThrow(
+        'Agent timeout'
+      );
 
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -262,10 +258,9 @@ describe('APMInstrumentationService', () => {
         })
       );
 
-      expect(logger.info).toHaveBeenCalledWith(
-        '[AESOP APM] ✅ Metrics index created',
-        { index: 'aesop_metrics' }
-      );
+      expect(logger.info).toHaveBeenCalledWith('[AESOP APM] ✅ Metrics index created', {
+        index: 'aesop_metrics',
+      });
     });
 
     it('should skip creation if index already exists', async () => {

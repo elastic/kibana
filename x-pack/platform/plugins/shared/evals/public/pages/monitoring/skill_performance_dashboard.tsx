@@ -47,9 +47,8 @@ export const SkillPerformanceDashboard: React.FC = () => {
         <EuiText textAlign="center" color="subdued">
           <h3>Skill Performance Monitoring</h3>
           <p>
-            Track skill quality over time with eval score trends, alerts, and
-            regression detection. Select a skill from the AESOP tab to view its
-            performance dashboard.
+            Track skill quality over time with eval score trends, alerts, and regression detection.
+            Select a skill from the AESOP tab to view its performance dashboard.
           </p>
         </EuiText>
       </EuiPageSection>

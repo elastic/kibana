@@ -35,9 +35,7 @@ export const useLLMConnectors = () => {
     queryFn: async (): Promise<LLMConnector[]> => {
       const connectors = await http.get<RawActionConnector[]>('/api/actions/connectors');
       return connectors
-        .filter(
-          (c) => AI_CONNECTOR_TYPES.has(c.connector_type_id) && !c.is_missing_secrets
-        )
+        .filter((c) => AI_CONNECTOR_TYPES.has(c.connector_type_id) && !c.is_missing_secrets)
         .map((c) => ({
           id: c.id,
           name: c.name,

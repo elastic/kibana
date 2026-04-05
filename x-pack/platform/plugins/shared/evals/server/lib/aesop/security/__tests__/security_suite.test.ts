@@ -117,7 +117,8 @@ describe('AESOP Security Test Suite', () => {
       });
 
       it('should handle multiple PII types', () => {
-        const data = 'User user@test.com at 192.168.1.1 with SSN 111-22-3333 and card 1234567890123456';
+        const data =
+          'User user@test.com at 192.168.1.1 with SSN 111-22-3333 and card 1234567890123456';
         const redacted = redactPII(data);
 
         expect(redacted).toContain('[EMAIL-REDACTED]');

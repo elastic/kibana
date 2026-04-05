@@ -199,9 +199,7 @@ describe('ChangeDetector', () => {
         },
       });
 
-      mockEsClient.cat.indices.mockResolvedValue([
-        { index: 'logs-app-2026.03.20' },
-      ] as any);
+      mockEsClient.cat.indices.mockResolvedValue([{ index: 'logs-app-2026.03.20' }] as any);
 
       mockEsClient.indices.getMapping.mockResolvedValue({
         'logs-app-2026.03.20': {
@@ -235,9 +233,7 @@ describe('ChangeDetector', () => {
         },
       });
 
-      mockEsClient.cat.indices.mockResolvedValue([
-        { index: 'logs-app-2026.03.20' },
-      ] as any);
+      mockEsClient.cat.indices.mockResolvedValue([{ index: 'logs-app-2026.03.20' }] as any);
 
       // Simulate mapping staying the same
       mockEsClient.indices.getMapping.mockResolvedValue({
@@ -269,9 +265,7 @@ describe('ChangeDetector', () => {
         },
       });
 
-      mockEsClient.cat.indices.mockResolvedValue([
-        { index: 'logs-app-2026.03.20' },
-      ] as any);
+      mockEsClient.cat.indices.mockResolvedValue([{ index: 'logs-app-2026.03.20' }] as any);
 
       mockEsClient.indices.getMapping.mockResolvedValue({
         'logs-app-2026.03.20': { mappings: {} },
@@ -305,9 +299,7 @@ describe('ChangeDetector', () => {
         },
       });
 
-      mockEsClient.cat.indices.mockResolvedValue([
-        { index: 'logs-app-2026.03.20' },
-      ] as any);
+      mockEsClient.cat.indices.mockResolvedValue([{ index: 'logs-app-2026.03.20' }] as any);
 
       // Both mapping AND doc count changed
       mockEsClient.indices.getMapping.mockResolvedValue({
@@ -335,9 +327,7 @@ describe('ChangeDetector', () => {
         discovered_indices: ['logs-app-2026.03.20', 'logs-app-2026.03.19', 'logs-old-2026.03.18'],
       });
 
-      mockEsClient.cat.indices.mockResolvedValue([
-        { index: 'logs-app-2026.03.20' },
-      ] as any);
+      mockEsClient.cat.indices.mockResolvedValue([{ index: 'logs-app-2026.03.20' }] as any);
 
       const result = await detector.detectRemovedIndices(['logs-*'], previousState);
 
@@ -432,9 +422,7 @@ describe('ChangeDetector', () => {
         last_run_timestamp: '2026-03-20T10:00:00.000Z',
       });
 
-      mockEsClient.cat.indices.mockResolvedValue([
-        { index: 'logs-static-2026.03.20' },
-      ] as any);
+      mockEsClient.cat.indices.mockResolvedValue([{ index: 'logs-static-2026.03.20' }] as any);
 
       mockEsClient.count.mockResolvedValue({ count: 0 } as any);
 
@@ -448,9 +436,7 @@ describe('ChangeDetector', () => {
         last_run_timestamp: '2026-03-20T10:00:00.000Z',
       });
 
-      mockEsClient.cat.indices.mockResolvedValue([
-        { index: 'logs-error-2026.03.20' },
-      ] as any);
+      mockEsClient.cat.indices.mockResolvedValue([{ index: 'logs-error-2026.03.20' }] as any);
 
       mockEsClient.count.mockRejectedValue(new Error('ES query failed'));
 

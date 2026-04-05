@@ -46,7 +46,9 @@ export function registerGetSkillDetailRoute({ router, logger }: AESOPRouteDepend
           });
 
           if (!doc._source) {
-            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found or source unavailable` },
+            });
           }
 
           return response.ok({
@@ -69,7 +71,9 @@ export function registerGetSkillDetailRoute({ router, logger }: AESOPRouteDepend
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to get skill: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to get skill: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

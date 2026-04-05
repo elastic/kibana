@@ -24,7 +24,10 @@ import type { AESOPRouteDependencies } from './register_aesop_routes';
 import { ALERTING_RULES } from '../../lib/aesop/monitoring/alerting_rules';
 
 const deployAlertingRulesRequestSchema = z.object({
-  rule_ids: z.array(z.string()).optional().describe('Specific rule IDs to deploy. If omitted, all rules are deployed.'),
+  rule_ids: z
+    .array(z.string())
+    .optional()
+    .describe('Specific rule IDs to deploy. If omitted, all rules are deployed.'),
   overwrite: z.boolean().default(true).describe('Whether to overwrite existing rules'),
   dry_run: z.boolean().default(false).describe('Preview rules without creating them'),
 });
@@ -83,7 +86,9 @@ export function registerDeployAlertingRulesRoute({ router, logger }: AESOPRouteD
         if (rulesToDeploy.length === 0) {
           return response.badRequest({
             body: {
-              message: `No matching rules found. Available rule IDs: ${ALERTING_RULES.map((r) => r.id).join(', ')}`,
+              message: `No matching rules found. Available rule IDs: ${ALERTING_RULES.map(
+                (r) => r.id
+              ).join(', ')}`,
             },
           });
         }
@@ -234,7 +239,9 @@ export function registerDeployAlertingRulesRoute({ router, logger }: AESOPRouteD
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to deploy alerting rules: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to deploy alerting rules: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

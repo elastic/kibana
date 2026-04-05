@@ -19,10 +19,7 @@ const generateDatasetBodySchema = z.object({
   count: z.coerce.number().min(5).max(50).optional().default(10),
 });
 
-export function registerGenerateEvalDatasetRoute({
-  router,
-  logger,
-}: AESOPRouteDependencies) {
+export function registerGenerateEvalDatasetRoute({ router, logger }: AESOPRouteDependencies) {
   router.versioned
     .post({
       path: '/internal/aesop/skills/{skillId}/generate-eval-dataset',
@@ -67,9 +64,7 @@ export function registerGenerateEvalDatasetRoute({
               body: { message: 'Actions plugin not available' },
             });
           }
-          const actionsClient = await actionsStart.getActionsClientWithRequest(
-            request
-          );
+          const actionsClient = await actionsStart.getActionsClientWithRequest(request);
 
           // Generate test cases via LLM
           const generator = new SkillDatasetGenerator(logger);
@@ -92,9 +87,7 @@ export function registerGenerateEvalDatasetRoute({
 
           // Upsert dataset (idempotent — same skill always writes to same dataset)
           const datasetName = `aesop-skill-eval:${skillId}`;
-          const datasetClient = evalsContext.datasetService.getClient(
-            esClient.asCurrentUser
-          );
+          const datasetClient = evalsContext.datasetService.getClient(esClient.asCurrentUser);
           const upsertResult = await datasetClient.upsert(
             datasetName,
             `Eval dataset for skill: ${skill.name}`,
@@ -116,8 +109,7 @@ export function registerGenerateEvalDatasetRoute({
             },
           });
         } catch (error) {
-          const msg =
-            error instanceof Error ? error.message : String(error);
+          const msg = error instanceof Error ? error.message : String(error);
           logger.error(`[AESOP] Failed to generate eval dataset: ${msg}`);
           return response.customError({
             statusCode: 500,

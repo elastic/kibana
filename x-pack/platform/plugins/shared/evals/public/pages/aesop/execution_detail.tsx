@@ -41,8 +41,6 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiDescriptionList,
-  EuiCodeBlock,
-  EuiAccordion,
 } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 import { useEvalsApi } from '../../hooks/use_evals_api';
@@ -115,7 +113,11 @@ export const ExecutionDetailPage = () => {
   const api = useEvalsApi();
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
-  const { data: execution, isLoading, error } = useQuery({
+  const {
+    data: execution,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['aesop', 'execution', executionId],
     queryFn: async () => {
       const response = await api.http.get(`/internal/aesop/exploration/executions/${executionId}`, {
@@ -185,7 +187,8 @@ export const ExecutionDetailPage = () => {
 
   // Convert workflow steps to EuiSteps format
   const workflowStepsFormatted = execution.workflow_steps.map((step, idx) => {
-    let status: 'complete' | 'incomplete' | 'warning' | 'danger' | 'loading' | 'disabled' = 'incomplete';
+    let status: 'complete' | 'incomplete' | 'warning' | 'danger' | 'loading' | 'disabled' =
+      'incomplete';
 
     if (step.status === 'completed') status = 'complete';
     else if (step.status === 'running') status = 'loading';
@@ -231,7 +234,8 @@ export const ExecutionDetailPage = () => {
       field: 'key_fields',
       name: 'Key Fields',
       width: '40%',
-      render: (fields: string[]) => fields.slice(0, 5).join(', ') + (fields.length > 5 ? '...' : ''),
+      render: (fields: string[]) =>
+        fields.slice(0, 5).join(', ') + (fields.length > 5 ? '...' : ''),
     },
   ];
 
@@ -312,10 +316,7 @@ export const ExecutionDetailPage = () => {
             description={`Execution ID: ${execution.execution_id}`}
             rightSideItems={[
               execution.trace_id ? (
-                <EuiButton
-                  iconType="apmTrace"
-                  onClick={() => setShowTraceFlyout(true)}
-                >
+                <EuiButton iconType="apmTrace" onClick={() => setShowTraceFlyout(true)}>
                   View O11y Trace
                 </EuiButton>
               ) : undefined,
@@ -401,7 +402,9 @@ export const ExecutionDetailPage = () => {
 
           {/* Configuration */}
           <EuiPanel>
-            <EuiTitle size="s"><h3>Configuration</h3></EuiTitle>
+            <EuiTitle size="s">
+              <h3>Configuration</h3>
+            </EuiTitle>
             <EuiSpacer size="m" />
             <EuiDescriptionList
               listItems={[
@@ -439,7 +442,9 @@ export const ExecutionDetailPage = () => {
 
           {/* Workflow Steps */}
           <EuiPanel>
-            <EuiTitle size="s"><h3>Workflow Execution Trace</h3></EuiTitle>
+            <EuiTitle size="s">
+              <h3>Workflow Execution Trace</h3>
+            </EuiTitle>
             <EuiSpacer size="m" />
             <EuiSteps steps={workflowStepsFormatted} />
           </EuiPanel>
@@ -450,7 +455,9 @@ export const ExecutionDetailPage = () => {
           {execution.schemas_discovered.length > 0 && (
             <>
               <EuiPanel>
-                <EuiTitle size="s"><h3>Discovered Schemas</h3></EuiTitle>
+                <EuiTitle size="s">
+                  <h3>Discovered Schemas</h3>
+                </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiBasicTable
                   items={execution.schemas_discovered}
@@ -466,7 +473,9 @@ export const ExecutionDetailPage = () => {
           {execution.patterns_identified.length > 0 && (
             <>
               <EuiPanel>
-                <EuiTitle size="s"><h3>Identified Patterns</h3></EuiTitle>
+                <EuiTitle size="s">
+                  <h3>Identified Patterns</h3>
+                </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiBasicTable
                   items={execution.patterns_identified}
@@ -482,7 +491,9 @@ export const ExecutionDetailPage = () => {
           {execution.skills_proposed.length > 0 && (
             <>
               <EuiPanel>
-                <EuiTitle size="s"><h3>Proposed Skills</h3></EuiTitle>
+                <EuiTitle size="s">
+                  <h3>Proposed Skills</h3>
+                </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiBasicTable
                   items={execution.skills_proposed}
@@ -498,7 +509,9 @@ export const ExecutionDetailPage = () => {
           {(execution.metrics.total_tokens_used || execution.metrics.total_cost_usd) && (
             <>
               <EuiPanel>
-                <EuiTitle size="s"><h3>Performance Metrics</h3></EuiTitle>
+                <EuiTitle size="s">
+                  <h3>Performance Metrics</h3>
+                </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup>
                   {execution.metrics.total_tokens_used && (
@@ -531,7 +544,9 @@ export const ExecutionDetailPage = () => {
       {showTraceFlyout && execution.trace_id && (
         <EuiFlyout onClose={() => setShowTraceFlyout(false)} size="l" ownFocus>
           <EuiFlyoutHeader>
-            <EuiTitle><h2>Observability Trace</h2></EuiTitle>
+            <EuiTitle>
+              <h2>Observability Trace</h2>
+            </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <TraceWaterfall traceId={execution.trace_id} />

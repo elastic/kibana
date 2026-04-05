@@ -96,9 +96,7 @@ export class ReadOnlyEnforcer {
         '/_split',
       ];
 
-      const isBlockedWrite = blockedWritePaths.some((blocked) =>
-        normalizedPath.includes(blocked)
-      );
+      const isBlockedWrite = blockedWritePaths.some((blocked) => normalizedPath.includes(blocked));
 
       if (isBlockedWrite) {
         throw new SecurityError(

@@ -9,7 +9,6 @@ import {
   WorkflowNotFoundError,
   WorkflowExecutionError,
   WorkflowTimeoutError,
-  SkillNotFoundError,
   SkillValidationNotPassedError,
   SkillAlreadyDeployedError,
 } from './aesop_errors';
@@ -60,12 +59,12 @@ describe('AESOP Error Classes', () => {
 
   describe('SkillValidationNotPassedError', () => {
     it('should include eval score in metadata', () => {
-      const error = new SkillValidationNotPassedError('test-skill', 0.65, 0.80);
+      const error = new SkillValidationNotPassedError('test-skill', 0.65, 0.8);
 
       expect(error.metadata).toEqual({
         skillId: 'test-skill',
         actualScore: 0.65,
-        requiredScore: 0.80,
+        requiredScore: 0.8,
       });
       expect(error.retryable).toBe(false);
     });

@@ -185,7 +185,9 @@ export class ExplorationStateService {
    * @param limit - Maximum number of states to return
    * @returns Array of historical states, newest first
    */
-  async getStateHistory(limit: number = 10): Promise<Array<ExplorationState & { saved_at: string }>> {
+  async getStateHistory(
+    limit: number = 10
+  ): Promise<Array<ExplorationState & { saved_at: string }>> {
     try {
       await this.ensureIndexExists();
 
@@ -202,7 +204,9 @@ export class ExplorationStateService {
         },
       });
 
-      const states = result.hits.hits.map((hit) => hit._source as ExplorationState & { saved_at: string });
+      const states = result.hits.hits.map(
+        (hit) => hit._source as ExplorationState & { saved_at: string }
+      );
 
       this.logger.debug(`[AESOP State] Retrieved ${states.length} historical states`);
 
@@ -245,7 +249,9 @@ export class ExplorationStateService {
     );
 
     const previousPatternIds = new Set(previous.discovered_patterns.map((p) => p.pattern_id));
-    const newPatterns = current.discovered_patterns.filter((p) => !previousPatternIds.has(p.pattern_id));
+    const newPatterns = current.discovered_patterns.filter(
+      (p) => !previousPatternIds.has(p.pattern_id)
+    );
 
     const previousSkillIds = new Set(previous.generated_skills);
     const newSkills = current.generated_skills.filter((skillId) => !previousSkillIds.has(skillId));
@@ -351,7 +357,9 @@ export class ExplorationStateService {
       });
 
       if (result.deleted && result.deleted > 0) {
-        this.logger.info(`[AESOP State] Cleaned up ${result.deleted} old states older than ${this.historyConfig.retentionDays} days`);
+        this.logger.info(
+          `[AESOP State] Cleaned up ${result.deleted} old states older than ${this.historyConfig.retentionDays} days`
+        );
       }
     } catch (error) {
       this.logger.warn(`[AESOP State] Failed to cleanup old states (non-critical)`, error);
@@ -396,6 +404,6 @@ export async function initializeExplorationStateIndex(
   logger: Logger
 ): Promise<void> {
   const service = new ExplorationStateService(esClient, logger);
-  await service['ensureIndexExists']();
+  await service.ensureIndexExists();
   logger.info(`[AESOP State] Exploration state persistence initialized`);
 }

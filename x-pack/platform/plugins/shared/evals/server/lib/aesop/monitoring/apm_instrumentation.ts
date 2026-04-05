@@ -52,10 +52,7 @@ interface AgentInvocationMetadata {
 export class APMInstrumentationService {
   private readonly metricsIndex = 'aesop_metrics';
 
-  constructor(
-    private esClient: ElasticsearchClient,
-    private logger: Logger
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   /**
    * Instrument workflow execution with custom APM spans
@@ -142,10 +139,7 @@ export class APMInstrumentationService {
    * @param operation - The async operation that invokes the agent
    * @returns The result of the agent invocation
    */
-  async instrumentAgentCall<T>(
-    agentId: string,
-    operation: () => Promise<T>
-  ): Promise<T> {
+  async instrumentAgentCall<T>(agentId: string, operation: () => Promise<T>): Promise<T> {
     const startTime = Date.now();
     const spanId = this.generateSpanId();
 
@@ -167,9 +161,7 @@ export class APMInstrumentationService {
       // Calculate cache hit rate if cached tokens available
       if (tokens.cached_tokens !== undefined && tokens.prompt_tokens !== undefined) {
         metadata.cache_hit_rate =
-          tokens.prompt_tokens > 0
-            ? (tokens.cached_tokens / tokens.prompt_tokens) * 100
-            : 0;
+          tokens.prompt_tokens > 0 ? (tokens.cached_tokens / tokens.prompt_tokens) * 100 : 0;
       }
 
       await this.recordSpan({

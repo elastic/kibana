@@ -29,7 +29,9 @@ export function sanitizeIndexPattern(pattern: string): string {
 
   // Validate format (alphanumeric, dots, hyphens, asterisks, underscores only)
   if (!/^[a-zA-Z0-9.*_-]+$/.test(sanitized)) {
-    throw new Error(`Invalid index pattern: ${pattern}. Only alphanumeric, dots, hyphens, asterisks, and underscores allowed.`);
+    throw new Error(
+      `Invalid index pattern: ${pattern}. Only alphanumeric, dots, hyphens, asterisks, and underscores allowed.`
+    );
   }
 
   return sanitized;
@@ -106,7 +108,9 @@ export function validateScopedIndices(indices: unknown): string[] {
   }
 
   if (indices.length > 50) {
-    throw new Error('scoped_indices cannot exceed 50 patterns. This prevents excessive exploration scope.');
+    throw new Error(
+      'scoped_indices cannot exceed 50 patterns. This prevents excessive exploration scope.'
+    );
   }
 
   return indices.map((idx) => {

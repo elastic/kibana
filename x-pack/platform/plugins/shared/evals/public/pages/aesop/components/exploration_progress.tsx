@@ -76,13 +76,16 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
   const api = useEvalsApi();
   const { euiTheme } = useEuiTheme();
 
-  const { data: progress, isLoading, error } = useQuery<WorkflowExecutionState>({
+  const {
+    data: progress,
+    isLoading,
+    error,
+  } = useQuery<WorkflowExecutionState>({
     queryKey: ['aesop', 'exploration', 'progress', executionId],
     queryFn: async () => {
-      const response = await api.http.get(
-        `/internal/aesop/exploration/${executionId}/progress`,
-        { version: '1' }
-      );
+      const response = await api.http.get(`/internal/aesop/exploration/${executionId}/progress`, {
+        version: '1',
+      });
       return response as WorkflowExecutionState;
     },
     refetchInterval: (data) => {
@@ -117,11 +120,7 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
 
   if (error) {
     return (
-      <EuiCallOut
-        title="Failed to load progress"
-        color="danger"
-        iconType="error"
-      >
+      <EuiCallOut title="Failed to load progress" color="danger" iconType="error">
         <p>{getErrorMessage(error)}</p>
       </EuiCallOut>
     );
@@ -181,10 +180,14 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
     const status = getPhaseStatus(phase);
     return {
       title: status.text,
-      status: phase.status === 'completed' ? ('complete' as const) :
-              phase.status === 'running' ? ('current' as const) :
-              phase.status === 'failed' ? ('danger' as const) :
-              ('incomplete' as const),
+      status:
+        phase.status === 'completed'
+          ? ('complete' as const)
+          : phase.status === 'running'
+          ? ('current' as const)
+          : phase.status === 'failed'
+          ? ('danger' as const)
+          : ('incomplete' as const),
       children: status.suffix && (
         <EuiText size="s" color="subdued">
           {status.suffix}
@@ -193,9 +196,12 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
     };
   });
 
-  const progressColor = progress.status === 'completed' ? 'success' :
-                        progress.status === 'failed' ? 'danger' :
-                        'primary';
+  const progressColor =
+    progress.status === 'completed'
+      ? 'success'
+      : progress.status === 'failed'
+      ? 'danger'
+      : 'primary';
 
   return (
     <EuiPanel
@@ -216,9 +222,7 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={progressColor}>
-            {progress.status.toUpperCase()}
-          </EuiBadge>
+          <EuiBadge color={progressColor}>{progress.status.toUpperCase()}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -278,9 +282,7 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
-            title={formatDuration(
-              new Date().getTime() - new Date(progress.started_at).getTime()
-            )}
+            title={formatDuration(new Date().getTime() - new Date(progress.started_at).getTime())}
             description="Elapsed Time"
             titleSize="s"
             textAlign="center"
@@ -292,11 +294,7 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
       {progress.status === 'failed' && progress.error_message && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            title="Exploration Failed"
-            color="danger"
-            iconType="error"
-          >
+          <EuiCallOut title="Exploration Failed" color="danger" iconType="error">
             <p>{progress.error_message}</p>
           </EuiCallOut>
         </>
@@ -306,15 +304,11 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
       {progress.status === 'completed' && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            title="Exploration Complete"
-            color="success"
-            iconType="check"
-          >
+          <EuiCallOut title="Exploration Complete" color="success" iconType="check">
             <p>
-              Total duration: {formatDuration(
-                new Date(progress.completed_at!).getTime() -
-                new Date(progress.started_at).getTime()
+              Total duration:{' '}
+              {formatDuration(
+                new Date(progress.completed_at!).getTime() - new Date(progress.started_at).getTime()
               )}
             </p>
           </EuiCallOut>

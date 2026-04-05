@@ -28,8 +28,7 @@ export const AESOP_AGENTS: AesopAgentDefinition[] = [
   {
     id: `${AESOP_AGENT_PREFIX}.schema-explorer`,
     name: 'AESOP Schema Explorer',
-    description:
-      'Discovers and profiles Elasticsearch index schemas for security operations data',
+    description: 'Discovers and profiles Elasticsearch index schemas for security operations data',
     toolIds: [AESOP_TOOLS.listIndices, AESOP_TOOLS.getMapping, AESOP_TOOLS.esql],
     instructions: `You are a data discovery agent for a Security Operations platform.
 

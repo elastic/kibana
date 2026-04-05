@@ -7,12 +7,7 @@
 
 import type { RetryConfig } from '../retry_logic';
 import { withRetry } from '../retry_logic';
-import {
-  AESOPError,
-  WorkflowExecutionError,
-  WorkflowTimeoutError,
-  AgentExecutionError,
-} from '../../errors/aesop_errors';
+import { AESOPError, WorkflowTimeoutError, AgentExecutionError } from '../../errors/aesop_errors';
 
 describe('Workflow Retry Logic', () => {
   let mockLogger: any;
@@ -86,9 +81,9 @@ describe('Workflow Retry Logic', () => {
     });
 
     it('should not retry non-retryable errors', async () => {
-      const operation = jest.fn().mockRejectedValue(
-        new AESOPError('Not retryable', 'TEST_ERROR', 400, false)
-      );
+      const operation = jest
+        .fn()
+        .mockRejectedValue(new AESOPError('Not retryable', 'TEST_ERROR', 400, false));
 
       await expect(
         withRetry(operation, {
@@ -186,9 +181,7 @@ describe('Workflow Retry Logic', () => {
   describe('retryable error detection', () => {
     it('should retry on AESOPError with retryable=true', async () => {
       const operation = jest.fn();
-      operation.mockRejectedValueOnce(
-        new AgentExecutionError('agent-1', 'Network timeout')
-      );
+      operation.mockRejectedValueOnce(new AgentExecutionError('agent-1', 'Network timeout'));
       operation.mockResolvedValueOnce('success');
 
       const promise = withRetry(operation, {
@@ -207,9 +200,9 @@ describe('Workflow Retry Logic', () => {
     });
 
     it('should not retry on AESOPError with retryable=false', async () => {
-      const operation = jest.fn().mockRejectedValue(
-        new AESOPError('Invalid input', 'VALIDATION_ERROR', 400, false)
-      );
+      const operation = jest
+        .fn()
+        .mockRejectedValue(new AESOPError('Invalid input', 'VALIDATION_ERROR', 400, false));
 
       await expect(
         withRetry(operation, {
@@ -224,9 +217,7 @@ describe('Workflow Retry Logic', () => {
 
     it('should retry on timeout errors', async () => {
       const operation = jest.fn();
-      operation.mockRejectedValueOnce(
-        new WorkflowTimeoutError('workflow-1', 300)
-      );
+      operation.mockRejectedValueOnce(new WorkflowTimeoutError('workflow-1', 300));
       operation.mockResolvedValueOnce('success');
 
       const promise = withRetry(operation, {
@@ -272,9 +263,7 @@ describe('Workflow Retry Logic', () => {
 
     it('should retry on 429 rate limit errors', async () => {
       const operation = jest.fn();
-      operation.mockRejectedValueOnce(
-        new Error('Request failed with status code 429')
-      );
+      operation.mockRejectedValueOnce(new Error('Request failed with status code 429'));
       operation.mockResolvedValueOnce('success');
 
       const promise = withRetry(operation, {

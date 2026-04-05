@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import { registerListProposedSkillsRoute } from './list_proposed_skills';
 
 describe('GET /internal/aesop/skills/proposed', () => {
@@ -24,7 +28,7 @@ describe('GET /internal/aesop/skills/proposed', () => {
           },
         },
       }),
-    }) as any;
+    } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -391,10 +395,7 @@ describe('GET /internal/aesop/skills/proposed', () => {
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({
-            sort: [
-              { 'metadata.created_at': { order: 'desc' } },
-              { confidence: { order: 'desc' } },
-            ],
+            sort: [{ 'metadata.created_at': { order: 'desc' } }, { confidence: { order: 'desc' } }],
           }),
         })
       );

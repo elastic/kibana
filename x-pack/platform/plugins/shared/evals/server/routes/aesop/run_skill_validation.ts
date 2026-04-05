@@ -49,7 +49,11 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         const { skillId } = request.params;
-        const { connector_id: connectorId, auto_converge: autoConverge, use_agent: useAgent } = request.body;
+        const {
+          connector_id: connectorId,
+          auto_converge: autoConverge,
+          use_agent: useAgent,
+        } = request.body;
 
         try {
           // 1. Load skill
@@ -60,7 +64,9 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
 
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
-            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found or source unavailable` },
+            });
           }
 
           logger.info('[AESOP] Starting LLM-based skill validation', {
@@ -100,9 +106,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                 const { AgentOrchestrator } = await import(
                   '../../lib/aesop/agents/agent_orchestrator'
                 );
-                const { ensureAesopAgents } = await import(
-                  '../../lib/aesop/agents/ensure_agents'
-                );
+                const { ensureAesopAgents } = await import('../../lib/aesop/agents/ensure_agents');
 
                 const agentRegistry = await agentBuilderStart.agents.getRegistry({ request });
                 await ensureAesopAgents(agentRegistry, logger);
@@ -150,11 +154,17 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                       skill_id: skillId,
                     });
                     // Fall back: mark as failed so user can retry with direct LLM
-                    await esClient.update({
-                      index: '.aesop-proposed-skills',
-                      id: skillId,
-                      body: { doc: { validation: { status: 'failed', error: 'Agent validation failed' } } },
-                    }).catch(() => {});
+                    await esClient
+                      .update({
+                        index: '.aesop-proposed-skills',
+                        id: skillId,
+                        body: {
+                          doc: {
+                            validation: { status: 'failed', error: 'Agent validation failed' },
+                          },
+                        },
+                      })
+                      .catch(() => {});
                   }
                 })();
 
@@ -169,7 +179,11 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                   },
                 });
               } catch (err) {
-                logger.warn(`[AESOP] Agent validation setup failed, falling back to direct LLM: ${err instanceof Error ? err.message : String(err)}`);
+                logger.warn(
+                  `[AESOP] Agent validation setup failed, falling back to direct LLM: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
+                );
                 // Fall through to direct LLM validation
               }
             }
@@ -177,9 +191,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
 
           if (autoConverge) {
             // 4a. Use convergence loop: iterate improve->validate until passing
-            const { ConvergenceLoop } = await import(
-              '../../lib/aesop/validation/convergence_loop'
-            );
+            const { ConvergenceLoop } = await import('../../lib/aesop/validation/convergence_loop');
 
             const loop = new ConvergenceLoop({
               threshold: 0.85,
@@ -205,13 +217,10 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                 });
               },
               onError: (error, iteration) => {
-                logger.error(
-                  `[AESOP] Convergence loop error at iteration ${iteration}`,
-                  {
-                    error: error instanceof Error ? error.message : String(error),
-                    skill_id: skillId,
-                  }
-                );
+                logger.error(`[AESOP] Convergence loop error at iteration ${iteration}`, {
+                  error: error instanceof Error ? error.message : String(error),
+                  skill_id: skillId,
+                });
               },
             });
 
@@ -288,14 +297,18 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
             })
             .catch((revertErr) => {
               logger.warn(
-                `[AESOP] Failed to revert skill status after validation setup failure: ${revertErr instanceof Error ? revertErr.message : String(revertErr)}`
+                `[AESOP] Failed to revert skill status after validation setup failure: ${
+                  revertErr instanceof Error ? revertErr.message : String(revertErr)
+                }`
               );
             });
 
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to start validation: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to start validation: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }
@@ -428,7 +441,9 @@ async function runLLMValidation({
       })
       .catch((markFailedErr) => {
         logger.warn(
-          `[AESOP] Failed to mark skill as failed: ${markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)}`
+          `[AESOP] Failed to mark skill as failed: ${
+            markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+          }`
         );
       });
   }
@@ -450,7 +465,9 @@ ${skill.markdown || skill.content || 'No content available'}
 - Confidence: ${(skill.confidence * 100).toFixed(1)}%
 - Pattern Frequency: ${skill.source?.pattern_frequency || 'unknown'} occurrences
 - Rationale: ${skill.source?.rationale || 'N/A'}
-- Source Indices: ${JSON.stringify(skill.source?.source_indices || skill.metadata?.source_indices || [])}
+- Source Indices: ${JSON.stringify(
+    skill.source?.source_indices || skill.metadata?.source_indices || []
+  )}
 
 ## Evaluation Criteria
 1. **Relevance** (0-1): Is this skill useful for security analysts?
@@ -498,7 +515,11 @@ interface LLMEvaluation {
 
 function parseLLMEvaluation(response: string): LLMEvaluation {
   const defaultCriteria: CriteriaScores = {
-    relevance: 0, completeness: 0, accuracy: 0, specificity: 0, safety: 0,
+    relevance: 0,
+    completeness: 0,
+    accuracy: 0,
+    specificity: 0,
+    safety: 0,
   };
 
   const defaults: LLMEvaluation = {
@@ -538,7 +559,7 @@ function parseLLMEvaluation(response: string): LLMEvaluation {
 
     return {
       score: Math.max(0, Math.min(1, Number(parsed.score) || 0.5)),
-      passed: parsed.passed ?? (Number(parsed.score) >= 0.85),
+      passed: parsed.passed ?? Number(parsed.score) >= 0.85,
       criteria,
       feedback: String(parsed.feedback || defaults.feedback),
       strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [],
@@ -775,7 +796,10 @@ function parseImprovedSkillResponse(response: string): {
   try {
     let cleaned = response;
     cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-    cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+    cleaned = cleaned
+      .replace(/```json?\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim();
     if (!cleaned.startsWith('{')) {
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
       if (jsonMatch) cleaned = jsonMatch[0];

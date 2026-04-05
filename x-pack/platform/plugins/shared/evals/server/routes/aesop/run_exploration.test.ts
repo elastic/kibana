@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import { registerRunExplorationRoute } from './run_exploration';
 import { discoverIndices } from '../../services/index_discovery';
 import { inferAnalystRole, describeRole } from '../../services/analyst_role_inference';
@@ -55,7 +59,7 @@ describe('POST /internal/aesop/exploration/run', () => {
           client: mockScopedClient(),
         },
       }),
-    }) as any;
+    } as any);
 
   const createMockRequest = (overrides: Record<string, any> = {}) => {
     const request = httpServerMock.createKibanaRequest({
@@ -200,10 +204,7 @@ describe('POST /internal/aesop/exploration/run', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(MockWorkflowStateTracker).toHaveBeenCalledWith(
-        scopedClient.asCurrentUser,
-        mockLogger
-      );
+      expect(MockWorkflowStateTracker).toHaveBeenCalledWith(scopedClient.asCurrentUser, mockLogger);
     });
 
     it('should pass esClient.asCurrentUser to APMInstrumentationService', async () => {
@@ -414,11 +415,7 @@ describe('POST /internal/aesop/exploration/run', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       // The handler does: request.auth.credentials?.username || 'anonymous'
-      expect(mockInferAnalystRole).toHaveBeenCalledWith(
-        expect.anything(),
-        mockLogger,
-        'anonymous'
-      );
+      expect(mockInferAnalystRole).toHaveBeenCalledWith(expect.anything(), mockLogger, 'anonymous');
     });
   });
 

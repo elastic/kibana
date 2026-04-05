@@ -52,9 +52,7 @@ describe('WorkflowStateTracker', () => {
           }),
         })
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Created index')
-      );
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Created index'));
     });
 
     it('should skip creation when the index already exists', async () => {
@@ -227,9 +225,7 @@ describe('WorkflowStateTracker', () => {
       error.meta = { statusCode: 503 };
       mockEsClient.get.mockRejectedValue(error);
 
-      await expect(tracker.getExecutionState('exec-012')).rejects.toThrow(
-        'Cluster unavailable'
-      );
+      await expect(tracker.getExecutionState('exec-012')).rejects.toThrow('Cluster unavailable');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         '[WorkflowStateTracker] Failed to get execution state',
@@ -441,7 +437,12 @@ describe('WorkflowStateTracker', () => {
         _source: {
           execution_id: 'exec-050',
           phases: [
-            { phase_number: 1, phase_name: 'Schema Discovery', status: 'running', started_at: '2026-03-23T10:00:00.000Z' },
+            {
+              phase_number: 1,
+              phase_name: 'Schema Discovery',
+              status: 'running',
+              started_at: '2026-03-23T10:00:00.000Z',
+            },
             { phase_number: 2, phase_name: 'Data Profiling', status: 'pending' },
             { phase_number: 3, phase_name: 'Relationship Analysis', status: 'pending' },
           ],

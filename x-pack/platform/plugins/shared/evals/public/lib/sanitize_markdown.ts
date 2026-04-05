@@ -64,10 +64,7 @@ const DEFAULT_ALLOWED_ATTRIBUTES = ['href', 'src', 'alt', 'title', 'class'];
  * - Links and images (with safe protocols)
  * - Code blocks
  */
-export function sanitizeSkillMarkdown(
-  markdown: string,
-  options: SanitizeOptions = {}
-): string {
+export function sanitizeSkillMarkdown(markdown: string, options: SanitizeOptions = {}): string {
   if (!markdown) {
     return '';
   }

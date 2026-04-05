@@ -129,8 +129,7 @@ export class WorkflowExecutorWithRecovery {
     const startTime = Date.now();
 
     const results: AgentResult[] = [];
-    const errorSummary: Array<{ agentId: string; error: string; circuitState?: CircuitState }> =
-      [];
+    const errorSummary: Array<{ agentId: string; error: string; circuitState?: CircuitState }> = [];
 
     this.logger.info('[WorkflowExecutor] Starting workflow execution', {
       total_agents: options.agents.length,
@@ -289,9 +288,7 @@ export class WorkflowExecutorWithRecovery {
   ): Promise<T> {
     return Promise.race([
       promise,
-      new Promise<T>((_, reject) =>
-        setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs)
-      ),
+      new Promise<T>((_, reject) => setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs)),
     ]);
   }
 

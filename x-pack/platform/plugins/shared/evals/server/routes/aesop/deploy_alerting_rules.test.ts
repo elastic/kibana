@@ -52,17 +52,21 @@ describe('Deploy Alerting Rules Route', () => {
         body: {},
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(200);
       expect(response.payload).toMatchObject({
         success: true,
         dry_run: false,
-        rule_ids: expect.arrayContaining(ALERTING_RULES.map(r => r.id)),
+        rule_ids: expect.arrayContaining(ALERTING_RULES.map((r) => r.id)),
       });
 
       // Should have called index template creation
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'aesop-alert-rules-template',
           index_patterns: ['.aesop-alert-rules'],
@@ -70,7 +74,9 @@ describe('Deploy Alerting Rules Route', () => {
       );
 
       // Should have indexed each rule
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).toHaveBeenCalledTimes(ALERTING_RULES.length);
+      expect(mockContext.core.elasticsearch.client.asCurrentUser.index).toHaveBeenCalledTimes(
+        ALERTING_RULES.length
+      );
     });
 
     it('should deploy only specified rules', async () => {
@@ -80,7 +86,9 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(200);
       expect(response.payload).toMatchObject({
@@ -99,7 +107,9 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(200);
       expect(response.payload).toMatchObject({
@@ -133,7 +143,9 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(200);
       expect(response.payload).toMatchObject({
@@ -158,7 +170,9 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(200);
       expect(response.payload).toMatchObject({
@@ -179,7 +193,9 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(400);
       expect(response.payload).toMatchObject({
@@ -195,14 +211,13 @@ describe('Deploy Alerting Rules Route', () => {
 
       const request = httpServerMock.createKibanaRequest({
         body: {
-          rule_ids: [
-            'aesop-exploration-failure-rate',
-            'aesop-workflow-timeout',
-          ],
+          rule_ids: ['aesop-exploration-failure-rate', 'aesop-workflow-timeout'],
         },
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(200);
       expect(response.payload).toMatchObject({
@@ -218,7 +233,9 @@ describe('Deploy Alerting Rules Route', () => {
     });
 
     it('should create index template if it does not exist', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.indices.existsIndexTemplate.mockResolvedValue(false);
+      mockContext.core.elasticsearch.client.asCurrentUser.indices.existsIndexTemplate.mockResolvedValue(
+        false
+      );
 
       const request = httpServerMock.createKibanaRequest({
         body: {
@@ -226,9 +243,13 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'aesop-alert-rules-template',
           index_patterns: ['.aesop-alert-rules'],
@@ -250,7 +271,9 @@ describe('Deploy Alerting Rules Route', () => {
     });
 
     it('should skip template creation if it already exists', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.indices.existsIndexTemplate.mockResolvedValue(true);
+      mockContext.core.elasticsearch.client.asCurrentUser.indices.existsIndexTemplate.mockResolvedValue(
+        true
+      );
 
       const request = httpServerMock.createKibanaRequest({
         body: {
@@ -258,9 +281,13 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
-      expect(mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.indices.putIndexTemplate
+      ).not.toHaveBeenCalled();
     });
 
     it('should include deployment metadata in indexed rules', async () => {
@@ -270,7 +297,9 @@ describe('Deploy Alerting Rules Route', () => {
         },
       });
 
-      await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(mockContext.core.elasticsearch.client.asCurrentUser.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -294,7 +323,9 @@ describe('Deploy Alerting Rules Route', () => {
         body: {},
       });
 
-      const response = await mockRouter.getRoutes()[0].handler(mockContext, request, httpServerMock.createResponseFactory());
+      const response = await mockRouter
+        .getRoutes()[0]
+        .handler(mockContext, request, httpServerMock.createResponseFactory());
 
       expect(response.status).toBe(500);
       expect(response.payload).toMatchObject({

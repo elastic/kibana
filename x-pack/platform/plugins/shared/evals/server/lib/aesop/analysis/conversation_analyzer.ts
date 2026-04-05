@@ -77,7 +77,8 @@ function toMessages(doc: ChatConversationDoc): ConversationMessage[] {
           toolCalls.push({ function: { name: step.tool_id } });
           // Tool result
           if (step.results) {
-            const resultStr = typeof step.results === 'string' ? step.results : JSON.stringify(step.results);
+            const resultStr =
+              typeof step.results === 'string' ? step.results : JSON.stringify(step.results);
             messages.push({ role: 'tool', name: step.tool_id, content: resultStr });
           }
         }

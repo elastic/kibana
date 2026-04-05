@@ -170,13 +170,10 @@ export class TraceNotFoundError extends AESOPError {
 
 export class EvaluationError extends AESOPError {
   constructor(skillId: string, cause: string) {
-    super(
-      `Evaluation failed for skill '${skillId}': ${cause}`,
-      'EVALUATION_FAILED',
-      500,
-      true,
-      { skill_id: skillId, cause }
-    );
+    super(`Evaluation failed for skill '${skillId}': ${cause}`, 'EVALUATION_FAILED', 500, true, {
+      skill_id: skillId,
+      cause,
+    });
     this.name = 'EvaluationError';
   }
 }
@@ -200,13 +197,10 @@ export class AgentNotFoundError extends AESOPError {
 
 export class AgentExecutionError extends AESOPError {
   constructor(agentId: string, cause: string) {
-    super(
-      `Agent '${agentId}' execution failed: ${cause}`,
-      'AGENT_EXECUTION_FAILED',
-      500,
-      true,
-      { agent_id: agentId, cause }
-    );
+    super(`Agent '${agentId}' execution failed: ${cause}`, 'AGENT_EXECUTION_FAILED', 500, true, {
+      agent_id: agentId,
+      cause,
+    });
     this.name = 'AgentExecutionError';
   }
 }

@@ -97,9 +97,7 @@ describe('DashboardGeneratorService', () => {
       const createCall = mockSavedObjectsClient.create.mock.calls[0];
       const [, attributes] = createCall;
 
-      expect(attributes.title).toBe(
-        'AESOP: Autonomous Skill Discovery - Performance Monitoring'
-      );
+      expect(attributes.title).toBe('AESOP: Autonomous Skill Discovery - Performance Monitoring');
       expect(attributes.description).toContain('Operational metrics');
       expect(attributes.timeRestore).toBe(true);
       expect(attributes.timeFrom).toBe('now-7d');
@@ -199,7 +197,9 @@ describe('DashboardGeneratorService', () => {
       const panels = JSON.parse(attributes.panelsJSON);
 
       const approvalRatePanel = panels[2];
-      expect(approvalRatePanel.embeddableConfig.title).toContain('Approval Rate by Exploration Cycle');
+      expect(approvalRatePanel.embeddableConfig.title).toContain(
+        'Approval Rate by Exploration Cycle'
+      );
       expect(approvalRatePanel.gridData).toEqual({ x: 0, y: 12, w: 48, h: 15 });
     });
 

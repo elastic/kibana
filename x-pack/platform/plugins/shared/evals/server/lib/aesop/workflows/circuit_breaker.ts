@@ -98,10 +98,7 @@ export class CircuitBreaker {
   private circuits: Map<string, CircuitInfo> = new Map();
   private options: CircuitBreakerOptions;
 
-  constructor(
-    private readonly logger: Logger,
-    options: Partial<CircuitBreakerOptions> = {}
-  ) {
+  constructor(private readonly logger: Logger, options: Partial<CircuitBreakerOptions> = {}) {
     this.options = {
       ...DEFAULT_CIRCUIT_BREAKER_OPTIONS,
       ...options,

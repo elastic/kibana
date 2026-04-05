@@ -65,7 +65,12 @@ const WORKFLOW_EXECUTIONS_INDEX = '.aesop-workflow-executions';
 const SELF_EXPLORATION_PHASES = [
   { phase_number: 1, phase_name: 'Schema Discovery', expected_steps: 4, avg_duration_ms: 120000 },
   { phase_number: 2, phase_name: 'Data Profiling', expected_steps: 3, avg_duration_ms: 180000 },
-  { phase_number: 3, phase_name: 'Relationship Analysis', expected_steps: 4, avg_duration_ms: 300000 },
+  {
+    phase_number: 3,
+    phase_name: 'Relationship Analysis',
+    expected_steps: 4,
+    avg_duration_ms: 300000,
+  },
   { phase_number: 4, phase_name: 'Pattern Mining', expected_steps: 3, avg_duration_ms: 240000 },
   { phase_number: 5, phase_name: 'Skill Synthesis', expected_steps: 4, avg_duration_ms: 180000 },
 ];
@@ -73,10 +78,7 @@ const SELF_EXPLORATION_PHASES = [
 const TOTAL_STEPS = SELF_EXPLORATION_PHASES.reduce((sum, p) => sum + p.expected_steps, 0);
 
 export class WorkflowStateTracker {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   /**
    * Ensure the workflow executions index exists
@@ -136,10 +138,7 @@ export class WorkflowStateTracker {
   /**
    * Initialize a new workflow execution
    */
-  async initializeExecution(
-    executionId: string,
-    workflowName: string
-  ): Promise<void> {
+  async initializeExecution(executionId: string, workflowName: string): Promise<void> {
     await this.ensureIndexExists();
 
     const now = new Date().toISOString();
@@ -285,9 +284,12 @@ export class WorkflowStateTracker {
         refresh: 'wait_for',
       });
 
-      this.logger.debug(`[WorkflowStateTracker] Completed phase ${phaseNumber} for execution: ${executionId}`, {
-        duration_ms: durationMs,
-      });
+      this.logger.debug(
+        `[WorkflowStateTracker] Completed phase ${phaseNumber} for execution: ${executionId}`,
+        {
+          duration_ms: durationMs,
+        }
+      );
     } catch (error) {
       this.logger.error('[WorkflowStateTracker] Failed to complete phase', {
         execution_id: executionId,
@@ -420,11 +422,17 @@ export class WorkflowStateTracker {
 
     // If we have actual duration data from completed phases, use it
     const completedPhases = state.phases.filter((p) => p.status === 'completed');
-    const actualCompletedDuration = completedPhases.reduce((sum, p) => sum + (p.duration_ms || 0), 0);
+    const actualCompletedDuration = completedPhases.reduce(
+      (sum, p) => sum + (p.duration_ms || 0),
+      0
+    );
 
     // Estimate remaining phases based on average durations
     const remainingPhases = SELF_EXPLORATION_PHASES.filter((p) => p.phase_number > currentPhase);
-    const estimatedRemainingDuration = remainingPhases.reduce((sum, p) => sum + p.avg_duration_ms, 0);
+    const estimatedRemainingDuration = remainingPhases.reduce(
+      (sum, p) => sum + p.avg_duration_ms,
+      0
+    );
 
     // Estimate current phase remaining time
     const currentPhaseConfig = SELF_EXPLORATION_PHASES.find((p) => p.phase_number === currentPhase);

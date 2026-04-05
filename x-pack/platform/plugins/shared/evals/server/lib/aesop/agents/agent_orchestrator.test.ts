@@ -46,13 +46,14 @@ describe('AgentOrchestrator', () => {
       expect(result).toBe('Hello world');
       expect(agentBuilder.execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({
-        request: mockRequest,
-        params: expect.objectContaining({
-          agentId: 'test-agent',
-          connectorId: 'test-connector',
-          nextInput: { message: 'test message' },
-        }),
-      }));
+          request: mockRequest,
+          params: expect.objectContaining({
+            agentId: 'test-agent',
+            connectorId: 'test-connector',
+            nextInput: { message: 'test message' },
+          }),
+        })
+      );
     });
 
     it('extracts response from conversationUpdate event', async () => {

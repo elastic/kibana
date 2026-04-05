@@ -6,9 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
-import type { EvalsRequestHandlerContext } from '../../types';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 
 /**
@@ -29,7 +26,8 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
       security: {
         authz: {
           enabled: false,
-          reason: 'Internal route for AESOP exploration execution details, RBAC handled by parent plugin',
+          reason:
+            'Internal route for AESOP exploration execution details, RBAC handled by parent plugin',
         },
       },
     })
@@ -94,7 +92,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
               index: '.aesop-discovered-relationships',
               query: {
                 term: {
-                  'exploration_execution_id': executionId,
+                  exploration_execution_id: executionId,
                 },
               },
               size: 100,
@@ -111,7 +109,7 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
               index: '.aesop-discovered-patterns',
               query: {
                 term: {
-                  'exploration_execution_id': executionId,
+                  exploration_execution_id: executionId,
                 },
               },
               size: 100,
@@ -169,8 +167,12 @@ export function registerGetExecutionDetailRoute({ router, logger }: AESOPRouteDe
                 ? new Date(executionState.completed_at).getTime() -
                   new Date(executionState.started_at).getTime()
                 : undefined,
-              indices_explored: executionState.metrics?.indices_explored || executionState.config?.scoped_indices?.length || 0,
-              relationships_discovered: executionState.metrics?.relationships_discovered || discoveredRelationships.length,
+              indices_explored:
+                executionState.metrics?.indices_explored ||
+                executionState.config?.scoped_indices?.length ||
+                0,
+              relationships_discovered:
+                executionState.metrics?.relationships_discovered || discoveredRelationships.length,
               patterns_found: executionState.metrics?.patterns_found || discoveredPatterns.length,
               skills_generated: executionState.metrics?.skills_generated || proposedSkills.length,
               total_tokens_used: executionState.metrics?.total_tokens,

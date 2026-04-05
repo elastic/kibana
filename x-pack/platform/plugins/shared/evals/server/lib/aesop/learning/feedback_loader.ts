@@ -147,13 +147,10 @@ export class FeedbackLoaderService {
     }
 
     // Count rejection reasons
-    const reasonCounts = feedback.reduce(
-      (acc, f) => {
-        acc[f.rejection_reason] = (acc[f.rejection_reason] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+    const reasonCounts = feedback.reduce((acc, f) => {
+      acc[f.rejection_reason] = (acc[f.rejection_reason] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
     // If >3 "poor_quality" rejections, increase thresholds
     if ((reasonCounts.poor_quality || 0) > 3) {
@@ -188,13 +185,10 @@ export class FeedbackLoaderService {
       );
 
       // Find most common keywords
-      const keywordCounts = keywords.reduce(
-        (acc, keyword) => {
-          acc[keyword] = (acc[keyword] || 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
+      const keywordCounts = keywords.reduce((acc, keyword) => {
+        acc[keyword] = (acc[keyword] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
 
       signals.excludePatterns = Object.entries(keywordCounts)
         .filter(([_, count]) => count >= 2)

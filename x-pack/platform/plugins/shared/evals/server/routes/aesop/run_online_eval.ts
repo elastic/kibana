@@ -41,8 +41,7 @@ export function registerRunOnlineEvalRoute({
       },
       async (context, request, response) => {
         const { skillId } = request.params;
-        const { connector_id: connectorId, evaluator_names: evaluatorNames } =
-          request.body;
+        const { connector_id: connectorId, evaluator_names: evaluatorNames } = request.body;
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client;
         // Capture the scoped client reference for use in fire-and-forget callbacks.
@@ -70,8 +69,7 @@ export function registerRunOnlineEvalRoute({
               body: { message: 'Actions plugin not available' },
             });
           }
-          const actionsClient =
-            await actionsStart.getActionsClientWithRequest(request);
+          const actionsClient = await actionsStart.getActionsClientWithRequest(request);
 
           if (!skillOnlineEvalService) {
             return response.badRequest({
@@ -94,7 +92,9 @@ export function registerRunOnlineEvalRoute({
           if (resolvedEvaluatorNames?.length && skillOnlineEvalService.evaluatorRegistry) {
             const registry = skillOnlineEvalService.evaluatorRegistry;
             const before = resolvedEvaluatorNames.length;
-            resolvedEvaluatorNames = resolvedEvaluatorNames.filter((name: string) => registry.has(name));
+            resolvedEvaluatorNames = resolvedEvaluatorNames.filter((name: string) =>
+              registry.has(name)
+            );
             if (resolvedEvaluatorNames.length < before) {
               logger.info(
                 `[AESOP] Filtered evaluators: ${before} requested, ${resolvedEvaluatorNames.length} available in registry`
@@ -104,7 +104,10 @@ export function registerRunOnlineEvalRoute({
 
           if (!resolvedEvaluatorNames?.length) {
             return response.badRequest({
-              body: { message: 'No valid evaluators available. Save proposed evaluators to the catalog first.' },
+              body: {
+                message:
+                  'No valid evaluators available. Save proposed evaluators to the catalog first.',
+              },
             });
           }
 
@@ -160,7 +163,9 @@ export function registerRunOnlineEvalRoute({
                   },
                 },
               });
-              logger.info(`[AESOP] Online eval completed for "${skill.name}": ${result.examplesRan} examples`);
+              logger.info(
+                `[AESOP] Online eval completed for "${skill.name}": ${result.examplesRan} examples`
+              );
             })
             .catch(async (err: unknown) => {
               const msg = err instanceof Error ? err.message : String(err);
@@ -191,8 +196,7 @@ export function registerRunOnlineEvalRoute({
             },
           });
         } catch (error) {
-          const msg =
-            error instanceof Error ? error.message : String(error);
+          const msg = error instanceof Error ? error.message : String(error);
           logger.error(`[AESOP] Online eval failed: ${msg}`);
           return response.customError({
             statusCode: 500,

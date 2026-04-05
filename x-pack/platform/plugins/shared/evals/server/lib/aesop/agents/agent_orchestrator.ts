@@ -59,8 +59,7 @@ export class AgentOrchestrator {
       const response = await lastValueFrom(
         events$.pipe(
           filter(
-            (event: any) =>
-              event.type === 'messageComplete' || event.type === 'conversationUpdate'
+            (event: any) => event.type === 'messageComplete' || event.type === 'conversationUpdate'
           ),
           map((event: any) => {
             if (event.type === 'messageComplete' && event.message?.content) {
@@ -68,9 +67,7 @@ export class AgentOrchestrator {
             }
             if (event.type === 'conversationUpdate') {
               const messages = event.conversation?.messages || [];
-              const lastAssistant = messages
-                .filter((m: any) => m.role === 'assistant')
-                .pop();
+              const lastAssistant = messages.filter((m: any) => m.role === 'assistant').pop();
               return lastAssistant?.content || '';
             }
             return '';
@@ -79,7 +76,9 @@ export class AgentOrchestrator {
           timeout(this.timeoutMs),
           catchError((err) => {
             logger.error(
-              `[AESOP] Agent ${agentId} stream error: ${err instanceof Error ? err.message : String(err)}`
+              `[AESOP] Agent ${agentId} stream error: ${
+                err instanceof Error ? err.message : String(err)
+              }`
             );
             return of('');
           })
@@ -114,27 +113,34 @@ export class AgentOrchestrator {
     if (hasIndices) {
       // Phase 1-2: Schema Explorer
       await progress('Schema Discovery', 1, 3, 'Agent exploring index schemas with tools...');
-      schemaResponse = await this.executeAgent(
-        'aesop.schema-explorer',
-        `Explore and profile these indices: ${context.indexNames.join(', ')}. Focus on security-relevant data for a ${context.analystRole}.`
-      ) || '';
+      schemaResponse =
+        (await this.executeAgent(
+          'aesop.schema-explorer',
+          `Explore and profile these indices: ${context.indexNames.join(
+            ', '
+          )}. Focus on security-relevant data for a ${context.analystRole}.`
+        )) || '';
 
       // Phase 3-4: Pattern Miner
       await progress('Pattern Mining', 2, 3, 'Agent mining patterns with ES|QL queries...');
-      patternResponse = await this.executeAgent(
-        'aesop.pattern-miner',
-        `Find automation-worthy patterns in this data. Schema context:\n${schemaResponse}`
-      ) || '';
+      patternResponse =
+        (await this.executeAgent(
+          'aesop.pattern-miner',
+          `Find automation-worthy patterns in this data. Schema context:\n${schemaResponse}`
+        )) || '';
     }
 
     // Build combined context for skill generation
     const contextParts: string[] = [];
     if (schemaResponse) contextParts.push(`## Index Schemas\n${schemaResponse}`);
     if (patternResponse) contextParts.push(`## Discovered Patterns\n${patternResponse}`);
-    if (context.conversationContext) contextParts.push(`## Agent Builder Conversation Analysis\n${context.conversationContext}`);
+    if (context.conversationContext)
+      contextParts.push(`## Agent Builder Conversation Analysis\n${context.conversationContext}`);
 
     if (contextParts.length === 0) {
-      logger.warn('[AESOP] No context available for skill generation (no indices, no conversations)');
+      logger.warn(
+        '[AESOP] No context available for skill generation (no indices, no conversations)'
+      );
       return [];
     }
 
@@ -142,7 +148,9 @@ export class AgentOrchestrator {
     await progress('Skill Generation', 3, 3, 'Agent generating skills from discovered patterns...');
     const skillResponse = await this.executeAgent(
       'aesop.skill-generator',
-      `Generate Agent Builder skills based on the following discovery context. Each skill should be a reusable automation that a security analyst would benefit from.\n\n${contextParts.join('\n\n')}`
+      `Generate Agent Builder skills based on the following discovery context. Each skill should be a reusable automation that a security analyst would benefit from.\n\n${contextParts.join(
+        '\n\n'
+      )}`
     );
 
     if (!skillResponse) {
@@ -177,7 +185,10 @@ export class AgentOrchestrator {
     try {
       let cleaned = response;
       cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+      cleaned = cleaned
+        .replace(/```json?\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim();
       const match = cleaned.match(/\[[\s\S]*\]/);
       return match ? JSON.parse(match[0]) : [];
     } catch {
@@ -190,7 +201,10 @@ export class AgentOrchestrator {
     try {
       let cleaned = response;
       cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+      cleaned = cleaned
+        .replace(/```json?\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim();
       if (!cleaned.startsWith('{')) {
         const match = cleaned.match(/\{[\s\S]*\}/);
         if (match) cleaned = match[0];

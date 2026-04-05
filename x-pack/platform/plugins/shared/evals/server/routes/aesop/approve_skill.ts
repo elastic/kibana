@@ -22,9 +22,15 @@ const approveSkillBodySchema = z.object({
 
 // Map skill content keywords to Agent Builder tool IDs
 const TOOL_KEYWORD_MAP: Array<{ keywords: string[]; toolId: string }> = [
-  { keywords: ['esql', 'es|ql', 'FROM ', 'STATS ', 'WHERE '], toolId: 'platform.core.execute_esql' },
+  {
+    keywords: ['esql', 'es|ql', 'FROM ', 'STATS ', 'WHERE '],
+    toolId: 'platform.core.execute_esql',
+  },
   { keywords: ['esql', 'es|ql', 'query'], toolId: 'platform.core.generate_esql' },
-  { keywords: ['visualization', 'chart', 'dashboard', 'graph'], toolId: 'platform.core.create_visualization' },
+  {
+    keywords: ['visualization', 'chart', 'dashboard', 'graph'],
+    toolId: 'platform.core.create_visualization',
+  },
   { keywords: ['alert', 'rule', 'detection'], toolId: 'security.create_detection_rule' },
 ];
 
@@ -36,7 +42,10 @@ const SKILL_NAME_RE = /^[a-zA-Z0-9](?:[a-zA-Z0-9 _-]*[a-zA-Z0-9])?$/;
 const MAX_TOOLS = 5;
 
 export function sanitizeSkillId(raw: string): string {
-  let id = raw.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
+  let id = raw
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '-')
+    .replace(/-+/g, '-');
   if (id.length > SKILL_ID_MAX) id = id.slice(0, SKILL_ID_MAX);
   id = id.replace(/^[^a-z0-9]+/, '').replace(/[^a-z0-9]+$/, '');
   if (!id || !SKILL_ID_RE.test(id)) {
@@ -101,22 +110,25 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
 
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
-            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found or source unavailable` },
+            });
           }
 
           // 2. Validate skill passed evaluations
           if (skill.validation?.status !== 'passed') {
             return response.badRequest({
               body: {
-                message: `Skill must pass validation before approval. Current status: ${skill.validation?.status || 'pending'}`,
+                message: `Skill must pass validation before approval. Current status: ${
+                  skill.validation?.status || 'pending'
+                }`,
               },
             });
           }
 
           // 3. Determine whether to update an existing skill or create a new one
-          const isUpdateExisting = update_existing &&
-            skill.base_skill?.id &&
-            skill.base_skill?.readonly === false;
+          const isUpdateExisting =
+            update_existing && skill.base_skill?.id && skill.base_skill?.readonly === false;
 
           // 4. Generate a valid skill ID for Agent Builder
           const agentBuilderSkillId = isUpdateExisting
@@ -194,16 +206,18 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
             }
           } catch (deployError) {
             // Rollback: revert deployment status on Agent Builder failure
-            await esClient.update({
-              index: '.aesop-proposed-skills',
-              id: skillId,
-              body: {
-                doc: {
-                  review: { status: 'pending_review' },
-                  deployment: { deployed: false },
+            await esClient
+              .update({
+                index: '.aesop-proposed-skills',
+                id: skillId,
+                body: {
+                  doc: {
+                    review: { status: 'pending_review' },
+                    deployment: { deployed: false },
+                  },
                 },
-              },
-            }).catch(() => {});
+              })
+              .catch(() => {});
             throw deployError;
           }
 
@@ -246,7 +260,9 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to approve skill: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to approve skill: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

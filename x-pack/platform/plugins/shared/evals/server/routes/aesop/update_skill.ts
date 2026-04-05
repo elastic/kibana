@@ -98,7 +98,9 @@ export function registerUpdateSkillRoute({ router, logger }: AESOPRouteDependenc
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to update skill: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to update skill: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

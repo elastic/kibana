@@ -225,7 +225,11 @@ export class SkillVersioningService {
   /**
    * Compares two versions and returns diff
    */
-  async compareVersions(skillId: string, version1: number, version2: number): Promise<{
+  async compareVersions(
+    skillId: string,
+    version1: number,
+    version2: number
+  ): Promise<{
     version1: SkillVersion;
     version2: SkillVersion;
     diff: string;

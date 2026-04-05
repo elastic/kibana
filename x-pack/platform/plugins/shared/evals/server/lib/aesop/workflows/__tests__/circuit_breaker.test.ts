@@ -6,7 +6,6 @@
  */
 
 import { CircuitBreaker, CircuitBreakerState } from '../circuit_breaker';
-import { AgentExecutionError } from '../../errors/aesop_errors';
 
 describe('Workflow Circuit Breaker', () => {
   let circuitBreaker: CircuitBreaker;
@@ -147,7 +146,10 @@ describe('Workflow Circuit Breaker', () => {
 
       // Failed execution should reopen circuit
       try {
-        await circuitBreaker.execute('agent', jest.fn().mockRejectedValue(new Error('Still broken')));
+        await circuitBreaker.execute(
+          'agent',
+          jest.fn().mockRejectedValue(new Error('Still broken'))
+        );
       } catch (e) {
         // Expected
       }
@@ -334,7 +336,10 @@ describe('Workflow Circuit Breaker', () => {
       expect(agent1).not.toHaveBeenCalled();
 
       // Other agents should still work
-      const agent2Result = await circuitBreaker.execute('agent-2', jest.fn().mockResolvedValue('works'));
+      const agent2Result = await circuitBreaker.execute(
+        'agent-2',
+        jest.fn().mockResolvedValue('works')
+      );
       expect(agent2Result).toBe('works');
     });
   });
@@ -427,7 +432,10 @@ describe('Workflow Circuit Breaker', () => {
 
     it('should log execution failures', async () => {
       try {
-        await circuitBreaker.execute('test-agent', jest.fn().mockRejectedValue(new Error('Test error')));
+        await circuitBreaker.execute(
+          'test-agent',
+          jest.fn().mockRejectedValue(new Error('Test error'))
+        );
       } catch (e) {
         // Expected
       }

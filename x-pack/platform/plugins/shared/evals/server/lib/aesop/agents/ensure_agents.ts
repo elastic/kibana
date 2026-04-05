@@ -39,7 +39,9 @@ export async function ensureAesopAgents(
       results.set(agentDef.id, true);
     } catch (error) {
       logger.warn(
-        `[AESOP] Failed to create agent ${agentDef.id}: ${error instanceof Error ? error.message : String(error)}`
+        `[AESOP] Failed to create agent ${agentDef.id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
       results.set(agentDef.id, false);
     }

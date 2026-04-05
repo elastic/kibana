@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  validateSkillContent,
-  suggestCorrectIndexName,
-} from './skill_content_validator';
+import { validateSkillContent, suggestCorrectIndexName } from './skill_content_validator';
 
 describe('validateSkillContent', () => {
   it('passes valid skill content using data stream names', () => {
@@ -43,8 +40,7 @@ describe('validateSkillContent', () => {
   });
 
   it('rejects skill referencing .ds- data stream backing index', () => {
-    const content =
-      'FROM .ds-logs-endpoint.events.process-default-2024.01.01-000001 | LIMIT 10';
+    const content = 'FROM .ds-logs-endpoint.events.process-default-2024.01.01-000001 | LIMIT 10';
 
     const result = validateSkillContent(content);
     expect(result.valid).toBe(false);
@@ -82,28 +78,22 @@ describe('validateSkillContent', () => {
 
 describe('suggestCorrectIndexName', () => {
   it('converts .internal backing index to alias', () => {
-    expect(
-      suggestCorrectIndexName('.internal.alerts-security.alerts-default-000001')
-    ).toBe('.alerts-security.alerts-default');
+    expect(suggestCorrectIndexName('.internal.alerts-security.alerts-default-000001')).toBe(
+      '.alerts-security.alerts-default'
+    );
   });
 
   it('converts .ds- backing index to data stream name', () => {
     expect(
-      suggestCorrectIndexName(
-        '.ds-logs-endpoint.events.process-default-2024.01.01-000001'
-      )
+      suggestCorrectIndexName('.ds-logs-endpoint.events.process-default-2024.01.01-000001')
     ).toBe('logs-endpoint.events.process-default');
   });
 
   it('strips rollover suffix from generic index', () => {
-    expect(suggestCorrectIndexName('.siem-signals-default-000001')).toBe(
-      '.siem-signals-default'
-    );
+    expect(suggestCorrectIndexName('.siem-signals-default-000001')).toBe('.siem-signals-default');
   });
 
   it('returns null for names without rollover suffix', () => {
-    expect(
-      suggestCorrectIndexName('logs-endpoint.events.process-default')
-    ).toBeNull();
+    expect(suggestCorrectIndexName('logs-endpoint.events.process-default')).toBeNull();
   });
 });

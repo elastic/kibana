@@ -24,7 +24,6 @@ import {
   EuiSteps,
   EuiPanel,
   EuiStat,
-  EuiCallOut,
   EuiSuperSelect,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
@@ -201,7 +200,10 @@ export const ProposedSkillsList = () => {
         const statusConfig = {
           pending: { color: 'default', label: 'Pending' },
           validating: { color: 'primary', label: 'Running...' },
-          passed: { color: 'success', label: `Passed (${((skill.validation.final_score ?? 0) * 100).toFixed(0)}%)` },
+          passed: {
+            color: 'success',
+            label: `Passed (${((skill.validation.final_score ?? 0) * 100).toFixed(0)}%)`,
+          },
           failed: { color: 'danger', label: 'Failed' },
         };
 
@@ -231,7 +233,9 @@ export const ProposedSkillsList = () => {
             </EuiFlexItem>
             {crossEval?.action === 'flagged' && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="warning" iconType="alert">flagged</EuiBadge>
+                <EuiBadge color="warning" iconType="alert">
+                  flagged
+                </EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -347,15 +351,27 @@ export const ProposedSkillsList = () => {
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiBadge color={lastExploration.status === 'completed' ? 'success' : lastExploration.status === 'running' ? 'primary' : 'danger'}>
-                          {lastExploration.status === 'running' ? 'running...' : lastExploration.status}
+                        <EuiBadge
+                          color={
+                            lastExploration.status === 'completed'
+                              ? 'success'
+                              : lastExploration.status === 'running'
+                              ? 'primary'
+                              : 'danger'
+                          }
+                        >
+                          {lastExploration.status === 'running'
+                            ? 'running...'
+                            : lastExploration.status}
                         </EuiBadge>
                         {lastExploration.status === 'running' && <EuiLoadingSpinner size="s" />}
                       </EuiFlexItem>
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <EuiText size="s" color="subdued">No exploration has been run yet</EuiText>
+                      <EuiText size="s" color="subdued">
+                        No exploration has been run yet
+                      </EuiText>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -419,7 +435,16 @@ export const ProposedSkillsList = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ borderLeft: '1px solid #D3DAE6', paddingLeft: 8 }}>
               <EuiFlexGroup gutterSize="xs">
-                {(['all', 'llm', 'conversations', 'patterns', 'relationships', 'skill_improvement'] as const).map((source) => (
+                {(
+                  [
+                    'all',
+                    'llm',
+                    'conversations',
+                    'patterns',
+                    'relationships',
+                    'skill_improvement',
+                  ] as const
+                ).map((source) => (
                   <EuiFlexItem key={source} grow={false}>
                     <EuiBadge
                       color={derivedFromFilter === source ? 'primary' : 'hollow'}
@@ -444,7 +469,9 @@ export const ProposedSkillsList = () => {
               body={
                 <>
                   <p>
-                    {'AESOP hasn\'t discovered any skills yet. Start an exploration to automatically'}
+                    {
+                      "AESOP hasn't discovered any skills yet. Start an exploration to automatically"
+                    }
                     identify patterns in your data and generate Agent Builder skills.
                   </p>
                   <EuiSpacer size="m" />
@@ -487,21 +514,13 @@ export const ProposedSkillsList = () => {
                 </>
               }
               actions={
-                <EuiButton
-                  iconType="play"
-                  fill
-                  onClick={() => history.push('/aesop/exploration')}
-                >
+                <EuiButton iconType="play" fill onClick={() => history.push('/aesop/exploration')}>
                   Go to Exploration Dashboard
                 </EuiButton>
               }
             />
           ) : (
-            <EuiBasicTable
-              items={skills}
-              columns={columns}
-              tableLayout="auto"
-            />
+            <EuiBasicTable items={skills} columns={columns} tableLayout="auto" />
           )}
         </EuiPageBody>
       </EuiPage>
@@ -512,7 +531,7 @@ export const ProposedSkillsList = () => {
           skill={selectedSkill}
           onClose={() => {
             setSelectedSkill(null);
-            refetch();  // Refresh list after review
+            refetch(); // Refresh list after review
           }}
         />
       )}

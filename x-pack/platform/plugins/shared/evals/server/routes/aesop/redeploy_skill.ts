@@ -16,9 +16,15 @@ const redeploySkillParamsSchema = z.object({
 });
 
 const TOOL_KEYWORD_MAP: Array<{ keywords: string[]; toolId: string }> = [
-  { keywords: ['esql', 'es|ql', 'FROM ', 'STATS ', 'WHERE '], toolId: 'platform.core.execute_esql' },
+  {
+    keywords: ['esql', 'es|ql', 'FROM ', 'STATS ', 'WHERE '],
+    toolId: 'platform.core.execute_esql',
+  },
   { keywords: ['esql', 'es|ql', 'query'], toolId: 'platform.core.generate_esql' },
-  { keywords: ['visualization', 'chart', 'dashboard', 'graph'], toolId: 'platform.core.create_visualization' },
+  {
+    keywords: ['visualization', 'chart', 'dashboard', 'graph'],
+    toolId: 'platform.core.create_visualization',
+  },
 ];
 
 function inferTools(markdown: string): string[] {
@@ -77,9 +83,12 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
 
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
-            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found or source unavailable` },
+            });
           }
-          const agentBuilderSkillId = skill.deployment?.agent_builder_skill_id || `aesop-${skillId}`;
+          const agentBuilderSkillId =
+            skill.deployment?.agent_builder_skill_id || `aesop-${skillId}`;
           const toolIds = inferTools(skill.markdown || '').slice(0, MAX_TOOLS);
 
           logger.info('[AESOP] Re-deploying skill to Agent Builder', {
@@ -148,7 +157,9 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to re-deploy: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to re-deploy: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

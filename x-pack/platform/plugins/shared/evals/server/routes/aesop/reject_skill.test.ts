@@ -10,10 +10,6 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { EvalsRequestHandlerContext } from '../../types';
 import { registerRejectSkillRoute } from './reject_skill';
 import type { IRouter } from '@kbn/core/server';
-import {
-  SkillNotFoundError,
-  SkillAlreadyDeployedError,
-} from '../../lib/aesop/errors/aesop_errors';
 
 describe('AESOP Reject Skill Route', () => {
   let mockRouter: jest.Mocked<IRouter<EvalsRequestHandlerContext>>;
@@ -196,7 +192,7 @@ describe('AESOP Reject Skill Route', () => {
           name: 'Low Frequency Skill',
           confidence: 0.65,
           source: { pattern_frequency: 5, pattern_id: 'p1' },
-          validation: { final_score: 0.80 },
+          validation: { final_score: 0.8 },
           deployment: { deployed: false },
         },
       } as any);

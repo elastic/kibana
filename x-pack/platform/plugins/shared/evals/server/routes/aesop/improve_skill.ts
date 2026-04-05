@@ -58,7 +58,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
 
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
-            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found or source unavailable` },
+            });
           }
 
           if (!skill.validation?.llm_feedback) {
@@ -81,9 +83,7 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
                 const { AgentOrchestrator } = await import(
                   '../../lib/aesop/agents/agent_orchestrator'
                 );
-                const { ensureAesopAgents } = await import(
-                  '../../lib/aesop/agents/ensure_agents'
-                );
+                const { ensureAesopAgents } = await import('../../lib/aesop/agents/ensure_agents');
 
                 const agentRegistry = await agentBuilderStart.agents.getRegistry({ request });
                 await ensureAesopAgents(agentRegistry, logger);
@@ -101,10 +101,7 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
                   ...(skill.validation?.suggestions || []),
                 ].join('\n');
 
-                const improved = await orchestrator.improveSkill(
-                  skill.markdown || '',
-                  feedback
-                );
+                const improved = await orchestrator.improveSkill(skill.markdown || '', feedback);
 
                 if (improved?.markdown) {
                   await esClient.update({
@@ -179,7 +176,11 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
                   });
                 }
               } catch (err) {
-                logger.warn(`[AESOP] Agent improvement failed, falling back to direct LLM: ${err instanceof Error ? err.message : String(err)}`);
+                logger.warn(
+                  `[AESOP] Agent improvement failed, falling back to direct LLM: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
+                );
               }
             }
           }
@@ -297,7 +298,9 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to improve skill: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to improve skill: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }
@@ -325,15 +328,21 @@ ${(skill.validation?.weaknesses || []).map((w: string) => `- ${w}`).join('\n')}
 **Suggestions:**
 ${(skill.validation?.suggestions || []).map((s: string) => `- ${s}`).join('\n')}
 
-${skill.validation?.criteria ? `**Criteria Scores:**
+${
+  skill.validation?.criteria
+    ? `**Criteria Scores:**
 - Relevance: ${((skill.validation.criteria.relevance || 0) * 100).toFixed(0)}%
 - Completeness: ${((skill.validation.criteria.completeness || 0) * 100).toFixed(0)}%
 - Accuracy: ${((skill.validation.criteria.accuracy || 0) * 100).toFixed(0)}%
 - Specificity: ${((skill.validation.criteria.specificity || 0) * 100).toFixed(0)}%
-- Safety: ${((skill.validation.criteria.safety || 0) * 100).toFixed(0)}%` : ''}
+- Safety: ${((skill.validation.criteria.safety || 0) * 100).toFixed(0)}%`
+    : ''
+}
 
 ## Discovery Context
-- Source Indices: ${JSON.stringify(skill.source?.source_indices || skill.metadata?.source_indices || [])}
+- Source Indices: ${JSON.stringify(
+    skill.source?.source_indices || skill.metadata?.source_indices || []
+  )}
 - Pattern Frequency: ${skill.source?.pattern_frequency || 'unknown'}
 - Rationale: ${skill.source?.rationale || 'N/A'}
 
@@ -359,7 +368,10 @@ function parseImprovedSkill(response: string): {
   try {
     let cleaned = response;
     cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-    cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+    cleaned = cleaned
+      .replace(/```json?\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim();
     if (!cleaned.startsWith('{')) {
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
       if (jsonMatch) cleaned = jsonMatch[0];
@@ -491,7 +503,9 @@ async function autoValidateImprovedSkill({
       })
       .catch((markFailedErr) => {
         logger.warn(
-          `[AESOP] Failed to mark skill as failed after auto-validation: ${markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)}`
+          `[AESOP] Failed to mark skill as failed after auto-validation: ${
+            markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+          }`
         );
       });
   }
@@ -499,12 +513,20 @@ async function autoValidateImprovedSkill({
 
 function parseEvaluation(response: string) {
   const defaults = {
-    score: 0.5, passed: false, criteria: { relevance: 0, completeness: 0, accuracy: 0, specificity: 0, safety: 0 },
-    feedback: 'Unable to parse', strengths: [] as string[], weaknesses: [] as string[], suggestions: [] as string[],
+    score: 0.5,
+    passed: false,
+    criteria: { relevance: 0, completeness: 0, accuracy: 0, specificity: 0, safety: 0 },
+    feedback: 'Unable to parse',
+    strengths: [] as string[],
+    weaknesses: [] as string[],
+    suggestions: [] as string[],
   };
   try {
     let cleaned = response.replace(/<think>[\s\S]*?<\/think>/g, '');
-    cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+    cleaned = cleaned
+      .replace(/```json?\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim();
     if (!cleaned.startsWith('{')) {
       const m = cleaned.match(/\{[\s\S]*\}/);
       if (m) cleaned = m[0];
@@ -512,7 +534,7 @@ function parseEvaluation(response: string) {
     const p = JSON.parse(cleaned);
     return {
       score: Math.max(0, Math.min(1, Number(p.score) || 0.5)),
-      passed: p.passed ?? (Number(p.score) >= 0.85),
+      passed: p.passed ?? Number(p.score) >= 0.85,
       criteria: {
         relevance: Number(p.criteria?.relevance) || 0,
         completeness: Number(p.criteria?.completeness) || 0,

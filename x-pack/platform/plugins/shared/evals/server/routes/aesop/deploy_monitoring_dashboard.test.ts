@@ -154,7 +154,9 @@ describe('registerDeployMonitoringDashboardRoute', () => {
 
     await routeHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockLogger.info).toHaveBeenCalledWith('[AESOP] Deploying performance monitoring dashboard');
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      '[AESOP] Deploying performance monitoring dashboard'
+    );
     expect(mockLogger.info).toHaveBeenCalledWith('[AESOP] ✅ Dashboard deployed successfully', {
       dashboard_id: 'aesop-performance-monitoring',
       url: '/app/dashboards#/view/aesop-performance-monitoring',

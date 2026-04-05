@@ -72,8 +72,7 @@ export const AESOP_TRANSLATIONS = {
 
   // Errors
   mustPassValidation: i18n.translate('xpack.evals.aesop.error.mustPassValidation', {
-    defaultMessage:
-      'Skill must pass validation before approval. Current status: {status}',
+    defaultMessage: 'Skill must pass validation before approval. Current status: {status}',
   }),
   workflowsNotAvailable: i18n.translate('xpack.evals.aesop.error.workflowsNotAvailable', {
     defaultMessage:

@@ -123,10 +123,7 @@ export const SkillImprovementDiffFlyout: React.FC<SkillImprovementDiffFlyoutProp
 
       if (viewMode === 'diff') {
         const originalModel = monaco.editor.createModel(currentContent, 'markdown');
-        const modifiedModel = monaco.editor.createModel(
-          improvement.improved_content,
-          'markdown'
-        );
+        const modifiedModel = monaco.editor.createModel(improvement.improved_content, 'markdown');
 
         const diffEditor = monaco.editor.createDiffEditor(container, {
           readOnly: true,

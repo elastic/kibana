@@ -265,7 +265,11 @@ describe('ExplorationStateService', () => {
       });
 
       const current = createMockState({
-        discovered_indices: ['logs-app-2026.03.20', 'logs-app-2026.03.21', 'metrics-new-2026.03.21'],
+        discovered_indices: [
+          'logs-app-2026.03.20',
+          'logs-app-2026.03.21',
+          'metrics-new-2026.03.21',
+        ],
       });
 
       const comparison = service.compareStates(current, previous);
@@ -290,9 +294,7 @@ describe('ExplorationStateService', () => {
 
     it('should count new relationships', () => {
       const previous = createMockState({
-        discovered_relationships: [
-          { from: 'idx1', to: 'idx2', via: 'field1', confidence: 0.9 },
-        ],
+        discovered_relationships: [{ from: 'idx1', to: 'idx2', via: 'field1', confidence: 0.9 }],
       });
 
       const current = createMockState({
@@ -355,7 +357,7 @@ describe('ExplorationStateService', () => {
       mockEsClient.indices.exists.mockResolvedValue(false);
       mockEsClient.indices.create.mockResolvedValue({} as any);
 
-      await service['ensureIndexExists']();
+      await service.ensureIndexExists();
 
       expect(mockEsClient.indices.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -380,7 +382,7 @@ describe('ExplorationStateService', () => {
     it('should skip creation if index already exists', async () => {
       mockEsClient.indices.exists.mockResolvedValue(true);
 
-      await service['ensureIndexExists']();
+      await service.ensureIndexExists();
 
       expect(mockEsClient.indices.create).not.toHaveBeenCalled();
     });

@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
-import type { AESOPRouteDependencies } from './register_aesop_routes';
-import type { ProposedSkillDocument } from '../../lib/aesop/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 import {
   AESOPError,
   SkillNotFoundError,
@@ -79,7 +79,12 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         const { skillId } = request.params;
-        const { review_notes, rejection_reason, suggested_improvements, connector_id: connectorId } = request.body;
+        const {
+          review_notes,
+          rejection_reason,
+          suggested_improvements,
+          connector_id: connectorId,
+        } = request.body;
 
         const startTime = Date.now();
 
@@ -110,15 +115,14 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
 
           const skill = skillDoc._source as ProposedSkillDocument | undefined;
           if (!skill) {
-            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+            return response.notFound({
+              body: { message: `Skill ${skillId} not found or source unavailable` },
+            });
           }
 
           // 2. Validate skill is not already deployed
           if (skill.deployment?.deployed) {
-            throw new SkillAlreadyDeployedError(
-              skillId,
-              skill.deployment.agent_builder_skill_id
-            );
+            throw new SkillAlreadyDeployedError(skillId, skill.deployment.agent_builder_skill_id);
           }
 
           // 3. Update skill document with rejection
@@ -163,9 +167,11 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
               rejected_at: new Date().toISOString(),
               rejected_by: request.auth.credentials?.username || 'unknown',
               learning_signals: {
-                pattern_frequency_threshold: skill.source?.pattern_frequency < 10 ? 'too_low' : 'acceptable',
+                pattern_frequency_threshold:
+                  skill.source?.pattern_frequency < 10 ? 'too_low' : 'acceptable',
                 confidence_threshold: skill.confidence < 0.8 ? 'too_low' : 'acceptable',
-                validation_score_threshold: skill.validation?.final_score < 0.85 ? 'failed' : 'passed',
+                validation_score_threshold:
+                  skill.validation?.final_score < 0.85 ? 'failed' : 'passed',
               },
             },
             refresh: 'wait_for',
@@ -202,7 +208,11 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
           return response.ok({
             body: {
               success: true,
-              message: `Skill '${skill.name}' rejected. ${connectorId ? 'Evaluating remaining pending skills for similar issues.' : 'Feedback will inform next exploration cycle.'}`,
+              message: `Skill '${skill.name}' rejected. ${
+                connectorId
+                  ? 'Evaluating remaining pending skills for similar issues.'
+                  : 'Feedback will inform next exploration cycle.'
+              }`,
               skill_id: skillId,
               skill_name: skill.name,
               rejection_reason,
@@ -275,7 +285,9 @@ async function crossEvaluatePendingSkills({
     return;
   }
 
-  logger.info(`[AESOP] Cross-evaluating ${pendingSkills.length} pending skills against rejection feedback`);
+  logger.info(
+    `[AESOP] Cross-evaluating ${pendingSkills.length} pending skills against rejection feedback`
+  );
 
   // Build a single LLM call with all pending skills for efficiency
   const skillSummaries = pendingSkills.map((hit: any) => ({
@@ -294,11 +306,15 @@ async function crossEvaluatePendingSkills({
 **Reviewer Notes:** ${rejectedSkill.review_notes || 'No notes provided'}
 
 ## Pending Skills to Evaluate
-${skillSummaries.map((s: any, i: number) => `### ${i + 1}. ${s.name} (ID: ${s.id})
+${skillSummaries
+  .map(
+    (s: any, i: number) => `### ${i + 1}. ${s.name} (ID: ${s.id})
 ${s.description}
 Confidence: ${((s.confidence || 0) * 100).toFixed(0)}%
 Preview: ${s.markdown_preview}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 For each pending skill, determine if the rejection feedback applies to it.
 Respond with ONLY a JSON array (no markdown fences):
@@ -318,7 +334,8 @@ Respond with ONLY a JSON array (no markdown fences):
             messages: [
               {
                 role: 'system',
-                content: 'You are a skill quality reviewer. Evaluate whether rejection feedback for one skill applies to other pending skills. Be precise and concise.',
+                content:
+                  'You are a skill quality reviewer. Evaluate whether rejection feedback for one skill applies to other pending skills. Be precise and concise.',
               },
               { role: 'user', content: prompt },
             ],
@@ -345,63 +362,73 @@ Respond with ONLY a JSON array (no markdown fences):
 
       if (evaluation.severity === 'high') {
         // Auto-reject: same fundamental issues, not worth improving
-        await esClient.update({
-          index: '.aesop-proposed-skills',
-          id: evaluation.id,
-          body: {
-            doc: {
-              review: {
-                status: 'rejected',
-                reviewed_by: 'aesop-auto',
-                reviewed_at: new Date().toISOString(),
-                review_notes: `Auto-rejected: shares same issues as rejected skill "${rejectedSkill.name}". ${evaluation.reason}`,
-                rejection_reason: rejectedSkill.rejection_reason,
-              },
-              cross_evaluation: {
-                triggered_by_rejection: rejectedSkill.id,
-                action: 'auto_rejected',
-                severity: evaluation.severity,
-                reason: evaluation.reason,
-                evaluated_at: new Date().toISOString(),
+        await esClient
+          .update({
+            index: '.aesop-proposed-skills',
+            id: evaluation.id,
+            body: {
+              doc: {
+                review: {
+                  status: 'rejected',
+                  reviewed_by: 'aesop-auto',
+                  reviewed_at: new Date().toISOString(),
+                  review_notes: `Auto-rejected: shares same issues as rejected skill "${rejectedSkill.name}". ${evaluation.reason}`,
+                  rejection_reason: rejectedSkill.rejection_reason,
+                },
+                cross_evaluation: {
+                  triggered_by_rejection: rejectedSkill.id,
+                  action: 'auto_rejected',
+                  severity: evaluation.severity,
+                  reason: evaluation.reason,
+                  evaluated_at: new Date().toISOString(),
+                },
               },
             },
-          },
-          refresh: 'wait_for',
-        }).catch((err: Error) => {
-          logger.warn(`[AESOP] Failed to auto-reject skill ${evaluation.id}: ${err.message}`);
-        });
+            refresh: 'wait_for',
+          })
+          .catch((err: Error) => {
+            logger.warn(`[AESOP] Failed to auto-reject skill ${evaluation.id}: ${err.message}`);
+          });
 
         autoRejected++;
         logger.info(`[AESOP] Auto-rejected skill ${evaluation.id}: ${evaluation.reason}`);
       } else {
         // Medium/low severity: flag with warning but keep for review
-        await esClient.update({
-          index: '.aesop-proposed-skills',
-          id: evaluation.id,
-          body: {
-            doc: {
-              cross_evaluation: {
-                triggered_by_rejection: rejectedSkill.id,
-                action: 'flagged',
-                severity: evaluation.severity,
-                reason: evaluation.reason,
-                evaluated_at: new Date().toISOString(),
+        await esClient
+          .update({
+            index: '.aesop-proposed-skills',
+            id: evaluation.id,
+            body: {
+              doc: {
+                cross_evaluation: {
+                  triggered_by_rejection: rejectedSkill.id,
+                  action: 'flagged',
+                  severity: evaluation.severity,
+                  reason: evaluation.reason,
+                  evaluated_at: new Date().toISOString(),
+                },
               },
             },
-          },
-        }).catch((err: Error) => {
-          logger.warn(`[AESOP] Failed to flag skill ${evaluation.id}: ${err.message}`);
-        });
+          })
+          .catch((err: Error) => {
+            logger.warn(`[AESOP] Failed to flag skill ${evaluation.id}: ${err.message}`);
+          });
 
         autoImproved++;
-        logger.info(`[AESOP] Flagged skill ${evaluation.id} (${evaluation.severity}): ${evaluation.reason}`);
+        logger.info(
+          `[AESOP] Flagged skill ${evaluation.id} (${evaluation.severity}): ${evaluation.reason}`
+        );
       }
     }
 
     const totalAffected = evaluations.filter((e: any) => e.affected).length;
-    logger.info(`[AESOP] Cross-evaluation complete: ${totalAffected} affected, ${autoRejected} auto-rejected, ${autoImproved} flagged`);
+    logger.info(
+      `[AESOP] Cross-evaluation complete: ${totalAffected} affected, ${autoRejected} auto-rejected, ${autoImproved} flagged`
+    );
   } catch (error) {
-    logger.error(`[AESOP] Cross-evaluation failed: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `[AESOP] Cross-evaluation failed: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
@@ -410,15 +437,21 @@ function extractLLMText(data: any): string {
   if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
   if (data?.completion) return data.completion;
   if (data?.content?.[0]?.text) return data.content[0].text;
-  if (data?.candidates?.[0]?.content?.parts?.[0]?.text) return data.candidates[0].content.parts[0].text;
+  if (data?.candidates?.[0]?.content?.parts?.[0]?.text)
+    return data.candidates[0].content.parts[0].text;
   return JSON.stringify(data);
 }
 
-function parseCrossEvaluation(response: string): Array<{ id: string; affected: boolean; reason: string; severity: string }> {
+function parseCrossEvaluation(
+  response: string
+): Array<{ id: string; affected: boolean; reason: string; severity: string }> {
   try {
     let cleaned = response;
     cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-    cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+    cleaned = cleaned
+      .replace(/```json?\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim();
     if (!cleaned.startsWith('[')) {
       const match = cleaned.match(/\[[\s\S]*\]/);
       if (match) cleaned = match[0];

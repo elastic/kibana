@@ -21,7 +21,11 @@ const runExplorationBodySchema = z.object({
   connector_id: z.string().optional(),
 });
 
-export function registerRunExplorationRoute({ router, logger, skillOnlineEvalService }: AESOPRouteDependencies) {
+export function registerRunExplorationRoute({
+  router,
+  logger,
+  skillOnlineEvalService,
+}: AESOPRouteDependencies) {
   router.versioned
     .post({
       path: '/internal/aesop/exploration/run',
@@ -93,7 +97,9 @@ export function registerRunExplorationRoute({ router, logger, skillOnlineEvalSer
           const indexCatalog = await discoverIndices(esClient, logger);
 
           if (indexCatalog.indices.length === 0) {
-            logger.info('[AESOP] No indices discovered — exploration will rely on conversation analysis only');
+            logger.info(
+              '[AESOP] No indices discovered — exploration will rely on conversation analysis only'
+            );
           }
 
           // Phase 2: Infer analyst role from event log

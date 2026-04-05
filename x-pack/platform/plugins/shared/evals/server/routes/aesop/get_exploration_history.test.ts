@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import { registerGetExplorationHistoryRoute } from './get_exploration_history';
 
 const WORKFLOW_EXECUTIONS_INDEX = '.aesop-workflow-executions';
@@ -27,7 +31,7 @@ describe('GET /internal/aesop/exploration/history', () => {
           },
         },
       }),
-    }) as any;
+    } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();

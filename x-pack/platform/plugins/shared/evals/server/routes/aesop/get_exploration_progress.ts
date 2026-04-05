@@ -87,7 +87,9 @@ export function registerGetExplorationProgressRoute({ router, logger }: AESOPRou
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to fetch exploration progress: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to fetch exploration progress: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

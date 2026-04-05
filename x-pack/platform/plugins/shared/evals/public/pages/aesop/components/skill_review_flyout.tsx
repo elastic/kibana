@@ -66,7 +66,9 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
     },
     initialData: initialSkill,
     refetchInterval: (data) => {
-      return (data?.validation?.status === 'validating' || isValidating || isImproving) ? 2000 : false;
+      return data?.validation?.status === 'validating' || isValidating || isImproving
+        ? 2000
+        : false;
     },
   });
 
@@ -74,7 +76,11 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
 
   // Clear local validating state when server confirms terminal status
   React.useEffect(() => {
-    if (isValidating && skill.validation?.status !== 'validating' && skill.validation?.status !== 'pending') {
+    if (
+      isValidating &&
+      skill.validation?.status !== 'validating' &&
+      skill.validation?.status !== 'pending'
+    ) {
       setIsValidating(false);
     }
   }, [isValidating, skill.validation?.status]);
@@ -267,14 +273,22 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
     }
   }, [datasetsData, skillDatasetName, selectedDatasetId]);
   const datasetOptions = [
-    { value: '_generate', inputDisplay: 'Auto-generate for this skill', dropdownDisplay: 'Auto-generate for this skill' },
+    {
+      value: '_generate',
+      inputDisplay: 'Auto-generate for this skill',
+      dropdownDisplay: 'Auto-generate for this skill',
+    },
     ...(datasetsData?.datasets ?? []).map((ds) => ({
       value: ds.id,
       inputDisplay: ds.name,
       dropdownDisplay: (
         <>
           <strong>{ds.name}</strong>
-          {ds.description && <EuiText size="xs" color="subdued"><p>{ds.description}</p></EuiText>}
+          {ds.description && (
+            <EuiText size="xs" color="subdued">
+              <p>{ds.description}</p>
+            </EuiText>
+          )}
         </>
       ),
     })),
@@ -288,10 +302,20 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
       const result = await api.http.get('/internal/evals/evaluators', {
         version: '1',
       });
-      return result as { evaluators: Array<{ name: string; kind: string; type: string; description: string; source: string }> };
+      return result as {
+        evaluators: Array<{
+          name: string;
+          kind: string;
+          type: string;
+          description: string;
+          source: string;
+        }>;
+      };
     },
   });
-  const catalogEvaluatorNames = new Set(catalogEvaluatorsData?.evaluators?.map((e) => e.name) ?? []);
+  const catalogEvaluatorNames = new Set(
+    catalogEvaluatorsData?.evaluators?.map((e) => e.name) ?? []
+  );
 
   const addCatalogEvaluator = (catalogEval: any) => {
     setProposedEvaluators((prev) => {
@@ -313,8 +337,8 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
   };
 
   const toggleEvaluator = (name: string) => {
-    setProposedEvaluators((prev) =>
-      prev?.map((e) => (e.name === name ? { ...e, selected: !e.selected } : e)) ?? null
+    setProposedEvaluators(
+      (prev) => prev?.map((e) => (e.name === name ? { ...e, selected: !e.selected } : e)) ?? null
     );
   };
 
@@ -420,15 +444,16 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
     },
     onSuccess: (result: any) => {
       api.notifications.toasts.addSuccess(
-        `Evaluation started with ${result.evaluators?.length ?? 0} evaluators. Results will appear in the Runs tab.`
+        `Evaluation started with ${
+          result.evaluators?.length ?? 0
+        } evaluators. Results will appear in the Runs tab.`
       );
       // Poll for skill updates to detect when eval completes
       queryClient.invalidateQueries({ queryKey: ['aesop', 'skill-detail', initialSkill.id] });
       queryClient.invalidateQueries({ queryKey: ['aesop', 'proposed-skills'] });
       queryClient.invalidateQueries({ queryKey: ['evals', 'runs'] });
     },
-    onError: (err: Error) =>
-      api.notifications.toasts.addDanger(`Eval failed: ${err.message}`),
+    onError: (err: Error) => api.notifications.toasts.addDanger(`Eval failed: ${err.message}`),
   });
 
   const canApprove = skill.validation?.status === 'passed';
@@ -484,7 +509,13 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 {[
                   { step: 1, label: 'Review Content', done: true },
-                  { step: 2, label: 'Validate', done: skill.validation?.status === 'passed' || skill.validation?.status === 'failed' },
+                  {
+                    step: 2,
+                    label: 'Validate',
+                    done:
+                      skill.validation?.status === 'passed' ||
+                      skill.validation?.status === 'failed',
+                  },
                   { step: 3, label: 'Evaluate', done: !!skill.eval_run },
                   { step: 4, label: 'Decide', done: skill.review?.status !== 'pending_review' },
                 ].map(({ step, label, done }) => (
@@ -515,7 +546,9 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
               <EuiPanel color="accent">
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="s"><h3>Based on: {skill.base_skill.name}</h3></EuiTitle>
+                    <EuiTitle size="s">
+                      <h3>Based on: {skill.base_skill.name}</h3>
+                    </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiBadge color={skill.base_skill.readonly ? 'default' : 'primary'}>
@@ -524,7 +557,10 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
-                <EuiText size="s">{skill.source?.rationale || 'Improvement proposed based on discovered data patterns.'}</EuiText>
+                <EuiText size="s">
+                  {skill.source?.rationale ||
+                    'Improvement proposed based on discovered data patterns.'}
+                </EuiText>
               </EuiPanel>
               <EuiSpacer />
             </>
@@ -551,11 +587,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
           {/* In-progress states */}
           {isImproving && (
             <>
-              <EuiCallOut
-                title="Applying LLM suggestions"
-                color="primary"
-                iconType="sparkles"
-              >
+              <EuiCallOut title="Applying LLM suggestions" color="primary" iconType="sparkles">
                 <EuiProgress size="s" color="primary" />
                 <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -564,7 +596,8 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      The LLM is rewriting the skill based on validation feedback. This typically takes 10-20 seconds.
+                      The LLM is rewriting the skill based on validation feedback. This typically
+                      takes 10-20 seconds.
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -574,11 +607,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
           )}
           {!isImproving && (isValidating || skill.validation?.status === 'validating') && (
             <>
-              <EuiCallOut
-                title="LLM validation in progress"
-                color="primary"
-                iconType="iInCircle"
-              >
+              <EuiCallOut title="LLM validation in progress" color="primary" iconType="iInCircle">
                 <EuiProgress size="s" color="primary" />
                 <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -615,7 +644,9 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         disabled={!selectedConnectorId}
                         aria-label={`Run validation for ${skill.name}`}
                       >
-                        {skill.validation?.status === 'failed' ? 'Re-run Validation' : 'Run Validation'}
+                        {skill.validation?.status === 'failed'
+                          ? 'Re-run Validation'
+                          : 'Run Validation'}
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -655,13 +686,23 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
           {/* ── Section 3: Performance Evaluation ─────────────────────── */}
           {isReviewable && (
             <>
-              <EuiTitle size="xs"><h3>Performance Evaluation</h3></EuiTitle>
+              <EuiTitle size="xs">
+                <h3>Performance Evaluation</h3>
+              </EuiTitle>
               <EuiSpacer size="s" />
               <EuiSteps
                 steps={[
                   {
-                    title: `Select Evaluators${proposedEvaluators?.length ? ` (${proposedEvaluators.filter((e: any) => e.selected).length} selected)` : ''}`,
-                    status: proposedEvaluators?.length ? 'complete' : proposeEvaluatorsMutation.isPending ? 'loading' : 'incomplete',
+                    title: `Select Evaluators${
+                      proposedEvaluators?.length
+                        ? ` (${proposedEvaluators.filter((e: any) => e.selected).length} selected)`
+                        : ''
+                    }`,
+                    status: proposedEvaluators?.length
+                      ? 'complete'
+                      : proposeEvaluatorsMutation.isPending
+                      ? 'loading'
+                      : 'incomplete',
                     children: (
                       <>
                         {proposedEvaluators && proposedEvaluators.length > 0 ? (
@@ -675,7 +716,11 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                                   style={{ marginBottom: 6 }}
                                   color={evaluator.selected ? 'plain' : 'subdued'}
                                 >
-                                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                                  <EuiFlexGroup
+                                    gutterSize="s"
+                                    alignItems="center"
+                                    responsive={false}
+                                  >
                                     <EuiFlexItem grow={false}>
                                       <EuiCheckbox
                                         id={`eval-${evaluator.name}`}
@@ -685,68 +730,113 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                                       />
                                     </EuiFlexItem>
                                     <EuiFlexItem grow={false}>
-                                      <EuiBadge color={evaluator.source === 'auto-generated' && !catalogEvaluatorNames.has(evaluator.name) ? 'accent' : 'hollow'}>
+                                      <EuiBadge
+                                        color={
+                                          evaluator.source === 'auto-generated' &&
+                                          !catalogEvaluatorNames.has(evaluator.name)
+                                            ? 'accent'
+                                            : 'hollow'
+                                        }
+                                      >
                                         {evaluator.kind}
                                       </EuiBadge>
                                     </EuiFlexItem>
                                     <EuiFlexItem>
                                       <EuiText size="xs">
                                         <strong>{evaluator.name}</strong>
-                                        {evaluator.source === 'auto-generated' && !catalogEvaluatorNames.has(evaluator.name) && (
-                                          <EuiBadge color="accent" style={{ marginLeft: 4 }}>new</EuiBadge>
-                                        )}
-                                        {catalogEvaluatorNames.has(evaluator.name) && evaluator.source === 'auto-generated' && (
-                                          <EuiBadge color="success" style={{ marginLeft: 4 }}>saved</EuiBadge>
-                                        )}
+                                        {evaluator.source === 'auto-generated' &&
+                                          !catalogEvaluatorNames.has(evaluator.name) && (
+                                            <EuiBadge color="accent" style={{ marginLeft: 4 }}>
+                                              new
+                                            </EuiBadge>
+                                          )}
+                                        {catalogEvaluatorNames.has(evaluator.name) &&
+                                          evaluator.source === 'auto-generated' && (
+                                            <EuiBadge color="success" style={{ marginLeft: 4 }}>
+                                              saved
+                                            </EuiBadge>
+                                          )}
                                       </EuiText>
                                     </EuiFlexItem>
-                                    {evaluator.source === 'auto-generated' && evaluator.config && !catalogEvaluatorNames.has(evaluator.name) && (
-                                      <EuiFlexItem grow={false}>
-                                        <EuiFlexGroup gutterSize="xs" responsive={false}>
-                                          <EuiFlexItem grow={false}>
-                                            <EuiButtonEmpty size="xs" iconType="save" onClick={() => saveEvaluatorMutation.mutate(evaluator)}>
-                                              Save
-                                            </EuiButtonEmpty>
-                                          </EuiFlexItem>
-                                          <EuiFlexItem grow={false}>
-                                            <EuiButtonEmpty
-                                              size="xs"
-                                              iconType={expandedEvaluator === evaluator.name ? 'arrowUp' : 'eye'}
-                                              onClick={() => setExpandedEvaluator(
-                                                expandedEvaluator === evaluator.name ? null : evaluator.name
-                                              )}
-                                            >
-                                              {expandedEvaluator === evaluator.name ? 'Hide' : 'Preview'}
-                                            </EuiButtonEmpty>
-                                          </EuiFlexItem>
-                                        </EuiFlexGroup>
-                                      </EuiFlexItem>
-                                    )}
+                                    {evaluator.source === 'auto-generated' &&
+                                      evaluator.config &&
+                                      !catalogEvaluatorNames.has(evaluator.name) && (
+                                        <EuiFlexItem grow={false}>
+                                          <EuiFlexGroup gutterSize="xs" responsive={false}>
+                                            <EuiFlexItem grow={false}>
+                                              <EuiButtonEmpty
+                                                size="xs"
+                                                iconType="save"
+                                                onClick={() =>
+                                                  saveEvaluatorMutation.mutate(evaluator)
+                                                }
+                                              >
+                                                Save
+                                              </EuiButtonEmpty>
+                                            </EuiFlexItem>
+                                            <EuiFlexItem grow={false}>
+                                              <EuiButtonEmpty
+                                                size="xs"
+                                                iconType={
+                                                  expandedEvaluator === evaluator.name
+                                                    ? 'arrowUp'
+                                                    : 'eye'
+                                                }
+                                                onClick={() =>
+                                                  setExpandedEvaluator(
+                                                    expandedEvaluator === evaluator.name
+                                                      ? null
+                                                      : evaluator.name
+                                                  )
+                                                }
+                                              >
+                                                {expandedEvaluator === evaluator.name
+                                                  ? 'Hide'
+                                                  : 'Preview'}
+                                              </EuiButtonEmpty>
+                                            </EuiFlexItem>
+                                          </EuiFlexGroup>
+                                        </EuiFlexItem>
+                                      )}
                                   </EuiFlexGroup>
                                   {evaluator.description && (
-                                    <EuiText size="xs" color="subdued" style={{ marginTop: 2, paddingLeft: 28 }}>
+                                    <EuiText
+                                      size="xs"
+                                      color="subdued"
+                                      style={{ marginTop: 2, paddingLeft: 28 }}
+                                    >
                                       {evaluator.description}
                                     </EuiText>
                                   )}
-                                  {evaluator.rationale && evaluator.rationale !== evaluator.description && (
-                                    <EuiText size="xs" color="subdued" style={{ marginTop: 2, paddingLeft: 28, fontStyle: 'italic' }}>
-                                      {evaluator.rationale}
-                                    </EuiText>
-                                  )}
-                                  {expandedEvaluator === evaluator.name && evaluator.config?.prompt_template && (
-                                    <>
-                                      <EuiSpacer size="xs" />
-                                      <EuiCodeBlock
-                                        language="markdown"
-                                        paddingSize="s"
-                                        fontSize="s"
-                                        overflowHeight={200}
-                                        isCopyable
+                                  {evaluator.rationale &&
+                                    evaluator.rationale !== evaluator.description && (
+                                      <EuiText
+                                        size="xs"
+                                        color="subdued"
+                                        style={{
+                                          marginTop: 2,
+                                          paddingLeft: 28,
+                                          fontStyle: 'italic',
+                                        }}
                                       >
-                                        {evaluator.config.prompt_template}
-                                      </EuiCodeBlock>
-                                    </>
-                                  )}
+                                        {evaluator.rationale}
+                                      </EuiText>
+                                    )}
+                                  {expandedEvaluator === evaluator.name &&
+                                    evaluator.config?.prompt_template && (
+                                      <>
+                                        <EuiSpacer size="xs" />
+                                        <EuiCodeBlock
+                                          language="markdown"
+                                          paddingSize="s"
+                                          fontSize="s"
+                                          overflowHeight={200}
+                                          isCopyable
+                                        >
+                                          {evaluator.config.prompt_template}
+                                        </EuiCodeBlock>
+                                      </>
+                                    )}
                                 </EuiPanel>
                               ))}
                             </div>
@@ -760,9 +850,17 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                             {showCatalogPicker && catalogEvaluatorsData?.evaluators && (
                               <div style={{ maxHeight: 140, overflowY: 'auto', marginTop: 4 }}>
                                 {catalogEvaluatorsData.evaluators
-                                  .filter((ce) => !proposedEvaluators?.some((pe) => pe.name === ce.name))
+                                  .filter(
+                                    (ce) => !proposedEvaluators?.some((pe) => pe.name === ce.name)
+                                  )
                                   .map((catalogEval) => (
-                                    <EuiFlexGroup key={catalogEval.name} gutterSize="s" alignItems="center" responsive={false} style={{ marginBottom: 4 }}>
+                                    <EuiFlexGroup
+                                      key={catalogEval.name}
+                                      gutterSize="s"
+                                      alignItems="center"
+                                      responsive={false}
+                                      style={{ marginBottom: 4 }}
+                                    >
                                       <EuiFlexItem grow={false}>
                                         <EuiBadge color="hollow">{catalogEval.kind}</EuiBadge>
                                       </EuiFlexItem>
@@ -772,7 +870,11 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                                         </EuiToolTip>
                                       </EuiFlexItem>
                                       <EuiFlexItem grow={false}>
-                                        <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={() => addCatalogEvaluator(catalogEval)}>
+                                        <EuiButtonEmpty
+                                          size="xs"
+                                          iconType="plusInCircle"
+                                          onClick={() => addCatalogEvaluator(catalogEval)}
+                                        >
                                           Add
                                         </EuiButtonEmpty>
                                       </EuiFlexItem>
@@ -797,7 +899,12 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   },
                   {
                     title: 'Choose Dataset',
-                    status: selectedDatasetId !== '_generate' || generateDatasetMutation.isSuccess ? 'complete' : generateDatasetMutation.isPending ? 'loading' : 'incomplete',
+                    status:
+                      selectedDatasetId !== '_generate' || generateDatasetMutation.isSuccess
+                        ? 'complete'
+                        : generateDatasetMutation.isPending
+                        ? 'loading'
+                        : 'incomplete',
                     children: (
                       <EuiFlexGroup gutterSize="s" alignItems="center">
                         <EuiFlexItem>
@@ -824,25 +931,38 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     ),
                   },
                   {
-                    title: `Run Evaluation${(skill as any).eval_run?.status === 'completed' ? ` — ${((skill as any).eval_run.mean_score * 100).toFixed(0)}% mean score` : (skill as any).eval_run?.status === 'running' ? ' — running...' : ''}`,
-                    status: (skill as any).eval_run?.status === 'completed' || runEvalMutation.isSuccess
-                      ? 'complete'
-                      : (skill as any).eval_run?.status === 'running' || runEvalMutation.isPending
+                    title: `Run Evaluation${
+                      (skill as any).eval_run?.status === 'completed'
+                        ? ` — ${((skill as any).eval_run.mean_score * 100).toFixed(0)}% mean score`
+                        : (skill as any).eval_run?.status === 'running'
+                        ? ' — running...'
+                        : ''
+                    }`,
+                    status:
+                      (skill as any).eval_run?.status === 'completed' || runEvalMutation.isSuccess
+                        ? 'complete'
+                        : (skill as any).eval_run?.status === 'running' || runEvalMutation.isPending
                         ? 'loading'
                         : (skill as any).eval_run?.status === 'failed'
-                          ? 'danger' as any
-                          : 'incomplete',
+                        ? ('danger' as any)
+                        : 'incomplete',
                     children: (
                       <EuiButton
                         size="s"
                         fill
                         onClick={() => runEvalMutation.mutate()}
                         isLoading={runEvalMutation.isPending}
-                        disabled={!selectedConnectorId || (!proposedEvaluators?.length && selectedDatasetId === '_generate')}
+                        disabled={
+                          !selectedConnectorId ||
+                          (!proposedEvaluators?.length && selectedDatasetId === '_generate')
+                        }
                         iconType="play"
                       >
-                        Run Eval{proposedEvaluators?.filter((e: any) => e.selected).length
-                          ? ` with ${proposedEvaluators.filter((e: any) => e.selected).length} evaluators`
+                        Run Eval
+                        {proposedEvaluators?.filter((e: any) => e.selected).length
+                          ? ` with ${
+                              proposedEvaluators.filter((e: any) => e.selected).length
+                            } evaluators`
                           : ''}
                       </EuiButton>
                     ),
@@ -855,169 +975,199 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
 
           {/* ── Section 4: Results ────────────────────────────────────── */}
           {/* Evaluation Score + LLM Feedback — hidden during re-validation or improvement */}
-          {skill.validation?.final_score != null && !isValidating && !isImproving && skill.validation?.status !== 'validating' && (
-            <>
-              <EuiPanel>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiStat
-                      title={`${(skill.validation.final_score * 100).toFixed(1)}%`}
-                      description="Quality Score"
-                      titleColor={skill.validation.status === 'passed' ? 'success' : 'danger'}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiStat
-                      title={skill.validation.iterations?.length || 0}
-                      description="Improvement Iterations"
-                      titleColor="primary"
-                    />
-                  </EuiFlexItem>
-                  {skill.validation.duration_ms && (
+          {skill.validation?.final_score != null &&
+            !isValidating &&
+            !isImproving &&
+            skill.validation?.status !== 'validating' && (
+              <>
+                <EuiPanel>
+                  <EuiFlexGroup>
                     <EuiFlexItem>
                       <EuiStat
-                        title={`${(skill.validation.duration_ms / 1000).toFixed(1)}s`}
-                        description="Validation Time"
-                        titleColor="subdued"
+                        title={`${(skill.validation.final_score * 100).toFixed(1)}%`}
+                        description="Quality Score"
+                        titleColor={skill.validation.status === 'passed' ? 'success' : 'danger'}
                       />
                     </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-                {skill.validation?.iterations?.length > 1 && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiFlexGroup gutterSize="xs" wrap>
-                      {skill.validation.iterations.map((iter: any, i: number) => (
-                        <EuiFlexItem key={i} grow={false}>
-                          <EuiBadge color={iter.score >= 0.85 ? 'success' : 'default'}>
-                            #{iter.iteration}: {(iter.score * 100).toFixed(0)}%
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </>
-                )}
-              </EuiPanel>
-              <EuiSpacer size="s" />
-
-              {/* Criteria Breakdown — with evaluator descriptions */}
-              {skill.validation.criteria && (
-                <>
-                  <EuiPanel>
-                    <EuiTitle size="xs"><h4>Evaluation Criteria</h4></EuiTitle>
-                    <EuiSpacer size="s" />
-                    {Object.entries(skill.validation.criteria as Record<string, number>).map(
-                      ([criterion, score]) => {
-                        const evalDescriptions: Record<string, string> = {
-                          safety: 'Detects destructive patterns (DELETE, DROP, _delete_by_query) and unsafe operations',
-                          accuracy: 'Validates ES|QL syntax, ECS field names, and index pattern correctness',
-                          completeness: 'Checks for step-by-step instructions, ES|QL examples, data sources, and error handling',
-                          specificity: 'Evaluates whether a junior analyst can follow the skill step-by-step',
-                          relevance: 'Assesses utility for SOC/security analyst workflows',
-                        };
-                        return (
-                          <EuiFlexGroup
-                            key={criterion}
-                            gutterSize="s"
-                            alignItems="center"
-                            responsive={false}
-                            style={{ marginBottom: 8 }}
-                          >
-                            <EuiFlexItem grow={false} style={{ minWidth: 70 }}>
-                              <EuiBadge
-                                color={score >= 0.85 ? 'success' : score >= 0.6 ? 'warning' : 'danger'}
-                              >
-                                {(score * 100).toFixed(0)}%
-                              </EuiBadge>
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiText size="s">
-                                <strong>{criterion.charAt(0).toUpperCase() + criterion.slice(1)}</strong>
-                              </EuiText>
-                              <EuiText size="xs" color="subdued">
-                                {evalDescriptions[criterion.toLowerCase()] || `Evaluates skill ${criterion}`}
-                              </EuiText>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        );
-                      }
+                    <EuiFlexItem>
+                      <EuiStat
+                        title={skill.validation.iterations?.length || 0}
+                        description="Improvement Iterations"
+                        titleColor="primary"
+                      />
+                    </EuiFlexItem>
+                    {skill.validation.duration_ms && (
+                      <EuiFlexItem>
+                        <EuiStat
+                          title={`${(skill.validation.duration_ms / 1000).toFixed(1)}s`}
+                          description="Validation Time"
+                          titleColor="subdued"
+                        />
+                      </EuiFlexItem>
                     )}
-                  </EuiPanel>
-                  <EuiSpacer size="s" />
-                </>
-              )}
-
-              {/* LLM Feedback */}
-              {skill.validation.llm_feedback && (
-                <EuiPanel>
-                  <EuiTitle size="xs"><h4>LLM Feedback</h4></EuiTitle>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s">{skill.validation.llm_feedback}</EuiText>
-
-                  {skill.validation.strengths?.length > 0 && (
+                  </EuiFlexGroup>
+                  {skill.validation?.iterations?.length > 1 && (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiText size="xs"><strong>Strengths</strong></EuiText>
-                      <ul>
-                        {skill.validation.strengths.map((s: string, i: number) => (
-                          <li key={i}><EuiText size="xs">{s}</EuiText></li>
+                      <EuiFlexGroup gutterSize="xs" wrap>
+                        {skill.validation.iterations.map((iter: any, i: number) => (
+                          <EuiFlexItem key={i} grow={false}>
+                            <EuiBadge color={iter.score >= 0.85 ? 'success' : 'default'}>
+                              #{iter.iteration}: {(iter.score * 100).toFixed(0)}%
+                            </EuiBadge>
+                          </EuiFlexItem>
                         ))}
-                      </ul>
-                    </>
-                  )}
-
-                  {skill.validation.weaknesses?.length > 0 && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiText size="xs"><strong>Weaknesses</strong></EuiText>
-                      <ul>
-                        {skill.validation.weaknesses.map((w: string, i: number) => (
-                          <li key={i}><EuiText size="xs">{w}</EuiText></li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-
-                  {skill.validation.suggestions?.length > 0 && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiText size="xs"><strong>Suggestions</strong></EuiText>
-                      <ul>
-                        {skill.validation.suggestions.map((s: string, i: number) => (
-                          <li key={i}><EuiText size="xs">{s}</EuiText></li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-
-                  {isReviewable && (
-                    <>
-                      <EuiSpacer size="m" />
-                      <EuiButton
-                        iconType="sparkles"
-                        onClick={() => improveMutation.mutate()}
-                        isLoading={improveMutation.isPending}
-                        disabled={!selectedConnectorId}
-                        size="s"
-                        fill
-                        aria-label="Apply LLM suggestions to improve skill"
-                      >
-                        Apply LLM Suggestions
-                      </EuiButton>
+                      </EuiFlexGroup>
                     </>
                   )}
                 </EuiPanel>
-              )}
-              <EuiSpacer />
-            </>
-          )}
+                <EuiSpacer size="s" />
+
+                {/* Criteria Breakdown — with evaluator descriptions */}
+                {skill.validation.criteria && (
+                  <>
+                    <EuiPanel>
+                      <EuiTitle size="xs">
+                        <h4>Evaluation Criteria</h4>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      {Object.entries(skill.validation.criteria as Record<string, number>).map(
+                        ([criterion, score]) => {
+                          const evalDescriptions: Record<string, string> = {
+                            safety:
+                              'Detects destructive patterns (DELETE, DROP, _delete_by_query) and unsafe operations',
+                            accuracy:
+                              'Validates ES|QL syntax, ECS field names, and index pattern correctness',
+                            completeness:
+                              'Checks for step-by-step instructions, ES|QL examples, data sources, and error handling',
+                            specificity:
+                              'Evaluates whether a junior analyst can follow the skill step-by-step',
+                            relevance: 'Assesses utility for SOC/security analyst workflows',
+                          };
+                          return (
+                            <EuiFlexGroup
+                              key={criterion}
+                              gutterSize="s"
+                              alignItems="center"
+                              responsive={false}
+                              style={{ marginBottom: 8 }}
+                            >
+                              <EuiFlexItem grow={false} style={{ minWidth: 70 }}>
+                                <EuiBadge
+                                  color={
+                                    score >= 0.85 ? 'success' : score >= 0.6 ? 'warning' : 'danger'
+                                  }
+                                >
+                                  {(score * 100).toFixed(0)}%
+                                </EuiBadge>
+                              </EuiFlexItem>
+                              <EuiFlexItem>
+                                <EuiText size="s">
+                                  <strong>
+                                    {criterion.charAt(0).toUpperCase() + criterion.slice(1)}
+                                  </strong>
+                                </EuiText>
+                                <EuiText size="xs" color="subdued">
+                                  {evalDescriptions[criterion.toLowerCase()] ||
+                                    `Evaluates skill ${criterion}`}
+                                </EuiText>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          );
+                        }
+                      )}
+                    </EuiPanel>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+
+                {/* LLM Feedback */}
+                {skill.validation.llm_feedback && (
+                  <EuiPanel>
+                    <EuiTitle size="xs">
+                      <h4>LLM Feedback</h4>
+                    </EuiTitle>
+                    <EuiSpacer size="s" />
+                    <EuiText size="s">{skill.validation.llm_feedback}</EuiText>
+
+                    {skill.validation.strengths?.length > 0 && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="xs">
+                          <strong>Strengths</strong>
+                        </EuiText>
+                        <ul>
+                          {skill.validation.strengths.map((s: string, i: number) => (
+                            <li key={i}>
+                              <EuiText size="xs">{s}</EuiText>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+
+                    {skill.validation.weaknesses?.length > 0 && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="xs">
+                          <strong>Weaknesses</strong>
+                        </EuiText>
+                        <ul>
+                          {skill.validation.weaknesses.map((w: string, i: number) => (
+                            <li key={i}>
+                              <EuiText size="xs">{w}</EuiText>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+
+                    {skill.validation.suggestions?.length > 0 && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="xs">
+                          <strong>Suggestions</strong>
+                        </EuiText>
+                        <ul>
+                          {skill.validation.suggestions.map((s: string, i: number) => (
+                            <li key={i}>
+                              <EuiText size="xs">{s}</EuiText>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+
+                    {isReviewable && (
+                      <>
+                        <EuiSpacer size="m" />
+                        <EuiButton
+                          iconType="sparkles"
+                          onClick={() => improveMutation.mutate()}
+                          isLoading={improveMutation.isPending}
+                          disabled={!selectedConnectorId}
+                          size="s"
+                          fill
+                          aria-label="Apply LLM suggestions to improve skill"
+                        >
+                          Apply LLM Suggestions
+                        </EuiButton>
+                      </>
+                    )}
+                  </EuiPanel>
+                )}
+                <EuiSpacer />
+              </>
+            )}
 
           {/* ── Section 5: Skill Content ──────────────────────────────── */}
           {/* Skill Content — view or edit */}
           <EuiPanel>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiTitle size="s"><h3>Skill Content</h3></EuiTitle>
+                <EuiTitle size="s">
+                  <h3>Skill Content</h3>
+                </EuiTitle>
               </EuiFlexItem>
               {isReviewable && (
                 <EuiFlexItem grow={false}>
@@ -1113,7 +1263,9 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
 
           {/* Discovery Metadata */}
           <EuiPanel>
-            <EuiTitle size="s"><h3>Discovery Source</h3></EuiTitle>
+            <EuiTitle size="s">
+              <h3>Discovery Source</h3>
+            </EuiTitle>
             <EuiSpacer />
             <EuiDescriptionList
               listItems={[
@@ -1136,9 +1288,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                 {
                   title: 'Derived From',
                   description: (
-                    <EuiBadge color="hollow">
-                      {skill.derived_from || 'patterns'}
-                    </EuiBadge>
+                    <EuiBadge color="hollow">{skill.derived_from || 'patterns'}</EuiBadge>
                   ),
                 },
                 {
@@ -1148,8 +1298,12 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                 {
                   title: 'Source Indices',
                   description: (() => {
-                    const indices = skill.source?.source_indices || skill.metadata?.source_indices || [];
-                    if (indices.length === 0) return `${skill.metadata?.indices_explored ?? 0} indices (names not recorded)`;
+                    const indices =
+                      skill.source?.source_indices || skill.metadata?.source_indices || [];
+                    if (indices.length === 0)
+                      return `${
+                        skill.metadata?.indices_explored ?? 0
+                      } indices (names not recorded)`;
                     return (
                       <EuiFlexGroup gutterSize="xs" wrap>
                         {indices.map((idx: string) => (
@@ -1194,7 +1348,11 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
           )}
           {skill.review?.status === 'approved' && (
             <>
-              <EuiCallOut title="This skill has been approved and deployed" color="success" iconType="check">
+              <EuiCallOut
+                title="This skill has been approved and deployed"
+                color="success"
+                iconType="check"
+              >
                 {skill.review.review_notes && <p>{skill.review.review_notes}</p>}
                 {skill.review.reviewed_at && (
                   <EuiText size="xs" color="subdued">
@@ -1244,17 +1402,19 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
           {isReviewable ? (
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={!reviewNotes.trim() ? 'Review notes are required to reject' : ''}>
-                <EuiButtonEmpty
-                  onClick={() => rejectMutation.mutate()}
-                  color="danger"
-                  isLoading={rejectMutation.isPending}
-                  disabled={!reviewNotes.trim()}
-                  aria-label={`Reject skill: ${skill.name}`}
+                <EuiToolTip
+                  content={!reviewNotes.trim() ? 'Review notes are required to reject' : ''}
                 >
-                  Reject
-                </EuiButtonEmpty>
-              </EuiToolTip>
+                  <EuiButtonEmpty
+                    onClick={() => rejectMutation.mutate()}
+                    color="danger"
+                    isLoading={rejectMutation.isPending}
+                    disabled={!reviewNotes.trim()}
+                    aria-label={`Reject skill: ${skill.name}`}
+                  >
+                    Reject
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s">
@@ -1283,9 +1443,15 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                       onClick={() => approveMutation.mutate()}
                       disabled={!canApprove}
                       isLoading={approveMutation.isPending}
-                      aria-label={skill.base_skill ? `Create ${skill.name} as new skill in Agent Builder` : `Approve and deploy ${skill.name} to Agent Builder`}
+                      aria-label={
+                        skill.base_skill
+                          ? `Create ${skill.name} as new skill in Agent Builder`
+                          : `Approve and deploy ${skill.name} to Agent Builder`
+                      }
                     >
-                      {skill.base_skill ? 'Create as New Skill' : 'Approve & Deploy to Agent Builder'}
+                      {skill.base_skill
+                        ? 'Create as New Skill'
+                        : 'Approve & Deploy to Agent Builder'}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -1294,13 +1460,14 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
           ) : (
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onClose} aria-label="Close skill review">Close</EuiButton>
+                <EuiButton onClick={onClose} aria-label="Close skill review">
+                  Close
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
         </EuiFlyoutFooter>
       </EuiFlyout>
-
     </>
   );
 };

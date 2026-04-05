@@ -82,12 +82,10 @@ export const ExplorationDashboard = () => {
     },
   });
 
-  const activeExplorations =
-    explorations?.explorations.filter((e) => e.status === 'running') || [];
+  const activeExplorations = explorations?.explorations.filter((e) => e.status === 'running') || [];
   const completedExplorations =
     explorations?.explorations.filter((e) => e.status === 'completed') || [];
-  const failedExplorations =
-    explorations?.explorations.filter((e) => e.status === 'failed') || [];
+  const failedExplorations = explorations?.explorations.filter((e) => e.status === 'failed') || [];
 
   const columns = [
     {
@@ -144,8 +142,7 @@ export const ExplorationDashboard = () => {
       field: 'skills_proposed',
       name: 'Skills',
       width: '8%',
-      render: (count?: number) =>
-        count ? <EuiBadge color="success">{count}</EuiBadge> : '-',
+      render: (count?: number) => (count ? <EuiBadge color="success">{count}</EuiBadge> : '-'),
     },
     {
       field: 'completed_at',
@@ -162,7 +159,11 @@ export const ExplorationDashboard = () => {
       name: 'Actions',
       width: '12%',
       render: (run: ExplorationRun) => (
-        <EuiButton size="s" onClick={() => viewDetails(run.execution_id)} aria-label={`View exploration details for execution ${run.execution_id}`}>
+        <EuiButton
+          size="s"
+          onClick={() => viewDetails(run.execution_id)}
+          aria-label={`View exploration details for execution ${run.execution_id}`}
+        >
           View
         </EuiButton>
       ),
@@ -234,10 +235,7 @@ export const ExplorationDashboard = () => {
           <EuiFlexItem>
             <EuiPanel>
               <EuiStat
-                title={completedExplorations.reduce(
-                  (sum, e) => sum + (e.skills_proposed || 0),
-                  0
-                )}
+                title={completedExplorations.reduce((sum, e) => sum + (e.skills_proposed || 0), 0)}
                 description="Skills Proposed"
                 titleColor="accent"
               />
@@ -245,11 +243,7 @@ export const ExplorationDashboard = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel>
-              <EuiStat
-                title={failedExplorations.length}
-                description="Failed"
-                titleColor="danger"
-              />
+              <EuiStat title={failedExplorations.length} description="Failed" titleColor="danger" />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -277,9 +271,7 @@ export const ExplorationDashboard = () => {
                 disabled={activeExplorations.length > 0}
                 aria-label="Start autonomous exploration of your data"
               >
-                {activeExplorations.length > 0
-                  ? 'Exploration Running...'
-                  : 'Start Exploration'}
+                {activeExplorations.length > 0 ? 'Exploration Running...' : 'Start Exploration'}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

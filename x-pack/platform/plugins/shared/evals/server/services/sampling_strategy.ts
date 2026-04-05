@@ -69,7 +69,8 @@ export async function calibrateSamplingStrategy(
       strategyName: 'Full Analysis',
       estimatedDocsSampled: totalVolume,
       depthLevel: 'deep',
-      description: 'Small dataset (<10K docs). Analyzing 100% of documents for comprehensive coverage.',
+      description:
+        'Small dataset (<10K docs). Analyzing 100% of documents for comprehensive coverage.',
     };
   } else if (totalVolume < 100_000) {
     // Small to medium: stratified sampling at 30%
@@ -97,7 +98,8 @@ export async function calibrateSamplingStrategy(
       strategyName: 'Sparse Sampling (1%)',
       estimatedDocsSampled: Math.floor(totalVolume * 0.01),
       depthLevel: 'light',
-      description: 'Very large dataset (1M-10M docs). Sparse sampling of 1% to maintain response times.',
+      description:
+        'Very large dataset (1M-10M docs). Sparse sampling of 1% to maintain response times.',
     };
   } else {
     // Huge: minimal sampling at 0.1%
@@ -112,7 +114,9 @@ export async function calibrateSamplingStrategy(
   }
 
   logger.info(
-    `[AESOP] Sampling strategy: ${config.strategyName} (${totalVolume.toLocaleString()} docs → ${config.estimatedDocsSampled.toLocaleString()} sampled)`
+    `[AESOP] Sampling strategy: ${
+      config.strategyName
+    } (${totalVolume.toLocaleString()} docs → ${config.estimatedDocsSampled.toLocaleString()} sampled)`
   );
 
   return config;

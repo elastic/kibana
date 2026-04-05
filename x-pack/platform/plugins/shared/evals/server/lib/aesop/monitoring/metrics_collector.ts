@@ -108,10 +108,7 @@ export interface TokenUsageByAgent {
 }
 
 export class MetricsCollectorService {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private logger: Logger
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   /**
    * Collect skill usage metrics from OTEL traces
@@ -235,12 +232,11 @@ export class MetricsCollectorService {
       });
 
       // Calculate total cost (Claude pricing: $3/M prompt, $15/M completion)
-      const totalCost =
-        buckets.reduce((sum: number, bucket: any) => {
-          const promptTokens = bucket.total_prompt_tokens?.value || 0;
-          const completionTokens = bucket.total_completion_tokens?.value || 0;
-          return sum + (promptTokens * 0.003) / 1000 + (completionTokens * 0.015) / 1000;
-        }, 0);
+      const totalCost = buckets.reduce((sum: number, bucket: any) => {
+        const promptTokens = bucket.total_prompt_tokens?.value || 0;
+        const completionTokens = bucket.total_completion_tokens?.value || 0;
+        return sum + (promptTokens * 0.003) / 1000 + (completionTokens * 0.015) / 1000;
+      }, 0);
 
       const avgSuccessRate =
         bySkill.length > 0
@@ -439,21 +435,22 @@ export class MetricsCollectorService {
 
       // Calculate aggregates
       const durations = byExecution.map((e) => e.duration_minutes);
-      const avgDuration = durations.length > 0
-        ? durations.reduce((sum, d) => sum + d, 0) / durations.length
-        : 0;
+      const avgDuration =
+        durations.length > 0 ? durations.reduce((sum, d) => sum + d, 0) / durations.length : 0;
 
       const sortedDurations = [...durations].sort((a, b) => a - b);
       const p95Index = Math.ceil(sortedDurations.length * 0.95) - 1;
       const p95Duration = sortedDurations[p95Index] || 0;
 
-      const avgIndices = byExecution.length > 0
-        ? byExecution.reduce((sum, e) => sum + e.indices_discovered, 0) / byExecution.length
-        : 0;
+      const avgIndices =
+        byExecution.length > 0
+          ? byExecution.reduce((sum, e) => sum + e.indices_discovered, 0) / byExecution.length
+          : 0;
 
-      const avgSkills = byExecution.length > 0
-        ? byExecution.reduce((sum, e) => sum + e.skills_proposed, 0) / byExecution.length
-        : 0;
+      const avgSkills =
+        byExecution.length > 0
+          ? byExecution.reduce((sum, e) => sum + e.skills_proposed, 0) / byExecution.length
+          : 0;
 
       const totalExecutions = result.hits.total;
       // Query only returns completed executions; success rate requires a separate
@@ -467,7 +464,8 @@ export class MetricsCollectorService {
           p95_duration_minutes: p95Duration,
           avg_indices_per_run: avgIndices,
           avg_skills_per_run: avgSkills,
-          total_executions: typeof totalExecutions === 'number' ? totalExecutions : totalExecutions.value,
+          total_executions:
+            typeof totalExecutions === 'number' ? totalExecutions : totalExecutions.value,
           success_rate: successRate,
         },
       };

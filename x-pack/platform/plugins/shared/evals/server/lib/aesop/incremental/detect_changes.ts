@@ -18,8 +18,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ExplorationState } from './exploration_state';
 import { createHash } from 'crypto';
+import type { ExplorationState } from './exploration_state';
 
 /**
  * Result of change detection analysis
@@ -96,7 +96,9 @@ export class ChangeDetector {
     // If no previous state, this is a full exploration
     if (!lastState) {
       const allIndices = await this.getAllMatchingIndices(scopedPatterns);
-      this.logger.info(`[AESOP Changes] First exploration - analyzing all ${allIndices.length} indices`);
+      this.logger.info(
+        `[AESOP Changes] First exploration - analyzing all ${allIndices.length} indices`
+      );
 
       return {
         new_indices: allIndices,
@@ -148,7 +150,10 @@ export class ChangeDetector {
    * @param lastState - Previous exploration state
    * @returns Array of new index names
    */
-  async detectNewIndices(scopedPatterns: string[], lastState: ExplorationState | null): Promise<string[]> {
+  async detectNewIndices(
+    scopedPatterns: string[],
+    lastState: ExplorationState | null
+  ): Promise<string[]> {
     const currentIndices = await this.getAllMatchingIndices(scopedPatterns);
 
     if (!lastState) {
@@ -176,7 +181,10 @@ export class ChangeDetector {
    * @param lastState - Previous exploration state
    * @returns Array of modified index names
    */
-  async detectModifiedIndices(scopedPatterns: string[], lastState: ExplorationState | null): Promise<string[]> {
+  async detectModifiedIndices(
+    scopedPatterns: string[],
+    lastState: ExplorationState | null
+  ): Promise<string[]> {
     if (!lastState) {
       return [];
     }
@@ -185,7 +193,9 @@ export class ChangeDetector {
     const currentIndices = await this.getAllMatchingIndices(scopedPatterns);
 
     // Only check indices that existed in previous state
-    const existingIndices = currentIndices.filter((idx) => lastState.discovered_indices.includes(idx));
+    const existingIndices = currentIndices.filter((idx) =>
+      lastState.discovered_indices.includes(idx)
+    );
 
     // Limit to avoid overwhelming ES
     const indicesToCheck = existingIndices.slice(0, this.config.maxIndicesToAnalyze);
@@ -223,7 +233,10 @@ export class ChangeDetector {
    * @param lastState - Previous exploration state
    * @returns Array of removed index names
    */
-  async detectRemovedIndices(scopedPatterns: string[], lastState: ExplorationState | null): Promise<string[]> {
+  async detectRemovedIndices(
+    scopedPatterns: string[],
+    lastState: ExplorationState | null
+  ): Promise<string[]> {
     if (!lastState) {
       return [];
     }
@@ -231,7 +244,9 @@ export class ChangeDetector {
     const currentIndices = await this.getAllMatchingIndices(scopedPatterns);
     const currentIndicesSet = new Set(currentIndices);
 
-    const removedIndices = lastState.discovered_indices.filter((idx) => !currentIndicesSet.has(idx));
+    const removedIndices = lastState.discovered_indices.filter(
+      (idx) => !currentIndicesSet.has(idx)
+    );
 
     if (removedIndices.length > 0) {
       this.logger.warn(`[AESOP Changes] Detected ${removedIndices.length} removed indices`, {
@@ -252,7 +267,10 @@ export class ChangeDetector {
    * @param lastState - Previous exploration state
    * @returns Map of index name to new document count
    */
-  async detectNewData(scopedPatterns: string[], lastState: ExplorationState): Promise<Record<string, number>> {
+  async detectNewData(
+    scopedPatterns: string[],
+    lastState: ExplorationState
+  ): Promise<Record<string, number>> {
     const newDocCounts: Record<string, number> = {};
     const indices = await this.getAllMatchingIndices(scopedPatterns);
 
@@ -262,7 +280,10 @@ export class ChangeDetector {
     for (const index of indicesToCheck) {
       try {
         // Try timestamp-based counting first
-        const timestampResult = await this.countDocumentsSinceTimestamp(index, lastState.last_run_timestamp);
+        const timestampResult = await this.countDocumentsSinceTimestamp(
+          index,
+          lastState.last_run_timestamp
+        );
 
         if (timestampResult !== null) {
           if (timestampResult > 0) {
@@ -285,7 +306,11 @@ export class ChangeDetector {
 
     const totalNew = Object.values(newDocCounts).reduce((sum, count) => sum + count, 0);
 
-    this.logger.debug(`[AESOP Changes] Counted ${totalNew} new documents across ${Object.keys(newDocCounts).length} indices`);
+    this.logger.debug(
+      `[AESOP Changes] Counted ${totalNew} new documents across ${
+        Object.keys(newDocCounts).length
+      } indices`
+    );
 
     return newDocCounts;
   }
@@ -313,7 +338,10 @@ export class ChangeDetector {
   /**
    * Detect mapping changes by comparing fingerprints
    */
-  private async detectMappingChanges(indices: string[], lastState: ExplorationState): Promise<string[]> {
+  private async detectMappingChanges(
+    indices: string[],
+    lastState: ExplorationState
+  ): Promise<string[]> {
     const changes: string[] = [];
 
     try {
@@ -343,7 +371,10 @@ export class ChangeDetector {
   /**
    * Detect significant document count changes
    */
-  private async detectDocCountChanges(indices: string[], lastState: ExplorationState): Promise<string[]> {
+  private async detectDocCountChanges(
+    indices: string[],
+    lastState: ExplorationState
+  ): Promise<string[]> {
     const changes: string[] = [];
 
     try {
@@ -382,7 +413,10 @@ export class ChangeDetector {
   /**
    * Count documents created since timestamp using @timestamp field
    */
-  private async countDocumentsSinceTimestamp(index: string, timestamp: string): Promise<number | null> {
+  private async countDocumentsSinceTimestamp(
+    index: string,
+    timestamp: string
+  ): Promise<number | null> {
     try {
       const result = await this.esClient.count({
         index,

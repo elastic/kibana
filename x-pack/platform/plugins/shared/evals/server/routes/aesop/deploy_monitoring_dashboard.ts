@@ -72,7 +72,9 @@ export function registerDeployMonitoringDashboardRoute({ router, logger }: AESOP
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to deploy dashboard: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to deploy dashboard: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

@@ -19,7 +19,12 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-export type AnalystRole = 'soc_analyst' | 'threat_hunter' | 'security_engineer' | 'ops_analyst' | 'unknown';
+export type AnalystRole =
+  | 'soc_analyst'
+  | 'threat_hunter'
+  | 'security_engineer'
+  | 'ops_analyst'
+  | 'unknown';
 
 export interface RoleInference {
   role: AnalystRole;
@@ -94,7 +99,9 @@ export async function inferAnalystRole(
     const confidence = totalScore > 0 ? topScore / totalScore : 0;
 
     logger.info(
-      `[AESOP] Inferred role: ${topRole} (confidence: ${(confidence * 100).toFixed(1)}%, events: ${events.length})`
+      `[AESOP] Inferred role: ${topRole} (confidence: ${(confidence * 100).toFixed(1)}%, events: ${
+        events.length
+      })`
     );
 
     return {

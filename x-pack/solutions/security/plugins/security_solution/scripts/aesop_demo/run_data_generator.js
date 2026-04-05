@@ -15,12 +15,12 @@ require('@babel/register')({
   extensions: ['.ts'],
   presets: [
     require.resolve('@babel/preset-typescript'),
-    [require.resolve('@babel/preset-env'), { targets: { node: 'current' } }]
-  ]
+    [require.resolve('@babel/preset-env'), { targets: { node: 'current' } }],
+  ],
 });
 
 // Import and run the data generator
-const { generateAESOPDemoData } = require('./data_generator.ts');
+const { generateAESOPDemoData } = require('./data_generator');
 
 generateAESOPDemoData()
   .then(() => {

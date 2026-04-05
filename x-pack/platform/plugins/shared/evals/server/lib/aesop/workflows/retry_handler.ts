@@ -111,7 +111,9 @@ export class WorkflowRetryHandler {
 
     for (let attempt = 1; attempt <= opts.maxRetries; attempt++) {
       try {
-        this.logger.debug(`[RetryHandler] Executing ${operationName}, attempt ${attempt}/${opts.maxRetries}`);
+        this.logger.debug(
+          `[RetryHandler] Executing ${operationName}, attempt ${attempt}/${opts.maxRetries}`
+        );
 
         const result = await operation();
 
@@ -138,9 +140,12 @@ export class WorkflowRetryHandler {
 
         // If this was the last attempt, throw
         if (attempt >= opts.maxRetries) {
-          this.logger.error(`[RetryHandler] ${operationName} failed after ${opts.maxRetries} attempts`, {
-            error: lastError.message,
-          });
+          this.logger.error(
+            `[RetryHandler] ${operationName} failed after ${opts.maxRetries} attempts`,
+            {
+              error: lastError.message,
+            }
+          );
           throw new MaxRetriesExceededError(operationName, attempt, lastError);
         }
 
@@ -332,7 +337,9 @@ export class WorkflowRetryHandler {
 
     for (let i = 0; i < operations.length; i++) {
       const operation = operations[i];
-      const operationName = options.operationName ? `${options.operationName}_step_${i + 1}` : `step_${i + 1}`;
+      const operationName = options.operationName
+        ? `${options.operationName}_step_${i + 1}`
+        : `step_${i + 1}`;
 
       const result = await this.executeWithRetry(operation, {
         ...options,

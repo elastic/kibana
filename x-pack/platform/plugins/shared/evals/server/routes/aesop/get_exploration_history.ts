@@ -57,7 +57,8 @@ export function registerGetExplorationHistoryRoute({ router, logger }: AESOPRout
                 completed_at: source.completed_at,
                 error_message: source.error_message,
                 agent_role: source.config?.agent_role || 'unknown',
-                indices_discovered: source.metrics?.indices_explored ?? source.config?.scoped_indices?.length ?? 0,
+                indices_discovered:
+                  source.metrics?.indices_explored ?? source.config?.scoped_indices?.length ?? 0,
                 scoped_indices: source.config?.scoped_indices || [],
                 relationships_found: source.metrics?.relationships_discovered ?? 0,
                 patterns_identified: source.metrics?.patterns_found ?? 0,
@@ -83,7 +84,9 @@ export function registerGetExplorationHistoryRoute({ router, logger }: AESOPRout
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to fetch exploration history: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to fetch exploration history: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }

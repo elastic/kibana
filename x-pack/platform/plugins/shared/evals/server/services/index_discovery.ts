@@ -135,7 +135,8 @@ function categorizeIndex(name: string): IndexInfo['type'] {
   if (lower.includes('alert')) return 'alerts';
   if (lower.startsWith('logs-') || lower.includes('log')) return 'logs';
   if (lower.startsWith('metrics-') || lower.includes('metric')) return 'metrics';
-  if (lower.startsWith('traces-') || lower.includes('trace') || lower.includes('apm')) return 'traces';
+  if (lower.startsWith('traces-') || lower.includes('trace') || lower.includes('apm'))
+    return 'traces';
   return 'other';
 }
 
@@ -170,12 +171,17 @@ function calculateRelevanceScore(name: string, docCount: number, type: IndexInfo
  */
 function prioritizeIndices(names: string[]): string[] {
   const securityPatterns = [
-    'alert', 'detection', 'threat', 'security', 'endpoint', 'malware', 'intrusion',
+    'alert',
+    'detection',
+    'threat',
+    'security',
+    'endpoint',
+    'malware',
+    'intrusion',
     'chat-conversations',
   ];
 
-  const isSecurity = (name: string) =>
-    securityPatterns.some((p) => name.toLowerCase().includes(p));
+  const isSecurity = (name: string) => securityPatterns.some((p) => name.toLowerCase().includes(p));
 
   const security = names.filter(isSecurity);
   const other = names.filter((n) => !isSecurity(n));
@@ -212,8 +218,13 @@ function isBackingIndex(name: string): boolean {
  */
 function isExcludedDataStream(name: string): boolean {
   const excludedPatterns = [
-    '.kibana', '.fleet', '.monitoring', '.transform', '.profiling',
-    'synthetics-', 'elastic-connectors',
+    '.kibana',
+    '.fleet',
+    '.monitoring',
+    '.transform',
+    '.profiling',
+    'synthetics-',
+    'elastic-connectors',
   ];
   return excludedPatterns.some((p) => name.startsWith(p));
 }
@@ -262,8 +273,14 @@ async function sampleIndex(
       isDataStream,
       docCount,
       ageRange: {
-        oldest: timestamps.length > 0 ? new Date(Math.min(...timestamps.map((t) => t.getTime()))) : new Date(),
-        newest: timestamps.length > 0 ? new Date(Math.max(...timestamps.map((t) => t.getTime()))) : new Date(),
+        oldest:
+          timestamps.length > 0
+            ? new Date(Math.min(...timestamps.map((t) => t.getTime())))
+            : new Date(),
+        newest:
+          timestamps.length > 0
+            ? new Date(Math.max(...timestamps.map((t) => t.getTime())))
+            : new Date(),
       },
       fields,
       relevanceScore,

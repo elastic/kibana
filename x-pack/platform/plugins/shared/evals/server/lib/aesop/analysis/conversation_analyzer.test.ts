@@ -25,17 +25,11 @@ describe('ConversationAnalyzer', () => {
       const messages = [
         {
           role: 'assistant',
-          tool_calls: [
-            { function: { name: 'esql_query' } },
-            { function: { name: 'get_alert' } },
-          ],
+          tool_calls: [{ function: { name: 'esql_query' } }, { function: { name: 'get_alert' } }],
         },
         {
           role: 'assistant',
-          tool_calls: [
-            { function: { name: 'esql_query' } },
-            { function: { name: 'esql_query' } },
-          ],
+          tool_calls: [{ function: { name: 'esql_query' } }, { function: { name: 'esql_query' } }],
         },
         {
           role: 'assistant',
@@ -84,9 +78,7 @@ describe('ConversationAnalyzer', () => {
       const result = ConversationAnalyzer.extractESQLPatterns(messages);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toBe(
-        'FROM logs-* | WHERE host.name == "server1" | LIMIT 10'
-      );
+      expect(result[0]).toBe('FROM logs-* | WHERE host.name == "server1" | LIMIT 10');
       expect(result[1]).toBe(
         'FROM .alerts-security.alerts-default | STATS count = COUNT(*) BY event.action'
       );
@@ -109,9 +101,7 @@ describe('ConversationAnalyzer', () => {
     });
 
     it('returns empty array when no esql blocks exist', () => {
-      const messages = [
-        { role: 'assistant', content: 'Here is some text without code blocks.' },
-      ];
+      const messages = [{ role: 'assistant', content: 'Here is some text without code blocks.' }];
 
       const result = ConversationAnalyzer.extractESQLPatterns(messages);
       expect(result).toEqual([]);
@@ -218,20 +208,14 @@ describe('ConversationAnalyzer', () => {
 
       // Should find the bigram "get_alert → esql_query" repeated 2x
       const getAlertToEsql = result.find(
-        (f) =>
-          f.steps.length === 2 &&
-          f.steps[0] === 'get_alert' &&
-          f.steps[1] === 'esql_query'
+        (f) => f.steps.length === 2 && f.steps[0] === 'get_alert' && f.steps[1] === 'esql_query'
       );
       expect(getAlertToEsql).toBeDefined();
       expect(getAlertToEsql!.frequency).toBe(2);
 
       // Should also find "esql_query → search_index" repeated 2x
       const esqlToSearch = result.find(
-        (f) =>
-          f.steps.length === 2 &&
-          f.steps[0] === 'esql_query' &&
-          f.steps[1] === 'search_index'
+        (f) => f.steps.length === 2 && f.steps[0] === 'esql_query' && f.steps[1] === 'search_index'
       );
       expect(esqlToSearch).toBeDefined();
       expect(esqlToSearch!.frequency).toBe(2);
@@ -272,10 +256,7 @@ describe('ConversationAnalyzer', () => {
       };
       const logger = createMockLogger();
 
-      const result = await ConversationAnalyzer.analyze(
-        mockEsClient as any,
-        logger as any
-      );
+      const result = await ConversationAnalyzer.analyze(mockEsClient as any, logger as any);
 
       expect(result).toEqual({
         toolUsage: [],
@@ -294,10 +275,7 @@ describe('ConversationAnalyzer', () => {
       };
       const logger = createMockLogger();
 
-      const result = await ConversationAnalyzer.analyze(
-        mockEsClient as any,
-        logger as any
-      );
+      const result = await ConversationAnalyzer.analyze(mockEsClient as any, logger as any);
 
       expect(result).toEqual({
         toolUsage: [],
@@ -321,8 +299,7 @@ describe('ConversationAnalyzer', () => {
                   {
                     role: 'assistant',
                     tool_calls: [{ function: { name: 'esql_query' } }],
-                    content:
-                      '```esql\nFROM logs-* | STATS count = COUNT(*) BY host.name\n```',
+                    content: '```esql\nFROM logs-* | STATS count = COUNT(*) BY host.name\n```',
                   },
                   {
                     role: 'tool',
@@ -355,10 +332,7 @@ describe('ConversationAnalyzer', () => {
       };
       const logger = createMockLogger();
 
-      const result = await ConversationAnalyzer.analyze(
-        mockEsClient as any,
-        logger as any
-      );
+      const result = await ConversationAnalyzer.analyze(mockEsClient as any, logger as any);
 
       expect(result.totalConversations).toBe(2);
       expect(result.totalMessages).toBe(4);

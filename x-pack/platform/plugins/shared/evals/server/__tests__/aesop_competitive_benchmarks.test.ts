@@ -21,8 +21,6 @@
  * - Tests serve as acceptance criteria for AESOP MVP
  */
 
-import { performance } from 'perf_hooks';
-
 describe('AESOP Competitive Benchmarks', () => {
   // Test data structures for baseline comparisons
   interface DocumentedRelationship {
@@ -373,7 +371,7 @@ describe('AESOP Competitive Benchmarks', () => {
         {
           skillId: 'cloud_resource_enumeration',
           evalScore: 0.88,
-          precision: 0.90,
+          precision: 0.9,
           recall: 0.86,
           f1Score: 0.88,
         },
@@ -529,9 +527,7 @@ describe('AESOP Competitive Benchmarks', () => {
       expect(improvement).toBeGreaterThanOrEqual(0.15); // ≥15% improvement
 
       console.log(`[H3] Cycle 1 Approval: ${(cycleMetrics[0].approvalRate * 100).toFixed(1)}%`);
-      console.log(
-        `[H3] Cycle 3 Approval: ${(cycleMetrics[2].approvalRate * 100).toFixed(1)}%`
-      );
+      console.log(`[H3] Cycle 3 Approval: ${(cycleMetrics[2].approvalRate * 100).toFixed(1)}%`);
       console.log(`[H3] Improvement: +${(improvement * 100).toFixed(1)}%`);
     });
 
@@ -919,7 +915,8 @@ describe('AESOP Competitive Benchmarks', () => {
       const torqManualEffortHours = 40; // 5 playbooks × 8 hours each
       const aesopEffortHours = 1.58; // From H2 calculation
 
-      const effortReduction = ((torqManualEffortHours - aesopEffortHours) / torqManualEffortHours) * 100;
+      const effortReduction =
+        ((torqManualEffortHours - aesopEffortHours) / torqManualEffortHours) * 100;
 
       expect(effortReduction).toBeGreaterThan(90); // >90% reduction
     });

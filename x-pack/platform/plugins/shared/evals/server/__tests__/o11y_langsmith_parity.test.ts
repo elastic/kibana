@@ -132,7 +132,8 @@ describe('O11y Traces vs LangSmith Parity', () => {
       // Calculate token count parity
       const o11yTotal = o11yTrace.totalTokens;
       const langsmithTotal = langsmithTrace.total_tokens;
-      const parity = (Math.min(o11yTotal, langsmithTotal) / Math.max(o11yTotal, langsmithTotal)) * 100;
+      const parity =
+        (Math.min(o11yTotal, langsmithTotal) / Math.max(o11yTotal, langsmithTotal)) * 100;
 
       expect(parity).toBeGreaterThanOrEqual(95);
 
@@ -503,7 +504,8 @@ describe('O11y Traces vs LangSmith Parity', () => {
         },
       };
 
-      const promptCost = (tokenUsage.promptTokens / 1_000_000) * pricing[tokenUsage.model].inputPer1M;
+      const promptCost =
+        (tokenUsage.promptTokens / 1_000_000) * pricing[tokenUsage.model].inputPer1M;
       const completionCost =
         (tokenUsage.completionTokens / 1_000_000) * pricing[tokenUsage.model].outputPer1M;
       const totalCost = promptCost + completionCost;
@@ -512,7 +514,9 @@ describe('O11y Traces vs LangSmith Parity', () => {
       expect(totalCost).toBeGreaterThan(0);
       expect(totalCost).toBeLessThan(0.02);
 
-      console.log(`[Cost] Prompt: $${promptCost.toFixed(4)}, Completion: $${completionCost.toFixed(4)}`);
+      console.log(
+        `[Cost] Prompt: $${promptCost.toFixed(4)}, Completion: $${completionCost.toFixed(4)}`
+      );
       console.log(`[Cost] Total: $${totalCost.toFixed(4)}`);
     });
 
@@ -613,7 +617,7 @@ describe('O11y Traces vs LangSmith Parity', () => {
         llmLatency: 2500, // ms
         esClusterLoad: 0.75, // 75% utilization
         cpuUsage: 0.65,
-        memoryUsage: 0.80,
+        memoryUsage: 0.8,
       };
 
       // High cluster load should correlate with high LLM latency

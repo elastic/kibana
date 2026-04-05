@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import {
   registerApproveSkillRoute,
   sanitizeSkillId,
@@ -160,7 +164,7 @@ describe('POST /internal/aesop/skills/{skillId}/approve', () => {
           },
         }),
       }),
-    }) as any;
+    } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
