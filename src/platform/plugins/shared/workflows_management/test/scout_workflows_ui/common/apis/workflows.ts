@@ -171,10 +171,13 @@ export class WorkflowsApiService {
   }
 
   /** POST /api/workflows/validate — validate a workflow YAML without saving. */
-  async validate(yaml: string): Promise<{ valid: boolean; errors?: Array<{ message: string }> }> {
+  async validate(yaml: string): Promise<{
+    valid: boolean;
+    diagnostics: Array<{ severity: string; message: string; source: string }>;
+  }> {
     const response = await this.kbnClient.request<{
       valid: boolean;
-      errors?: Array<{ message: string }>;
+      diagnostics: Array<{ severity: string; message: string; source: string }>;
     }>({
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/validate`,
