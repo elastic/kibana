@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -37,6 +38,7 @@ const mockConnectors = [
     actionTypeId: '.inference',
     isPreconfigured: true,
     isMissingSecrets: false,
+    isRecommended: true,
   },
 ];
 

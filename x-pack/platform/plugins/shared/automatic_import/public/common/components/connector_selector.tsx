@@ -29,23 +29,22 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import type { AIConnector } from '@kbn/inference-connectors';
 import { useAuthorization } from '../hooks/use_authorization';
 import { useKibana } from '..';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
 
-const ELASTIC_LLM_CONNECTOR_ID = 'Elastic-Managed-LLM';
-
 /**
- * Returns the default connector with priority:
+ * Returns the default connector with priority based on available connectors:
  * 1. User's settings default (if set and exists)
- * 2. Elastic Managed LLM
+ * 2. Recommended connector (per feature registry)
  * 3. First available connector
  */
 const getDefaultConnector = (
-  connectors: ActionConnector[] | undefined,
+  connectors: AIConnector[] | undefined,
   settingsDefaultConnectorId: string | undefined
-): ActionConnector | undefined => {
+): AIConnector | undefined => {
   if (!connectors?.length) {
     return undefined;
   }
@@ -60,10 +59,10 @@ const getDefaultConnector = (
     }
   }
 
-  // 2. Elastic Managed LLM
-  const elasticLLM = validConnectors.find((c) => c.id === ELASTIC_LLM_CONNECTOR_ID);
-  if (elasticLLM) {
-    return elasticLLM;
+  // 2. Recommended connectors in order by feature registry
+  const preferred = validConnectors.find((c) => c.isRecommended);
+  if (preferred) {
+    return preferred;
   }
 
   // 3. First available connector
@@ -78,7 +77,7 @@ export interface ConnectorSelectorProps {
 }
 
 interface ConnectorData {
-  connectors: ActionConnector[] | undefined;
+  connectors: AIConnector[] | undefined;
   customConnectors: ConnectorSelectableComponentProps['customConnectors'];
   preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
   defaultConnectorId: string | undefined;
