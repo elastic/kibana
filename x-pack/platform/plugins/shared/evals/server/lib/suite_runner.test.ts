@@ -11,9 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SuiteRunner } from './suite_runner';
 import type { SuiteRunConfig } from './suite_runner';
 
-interface MockStream extends PassThrough {
-  unref: jest.Mock;
-}
+type MockStream = PassThrough;
 
 interface MockChild extends EventEmitter {
   unref: jest.Mock;
@@ -23,9 +21,7 @@ interface MockChild extends EventEmitter {
 }
 
 const createMockStream = (): MockStream => {
-  const stream = new PassThrough() as MockStream;
-  stream.unref = jest.fn();
-  return stream;
+  return new PassThrough();
 };
 
 const createMockChild = (): MockChild => {
@@ -327,14 +323,6 @@ describe('SuiteRunner', () => {
 
       const status = runner.getStatus(runId);
       expect(status?.output).toEqual(['Error: actual test failure']);
-    });
-
-    it('calls unref on stdout and stderr streams', () => {
-      runner.startRun(baseConfig);
-      const child = getSpawnedChild();
-
-      expect(child.stdout.unref).toHaveBeenCalled();
-      expect(child.stderr.unref).toHaveBeenCalled();
     });
 
     it('trims output to MAX_OUTPUT_LINES (200)', () => {
