@@ -33,6 +33,10 @@ function buildServices({
   const services = {
     settings: {
       client: {
+        get: jest.fn(),
+        get$: jest.fn(),
+      },
+      globalClient: {
         get: (key: string) => (key === HIDE_ANNOUNCEMENTS_ID ? hideAnnouncements : undefined),
         get$: jest.fn(),
       },
