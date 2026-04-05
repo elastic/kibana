@@ -211,11 +211,24 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
               border-top: ${euiTheme.colors.borderBasePlain};
               border-bottom: ${euiTheme.colors.borderBasePlain};
               .euiModalBody__overflow {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
                 padding-inline: 0;
+                overflow: hidden;
               }
             `}
           >
-            <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="m"
+              css={css`
+                flex: 1;
+                min-height: 0;
+                align-self: stretch;
+              `}
+            >
               <EuiFlexItem
                 grow={false}
                 css={css`
@@ -269,6 +282,11 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
               <EuiFlexItem
                 css={css`
+                  flex: 1;
+                  min-height: 0;
+                  display: flex;
+                  flex-direction: column;
+                  overflow: hidden;
                   background-color: ${euiTheme.colors.backgroundBaseSubdued};
                   padding: ${euiTheme.size.m} ${euiTheme.size.l};
                 `}
