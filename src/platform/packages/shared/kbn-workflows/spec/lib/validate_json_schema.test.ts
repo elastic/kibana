@@ -9,6 +9,9 @@
 
 import { isValidJsonSchema } from './validate_json_schema';
 
+// Unit tests for isValidJsonSchema (JsonModelShapeSchema + explicit unsupported-keyword checks).
+// Integration: schema.test.ts (JsonModelSchema). Full Monaco JSON Schema from getWorkflowJsonSchema
+// is intentionally not asserted here — it includes OpenAPI/Zod keywords outside this model.
 describe('isValidJsonSchema', () => {
   it('should validate a simple string schema', () => {
     const schema = { type: 'string' };
@@ -101,11 +104,11 @@ describe('isValidJsonSchema', () => {
     expect(isValidJsonSchema(schema)).toBe(true);
   });
 
-  it('should validate a schema with allOf', () => {
+  it('should reject allOf (not a supported keyword for workflow input schemas)', () => {
     const schema = {
       allOf: [{ type: 'object' }, { properties: { name: { type: 'string' } } }],
     };
-    expect(isValidJsonSchema(schema)).toBe(true);
+    expect(isValidJsonSchema(schema)).toBe(false);
   });
 
   it('should reject null', () => {
@@ -234,11 +237,11 @@ describe('isValidJsonSchema', () => {
     expect(isValidJsonSchema(schema)).toBe(true);
   });
 
-  it('should validate schema with not (negation)', () => {
+  it('should reject not (not a supported keyword for workflow input schemas)', () => {
     const schema = {
       not: { type: 'null' },
     };
-    expect(isValidJsonSchema(schema)).toBe(true);
+    expect(isValidJsonSchema(schema)).toBe(false);
   });
 
   it('should validate schema with additionalProperties', () => {
@@ -252,7 +255,7 @@ describe('isValidJsonSchema', () => {
     expect(isValidJsonSchema(schema)).toBe(true);
   });
 
-  it('should validate schema with additionalProperties as schema', () => {
+  it('should reject additionalProperties as a nested schema (only boolean is supported)', () => {
     const schema = {
       type: 'object',
       properties: {
@@ -262,7 +265,7 @@ describe('isValidJsonSchema', () => {
         type: 'string',
       },
     };
-    expect(isValidJsonSchema(schema)).toBe(true);
+    expect(isValidJsonSchema(schema)).toBe(false);
   });
 
   it('should validate schema with const (constant value)', () => {

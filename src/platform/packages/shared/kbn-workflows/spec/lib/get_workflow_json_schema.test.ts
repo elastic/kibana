@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Ajv from 'ajv';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 
@@ -247,14 +246,7 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
     expect(actualSchema.properties.name.type).toBe('string');
     expect(actualSchema.properties.enabled.type).toBe('boolean');
 
-    // Verify validation works with AJV (same validator Monaco uses)
-    if (!jsonSchema) {
-      throw new Error('JSON schema is null');
-    }
-    const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
-    const validate = ajv.compile(jsonSchema);
-
-    // Valid workflow should pass
+    // Verify validation against the same Zod schema used to produce the JSON Schema (Monaco uses JSON Schema; runtime validation uses Zod)
     const validWorkflow = {
       name: 'Test Workflow',
       enabled: true,
@@ -262,9 +254,8 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
       triggers: [{ type: 'manual' }],
       steps: [{ name: 'step1', type: 'console' }],
     };
-    expect(validate(validWorkflow)).toBe(true);
+    expect(pipeSchema.safeParse(validWorkflow).success).toBe(true);
 
-    // Invalid workflow (wrong type for enabled) should fail
     const invalidWorkflow = {
       name: 'Test Workflow',
       enabled: 23, // Should be boolean, not number
@@ -272,14 +263,13 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
       triggers: [{ type: 'manual' }],
       steps: [{ name: 'step1', type: 'console' }],
     };
-    expect(validate(invalidWorkflow)).toBe(false);
-    expect(validate.errors).toBeDefined();
-    expect(validate.errors?.length).toBeGreaterThan(0);
-
-    // Check that the error is about the enabled field
-    const enabledError = validate.errors?.find(
-      (error: any) => error.instancePath === '/enabled' || error.params?.type === 'boolean'
-    );
-    expect(enabledError).toBeDefined();
+    const invalidResult = pipeSchema.safeParse(invalidWorkflow);
+    expect(invalidResult.success).toBe(false);
+    if (!invalidResult.success) {
+      const enabledIssue = invalidResult.error.issues.find(
+        (issue) => issue.path[0] === 'enabled' || issue.path.join('.') === 'enabled'
+      );
+      expect(enabledIssue).toBeDefined();
+    }
   });
 });

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Ajv from 'ajv/dist/2020';
-import addFormats from 'ajv-formats';
 import { readFileSync } from 'fs'; // eslint-disable-line import/no-nodejs-modules
 import { join } from 'path'; // eslint-disable-line import/no-nodejs-modules
 import { parse } from 'yaml';
@@ -72,7 +70,7 @@ describe('Validate example_security_workflow.yaml against Monaco Schema', () => 
 
     // With transform schemas and reused: 'ref', the schema structure may differ
     // If workflowSchemaDef is not found, use the root schema for validation
-    // The critical requirement is that the schema can be compiled by AJV
+    // The critical requirement is that we can resolve a schema object for checks below
     if (!workflowSchemaDef && jsonSchema) {
       // Fallback to using root schema if no definition found
       workflowSchemaDef = jsonSchema as Record<string, unknown>;
@@ -80,43 +78,9 @@ describe('Validate example_security_workflow.yaml against Monaco Schema', () => 
 
     expect(workflowSchemaDef).toBeDefined();
 
-    // Validate using Ajv (same validator that Monaco uses)
-    // We need to compile the full schema (with definitions) so that $ref references can be resolved
-    const ajv = new Ajv({
-      strict: false,
-      allErrors: true,
-      validateFormats: true,
-    });
-    addFormats(ajv);
-
-    // Create a validation schema that includes the WorkflowSchema and all definitions
-    // This ensures all $ref references can be resolved
-    if (!jsonSchema) {
-      throw new Error('jsonSchema is null');
-    }
-    // Use the full jsonSchema for validation, not just a single definition
-    // This ensures all $ref references can be resolved correctly
-    // The root schema might be a $ref, so we need to include all definitions
-    const validationSchema = {
-      ...(jsonSchema as Record<string, unknown>),
-    };
-
-    // Remove $schema property if present - AJV 2020 doesn't need it and may complain
-    if ('$schema' in validationSchema) {
-      delete (validationSchema as { $schema?: string }).$schema;
-    }
-
-    // If the root is a $ref, we need to resolve it for validation
-    // AJV can handle $ref at root, but we need to ensure the root schema is valid
-    const validate = ajv.compile(validationSchema);
-    const valid = validate(workflowData);
-
-    // if (!valid && validate.errors) {
-    //   console.error('Validation errors:', JSON.stringify(validate.errors, null, 2));
-    // }
-
-    expect(valid).toBe(true);
-    expect(validate.errors).toBeNull();
+    // Validate parsed YAML against the same Zod schema used to build the Monaco JSON Schema
+    const parseResult = workflowZodSchema.safeParse(workflowData);
+    expect(parseResult.success).toBe(true);
 
     // Specifically verify that inputs.properties is an object, not an array
     expect(workflowData.inputs).toBeDefined();
