@@ -6,6 +6,8 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+
+import type { GetStatusResult } from '../../../../server/domain/types';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
 
@@ -16,6 +18,26 @@ import {
   LATEST_INDEX,
   UPDATES_INDEX,
 } from './constants';
+
+export interface ApiClientOptions {
+  headers?: Record<string, string>;
+  responseType?: 'json' | 'text' | 'buffer';
+  body?: any;
+}
+export interface ApiClientResponse {
+  statusCode: number;
+  statusMessage: string;
+  headers: Record<string, string | string[]>;
+  body: any;
+}
+export interface ApiClientFixture {
+  get(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  post(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  put(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  delete(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  patch(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+  head(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
+}
 
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
@@ -265,4 +287,70 @@ export const forceLogExtraction = async (
     headers,
     responseType: 'json',
     body: { fromDateISO, toDateISO },
+  });
+
+export const installAllEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) =>
+  apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const uninstallAllEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) =>
+  apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const getStatus = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  { includeComponents = false } = {}
+): Promise<
+  Omit<ApiClientResponse, 'body'> & { body: Pick<GetStatusResult, 'engines' | 'status'> }
+> =>
+  apiClient.get(
+    includeComponents
+      ? `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`
+      : ENTITY_STORE_ROUTES.public.STATUS,
+    {
+      headers,
+      responseType: 'json',
+    }
+  );
+
+export const startEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityTypes: EntityType[]
+) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
+    headers,
+    responseType: 'json',
+    body: { entityTypes },
+  });
+
+export const stopEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityTypes: EntityType[]
+) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
+    headers,
+    responseType: 'json',
+    body: { entityTypes },
+  });
+
+export const stopAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
+    headers,
+    responseType: 'json',
+    body: {},
   });
