@@ -93,8 +93,7 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
 function getPropertyAccessToken(
   filtered: ReturnType<Tokenizer['readFilteredValue']>
 ): PropertyAccessToken | null {
-  const expr = filtered.initial as { postfix?: Token[] };
-  const first = expr.postfix?.[0];
+  const first = filtered.initial.postfix[0];
   if (first && first.kind === TokenKind.PropertyAccess) {
     return first as PropertyAccessToken;
   }
