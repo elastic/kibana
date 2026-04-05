@@ -560,6 +560,21 @@ function createNavTree({
               { link: 'monitoring' },
             ],
           },
+          ...(showAlertingV2
+            ? [
+                {
+                  id: 'v2_alerting_preview',
+                  title: i18n.translate('xpack.observability.obltNav.v2AlertingPreview', {
+                    defaultMessage: 'V2 Alerting Preview',
+                  }),
+                  renderAs: 'panelOpener' as const,
+                  children: [
+                    { link: 'management:rules' as const },
+                    { link: 'management:notification_policies' as const },
+                  ],
+                },
+              ]
+            : []),
           {
             id: 'alerts_and_insights',
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
@@ -595,6 +610,17 @@ function createNavTree({
               { link: 'management:analytics' },
               { link: 'management:trained_models' },
               { link: 'management:supplied_configurations' },
+            ],
+          },
+          {
+            id: 'management_model_management',
+            title: i18n.translate('xpack.observability.obltNav.modelManagement', {
+              defaultMessage: 'Model Management',
+            }),
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
             ],
           },
           {
