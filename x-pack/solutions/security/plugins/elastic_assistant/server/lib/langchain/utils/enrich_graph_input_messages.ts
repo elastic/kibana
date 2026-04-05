@@ -57,7 +57,7 @@ const getUserPrompt = (
     if (lastMessage instanceof HumanMessage) {
       messagesCopy[messagesCopy.length - 1] = new HumanMessage({
         content: `${userPrompt} ${lastMessage.content}`.trim(),
-        ...lastMessage.additional_kwargs,
+        additional_kwargs: lastMessage.additional_kwargs,
       });
     }
     return messagesCopy;
