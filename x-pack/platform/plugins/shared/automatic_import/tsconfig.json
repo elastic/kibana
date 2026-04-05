@@ -60,6 +60,7 @@
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/scout",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/inference-common"
   ]
 }
