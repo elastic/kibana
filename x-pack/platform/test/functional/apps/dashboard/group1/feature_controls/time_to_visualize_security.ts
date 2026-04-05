@@ -39,7 +39,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const securityService = getService('security');
-  const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
   describe('dashboard time to visualize security', () => {
@@ -152,8 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
 
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
-        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
+        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
 
         await timeToVisualize.saveFromModal('New Lens from Modal', {
           addToDashboard: 'new',
@@ -229,9 +227,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('visualizeSaveButton');
 
         await visualize.ensureSavePanelOpen();
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
-        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
 
+        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
         await timeToVisualize.saveFromModal('My New Vis 1', {
           addToDashboard: 'new',
         });

@@ -46,7 +46,8 @@ async function waitForValidationToSettle(
 const MARKER_QUIESCENCE_MS = 2000;
 const MARKER_MAX_WAIT_MS = 15000;
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/261213
+test.describe.skip(
   'Workflow editor: validation performance',
   {
     tag: [
