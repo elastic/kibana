@@ -100,11 +100,14 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
 function getPropertyAccessToken(
   filtered: ReturnType<Tokenizer['readFilteredValue']>
 ): PropertyAccessToken | null {
+  if (filtered.initial.postfix.length !== 1) return null;
   const first = filtered.initial.postfix[0];
-  if (first && first.kind === TokenKind.PropertyAccess) {
-    return first as PropertyAccessToken;
-  }
-  return null;
+  if (!first || first.kind !== TokenKind.PropertyAccess) return null;
+  const token = first as PropertyAccessToken;
+  if (token.props.length === 0) return null;
+  if (token.props[0].kind !== TokenKind.Word) return null;
+  if (token.props.some((p) => p.kind === TokenKind.Word && p.getText() === '')) return null;
+  return token;
 }
 
 function containsDynamicAccess(props: Token[]): boolean {

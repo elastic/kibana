@@ -70,20 +70,26 @@ describe('wrapAsMonacoSuggestion', () => {
       expect(result.additionalTextEdits).toEqual([]);
     });
 
-    it('should use bracket notation for keys with special characters', () => {
+    it('should use dot notation for kebab-case keys', () => {
       const range = createMockRange();
       const result = wrapAsMonacoSuggestion('my-prop', '.', range, null, false, 'string');
 
-      // Should use bracket notation with quotes
-      expect(result.insertText).toMatch(/^\[["']my-prop["']\]$/);
-      // Should include a text edit to remove the dot
+      expect(result.insertText).toBe('my-prop');
+      expect(result.additionalTextEdits).toEqual([]);
+    });
+
+    it('should use bracket notation for keys with special characters', () => {
+      const range = createMockRange();
+      const result = wrapAsMonacoSuggestion('key with spaces', '.', range, null, false, 'string');
+
+      expect(result.insertText).toMatch(/^\[["']key with spaces["']\]$/);
       expect(result.additionalTextEdits).toHaveLength(1);
     });
 
     it('should use double quotes in bracket notation when scalar type is QUOTE_DOUBLE', () => {
       const range = createMockRange();
       const result = wrapAsMonacoSuggestion(
-        'my-prop',
+        'key with spaces',
         '.',
         range,
         Scalar.QUOTE_DOUBLE,
@@ -91,14 +97,13 @@ describe('wrapAsMonacoSuggestion', () => {
         'string'
       );
 
-      // Should use single quotes as opposite quote type
-      expect(result.insertText).toBe("['my-prop']");
+      expect(result.insertText).toBe("['key with spaces']");
     });
 
     it('should use double quotes in bracket notation for non-QUOTE_DOUBLE scalar', () => {
       const range = createMockRange();
       const result = wrapAsMonacoSuggestion(
-        'my-prop',
+        'key with spaces',
         '.',
         range,
         Scalar.QUOTE_SINGLE,
@@ -106,7 +111,7 @@ describe('wrapAsMonacoSuggestion', () => {
         'string'
       );
 
-      expect(result.insertText).toBe('["my-prop"]');
+      expect(result.insertText).toBe('["key with spaces"]');
     });
   });
 
