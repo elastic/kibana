@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { Request, Response } from '@kbn/core-di-server';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
 import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 
 @injectable()
-export class GetRuleRoute {
+export class GetRuleRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/{id}`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
-  static options = {
-    access: 'internal',
+  static routeOptions = {
     summary: 'Get a rule',
-    tags: ['oas-tag:alerting-v2'],
   } as const;
   static validate = {
     request: {
@@ -48,23 +46,19 @@ export class GetRuleRoute {
     },
   };
 
+  protected readonly routeName = 'get rule';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<z.infer<typeof ruleIdParamsSchema>, unknown, unknown>,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const rule = await this.rulesClient.getRule({ id: this.request.params.id });
-      return this.response.ok({ body: rule });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  protected async execute() {
+    const rule = await this.rulesClient.getRule({ id: this.request.params.id });
+    return this.ctx.response.ok({ body: rule });
   }
 }

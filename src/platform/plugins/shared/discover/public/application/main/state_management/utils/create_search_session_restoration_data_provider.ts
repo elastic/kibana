@@ -87,6 +87,7 @@ function createUrlGeneratorState({
     ...(shouldRestoreSearchSession
       ? {
           hideChart: appState.hideChart ?? false,
+          hideTable: appState.hideTable ?? false,
           sampleSize: appState.sampleSize,
         }
       : {}),

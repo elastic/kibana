@@ -588,6 +588,9 @@ $$$settings-explore-data-in-chart$$$ `xpack.discoverEnhanced.actions.exploreData
 `xpack.securitySolution.disableEndpointRuleAutoInstall` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.2.4+`
 :   Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Introduced with v9.2.4. Default is `false`.
 
+`xpack.securitySolution.maxEndpointScriptFileSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.4+`
+:   The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
+
 
 `xpack.snapshot_restore.ui.enabled`
 :   Set this value to false to disable the Snapshot and Restore UI. **Default: true**

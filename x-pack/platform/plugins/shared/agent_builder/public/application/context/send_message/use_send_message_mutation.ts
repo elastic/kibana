@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
+import { useRef, useState, useMemo, useCallback } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
@@ -117,15 +117,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
 
   const removeError = useCallback(() => {
     setError(null);
-    setErrorSteps([]);
+    setErrorSteps((prev) => (prev.length === 0 ? prev : []));
   }, []);
-
-  useEffect(() => {
-    // Clear errors any time conversation id changes - we do not persist it.
-    if (conversationId) {
-      removeError();
-    }
-  }, [conversationId, removeError]);
 
   const browserApiToolsMetadata = useMemo(() => {
     if (!browserApiTools) return undefined;
@@ -308,5 +301,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
      */
     regenerate: () => mutate({ action: 'regenerate' }),
     isRegenerating: isLoading && isRegeneratingRef.current,
+    removeError,
   };
 };

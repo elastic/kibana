@@ -8,6 +8,7 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { i18n } from '@kbn/i18n';
 import { dashboardClient } from '../../dashboard_client';
 import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
 import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
@@ -66,6 +67,21 @@ export async function loadDashboardApi({
     throw new Error('Dashboard failed saved object result validation');
   } else if (validationResult === 'redirected') {
     return;
+  }
+
+  let droppedPanelsCount = 0;
+  readResult?.warnings?.forEach(({ type }) => {
+    if (type === 'dropped_panel') {
+      droppedPanelsCount++;
+    }
+  });
+  if (droppedPanelsCount) {
+    coreServices.notifications.toasts.addWarning(
+      i18n.translate('dashboard.droppedPanelsWarning', {
+        defaultMessage: '{droppedPanelsCount} panels have been removed from dashboard',
+        values: { droppedPanelsCount },
+      })
+    );
   }
 
   await initializeDashboardApiServices();

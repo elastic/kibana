@@ -54,6 +54,7 @@ exports[`Table should render normally 1`] = `
         </EuiToolTip>,
         <EuiPopover
           anchorPosition="downLeft"
+          aria-label="Export options"
           button={
             <EuiButton
               iconSide="right"

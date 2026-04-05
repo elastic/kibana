@@ -114,6 +114,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkEnable={handleBulkEnable}
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
+        onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
         onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
         onClone={(r) =>
           navigateToUrl(

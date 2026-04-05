@@ -23,6 +23,7 @@ import type { EntityDetailsPath } from '../shared/components/left_panel/left_pan
 import type { IdentityFields } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { HostItem } from '../../../../common/search_strategy';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -44,6 +45,7 @@ interface HostPanelContentProps {
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const HostPanelContent = ({
@@ -60,6 +62,7 @@ export const HostPanelContent = ({
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
+  entityStoreEntityId,
 }: HostPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -91,6 +94,12 @@ export const HostPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && !isPreviewMode && (
+        <>
+          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <EuiHorizontalRule />
+        </>
+      )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
           entity={{ name: hostName, type: EntityType.host }}

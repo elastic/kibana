@@ -1432,7 +1432,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"none\" | \"required\" | \"optional\">; }>"
+          "<\"none\" | \"optional\" | \"required\">; }>"
         ],
         "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
         "lineNumber": 25,
