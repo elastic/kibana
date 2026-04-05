@@ -170,6 +170,33 @@ export interface CiGateResult {
 }
 
 // ---------------------------------------------------------------------------
+// Adapter output types — used by CODE evaluators
+// ---------------------------------------------------------------------------
+
+/**
+ * A single tool call record captured in adapter output.
+ */
+export interface ToolCallRecord {
+  /** Name of the tool that was called. */
+  toolName: string;
+  /** Arguments passed to the tool. */
+  args: Record<string, unknown>;
+}
+
+/**
+ * Structured output produced by an adapter after running a skill.
+ * CODE evaluators receive this as their `output` parameter.
+ */
+export interface AdapterOutput {
+  /** Ordered list of tool calls made during the run. */
+  toolCalls: ToolCallRecord[];
+  /** Final text response from the agent, if any. */
+  response?: string;
+  /** Any additional metadata captured by the adapter. */
+  metadata?: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
 // Trial / repetition metrics
 // ---------------------------------------------------------------------------
 

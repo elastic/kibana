@@ -640,7 +640,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         size="s"
-                        onClick={() => validateMutation.mutate()}
+                        onClick={() => validateMutation.mutate(undefined)}
                         disabled={!selectedConnectorId}
                         aria-label={`Run validation for ${skill.name}`}
                       >
@@ -671,7 +671,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                 >
                   <EuiButton
                     size="s"
-                    onClick={() => validateMutation.mutate()}
+                    onClick={() => validateMutation.mutate(undefined)}
                     disabled={!selectedConnectorId}
                     aria-label={`Run validation for ${skill.name}`}
                   >
@@ -700,7 +700,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     }`,
                     status: proposedEvaluators?.length
                       ? 'complete'
-                      : proposeEvaluatorsMutation.isPending
+                      : proposeEvaluatorsMutation.isLoading
                       ? 'loading'
                       : 'incomplete',
                     children: (
@@ -726,7 +726,6 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                                         id={`eval-${evaluator.name}`}
                                         checked={evaluator.selected}
                                         onChange={() => toggleEvaluator(evaluator.name)}
-                                        compressed
                                       />
                                     </EuiFlexItem>
                                     <EuiFlexItem grow={false}>
@@ -887,7 +886,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                           <EuiButton
                             size="s"
                             onClick={() => proposeEvaluatorsMutation.mutate()}
-                            isLoading={proposeEvaluatorsMutation.isPending}
+                            isLoading={proposeEvaluatorsMutation.isLoading}
                             disabled={!selectedConnectorId}
                             iconType="inspect"
                           >
@@ -902,7 +901,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     status:
                       selectedDatasetId !== '_generate' || generateDatasetMutation.isSuccess
                         ? 'complete'
-                        : generateDatasetMutation.isPending
+                        : generateDatasetMutation.isLoading
                         ? 'loading'
                         : 'incomplete',
                     children: (
@@ -920,7 +919,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                           <EuiButton
                             size="s"
                             onClick={() => generateDatasetMutation.mutate()}
-                            isLoading={generateDatasetMutation.isPending}
+                            isLoading={generateDatasetMutation.isLoading}
                             disabled={!selectedConnectorId}
                             iconType="sparkles"
                           >
@@ -941,7 +940,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     status:
                       (skill as any).eval_run?.status === 'completed' || runEvalMutation.isSuccess
                         ? 'complete'
-                        : (skill as any).eval_run?.status === 'running' || runEvalMutation.isPending
+                        : (skill as any).eval_run?.status === 'running' || runEvalMutation.isLoading
                         ? 'loading'
                         : (skill as any).eval_run?.status === 'failed'
                         ? ('danger' as any)
@@ -951,7 +950,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         size="s"
                         fill
                         onClick={() => runEvalMutation.mutate()}
-                        isLoading={runEvalMutation.isPending}
+                        isLoading={runEvalMutation.isLoading}
                         disabled={
                           !selectedConnectorId ||
                           (!proposedEvaluators?.length && selectedDatasetId === '_generate')
@@ -1144,7 +1143,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         <EuiButton
                           iconType="sparkles"
                           onClick={() => improveMutation.mutate()}
-                          isLoading={improveMutation.isPending}
+                          isLoading={improveMutation.isLoading}
                           disabled={!selectedConnectorId}
                           size="s"
                           fill
@@ -1192,7 +1191,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                           size="s"
                           fill
                           onClick={() => saveMutation.mutate()}
-                          isLoading={saveMutation.isPending}
+                          isLoading={saveMutation.isLoading}
                           aria-label="Save skill content changes"
                         >
                           Save Changes
@@ -1337,7 +1336,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   size="s"
                   color="warning"
                   onClick={() => unrejectMutation.mutate()}
-                  isLoading={unrejectMutation.isPending}
+                  isLoading={unrejectMutation.isLoading}
                   aria-label={`Restore ${skill.name} to pending review`}
                 >
                   Restore to Pending Review
@@ -1370,7 +1369,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   size="s"
                   iconType="refresh"
                   onClick={() => redeployMutation.mutate()}
-                  isLoading={redeployMutation.isPending}
+                  isLoading={redeployMutation.isLoading}
                   aria-label={`Re-deploy ${skill.name} to Agent Builder`}
                 >
                   Re-deploy to Agent Builder
@@ -1408,7 +1407,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   <EuiButtonEmpty
                     onClick={() => rejectMutation.mutate()}
                     color="danger"
-                    isLoading={rejectMutation.isPending}
+                    isLoading={rejectMutation.isLoading}
                     disabled={!reviewNotes.trim()}
                     aria-label={`Reject skill: ${skill.name}`}
                   >
@@ -1429,7 +1428,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         color="success"
                         onClick={() => approveMutation.mutate({ updateExisting: true })}
                         disabled={!canApprove}
-                        isLoading={approveMutation.isPending}
+                        isLoading={approveMutation.isLoading}
                         aria-label={`Update existing skill ${skill.base_skill?.name}`}
                       >
                         Update Existing Skill
@@ -1440,9 +1439,9 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     <EuiButton
                       fill
                       color="success"
-                      onClick={() => approveMutation.mutate()}
+                      onClick={() => approveMutation.mutate(undefined)}
                       disabled={!canApprove}
-                      isLoading={approveMutation.isPending}
+                      isLoading={approveMutation.isLoading}
                       aria-label={
                         skill.base_skill
                           ? `Create ${skill.name} as new skill in Agent Builder`
