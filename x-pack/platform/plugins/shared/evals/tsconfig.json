@@ -23,6 +23,9 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-theme",
-    "@kbn/evals-extensions"
+    "@kbn/evals-extensions",
+    "@kbn/fs",
+    "@kbn/zod",
+    "@kbn/actions-plugin"
   ]
 }
