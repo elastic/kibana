@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-http-browser'
   - '@kbn/scout-oblt'
+  - '@kbn/scout-synthtrace'
   - '@kbn/alerting-plugin'
   - '@kbn/inference-common'
   - '@kbn/product-doc-base-plugin'

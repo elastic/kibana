@@ -9,7 +9,7 @@
 
 import { test as base } from '@playwright/test';
 import type { KbnClient } from '@kbn/kbn-client';
-import type { SamlSessionManager } from '@kbn/test';
+import type { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   KibanaUrl,
@@ -32,7 +32,7 @@ import type { ScoutTestConfig } from '.';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient } from '@kbn/kbn-client';
-export type { SamlSessionManager } from '@kbn/test';
+export type { SamlSessionManager } from '@kbn/test-saml-auth';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../../types';
