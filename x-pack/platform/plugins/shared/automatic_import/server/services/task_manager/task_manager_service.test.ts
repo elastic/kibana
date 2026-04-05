@@ -377,13 +377,15 @@ describe('runTask abort handling', () => {
     );
   });
 
-  it('cancel() aborts the abort controller and returns cancelled state', async () => {
+  it('cancel() returns cancelled state', async () => {
     const abortController = new AbortController();
     const runner = createRunner(abortController);
 
     const cancelResult = await runner.cancel();
 
-    expect(abortController.signal.aborted).toBe(true);
+    // The Task Manager framework is responsible for aborting the controller;
+    // the runner's cancel() callback only returns the cancelled state.
+    expect(abortController.signal.aborted).toBe(false);
     expect(cancelResult.state.task_status).toBe(TASK_STATUSES.cancelled);
   });
 });
