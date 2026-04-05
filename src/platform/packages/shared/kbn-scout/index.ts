@@ -17,7 +17,8 @@ export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from 
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
+  coreWorkerFixtures,
+  esArchiverFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from './src/playwright';
@@ -49,7 +50,6 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
-  SynthtraceFixture,
 } from './src/playwright';
 
 // Service & configuration types

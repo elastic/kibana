@@ -30,9 +30,6 @@ export type { ScoutSpaceParallelFixture } from './scout_space';
 export { apiServicesFixture } from './apis';
 export type { ApiServicesFixture } from './apis';
 
-export { synthtraceFixture } from './synthtrace';
-export type { SynthtraceFixture } from './synthtrace';
-
 export { lighthouseFixture } from './lighthouse';
 export type { LighthouseFixture, LighthouseAuditOptions } from './lighthouse';
 
