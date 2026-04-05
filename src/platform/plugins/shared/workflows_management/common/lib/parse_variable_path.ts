@@ -44,6 +44,11 @@ export function validateVariablePath(path: string): boolean {
   return parsed !== null && !parsed.errors;
 }
 
+/**
+ * Parses a variable expression including its Liquid filters (e.g. `| entries`) into
+ * its property path and filters, which are needed for semantic validation like item type resolution.
+ * Returns null for empty input, or an object with errors for invalid syntax.
+ */
 export function parseVariablePath(path: string): ParsedVariablePath | null {
   const trimmedPath = path.trim();
   if (trimmedPath.length === 0) return null;
