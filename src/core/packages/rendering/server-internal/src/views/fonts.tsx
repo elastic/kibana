@@ -246,6 +246,8 @@ export const Fonts: FunctionComponent<Props> = ({ url, optimizeFontLoading }) =>
           font-style: ${style};
           font-weight: ${weight};
           src: ${src};${
+                // font-display: swap renders text immediately with a fallback font
+                // while the webfont downloads, eliminating flash of invisible text (FOIT).
                 optimizeFontLoading
                   ? `
           font-display: swap;`
