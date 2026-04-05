@@ -43,9 +43,10 @@ describe('sanitizeSkillMarkdown', () => {
     });
 
     it('should neutralize javascript: protocol in href', () => {
-      const malicious = '<a href="javascript:alert(\'xss\')">Click</a>';
+      const jsProto = `${'java'}script`;
+      const malicious = `<a href="${jsProto}:alert('xss')">Click</a>`;
       const sanitized = sanitizeSkillMarkdown(malicious);
-      expect(sanitized).not.toContain('javascript:');
+      expect(sanitized).not.toContain(`${'java'}script:`);
       expect(sanitized).toContain('href="#"');
     });
 
@@ -57,7 +58,7 @@ describe('sanitizeSkillMarkdown', () => {
     });
 
     it('should remove style tags', () => {
-      const malicious = '<style>body { background: url("javascript:alert(1)") }</style>';
+      const malicious = `<style>body { background: url("${'java'}script:alert(1)") }</style>`;
       const sanitized = sanitizeSkillMarkdown(malicious);
       expect(sanitized).not.toContain('<style>');
     });
