@@ -54,7 +54,7 @@ export function enrichErrorMessage(
   errorCode: string,
   context: ErrorContext
 ): EnrichmentResult {
-  const { schema, yamlDocument } = context;
+  const { schema } = context;
   // TODO: remove the field name, it's in the path, and could be nested; also default fieldback doesn't make sense
   const fieldName = path.length > 0 ? String(path[path.length - 1]) : 'field';
 
@@ -239,9 +239,6 @@ function tryGenericFallbackEnrichment(
 // ═══════════════════════════════════════════════════════════════════════════
 // YAML Document Navigation (with nested step support)
 // ═══════════════════════════════════════════════════════════════════════════
-
-/** Keys that contain nested step arrays */
-const NESTED_STEP_KEYS = ['steps', 'else', 'fallback'];
 
 interface StepInfo {
   stepType: string;
