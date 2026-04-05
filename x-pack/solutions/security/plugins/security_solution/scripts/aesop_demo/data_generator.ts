@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+/* eslint-disable no-process-exit */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * AESOP Demo Data Generator
  *

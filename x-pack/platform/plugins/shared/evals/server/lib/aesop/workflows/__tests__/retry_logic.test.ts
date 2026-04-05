@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { RetryConfig } from '../retry_logic';
-import { withRetry } from '../retry_logic';
-import { AESOPError, WorkflowTimeoutError, AgentExecutionError } from '../../errors/aesop_errors';
+import {
+  withRetry,
+  AESOPError,
+  WorkflowTimeoutError,
+  AgentExecutionError,
+} from '../../errors/aesop_errors';
 
 describe('Workflow Retry Logic', () => {
   let mockLogger: any;

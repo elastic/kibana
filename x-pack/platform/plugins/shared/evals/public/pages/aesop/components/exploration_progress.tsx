@@ -101,7 +101,7 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
     if (progress && progress.status !== 'running' && onComplete) {
       onComplete();
     }
-  }, [progress?.status, onComplete]);
+  }, [progress, onComplete]);
 
   if (isLoading) {
     return (

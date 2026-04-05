@@ -109,8 +109,8 @@ export const ProposedSkillsList = () => {
       });
       return response as { explorations: any[] };
     },
-    refetchInterval: (data) => {
-      const latest = data?.explorations?.[0];
+    refetchInterval: (explorationData) => {
+      const latest = explorationData?.explorations?.[0];
       return latest?.status === 'running' ? 3000 : false;
     },
   });

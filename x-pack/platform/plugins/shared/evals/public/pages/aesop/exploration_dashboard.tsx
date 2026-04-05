@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -51,6 +51,7 @@ export const ExplorationDashboard = () => {
   const history = useHistory();
 
   const [isDeployingDashboard, setIsDeployingDashboard] = useState(false);
+  const [deployDashboardError, setDeployDashboardError] = useState<string | null>(null);
 
   // Fetch active + recent explorations
   const {
@@ -174,8 +175,9 @@ export const ExplorationDashboard = () => {
     history.push(`/aesop/exploration/${executionId}`);
   };
 
-  const handleDeployDashboard = async () => {
+  const handleDeployDashboard = useCallback(async () => {
     setIsDeployingDashboard(true);
+    setDeployDashboardError(null);
     try {
       const result = await api.http.post('/internal/aesop/monitoring/dashboard/deploy', {
         version: '1',
@@ -183,11 +185,11 @@ export const ExplorationDashboard = () => {
       const dashboardUrl = (result as any).url;
       window.open(dashboardUrl, '_blank');
     } catch (err) {
-      console.error('Failed to deploy dashboard:', err);
+      setDeployDashboardError(getErrorMessage(err));
     } finally {
       setIsDeployingDashboard(false);
     }
-  };
+  }, [api.http]);
 
   return (
     <EuiPage>
@@ -208,6 +210,15 @@ export const ExplorationDashboard = () => {
             </EuiButton>,
           ]}
         />
+
+        {deployDashboardError && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut title="Failed to deploy dashboard" color="danger" iconType="error">
+              <p>{deployDashboardError}</p>
+            </EuiCallOut>
+          </>
+        )}
 
         <EuiSpacer />
 

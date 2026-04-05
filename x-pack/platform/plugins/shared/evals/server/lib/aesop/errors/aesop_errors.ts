@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable max-classes-per-file */
 
 /**
  * AESOP Error Types - Production-Grade Error Handling

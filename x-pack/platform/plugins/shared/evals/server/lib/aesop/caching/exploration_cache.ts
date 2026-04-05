@@ -138,7 +138,7 @@ export const CACHE_KEYS = {
   patternMining: (personaRole: string, timeRange: string) => `patterns:${personaRole}:${timeRange}`,
 };
 
-export const CACHE_TTLs = {
+export const CACHE_TTLS = {
   SCHEMA_DISCOVERY: 24 * 3600000, // 24 hours
   RELATIONSHIP_VALIDATION: 3600000, // 1 hour
   INDEX_CATEGORIZATION: 6 * 3600000, // 6 hours

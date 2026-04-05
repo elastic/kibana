@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+/* eslint-disable import/no-extraneous-dependencies, @kbn/imports/no_boundary_crossing */
 import {
   SKILL_RELEVANCE_PROMPT,
   SKILL_COMPLETENESS_PROMPT,

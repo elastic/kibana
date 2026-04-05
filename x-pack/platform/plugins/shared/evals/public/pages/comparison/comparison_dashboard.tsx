@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -49,21 +49,6 @@ export const ComparisonDashboard: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading } = useComparisonData(comparisonId);
 
-  if (!comparisonId) {
-    return (
-      <EuiPageSection>
-        <EuiSpacer />
-        <EuiText textAlign="center" color="subdued">
-          <h3>Skill Comparison</h3>
-          <p>
-            Compare two skill variants side-by-side. Select a comparison from the AESOP skill review
-            to see evaluator score deltas.
-          </p>
-        </EuiText>
-      </EuiPageSection>
-    );
-  }
-
   const scoreMatrixRows: ScoreMatrixRow[] = useMemo(() => {
     if (!data) return [];
     return data.per_evaluator.map((s) => ({
@@ -75,7 +60,7 @@ export const ComparisonDashboard: React.FC = () => {
     }));
   }, [data]);
 
-  const directionBadge = (direction: 'A_better' | 'B_better' | 'tie') => {
+  const directionBadge = useCallback((direction: 'A_better' | 'B_better' | 'tie') => {
     if (direction === 'A_better') {
       return <EuiBadge color="success">{i18n.DIRECTION_A_BETTER}</EuiBadge>;
     }
@@ -83,7 +68,7 @@ export const ComparisonDashboard: React.FC = () => {
       return <EuiBadge color="danger">{i18n.DIRECTION_B_BETTER}</EuiBadge>;
     }
     return <EuiBadge color="default">{i18n.DIRECTION_TIE}</EuiBadge>;
-  };
+  }, []);
 
   const columns: Array<EuiBasicTableColumn<ScoreMatrixRow>> = useMemo(
     () => [
@@ -126,8 +111,23 @@ export const ComparisonDashboard: React.FC = () => {
         render: (direction: ScoreMatrixRow['direction']) => directionBadge(direction),
       },
     ],
-    []
+    [directionBadge]
   );
+
+  if (!comparisonId) {
+    return (
+      <EuiPageSection>
+        <EuiSpacer />
+        <EuiText textAlign="center" color="subdued">
+          <h3>Skill Comparison</h3>
+          <p>
+            Compare two skill variants side-by-side. Select a comparison from the AESOP skill review
+            to see evaluator score deltas.
+          </p>
+        </EuiText>
+      </EuiPageSection>
+    );
+  }
 
   if (isLoading) {
     return (

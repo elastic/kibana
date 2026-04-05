@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+// eslint-disable-next-line import/no-extraneous-dependencies, @kbn/imports/no_boundary_crossing
 import { computeCompositeScore, evaluateCiGates } from '@kbn/evals-extensions';
 import type { EvaluatorRegistry } from '../evaluation_engine';
 import { createEvaluationRunner } from '../evaluation_engine';

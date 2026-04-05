@@ -6,8 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { computeCompositeScore, evaluateCiGates } from '@kbn/evals-extensions';
-import type { CompositeScoreConfig, CiGateResult } from '@kbn/evals-extensions';
 import type {
   ProposedSkillDocument,
   ConvergenceConfig,
@@ -16,6 +14,129 @@ import type {
 } from './types';
 import type { EvaluatorRegistry, ServerEvaluatorResult } from '../evaluation_engine';
 import { createEvaluationRunner } from '../evaluation_engine';
+
+// ─── Inlined scoring types/functions (from @kbn/evals-extensions, devOnly) ───
+
+interface CompositeScoreConfig {
+  weights: Record<string, number>;
+  dimensions: Record<string, string[]>;
+}
+
+interface CompositeScoreResult {
+  compositeScore: number;
+  compositeGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  dimensionScores: Record<string, number>;
+}
+
+interface CiGateConfig {
+  compositeThreshold?: number;
+  perEvaluator?: Record<string, { min?: number; avg?: number }>;
+  requiredPass?: string[];
+}
+
+interface GateFailure {
+  gate: string;
+  evaluator?: string;
+  expected: number;
+  actual: number;
+  message: string;
+}
+
+export interface CiGateResult {
+  passed: boolean;
+  failedGates: GateFailure[];
+}
+
+const GRADE_THRESHOLDS: Array<[CompositeScoreResult['compositeGrade'], number]> = [
+  ['A', 0.9],
+  ['B', 0.8],
+  ['C', 0.7],
+  ['D', 0.6],
+  ['F', 0],
+];
+
+const computeCompositeScore = (
+  evaluatorResults: Array<{ evaluator: string; score: number | null }>,
+  config: CompositeScoreConfig
+): CompositeScoreResult => {
+  const dimensionScores: Record<string, number> = {};
+
+  for (const [dimension, evaluatorNames] of Object.entries(config.dimensions)) {
+    const scores = evaluatorNames
+      .map((name) => evaluatorResults.find((r) => r.evaluator === name)?.score)
+      .filter((s): s is number => s != null);
+
+    dimensionScores[dimension] =
+      scores.length > 0 ? scores.reduce((sum, s) => sum + s, 0) / scores.length : 0;
+  }
+
+  let totalWeight = 0;
+  let weightedSum = 0;
+
+  for (const [dimension, weight] of Object.entries(config.weights)) {
+    if (dimension in dimensionScores) {
+      weightedSum += dimensionScores[dimension] * weight;
+      totalWeight += weight;
+    }
+  }
+
+  const compositeScore = totalWeight > 0 ? weightedSum / totalWeight : 0;
+  const compositeGrade =
+    GRADE_THRESHOLDS.find(([, threshold]) => compositeScore >= threshold)?.[0] ?? 'F';
+
+  return { compositeScore, compositeGrade, dimensionScores };
+};
+
+const evaluateCiGates = (
+  evaluatorResults: Array<{ evaluator: string; score: number | null }>,
+  compositeScore: number,
+  config: CiGateConfig
+): CiGateResult => {
+  const failedGates: GateFailure[] = [];
+
+  if (config.compositeThreshold != null && compositeScore < config.compositeThreshold) {
+    failedGates.push({
+      gate: 'composite-threshold',
+      expected: config.compositeThreshold,
+      actual: compositeScore,
+      message: `Composite score ${compositeScore.toFixed(3)} below threshold ${
+        config.compositeThreshold
+      }`,
+    });
+  }
+
+  for (const required of config.requiredPass ?? []) {
+    const result = evaluatorResults.find((r) => r.evaluator === required);
+    if (!result || result.score === null || result.score === 0) {
+      failedGates.push({
+        gate: 'required-pass',
+        evaluator: required,
+        expected: 0,
+        actual: result?.score ?? 0,
+        message: `Required evaluator "${required}" failed (score: ${result?.score ?? 'null'})`,
+      });
+    }
+  }
+
+  for (const [evaluator, thresholds] of Object.entries(config.perEvaluator ?? {})) {
+    const result = evaluatorResults.find((r) => r.evaluator === evaluator);
+    if (result?.score != null && thresholds.min != null && result.score < thresholds.min) {
+      failedGates.push({
+        gate: 'per-evaluator-min',
+        evaluator,
+        expected: thresholds.min,
+        actual: result.score,
+        message: `Evaluator "${evaluator}" score ${result.score.toFixed(3)} below minimum ${
+          thresholds.min
+        }`,
+      });
+    }
+  }
+
+  return { passed: failedGates.length === 0, failedGates };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface ConvergenceResult {
   finalScore: number;

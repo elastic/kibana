@@ -6,6 +6,9 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+/* eslint-disable no-process-exit */
+
 /**
  * Wrapper script to run the TypeScript data generator
  * Uses @babel/register to transpile on-the-fly

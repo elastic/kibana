@@ -6,7 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
+// eslint-disable-next-line import/no-extraneous-dependencies, @kbn/imports/no_boundary_crossing
 import { testSignificance, determineWinner, computePairwiseResults } from '@kbn/evals-extensions';
+
 import type { PairwiseEvaluatorResult } from '@kbn/evals-extensions';
 import type { EvaluatorRegistry, ServerEvaluatorResult } from '../evaluation_engine';
 import { createEvaluationRunner } from '../evaluation_engine';
