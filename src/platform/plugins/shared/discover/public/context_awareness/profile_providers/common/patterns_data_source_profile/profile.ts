@@ -31,7 +31,7 @@ export const createPatternsDataSourceProfileProvider = (
   patternColumns: string[];
   sparklineColumns: string[];
 }> => ({
-  profileId: 'patterns1-data-source-profile',
+  profileId: 'patterns-data-source-profile',
   profile: {
     getCellRenderers:
       (prev, { context }) =>
