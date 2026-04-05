@@ -13,11 +13,11 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 import {
+  type AttackDiscoveryAlertDocument,
   CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema,
   type CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
 
-import type { AttackDiscoveryAlertDocument } from '../schedules/types';
 import {
   generateAttackDiscoveryAlertHash,
   transformToBaseAlertDocument,

@@ -8,6 +8,10 @@
  */
 
 import { lexerRules as sqlLexerRules, keywords, builtinFunctions } from '../../sql/lexer_rules';
+import { languageTolerantRules } from './constants';
+import { remapStringsToNestedState } from './utils/remap_strings_to_nested_state';
+import type { monaco } from '../../../monaco_imports';
+
 /*
  * This rule is used inside json root to start a sql highlighting sequence
  */
@@ -32,8 +36,13 @@ export const buildSqlStartRule = (sqlRoot: string = 'sql_root') => {
  * It reuses the lexer ruls from the "sql" language, but since not all rules are referenced in the root
  * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
  */
-export const buildSqlRules = (sqlRoot: string = 'sql_root') => {
-  const { root, comment, numbers } = sqlLexerRules.tokenizer;
+export const buildSqlRules = (
+  sqlRoot: string = 'sql_root'
+): Record<string, monaco.languages.IMonarchLanguageRule[]> => {
+  const { root, comment, numbers, strings, string: sqlString } = sqlLexerRules.tokenizer;
+
+  const remappedStrings = remapStringsToNestedState(strings, '@sql_string');
+
   return {
     [sqlRoot]: [
       // the rule to end sql highlighting and get back to the previous tokenizer state
@@ -44,8 +53,16 @@ export const buildSqlRules = (sqlRoot: string = 'sql_root') => {
           next: '@pop',
         },
       ],
+      ...languageTolerantRules,
       ...root,
       ...numbers,
+      ...remappedStrings,
+      [/./, 'text'],
+    ],
+    sql_string: [
+      [/(?=""")/, { token: '', next: '@pop' }],
+      [/(?=")/, { token: '', next: '@pop' }],
+      ...(Array.isArray(sqlString) ? sqlString : []),
     ],
     comment,
   };

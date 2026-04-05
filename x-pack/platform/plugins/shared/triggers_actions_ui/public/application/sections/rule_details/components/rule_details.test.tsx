@@ -13,14 +13,8 @@ import { userEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
-import type {
-  Rule,
-  ActionType,
-  RuleTypeModel,
-  GetDescriptionFieldsFn,
-  RuleType,
-} from '../../../../types';
-import { EuiBadge, EuiButtonEmpty, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
+import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
+import { EuiBadge, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
@@ -81,9 +75,20 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
+    replace: jest.fn(),
+    createHref: jest.fn(({ pathname, search = '', hash = '' }) => `${pathname}${search}${hash}`),
+    listen: jest.fn(() => jest.fn()),
+    location: {
+      pathname: '/triggersActions/rules/',
+      search: '',
+      hash: '',
+      state: undefined,
+    },
   }),
   useLocation: () => ({
     pathname: '/triggersActions/rules/',
+    search: '',
+    hash: '',
   }),
 }));
 
@@ -93,6 +98,10 @@ jest.mock('../../../lib/action_connector_api', () => ({
 
 jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
+}));
+
+jest.mock('./rule_route', () => ({
+  RuleRouteWithApi: () => <div data-test-subj="ruleRouteWithApi" />,
 }));
 
 const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
@@ -325,25 +334,30 @@ describe('rule_details', () => {
         .toMatchInlineSnapshot(`
         <EuiPanel
           borderRadius="none"
+          className="euiCallOut euiCallOut--danger"
           color="danger"
-          css="unknown styles"
           data-test-subj="ruleErrorBanner"
           grow={false}
           paddingSize="s"
           panelRef={null}
         >
-          <p
-            className="euiCallOutHeader__title"
+          <EuiTitle
+            css="unknown styles"
+            size="xxs"
           >
-            <EuiIcon
-              aria-hidden="true"
-              color="inherit"
-              css="unknown styles"
-              size="m"
-              type="error"
-            />
-            Cannot run rule
-          </p>
+            <p
+              className="euiCallOutHeader__title"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                color="inherit"
+                css="unknown styles"
+                size="m"
+                type="error"
+              />
+              Cannot run rule
+            </p>
+          </EuiTitle>
           <EuiSpacer
             size="s"
           />
@@ -526,8 +540,7 @@ describe('rule_details', () => {
     });
 
     describe('links', () => {
-      it('renders view in app button in management context', () => {
-        (getIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      it('renders view in app button', () => {
         const rule = mockRule();
         expect(
           shallowWithIntl(
@@ -554,23 +567,15 @@ describe('rule_details', () => {
           .find(EuiPageHeader)
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
-        expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-          <React.Fragment>
-            <EuiButtonEmpty
-              aria-label="Edit"
-              data-test-subj="openEditRuleFlyoutButton"
-              disabled={false}
-              iconType="pencil"
-              name="edit"
-              onClick={[Function]}
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="Edit"
-                id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-              />
-            </EuiButtonEmpty>
-          </React.Fragment>
-        `);
+        expect(rightSideItems?.[0]).toBeTruthy();
+
+        const actionsMenuWrapper = mountWithIntl(<>{rightSideItems![0]}</>);
+        actionsMenuWrapper.find('[data-test-subj="ruleActionsButton"]').last().simulate('click');
+        actionsMenuWrapper.update();
+
+        expect(
+          actionsMenuWrapper.find('[data-test-subj="openEditRuleFlyoutButton"]').last().exists()
+        ).toBeTruthy();
       });
     });
   });
@@ -618,23 +623,15 @@ describe('rule_details', () => {
         .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButtonEmpty
-            aria-label="Edit"
-            data-test-subj="openEditRuleFlyoutButton"
-            disabled={false}
-            iconType="pencil"
-            name="edit"
-            onClick={[Function]}
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </React.Fragment>
-      `);
+      expect(rightSideItems?.[0]).toBeTruthy();
+
+      const actionsMenuWrapper = mountWithIntl(<>{rightSideItems![0]}</>);
+      actionsMenuWrapper.find('[data-test-subj="ruleActionsButton"]').last().simulate('click');
+      actionsMenuWrapper.update();
+
+      expect(
+        actionsMenuWrapper.find('[data-test-subj="openEditRuleFlyoutButton"]').last().exists()
+      ).toBeTruthy();
     });
 
     it('should not render an edit button when rule editable but actions arent', () => {
@@ -652,20 +649,13 @@ describe('rule_details', () => {
           },
         ],
       });
-      expect(
-        shallowWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
-        )
-          .find(EuiButtonEmpty)
-          .find('[name="edit"]')
-          .first()
-          .exists()
-      ).toBeFalsy();
+      const pageHeaderProps = shallowWithIntl(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
+      )
+        .find(EuiPageHeader)
+        .props() as EuiPageHeaderProps;
+      const rightSideItems = pageHeaderProps.rightSideItems;
+      expect(rightSideItems?.[0]).toBeFalsy();
     });
 
     it('should render an edit button when rule editable but actions arent when there are no actions on the rule', async () => {
@@ -682,23 +672,15 @@ describe('rule_details', () => {
         .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButtonEmpty
-            aria-label="Edit"
-            data-test-subj="openEditRuleFlyoutButton"
-            disabled={false}
-            iconType="pencil"
-            name="edit"
-            onClick={[Function]}
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </React.Fragment>
-      `);
+      expect(rightSideItems?.[0]).toBeTruthy();
+
+      const actionsMenuWrapper = mountWithIntl(<>{rightSideItems![0]}</>);
+      actionsMenuWrapper.find('[data-test-subj="ruleActionsButton"]').last().simulate('click');
+      actionsMenuWrapper.update();
+
+      expect(
+        actionsMenuWrapper.find('[data-test-subj="openEditRuleFlyoutButton"]').last().exists()
+      ).toBeTruthy();
     });
   });
 
@@ -899,35 +881,6 @@ describe('rule_details', () => {
     });
   });
 
-  describe('refresh button', () => {
-    it('should call requestRefresh when clicked', async () => {
-      const rule = mockRule();
-      const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={[]}
-            {...mockRuleApis}
-            requestRefresh={requestRefresh}
-          />
-        </QueryClientProvider>
-      );
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').last();
-      expect(refreshButton.exists()).toBeTruthy();
-
-      refreshButton.simulate('click');
-      expect(requestRefresh).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('update API key button', () => {
     it('should call update api key when clicked', async () => {
       const rule = mockRule();
@@ -1121,70 +1074,6 @@ describe('rule_details', () => {
         ids: [rule.id],
         untrack: false,
       });
-    });
-  });
-
-  describe('when the rule type includes the getDescriptionFields function in the registry definition', () => {
-    const getDescriptionFields: GetDescriptionFieldsFn = ({ rule }) => {
-      return [
-        {
-          title: 'my title',
-          description: <div>Generated Test Description Field - {rule.ruleTypeId}</div>,
-        },
-      ];
-    };
-
-    const ruleTypeWithDescriptionFields = {
-      ...ruleType,
-      id: '.noop-with-description-fields',
-      name: 'No Op with description fields',
-      getDescriptionFields,
-    };
-
-    const ruleTypeWithDescriptionFieldsModel: RuleTypeModel = {
-      id: '.noop-with-description-fields',
-      iconClass: 'test',
-      description: 'Rule when testing',
-      documentationUrl: 'https://localhost.local/docs',
-      validate: () => {
-        return { errors: {} };
-      },
-      ruleParamsExpression: jest.fn(),
-      requiresAppContext: false,
-      getDescriptionFields,
-    };
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-
-      ruleTypeRegistry.has.mockReturnValue(true);
-      ruleTypeRegistry.get.mockReturnValue(ruleTypeWithDescriptionFieldsModel);
-      useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-    });
-
-    it('should render the description fields', async () => {
-      const rule = mockRule({
-        ruleTypeId: '.noop-with-description-fields',
-      });
-      const requestRefresh = jest.fn();
-
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleTypeWithDescriptionFields}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
-      );
-
-      expect(
-        await screen.findByText('Generated Test Description Field - .noop-with-description-fields')
-      ).toBeInTheDocument();
     });
   });
 

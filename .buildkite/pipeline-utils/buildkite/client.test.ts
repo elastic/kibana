@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import { BuildkiteClient } from './client';
 import type { Build } from './types/build';
 import type { Job } from './types/job';
+
+jest.mock('child_process', () => ({
+  ...jest.requireActual('child_process'),
+  execFileSync: jest.fn(),
+}));
+
+const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
 describe('BuildkiteClient', () => {
   let buildkite: BuildkiteClient;
@@ -254,6 +262,24 @@ describe('BuildkiteClient', () => {
 
       const result = buildkite.getJobStatus(build, job);
       expect(result.success).toEqual(true);
+    });
+  });
+
+  describe('cancelStep', () => {
+    afterEach(() => {
+      execFileSyncMock.mockReset();
+    });
+
+    it('calls buildkite-agent step cancel for the specified step', () => {
+      buildkite.cancelStep('step-id-1');
+
+      expect(execFileSyncMock).toHaveBeenCalledWith(
+        'buildkite-agent',
+        ['step', 'cancel', '--step', 'step-id-1'],
+        {
+          stdio: ['pipe', 'inherit', 'inherit'],
+        }
+      );
     });
   });
 });

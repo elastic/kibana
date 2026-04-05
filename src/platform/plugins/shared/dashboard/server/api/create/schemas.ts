@@ -8,37 +8,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { allowUnmappedKeysSchema, getDashboardStateSchema } from '../dashboard_state_schemas';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
-export const createRequestParamsSchema = schema.maybe(
-  schema.object(
-    {
-      id: schema.maybe(
-        schema.string({
-          meta: { description: 'A unique identifier for the dashboard.' },
-        })
-      ),
-    },
-    { unknowns: 'forbid' }
-  )
-);
-
-export const createRequestQuerySchema = schema.maybe(
-  schema.object({
-    allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
-  })
-);
-
-export function getCreateRequestBodySchema() {
-  return getDashboardStateSchema();
+export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
+  return getDashboardStateSchema(isDashboardAppRequest);
 }
 
-export function getCreateResponseBodySchema() {
+export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardStateSchema(),
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
+    data: getDashboardStateSchema(isDashboardAppRequest),
+    meta: asCodeMetaSchema,
   });
 }

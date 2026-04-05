@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-observability-ai",
+  "owner": "@elastic/obs-ai-team",
+  "group": "observability",
+  "visibility": "private"
+}

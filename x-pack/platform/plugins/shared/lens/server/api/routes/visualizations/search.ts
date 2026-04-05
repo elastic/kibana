@@ -9,11 +9,16 @@ import { isBoom, boomify } from '@hapi/boom';
 
 import type { TypeOf } from '@kbn/config-schema';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
 import type { LensSearchIn, LensSavedObject } from '../../../content_management';
-import type { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
-import { getLensResponseItem } from '../utils';
+import { getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -23,10 +28,10 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
     enableQueryVersion: true,
-    summary: 'Search Lens visualizations',
-    description: 'Get list of Lens visualizations.',
+    summary: 'Search visualizations',
+    description: 'Get list of visualizations.',
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
       },
@@ -72,7 +77,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { query: q, page, perPage, ...reqOptions } = req.query;
+      const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
 
       try {
         // Note: these types are to enforce loose param typings of client methods
@@ -100,7 +105,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
             }),
             meta: {
               page,
-              perPage,
+              per_page: perPage,
               total: pagination.total,
             },
           },

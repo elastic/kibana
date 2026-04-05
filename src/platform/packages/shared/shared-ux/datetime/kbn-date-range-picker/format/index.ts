@@ -8,5 +8,10 @@
  */
 
 export { durationToDisplayShortText } from './format_duration';
-export { timeRangeToDisplayText, timeRangeToFullFormattedText } from './format_time_range';
+export {
+  applyTimePrecision,
+  dateMathToRelativeParts,
+  timeRangeToDisplayText,
+  timeRangeToFullFormattedText,
+} from './format_time_range';
 export type { TimeRangeTransformOptions } from '../types';

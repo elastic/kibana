@@ -13,44 +13,41 @@ import type { IntegrationCardItem } from '../../home/card_utils';
 
 import { useBrowseIntegrationHook } from '.';
 import { useUrlFilters } from './url_filters';
+import { useUrlCategories, useSetUrlCategory } from './url_categories';
 
 jest.mock('../../home/hooks/use_available_packages');
 jest.mock('./url_filters');
+jest.mock('./url_categories');
 jest.mock('../../../../../hooks', () => ({
   searchIdField: 'id',
   useLocalSearch: jest.fn(),
 }));
 
 describe('useBrowseIntegrationHook', () => {
-  const mockSetCategory = jest.fn();
-  const mockSetSelectedSubCategory = jest.fn();
-  const mockSetUrlandPushHistory = jest.fn();
-  const mockSetUrlandReplaceHistory = jest.fn();
+  const mockSetUrlCategory = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useUrlCategories as jest.Mock).mockReturnValue({
+      category: '',
+      subCategory: undefined,
+    });
+    (useSetUrlCategory as jest.Mock).mockReturnValue(mockSetUrlCategory);
   });
 
   const mockUseAvailablePackages = (cards: IntegrationCardItem[] = []) => {
     (useAvailablePackages as jest.Mock).mockReturnValue({
       initialSelectedCategory: '',
-      selectedCategory: '',
-      setCategory: mockSetCategory,
       allCategories: [],
       mainCategories: [],
-      onlyAgentlessFilter: false,
       isLoading: false,
       isLoadingCategories: false,
       isLoadingAllPackages: false,
       isLoadingAppendCustomIntegrations: false,
       eprPackageLoadingError: undefined,
       eprCategoryLoadingError: undefined,
-      setUrlandPushHistory: mockSetUrlandPushHistory,
-      setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
       filteredCards: cards,
       availableSubCategories: [],
-      selectedSubCategory: undefined,
-      setSelectedSubCategory: mockSetSelectedSubCategory,
     });
   };
 

@@ -20,10 +20,12 @@ import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 /**
- * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
+ * Graph preview under Overview, Visualizations. It shows a graph representation of entities,
+ * or an upsell message when the required license is not met.
  */
 export const GraphPreviewContainer: React.FC = () => {
   const renderingId = useGeneratedHtmlId();
@@ -61,6 +63,9 @@ export const GraphPreviewContainer: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
+  // Show upsell when event has graph data but license is insufficient (ESS only)
+  const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
+
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
@@ -82,6 +87,11 @@ export const GraphPreviewContainer: React.FC = () => {
     }
   }, [shouldShowGraph, renderingId]);
 
+  // Nothing to render when graph is not available and there is no upsell
+  if (!shouldShowGraph && !GraphVisualizationUpsell) {
+    return null;
+  }
+
   return (
     <ExpandablePanel
       header={{
@@ -94,7 +104,7 @@ export const GraphPreviewContainer: React.FC = () => {
         headerContent: (
           <EuiBetaBadge
             alignment="middle"
-            iconType="beaker"
+            iconType="flask"
             data-test-subj="graphPreviewBetaBadge"
             label={i18n.translate(
               'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel',
@@ -111,29 +121,30 @@ export const GraphPreviewContainer: React.FC = () => {
             )}
           />
         ),
-        iconType: allowFlyoutExpansion ? 'arrowStart' : undefined,
-        ...(allowFlyoutExpansion && {
-          link: {
-            callback: navigateToGraphVisualization,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
-                defaultMessage="Expand graph"
-              />
-            ),
-          },
-        }),
+        iconType: allowFlyoutExpansion ? 'chevronLimitLeft' : undefined,
+        ...(allowFlyoutExpansion &&
+          shouldShowGraph && {
+            link: {
+              callback: navigateToGraphVisualization,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
+                  defaultMessage="Expand graph"
+                />
+              ),
+            },
+          }),
       }}
       data-test-subj={GRAPH_PREVIEW_TEST_ID}
-      content={
-        !isLoading && !isError
-          ? {
-              paddingSize: 'none',
-            }
-          : undefined
-      }
+      content={{
+        paddingSize: 'none',
+      }}
     >
-      <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+      {shouldShowGraph ? (
+        <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+      ) : (
+        GraphVisualizationUpsell && <GraphVisualizationUpsell />
+      )}
     </ExpandablePanel>
   );
 };

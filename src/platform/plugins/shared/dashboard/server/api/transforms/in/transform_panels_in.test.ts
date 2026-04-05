@@ -133,7 +133,7 @@ describe('transformPanelsIn', () => {
           uid: 'panel1',
         },
       ];
-      expect(() => transformPanelsIn(panels)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => transformPanelsIn(panels, true)).toThrowErrorMatchingInlineSnapshot(
         `"Panel config validation failed. Panel uid: panel1, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
       );
     });

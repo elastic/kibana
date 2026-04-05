@@ -61,9 +61,7 @@ describe('useNavigateToServiceDetails', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: ServiceDetailsPanelKey,
       params: {
-        service: {
-          name: mockProps.serviceName,
-        },
+        serviceName: mockProps.serviceName,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },

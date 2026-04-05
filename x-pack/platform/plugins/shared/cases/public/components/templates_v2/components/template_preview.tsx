@@ -5,19 +5,53 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
+import { EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { load as parseYaml } from 'js-yaml';
+import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
+import { TemplateMetadataPreview } from './template_metadata_preview';
+import * as i18n from '../translations';
 
-export const TemplatePreview = () => {
+type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
+
+interface TemplatePreviewProps {
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+}
+
+export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefaultChange }) => {
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
+  // Store the last valid parsed template
+  const lastValidTemplateRef = useRef<ParsedTemplateDefinition | null>(null);
+
   const parsedTemplate = useMemo(() => {
     try {
+      if (!values.definition || values.definition.trim() === '') {
+        return {
+          success: false,
+          data: undefined,
+          error: {
+            message: 'Template definition is empty',
+          },
+        } as const;
+      }
+
       const parsedDefinition = parseYaml(values.definition);
+
+      if (!parsedDefinition || typeof parsedDefinition !== 'object') {
+        return {
+          success: false,
+          data: undefined,
+          error: {
+            message: 'Invalid YAML: parsed to null or non-object',
+          },
+        } as const;
+      }
+
       return ParsedTemplateDefinitionSchema.safeParse(parsedDefinition);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -27,7 +61,7 @@ export const TemplatePreview = () => {
           error: {
             message: error?.message,
           },
-        };
+        } as const;
       }
 
       return {
@@ -36,24 +70,40 @@ export const TemplatePreview = () => {
         error: {
           message: 'Unknown error occurred during template parse phase',
         },
-      };
+      } as const;
     }
   }, [values.definition]);
 
-  const parsedTemplateData = parsedTemplate.success ? parsedTemplate.data : undefined;
+  if (parsedTemplate.success && parsedTemplate.data) {
+    lastValidTemplateRef.current = parsedTemplate.data;
+  }
+
+  // Use last valid template if current parsing failed
+  const parsedTemplateData = parsedTemplate.success
+    ? parsedTemplate.data
+    : lastValidTemplateRef.current;
 
   if (!parsedTemplateData) {
-    return (
-      <div>
-        <pre>{JSON.stringify(parsedTemplate.error, null, 2)}</pre>
-      </div>
-    );
+    return null;
   }
 
   return (
     <div>
-      {/** NOTE: this component uses shared-form renderer for Case form compatiblit */}
-      <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
+      <TemplateMetadataPreview parsedTemplate={parsedTemplateData} />
+
+      {parsedTemplateData.fields.length > 0 && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiText size="xs" color="subdued">
+            <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <TemplateFieldRenderer
+            parsedTemplate={parsedTemplateData}
+            onFieldDefaultChange={onFieldDefaultChange}
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isList } from '../../../../../../ast/is';
+import { isList } from '@elastic/esql';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { isMarkerNode } from '../../../ast';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import type { ESQLSingleAstItem } from '../../../../../../types';
 import { logicalOperators } from '../../../../all_operators';
 
 export const LIKE_OPERATOR_REGEX = /\b(not\s+)?(r?like)\s*$/i;

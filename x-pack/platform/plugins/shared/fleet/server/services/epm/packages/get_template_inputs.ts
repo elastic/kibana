@@ -46,7 +46,7 @@ type PackageWithInputAndStreamIndexed = Record<
     streams: Record<
       string,
       RegistryStream & {
-        data_stream: { type: string; dataset: string };
+        data_stream: { type?: string; dataset: string };
       }
     >;
   }
@@ -100,7 +100,8 @@ export async function getTemplateInputs(
   format: 'yml',
   isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<string>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
@@ -109,7 +110,8 @@ export async function getTemplateInputs(
   format: 'json',
   isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<{ inputs: TemplateAgentPolicyInput[] }>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
@@ -118,7 +120,8 @@ export async function getTemplateInputs(
   format: Format,
   isInputIncluded: (input: TemplateAgentPolicyInput) => boolean = () => true,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting: boolean = false
 ) {
   const experimentalFeature = appContextService.getExperimentalFeatures();
 
@@ -195,10 +198,31 @@ export async function getTemplateInputs(
     inputIdsDestinationMap
   ).filter(isInputIncluded);
 
+  if (injectWiredStreamsRouting) {
+    for (const input of inputs) {
+      const inputStreams = input.streams as Array<{
+        data_stream?: { type?: string };
+        processors?: Array<Record<string, unknown>>;
+      }>;
+      if (inputStreams) {
+        for (const stream of inputStreams) {
+          if (stream.data_stream?.type === 'logs') {
+            stream.processors = stream.processors || [];
+            stream.processors.unshift({
+              add_fields: {
+                target: '@metadata',
+                fields: { raw_index: 'logs.ecs' },
+              },
+            });
+          }
+        }
+      }
+    }
+  }
+
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    // Template inputs don't have package info cache, so pass undefined
-    otelcolConfig = generateOtelcolConfig(inputs, undefined, undefined);
+    otelcolConfig = generateOtelcolConfig(inputs, undefined, undefined, packageInfo);
   }
   // filter out the otelcol inputs, they will be added at the root of the config
   const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);
@@ -254,7 +278,7 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
             Record<
               string,
               RegistryStream & {
-                data_stream: { type: string; dataset: string };
+                data_stream: { type?: string; dataset: string };
               }
             >
           >((acc, stream) => {

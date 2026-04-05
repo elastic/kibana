@@ -9,6 +9,8 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -22,7 +24,6 @@ import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
 const mockUseParams = jest.fn();
-const mockUseCapabilities = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseSaveYaml = jest.fn();
 const mockUseUpdateWorkflow = jest.fn();
@@ -35,9 +36,14 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => mockUseParams(),
 }));
-jest.mock('../../../hooks/use_capabilities', () => ({
-  useCapabilities: () => mockUseCapabilities(),
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
 }));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
@@ -128,11 +134,7 @@ describe('WorkflowDetailHeader', () => {
       },
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
-    mockUseCapabilities.mockReturnValue({
-      canCreateWorkflow: true,
-      canUpdateWorkflow: true,
-      canExecuteWorkflow: true,
-    });
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
       setActiveTab: jest.fn(),

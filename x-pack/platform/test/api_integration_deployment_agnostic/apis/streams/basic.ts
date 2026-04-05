@@ -10,7 +10,9 @@ import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { get, omit } from 'lodash';
+import type { JsonObject } from '@kbn/utility-types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
@@ -18,6 +20,7 @@ import {
   createStreamsRepositoryViewerClient,
 } from './helpers/repository_client';
 import {
+  deleteStream,
   disableStreams,
   enableStreams,
   fetchDocument,
@@ -35,6 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
   const status = 'enabled' as RoutingStatus;
 
   interface Resources {
@@ -72,9 +76,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       return response.body;
     }
 
+    // Tracks whether the ES|QL views API is available in the current test environment.
+    // The API is only available in stateful (non-serverless) Elasticsearch and only in
+    // recent-enough versions. When unavailable, view-specific assertions are skipped.
+    let viewsApiAvailable = false;
+
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       viewerApiClient = await createStreamsRepositoryViewerClient(roleScopedSupertest);
+      if (!isServerless) {
+        // Probe whether the ES|QL views API exists. A 404 means the endpoint
+        // exists but the view resource was not found – i.e. the API is available.
+        // Any other error (e.g. 400/405) indicates the API is not yet supported.
+        viewsApiAvailable = await esClient.transport
+          .request({ method: 'GET', path: '/_query/view/__kibana_probe__' })
+          .then(() => true)
+          .catch((err: { statusCode?: number }) => err?.statusCode === 404);
+
+        if (viewsApiAvailable) {
+          await kibanaServer.uiSettings.update({
+            [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+          });
+        }
+      }
+    });
+
+    after(async () => {
+      if (!isServerless && viewsApiAvailable) {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+        });
+      }
     });
 
     describe('initially', () => {
@@ -108,6 +140,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const parsed = Streams.WiredStream.GetResponse.parse(stream);
           expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
         });
+
+        // ES|QL views API is not available in all environments
+        if (!isServerless) {
+          it('creates ES|QL views for wired root streams', async () => {
+            if (!viewsApiAvailable) return;
+            for (const streamName of ['logs.otel', 'logs.ecs']) {
+              const response = await esClient.transport.request<{
+                views: Array<{ name: string; query: string }>;
+              }>({
+                method: 'GET',
+                path: `/_query/view/%24.${streamName}`,
+              });
+              expect(response.views).to.have.length(1);
+              expect(response.views[0].name).to.eql(`$.${streamName}`);
+              expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+            }
+          });
+        }
 
         // Elasticsearch doesn't support streams in serverless mode yet
         if (!isServerless) {
@@ -184,6 +234,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             expect(wiredStatus['logs.otel']).to.eql(false);
             expect(wiredStatus['logs.ecs']).to.eql(false);
           });
+
+          // ES|QL views API is not available in all environments
+          if (!isServerless) {
+            it('removes ES|QL views for wired root streams', async () => {
+              if (!viewsApiAvailable) return;
+              for (const streamName of ['logs.otel', 'logs.ecs']) {
+                await esClient.transport
+                  .request<{ views: Array<{ name: string; query: string }> }>({
+                    method: 'GET',
+                    path: `/_query/view/%24.${streamName}`,
+                  })
+                  .then(
+                    () => {
+                      throw new Error(`Expected view $.${streamName} to be deleted`);
+                    },
+                    (err: { statusCode?: number }) => {
+                      expect(err.statusCode).to.eql(404);
+                    }
+                  );
+              }
+            });
+          }
         });
       });
     });
@@ -263,6 +335,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await forkStream(apiClient, rootStream, body);
         expect(response).to.have.property('acknowledged', true);
       });
+
+      // ES|QL views API is not available in all environments
+      if (!isServerless) {
+        it(`creates ES|QL view $.${rootStream}.nginx for the forked child stream`, async () => {
+          if (!viewsApiAvailable) return;
+          const childStreamName = `${rootStream}.nginx`;
+          const response = await esClient.transport.request<{
+            views: Array<{ name: string; query: string }>;
+          }>({
+            method: 'GET',
+            path: `/_query/view/%24.${childStreamName}`,
+          });
+          expect(response.views).to.have.length(1);
+          expect(response.views[0].name).to.eql(`$.${childStreamName}`);
+          expect(response.views[0].query).to.eql(`FROM ${childStreamName}`);
+        });
+
+        it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
+          if (!viewsApiAvailable) return;
+          const response = await esClient.transport.request<{
+            views: Array<{ name: string; query: string }>;
+          }>({
+            method: 'GET',
+            path: `/_query/view/%24.${rootStream}`,
+          });
+          expect(response.views).to.have.length(1);
+          expect(response.views[0].name).to.eql(`$.${rootStream}`);
+          expect(response.views[0].query).to.eql(`FROM ${rootStream}, $.${rootStream}.nginx`);
+        });
+      }
 
       it(`fails to fork ${rootStream} to ${rootStream}.nginx when already forked`, async () => {
         const body = {
@@ -423,6 +525,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, `${rootStream}.nginx`, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -473,8 +576,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(result._index).to.match(new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`));
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:00.000Z');
         expect(result._source).to.have.property('message', 'test message');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property('name', rootStream);
+        // With subobjects: false, stream.name is a flat dotted key
+        expect((result._source as JsonObject)['stream.name']).to.eql(rootStream);
       });
 
       it('Index an ECS doc with nested fields', async () => {
@@ -492,8 +595,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, rootStream, doc);
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:00.000Z');
         expect(result._source).to.have.property('message', 'test message');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property('name', rootStream);
+        expect((result._source as JsonObject)['stream.name']).to.eql(rootStream);
       });
 
       it(`Fork ${rootStream} to ${rootStream}.apache`, async () => {
@@ -541,8 +643,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, `${rootStream}.apache`, doc);
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:10.000Z');
         expect(result._source).to.have.property('message', 'Apache access log');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property('name', `${rootStream}.apache`);
+        expect((result._source as JsonObject)['stream.name']).to.eql(`${rootStream}.apache`);
       });
 
       it(`Fork ${rootStream}.apache to ${rootStream}.apache.error`, async () => {
@@ -574,17 +675,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:20.000Z');
         expect(result._source).to.have.property('message', 'Apache error log');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property(
-          'name',
-          `${rootStream}.apache.error`
-        );
+        expect((result._source as JsonObject)['stream.name']).to.eql(`${rootStream}.apache.error`);
       });
 
       it(`Does not index to ${rootStream}.apache.error if routing is disabled`, async () => {
         await putStream(apiClient, `${rootStream}.apache`, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -773,6 +871,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -797,6 +896,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...body,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...body.stream.ingest,
@@ -819,6 +919,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -912,11 +1013,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       }
 
+      const isEcs = streams[0].startsWith('logs.ecs');
       const mappingsResponse = await esClient.indices.getMapping({ index: streams });
       for (const { mappings } of Object.values(mappingsResponse)) {
         for (const [field, fieldConfig] of Object.entries(expectedFields)) {
-          const fieldPath = field.split('.').join('.properties.');
-          expect(get(mappings.properties, fieldPath)).to.eql(omit(fieldConfig, ['from']));
+          if (isEcs) {
+            // With subobjects: false, dotted field names are literal keys in mappings
+            expect(get(mappings.properties, [field])).to.eql(omit(fieldConfig, ['from']));
+          } else {
+            const fieldPath = field.split('.').join('.properties.');
+            expect(get(mappings.properties, fieldPath)).to.eql(omit(fieldConfig, ['from']));
+          }
         }
       }
     }
@@ -940,6 +1047,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, `${rootStream}.one`, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -954,6 +1062,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, `${rootStream}.one.two.three`, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -988,6 +1097,132 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await disableStreams(apiClient);
       });
 
+      it('persists description-only overrides without freezing inherited mappings', async () => {
+        const parentStream = 'logs.otel.doconlyparent';
+        const childStream = `${parentStream}.child`;
+        const fieldName = 'attributes.abc';
+        const childDescription = 'Child-only description override';
+
+        try {
+          // Create a parent/child hierarchy via fork so routing linkage is valid.
+          await forkStream(apiClient, 'logs.otel', {
+            stream: { name: parentStream },
+            where: { always: {} },
+            status,
+          });
+          await forkStream(apiClient, parentStream, {
+            stream: { name: childStream },
+            where: { always: {} },
+            status,
+          });
+
+          // Update the parent stream to include a mapped field.
+          const parentBefore = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, parentStream)
+          );
+          const { updated_at: _parentProcessingUpdatedAt, ...parentProcessing } =
+            parentBefore.stream.ingest.processing;
+          await putStream(apiClient, parentStream, {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: parentBefore.stream.description,
+              ingest: {
+                ...parentBefore.stream.ingest,
+                processing: parentProcessing,
+                wired: {
+                  ...parentBefore.stream.ingest.wired,
+                  fields: {
+                    ...parentBefore.stream.ingest.wired.fields,
+                    [fieldName]: { type: 'keyword', ignore_above: 256 },
+                  },
+                },
+              },
+            },
+          });
+
+          // Update the child stream to only override the description (no type persisted).
+          const childBefore = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, childStream)
+          );
+          const { updated_at: _childProcessingUpdatedAt, ...childProcessing } =
+            childBefore.stream.ingest.processing;
+          await putStream(apiClient, childStream, {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: childBefore.stream.description,
+              ingest: {
+                ...childBefore.stream.ingest,
+                processing: childProcessing,
+                wired: {
+                  ...childBefore.stream.ingest.wired,
+                  fields: {
+                    ...childBefore.stream.ingest.wired.fields,
+                    [fieldName]: { description: childDescription },
+                  },
+                },
+              },
+            },
+          });
+
+          const childBeforeParentMapping = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, childStream)
+          );
+
+          expect(childBeforeParentMapping.stream.ingest.wired.fields[fieldName]).to.eql({
+            description: childDescription,
+          });
+          expect(childBeforeParentMapping.inherited_fields[fieldName]).to.eql({
+            type: 'keyword',
+            ignore_above: 256,
+            from: parentStream,
+          });
+
+          // Later: parent updates the mapping configuration. The child should reflect the updated
+          // inherited mapping, while keeping its own description override as a typeless entry.
+          const parentForUpdate = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, parentStream)
+          );
+          const { updated_at: _parentForUpdateProcessingUpdatedAt, ...parentProcessingForUpdate } =
+            parentForUpdate.stream.ingest.processing;
+          await putStream(apiClient, parentStream, {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: parentForUpdate.stream.description,
+              ingest: {
+                ...parentForUpdate.stream.ingest,
+                processing: parentProcessingForUpdate,
+                wired: {
+                  ...parentForUpdate.stream.ingest.wired,
+                  fields: {
+                    ...parentForUpdate.stream.ingest.wired.fields,
+                    [fieldName]: { type: 'keyword', ignore_above: 1024 },
+                  },
+                },
+              },
+            },
+          });
+
+          const childAfterParentMapping = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, childStream)
+          );
+
+          expect(childAfterParentMapping.inherited_fields[fieldName]).to.eql({
+            type: 'keyword',
+            ignore_above: 1024,
+            from: parentStream,
+          });
+          expect(childAfterParentMapping.stream.ingest.wired.fields[fieldName]).to.eql({
+            description: childDescription,
+          });
+        } finally {
+          await deleteStream(apiClient, childStream).catch(() => {});
+          await deleteStream(apiClient, parentStream).catch(() => {});
+        }
+      });
+
       it('fails to create a stream if an existing template takes precedence', async () => {
         const index = 'logs.otel.noprecedence';
         await esClient.indices.putIndexTemplate({
@@ -996,30 +1231,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           priority: `${MAX_PRIORITY}` as unknown as number,
         });
 
-        await putStream(
-          apiClient,
-          index,
-          {
-            ...emptyAssets,
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: { steps: [] },
-                settings: {},
-                wired: { fields: {}, routing: [] },
-                failure_store: { inherit: {} },
+        try {
+          await putStream(
+            apiClient,
+            index,
+            {
+              ...emptyAssets,
+              stream: {
+                type: 'wired',
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  wired: { fields: {}, routing: [] },
+                  failure_store: { inherit: {} },
+                },
               },
             },
-          },
-          500
-        );
+            500
+          );
+        } finally {
+          await esClient.indices
+            .deleteIndexTemplate({ name: 'highest_priority_template' })
+            .catch(() => {});
+        }
       });
 
       it('does not allow super deeply nested streams', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -1038,6 +1281,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const validStreamBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },

@@ -10,8 +10,8 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import type { HostOptions } from '@kbn/test';
-import { SamlSessionManager } from '@kbn/test';
+import type { HostOptions } from '@kbn/test-saml-auth';
+import { SamlSessionManager } from '@kbn/test-saml-auth';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import axios from 'axios';
@@ -148,8 +148,8 @@ export const samlAuthentication = async (
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {
-      const { full_name: fullName } = await sessionManager.getUserData(role);
-      return fullName;
+      const { full_name: fullName, email, username } = await sessionManager.getUserData(role);
+      return fullName || email || username;
     },
     getUsername: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE

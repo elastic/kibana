@@ -10,9 +10,12 @@ import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { OverviewTab } from '../../../../flyout_v2/document/tabs/overview_tab';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { KibanaContextProvider, useKibana } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import {
   DocumentDetailsLeftPanelKey,
@@ -24,10 +27,11 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -74,9 +78,15 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
+  const hit: DataTableRecord | undefined = useMemo(
+    () => esHitRecord && buildDataTableRecord(esHitRecord),
+    [esHitRecord]
+  );
 
   const { services } = useKibana();
   const { telemetry, overlays } = services;
+  const store = useStore();
+  const history = useHistory();
 
   const { openFlyout } = useExpandableFlyoutApi();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
@@ -102,18 +112,31 @@ const RowActionComponent = ({
   } = useUserPrivileges();
   const showNotes = canReadNotes;
 
+  const handleAlertUpdated = useCallback(() => {
+    refetch?.();
+  }, [refetch]);
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    if (newFlyoutSystemEnabled && esHitRecord) {
-      const hit: DataTableRecord = buildDataTableRecord(esHitRecord);
+    if (newFlyoutSystemEnabled && hit) {
       overlays.openSystemFlyout(
-        <KibanaContextProvider services={services}>
-          <OverviewTab hit={hit} />
-        </KibanaContextProvider>,
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={eventId}
+              indexName={indexName ?? undefined}
+              renderCellActions={cellActionRenderer}
+              onAlertUpdated={handleAlertUpdated}
+            />
+          ),
+        }),
         {
-          // @ts-ignore EUI to fix this typing issue
-          resizable: true,
-          type: 'overlay',
           ownFocus: false,
+          resizable: true,
+          size: 's',
+          type: 'overlay',
         }
       );
     } else {
@@ -133,13 +156,16 @@ const RowActionComponent = ({
       });
     }
   }, [
-    esHitRecord,
-    eventId,
-    indexName,
     newFlyoutSystemEnabled,
-    openFlyout,
+    hit,
     overlays,
     services,
+    store,
+    history,
+    eventId,
+    indexName,
+    handleAlertUpdated,
+    openFlyout,
     tableId,
     telemetry,
   ]);
@@ -194,6 +220,7 @@ const RowActionComponent = ({
           disableTimelineAction={!canReadTimelines}
           ecsData={ecsData}
           eventId={eventId}
+          hit={hit}
           index={index}
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}

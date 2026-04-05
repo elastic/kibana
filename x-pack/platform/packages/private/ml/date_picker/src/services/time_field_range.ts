@@ -42,6 +42,10 @@ interface GetTimeFieldRangeOptions {
   path: string;
 
   signal?: AbortSignal;
+  /**
+   * Project routing
+   */
+  projectRouting?: string;
 }
 
 /**

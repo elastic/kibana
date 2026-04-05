@@ -52,12 +52,14 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
     page = 0,
     perPage = 10,
     statusFilters,
+    kqlQuery,
   }: {
     serviceName: string;
     environment?: string;
     page?: number;
     perPage?: number;
     statusFilters?: string[];
+    kqlQuery?: string;
   }) {
     return apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/slos',
@@ -68,6 +70,7 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
           page,
           perPage,
           ...(statusFilters && { statusFilters: JSON.stringify(statusFilters) }),
+          ...(kqlQuery && { kqlQuery }),
         },
       },
     });
@@ -113,6 +116,16 @@ export default function ServiceSlos({ getService }: DeploymentAgnosticFtrProvide
       const response = await getServiceSlos({
         serviceName,
         statusFilters: ['VIOLATED', 'DEGRADING'],
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.results).to.eql([]);
+    });
+
+    it('accepts kqlQuery parameter', async () => {
+      const response = await getServiceSlos({
+        serviceName,
+        kqlQuery: 'slo.name : "non-existent"',
       });
 
       expect(response.status).to.be(200);

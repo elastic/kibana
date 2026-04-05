@@ -36,6 +36,7 @@ import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-inter
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { registerStatusRoute, registerPrebootStatusRoute } from './routes';
 
 import { statusConfig as config, type StatusConfigType } from './status_config';
@@ -69,6 +70,7 @@ export interface StatusServiceSetupDeps {
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
   coreUsageData: Pick<InternalCoreUsageDataSetup, 'incrementUsageCounter'>;
+  loggingSystem: Pick<ILoggingSystem, 'setGlobalContext'>;
 }
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
@@ -102,6 +104,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     savedObjects,
     environment,
     coreUsageData,
+    loggingSystem,
   }: StatusServiceSetupDeps) {
     const statusConfig = await firstValueFrom(this.config$);
     const core$ = (this.core$ = this.setupCoreStatus({
@@ -121,6 +124,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
             status: summary,
           },
         });
+        // Changing the state after the log above so that we can see the previous state before recalculating the status.
+        loggingSystem.setGlobalContext({ service: { state: summary.level.toString() } });
         return summary;
       }),
       distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),

@@ -7,10 +7,11 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { encode } from '@kbn/rison';
+import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { MouseEvent } from 'react';
 import React from 'react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface Props {
@@ -27,14 +28,16 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
 
   const handleActiveAlertsClick = () => {
     if (activeAlerts) {
-      const kuery = encodeURIComponent(
-        `'slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"'`
-      );
-      navigateToUrl(
-        `${basePath.prepend(
-          observabilityPaths.alerts
-        )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
-      );
+      const encodedKuery = encode({
+        kuery:
+          slo.instanceId !== ALL_VALUE
+            ? `slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"`
+            : `slo.id:"${slo.id}"`,
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        status: 'active',
+      });
+      navigateToUrl(`${basePath.prepend(observabilityPaths.alerts)}?_a=${encodedKuery}`);
     }
   };
 

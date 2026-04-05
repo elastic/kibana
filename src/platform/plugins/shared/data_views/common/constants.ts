@@ -11,7 +11,9 @@
  * All runtime field types.
  * @public
  */
-export const RUNTIME_FIELD_TYPES = [
+export const RUNTIME_FIELD_COMPOSITE_TYPE = 'composite' as const;
+
+export const PRIMITIVE_RUNTIME_FIELD_TYPES = [
   'keyword',
   'long',
   'double',
@@ -19,9 +21,12 @@ export const RUNTIME_FIELD_TYPES = [
   'ip',
   'boolean',
   'geo_point',
-  'composite',
 ] as const;
 
+export const RUNTIME_FIELD_TYPES = [
+  ...PRIMITIVE_RUNTIME_FIELD_TYPES,
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+] as const;
 /**
  * Used to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources
  * that are created by default by elastic in ese.

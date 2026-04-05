@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { language } from '../model/language';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { sortItem } from '../model/sort';
@@ -20,6 +20,7 @@ const sort = z.array(extendedSortItem);
 
 export const timelineEventsAllSchema = requestPaginated.extend({
   authFilter: z.object({}).optional(),
+  dateRangeField: z.string().optional(),
   excludeEcsData: z.boolean().optional(),
   fieldRequested: z.array(z.string()),
   sort,

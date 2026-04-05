@@ -34,7 +34,7 @@ export const WorkflowSelectorEmptyState: React.FC<WorkflowSelectorEmptyStateProp
             fill={false}
             href={createWorkflowHref}
             target="_blank"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="s"
           >
             {i18n.EMPTY_STATE_BUTTON_TEXT}

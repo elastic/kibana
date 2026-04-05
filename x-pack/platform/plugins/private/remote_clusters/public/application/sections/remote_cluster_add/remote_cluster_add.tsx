@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection, EuiPageBody } from '@elastic/eui';
 
 import type { ClusterPayload } from '../../../../common/lib';
+import type { RequestError } from '../../../types';
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
@@ -19,7 +20,7 @@ import { RemoteClusterWizard } from './wizard_form';
 interface Props {
   addCluster: (cluster: ClusterPayload) => void;
   isAddingCluster: boolean;
-  addClusterError?: { message: string };
+  addClusterError?: RequestError;
   clearAddClusterErrors: () => void;
 }
 

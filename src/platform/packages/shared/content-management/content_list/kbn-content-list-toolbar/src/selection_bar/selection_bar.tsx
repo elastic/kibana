@@ -24,12 +24,13 @@ export interface SelectionBarProps {
 /**
  * Selection actions rendered as `toolsLeft` inside the `EuiSearchBar`.
  *
- * When items are selected, renders a danger button labelled
- * "Delete {count} {entity}" matching the existing `TableListView` pattern.
- * Clicking the button opens a {@link DeleteConfirmationModal} that handles
- * the delete lifecycle (confirmation, loading, error, refetch).
+ * When items are selected and `onDelete` is configured on the provider, renders
+ * a danger button labelled "Delete {count} {entity}" matching the existing
+ * `TableListView` pattern. Clicking the button opens a {@link DeleteConfirmationModal}
+ * that handles the delete lifecycle (confirmation, loading, error, refetch).
+ * Clears selection when the modal closes (cancel or success).
  *
- * Returns `null` when nothing is selected.
+ * Returns `null` when nothing is selected or when `onDelete` is not configured.
  *
  * @internal Rendered automatically by {@link ContentListToolbar}.
  */

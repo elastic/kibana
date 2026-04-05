@@ -177,7 +177,7 @@ export function SpanLinksTable({ items }: Props) {
                 aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => {
                   setIdActionMenuOpen(id);
                 }}

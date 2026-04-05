@@ -136,17 +136,11 @@ export const initializeCanvas = async (
         href: docLinks.links.canvas.guide,
       },
     ],
-    content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(
-        <KibanaRenderContextProvider {...coreStart}>
-          <Provider store={canvasStore}>
-            <HelpMenu hideHelpMenu={hideHelpMenu} />
-          </Provider>
-        </KibanaRenderContextProvider>,
-        domNode
-      );
-      return () => ReactDOM.unmountComponentAtNode(domNode);
-    },
+    content: ({ hideHelpMenu }) => (
+      <Provider store={canvasStore}>
+        <HelpMenu hideHelpMenu={hideHelpMenu} />
+      </Provider>
+    ),
   });
 
   if (setupPlugins.usageCollection) {

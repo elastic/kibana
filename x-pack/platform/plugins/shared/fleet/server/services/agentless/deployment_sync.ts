@@ -13,6 +13,7 @@ import { agentPolicyService, appContextService } from '..';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import { AgentlessAgentListNotFoundError } from '../../errors';
+import { isAgentlessEnabled } from '../utils/agentless';
 
 const AGENTLESS_CONCURRENCY = 1;
 const PAGE_SIZE = 20;
@@ -37,6 +38,11 @@ export async function syncAgentlessDeployments(
     abortController?: AbortController;
   }
 ) {
+  if (!isAgentlessEnabled()) {
+    logger.info(`[Agentless Deployment Sync] Agentless is not enabled. Skipping sync process.`);
+    return;
+  }
+
   logger.info(`[Agentless Deployment Sync] Starting sync process`);
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 

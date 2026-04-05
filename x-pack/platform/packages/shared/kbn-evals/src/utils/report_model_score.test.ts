@@ -58,6 +58,8 @@ describe('mapToEvaluationScoreDocuments', () => {
 
     expect(docs[0].example.dataset.name).toBe('Dataset 1');
     expect(docs[0].example.id).toBe('0');
+    expect(docs[0].example.input).toEqual({ question: 'one' });
+    expect(docs[0].task.output).toBeNull();
   });
 
   it('uses experiment run id to resolve example id when available', async () => {
@@ -98,5 +100,42 @@ describe('mapToEvaluationScoreDocuments', () => {
 
     expect(docs[0].example.id).toBe('example-2');
     expect(docs[0].task.trace_id).toBe('trace-1');
+  });
+
+  it('includes task output when present', async () => {
+    const experiments = [
+      {
+        id: 'exp-1',
+        datasetId: 'dataset-1',
+        datasetName: 'Dataset 1',
+        runs: {
+          'run-1': {
+            exampleIndex: 0,
+            repetition: 0,
+            input: { question: 'three' },
+            expected: undefined,
+            metadata: undefined,
+            output: { answer: 'yes' },
+          },
+        },
+        evaluationRuns: [
+          {
+            name: 'Correctness',
+            experimentRunId: 'run-1',
+            result: { score: 0.6 },
+          },
+        ],
+      },
+    ] as RanExperiment[];
+
+    const docs = await mapToEvaluationScoreDocuments({
+      experiments,
+      taskModel,
+      evaluatorModel,
+      runId: 'run-123',
+      totalRepetitions: 1,
+    });
+
+    expect(docs[0].task.output).toEqual({ answer: 'yes' });
   });
 });

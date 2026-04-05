@@ -629,11 +629,15 @@ describe('RelatedDashboardsClient', () => {
         mockGetDashboard
           .mockResolvedValueOnce({
             id: 'dashboard1',
-            title: 'Dashboard 1',
+            data: {
+              title: 'Dashboard 1',
+            },
           })
           .mockResolvedValueOnce({
             id: 'dashboard2',
-            title: 'Dashboard 2',
+            data: {
+              title: 'Dashboard 2',
+            },
           });
 
         // @ts-ignore next-line
@@ -662,7 +666,9 @@ describe('RelatedDashboardsClient', () => {
         mockGetDashboard
           .mockResolvedValueOnce({
             id: 'dashboard1',
-            title: 'Dashboard 1',
+            data: {
+              title: 'Dashboard 1',
+            },
           })
           .mockRejectedValueOnce(new Boom.Boom('Dashboard not found', { statusCode: 404 }));
 
@@ -683,11 +689,15 @@ describe('RelatedDashboardsClient', () => {
         mockGetDashboard
           .mockResolvedValueOnce({
             id: 'dashboard1',
-            title: 'Dashboard 1',
+            data: {
+              title: 'Dashboard 1',
+            },
           })
           .mockResolvedValueOnce({
             id: 'dashboard2',
-            title: 'Dashboard 2',
+            data: {
+              title: 'Dashboard 2',
+            },
           });
         // @ts-ignore next-line
         const result = await client.getLinkedDashboardsByIds(['dashboard1', 'dashboard2']);
@@ -740,7 +750,9 @@ describe('RelatedDashboardsClient', () => {
 
       mockGetDashboard.mockResolvedValueOnce({
         id: 'dashboard2',
-        title: 'Dashboard 2',
+        data: {
+          title: 'Dashboard 2',
+        },
       });
 
       mockScanDashboards.mockResolvedValue({

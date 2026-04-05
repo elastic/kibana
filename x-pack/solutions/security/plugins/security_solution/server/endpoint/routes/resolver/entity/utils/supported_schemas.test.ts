@@ -6,7 +6,6 @@
  */
 
 import { getSupportedSchemas } from './supported_schemas';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import * as securityModules from './security_modules';
 
 const actualSecurityModules = jest.requireActual('./security_modules');
@@ -30,12 +29,8 @@ describe('getSupportedSchemas', () => {
     );
   });
   describe('Microsoft Defender for Endpoint integration', () => {
-    it('should include Microsoft Defender datasets when feature flag is enabled', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-      } as ExperimentalFeatures;
-
-      const schemas = getSupportedSchemas(experimentalFeatures);
+    it('should include Microsoft Defender datasets', () => {
+      const schemas = getSupportedSchemas();
       const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
 
       expect(filebeatSchema).toBeDefined();
@@ -53,58 +48,8 @@ describe('getSupportedSchemas', () => {
       );
     });
 
-    it('should not include Microsoft Defender datasets when feature flag is disabled', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        microsoftDefenderEndpointDataInAnalyzerEnabled: false,
-      } as ExperimentalFeatures;
-
-      const schemas = getSupportedSchemas(experimentalFeatures);
-      const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
-
-      expect(filebeatSchema).toBeDefined();
-
-      // Get the event.dataset constraint
-      const datasetConstraint = filebeatSchema!.constraints.find(
-        (constraint) => constraint.field === 'event.dataset'
-      );
-
-      expect(datasetConstraint).toBeDefined();
-      expect(datasetConstraint!.value).not.toEqual(
-        expect.arrayContaining([
-          'microsoft_defender_endpoint.log',
-          'm365_defender.alert',
-          'm365_defender.incident',
-        ])
-      );
-    });
-
-    it('should not include Microsoft Defender datasets when experimentalFeatures is undefined', () => {
-      const schemas = getSupportedSchemas(undefined);
-      const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
-
-      expect(filebeatSchema).toBeDefined();
-
-      // Get the event.dataset constraint
-      const datasetConstraint = filebeatSchema!.constraints.find(
-        (constraint) => constraint.field === 'event.dataset'
-      );
-
-      expect(datasetConstraint).toBeDefined();
-      expect(datasetConstraint!.value).not.toEqual(
-        expect.arrayContaining([
-          'microsoft_defender_endpoint.log',
-          'm365_defender.alert',
-          'm365_defender.incident',
-        ])
-      );
-    });
-
     it('should always include standard third-party datasets', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        microsoftDefenderEndpointDataInAnalyzerEnabled: false,
-      } as ExperimentalFeatures;
-
-      const schemas = getSupportedSchemas(experimentalFeatures);
+      const schemas = getSupportedSchemas();
       const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
 
       expect(filebeatSchema).toBeDefined();
@@ -133,7 +78,7 @@ describe('getSupportedSchemas', () => {
 
   describe('schema structure', () => {
     it('should return correct schema structure for endpoint', () => {
-      const schemas = getSupportedSchemas(undefined);
+      const schemas = getSupportedSchemas();
       const endpointSchema = schemas.find((schema) => schema.name === 'endpoint');
 
       expect(endpointSchema).toEqual({
@@ -155,7 +100,7 @@ describe('getSupportedSchemas', () => {
     });
 
     it('should return correct schema structure for winlogbeat', () => {
-      const schemas = getSupportedSchemas(undefined);
+      const schemas = getSupportedSchemas();
       const winlogbeatSchema = schemas.find((schema) => schema.name === 'winlogbeat');
 
       expect(winlogbeatSchema).toEqual({
@@ -179,7 +124,7 @@ describe('getSupportedSchemas', () => {
     });
 
     it('should return correct schema structure for sysmonViaFilebeat', () => {
-      const schemas = getSupportedSchemas(undefined);
+      const schemas = getSupportedSchemas();
       const sysmonSchema = schemas.find((schema) => schema.name === 'sysmonViaFilebeat');
 
       expect(sysmonSchema).toEqual({
@@ -203,7 +148,7 @@ describe('getSupportedSchemas', () => {
     });
 
     it('should include process.name field in all schemas', () => {
-      const schemas = getSupportedSchemas(undefined);
+      const schemas = getSupportedSchemas();
 
       schemas.forEach((schemaConfig) => {
         expect(schemaConfig.schema.name).toBe('process.name');
@@ -212,12 +157,8 @@ describe('getSupportedSchemas', () => {
   });
 
   describe('Microsoft Defender datasets integration', () => {
-    it('should include all three Microsoft Defender datasets when enabled', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-      } as ExperimentalFeatures;
-
-      const schemas = getSupportedSchemas(experimentalFeatures);
+    it('should include all three Microsoft Defender datasets', () => {
+      const schemas = getSupportedSchemas();
       const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
 
       const datasetConstraint = filebeatSchema!.constraints.find(
@@ -231,12 +172,8 @@ describe('getSupportedSchemas', () => {
       expect(datasets).toContain('m365_defender.incident');
     });
 
-    it('should maintain existing third-party integrations when Microsoft Defender is enabled', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-      } as ExperimentalFeatures;
-
-      const schemas = getSupportedSchemas(experimentalFeatures);
+    it('should maintain existing third-party integrations', () => {
+      const schemas = getSupportedSchemas();
       const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
 
       const datasetConstraint = filebeatSchema!.constraints.find(
@@ -268,27 +205,8 @@ describe('getSupportedSchemas', () => {
   });
 
   describe('centralized security module integration', () => {
-    it('should call getSecurityModuleDatasets with core modules when feature flag is disabled', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        microsoftDefenderEndpointDataInAnalyzerEnabled: false,
-      } as ExperimentalFeatures;
-
-      getSupportedSchemas(experimentalFeatures);
-
-      expect(mockGetSecurityModuleDatasets).toHaveBeenCalledWith([
-        'crowdstrike',
-        'jamf_protect',
-        'sentinel_one',
-        'sentinel_one_cloud_funnel',
-      ]);
-    });
-
-    it('should call getSecurityModuleDatasets with all modules when feature flag is enabled', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-      } as ExperimentalFeatures;
-
-      getSupportedSchemas(experimentalFeatures);
+    it('should call getSecurityModuleDatasets with all modules', () => {
+      getSupportedSchemas();
 
       expect(mockGetSecurityModuleDatasets).toHaveBeenCalledWith([
         'crowdstrike',
@@ -300,22 +218,11 @@ describe('getSupportedSchemas', () => {
       ]);
     });
 
-    it('should call getSecurityModuleDatasets with core modules when experimentalFeatures is undefined', () => {
-      getSupportedSchemas(undefined);
-
-      expect(mockGetSecurityModuleDatasets).toHaveBeenCalledWith([
-        'crowdstrike',
-        'jamf_protect',
-        'sentinel_one',
-        'sentinel_one_cloud_funnel',
-      ]);
-    });
-
     it('should use datasets returned by getSecurityModuleDatasets in filebeat schema constraint', () => {
       const mockDatasets = ['custom.dataset1', 'custom.dataset2'];
       mockGetSecurityModuleDatasets.mockReturnValue(mockDatasets);
 
-      const schemas = getSupportedSchemas(undefined);
+      const schemas = getSupportedSchemas();
       const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
 
       expect(filebeatSchema).toBeDefined();
@@ -330,7 +237,7 @@ describe('getSupportedSchemas', () => {
     it('should handle empty datasets from getSecurityModuleDatasets', () => {
       mockGetSecurityModuleDatasets.mockReturnValue([]);
 
-      const schemas = getSupportedSchemas(undefined);
+      const schemas = getSupportedSchemas();
       const filebeatSchema = schemas.find((schema) => schema.name === 'filebeat');
 
       expect(filebeatSchema).toBeDefined();
@@ -343,13 +250,11 @@ describe('getSupportedSchemas', () => {
     });
 
     it('should call getSecurityModuleDatasets exactly once per getSupportedSchemas call', () => {
-      getSupportedSchemas(undefined);
+      getSupportedSchemas();
 
       expect(mockGetSecurityModuleDatasets).toHaveBeenCalledTimes(1);
 
-      getSupportedSchemas({
-        microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-      } as ExperimentalFeatures);
+      getSupportedSchemas();
 
       expect(mockGetSecurityModuleDatasets).toHaveBeenCalledTimes(2);
     });
@@ -361,7 +266,7 @@ describe('getSupportedSchemas', () => {
         throw new Error('Security module datasets error');
       });
 
-      expect(() => getSupportedSchemas(undefined)).toThrow('Security module datasets error');
+      expect(() => getSupportedSchemas()).toThrow('Security module datasets error');
     });
   });
 });

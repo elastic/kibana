@@ -15,6 +15,7 @@ import {
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
 } from '@kbn/observability-agent-builder-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
+import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ServiceSloContextProvider } from '../../../../context/service_slo/service_slo_context';
@@ -44,9 +45,11 @@ interface Props {
 
 export function ApmServiceTemplate(props: Props) {
   return (
-    <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
-    </ApmServiceContextProvider>
+    <ApmIndexSettingsContextProvider>
+      <ApmServiceContextProvider>
+        <TemplateWithContext {...props} />
+      </ApmServiceContextProvider>
+    </ApmIndexSettingsContextProvider>
   );
 }
 
@@ -105,7 +108,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setChatConfig({
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
@@ -125,7 +128,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, serviceName, environment, start, end]);
 
@@ -139,43 +142,36 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     <ServiceSloContextProvider serviceName={serviceName} environment={environment}>
       <ApmMainTemplate
         showActionsMenu
+        searchBar={<SearchBar {...searchBarOptions} showEnvironmentFilter />}
         pageHeader={{
           tabs,
+          rightSideItems: [<AnalyzeDataButton />],
           pageTitle: (
-            <>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="l">
-                        <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ServiceIcons
-                        serviceName={serviceName}
-                        environment={environment}
-                        start={start}
-                        end={end}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <AnalyzeDataButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <ServiceHeaderBadges
-                serviceName={serviceName}
-                environment={environment}
-                start={start}
-                end={end}
-                onSloClick={openSloOverviewFlyout}
-                alertsTabHref={alertsTabHref}
-              />
-            </>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ServiceIcons
+                  serviceName={serviceName}
+                  environment={environment}
+                  start={start}
+                  end={end}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          children: (
+            <ServiceHeaderBadges
+              serviceName={serviceName}
+              environment={environment}
+              start={start}
+              end={end}
+              onSloClick={openSloOverviewFlyout}
+              alertsTabHref={alertsTabHref}
+            />
           ),
         }}
       >
@@ -187,12 +183,9 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <>
-            <SearchBar {...searchBarOptions} />
-            <ServiceAnomalyTimeseriesContextProvider>
-              {children}
-            </ServiceAnomalyTimeseriesContextProvider>
-          </>
+          <ServiceAnomalyTimeseriesContextProvider>
+            {children}
+          </ServiceAnomalyTimeseriesContextProvider>
         )}
         {sloOverviewFlyout && (
           <SloOverviewFlyout

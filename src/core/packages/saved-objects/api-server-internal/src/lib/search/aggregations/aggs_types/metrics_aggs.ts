@@ -68,8 +68,8 @@ export const metricsAggsSchemas: Record<string, ObjectType> = {
   }),
   top_hits: s.object({
     explain: s.maybe(s.boolean()),
-    docvalue_fields: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
-    stored_fields: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+    docvalue_fields: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 100 })])),
+    stored_fields: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string(), { maxSize: 100 })])),
     from: s.maybe(s.number()),
     size: s.maybe(s.number()),
     sort: s.maybe(sortSchema),
@@ -77,7 +77,7 @@ export const metricsAggsSchemas: Record<string, ObjectType> = {
     version: s.maybe(s.boolean()),
     track_scores: s.maybe(s.boolean()),
     highlight: s.maybe(s.any()),
-    _source: s.maybe(s.oneOf([s.boolean(), s.string(), s.arrayOf(s.string())])),
+    _source: s.maybe(s.oneOf([s.boolean(), s.string(), s.arrayOf(s.string(), { maxSize: 100 })])),
   }),
   value_count: s.object({
     field: s.maybe(s.string()),

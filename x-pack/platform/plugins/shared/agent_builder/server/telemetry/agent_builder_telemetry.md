@@ -37,27 +37,42 @@ pipeline. They include:
   - How we count: ES `count` on the agents system index.
 
 ### conversations
+
+All-time conversation metrics (no date filter).
+
 - `conversations.total`
   - What it is: Total number of conversations.
-  - How we count: ES `hits.total` on the conversations index.
+  - How we count: ES `hits.total` (with `track_total_hits: true`) on the conversations index.
 - `conversations.rounds_distribution[]`
   - What it is: Distribution of conversations by number of rounds.
   - How we count: ES scripted terms aggregation using `conversation_rounds` (or `rounds` fallback)
     and bucket labels `1-5`, `6-10`, `11-20`, `21-50`, `51+`.
 - `conversations.total_rounds`
-  - What it is: Approximate total number of rounds across all conversations.
-  - How we count: Derived from `rounds_distribution` buckets by multiplying each bucket count by
-    a midpoint (3, 8, 15, 35, 75) and summing.
+  - What it is: Exact total number of rounds across all conversations.
+  - How we count: ES scripted sum aggregation that counts the actual size of each conversation's
+    `conversation_rounds` (or `rounds`) array.
 - `conversations.avg_rounds_per_conversation`
   - What it is: Average rounds per conversation.
   - How we count: `total_rounds / total`, rounded to two decimals.
 - `conversations.tokens_used`
-  - What it is: Total tokens used across all conversation rounds.
-  - How we count: ES scripted sum aggregation over `conversation_rounds[*].model_usage`
-    (`input_tokens + output_tokens`).
+  - What it is: Total tokens used across all conversation rounds (input + output).
+  - How we count: Sum of `tokens_input` and `tokens_output`.
+- `conversations.tokens_input`
+  - What it is: Total input tokens across all conversation rounds.
+  - How we count: ES scripted sum aggregation over `conversation_rounds[*].model_usage.input_tokens`.
+- `conversations.tokens_output`
+  - What it is: Total output tokens across all conversation rounds.
+  - How we count: ES scripted sum aggregation over `conversation_rounds[*].model_usage.output_tokens`.
 - `conversations.average_tokens_per_conversation`
   - What it is: Average tokens per conversation.
   - How we count: `tokens_used / total`, rounded to two decimals.
+
+### daily
+
+Same structure as `conversations` above, but filtered to the last 24 hours using a
+`created_at >= now-24h` range filter. All fields (`total`, `total_rounds`, `tokens_used`,
+`tokens_input`, `tokens_output`, `rounds_distribution`, etc.) are computed identically but
+only over conversations created in the last day.
 
 ### tokens_by_model[]
 - `tokens_by_model[].model`

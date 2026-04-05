@@ -98,7 +98,7 @@ export const ObservableActionsPopoverButton: React.FC<{
         button={
           <EuiButtonIcon
             onClick={tooglePopover}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18n.OBSERVABLE_ACTIONS}
             color="text"
             key={`cases-observables-actions-popover-button-${observable.id}`}

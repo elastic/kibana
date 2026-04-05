@@ -17,7 +17,8 @@ import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
 
 export const transformDashboardIn = (
-  dashboardState: DashboardState
+  dashboardState: Partial<DashboardState>,
+  isDashboardAppRequest: boolean = false
 ):
   | {
       attributes: DashboardSavedObjectAttributes;
@@ -50,7 +51,7 @@ export const transformDashboardIn = (
       sections,
       references: panelReferences,
     } = panels
-      ? transformPanelsIn(panels)
+      ? transformPanelsIn(panels, isDashboardAppRequest)
       : {
           panelsJSON: '',
           sections: undefined,
@@ -67,11 +68,12 @@ export const transformDashboardIn = (
 
     const attributes = {
       description: '',
+      title: '',
       ...rest,
       ...(pinnedPanels && {
         pinned_panels: { panels: pinnedPanels },
       }),
-      optionsJSON: transformOptionsIn(options),
+      optionsJSON: transformOptionsIn(options ?? {}),
       panelsJSON,
       ...(refresh_interval && { refreshInterval: refresh_interval }),
       ...(sections?.length && { sections }),

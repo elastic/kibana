@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
+import { isColumn, isOptionNode } from '@elastic/esql';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommandOption, ESQLAstAllCommands } from '../../../../types';
 import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
-import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { isColumn, isOptionNode } from '../../../../ast/is';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 
 export const METADATA_FIELDS = [
@@ -37,6 +36,13 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   category: SuggestionCategory.VALUE,
 });
 
+const METADATA_TRAILING_FRAGMENT_REGEX = /(?:METADATA|,)\s+(\S*)$/i;
+
+const getMetadataFragment = (innerText: string) => {
+  const match = innerText.match(METADATA_TRAILING_FRAGMENT_REGEX);
+  return match?.[1] ?? '';
+};
+
 export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {
   const metadataNode = command.args.find((arg) => isOptionNode(arg) && arg.name === 'metadata') as
     | ESQLCommandOption
@@ -57,38 +63,30 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
   // FROM something METADATA field/
   // FROM something METADATA field, /
   if (/(?:,|METADATA)\s+$/i.test(innerText) || /\S$/.test(innerText)) {
-    suggestions.push(
-      ...(await handleFragment(
-        innerText,
-        (fragment) => METADATA_FIELDS.includes(fragment),
-        (_fragment, rangeToReplace) =>
-          buildFieldsDefinitions(filteredMetaFields).map((suggestion) => ({
-            ...suggestion,
-            rangeToReplace,
-          })),
-        (fragment, rangeToReplace) => {
-          const _suggestions = [
-            withAutoSuggest({
-              ...pipeCompleteItem,
-              text: fragment + ' | ',
-              filterText: fragment,
-              rangeToReplace,
-            }),
-          ];
-          if (filteredMetaFields.length > 1) {
-            _suggestions.push(
-              withAutoSuggest({
-                ...commaCompleteItem,
-                text: fragment + ', ',
-                filterText: fragment,
-                rangeToReplace,
-              })
-            );
-          }
-          return _suggestions;
-        }
-      ))
-    );
+    const prefix = getMetadataFragment(innerText);
+
+    if (prefix && METADATA_FIELDS.includes(prefix)) {
+      const completionSuggestions: ISuggestionItem[] = [
+        {
+          ...pipeCompleteItem,
+          text: ' | ',
+          preserveTypedPrefix: true,
+        },
+      ];
+      if (filteredMetaFields.length > 1) {
+        completionSuggestions.push(
+          withAutoSuggest({
+            ...commaCompleteItem,
+            text: ', ',
+            preserveTypedPrefix: true,
+          })
+        );
+      }
+      suggestions.push(...completionSuggestions);
+      return suggestions;
+    }
+
+    suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
   } else {
     // METADATA field /
     if (existingFields.size > 0) {

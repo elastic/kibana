@@ -32,7 +32,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AsyncSearchGetResponse,
   ErrorResponseBase,
-  SqlGetAsyncResponse,
+  EsqlAsyncQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -52,6 +52,7 @@ import type {
   UserProfileService,
 } from '@kbn/core/public';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
@@ -367,9 +368,15 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategyToString(strategy)}/${id}`, {
-        version: '1',
-      })
+      this.deps.http.delete(
+        buildPath('/internal/search/{strategy}/{id}', {
+          strategy: strategyToString(strategy),
+          id: id as string,
+        }),
+        {
+          version: '1',
+        }
+      )
     );
 
     const cancel = async () => {
@@ -491,7 +498,10 @@ export class SearchInterceptor {
     const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,
+        buildPath('/internal/search/{strategy}/{id?}', {
+          strategy: strategyToString(strategy),
+          id: request.id,
+        }),
         {
           version: '1',
           signal: abortSignal,
@@ -549,7 +559,7 @@ export class SearchInterceptor {
               ...getTotalLoaded(shimmedResponse),
             };
           case ESQL_ASYNC_SEARCH_STRATEGY:
-            const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+            const esqlResponse = rawResponse.body as unknown as EsqlAsyncQueryResponse;
             return {
               id: esqlResponse.id,
               rawResponse: esqlResponse,

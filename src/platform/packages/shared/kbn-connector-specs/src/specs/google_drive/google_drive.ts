@@ -9,6 +9,10 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import downloadWorkflow from './workflows/download.yaml';
+import listWorkflow from './workflows/list.yaml';
+import metadataWorkflow from './workflows/metadata.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
@@ -52,10 +56,27 @@ export const GoogleDriveConnector: ConnectorSpec = {
       defaultMessage: 'Search and access files and folders in Google Drive',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            scope: { disabled: true },
+          },
+        },
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },
@@ -373,4 +394,6 @@ export const GoogleDriveConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, metadataWorkflow, searchWorkflow],
 };

@@ -15,6 +15,13 @@ export {
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
+export { VISIBILITY_ICON, VISIBILITY_BADGE_COLOR, AgentVisibility } from './visibility';
+export {
+  isAgentOwner,
+  canChangeAgentVisibility,
+  hasAgentReadAccess,
+  hasAgentWriteAccess,
+} from './access_control';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,

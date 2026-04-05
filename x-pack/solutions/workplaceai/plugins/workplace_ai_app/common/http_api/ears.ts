@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Supported OAuth providers for EARS
@@ -29,6 +29,7 @@ export const ALL_EARS_OAUTH_PROVIDERS = [
 
 // Exchange token
 export interface ExchangeCodeRequest {
+  pkce_verifier: string;
   code: string;
 }
 

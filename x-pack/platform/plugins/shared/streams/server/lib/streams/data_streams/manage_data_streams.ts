@@ -27,6 +27,7 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { getErrorMessage, parseError } from '../errors/parse_error';
+import { StatusError } from '../errors/status_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -225,6 +226,15 @@ export async function updateDataStreamsLifecycle({
             };
           };
 
+          // simulateIndexTemplate returns an empty response for replicated data streams
+          // that have no local index template
+          if (!template || !template.settings) {
+            throw new StatusError(
+              `Cannot determine template lifecycle for ${name} — the data stream may be replicated and managed by a remote cluster`,
+              400
+            );
+          }
+
           const templateLifecycle = getTemplateLifecycle(template);
           if (isDslLifecycle(templateLifecycle)) {
             const templateDownsampling = templateLifecycle.dsl.downsample;
@@ -284,11 +294,12 @@ export async function putDataStreamsSettings({
       settings,
     })
   );
-  const errors = response.data_streams
+  const dataStreamErrors = response.data_streams
     .filter(({ error }) => Boolean(error))
-    .map(({ error }) => error);
-  if (errors.length) {
-    throw new Error(errors.join('\n'));
+    .map(({ error }) => (typeof error === 'string' ? error : JSON.stringify(error)));
+  if (dataStreamErrors.length) {
+    const joined = dataStreamErrors.join('\n');
+    throw new Error(joined);
   }
 }
 

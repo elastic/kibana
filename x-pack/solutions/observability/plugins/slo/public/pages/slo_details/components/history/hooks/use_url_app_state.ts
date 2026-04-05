@@ -85,7 +85,7 @@ export function useUrlAppState(slo: SLOWithSummaryResponse | SLODefinitionRespon
   };
 }
 
-function getDefaultRangeFromSlo(
+export function getDefaultRangeFromSlo(
   slo: SLOWithSummaryResponse | SLODefinitionResponse
 ): AppState['range'] {
   if (slo.timeWindow.type === 'calendarAligned') {

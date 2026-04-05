@@ -26,6 +26,7 @@ export const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:splunk',
   'epr:google_secops',
   'epr:microsoft_sentinel',
+  'epr:ibm_qradar',
   'epr:sentinel_one',
   'epr:crowdstrike',
   'epr:elastic_security',

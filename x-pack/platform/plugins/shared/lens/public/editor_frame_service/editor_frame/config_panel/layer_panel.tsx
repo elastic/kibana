@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { LensDatasourceId } from '@kbn/lens-common';
+
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiSpacer,
@@ -136,7 +138,7 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId! as 'formBased' | 'textBased';
+  const datasourceId = datasourcePublicAPI?.datasourceId! as LensDatasourceId;
   let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
@@ -259,17 +261,13 @@ export function LayerPanel(props: LayerPanelProps) {
           props.onRemoveDimension({ layerId, columnId: openColumnId });
         }
       } else if (isDimensionComplete) {
-        updateAll(
+        updateAll({
           datasourceId,
-          newState,
-          activeVisualization.setDimension({
-            layerId,
-            groupId: openColumnGroup.groupId,
-            columnId: openColumnId,
-            prevState: visualizationState,
-            frame: framePublicAPI,
-          })
-        );
+          newDatasourceState: newState,
+          layerId,
+          groupId: openColumnGroup.groupId,
+          columnId: openColumnId,
+        });
       } else {
         if (forceRender) {
           updateDatasource(datasourceId, newState);
@@ -288,8 +286,6 @@ export function LayerPanel(props: LayerPanelProps) {
       layerId,
       updateAll,
       updateDatasourceAsync,
-      visualizationState,
-      framePublicAPI,
     ]
   );
 

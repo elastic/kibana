@@ -6,8 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
-import type { AttackDiscoveryAlertDocument } from '../lib/attack_discovery/schedules/types';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
 
 export const getResponseMock = (): estypes.SearchResponse<AttackDiscoveryAlertDocument> => ({
   took: 1,

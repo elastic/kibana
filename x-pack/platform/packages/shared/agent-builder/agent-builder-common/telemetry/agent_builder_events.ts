@@ -18,8 +18,13 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
   AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
   ToolCreated: `${TELEMETRY_PREFIX}_tool_created`,
+  SkillCreated: `${TELEMETRY_PREFIX}_skill_created`,
+  SkillUpdated: `${TELEMETRY_PREFIX}_skill_updated`,
+  SkillDeleted: `${TELEMETRY_PREFIX}_skill_deleted`,
   RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
+  ToolCallSuccess: `${TELEMETRY_PREFIX}_tool_call_success`,
+  ToolCallError: `${TELEMETRY_PREFIX}_tool_call_error`,
 } as const;
 
 export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
@@ -48,6 +53,7 @@ export interface ReportRoundCompleteParams {
   agent_id: string;
   attachments?: string[];
   conversation_id?: string;
+  execution_id?: string;
   input_tokens: number;
   llm_calls: number;
   message_length: number;
@@ -57,9 +63,12 @@ export interface ReportRoundCompleteParams {
   round_id: string;
   response_length: number;
   round_number: number;
+  round_status: string;
   started_at: string;
   time_to_first_token: number;
   time_to_last_token: number;
+  tool_calls: number;
+  tool_call_errors: number;
   tools_invoked: string[];
 }
 
@@ -68,6 +77,7 @@ export interface ReportRoundErrorParams {
   error_message: string;
   model_provider?: string;
   conversation_id?: string;
+  execution_id?: string;
   agent_id: string;
   round_id?: string;
 }
@@ -87,6 +97,49 @@ export interface ReportToolCreatedParams {
   tool_type: string;
 }
 
+/** Telemetry params reported when a user-created skill is created. */
+export interface ReportSkillCreatedParams {
+  /** Identifier of the created skill. */
+  skill_id: string;
+}
+
+/** Telemetry params reported when a user-created skill is updated. */
+export interface ReportSkillUpdatedParams {
+  /** Identifier of the updated skill. */
+  skill_id: string;
+}
+
+/** Telemetry params reported when a user-created skill is deleted. */
+export interface ReportSkillDeletedParams {
+  /** Identifier of the deleted skill. */
+  skill_id: string;
+}
+
+export interface ReportToolCallSuccessParams {
+  tool_id: string;
+  tool_call_id: string;
+  source: string;
+  agent_id?: string;
+  conversation_id?: string;
+  execution_id?: string;
+  model?: string;
+  result_types: string[];
+  duration_ms: number;
+}
+
+export interface ReportToolCallErrorParams {
+  tool_id: string;
+  tool_call_id: string;
+  source: string;
+  agent_id?: string;
+  conversation_id?: string;
+  execution_id?: string;
+  model?: string;
+  error_type: string;
+  error_message: string;
+  duration_ms: number;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -94,8 +147,16 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
+  /** Fired when a user-created skill is created. */
+  [AGENT_BUILDER_EVENT_TYPES.SkillCreated]: ReportSkillCreatedParams;
+  /** Fired when a user-created skill is updated. */
+  [AGENT_BUILDER_EVENT_TYPES.SkillUpdated]: ReportSkillUpdatedParams;
+  /** Fired when a user-created skill is deleted. */
+  [AGENT_BUILDER_EVENT_TYPES.SkillDeleted]: ReportSkillDeletedParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
+  [AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess]: ReportToolCallSuccessParams;
+  [AGENT_BUILDER_EVENT_TYPES.ToolCallError]: ReportToolCallErrorParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -105,8 +166,13 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
   | EventTypeOpts<ReportToolCreatedParams>
+  | EventTypeOpts<ReportSkillCreatedParams>
+  | EventTypeOpts<ReportSkillUpdatedParams>
+  | EventTypeOpts<ReportSkillDeletedParams>
   | EventTypeOpts<ReportRoundCompleteParams>
-  | EventTypeOpts<ReportRoundErrorParams>;
+  | EventTypeOpts<ReportRoundErrorParams>
+  | EventTypeOpts<ReportToolCallSuccessParams>
+  | EventTypeOpts<ReportToolCallErrorParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -115,8 +181,13 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCreated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillCreated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillUpdated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillDeleted
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
-  | typeof AGENT_BUILDER_EVENT_TYPES.RoundError;
+  | typeof AGENT_BUILDER_EVENT_TYPES.RoundError
+  | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess
+  | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallError;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -259,6 +330,48 @@ const TOOL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the created skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the updated skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_DELETED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillDeleted,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the deleted skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+  },
+};
+
 const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.RoundComplete,
   schema: {
@@ -287,6 +400,13 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Conversation ID',
+        optional: true,
+      },
+    },
+    execution_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Execution ID',
         optional: true,
       },
     },
@@ -353,6 +473,13 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    round_status: {
+      type: 'keyword',
+      _meta: {
+        description: 'Status the round was in after current execution',
+        optional: false,
+      },
+    },
     started_at: {
       type: 'date',
       _meta: {
@@ -386,6 +513,20 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description:
           'Tool IDs invoked in the round (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>"). Intentionally includes duplicates (one entry per tool call) so counts per tool can be computed downstream by aggregating over this array.',
+        optional: false,
+      },
+    },
+    tool_calls: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of tool calls performed in this round',
+        optional: false,
+      },
+    },
+    tool_call_errors: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of tool erroring tool calls performed in this round',
         optional: false,
       },
     },
@@ -428,6 +569,13 @@ const ROUND_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
       optional: true,
     },
   },
+  execution_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'Execution ID',
+      optional: true,
+    },
+  },
   agent_id: {
     type: 'keyword',
     _meta: {
@@ -442,6 +590,161 @@ const ROUND_ERROR_EVENT: AgentBuilderTelemetryEvent = {
   schema: ROUND_ERROR_SCHEMA,
 };
 
+const TOOL_CALL_SUCCESS_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Conversation ID',
+        optional: true,
+      },
+    },
+    execution_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent execution ID',
+        optional: true,
+      },
+    },
+    tool_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the tool (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    tool_call_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique ID of this tool call invocation',
+        optional: false,
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the tool was called from (agent|user|mcp|api|unknown)',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The exact model used, if available',
+        optional: true,
+      },
+    },
+    duration_ms: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of the tool call in milliseconds',
+        optional: false,
+      },
+    },
+    result_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Type of the tool result (resource|esql_results|error|other|...)',
+        },
+      },
+      _meta: {
+        description: 'Types of results returned by the tool call',
+        optional: false,
+      },
+    },
+  },
+};
+
+const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ToolCallError,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the agent (normalized: built-in agents keep ID, custom agents become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Conversation ID',
+        optional: true,
+      },
+    },
+    execution_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent execution ID',
+        optional: true,
+      },
+    },
+    tool_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the tool (normalized: built-in tools keep ID, custom tools become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+    tool_call_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique ID of this tool call invocation',
+        optional: false,
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the tool was called from (agent|user|mcp|api|unknown)',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The exact model used, if available',
+        optional: true,
+      },
+    },
+    duration_ms: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of the tool call in milliseconds',
+        optional: false,
+      },
+    },
+    error_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type/name of the error that occurred',
+        optional: false,
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'The error message describing what went wrong',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -452,6 +755,11 @@ export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unk
   AGENT_CREATED_EVENT,
   AGENT_UPDATED_EVENT,
   TOOL_CREATED_EVENT,
+  SKILL_CREATED_EVENT,
+  SKILL_UPDATED_EVENT,
+  SKILL_DELETED_EVENT,
   ROUND_COMPLETE_EVENT,
   ROUND_ERROR_EVENT,
+  TOOL_CALL_SUCCESS_EVENT,
+  TOOL_CALL_ERROR_EVENT,
 ];

@@ -21,9 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
 
-  // find csp benchmark rule tests
-  describe.skip('GET internal/cloud_security_posture/rules/_find', function () {
-    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.fleet-actions-7], this action is granted by the index privileges [create_index,manage,all]
+  describe('GET internal/cloud_security_posture/rules/_find', function () {
     this.tags(['failsOnMKI']);
 
     let agentPolicyId: string;

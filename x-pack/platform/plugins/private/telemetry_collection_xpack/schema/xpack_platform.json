@@ -362,19 +362,19 @@
             "total": {
               "type": "long",
               "_meta": {
-                "description": "Total number of conversations"
+                "description": "Total number of conversations (all-time)"
               }
             },
             "total_rounds": {
               "type": "long",
               "_meta": {
-                "description": "Total conversation rounds across all conversations"
+                "description": "Total conversation rounds across all conversations (all-time)"
               }
             },
             "avg_rounds_per_conversation": {
               "type": "float",
               "_meta": {
-                "description": "Average rounds per conversation"
+                "description": "Average rounds per conversation (all-time)"
               }
             },
             "rounds_distribution": {
@@ -399,13 +399,90 @@
             "tokens_used": {
               "type": "long",
               "_meta": {
-                "description": "Total tokens used across all conversations (input + output)"
+                "description": "Total tokens used (input + output) (all-time)"
+              }
+            },
+            "tokens_input": {
+              "type": "long",
+              "_meta": {
+                "description": "Total input tokens across all conversations (all-time)"
+              }
+            },
+            "tokens_output": {
+              "type": "long",
+              "_meta": {
+                "description": "Total output tokens across all conversations (all-time)"
               }
             },
             "average_tokens_per_conversation": {
               "type": "float",
               "_meta": {
-                "description": "Average tokens per conversation"
+                "description": "Average tokens per conversation (all-time)"
+              }
+            }
+          }
+        },
+        "daily": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of conversations (daily, last 24h)"
+              }
+            },
+            "total_rounds": {
+              "type": "long",
+              "_meta": {
+                "description": "Total conversation rounds (daily, last 24h)"
+              }
+            },
+            "avg_rounds_per_conversation": {
+              "type": "float",
+              "_meta": {
+                "description": "Average rounds per conversation (daily, last 24h)"
+              }
+            },
+            "rounds_distribution": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "bucket": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of conversations in this bucket"
+                    }
+                  }
+                }
+              }
+            },
+            "tokens_used": {
+              "type": "long",
+              "_meta": {
+                "description": "Total tokens used (input + output) (daily, last 24h)"
+              }
+            },
+            "tokens_input": {
+              "type": "long",
+              "_meta": {
+                "description": "Total input tokens (daily, last 24h)"
+              }
+            },
+            "tokens_output": {
+              "type": "long",
+              "_meta": {
+                "description": "Total output tokens (daily, last 24h)"
+              }
+            },
+            "average_tokens_per_conversation": {
+              "type": "float",
+              "_meta": {
+                "description": "Average tokens per conversation (daily, last 24h)"
               }
             }
           }
@@ -9894,6 +9971,130 @@
               }
             }
           }
+        },
+        "custom_rules": {
+          "properties": {
+            "total_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of custom rules across all detectors in all jobs"
+              }
+            },
+            "jobs_with_rules_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of jobs that have at least one custom rule on any detector"
+              }
+            },
+            "detectors_with_rules_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of detectors that have at least one custom rule"
+              }
+            },
+            "count_by_action": {
+              "properties": {
+                "skip_result": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of rules with the skip_result action"
+                  }
+                },
+                "skip_model_update": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of rules with the skip_model_update action"
+                  }
+                }
+              }
+            },
+            "count_with_conditions": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules that have one or more numeric conditions"
+              }
+            },
+            "count_with_scope": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of rules that have scope (filter list) configuration"
+              }
+            }
+          }
+        },
+        "calendars": {
+          "properties": {
+            "total_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of calendars (standard and DST combined)"
+              }
+            },
+            "dst_calendars_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of DST calendars, identified by events with a force_time_shift field"
+              }
+            },
+            "standard_calendars_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of standard (non-DST) calendars"
+              }
+            },
+            "global_calendars_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of calendars applied to all jobs (job_ids contains '_all')"
+              }
+            },
+            "calendars_with_jobs_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of non-global calendars assigned to at least one job or job group"
+              }
+            },
+            "standard_events_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of scheduled events across all standard (non-DST) calendars. DST event counts are excluded because they are auto-generated."
+              }
+            }
+          }
+        },
+        "filter_lists": {
+          "properties": {
+            "total_filter_list_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of ML filter lists"
+              }
+            },
+            "total_filter_item_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of items across all filter lists"
+              }
+            },
+            "avg_items_per_filter_list": {
+              "type": "float",
+              "_meta": {
+                "description": "Average number of items per filter list, rounded to 2 decimal places"
+              }
+            },
+            "empty_filter_list_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of filter lists that contain no items"
+              }
+            },
+            "filter_lists_used_in_rules_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of filter lists referenced by at least one custom rule scope across all jobs"
+              }
+            }
+          }
         }
       }
     },
@@ -10875,6 +11076,18 @@
               "type": "long",
               "_meta": {
                 "description": "The number of inference connectors created using the Contextual AI provider."
+              }
+            },
+            "fireworksai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Fireworks AI provider."
+              }
+            },
+            "nvidia": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the NVIDIA provider."
               }
             },
             "groq": {

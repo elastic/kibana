@@ -98,11 +98,7 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
 }
 
 export function getUnitDuration(unit: number = 1) {
-  const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
-    const result = /s$/.test(name);
-    return unit > 1 ? result : !result;
-  });
-  return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
+  return timeUnitsToSuggest.map(({ name }) => `${unit} ${name}`);
 }
 
 /**

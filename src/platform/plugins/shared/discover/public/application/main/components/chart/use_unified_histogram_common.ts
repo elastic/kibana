@@ -8,31 +8,33 @@
  */
 
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import React, { useCallback, useEffect } from 'react';
-import type { DiscoverMainContentProps } from '../layout/discover_main_content';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
+import { useCallback, useEffect, type ReactElement } from 'react';
+import {
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
+  selectTabRuntimeState,
+  useRuntimeStateManager,
+} from '../../state_management/redux';
 
 export const useUnifiedHistogramCommon = ({
   currentTabId,
   layoutProps,
-  stateContainer,
   panelsToggle,
   localStorageKeyPrefix,
 }: {
   currentTabId: string;
   layoutProps?: UnifiedHistogramPartialLayoutProps;
-  stateContainer: DiscoverStateContainer;
-  panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+  panelsToggle?: ReactElement;
   localStorageKeyPrefix?: string;
 }) => {
+  const runtimeStateManager = useRuntimeStateManager();
+
   useEffect(() => {
     if (!layoutProps) {
       return;
     }
 
     const histogramConfig$ = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
+      runtimeStateManager,
       currentTabId
     ).unifiedHistogramConfig$;
 
@@ -43,13 +45,10 @@ export const useUnifiedHistogramCommon = ({
         [localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX]: layoutProps,
       },
     });
-  }, [currentTabId, layoutProps, localStorageKeyPrefix, stateContainer.runtimeStateManager]);
+  }, [currentTabId, layoutProps, localStorageKeyPrefix, runtimeStateManager]);
 
   const renderCustomChartToggleActions = useCallback(
-    () =>
-      React.isValidElement(panelsToggle)
-        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
-        : panelsToggle,
+    () => panelsToggle ?? undefined,
     [panelsToggle]
   );
 

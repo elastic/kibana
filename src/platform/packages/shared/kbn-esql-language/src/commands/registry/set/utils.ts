@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstItem } from '@elastic/esql/types';
+import { isMap } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
-import type { ESQLAstItem } from '../../../types';
-import { isMap, SuggestionCategory } from '../../../..';
+import { SuggestionCategory } from '../../../..';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { settings } from '../../definitions/generated/settings';
@@ -51,8 +52,8 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
 const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
   return [
     {
-      label: UnmappedFieldsStrategy.FAIL,
-      text: UnmappedFieldsStrategy.FAIL,
+      label: UnmappedFieldsStrategy.DEFAULT,
+      text: UnmappedFieldsStrategy.DEFAULT,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
         defaultMessage: 'Fails the query if unmapped fields are present',
@@ -93,7 +94,7 @@ const getApproximateCompletionItems = (
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
-    availableParameters.num_rows.suggestions = numOfRowsValueItems;
+    availableParameters.rows.suggestions = numOfRowsValueItems;
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
 

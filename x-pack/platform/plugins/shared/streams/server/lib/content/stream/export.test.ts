@@ -19,7 +19,12 @@ const streams = [
       { destination: 'logs.hello', where: { always: {} }, status: 'enabled' },
     ],
     queries: [
-      { id: 'logs-query', title: 'logs-query', kql: { query: 'logs' }, esql: { query: '' } },
+      {
+        id: 'logs-query',
+        title: 'logs-query',
+        description: '',
+        esql: { query: 'FROM logs | WHERE level == "error"' },
+      },
     ],
   }),
   testContentPackEntry({
@@ -30,7 +35,12 @@ const streams = [
   testContentPackEntry({
     name: 'logs.hello',
     queries: [
-      { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
+      {
+        id: 'hello-query',
+        title: 'hello-query',
+        description: '',
+        esql: { query: 'FROM logs | WHERE greeting == "hello"' },
+      },
     ],
   }),
 ];
@@ -53,7 +63,12 @@ describe('content pack export', () => {
           { destination: 'hello', where: { always: {} }, status: 'enabled' },
         ],
         queries: [
-          { id: 'logs-query', title: 'logs-query', kql: { query: 'logs' }, esql: { query: '' } },
+          {
+            id: 'logs-query',
+            title: 'logs-query',
+            description: '',
+            esql: { query: 'FROM logs | WHERE level == "error"' },
+          },
         ],
       }),
       testContentPackEntry({
@@ -64,7 +79,12 @@ describe('content pack export', () => {
       testContentPackEntry({
         name: 'hello',
         queries: [
-          { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
+          {
+            id: 'hello-query',
+            title: 'hello-query',
+            description: '',
+            esql: { query: 'FROM logs | WHERE greeting == "hello"' },
+          },
         ],
       }),
     ]);
@@ -101,7 +121,12 @@ describe('content pack export', () => {
       testContentPackEntry({
         name: 'hello',
         queries: [
-          { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
+          {
+            id: 'hello-query',
+            title: 'hello-query',
+            description: '',
+            esql: { query: 'FROM logs | WHERE greeting == "hello"' },
+          },
         ],
       }),
     ]);

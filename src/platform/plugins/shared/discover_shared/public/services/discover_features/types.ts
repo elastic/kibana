@@ -8,7 +8,8 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { FunctionComponent, PropsWithChildren } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
@@ -40,6 +41,7 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
+  renderCpsWarning?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
@@ -114,20 +116,30 @@ export interface SecuritySolutionCellRendererFeature {
   >;
 }
 
-export interface SecuritySolutionAppWrapperFeature {
-  id: 'security-solution-app-wrapper';
-  getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
+interface SecuritySolutionAlertFlyoutRenderProps extends DocViewRenderProps {
+  onAlertUpdated: () => void;
 }
 
 export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
   id: 'security-solution-alert-flyout-overview-tab';
-  render: (hit: DataTableRecord) => JSX.Element;
+  render: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
+  id: 'security-solution-alert-flyout-header-title';
+  renderHeader: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAlertFlyoutFooterFeature {
+  id: 'security-solution-alert-flyout-footer';
+  renderFooter: (hit: DataTableRecord) => JSX.Element;
 }
 
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
-  | SecuritySolutionAppWrapperFeature
-  | SecuritySolutionAlertFlyoutOverviewTabFeature;
+  | SecuritySolutionAlertFlyoutOverviewTabFeature
+  | SecuritySolutionAlertFlyoutHeaderTitleFeature
+  | SecuritySolutionAlertFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 

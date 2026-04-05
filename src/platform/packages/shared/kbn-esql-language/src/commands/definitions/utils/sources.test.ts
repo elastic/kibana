@@ -17,8 +17,8 @@ import {
   buildSourcesDefinitions,
   getLookupJoinSource,
 } from './sources';
-import { EsqlQuery, synth } from '../../../composer';
-import { Walker, type ESQLAstJoinCommand } from '../../../..';
+import { EsqlQuery, synth, Walker } from '@elastic/esql';
+import type { ESQLAstJoinCommand } from '@elastic/esql/types';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {
@@ -169,6 +169,7 @@ describe('buildSourcesDefinitions with timeseries', () => {
 
     // Timeseries suggestion should have TS prefix and range replacement
     expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
+    expect(timeseriesSuggestion?.filterText).toBe('FROM my_timeseries_index');
     expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
     expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
 

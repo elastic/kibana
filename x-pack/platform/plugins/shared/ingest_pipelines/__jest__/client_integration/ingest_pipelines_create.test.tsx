@@ -42,10 +42,11 @@ const renderPipelinesCreate = async (httpSetup: TestHttpSetup, queryParams: stri
   );
 
   await screen.findByTestId('pipelineForm');
+  await screen.findByTestId('descriptionField');
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/253406
-// FLAKY: https://github.com/elastic/kibana/issues/253362
+// Failing: See https://github.com/elastic/kibana/issues/253406
+// Failing: See https://github.com/elastic/kibana/issues/253362
 describe.skip('<PipelinesCreate />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 

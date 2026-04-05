@@ -10,8 +10,11 @@ import {
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
+  type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
@@ -26,6 +29,9 @@ import {
   DocLinksService,
   NavigationService,
   ToolsService,
+  SkillsService,
+  SmlService,
+  PluginsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -70,7 +76,9 @@ export class AgentBuilderPlugin
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -94,6 +102,7 @@ export class AgentBuilderPlugin
         }
         return this.internalServices;
       },
+      appUpdater$: this.appUpdater$,
     });
 
     registerAnalytics({ analytics: core.analytics });
@@ -121,7 +130,7 @@ export class AgentBuilderPlugin
     const { licensing, inference } = startDependencies;
 
     const agentService = new AgentService({ http });
-    const attachmentsService = new AttachmentsService();
+    const attachmentsService = new AttachmentsService({ http });
 
     attachmentsService.addAttachmentType(
       'visualization',
@@ -133,6 +142,9 @@ export class AgentBuilderPlugin
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
+    const skillsService = new SkillsService({ http });
+    const smlService = new SmlService({ http });
+    const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -140,23 +152,6 @@ export class AgentBuilderPlugin
     }
 
     const { navigationService } = this.setupServices;
-
-    const internalServices: AgentBuilderInternalService = {
-      agentService,
-      attachmentsService,
-      chatService,
-      conversationsService,
-      docLinksService,
-      navigationService,
-      toolsService,
-      startDependencies,
-      accessChecker,
-      eventsService,
-    };
-
-    this.internalServices = internalServices;
-
-    setSidebarServices(core, internalServices);
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
@@ -167,7 +162,7 @@ export class AgentBuilderPlugin
       // If already open, update props instead of creating new
       if (this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
-        return { flyoutRef: this.activeSidebarRef };
+        return { chatRef: this.activeSidebarRef };
       }
 
       // Set runtime context before opening
@@ -195,34 +190,62 @@ export class AgentBuilderPlugin
       };
 
       this.activeSidebarRef = sidebarRef;
-      return { flyoutRef: sidebarRef };
+      return { chatRef: sidebarRef };
     };
+
+    const internalServices: AgentBuilderInternalService = {
+      agentService,
+      attachmentsService,
+      chatService,
+      conversationsService,
+      docLinksService,
+      navigationService,
+      toolsService,
+      skillsService,
+      smlService,
+      pluginsService,
+      startDependencies,
+      accessChecker,
+      eventsService,
+      openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
+        return openSidebarInternal(options);
+      },
+    };
+
+    this.internalServices = internalServices;
+
+    setSidebarServices(core, internalServices);
 
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
-      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+      addAttachment: (attachment: AttachmentInput) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
+      setChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;
         // If there is already an active sidebar, update its props
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           this.sidebarCallbacks.updateProps(config);
-          return { flyoutRef: this.activeSidebarRef };
+          return { chatRef: this.activeSidebarRef };
         }
       },
-      clearConversationFlyoutActiveConfig: () => {
+      clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           // Removes stale browserApiTools from the sidebar
           this.sidebarCallbacks.resetBrowserApiTools();
         }
       },
-      openConversationFlyout: (options?: OpenConversationSidebarOptions) => {
+      openChat: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
-      toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => {
+      toggleChat: (options?: OpenConversationSidebarOptions) => {
         if (this.activeSidebarRef) {
           const sidebarRef = this.activeSidebarRef;
           // Be defensive: clear local references immediately in case the sidebar doesn't
@@ -234,6 +257,9 @@ export class AgentBuilderPlugin
         }
 
         openSidebarInternal(options);
+      },
+      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
+        return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
     };
 

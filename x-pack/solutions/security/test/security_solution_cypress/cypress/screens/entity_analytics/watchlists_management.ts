@@ -9,3 +9,13 @@ import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const WATCHLISTS_MANAGEMENT_PAGE_TITLE =
   getDataTestSubjectSelector('watchlistManagementPage');
+export const WATCHLISTS_MANAGEMENT_TABLE = getDataTestSubjectSelector('watchlistsManagementTable');
+export const WATCHLISTS_MANAGEMENT_TABLE_LOADING = getDataTestSubjectSelector(
+  'watchlistsManagementTableLoading'
+);
+export const WATCHLISTS_MANAGEMENT_TABLE_EMPTY = getDataTestSubjectSelector(
+  'watchlistsManagementTableEmpty'
+);
+export const WATCHLISTS_MANAGEMENT_TABLE_ERROR = getDataTestSubjectSelector(
+  'watchlistsManagementTableError'
+);

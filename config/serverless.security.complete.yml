@@ -3,10 +3,6 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
-# Cross Project Search
-cps.enabled: true
-cps.cpsEnabled: false
-
 xpack.features.overrides:
   ### Workflows Management should be moved from Analytics category to the Security one.
   workflowsManagement.category: "security"

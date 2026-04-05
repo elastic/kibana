@@ -4254,80 +4254,11 @@
         "label": "MapsStorage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-        "lineNumber": 71,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "maps",
-            "id": "def-server.MapsStorage.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 72,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-server.MapsStorage.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{\n    logger,\n    throwOnResultValidationError,\n  }",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 75,
-                "columnNumber": 6,
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "maps",
-                    "id": "def-server.MapsStorage.Unnamed.$1.logger",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "logger",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "@kbn/logging",
-                        "scope": "common",
-                        "docId": "kibKbnLoggingPluginApi",
-                        "section": "def-common.Logger",
-                        "text": "Logger"
-                      }
-                    ],
-                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 76,
-                    "columnNumber": 5,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "maps",
-                    "id": "def-server.MapsStorage.Unnamed.$1.throwOnResultValidationError",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "throwOnResultValidationError",
-                    "description": [],
-                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 77,
-                    "columnNumber": 5,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
           {
             "parentPluginId": "maps",
             "id": "def-server.MapsStorage.get",
@@ -4352,7 +4283,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -4676,7 +4607,7 @@
                 "section": "def-common.LABEL_POSITIONS",
                 "text": "LABEL_POSITIONS"
               },
-              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -4746,7 +4677,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -4754,7 +4685,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -4824,7 +4755,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -4956,7 +4887,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -5026,7 +4957,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5152,7 +5083,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5242,7 +5173,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+              "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5250,7 +5181,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5266,7 +5197,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5274,7 +5205,7 @@
                 "section": "def-common.LAYER_TYPE",
                 "text": "LAYER_TYPE"
               },
-              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5309,7 +5240,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 86,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5331,7 +5262,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 86,
+                "lineNumber": 71,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5348,7 +5279,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 86,
+                "lineNumber": 71,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5368,7 +5299,7 @@
               "() => Promise<never>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 125,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5399,7 +5330,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5723,7 +5654,7 @@
                 "section": "def-common.LABEL_POSITIONS",
                 "text": "LABEL_POSITIONS"
               },
-              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -5793,7 +5724,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5801,7 +5732,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -5871,7 +5802,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6003,7 +5934,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -6073,7 +6004,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6199,7 +6130,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6289,7 +6220,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+              "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6297,7 +6228,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6313,7 +6244,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6321,7 +6252,7 @@
                 "section": "def-common.LAYER_TYPE",
                 "text": "LAYER_TYPE"
               },
-              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6361,7 +6292,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6685,7 +6616,7 @@
                 "section": "def-common.LABEL_POSITIONS",
                 "text": "LABEL_POSITIONS"
               },
-              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -6755,7 +6686,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6763,7 +6694,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -6833,7 +6764,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6965,7 +6896,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -7035,7 +6966,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7161,7 +7092,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7251,7 +7182,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+              "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7259,7 +7190,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7275,7 +7206,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7283,7 +7214,7 @@
                 "section": "def-common.LAYER_TYPE",
                 "text": "LAYER_TYPE"
               },
-              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7318,7 +7249,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 130,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7340,7 +7271,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 131,
+                "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7362,7 +7293,7 @@
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -7686,7 +7617,7 @@
                     "section": "def-common.LABEL_POSITIONS",
                     "text": "LABEL_POSITIONS"
                   },
-                  "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -7756,7 +7687,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -7764,7 +7695,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -7834,7 +7765,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -7966,7 +7897,7 @@
                   "GRID_RESOLUTION",
                   "; geoField: string; requestType: ",
                   "RENDER_AS",
-                  "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -8036,7 +7967,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8162,7 +8093,7 @@
                     "section": "def-common.LAYER_STYLE_TYPE",
                     "text": "LAYER_STYLE_TYPE"
                   },
-                  ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8252,7 +8183,7 @@
                   "GRID_RESOLUTION",
                   "; geoField: string; requestType: ",
                   "RENDER_AS",
-                  "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+                  "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8260,7 +8191,7 @@
                     "section": "def-common.LAYER_STYLE_TYPE",
                     "text": "LAYER_STYLE_TYPE"
                   },
-                  ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+                  ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8276,7 +8207,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8284,7 +8215,7 @@
                     "section": "def-common.LAYER_TYPE",
                     "text": "LAYER_TYPE"
                   },
-                  ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8319,7 +8250,7 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 132,
+                "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8336,7 +8267,7 @@
                   "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 133,
+                "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8369,7 +8300,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -8693,7 +8624,7 @@
                 "section": "def-common.LABEL_POSITIONS",
                 "text": "LABEL_POSITIONS"
               },
-              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -8763,7 +8694,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -8771,7 +8702,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -8841,7 +8772,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -8973,7 +8904,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -9043,7 +8974,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9169,7 +9100,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9259,7 +9190,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+              "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9267,7 +9198,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9283,7 +9214,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9291,7 +9222,7 @@
                 "section": "def-common.LAYER_TYPE",
                 "text": "LAYER_TYPE"
               },
-              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9331,7 +9262,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9655,7 +9586,7 @@
                 "section": "def-common.LABEL_POSITIONS",
                 "text": "LABEL_POSITIONS"
               },
-              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -9725,7 +9656,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9733,7 +9664,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -9803,7 +9734,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9935,7 +9866,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -10005,7 +9936,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10131,7 +10062,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10221,7 +10152,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+              "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10229,7 +10160,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10245,7 +10176,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10253,7 +10184,7 @@
                 "section": "def-common.LAYER_TYPE",
                 "text": "LAYER_TYPE"
               },
-              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10288,7 +10219,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 197,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10310,7 +10241,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 198,
+                "lineNumber": 175,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10327,7 +10258,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 199,
+                "lineNumber": 176,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10349,7 +10280,7 @@
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -10673,7 +10604,7 @@
                     "section": "def-common.LABEL_POSITIONS",
                     "text": "LABEL_POSITIONS"
                   },
-                  "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -10743,7 +10674,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -10751,7 +10682,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -10821,7 +10752,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -10953,7 +10884,7 @@
                   "GRID_RESOLUTION",
                   "; geoField: string; requestType: ",
                   "RENDER_AS",
-                  "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -11023,7 +10954,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11149,7 +11080,7 @@
                     "section": "def-common.LAYER_STYLE_TYPE",
                     "text": "LAYER_STYLE_TYPE"
                   },
-                  ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11239,7 +11170,7 @@
                   "GRID_RESOLUTION",
                   "; geoField: string; requestType: ",
                   "RENDER_AS",
-                  "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+                  "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11247,7 +11178,7 @@
                     "section": "def-common.LAYER_STYLE_TYPE",
                     "text": "LAYER_STYLE_TYPE"
                   },
-                  ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+                  ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11263,7 +11194,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11271,7 +11202,7 @@
                     "section": "def-common.LAYER_TYPE",
                     "text": "LAYER_TYPE"
                   },
-                  ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11306,7 +11237,7 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 200,
+                "lineNumber": 177,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11323,7 +11254,7 @@
                   "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 201,
+                "lineNumber": 178,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11359,7 +11290,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 270,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11381,7 +11312,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 271,
+                "lineNumber": 244,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11398,7 +11329,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 272,
+                "lineNumber": 245,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11412,7 +11343,7 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 274,
+                "lineNumber": 247,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11425,7 +11356,7 @@
                     "label": "force",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 274,
+                    "lineNumber": 247,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -11475,7 +11406,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -11799,7 +11730,7 @@
                 "section": "def-common.LABEL_POSITIONS",
                 "text": "LABEL_POSITIONS"
               },
-              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -11869,7 +11800,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -11877,7 +11808,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -11947,7 +11878,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12079,7 +12010,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+              "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
               "MASK_OPERATOR",
               "; }> | undefined; } & { type: ",
               {
@@ -12149,7 +12080,7 @@
                 "section": "def-common.AGG_TYPE",
                 "text": "AGG_TYPE"
               },
-              ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+              ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12275,7 +12206,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12365,7 +12296,7 @@
               "GRID_RESOLUTION",
               "; geoField: string; requestType: ",
               "RENDER_AS",
-              "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+              "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12373,7 +12304,7 @@
                 "section": "def-common.LAYER_STYLE_TYPE",
                 "text": "LAYER_STYLE_TYPE"
               },
-              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12389,7 +12320,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12397,7 +12328,7 @@
                 "section": "def-common.LAYER_TYPE",
                 "text": "LAYER_TYPE"
               },
-              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12432,7 +12363,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>>[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 281,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12454,7 +12385,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 282,
+                "lineNumber": 255,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12477,7 +12408,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 283,
+                "lineNumber": 256,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12494,7 +12425,7 @@
                   "Readonly<{ onlyTitle?: boolean | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 284,
+                "lineNumber": 257,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12511,7 +12442,7 @@
             "label": "mSearch",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 335,
+            "lineNumber": 304,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12524,7 +12455,7 @@
                 "label": "savedObjectType",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 336,
+                "lineNumber": 305,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -12571,7 +12502,7 @@
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -12895,7 +12826,7 @@
                     "section": "def-common.LABEL_POSITIONS",
                     "text": "LABEL_POSITIONS"
                   },
-                  "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -12965,7 +12896,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -12973,7 +12904,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -13043,7 +12974,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13175,7 +13106,7 @@
                   "GRID_RESOLUTION",
                   "; geoField: string; requestType: ",
                   "RENDER_AS",
-                  "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+                  "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
                   "MASK_OPERATOR",
                   "; }> | undefined; } & { type: ",
                   {
@@ -13245,7 +13176,7 @@
                     "section": "def-common.AGG_TYPE",
                     "text": "AGG_TYPE"
                   },
-                  ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+                  ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13371,7 +13302,7 @@
                     "section": "def-common.LAYER_STYLE_TYPE",
                     "text": "LAYER_STYLE_TYPE"
                   },
-                  ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13461,7 +13392,7 @@
                   "GRID_RESOLUTION",
                   "; geoField: string; requestType: ",
                   "RENDER_AS",
-                  "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+                  "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13469,7 +13400,7 @@
                     "section": "def-common.LAYER_STYLE_TYPE",
                     "text": "LAYER_STYLE_TYPE"
                   },
-                  ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+                  ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13485,7 +13416,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13493,7 +13424,7 @@
                     "section": "def-common.LAYER_TYPE",
                     "text": "LAYER_TYPE"
                   },
-                  ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -13528,7 +13459,7 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 337,
+                "lineNumber": 306,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13550,7 +13481,7 @@
                       }
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 337,
+                    "lineNumber": 306,
                     "columnNumber": 20,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -13576,7 +13507,7 @@
                       ">"
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 337,
+                    "lineNumber": 306,
                     "columnNumber": 41,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -14046,7 +13977,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: string; readonly indexPatternId: string; }"
+          ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly id: string; readonly type: string; readonly indexPatternId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
         "lineNumber": 46,
@@ -14647,7 +14578,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: ",
+          ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -14771,7 +14702,7 @@
         "label": "ESGeoLineSourceDescriptor",
         "description": [],
         "signature": [
-          "{ readonly sortField?: string | undefined; readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -14841,7 +14772,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly groupByTimeseries?: boolean | undefined; readonly lineSimplificationSize?: number | undefined; readonly splitField?: string | undefined; readonly id: string; readonly type: ",
+          ".PERCENTILE; }>)[] | undefined; readonly sortField?: string | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly groupByTimeseries?: boolean | undefined; readonly lineSimplificationSize?: number | undefined; readonly splitField?: string | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -15027,7 +14958,7 @@
         "label": "ESTermSourceDescriptor",
         "description": [],
         "signature": [
-          "{ readonly size?: number | undefined; readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -15097,7 +15028,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: ",
+          ".PERCENTILE; }>)[] | undefined; readonly size?: number | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -15411,7 +15342,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -15419,7 +15350,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -15489,7 +15420,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -15699,7 +15630,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; readonly description?: string | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly center?: Readonly<{} & { lat: number; lon: number; }> | undefined; readonly settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; readonly description?: string | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly center?: Readonly<{} & { lat: number; lon: number; }> | undefined; readonly settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16023,7 +15954,7 @@
             "section": "def-common.LABEL_POSITIONS",
             "text": "LABEL_POSITIONS"
           },
-          "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -16093,7 +16024,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16101,7 +16032,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -16171,7 +16102,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16303,7 +16234,7 @@
           "GRID_RESOLUTION",
           "; geoField: string; requestType: ",
           "RENDER_AS",
-          "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -16373,7 +16304,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16499,7 +16430,7 @@
             "section": "def-common.LAYER_STYLE_TYPE",
             "text": "LAYER_STYLE_TYPE"
           },
-          ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16589,7 +16520,7 @@
           "GRID_RESOLUTION",
           "; geoField: string; requestType: ",
           "RENDER_AS",
-          "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+          "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16597,7 +16528,7 @@
             "section": "def-common.LAYER_STYLE_TYPE",
             "text": "LAYER_STYLE_TYPE"
           },
-          ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+          ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16613,7 +16544,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16621,7 +16552,7 @@
             "section": "def-common.LAYER_TYPE",
             "text": "LAYER_TYPE"
           },
-          ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16687,7 +16618,7 @@
         "label": "MapSettings",
         "description": [],
         "signature": [
-          "{ readonly backgroundColor: string; readonly minZoom: number; readonly maxZoom: number; readonly autoFitToDataBounds: boolean; readonly customIcons: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[]; readonly disableInteractive: boolean; readonly disableTooltipControl: boolean; readonly hideToolbarOverlay: boolean; readonly hideLayerControl: boolean; readonly hideViewControl: boolean; readonly initialLocation: ",
+          "{ readonly minZoom: number; readonly maxZoom: number; readonly autoFitToDataBounds: boolean; readonly backgroundColor: string; readonly customIcons: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[]; readonly disableInteractive: boolean; readonly disableTooltipControl: boolean; readonly hideToolbarOverlay: boolean; readonly hideLayerControl: boolean; readonly hideViewControl: boolean; readonly initialLocation: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17058,7 +16989,7 @@
           "GRID_RESOLUTION",
           "; geoField: string; requestType: ",
           "RENDER_AS",
-          "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -17128,7 +17059,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17314,7 +17245,7 @@
         "label": "StoredEMSVectorTileLayer",
         "description": [],
         "signature": [
-          "{ readonly parent?: string | undefined; readonly label?: string | undefined; readonly style?: Readonly<{} & { type: ",
+          "{ readonly parent?: string | undefined; readonly locale?: string | undefined; readonly label?: string | undefined; readonly style?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17322,7 +17253,7 @@
             "section": "def-common.LAYER_STYLE_TYPE",
             "text": "LAYER_STYLE_TYPE"
           },
-          ".EMS_VECTOR_TILE; color: string; }> | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly locale?: string | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly areLabelsOnTop?: boolean | undefined; readonly id: string; readonly type: ",
+          ".EMS_VECTOR_TILE; color: string; }> | undefined; readonly query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly areLabelsOnTop?: boolean | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17363,7 +17294,7 @@
             "section": "def-common.LAYER_STYLE_TYPE",
             "text": "LAYER_STYLE_TYPE"
           },
-          ".HEATMAP; }> | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly id: string; readonly type: ",
+          ".HEATMAP; }> | undefined; readonly query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17470,7 +17401,7 @@
         "label": "StoredLayerGroup",
         "description": [],
         "signature": [
-          "{ readonly parent?: string | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly id: string; readonly type: ",
+          "{ readonly parent?: string | undefined; readonly query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17521,7 +17452,7 @@
         "label": "StoredRasterLayer",
         "description": [],
         "signature": [
-          "{ readonly parent?: string | undefined; readonly label?: string | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly id: string; readonly type: ",
+          "{ readonly parent?: string | undefined; readonly label?: string | undefined; readonly query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17886,7 +17817,7 @@
             "section": "def-common.LABEL_POSITIONS",
             "text": "LABEL_POSITIONS"
           },
-          "; }>; }> | undefined; } & {}>; }> | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly disableTooltips?: boolean | undefined; readonly joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }>; }> | undefined; } & {}>; }> | undefined; readonly query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly visible?: boolean | undefined; readonly attribution?: Readonly<{} & { label: string; url: string; }> | undefined; readonly minZoom?: number | undefined; readonly maxZoom?: number | undefined; readonly alpha?: number | undefined; readonly includeInFitToBounds?: boolean | undefined; readonly disableTooltips?: boolean | undefined; readonly joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -17956,7 +17887,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17964,7 +17895,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -18034,7 +17965,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -18166,7 +18097,7 @@
           "GRID_RESOLUTION",
           "; geoField: string; requestType: ",
           "RENDER_AS",
-          "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -18236,7 +18167,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -19944,7 +19875,7 @@
         "label": "ESTermSourceDescriptor",
         "description": [],
         "signature": [
-          "{ readonly size?: number | undefined; readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "{ readonly metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -20014,7 +19945,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly id: string; readonly type: ",
+          ".PERCENTILE; }>)[] | undefined; readonly size?: number | undefined; readonly applyForceRefresh?: boolean | undefined; readonly applyGlobalQuery?: boolean | undefined; readonly applyGlobalTime?: boolean | undefined; readonly whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; readonly id: string; readonly type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20088,7 +20019,7 @@
           "HeatmapLayerDescriptor",
           " | ",
           "EMSVectorTileLayerDescriptor",
-          " | (Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          " | (Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20096,7 +20027,7 @@
             "section": "def-common.LAYER_TYPE",
             "text": "LAYER_TYPE"
           },
-          ".LAYER_GROUP; label: string; visible: boolean; }> & RuntimeLayerState & { sourceDescriptor?: { type: string; } | undefined; style?: { type: string; } | undefined; }) | (Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".LAYER_GROUP; label: string; visible: boolean; }> & RuntimeLayerState & { sourceDescriptor?: { type: string; } | undefined; style?: { type: string; } | undefined; }) | (Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20163,13 +20094,13 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
-            "text": "SerializedTimeRange"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -20177,7 +20108,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; } & {}>> & ",
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>> & ",
           {
             "pluginId": "embeddable",
             "scope": "server",
@@ -20189,7 +20120,7 @@
           "MapCenterAndZoom",
           " | undefined; mapBuffer?: ",
           "MapExtent",
-          " | undefined; mapSettings?: Partial<Required<Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          " | undefined; mapSettings?: Partial<Required<Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20215,13 +20146,13 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
-            "text": "SerializedTimeRange"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -20229,7 +20160,7 @@
             "section": "def-common.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; } & {}>> & ",
+          "<Readonly<{ description?: string | undefined; title?: string | undefined; hide_title?: boolean | undefined; hide_border?: boolean | undefined; } & {}>> & ",
           {
             "pluginId": "embeddable",
             "scope": "server",
@@ -20241,7 +20172,7 @@
           "MapCenterAndZoom",
           " | undefined; mapBuffer?: ",
           "MapExtent",
-          " | undefined; mapSettings?: Partial<Required<Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          " | undefined; mapSettings?: Partial<Required<Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20257,7 +20188,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; backgroundColor?: string | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20581,7 +20512,7 @@
             "section": "def-common.LABEL_POSITIONS",
             "text": "LABEL_POSITIONS"
           },
-          "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -20651,7 +20582,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20659,7 +20590,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -20729,7 +20660,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -20861,7 +20792,7 @@
           "GRID_RESOLUTION",
           "; geoField: string; requestType: ",
           "RENDER_AS",
-          "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -20931,7 +20862,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21057,7 +20988,7 @@
             "section": "def-common.LAYER_STYLE_TYPE",
             "text": "LAYER_STYLE_TYPE"
           },
-          ".HEATMAP; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".HEATMAP; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21147,7 +21078,7 @@
           "GRID_RESOLUTION",
           "; geoField: string; requestType: ",
           "RENDER_AS",
-          "; }>; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
+          "; }>; }> | Readonly<{ parent?: string | undefined; locale?: string | undefined; label?: string | undefined; style?: Readonly<{} & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21155,7 +21086,7 @@
             "section": "def-common.LAYER_STYLE_TYPE",
             "text": "LAYER_STYLE_TYPE"
           },
-          ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; locale?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
+          ".EMS_VECTOR_TILE; color: string; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; areLabelsOnTop?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21171,7 +21102,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".EMS_TMS; }>; }> | Readonly<{ parent?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21179,7 +21110,7 @@
             "section": "def-common.LAYER_TYPE",
             "text": "LAYER_TYPE"
           },
-          ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".LAYER_GROUP; label: string; visible: boolean; }> | Readonly<{ parent?: string | undefined; label?: string | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21651,7 +21582,7 @@
             "section": "def-common.LABEL_POSITIONS",
             "text": "LABEL_POSITIONS"
           },
-          "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }>; }> | undefined; } & {}>; }> | undefined; query?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; disableTooltips?: boolean | undefined; joins?: Readonly<{ leftField?: string | undefined; } & { right: Readonly<{} & { id: string; type: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -21721,7 +21652,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21729,7 +21660,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ size?: number | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          ".ES_DISTANCE_SOURCE; indexPatternId: string; distance: number; geoField: string; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -21799,7 +21730,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; size?: number | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; whereQuery?: Readonly<{} & { language: string; query: string | Record<string, any>; }> | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21931,7 +21862,7 @@
           "GRID_RESOLUTION",
           "; geoField: string; requestType: ",
           "RENDER_AS",
-          "; }> | Readonly<{ sortField?: string | undefined; metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
+          "; }> | Readonly<{ metrics?: (Readonly<{ label?: string | undefined; mask?: Readonly<{} & { value: number; operator: ",
           "MASK_OPERATOR",
           "; }> | undefined; } & { type: ",
           {
@@ -22001,7 +21932,7 @@
             "section": "def-common.AGG_TYPE",
             "text": "AGG_TYPE"
           },
-          ".PERCENTILE; }>)[] | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
+          ".PERCENTILE; }>)[] | undefined; sortField?: string | undefined; applyForceRefresh?: boolean | undefined; applyGlobalQuery?: boolean | undefined; applyGlobalTime?: boolean | undefined; groupByTimeseries?: boolean | undefined; lineSimplificationSize?: number | undefined; splitField?: string | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",

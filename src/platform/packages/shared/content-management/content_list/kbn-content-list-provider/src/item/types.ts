@@ -27,6 +27,8 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
   type?: string;
   /** Last update timestamp. */
   updatedAt?: Date;
+  /** Optional array of tag IDs associated with this item. */
+  tags?: string[];
 };
 
 /**

@@ -6,3 +6,5 @@
  */
 
 export * from './management';
+export * from './sync';
+export * as WatchlistDataSources from './data_source';

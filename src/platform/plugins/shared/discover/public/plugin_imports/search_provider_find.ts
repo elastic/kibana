@@ -50,7 +50,7 @@ export const searchProviderFind: (
 
   const params = {
     query: {
-      esql: getInitialESQLQuery(defaultDataView, true),
+      esql: getInitialESQLQuery(defaultDataView),
     },
     dataViewSpec: defaultDataView?.toSpec(),
   };

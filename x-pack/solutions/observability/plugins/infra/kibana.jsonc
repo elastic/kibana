@@ -52,6 +52,7 @@
       "profilingDataAccess",
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
+      "agentBuilder",
       "licenseManagement",
       "serverless"
     ],
@@ -61,7 +62,8 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "fleet"
+      "fleet",
+      "observabilityAgentBuilder"
     ]
   }
 }

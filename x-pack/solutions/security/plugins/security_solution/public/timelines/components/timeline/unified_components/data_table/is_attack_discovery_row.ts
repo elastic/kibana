@@ -13,7 +13,6 @@ import {
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 
-const ATTACK_DISCOVERY_ALERT_IDS_FIELD = 'kibana.alert.attack_discovery.alert_ids';
 const ATTACK_DISCOVERY_RULE_TYPE_IDS = [
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
@@ -29,11 +28,6 @@ const getTimelineFieldValues = (
 };
 
 export const isAttackDiscoveryRow = (eventData: DataTableRecord & TimelineItem): boolean => {
-  const attackAlertIds = getTimelineFieldValues(eventData, ATTACK_DISCOVERY_ALERT_IDS_FIELD);
-  if (attackAlertIds.length > 0) {
-    return true;
-  }
-
   const ruleTypeIds = getTimelineFieldValues(eventData, ALERT_RULE_TYPE_ID);
   if (ruleTypeIds.some((ruleTypeId) => ATTACK_DISCOVERY_RULE_TYPES.has(ruleTypeId))) {
     return true;

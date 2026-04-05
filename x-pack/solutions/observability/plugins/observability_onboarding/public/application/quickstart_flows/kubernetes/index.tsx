@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,16 +17,12 @@ import { DataIngestStatus } from './data_ingest_status';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useKubernetesFlow } from './use_kubernetes_flow';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
-import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 
 export const KubernetesPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
-      defaultMessage: 'Kubernetes: Logs & Metrics',
-    }),
-  });
   const { data, status, error, refetch } = useKubernetesFlow();
   const { onPageReady } = usePerformanceContext();
+  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
 
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
@@ -72,6 +68,8 @@ export const KubernetesPanel: React.FC = () => {
               elasticsearchUrl={data.elasticsearchUrl}
               elasticAgentVersionInfo={data.elasticAgentVersionInfo}
               isCopyPrimaryAction={!isMonitoringStepActive}
+              ingestionMode={ingestionMode}
+              onIngestionModeChange={setIngestionMode}
             />
           )}
         </>
@@ -86,7 +84,7 @@ export const KubernetesPanel: React.FC = () => {
       ),
       status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
       children: isMonitoringStepActive && data && (
-        <DataIngestStatus onboardingId={data.onboardingId} />
+        <DataIngestStatus onboardingId={data.onboardingId} ingestionMode={ingestionMode} />
       ),
     },
   ];

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workflows-ui'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-ui'
+  title: '@kbn/workflows-ui'
   description: Moon project for @kbn/workflows-ui
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-workflows-ui
+  sourceRoot: src/platform/packages/shared/kbn-workflows-ui
 dependsOn:
   - '@kbn/react-query'
   - '@kbn/kibana-react-plugin'
@@ -25,6 +24,10 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/core'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-application-browser'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
@@ -38,16 +41,6 @@ fileGroups:
     - '**/*.tsx'
     - index.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

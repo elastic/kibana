@@ -27,12 +27,14 @@ import type {
   MlGetTrainedModelParams,
 } from './types';
 import type { MlAuditLogger } from './ml_audit_logger';
+import type { ServerlessInfo } from '../../types';
 
 export function getMlClient(
   client: IScopedClusterClient,
   mlSavedObjectService: MLSavedObjectService,
   auditLogger: MlAuditLogger,
-  mlLicense: MlLicense
+  mlLicense: MlLicense,
+  serverless: ServerlessInfo
 ): MlClient {
   const mlClient = client.asInternalUser.ml;
 
@@ -756,7 +758,7 @@ export function getMlClient(
       return mlClient.getMemoryStats(...p);
     },
 
-    ...searchProvider(client, mlSavedObjectService),
+    ...searchProvider(client, mlSavedObjectService, serverless),
   } as MlClient;
 }
 

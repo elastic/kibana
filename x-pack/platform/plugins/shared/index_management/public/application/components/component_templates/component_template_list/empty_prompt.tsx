@@ -50,7 +50,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ history }) => {
       actions={
         <EuiButton
           {...reactRouterNavigate(history, '/create_component_template')}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           fill
         >
           {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptButtonLabel', {

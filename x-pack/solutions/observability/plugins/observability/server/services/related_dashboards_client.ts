@@ -11,6 +11,7 @@ import type {
   DashboardState,
   DashboardPanel,
   ScanDashboardsResult,
+  DashboardReadResponseBody,
 } from '@kbn/dashboard-plugin/server';
 import type {
   FieldBasedIndexPatternColumn,
@@ -40,9 +41,7 @@ export class RelatedDashboardsClient {
 
   constructor(
     private logger: Logger,
-    private getDashboard: (
-      id: string
-    ) => Promise<Pick<DashboardState, 'description' | 'tags' | 'title'> & { id: string }>,
+    private getDashboard: (id: string) => Promise<DashboardReadResponseBody>,
     private scanDashboards: (page: number, perPage: number) => Promise<ScanDashboardsResult>,
     private alertsClient: InvestigateAlertsClient,
     private alertId: string,
@@ -352,9 +351,12 @@ export class RelatedDashboardsClient {
 
   private async getLinkedDashboardById(id: string): Promise<LinkedDashboard | null> {
     try {
-      const dashboard = await this.getDashboard(id);
+      const { id: dashboardId, data: dashboard } = await this.getDashboard(id);
       return {
-        ...dashboard,
+        id: dashboardId,
+        title: dashboard.title,
+        description: dashboard.description,
+        tags: dashboard.tags,
         matchedBy: { linked: true },
       };
     } catch (error) {

@@ -27,12 +27,21 @@ export const createAutomaticTroubleshootingSkill = (
 ): SkillDefinition<typeof NAME, typeof BASE_PATH> => {
   const systemInstructions = `# Elastic Defend Configuration Troubleshooting
 
-This skill provides guidance for diagnosing and resolving Elastic Defend configuration issues on endpoints.
+This skill diagnoses and resolves Elastic Defend configuration issues on endpoints.
 
-## When to use this skill
+## When to use this skill (REQUIRED)
 
-Use this skill when:
-- When a user is having issues with Elastic Defend configuration on one or more endpoints.
+You MUST use this skill when the user mentions ANY of these:
+- "Elastic Defend" configuration issues
+- Endpoint troubleshooting or diagnostics
+- Endpoint not showing up, not reporting, or missing from the endpoint list
+- Policy response failure, warning, or error
+- Elastic Defend integration errors or warnings
+- Incompatible antivirus software on endpoints
+- Agent enrollment or check-in problems related to Elastic Defend
+- Endpoint protection not applying or not updating
+- Elastic Defend package configuration questions
+- Endpoint isolation, response action, or policy sync issues
 
 ## Available Indices
 
@@ -53,13 +62,30 @@ Reference './available_indices' for the list of indices available for troublesho
 3. **Iterate** - Continue querying and gathering context until the root cause or relevant findings are understood.
 4. **Persist findings** - Call ${GENERATE_INSIGHT_TOOL_ID} with a clear problem description, actionable remediation steps, affected endpoint IDs, and relevant raw documents.
 
+## Response format (CRITICAL)
+
+- DO use tools to gather evidence before drawing conclusions.
+- DO call ${GENERATE_INSIGHT_TOOL_ID} as the final step to persist structured findings — this is mandatory.
+- DO include specific endpoint IDs, policy names, and error messages from queried data.
+- DO provide actionable remediation steps grounded in the evidence.
+- DON'T provide troubleshooting advice without first querying the available indices for evidence.
+- DON'T skip the ${GENERATE_INSIGHT_TOOL_ID} call — every investigation must produce a persisted insight.
+- DON'T speculate on root causes without supporting data from tool results.
+- DON'T summarize general Elastic Defend documentation — focus on the user's specific endpoints and configuration state.
+
+## FORBIDDEN RESPONSES
+
+- NEVER respond with generic Elastic Defend documentation or setup guides without first investigating the user's data.
+- NEVER provide a diagnosis based solely on the user's description — always corroborate with queried evidence.
+- NEVER skip tool calls and respond with text-only troubleshooting suggestions.
+- NEVER omit the ${GENERATE_INSIGHT_TOOL_ID} call at the end of the investigation.
+
 ## Constraints
 
-- Only query indices listed in './available_indices.md'
+- Only query indices listed in './available_indices'
 - Always include document \`_id\` and \`_index\` fields in search queries
 - Keep query result sets small enough to fit within context limits
-- Base all conclusions on actual queried data, not assumptions
-- **Always call ${GENERATE_INSIGHT_TOOL_ID}** to persist findings — this is mandatory and must not be skipped`;
+- Base all conclusions on actual queried data, not assumptions`;
 
   return defineSkillType({
     id: ID,

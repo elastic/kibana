@@ -134,14 +134,15 @@ export function SloStatusBadge({
   return (
     <EuiToolTip position="bottom" content={config.tooltipContent}>
       <EuiBadge
-        data-test-subj={`serviceInventorySlo${config.id}Badge`}
+        data-test-subj="apmSloBadge"
+        data-slo-status={sloStatus}
         color={config.color}
         onClick={onClick}
         onClickAriaLabel={config.ariaLabel(serviceName)}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="visGauge" aria-hidden={true} />
+            <EuiIcon type="chartGauge" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>

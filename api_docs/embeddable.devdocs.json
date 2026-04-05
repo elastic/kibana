@@ -895,6 +895,51 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.getAddFromLibraryType",
+        "type": "Function",
+        "tags": [],
+        "label": "getAddFromLibraryType",
+        "description": [
+          "\nGetter for accessing saved object type from AddFromLibrary registry"
+        ],
+        "signature": [
+          "(libraryType: string) => ",
+          "RegistryItem",
+          "<any> | undefined"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/add_from_library/registry.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.getAddFromLibraryType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "libraryType",
+            "description": [
+              "string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/add_from_library/registry.ts",
+            "lineNumber": 80,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "registry item for saved object type"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.isMultiValueClickTriggerContext",
         "type": "Function",
         "tags": [],
@@ -1117,6 +1162,43 @@
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
             "lineNumber": 67,
             "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.transformType",
+        "type": "Function",
+        "tags": [],
+        "label": "transformType",
+        "description": [],
+        "signature": [
+          "(type: string) => Promise<string>"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/index.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.transformType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3000,7 +3082,45 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-server.transformType",
+        "type": "Function",
+        "tags": [],
+        "label": "transformType",
+        "description": [],
+        "signature": [
+          "(type: string) => string"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/common/bwc/transform_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-server.transformType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/common/bwc/transform_type.ts",
+            "lineNumber": 10,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "embeddable",
@@ -3556,7 +3676,7 @@
           "section": "def-server.EmbeddableStateWithType",
           "text": "EmbeddableStateWithType"
         },
-        "> & { getAllEmbeddableSchemas: () => ",
+        "> & { getAllEmbeddableSchemas: () => { [key: string]: ",
         {
           "pluginId": "@kbn/config-schema",
           "scope": "common",
@@ -3564,7 +3684,7 @@
           "section": "def-common.ObjectType",
           "text": "ObjectType"
         },
-        "<any>[]; getTransforms: (type: string) => (",
+        "<any>; }; getTransforms: (type: string) => (",
         {
           "pluginId": "embeddable",
           "scope": "server",

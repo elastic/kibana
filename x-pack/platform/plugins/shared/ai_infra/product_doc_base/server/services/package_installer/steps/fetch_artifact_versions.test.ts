@@ -46,12 +46,13 @@ const artifactRepositoryUrl = 'https://lost.com';
 const localArtifactRepositoryUrl = 'file://usr/local/local_artifacts';
 
 const expectVersions = (
-  versions: Partial<Record<ProductName, string[]>>
-): Record<ProductName, string[]> => {
-  const response = {} as Record<ProductName, string[]>;
+  versions: Partial<Record<ProductName | 'openapi', string[]>>
+): Record<ProductName | 'openapi', string[]> => {
+  const response = {} as Record<ProductName | 'openapi', string[]>;
   Object.values(DocumentationProduct).forEach((productName) => {
     response[productName] = [];
   });
+  response.openapi = [];
   return {
     ...response,
     ...versions,
@@ -107,6 +108,7 @@ describe('fetchArtifactVersions', () => {
       elasticsearch: ['8.16'],
       kibana: ['8.16'],
       observability: [],
+      openapi: [],
       security: [],
     });
   });
@@ -150,6 +152,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.16'],
         elasticsearch: ['8.16'],
+        openapi: [],
       })
     );
   });
@@ -170,6 +173,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.15', '8.16', '8.17'],
         elasticsearch: ['8.16', '9.0'],
+        openapi: [],
       })
     );
   });

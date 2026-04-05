@@ -9,33 +9,71 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from './types';
+import type { PublicStepDefinitionOrLoader } from '../types';
 
 /**
  * Registry for public-side workflow step definition.
  * Stores UI-related information (label, description, icon) for step types.
+ * Accepts either a definition directly or a loader function that returns a promise of a definition.
  */
 export class PublicStepRegistry {
   private readonly registry = new Map<string, PublicStepDefinition>();
+  private readonly pending = new Set<Promise<void>>(); // Stores promises that are either in progress or have been rejected
 
   /**
    * Register step definition.
-   * @param definition - The step definition to register
-   * @throws Error if definition for the same step type ID is already registered
+   * @param definitionOrLoader - The step definition to register, or a function that returns a promise of the definition (e.g. for dynamic imports)
    */
   public register<
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
+  >(definitionOrLoader: PublicStepDefinitionOrLoader<Input, Output, Config>): void {
+    if (typeof definitionOrLoader === 'function') {
+      const promise = definitionOrLoader().then((definition) => {
+        if (!definition) {
+          throw new Error('Step definition is not loaded correctly');
+        }
+        this.addToRegistry(definition);
+        this.pending.delete(promise);
+      });
+      this.pending.add(promise);
+    } else {
+      this.addToRegistry(definitionOrLoader);
+    }
+  }
+
+  /**
+   * Add a step definition to the registry.
+   * @param definition - The step definition to add
+   * @throws Error if the step id is already registered
+   */
+  private addToRegistry<
+    Input extends z.ZodType = z.ZodType,
+    Output extends z.ZodType = z.ZodType,
+    Config extends z.ZodObject = z.ZodObject
   >(definition: PublicStepDefinition<Input, Output, Config>): void {
-    const stepTypeId = String(definition.id);
-    if (this.registry.has(stepTypeId)) {
+    if (this.registry.has(definition.id)) {
       throw new Error(
-        `Step definition for type "${stepTypeId}" is already registered. Each step type must have unique definition.`
+        `Step definition for type "${definition.id}" is already registered. Each step type must have unique definition.`
       );
     }
-    // Type assertion is safe here because the Map stores the base type
-    // and we don't need to preserve specific generic types after storage
-    this.registry.set(stepTypeId, definition as PublicStepDefinition);
+    this.registry.set(definition.id, definition as PublicStepDefinition);
+  }
+
+  /**
+   * Returns a promise that resolves when all pending async loaders have settled.
+   * Use before reading the registry if you need to guarantee all async registrations are complete.
+   */
+  public async whenReady(): Promise<void> {
+    if (this.pending.size > 0) {
+      const results = await Promise.allSettled(this.pending);
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          throw result.reason;
+        }
+      }
+    }
   }
 
   /**

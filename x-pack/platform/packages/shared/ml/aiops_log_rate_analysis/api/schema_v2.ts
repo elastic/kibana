@@ -60,6 +60,7 @@ export const aiopsLogRateAnalysisBase = schema.object({
   flushFix: schema.maybe(schema.boolean()),
   /** Probability used for the random sampler aggregations */
   sampleProbability: schema.maybe(schema.number()),
+  projectRouting: schema.maybe(schema.string()),
 });
 
 export const aiopsLogRateAnalysisSchemaV2 = schema.intersection([

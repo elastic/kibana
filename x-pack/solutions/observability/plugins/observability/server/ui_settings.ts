@@ -423,7 +423,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     name: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfall', {
       defaultMessage: 'Use unified trace waterfall',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfallDescription', {
       defaultMessage: 'Enable the new unified trace waterfall',
     }),
@@ -445,7 +445,8 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     value: [],
     schema: schema.arrayOf(
-      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')]),
+      { maxSize: 2 }
     ),
     requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],

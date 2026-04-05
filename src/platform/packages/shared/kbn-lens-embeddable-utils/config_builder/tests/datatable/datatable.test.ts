@@ -16,6 +16,8 @@ import {
   fullConfigDatatableAttributes,
   sortedByTransposedMetricColumnDatatableAttributes,
   sortedByRowDatatableAttributes,
+  defaultColorByValueAttributes,
+  selectorColorByValueAttributes,
 } from './lens_state_config_dsl.mock';
 import {
   singleMetricESQLDatatableAttributes,
@@ -87,6 +89,14 @@ describe('Datatable', () => {
         sortedByTransposedMetricColumnESQLDatatableAttributes,
         datatableStateSchema
       );
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, datatableStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, datatableStateSchema);
     });
   });
   describe('validateAPIConverter ', () => {

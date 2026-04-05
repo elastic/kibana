@@ -41,8 +41,11 @@
       "cloud",
       "evals",
       "licenseManagement",
+      "security",
       "workflowsManagement",
+      "searchInferenceEndpoints",
       "usageCollection",
+      "usageApi",
       "home",
     ],
     "extraPublicDirs": []

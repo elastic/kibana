@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
+import { isSubQuery } from '@elastic/esql';
+import type { ESQLCommand, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '..';
-import { isSubQuery } from '../../../ast/is';
-import { type ESQLCommand, type ESQLAstQueryExpression } from '../../../types';
 import type { ESQLColumnData } from '../types';
 import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
@@ -19,7 +19,7 @@ export const columnsAfter = async (
   _previousColumns: ESQLColumnData[], // will always be empty for FROM
   query: string,
   additionalFields: IAdditionalFields,
-  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
 ) => {
   const options = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'option');
   const sources = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'source');

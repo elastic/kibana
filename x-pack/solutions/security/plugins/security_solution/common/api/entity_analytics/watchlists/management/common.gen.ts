@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type WatchlistObject = z.infer<typeof WatchlistObject>;
 export const WatchlistObject = z.object({
@@ -38,6 +38,10 @@ export const WatchlistObject = z.object({
    * Risk score modifier associated with the watchlist
    */
   riskModifier: z.number(),
+  /**
+   * List of entity source IDs associated with the watchlist
+   */
+  entitySourceIds: z.array(z.string()).optional(),
   /**
    * Timestamp indicating when the watchlist was created
    */

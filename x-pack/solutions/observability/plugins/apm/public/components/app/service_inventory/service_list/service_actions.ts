@@ -14,7 +14,7 @@ import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import type { TableActions } from '../../../shared/managed_table';
+import type { TableAction, TableActions } from '../../../shared/managed_table';
 import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
 
 interface UseServiceActionsParams {
@@ -30,7 +30,7 @@ export function useServiceActions({
 }: UseServiceActionsParams): TableActions<ServiceListItem> {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
-  const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
+  const sloListLocator = share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID);
 
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
@@ -118,39 +118,46 @@ export function useServiceActions({
     }
 
     if (canWriteSlos) {
+      const sloActions: Array<TableAction<ServiceListItem>> = [
+        {
+          id: 'createLatencySlo',
+          name: i18n.translate('xpack.apm.servicesTable.actions.createLatencySlo', {
+            defaultMessage: 'Create APM latency SLO',
+          }),
+          onClick: (item: ServiceListItem) => {
+            openSloFlyout('sli.apm.transactionDuration', item.serviceName);
+          },
+        },
+        {
+          id: 'createAvailabilitySlo',
+          name: i18n.translate('xpack.apm.servicesTable.actions.createAvailabilitySlo', {
+            defaultMessage: 'Create APM availability SLO',
+          }),
+          onClick: (item: ServiceListItem) => {
+            openSloFlyout('sli.apm.transactionErrorRate', item.serviceName);
+          },
+        },
+        ...(sloListLocator
+          ? [
+              {
+                id: 'manageSlos',
+                name: i18n.translate('xpack.apm.servicesTable.actions.manageSlos', {
+                  defaultMessage: 'Manage SLOs',
+                }),
+                icon: 'tableOfContents' as const,
+                href: (item: ServiceListItem) =>
+                  getManageSlosUrl(sloListLocator, { serviceName: item.serviceName }),
+              },
+            ]
+          : []),
+      ];
+
       actionsList.push({
         id: 'slos',
         groupLabel: i18n.translate('xpack.apm.servicesTable.actions.slosGroupLabel', {
           defaultMessage: 'SLOs',
         }),
-        actions: [
-          {
-            id: 'createLatencySlo',
-            name: i18n.translate('xpack.apm.servicesTable.actions.createLatencySlo', {
-              defaultMessage: 'Create APM latency SLO',
-            }),
-            onClick: (item) => {
-              openSloFlyout('sli.apm.transactionDuration', item.serviceName);
-            },
-          },
-          {
-            id: 'createAvailabilitySlo',
-            name: i18n.translate('xpack.apm.servicesTable.actions.createAvailabilitySlo', {
-              defaultMessage: 'Create APM availability SLO',
-            }),
-            onClick: (item) => {
-              openSloFlyout('sli.apm.transactionErrorRate', item.serviceName);
-            },
-          },
-          {
-            id: 'manageSlos',
-            name: i18n.translate('xpack.apm.servicesTable.actions.manageSlos', {
-              defaultMessage: 'Manage SLOs',
-            }),
-            icon: 'tableOfContents',
-            href: (item) => getManageSlosUrl(sloListLocator, { serviceName: item.serviceName }),
-          },
-        ],
+        actions: sloActions,
       });
     }
 

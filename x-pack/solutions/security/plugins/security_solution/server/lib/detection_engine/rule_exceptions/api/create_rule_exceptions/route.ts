@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers/v4';
 import type {
   CreateRuleExceptionListItemProps,
   ExceptionList,
@@ -24,6 +24,7 @@ import {
 
 import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ZodError } from '@kbn/zod/v4';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
@@ -215,7 +216,7 @@ export const createExceptionList = async ({
   const parseResult = CreateExceptionListRequestBody.safeParse(exceptionList);
 
   if (!parseResult.success) {
-    throw new Error(stringifyZodError(parseResult.error));
+    throw new Error(stringifyZodError(parseResult.error as unknown as ZodError));
   }
 
   const {

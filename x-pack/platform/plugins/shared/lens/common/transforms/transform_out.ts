@@ -6,7 +6,7 @@
  */
 
 import type { LensSerializedState } from '@kbn/lens-common';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
@@ -22,19 +22,24 @@ import type {
 } from './types';
 import { findLensReference, isByRefLensState } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
+import { stripInheritedContext } from './helpers';
 
 /**
  * Transform from Lens Stored State to Lens API format
  */
 export const getTransformOut = (
   builder: LensConfigBuilder,
-  transformDrilldownsOut: DrilldownTransforms['transformOut']
+  transformDrilldownsOut: DrilldownTransforms['transformOut'],
+  isDashboardAppRequest: boolean
 ): LensTransformOut => {
   return function transformOut(storedState, panelReferences) {
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
-      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
+      transformTimeRangeOut<LensSerializedState>,
+      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences),
+      stripInheritedContext
     );
+
     const state = transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
@@ -42,7 +47,7 @@ export const getTransformOut = (
     if (savedObjectRef && isByRefLensState(state)) {
       return {
         ...state,
-        savedObjectId: savedObjectRef.id,
+        ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 
@@ -55,11 +60,14 @@ export const getTransformOut = (
       panelReferences
     );
 
-    const chartType = builder.getType(migratedAttributes);
-
-    if (!builder.isSupported(chartType)) {
-      // TODO: remove this once all formats are supported
+    if (isDashboardAppRequest && !builder.isEnabled) {
       return injectedState as LensByValueTransformOutResult;
+    }
+
+    const chartType = builder.getType(migratedAttributes);
+    // should be filtered out my unmapped panel check
+    if (!builder.isSupported(chartType)) {
+      throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
     const apiConfig = builder.toAPIFormat({

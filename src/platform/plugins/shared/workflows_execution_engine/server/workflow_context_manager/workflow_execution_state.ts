@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -37,8 +34,14 @@ export class WorkflowExecutionState {
   }
 
   public async load(): Promise<void> {
-    const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
-      this.workflowExecution.id
+    if (!this.workflowExecution.stepExecutionIds) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
+      );
+    }
+
+    const foundSteps = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
+      this.workflowExecution.stepExecutionIds
     );
     foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
     this.buildStepIdExecutionIdIndex();
@@ -108,7 +111,7 @@ export class WorkflowExecutionState {
     if (!this.stepExecutions.has(step.id)) {
       this.createStep(step);
     } else {
-      this.updateStep(step);
+      this.updateStep(step.id, step);
     }
   }
 
@@ -136,10 +139,6 @@ export class WorkflowExecutionState {
     await this.workflowExecutionRepository.updateWorkflowExecution({
       ...changes,
       id: this.workflowExecution.id,
-      // Include all step execution IDs sorted by execution order for O(1) mget lookup on read side
-      stepExecutionIds: Array.from(this.stepExecutions.values())
-        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-        .map((step) => step.id),
     });
   }
 
@@ -157,18 +156,30 @@ export class WorkflowExecutionState {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
+      isTestRun: Boolean(this.workflowExecution.isTestRun),
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
     this.stepDocumentsChanges.set(step.id as string, newStep);
+    // As we are creating a new step execution, we need to update the workflow execution with the new step execution ID
+    // Due to the fact that execution and flushes are synchronous, it's safe to use incremental approach to update the step execution IDs
+    // while still keeping the order of the step execution IDs according to the global execution index
+    // At the same time it's safer because we don't rely on how many step executions are loaded in resume task.
+    this.updateWorkflowExecution({
+      stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), step.id as string],
+    });
   }
 
-  private updateStep(step: Partial<EsWorkflowStepExecution>) {
-    this.stepExecutions.set(step.id!, {
-      ...this.stepExecutions.get(step.id!),
+  private updateStep(stepId: string, step: Partial<EsWorkflowStepExecution>) {
+    const existingStep = this.stepExecutions.get(stepId);
+    const updatedStep = {
+      ...existingStep,
       ...step,
-    } as EsWorkflowStepExecution);
-    this.stepDocumentsChanges.set(step.id as string, {
-      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
+    } as EsWorkflowStepExecution;
+    this.stepExecutions.set(stepId, updatedStep);
+    // Accumulate changes for the next flush — merge with any pending changes
+    // ES partial update (doc_as_upsert) preserves fields not included in the update
+    this.stepDocumentsChanges.set(stepId, {
+      ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,
     });
   }
@@ -176,10 +187,14 @@ export class WorkflowExecutionState {
   private buildStepIdExecutionIdIndex(): void {
     this.stepIdExecutionIdIndex.clear();
     for (const step of this.stepExecutions.values()) {
-      if (!this.stepIdExecutionIdIndex.has(step.stepId)) {
-        this.stepIdExecutionIdIndex.set(step.stepId, []);
+      let idsList = this.stepIdExecutionIdIndex.get(step.stepId);
+
+      if (!idsList) {
+        idsList = [];
+        this.stepIdExecutionIdIndex.set(step.stepId, idsList);
       }
-      this.stepIdExecutionIdIndex.get(step.stepId)!.push(step.id);
+
+      idsList.push(step.id);
     }
 
     for (const [stepId, stepExecutionIds] of this.stepIdExecutionIdIndex.entries()) {

@@ -64,7 +64,7 @@ export const GetStarted = () => {
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty onClick={reset} iconType="arrowLeft" iconSide="left">
+                      <EuiButtonEmpty onClick={reset} iconType="chevronSingleLeft" iconSide="left">
                         <FormattedMessage
                           id="xpack.securitySolution.assetInventory.error.backToStart"
                           defaultMessage="Back to Get Started with Inventory"
@@ -176,7 +176,7 @@ export const GetStarted = () => {
                   color="primary"
                   fill
                   onClick={enableAssetInventory}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   isLoading={isEnabling}
                 >
                   {isEnabling ? (

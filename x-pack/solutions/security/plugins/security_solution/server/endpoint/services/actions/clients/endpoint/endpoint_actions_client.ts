@@ -162,7 +162,13 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     }
 
     if (actionRequest.command === 'runscript') {
-      const scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+      let scriptDetails: EndpointScript;
+
+      try {
+        scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+      } catch (error) {
+        return { isValid: false, error };
+      }
 
       if (scriptDetails.requiresInput && !(actionRequest.parameters.scriptInput ?? '').trim()) {
         return {
@@ -560,7 +566,12 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript) {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript ||
+      (this.options.isAutomated &&
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointAutomatedRunScript)
+    ) {
       throw new ResponseActionsClientError(
         'Elastic Defend runscript operation is not enabled',
         400

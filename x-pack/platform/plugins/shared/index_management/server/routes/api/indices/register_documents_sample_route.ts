@@ -39,7 +39,13 @@ export function registerDocumentsSampleRoute({
           index: indexName,
           size: DEFAULT_DOCUMENT_PAGE_SIZE,
           track_total_hits: false,
-          sort: ['_doc'],
+          sort: [
+            {
+              _doc: {
+                order: 'desc',
+              },
+            },
+          ],
         });
 
         return response.ok({

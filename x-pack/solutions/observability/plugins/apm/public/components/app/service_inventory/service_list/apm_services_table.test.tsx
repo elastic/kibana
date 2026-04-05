@@ -21,6 +21,8 @@ import { ServiceInventoryFieldName } from '../../../../../common/service_invento
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
+import { EuiThemeProvider } from '@elastic/eui';
 
 jest.mock('../../../../hooks/use_breakpoints', () => ({
   useBreakpoints: () => ({
@@ -57,6 +59,7 @@ const mockKibanaServices = {
   apmSourcesAccess: {
     getApmIndexSettings: jest.fn().mockResolvedValue({ apmIndexSettings: [] }),
   },
+  telemetry: mockTelemetryClient,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -201,8 +204,11 @@ function renderApmServicesTable({
 }) {
   const defaultSortFn = (items: ServiceListItem[]) => items;
 
+  // TODO: This should be replaced with renderWithKibanaRenderContext, which would eliminate
+  // the need for <EuiThemeProvider> and <IntlProvider> wrappers, but that's currently
+  // impossible with the way <MockApmPluginContextWrapper> is shaped
   return render(
-    <IntlProvider locale="en">
+    <EuiThemeProvider>
       <MockApmPluginContextWrapper history={history}>
         <ApmServicesTable
           status={status}
@@ -219,7 +225,7 @@ function renderApmServicesTable({
           maxCountExceeded={false}
         />
       </MockApmPluginContextWrapper>
-    </IntlProvider>
+    </EuiThemeProvider>
   );
 }
 
@@ -891,7 +897,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(sloBadge).toHaveAttribute('data-slo-status', 'violated');
       expect(screen.getByText('2 Violated')).toBeInTheDocument();
     });
 
@@ -908,7 +916,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloDegradingBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(sloBadge).toHaveAttribute('data-slo-status', 'degrading');
       expect(screen.getByText('3 Degrading')).toBeInTheDocument();
     });
 
@@ -925,7 +935,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloHealthyBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'healthy');
       expect(screen.getByText('Healthy')).toBeInTheDocument();
     });
 
@@ -942,11 +954,13 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloNoDataBadge')).toBeInTheDocument();
+      const badge = screen.getByTestId('apmSloBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute('data-slo-status', 'noData');
       expect(screen.getByText('No data')).toBeInTheDocument();
     });
 
-    it('does not render SLO badge when service has no SLO status', async () => {
+    it('renders "no SLOs" badge when service has no SLO status', async () => {
       const servicesWithoutSlos: ServiceListItem[] = [
         {
           ...mockService,
@@ -959,10 +973,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloDegradingBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloHealthyBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloNoDataBadge')).not.toBeInTheDocument();
+      const badge = screen.queryByTestId('apmSloBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute('data-slo-status', 'noSLOs');
     });
 
     it('opens SLO overview flyout when clicking SLO badge', async () => {
@@ -978,7 +991,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const sloBadge = screen.getByTestId('serviceInventorySloViolatedBadge');
+      const sloBadge = screen.getByTestId('apmSloBadge');
       fireEvent.click(sloBadge);
 
       await waitFor(() => {

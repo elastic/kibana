@@ -110,7 +110,7 @@ export function SloDetailsPage() {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setChatConfig({
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
@@ -129,7 +129,7 @@ export function SloDetailsPage() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, sloId, sloInstanceId, remoteName, slo]);
 

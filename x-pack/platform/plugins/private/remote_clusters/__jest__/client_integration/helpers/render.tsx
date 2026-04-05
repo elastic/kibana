@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { HttpSetup } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { RenderResult } from '@testing-library/react';
@@ -45,8 +46,8 @@ export interface RenderRemoteClustersResult extends RenderResult {
   store: Store;
 }
 
-export function renderRemoteClustersRoute(
-  Component: React.ComponentType,
+export function renderRemoteClustersRoute<P extends object>(
+  Component: React.ComponentType<P>,
   {
     httpSetup,
     contextOverrides = {},
@@ -56,11 +57,11 @@ export function renderRemoteClustersRoute(
 ): RenderRemoteClustersResult {
   const store = createRemoteClustersStore();
   const history = createMemoryHistory({ initialEntries });
+  const scopedHistory = new CoreScopedHistory(history, '');
 
   const router: AppRouter = {
-    // ScopedHistory is structurally compatible with MemoryHistory for our usage in tests.
-    history: history as unknown as AppRouter['history'],
-    route: { location: history.location },
+    history: scopedHistory,
+    route: { location: scopedHistory.location },
   };
 
   registerRouter(router);
@@ -72,7 +73,7 @@ export function renderRemoteClustersRoute(
   const result = render(
     <I18nProvider>
       <Provider store={store}>
-        <Router history={history}>
+        <Router history={scopedHistory}>
           <Routes>
             <Route path={routePath} component={WrappedComponent} />
           </Routes>

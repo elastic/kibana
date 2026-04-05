@@ -6,12 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 
-export const generateSchema = (spec: ConnectorSpec) => {
+export const generateSchema = (
+  spec: ConnectorSpec,
+  { isPfxEnabled, authMode }: { isPfxEnabled?: boolean; authMode?: AuthMode } = {}
+) => {
   return z.object({
     config: spec.schema ?? z.object({}),
-    secrets: generateSecretsSchemaFromSpec(spec.auth),
+    secrets: generateSecretsSchemaFromSpec(spec.auth, { isPfxEnabled, authMode }),
   });
 };

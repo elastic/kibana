@@ -71,23 +71,29 @@ export const FeedbackTriggerButton = ({
     <>
       <EuiToolTip
         content={
-          !isOptedIn &&
-          i18n.translate('feedback.triggerButton.tooltip', {
-            defaultMessage: 'Enable usage collection to submit feedback',
-          })
+          !isOptedIn
+            ? i18n.translate('feedback.triggerButton.tooltip.disabled', {
+                defaultMessage: 'Enable usage collection to submit feedback',
+              })
+            : i18n.translate('feedback.triggerButton.tooltip.enabled', {
+                defaultMessage: 'Submit feedback',
+              })
         }
       >
         <EuiHeaderSectionItemButton
           data-test-subj="feedbackTriggerButton"
           aria-haspopup="dialog"
-          aria-label={i18n.translate('feedback.triggerButton.ariaLabel', {
-            defaultMessage: 'Submit feedback',
-          })}
           onClick={handleShowFeedbackContainer}
           isLoading={isLoading}
           disabled={!isOptedIn}
         >
-          <EuiIcon type="comment" size="m" />
+          <EuiIcon
+            type="comment"
+            size="m"
+            aria-label={i18n.translate('feedback.triggerButton.ariaLabel', {
+              defaultMessage: 'Submit feedback',
+            })}
+          />
         </EuiHeaderSectionItemButton>
       </EuiToolTip>
       {isModalOpen && (

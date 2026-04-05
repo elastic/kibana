@@ -24,9 +24,11 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
   return async (state) => {
     const vendor = state.original_rule.vendor;
 
-    const indexPatterns = state.integration?.data_streams
-      ?.map((dataStream) => dataStream.index_pattern)
-      .join(',');
+    const indexPatterns =
+      state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
+      'logs-*';
+
+    const knowledgeBase = state.integration?.knowledge_base ?? '';
 
     let esqlQuery: string | undefined;
     let comments: MigrationComments = [];
@@ -38,6 +40,7 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
       ({ esqlQuery, comments } = await nlToESQLQuery({
         query: state.nl_query,
         indexPattern: indexPatterns,
+        knowledgeBase,
       }));
     } else {
       params.logger.debug(

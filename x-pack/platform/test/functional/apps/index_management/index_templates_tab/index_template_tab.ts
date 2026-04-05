@@ -168,6 +168,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             mode: 'logsdb',
             mapping: {
               ignore_above: '20',
+              source: {
+                mode: 'synthetic',
+              },
               total_fields: {
                 ignore_dynamic_beyond_limit: 'true',
               },
@@ -183,9 +186,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const mappingsTabContent = await testSubjects.getVisibleText('mappingsTabContent');
         expect(JSON.parse(mappingsTabContent)).to.eql({
           dynamic_date_formats: ['basic_date'],
-          _source: {
-            mode: 'synthetic',
-          },
           subobjects: false,
         });
       });

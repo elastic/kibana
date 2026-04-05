@@ -25,6 +25,7 @@ import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import {
   setLayerDefaultDimension,
+  setDimensionAndUpdateDatasource,
   useLensDispatch,
   removeOrClearLayer,
   cloneLayer,
@@ -163,16 +164,13 @@ export function ConfigPanel(
     [updateDatasource]
   );
 
-  const updateAll = useMemo(
+  const updateAll = useMemo<LayerPanelProps['updateAll']>(
     () =>
-      (
-        datasourceId: string | undefined,
-        newDatasourceState: unknown,
-        newVisualizationState: unknown
-      ) => {
-        if (!datasourceId) return;
-        // React will synchronously update if this is triggered from a third party component,
-        // which we don't want. The timeout lets user interaction have priority, then React updates.
+      ({ datasourceId, newDatasourceState, layerId, groupId, columnId }) => {
+        const visualizationId = visualization.activeId;
+        if (!datasourceId || !visualizationId) return;
+        // Keep async behavior from dimension editors, but delegate the
+        // datasource+visualization orchestration to a single reducer action.
 
         setTimeout(() => {
           const newDsState =
@@ -180,28 +178,19 @@ export function ConfigPanel(
               ? newDatasourceState(datasourceStates[datasourceId].state)
               : newDatasourceState;
 
-          const newVisState =
-            typeof newVisualizationState === 'function'
-              ? newVisualizationState(visualization.state)
-              : newVisualizationState;
-
           dispatchLens(
-            updateVisualizationState({
-              visualizationId: activeVisualization.id,
-              newState: newVisState,
-              dontSyncLinkedDimensions: true, // TODO: to refactor: this is quite brittle, we avoid to sync linked dimensions because we do it with datasourceState update
-            })
-          );
-          dispatchLens(
-            updateDatasourceState({
-              newDatasourceState: newDsState,
+            setDimensionAndUpdateDatasource({
+              visualizationId,
+              layerId,
+              groupId,
+              columnId,
               datasourceId,
-              clearStagedPreview: false,
+              newDatasourceState: newDsState,
             })
           );
         }, 0);
       },
-    [dispatchLens, visualization.state, datasourceStates, activeVisualization.id]
+    [dispatchLens, datasourceStates, visualization.activeId]
   );
 
   const toggleFullscreen = useCallback(() => {

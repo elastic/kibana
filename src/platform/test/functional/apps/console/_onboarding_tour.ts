@@ -18,9 +18,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
+  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/224128
-  describe.skip('console onboarding tour', function describeIndexTests() {
+  describe('console onboarding tour', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -31,16 +32,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const isTourStepOpen = async (tourStepDataSubj: string) => {
+      const exists = await find.existsByCssSelector(`[data-test-subj="${tourStepDataSubj}"]`);
+      if (!exists) return false;
+
       const classAttribute = await testSubjects.getAttribute(tourStepDataSubj, 'class');
-      return classAttribute?.includes('euiPopover-isOpen');
+      return Boolean(classAttribute?.includes('euiPopover-isOpen'));
     };
 
-    const expectAllStepsHidden = async () => {
-      expect(await isTourStepOpen('shellTourStep')).to.be(false);
-      expect(await isTourStepOpen('editorTourStep')).to.be(false);
-      expect(await isTourStepOpen('historyTourStep')).to.be(false);
-      expect(await isTourStepOpen('configTourStep')).to.be(false);
-      expect(await isTourStepOpen('filesTourStep')).to.be(false);
+    const waitForAllStepsHidden = async () => {
+      await retry.waitFor('tour steps to be hidden', async () => {
+        return (
+          !(await isTourStepOpen('shellTourStep')) &&
+          !(await isTourStepOpen('editorTourStep')) &&
+          !(await isTourStepOpen('historyTourStep')) &&
+          !(await isTourStepOpen('configTourStep')) &&
+          !(await isTourStepOpen('filesTourStep'))
+        );
+      });
+    };
+
+    const waitForStepOpen = async (tourStepDataSubj: string) => {
+      await retry.waitFor(`${tourStepDataSubj} to open`, async () => {
+        return await isTourStepOpen(tourStepDataSubj);
+      });
+    };
+
+    const clickNextAndWaitForStep = async (currentStep: string, nextStep: string) => {
+      await waitForStepOpen(currentStep);
+
+      await retry.waitFor(`advance from ${currentStep} to ${nextStep}`, async () => {
+        if (await isTourStepOpen(nextStep)) return true;
+
+        if (await isTourStepOpen(currentStep)) {
+          await testSubjects.existOrFail('consoleNextTourStepButton');
+          await testSubjects.waitForEnabled('consoleNextTourStepButton');
+          await PageObjects.console.clickNextTourStep();
+        }
+
+        return await isTourStepOpen(nextStep);
+      });
     };
 
     const waitUntilFinishedLoading = async () => {
@@ -58,46 +88,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await waitUntilFinishedLoading();
 
       // Verify that tour is hidden
-      await expectAllStepsHidden();
+      await waitForAllStepsHidden();
 
       // Run tour
       await runConsoleTour();
 
       // Verify that first tour step is visible
-      expect(await isTourStepOpen('shellTourStep')).to.be(true);
+      await waitForStepOpen('shellTourStep');
     });
 
     it('displays all five steps in the tour', async () => {
-      const andWaitFor = DELAY_FOR;
       await waitUntilFinishedLoading();
 
       // Run tour
       await runConsoleTour();
 
       log.debug('on Shell tour step');
-      expect(await isTourStepOpen('shellTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('shellTourStep', 'editorTourStep');
 
       log.debug('on Editor tour step');
-      expect(await isTourStepOpen('editorTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('editorTourStep', 'historyTourStep');
 
       log.debug('on History tour step');
-      expect(await isTourStepOpen('historyTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('historyTourStep', 'configTourStep');
 
       log.debug('on Config tour step');
-      expect(await isTourStepOpen('configTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('configTourStep', 'filesTourStep');
 
       log.debug('on Files tour step');
-      expect(await isTourStepOpen('filesTourStep')).to.be(true);
+      await waitForStepOpen('filesTourStep');
       // Last tour step should contain the "Complete" button
       expect(await testSubjects.exists('consoleCompleteTourButton')).to.be(true);
       await PageObjects.console.clickCompleteTour();
 
       // All steps should now be hidden
-      await expectAllStepsHidden();
+      await waitForAllStepsHidden();
     });
 
     it('skipping the tour hides the tour steps', async () => {
@@ -106,12 +131,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Run tour
       await runConsoleTour();
 
-      expect(await isTourStepOpen('shellTourStep')).to.be(true);
-      expect(await testSubjects.exists('consoleSkipTourButton')).to.be(true);
+      await retry.waitFor('first tour step to open', async () => {
+        return await isTourStepOpen('shellTourStep');
+      });
+
+      await testSubjects.existOrFail('consoleSkipTourButton');
       await PageObjects.console.clickSkipTour();
 
+      // Wait for the skip button to be removed, indicating tour has closed
+      await testSubjects.waitForDeleted('consoleSkipTourButton');
+
       // All steps should now be hidden
-      await expectAllStepsHidden();
+      await waitForAllStepsHidden();
+      expect(await isTourStepOpen('shellTourStep')).to.be(false);
+      expect(await isTourStepOpen('editorTourStep')).to.be(false);
+      expect(await isTourStepOpen('historyTourStep')).to.be(false);
+      expect(await isTourStepOpen('configTourStep')).to.be(false);
+      expect(await isTourStepOpen('filesTourStep')).to.be(false);
     });
 
     it('allows re-running the tour', async () => {
@@ -130,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.waitForDeleted('consoleSkipTourButton');
 
       // Verify that tour is hidden
-      await expectAllStepsHidden();
+      await waitForAllStepsHidden();
 
       // Re-run tour
       await runConsoleTour();

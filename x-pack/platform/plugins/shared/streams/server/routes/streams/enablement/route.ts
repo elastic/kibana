@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { conflict } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
@@ -20,6 +20,7 @@ export const enableStreamsRoute = createServerRoute({
     summary: 'Enable streams',
     description: 'Enables wired streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -54,6 +55,7 @@ export const disableStreamsRoute = createServerRoute({
     description:
       'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },

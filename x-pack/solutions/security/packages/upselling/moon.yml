@@ -4,24 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-upselling'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-threat-hunting-investigations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-upselling'
+  title: '@kbn/security-solution-upselling'
   description: Moon project for @kbn/security-solution-upselling
   channel: ''
   owner: '@elastic/security-threat-hunting-investigations'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/upselling
+  sourceRoot: x-pack/solutions/security/packages/upselling
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/security-solution-navigation'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/ai-assistant-icon'
+  - '@kbn/i18n-react'
 tags:
   - shared-browser
   - package
@@ -34,16 +34,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

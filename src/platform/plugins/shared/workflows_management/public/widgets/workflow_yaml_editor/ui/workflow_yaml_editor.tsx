@@ -9,7 +9,14 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import type { SchemasSettings } from 'monaco-yaml';
@@ -28,8 +35,14 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowIdDecorations,
 } from './decorations';
+import { DocumentationLink } from './documentation_link';
+import type { ExtraAction } from './extra_actions_bar';
+import { ExtraActionsBar } from './extra_actions_bar';
+import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
+import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -44,15 +57,19 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
+  selectEditorWorkflowLookup,
   selectEditorYaml,
   selectExecution,
   selectHasChanges,
+  selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectStepExecutions,
   selectWorkflow,
+  selectWorkflowDefinition,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  HIGHLIGHTED_STEP_TRIGGER,
   setHasYamlSchemaValidationErrors,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -75,6 +92,7 @@ import {
   GenericMonacoConnectorHandler,
   HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
+  WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
 import {
@@ -96,6 +114,8 @@ import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../styles/use_workflows_monaco_theme';
+
+const hiddenButtonStyles = css({ display: 'none' });
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -205,6 +225,7 @@ export const WorkflowYAMLEditor = ({
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const workflowYamlSchema = useSelector(selectSchema);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
   // The current yaml document in the editor (could be unsaved)
   const yamlDocument = useSelector(selectEditorYamlDocument);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
@@ -213,6 +234,9 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
+
+  const highlightedStepId = useSelector(selectHighlightedStepId);
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -227,6 +251,9 @@ export const WorkflowYAMLEditor = ({
 
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  // Lifecycle
+  const [isEditorMounted, setIsEditorMounted] = useState(false);
 
   // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
   useEffect(() => {
@@ -251,15 +278,34 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
-  const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
-    editorRef.current
-  );
+  const {
+    error: errorValidating,
+    isLoading: isLoadingValidation,
+    validationResults: customValidationResults,
+  } = useYamlValidation(editorRef.current);
 
-  const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
-    useMonacoMarkersChangedInterceptor({
-      yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
-    });
+  const {
+    validationErrors: interceptorValidationErrors,
+    transformMonacoMarkers,
+    handleMarkersChanged,
+  } = useMonacoMarkersChangedInterceptor({
+    yamlDocumentRef,
+    workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
+  });
+
+  const transformMonacoMarkersRef = useRef(transformMonacoMarkers);
+  transformMonacoMarkersRef.current = transformMonacoMarkers;
+  const handleMarkersChangedRef = useRef(handleMarkersChanged);
+  handleMarkersChangedRef.current = handleMarkersChanged;
+
+  // Custom validations from the hook are the source of truth; add Monaco YAML schema errors from the interceptor
+  const validationErrors = useMemo(
+    () => [
+      ...customValidationResults,
+      ...(interceptorValidationErrors?.filter((e) => e.owner === 'yaml') ?? []),
+    ],
+    [customValidationResults, interceptorValidationErrors]
+  );
 
   // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
   useEffect(() => {
@@ -267,15 +313,21 @@ export const WorkflowYAMLEditor = ({
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
   }, [validationErrors, dispatch]);
 
+  // Agent Builder integration for AI-assisted editing
+  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+    editorRef,
+    isEditorMounted,
+    workflowId: workflow?.id,
+    workflowName: workflow?.name ?? workflowDefinition?.name,
+    validationErrors,
+  });
+
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
       return;
     }
     navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
   }, []);
-
-  // Lifecycle
-  const [isEditorMounted, setIsEditorMounted] = useState(false);
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -340,6 +392,7 @@ export const WorkflowYAMLEditor = ({
       if (!model) {
         return;
       }
+
       // If no model, just set the mounted state
       setTimeout(() => {
         setIsEditorMounted(true);
@@ -361,6 +414,9 @@ export const WorkflowYAMLEditor = ({
           kibanaHost: window.location.origin,
         });
         registerMonacoConnectorHandler(kibanaHandler);
+
+        const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
+        registerMonacoConnectorHandler(workflowExecuteHandler);
 
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
@@ -442,6 +498,12 @@ export const WorkflowYAMLEditor = ({
     readOnly: isExecutionYaml,
   });
 
+  useWorkflowIdDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
   const updateContainerPosition = (
     stepInfo: StepInfo,
     _editor: monaco.editor.IStandaloneCodeEditor
@@ -479,6 +541,23 @@ export const WorkflowYAMLEditor = ({
 
     return () => disposable.dispose();
   }, [isEditorMounted, dispatch]);
+
+  // Scroll editor to highlighted step when selected from execution flyout.
+  // workflowLookup is a dependency because the line numbers may shift, but in
+  // practice this only fires in execution mode where the editor is read-only,
+  // so re-scrolling on lookup changes is harmless.
+  useEffect(() => {
+    if (!isEditorMounted || !highlightedStepId || !workflowLookup) {
+      return;
+    }
+    const lineStart =
+      highlightedStepId === HIGHLIGHTED_STEP_TRIGGER
+        ? workflowLookup.triggersLineStart
+        : workflowLookup.steps[highlightedStepId]?.lineStart;
+    if (lineStart != null) {
+      editorRef.current?.revealLineInCenter(lineStart);
+    }
+  }, [isEditorMounted, highlightedStepId, workflowLookup]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
@@ -519,28 +598,25 @@ export const WorkflowYAMLEditor = ({
   }, [isExecutionYaml]);
 
   useEffect(() => {
-    // Monkey patching
-    // 1. to set the initial markers https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
-    // 2. to intercept and format markers validation messages – this prevents Monaco from ever seeing the problematic numeric enum messages
+    // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
+    // validation messages. Effect has empty deps and uses refs for callbacks so it never
+    // re-runs; re-running would briefly restore the original and drop validation markers.
     const setModelMarkers = monaco.editor.setModelMarkers;
     monaco.editor.setModelMarkers = function (model, owner, markers) {
-      // as we intercepted the setModelMarkers method, we need to check if the call is from the current editor to avoid setting markers which could come from other editors
       const editorUri = editorRef.current?.getModel()?.uri;
       if (model.uri.path !== editorUri?.path) {
-        // skip setting markers for other editors
         setModelMarkers.call(monaco.editor, model, owner, markers);
         return;
       }
-      const transformedMarkers = transformMonacoMarkers(model, owner, markers);
+      const transformedMarkers = transformMonacoMarkersRef.current(model, owner, markers);
       setModelMarkers.call(monaco.editor, model, owner, transformedMarkers);
-      handleMarkersChanged(model, owner, transformedMarkers);
+      handleMarkersChangedRef.current(model, owner, transformedMarkers);
     };
 
     return () => {
-      // Reset the monaco.editor.setModelMarkers to the original function
       monaco.editor.setModelMarkers = setModelMarkers;
     };
-  }, [handleMarkersChanged, transformMonacoMarkers]);
+  }, []);
 
   // Debug
   const downloadSchema = useCallback(() => {
@@ -564,13 +640,34 @@ export const WorkflowYAMLEditor = ({
     }
   }, [workflowJsonSchemaStrict, notifications]);
 
+  const extraActions = useMemo<ExtraAction[]>(
+    () => [
+      {
+        id: 'documentation',
+        content: <DocumentationLink />,
+        showInReadOnly: true,
+      },
+      {
+        id: 'actions-menu',
+        content: <ActionsMenuButton onClick={openActionsPopover} />,
+        showInReadOnly: false,
+      },
+      {
+        id: 'keyboard-shortcuts',
+        content: <KeyboardShortcutsPopover />,
+        showInReadOnly: true,
+      },
+    ],
+    [openActionsPopover]
+  );
+
   return (
     <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
-        button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
+        button={<EuiButton iconType="plusCircle" css={hiddenButtonStyles} />}
         container={containerRef.current ?? undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
@@ -579,36 +676,66 @@ export const WorkflowYAMLEditor = ({
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
-      <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
-        <StepActions onStepActionClicked={onStepRun} />
+      <div
+        css={styles.stepActionsContainer}
+        style={positionStyles ? positionStyles : {}}
+        data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
+      >
+        <StepActions onStepRun={onStepRun} />
       </div>
-      {isDevelopment && (
+      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
         <div
           css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {/* Debug: Download Schema Button - Only show in development */}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                css={styles.downloadSchemaButton}
-                iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
-                size="xs"
-                aria-label="Download JSON schema for debugging"
-                onClick={downloadSchema}
-                tabIndex={0}
-                disabled={workflowJsonSchemaStrict === null}
-                onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.currentTarget.click();
+            {isAgentBuilderAvailable && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="workflows.yamlEditor.aiAgentTooltip"
+                      defaultMessage="Ask AI to help edit this workflow"
+                    />
                   }
-                }}
-              >
-                <FormattedMessage
-                  id="workflows.yamlEditor.downloadSchemaButtonLabel"
-                  defaultMessage="JSON Schema"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+                >
+                  <EuiButtonEmpty
+                    iconType="sparkles"
+                    size="xs"
+                    aria-label="Open AI Agent"
+                    onClick={() => openAgentChat()}
+                    data-test-subj="workflowYamlEditorAiAgentButton"
+                  >
+                    <FormattedMessage
+                      id="workflows.yamlEditor.aiAgentButtonLabel"
+                      defaultMessage="AI Agent"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {isDevelopment && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  css={styles.downloadSchemaButton}
+                  iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
+                  size="xs"
+                  aria-label="Download JSON schema for debugging"
+                  onClick={downloadSchema}
+                  tabIndex={0}
+                  disabled={workflowJsonSchemaStrict === null}
+                  onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.currentTarget.click();
+                    }
+                  }}
+                >
+                  <FormattedMessage
+                    id="workflows.yamlEditor.downloadSchemaButtonLabel"
+                    defaultMessage="JSON Schema"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </div>
       )}
@@ -635,10 +762,7 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          extraAction={
-            // Only show the shortcuts in edit mode
-            !isExecutionYaml ? <ActionsMenuButton onClick={openActionsPopover} /> : null
-          }
+          extraAction={<ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />}
         />
       </div>
     </div>

@@ -65,11 +65,11 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // Generate console format
       const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
 
-      // Create hover content with enhanced formatting and shadowed icons
       const content = [
         `**Endpoint**: \`${requestInfo.method} ${requestInfo.url}\``,
         '',
         this.getDescription(connector, requestInfo),
+        this.getStabilityNote(connector.stability),
         '',
         documentationUrl
           ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **Documentation** \n\n [${documentationUrl}](${documentationUrl}) (Opens in new tab)`

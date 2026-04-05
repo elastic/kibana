@@ -41,3 +41,12 @@ export interface AnonymizationRegexWorkerTaskPayload {
   rules: RegexAnonymizationRule[];
   records: Array<Record<string, string>>;
 }
+
+/**
+ * RFC-6901 JSON Pointer token escape/unescape utilities.
+ */
+export const escapePointerToken = (token: string): string =>
+  token.replace(/~/g, '~0').replace(/\//g, '~1');
+
+export const unescapePointerToken = (token: string): string =>
+  token.replace(/~1/g, '/').replace(/~0/g, '~');

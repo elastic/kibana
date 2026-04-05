@@ -20,9 +20,10 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 
-import type { SingleSloCustomInput } from './types';
-
-interface Props extends SingleSloCustomInput {
+interface Props {
+  sloId: string | undefined;
+  sloInstanceId: string | undefined;
+  remoteName?: string;
   reloadSubject?: Subject<boolean>;
 }
 
@@ -67,26 +68,24 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
     refetch();
   }, [lastRefreshTime, refetch]);
 
-  const isSloNotFound = !isLoading && slo === undefined;
+  if (!isLoading && !isRefetching && slo === undefined) {
+    return (
+      <LoadingContainer>
+        <LoadingContent>
+          {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
+            defaultMessage:
+              'Unable to find SLO. You can safely delete the widget from the dashboard.',
+          })}
+        </LoadingContent>
+      </LoadingContainer>
+    );
+  }
 
   if (isRefetching || isLoading || !slo) {
     return (
       <LoadingContainer>
         <LoadingContent>
           <EuiLoadingChart />
-        </LoadingContent>
-      </LoadingContainer>
-    );
-  }
-
-  if (isSloNotFound) {
-    return (
-      <LoadingContainer>
-        <LoadingContent>
-          {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
-            defaultMessage:
-              'The SLO has been deleted. You can safely delete the widget from the dashboard.',
-          })}
         </LoadingContent>
       </LoadingContainer>
     );

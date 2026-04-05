@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
+import { v4 as uuidv4 } from 'uuid';
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -60,7 +62,7 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             });
           }
 
-          const { client, sourceAttributes, newName, username, now } = copyContext;
+          const { client, sourceAttributes, newName, username, profileUid, now } = copyContext;
 
           const {
             name: _name,
@@ -75,18 +77,27 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             ...restAttributes
           } = sourceAttributes;
 
+          const copiedQueries = restAttributes.queries?.map((q) => ({
+            ...q,
+            schedule_id: uuidv4(),
+            start_date: moment().toISOString(),
+          }));
+
           const newPackSO = await client.create<
             Omit<PackSavedObject, 'saved_object_id' | 'references'>
           >(
             packSavedObjectType,
             {
               ...restAttributes,
+              queries: copiedQueries,
               name: newName,
               enabled: false, // Always disable copy to prevent unexpected deployments
               shards: [],
               created_by: username,
+              created_by_profile_uid: profileUid,
               created_at: now,
               updated_by: username,
+              updated_by_profile_uid: profileUid,
               updated_at: now,
             },
             {
@@ -107,8 +118,10 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             enabled: attributes.enabled,
             created_at: attributes.created_at,
             created_by: attributes.created_by,
+            created_by_profile_uid: attributes.created_by_profile_uid,
             updated_at: attributes.updated_at,
             updated_by: attributes.updated_by,
+            updated_by_profile_uid: attributes.updated_by_profile_uid,
             policy_ids: [], // No policy assignments — references are empty
             shards: attributes.shards,
             saved_object_id: newPackSO.id,

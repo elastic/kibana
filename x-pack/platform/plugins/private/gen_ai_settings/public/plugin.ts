@@ -55,13 +55,13 @@ export class GenAiSettingsPlugin
       ? (await firstValueFrom(licensing.license$)).hasAtLeast('enterprise')
       : false;
 
+    const hasConnectorsReadPrivilege =
+      capabilities.actions?.show === true && capabilities.actions?.execute === true;
+    const hasAnonymizationPrivilege =
+      capabilities.anonymization?.show === true || capabilities.anonymization?.manage === true;
+
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
-    if (
-      // Connectors 'Read' privilege
-      capabilities.actions?.show === true &&
-      capabilities.actions?.execute === true &&
-      hasEnterpriseLicense
-    ) {
+    if (hasEnterpriseLicense && (hasConnectorsReadPrivilege || hasAnonymizationPrivilege)) {
       management.sections.section.ai.registerApp({
         id: 'genAiSettings',
         title: i18n.translate('genAiSettings.managementSectionLabel', {

@@ -5,108 +5,291 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useCallback, useMemo, type MouseEvent } from 'react';
 import {
-  EuiPageTemplate,
+  EuiAccordion,
   EuiBasicTable,
+  EuiLink,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageSection,
   EuiStat,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonEmpty,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutResizable,
   EuiTitle,
+  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import type { EvaluatorStats } from '@kbn/evals-common';
-import { useEvaluationRun, useEvaluationRunScores } from '../../hooks/use_evals_api';
+import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
+import { ExampleScoresTable } from '../../components/example_scores_table';
 import { TraceWaterfall } from '../../components/trace_waterfall';
+import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
+
+interface DatasetStatsGroup {
+  datasetId: string;
+  datasetName: string;
+  stats: EvaluatorStats[];
+}
+
+interface DatasetStatsAccordionProps {
+  runId: string;
+  group: DatasetStatsGroup;
+  totalRepetitions: number;
+  statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
+  runLoading: boolean;
+  isOpen: boolean;
+  selectedExampleId?: string | null;
+  onTraceClick: (traceId: string, exampleId: string) => void;
+  onDatasetClick: (datasetId: string) => void;
+  onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
+  onExampleClick: (exampleId: string) => void;
+}
+
+const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
+  runId,
+  group,
+  totalRepetitions,
+  statsColumns,
+  runLoading,
+  isOpen,
+  selectedExampleId,
+  onTraceClick,
+  onDatasetClick,
+  onDatasetToggle,
+  onExampleClick,
+}) => {
+  const {
+    data: datasetExamples,
+    isLoading: examplesLoading,
+    error: examplesError,
+  } = useRunDatasetExamples(runId, isOpen ? group.datasetId : '');
+
+  const scoreCount = group.stats[0]?.stats.count;
+  const exampleCount = scoreCount != null ? Math.round(scoreCount / totalRepetitions) : undefined;
+
+  return (
+    <>
+      <EuiAccordion
+        id={`runDatasetAccordion-${group.datasetId}`}
+        buttonContent={
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h4>
+                  <EuiLink
+                    onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onDatasetClick(group.datasetId);
+                    }}
+                  >
+                    {group.datasetName}
+                  </EuiLink>
+                </h4>
+              </EuiText>
+            </EuiFlexItem>
+            {exampleCount != null && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.getExampleCountLabel(exampleCount)}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        }
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={(nextIsOpen) => onDatasetToggle(group.datasetId, nextIsOpen)}
+      >
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <h5>{i18n.SECTION_EXAMPLE_SCORES}</h5>
+        </EuiText>
+        <EuiSpacer size="s" />
+        {examplesError ? (
+          <EuiText color="danger" size="s">
+            <p>{i18n.getExamplesLoadError(String(examplesError))}</p>
+          </EuiText>
+        ) : (
+          <ExampleScoresTable
+            examples={datasetExamples?.examples ?? []}
+            selectedExampleId={selectedExampleId}
+            onExampleClick={onExampleClick}
+            onTraceClick={onTraceClick}
+          />
+        )}
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <h5>{i18n.SECTION_EVALUATOR_STATS}</h5>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiBasicTable<EvaluatorStats>
+          items={group.stats}
+          columns={statsColumns}
+          loading={runLoading || (isOpen && examplesLoading)}
+        />
+      </EuiAccordion>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
 
 export const RunDetailPage: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
   const history = useHistory();
+  const location = useLocation();
+  const { euiTheme } = useEuiTheme();
   const { data: runDetail, isLoading: runLoading, error: runError } = useEvaluationRun(runId);
-  const { data: scoresData, isLoading: scoresLoading } = useEvaluationRunScores(runId);
-  const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
-  const runIdShort = runId.slice(0, 12);
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const openDatasetId = searchParams.get('dataset_id');
+  const selectedExampleId = searchParams.get('example_id');
+  const selectedTraceId = searchParams.get('trace_id');
+  const prUrl = useMemo(() => {
+    const pr = runDetail?.ci?.pull_request;
+    return pr ? resolvePrUrl(pr) : null;
+  }, [runDetail?.ci?.pull_request]);
 
-  const uniqueTraceIds = useMemo(() => {
-    if (!scoresData?.scores) return [];
-    const traceIds = new Set<string>();
-    for (const score of scoresData.scores) {
-      const traceId = (score as any).task?.trace_id;
-      if (traceId) traceIds.add(traceId);
+  const updateSearchParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const next = new URLSearchParams(location.search);
+      updater(next);
+      const search = next.toString();
+      history.push({
+        pathname: location.pathname,
+        search: search ? `?${search}` : '',
+      });
+    },
+    [history, location.pathname, location.search]
+  );
+
+  const setOpenDatasetId = useCallback(
+    (datasetId: string | null) => {
+      updateSearchParams((params) => {
+        if (datasetId) {
+          params.set('dataset_id', datasetId);
+        } else {
+          params.delete('dataset_id');
+          params.delete('example_id');
+          params.delete('trace_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const setSelectedExample = useCallback(
+    (exampleId: string | null) => {
+      updateSearchParams((params) => {
+        if (exampleId) {
+          params.set('example_id', exampleId);
+        } else {
+          params.delete('example_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const setSelectedTrace = useCallback(
+    (traceId: string | null, exampleId?: string) => {
+      updateSearchParams((params) => {
+        if (traceId) {
+          params.set('trace_id', traceId);
+          if (exampleId) {
+            params.set('example_id', exampleId);
+          }
+        } else {
+          params.delete('trace_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const datasetStatsGroups = useMemo(() => {
+    const groupedStats = new Map<
+      string,
+      { datasetId: string; datasetName: string; stats: EvaluatorStats[] }
+    >();
+
+    for (const stat of runDetail?.stats ?? []) {
+      const existingGroup = groupedStats.get(stat.dataset_id);
+      if (existingGroup) {
+        existingGroup.stats.push(stat);
+        continue;
+      }
+
+      groupedStats.set(stat.dataset_id, {
+        datasetId: stat.dataset_id,
+        datasetName: stat.dataset_name,
+        stats: [stat],
+      });
     }
-    return Array.from(traceIds);
-  }, [scoresData?.scores]);
+
+    return Array.from(groupedStats.values()).sort((a, b) =>
+      a.datasetName.localeCompare(b.datasetName)
+    );
+  }, [runDetail?.stats]);
 
   const statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>> = useMemo(
     () => [
       {
-        field: 'dataset_name',
-        name: i18n.COLUMN_DATASET,
-        sortable: true,
-      },
-      {
         field: 'evaluator_name',
         name: i18n.COLUMN_EVALUATOR,
         sortable: true,
-        render: (name: string) => <EuiBadge color="hollow">{name}</EuiBadge>,
+        render: (name: string) => (
+          <EuiText size="s">
+            <strong>{name}</strong>
+          </EuiText>
+        ),
       },
       {
         field: 'stats.mean',
         name: i18n.COLUMN_MEAN,
         sortable: true,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.median',
         name: i18n.COLUMN_MEDIAN,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.std_dev',
         name: i18n.COLUMN_STD_DEV,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.min',
         name: i18n.COLUMN_MIN,
-        render: (value: number) => value.toFixed(3),
+        render: (value: number) => value.toFixed(2),
       },
       {
         field: 'stats.max',
         name: i18n.COLUMN_MAX,
-        render: (value: number) => value.toFixed(3),
-      },
-      {
-        field: 'stats.count',
-        name: i18n.COLUMN_COUNT,
-        width: '70px',
+        render: (value: number) => value.toFixed(2),
       },
     ],
     []
   );
 
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header
-        pageTitle={i18n.getPageTitle(runIdShort)}
-        breadcrumbs={[
-          { text: i18n.BREADCRUMB_EVALUATIONS, onClick: () => history.push('/') },
-          { text: i18n.getBreadcrumbRun(runIdShort) },
-        ]}
-      />
-      <EuiPageTemplate.Section>
+    <>
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiTitle size="l">
+          <h2>{i18n.getPageTitle(runId)}</h2>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+
         {runError ? (
           <>
             <EuiText color="danger" size="s">
@@ -118,7 +301,7 @@ export const RunDetailPage: React.FC = () => {
 
         {runDetail && (
           <>
-            <EuiFlexGroup>
+            <EuiFlexGroup wrap>
               <EuiFlexItem>
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
@@ -149,18 +332,48 @@ export const RunDetailPage: React.FC = () => {
               <EuiFlexItem>
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
-                    title={String(scoresData?.total ?? '-')}
-                    description={i18n.STAT_TOTAL_SCORES}
+                    title={
+                      runDetail.git_branch ? (
+                        <EuiBadge color="hollow">{runDetail.git_branch}</EuiBadge>
+                      ) : (
+                        '-'
+                      )
+                    }
+                    description={i18n.STAT_BRANCH}
                     titleSize="xs"
-                    isLoading={scoresLoading}
                   />
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
-                    title={String(uniqueTraceIds.length)}
-                    description={i18n.STAT_TRACES}
+                    title={
+                      runDetail.ci?.build_url ? (
+                        <EuiLink href={runDetail.ci.build_url} target="_blank" external>
+                          {i18n.CI_BUILD_LINK}
+                        </EuiLink>
+                      ) : (
+                        '-'
+                      )
+                    }
+                    description={i18n.STAT_CI}
+                    titleSize="xs"
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiStat
+                    title={
+                      prUrl ? (
+                        <EuiLink href={prUrl} target="_blank" external>
+                          {i18n.PR_LINK}
+                        </EuiLink>
+                      ) : (
+                        '-'
+                      )
+                    }
+                    description={i18n.STAT_PULL_REQUEST}
                     titleSize="xs"
                   />
                 </EuiPanel>
@@ -170,44 +383,34 @@ export const RunDetailPage: React.FC = () => {
           </>
         )}
 
-        {uniqueTraceIds.length > 0 && (
-          <>
-            <EuiText size="s">
-              <h3>{i18n.SECTION_TRACES}</h3>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup wrap>
-              {uniqueTraceIds.slice(0, 20).map((traceId) => (
-                <EuiFlexItem key={traceId} grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="apmTrace"
-                    onClick={() => setSelectedTraceId(traceId)}
-                  >
-                    {traceId.slice(0, 12)}...
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-          </>
-        )}
-
         <EuiText size="s">
-          <h3>{i18n.SECTION_EVALUATOR_STATS}</h3>
+          <h3>{i18n.SECTION_DATASETS}</h3>
         </EuiText>
-        <EuiSpacer size="s" />
-        <EuiBasicTable<EvaluatorStats>
-          items={runDetail?.stats ?? []}
-          columns={statsColumns}
-          loading={runLoading}
-        />
-      </EuiPageTemplate.Section>
+        <EuiSpacer size="m" />
+        {datasetStatsGroups.map(({ datasetId, datasetName, stats }) => (
+          <DatasetStatsAccordion
+            key={datasetId}
+            runId={runId}
+            group={{ datasetId, datasetName, stats }}
+            totalRepetitions={runDetail?.total_repetitions ?? 1}
+            statsColumns={statsColumns}
+            runLoading={runLoading}
+            isOpen={openDatasetId === datasetId}
+            selectedExampleId={openDatasetId === datasetId ? selectedExampleId : null}
+            onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
+            onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
+            onDatasetToggle={(targetDatasetId, nextIsOpen) =>
+              setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
+            }
+            onExampleClick={(exampleId) => setSelectedExample(exampleId)}
+          />
+        ))}
+      </EuiPageSection>
 
       {selectedTraceId && (
         <EuiFlyoutResizable
           ownFocus
-          onClose={() => setSelectedTraceId(null)}
+          onClose={() => setSelectedTrace(null)}
           size="l"
           minWidth={480}
           maxWidth={1600}
@@ -237,6 +440,6 @@ export const RunDetailPage: React.FC = () => {
           </EuiFlyoutBody>
         </EuiFlyoutResizable>
       )}
-    </EuiPageTemplate>
+    </>
   );
 };

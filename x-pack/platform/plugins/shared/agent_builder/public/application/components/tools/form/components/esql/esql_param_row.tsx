@@ -108,7 +108,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           ((errorMessages && (
             <EuiIconTip
               content={errorMessages}
-              type="errorFilled"
+              type="errorFill"
               color={euiTheme.colors.danger}
               size="m"
             />
@@ -116,7 +116,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             (warning && (
               <EuiIconTip
                 content={warning}
-                type="warningFilled"
+                type="warningFill"
                 color={euiTheme.colors.warning}
                 size="m"
               />
@@ -124,7 +124,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             (source === EsqlParamSource.Inferred ? (
               <EuiIcon type="sparkles" color="subdued" size="m" />
             ) : (
-              <EuiIcon type="documentEdit" color="subdued" size="m" />
+              <EuiIcon type="pencil" color="subdued" size="m" />
             )))}
       </EuiTableRowCell>
       <EuiTableRowCell

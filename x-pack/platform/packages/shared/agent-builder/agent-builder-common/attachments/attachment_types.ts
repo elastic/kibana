@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * List of internal / built-in attachment types.
@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   visualization = 'visualization',
+  connector = 'connector',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
+  [AttachmentType.connector]: ConnectorAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -53,16 +55,34 @@ export interface TextAttachmentData {
   content: string;
 }
 
+export const screenContextTimeRangeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+});
+
+export interface TimeRange {
+  from: string;
+  to: string;
+}
+
 export const screenContextAttachmentDataSchema = z
   .object({
     url: z.string().optional(),
     app: z.string().optional(),
     description: z.string().optional(),
-    additional_data: z.record(z.string()).optional(),
+    time_range: screenContextTimeRangeSchema.optional(),
+    additional_data: z.record(z.string(), z.string()).optional(),
   })
-  .refine((data) => {
+  .check((ctx) => {
     // at least one of the fields must be present
-    return data.url || data.app || data.description || data.additional_data;
+    const data = ctx.value;
+    if (!data.url && !data.app && !data.description && !data.additional_data) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'At least one of url, app, description, or additional_data must be present',
+        input: data,
+      });
+    }
   });
 
 /**
@@ -75,15 +95,23 @@ export interface ScreenContextAttachmentData {
   app?: string;
   /** app description */
   description?: string;
+  /** the currently active time range */
+  time_range?: TimeRange;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
 }
 
+export const visualizationTimeRangeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+});
+
 export const visualizationAttachmentDataSchema = z.object({
   query: z.string(),
-  visualization: z.record(z.unknown()),
+  visualization: z.record(z.string(), z.unknown()),
   chart_type: z.string(),
   esql: z.string(),
+  time_range: visualizationTimeRangeSchema.optional(),
 });
 
 /**
@@ -99,22 +127,53 @@ export interface VisualizationAttachmentData {
   chart_type: string;
   /** The ES|QL query */
   esql: string;
+  /** Optional time range for the visualization (e.g., { from: 'now-24h', to: 'now' }) */
+  time_range?: { from: string; to: string };
 }
 
-export const visualizationOriginDataSchema = z.object({
-  saved_object_id: z.string(),
-  title: z.string().optional(),
-  description: z.string().optional(),
+/**
+ * Tag prefix used to associate tools with their parent connector instance.
+ * A tool tagged `connector:<connectorId>` belongs to that connector.
+ */
+export const CONNECTOR_TAG_PREFIX = 'connector:';
+
+export const connectorAttachmentToolSchema = z.object({
+  tool_id: z.string(),
+  description: z.string(),
+  configuration: z.object({
+    workflow_id: z.string(),
+  }),
+});
+
+export const connectorAttachmentDataSchema = z.object({
+  connector_id: z.string(),
+  connector_name: z.string(),
+  connector_type: z.string(),
+  tools: z.array(connectorAttachmentToolSchema),
 });
 
 /**
- * Origin data for a visualization attachment created by-reference.
- * Stored on the attachment for UI purposes (e.g., "Open in Lens" link).
+ * Data for a connector attachment.
  */
-export interface VisualizationOriginData {
-  saved_object_id: string;
-  title?: string;
-  description?: string;
+export interface ConnectorAttachmentData {
+  /** The saved connector instance ID */
+  connector_id: string;
+  /** Human-readable connector name */
+  connector_name: string;
+  /** Action type ID (e.g., ".slack2", ".mcp") */
+  connector_type: string;
+  /** Workflow tools for this connector instance */
+  tools: Array<{
+    /** Tool ID */
+    tool_id: string;
+    /** Tool description from workflow YAML */
+    description: string;
+    /** Tool configuration */
+    configuration: {
+      /** The workflow ID */
+      workflow_id: string;
+    };
+  }>;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

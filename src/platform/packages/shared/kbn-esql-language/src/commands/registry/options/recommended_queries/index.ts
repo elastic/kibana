@@ -37,6 +37,15 @@ export const getRecommendedQueriesTemplates = ({
   timeField?: string;
   categorizationField?: string;
 }): QueryTemplate[] => {
+  // Recommend TBUCKET for @timestamp fields as it is smarter and has easier to understand syntax
+  const bucketExpression =
+    timeField === '@timestamp' ? 'TBUCKET(50)' : `BUCKET(${timeField}, 50, ?_tstart, ?_tend)`;
+
+  const commentDescription =
+    timeField !== '@timestamp'
+      ? ' /* ?_tstart and ?_tend take the values of the time picker */'
+      : '';
+
   const queries: QueryTemplate[] = [
     {
       label: i18n.translate('kbn-esql-language.recommendedQueries.searchExample.label', {
@@ -88,7 +97,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
+            queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 m, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
           },
         ]
       : []),
@@ -113,7 +122,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) /* ?_tstart and ?_tend take the values of the time picker */`,
+            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.eventRate.label', {
@@ -139,7 +148,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Change point on count aggregation',
               }
             ),
-            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend)  | CHANGE_POINT count ON buckets `,
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression}  | CHANGE_POINT count ON buckets `,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
@@ -210,6 +219,15 @@ export async function getTimeAndCategorizationFields(
   return { timeField, categorizationField };
 }
 
+const buildRecommendedQueryCommand = (
+  queryLabel: string,
+  queryText?: string
+): ISuggestionItem['command'] => ({
+  id: 'esql.recommendedQuery.accept',
+  title: 'Accept recommended query',
+  arguments: [queryText ? { queryLabel, queryText } : { queryLabel }],
+});
+
 export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
@@ -230,16 +248,29 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       detail: query.description,
       sortText: query?.sortText ?? 'E',
       category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
-      command: {
-        id: 'esql.recommendedQuery.accept',
-        title: 'Accept recommended query',
-        arguments: [{ queryLabel: query.label }],
-      },
+      command: buildRecommendedQueryCommand(query.label),
     };
   });
 
   return suggestions;
 };
+
+const buildExtensionSuggestion = (
+  recommendedQuery: RecommendedQuery,
+  text: string,
+  command?: ISuggestionItem['command']
+): ISuggestionItem => ({
+  label: recommendedQuery.name,
+  text,
+  detail: recommendedQuery.name ?? '',
+  ...(recommendedQuery.description
+    ? { documentation: { value: recommendedQuery.description } }
+    : {}),
+  kind: 'Issue',
+  sortText: 'D',
+  category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
+  ...(command ? { command } : {}),
+});
 
 /**
  * This function extracts the templates from the recommended queries extensions.
@@ -255,25 +286,21 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
     return [];
   }
 
-  // the templates are the recommended queries without the source command (FROM)
-  const recommendedQueriesTemplates: ISuggestionItem[] = recommendedQueriesExtensions.map(
-    (recommendedQuery) => {
-      const formattedQuery = prettifyQueryTemplate(recommendedQuery.query);
-      return {
-        label: recommendedQuery.name,
-        text: formattedQuery,
-        detail: recommendedQuery.name ?? '',
-        ...(recommendedQuery.description
-          ? { documentation: { value: recommendedQuery.description } }
-          : {}),
-        kind: 'Issue',
-        sortText: 'D',
-        category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
-      };
+  return recommendedQueriesExtensions.map((recommendedQuery) => {
+    if (recommendedQuery.isStandalone) {
+      const queryText = prettifyQuery(recommendedQuery.query);
+      return buildExtensionSuggestion(
+        recommendedQuery,
+        '',
+        buildRecommendedQueryCommand(recommendedQuery.name, queryText)
+      );
     }
-  );
 
-  return recommendedQueriesTemplates;
+    return buildExtensionSuggestion(
+      recommendedQuery,
+      prettifyQueryTemplate(recommendedQuery.query)
+    );
+  });
 };
 
 // Function returning suggestions from static templates and editor extensions

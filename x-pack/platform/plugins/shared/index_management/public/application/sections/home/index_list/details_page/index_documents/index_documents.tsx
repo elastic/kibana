@@ -8,18 +8,23 @@
 import React from 'react';
 import { EuiTitle, EuiSpacer, EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { DocumentList } from './document_list';
-import { useLoadIndexDocumentsSample } from '../../../../../services/api';
 import type { MappingsResponse } from '../../../../../../../common';
 
 interface IndexDocumentsProps {
-  indexName: string;
+  documents: SearchHit[];
+  isLoading: boolean;
+  error: unknown;
   mappings?: MappingsResponse;
 }
 
-export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ indexName, mappings }) => {
-  const { data, isLoading, error } = useLoadIndexDocumentsSample(indexName);
-  const documents = data?.results ?? [];
+export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
+  documents,
+  isLoading,
+  error,
+  mappings,
+}) => {
   const mappingProperties = mappings?.mappings?.properties;
 
   if (isLoading || error || documents.length === 0) {

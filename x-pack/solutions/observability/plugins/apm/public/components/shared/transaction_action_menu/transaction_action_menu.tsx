@@ -52,7 +52,7 @@ function ActionMenuButton({ onClick, isLoading }: { onClick: () => void; isLoadi
     <EuiButton
       data-test-subj="apmActionMenuButtonInvestigateButton"
       isLoading={isLoading}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onClick}
     >
@@ -132,16 +132,16 @@ function ActionMenuSections({
 
   const metricsIndices = metricsIndicesAsync.value?.metricIndices;
 
-  const logsLocator = getLogsLocatorFromUrlService(share.url)!;
+  const logsLocator = getLogsLocatorFromUrlService(share?.url)!;
 
-  const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
+  const uptimeLocator = share?.url?.locators?.get(uptimeOverviewLocatorID);
 
   const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
 
   const assetDetailsLocator =
-    share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+    share?.url?.locators?.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
-  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+  const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
 
   const {
     query: { rangeFrom, rangeTo, environment },

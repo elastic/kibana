@@ -30,6 +30,8 @@ export interface UseBulkAlertClosingReasonItemsProps {
    * Called once the user confirms the closing reason
    */
   onSubmitCloseReason?: (params: OnSubmitCloseReasonParams) => void;
+  /** Optional label override for the confirm button */
+  buttonLabel?: string;
 }
 
 /**
@@ -37,11 +39,12 @@ export interface UseBulkAlertClosingReasonItemsProps {
  */
 export const useBulkAlertClosingReasonItems = ({
   onSubmitCloseReason,
+  buttonLabel,
 }: UseBulkAlertClosingReasonItemsProps = {}) => {
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const item = useMemo(
     () =>
-      hasIndexWrite
+      hasAlertsUpdate
         ? ({
             key: 'close-alert-with-reason',
             'data-test-subj': 'alert-close-context-menu-item',
@@ -49,14 +52,16 @@ export const useBulkAlertClosingReasonItems = ({
             panel: ALERT_CLOSING_REASON_PANEL_ID,
           } as BulkActionsConfig)
         : undefined,
-    [hasIndexWrite]
+    [hasAlertsUpdate]
   );
 
   const getRenderContent = useCallback(
     ({
       onSubmitCloseReason: onSubmitCloseReasonCb,
+      buttonLabel: buttonLabelOverride,
     }: {
       onSubmitCloseReason?: UseBulkAlertClosingReasonItemsProps['onSubmitCloseReason'];
+      buttonLabel?: string;
     }) => {
       function renderContent(renderProps: RenderContentPanelProps) {
         const handleSubmit = (reason: AlertClosingReason) => {
@@ -66,7 +71,7 @@ export const useBulkAlertClosingReasonItems = ({
           });
         };
 
-        return <BulkAlertClosingReason onSubmit={handleSubmit} />;
+        return <BulkAlertClosingReason onSubmit={handleSubmit} buttonLabel={buttonLabelOverride} />;
       }
 
       return renderContent;
@@ -76,16 +81,16 @@ export const useBulkAlertClosingReasonItems = ({
 
   const panels = useMemo(
     () =>
-      hasIndexWrite
+      hasAlertsUpdate
         ? ([
             {
               id: ALERT_CLOSING_REASON_PANEL_ID,
               title: i18n.ALERT_CLOSING_REASON_MENU_TITLE,
-              renderContent: getRenderContent({ onSubmitCloseReason }),
+              renderContent: getRenderContent({ onSubmitCloseReason, buttonLabel }),
             },
           ] as ContentPanelConfig[])
         : [],
-    [hasIndexWrite, getRenderContent, onSubmitCloseReason]
+    [hasAlertsUpdate, getRenderContent, onSubmitCloseReason, buttonLabel]
   );
 
   /**
@@ -98,16 +103,19 @@ export const useBulkAlertClosingReasonItems = ({
     }: {
       onSubmitCloseReason?: UseBulkAlertClosingReasonItemsProps['onSubmitCloseReason'];
     }) =>
-      hasIndexWrite
+      hasAlertsUpdate
         ? ([
             {
               id: ALERT_CLOSING_REASON_PANEL_ID,
               title: i18n.ALERT_CLOSING_REASON_MENU_TITLE,
-              renderContent: getRenderContent({ onSubmitCloseReason: onSubmitCloseReasonCb }),
+              renderContent: getRenderContent({
+                onSubmitCloseReason: onSubmitCloseReasonCb,
+                buttonLabel,
+              }),
             },
           ] as ContentPanelConfig[])
         : [],
-    [getRenderContent, hasIndexWrite]
+    [getRenderContent, hasAlertsUpdate, buttonLabel]
   );
 
   return useMemo(
