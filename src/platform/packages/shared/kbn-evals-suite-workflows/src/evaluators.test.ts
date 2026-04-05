@@ -68,19 +68,21 @@ describe('Efficiency evaluator', () => {
 
   it('scores 1 when all tool calls succeed', async () => {
     const output = mockOutput([toolCall('workflow_modify_step', { success: true })]);
-    const result = await evaluator.evaluate({ output });
+    const result = await evaluator.evaluate({ output, expected: {} });
     expect(result.score).toBe(1);
     expect(result.metadata.totalToolCalls).toBe(1);
   });
 
-  it('scores 0.5 when half of workflow calls fail', async () => {
+  it('penalizes when half of workflow calls fail', async () => {
     const output = mockOutput([
       toolCall('workflow_modify_step', { success: false, error: 'error' }),
       toolCall('workflow_modify_step', { success: true }),
     ]);
-    const result = await evaluator.evaluate({ output });
-    expect(result.score).toBe(0.5);
+    const result = await evaluator.evaluate({ output, expected: {} });
+    expect(result.score).toBe(0.8);
     expect(result.metadata.failedCalls).toBe(1);
+    expect(result.metadata.failedCallScore).toBe(0.5);
+    expect(result.metadata.budgetScore).toBe(1);
   });
 
   it('excludes lookup calls from waste calculation', async () => {
@@ -89,18 +91,20 @@ describe('Efficiency evaluator', () => {
       toolCall('get_connectors', {}),
       toolCall('workflow_set_yaml', { success: true }),
     ]);
-    const result = await evaluator.evaluate({ output });
+    const result = await evaluator.evaluate({ output, expected: {} });
     expect(result.score).toBe(1);
     expect(result.metadata.lookupCalls).toBe(2);
     expect(result.metadata.totalToolCalls).toBe(3);
   });
 
-  it('scores 0 when all workflow calls fail', async () => {
+  it('penalizes heavily when all workflow calls fail', async () => {
     const output = mockOutput([
       toolCall('workflow_modify_step', { success: false, error: 'error' }),
     ]);
-    const result = await evaluator.evaluate({ output });
-    expect(result.score).toBe(0);
+    const result = await evaluator.evaluate({ output, expected: {} });
+    expect(result.score).toBe(0.6);
     expect(result.metadata.failedCalls).toBe(1);
+    expect(result.metadata.failedCallScore).toBe(0);
+    expect(result.metadata.budgetScore).toBe(1);
   });
 });

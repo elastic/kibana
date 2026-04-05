@@ -588,7 +588,7 @@ export function createEfficiencyEvaluator() {
       const failedCallScore =
         totalToolCalls > 0 ? Math.max(0, 1 - wastedCalls / totalToolCalls) : 1;
 
-      const budget = expected.expectedMaxToolCalls ?? DEFAULT_TOOL_CALL_BUDGET;
+      const budget = expected?.expectedMaxToolCalls ?? DEFAULT_TOOL_CALL_BUDGET;
       const budgetScore = calculateBudgetScore(totalToolCalls, budget);
 
       const {
