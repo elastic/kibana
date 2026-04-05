@@ -105,7 +105,6 @@ export interface SecuritySolutionPluginStartDependencies {
   anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
-  entityStore?: EntityStoreStartContract;
 }
 
 export interface SecuritySolutionPluginSetup {

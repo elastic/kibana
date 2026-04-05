@@ -145,7 +145,7 @@ describe('emitEvent', () => {
       triggerEventHandler: handler,
     });
     const requestWithContext = {} as any;
-    setWorkflowEventChainContext(requestWithContext, { depth: 1, sourceWorkflowId: 'wf-1' });
+    setWorkflowEventChainContext(requestWithContext, { depth: 1, sourceExecutionId: 'exec-1' });
 
     await emitEvent(
       {
@@ -159,7 +159,7 @@ describe('emitEvent', () => {
 
     expect(handler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventChainContext: { depth: 1, sourceWorkflowId: 'wf-1' },
+        eventChainContext: { depth: 1, sourceExecutionId: 'exec-1' },
       })
     );
   });

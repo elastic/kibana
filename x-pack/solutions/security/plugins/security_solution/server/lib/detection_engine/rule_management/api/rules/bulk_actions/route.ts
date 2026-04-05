@@ -9,7 +9,11 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
+import type {
+  BulkActionSkipResult,
+  GapFillStatus,
+  GapReasonType,
+} from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -22,6 +26,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
+  EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -236,6 +241,7 @@ export const performBulkActionRoute = (
                 : MAX_RULES_TO_PROCESS_TOTAL,
             gapRange: gapParams.gapRange,
             gapFillStatuses: gapParams.gapFillStatuses,
+            schedulerId: body.gap_auto_fill_scheduler_id,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
@@ -436,6 +442,11 @@ export const performBulkActionRoute = (
             }
 
             case BulkActionTypeEnum.fill_gaps: {
+              const uiSettingsClient = ctx.core.uiSettings.client;
+              const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
+                EXCLUDED_GAP_REASONS_KEY
+              );
+
               const {
                 backfilled,
                 errors: bulkActionErrors,
@@ -446,6 +457,7 @@ export const performBulkActionRoute = (
                 rulesClient,
                 mlAuthz,
                 fillGapsPayload: body.fill_gaps,
+                excludedReasons,
               });
               errors.push(...bulkActionErrors);
               updated = backfilled;
