@@ -16,7 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
@@ -36,6 +36,11 @@ import {
 import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
+import {
+  buildTaskAttemptsExhaustedMessage,
+  markExecutionFailedTaskRecovery,
+  resolveInterruptedWorkflowRunTask,
+} from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -61,9 +66,12 @@ import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
+import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
+
+/** Must match `maxAttempts` on `WORKFLOW_RUN_TASK_TYPE` (Task Manager retries after interrupt). */
+const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -125,14 +133,15 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     plugins.taskManager.registerTaskDefinitions({
-      'workflow:run': {
+      [WORKFLOW_RUN_TASK_TYPE]: {
         title: 'Run Workflow',
         description: 'Executes a workflow immediately',
         // Set high timeout for long-running workflows.
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 1,
+        // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
+        maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
@@ -178,19 +187,66 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              await runWorkflow({
+              const workflowExecutionRepository = new WorkflowExecutionRepository(
+                coreStart.elasticsearch.client.asInternalUser
+              );
+
+              const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
+                workflowExecutionRepository,
                 workflowRunId,
                 spaceId,
-                taskAbortController,
-                config,
+                taskAttempts: taskInstance.attempts,
                 logger,
-                fakeRequest,
-                dependencies,
-                workflowsExecutionEngine,
-                meteringService: this.meteringService,
-                isEventDrivenExecutionEnabled:
-                  workflowsExecutionEngine.isEventDrivenExecutionEnabled,
               });
+
+              if (interruptedOutcome === 'task_complete') {
+                return;
+              }
+
+              try {
+                await runWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  taskAbortController,
+                  config,
+                  logger,
+                  fakeRequest,
+                  dependencies,
+                  workflowsExecutionEngine,
+                  meteringService: this.meteringService,
+                  isEventDrivenExecutionEnabled:
+                    workflowsExecutionEngine.isEventDrivenExecutionEnabled,
+                });
+              } catch (error) {
+                if (taskInstance.attempts >= WORKFLOW_RUN_TASK_MAX_ATTEMPTS) {
+                  try {
+                    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+                      workflowRunId,
+                      spaceId
+                    );
+                    if (execution && !isTerminalStatus(execution.status)) {
+                      const lastMessage = error instanceof Error ? error.message : String(error);
+                      await markExecutionFailedTaskRecovery(
+                        workflowExecutionRepository,
+                        workflowRunId,
+                        {
+                          type: 'TaskAttemptsExhaustedError',
+                          message: buildTaskAttemptsExhaustedMessage(lastMessage),
+                        }
+                      );
+                    }
+                  } catch (markFailedErr) {
+                    logger.error(
+                      `Failed to mark workflow execution ${workflowRunId} as FAILED after task attempts exhausted: ${
+                        markFailedErr instanceof Error
+                          ? markFailedErr.message
+                          : String(markFailedErr)
+                      }`
+                    );
+                  }
+                }
+                throw error;
+              }
             },
             cancel: async () => {
               taskAbortController.abort();
@@ -587,7 +643,7 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       return {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: 'workflow:run',
+        taskType: WORKFLOW_RUN_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -770,7 +826,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const taskInstance = {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: 'workflow:run',
+        taskType: WORKFLOW_RUN_TASK_TYPE,
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
