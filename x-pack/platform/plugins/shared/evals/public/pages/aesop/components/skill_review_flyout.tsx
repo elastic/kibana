@@ -34,7 +34,7 @@ import {
   EuiCheckbox,
   EuiSteps,
 } from '@elastic/eui';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useEvalsApi } from '../../../hooks/use_evals_api';
 import { useLLMConnectors } from '../../../hooks/use_llm_connectors';
 

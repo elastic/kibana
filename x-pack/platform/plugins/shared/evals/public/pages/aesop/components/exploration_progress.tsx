@@ -34,7 +34,7 @@ import {
   EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { css } from '@emotion/react';
 import { useEvalsApi } from '../../../hooks/use_evals_api';
 

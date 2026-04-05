@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useEvalsApi } from './use_evals_api';
 
 const AI_CONNECTOR_TYPES = new Set(['.gen-ai', '.bedrock', '.gemini', '.inference']);

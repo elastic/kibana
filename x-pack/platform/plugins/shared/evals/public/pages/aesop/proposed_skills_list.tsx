@@ -27,7 +27,7 @@ import {
   EuiCallOut,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useHistory } from 'react-router-dom';
 import { useEvalsApi } from '../../hooks/use_evals_api';
 import { useLLMConnectors } from '../../hooks/use_llm_connectors';

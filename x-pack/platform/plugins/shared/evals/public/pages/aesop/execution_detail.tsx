@@ -44,7 +44,7 @@ import {
   EuiCodeBlock,
   EuiAccordion,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useEvalsApi } from '../../hooks/use_evals_api';
 import { TraceWaterfall } from '../../components/trace_waterfall';
 

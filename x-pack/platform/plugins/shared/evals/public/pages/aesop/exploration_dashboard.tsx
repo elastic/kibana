@@ -26,7 +26,7 @@ import {
   EuiBadge,
   EuiSteps,
 } from '@elastic/eui';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useHistory } from 'react-router-dom';
 import { useEvalsApi } from '../../hooks/use_evals_api';
 import { ExplorationProgress } from './components/exploration_progress';
