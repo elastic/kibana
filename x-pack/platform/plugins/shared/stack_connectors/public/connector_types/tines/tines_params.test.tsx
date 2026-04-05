@@ -210,7 +210,7 @@ describe('TinesParamsFields renders', () => {
         .first()
         .simulate('click');
       wrapper
-        .find('[data-test-subj="tines-storySelector-optionsList"] button')
+        .find('[data-test-subj="tines-storySelector-optionsList"] .euiComboBoxOption')
         .first()
         .simulate('click');
 
@@ -247,7 +247,7 @@ describe('TinesParamsFields renders', () => {
         .first()
         .simulate('click');
       wrapper
-        .find('[data-test-subj="tines-storySelector-optionsList"] button')
+        .find('[data-test-subj="tines-storySelector-optionsList"] .euiComboBoxOption')
         .first()
         .simulate('click');
 
@@ -264,7 +264,7 @@ describe('TinesParamsFields renders', () => {
         .first()
         .simulate('click');
       wrapper
-        .find('[data-test-subj="tines-webhookSelector-optionsList"] button')
+        .find('[data-test-subj="tines-webhookSelector-optionsList"] .euiComboBoxOption')
         .first()
         .simulate('click');
 

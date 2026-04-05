@@ -937,7 +937,7 @@ EUI wrappers abstract away the complexity of interacting with EUI components. Us
 await page.testSubj.click('environmentFilter > comboBoxSearchInput');
 await page.testSubj
   .click('comboBoxOptionsList environmentFilter-optionsList')
-  .locator('button:has-text("production")')
+  .locator('.euiComboBoxOption:has-text("production")')
   .click();
 await expect(page.testSubj.locator('comboBoxSearchInput')).toHaveValue('production');
 ```

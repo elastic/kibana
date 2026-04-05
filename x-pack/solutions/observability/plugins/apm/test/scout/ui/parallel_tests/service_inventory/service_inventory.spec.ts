@@ -53,7 +53,7 @@ test.describe(
       await page.testSubj.click('environmentFilter > comboBoxSearchInput');
       await page
         .getByTestId('comboBoxOptionsList environmentFilter-optionsList')
-        .locator(`button:has-text("${PRODUCTION_ENVIRONMENT}")`)
+        .locator(`.euiComboBoxOption:has-text("${PRODUCTION_ENVIRONMENT}")`)
         .click();
       await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT);
     });

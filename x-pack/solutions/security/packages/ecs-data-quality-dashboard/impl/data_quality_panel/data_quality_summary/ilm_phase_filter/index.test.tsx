@@ -65,9 +65,9 @@ describe('IlmPhaseFilter', () => {
       await userEvent.click(searchInput);
 
       expect(screen.getByTitle('frozen')).toHaveAttribute('role', 'option');
-      expect(screen.getByTitle('frozen')).toBeDisabled();
+      expect(screen.getByTitle('frozen')).toHaveAttribute('aria-disabled', 'true');
       expect(screen.getByTitle('cold')).toHaveAttribute('role', 'option');
-      expect(screen.getByTitle('cold')).toBeDisabled();
+      expect(screen.getByTitle('cold')).toHaveAttribute('aria-disabled', 'true');
     });
   });
 
