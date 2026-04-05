@@ -18862,23 +18862,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -19209,23 +19211,25 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -82742,7 +82746,7 @@ components:
       description: Agent ID
       type: string
     Security_Endpoint_Management_API_AgentIds:
-      description: A list of agent IDs. Max of 50.
+      description: A list of agent IDs. Max of 250.
       example:
         - agent-id-1
         - agent-id-2
@@ -82751,7 +82755,7 @@ components:
         - items:
             minLength: 1
             type: string
-          maxItems: 50
+          maxItems: 250
           minItems: 1
           type: array
         - minLength: 1
@@ -82793,23 +82797,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -82875,6 +82881,7 @@ components:
         - unisolate
       items:
         $ref: '#/components/schemas/Security_Endpoint_Management_API_Command'
+      maxItems: 50
       type: array
     Security_Endpoint_Management_API_Comment:
       description: Optional comment
@@ -82895,13 +82902,14 @@ components:
       example: '2023-10-31T23:59:59.999Z'
       type: string
     Security_Endpoint_Management_API_EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example:
         - endpoint-id-1
         - endpoint-id-2
       items:
         minLength: 1
         type: string
+      maxItems: 250
       minItems: 1
       type: array
     Security_Endpoint_Management_API_EndpointMetadataResponse:
@@ -83039,23 +83047,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83220,23 +83230,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83299,23 +83311,25 @@ components:
         agent_type:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
         alert_ids:
-          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
           example:
             - alert-id-1
             - alert-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         case_ids:
-          description: The IDs of cases where the action taken will be logged.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example:
             - case-id-1
             - case-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         comment:
@@ -83380,6 +83394,7 @@ components:
           - inactive
           - unenrolled
         type: string
+      maxItems: 20
       type: array
     Security_Endpoint_Management_API_Isolate:
       allOf:
@@ -83474,23 +83489,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -83659,23 +83676,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84186,23 +84205,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84253,23 +84274,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84424,23 +84447,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84589,23 +84614,25 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -84669,7 +84696,7 @@ components:
       type: object
       properties: {}
     Security_Endpoint_Management_API_UserIds:
-      description: A list of user IDs.
+      description: A list of user IDs. Max of 50.
       example:
         - user-id-1
         - user-id-2
@@ -84677,12 +84704,13 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
           type: string
     Security_Endpoint_Management_API_WithOutputs:
-      description: A list of action IDs that should include the complete output of the action.
+      description: A list of action IDs that should include the complete output of the action. Max of 50.
       example:
         - action-id-1
         - action-id-2
@@ -84690,6 +84718,7 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
