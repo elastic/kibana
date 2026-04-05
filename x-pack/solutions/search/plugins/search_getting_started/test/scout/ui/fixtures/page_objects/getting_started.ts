@@ -98,34 +98,6 @@ export class GettingStarted {
     await card.click();
   }
 
-  async clickTutorialExpandButton() {
-    const button = this.page.testSubj.locator(
-      'searchGettingStartedConsoleTutorialsGroupExpandButton'
-    );
-    await button.scrollIntoViewIfNeeded();
-    await button.click();
-  }
-
-  async expandTutorialCards() {
-    const buttonText = await (await this.getTutorialExpandButton()).innerText();
-    if (buttonText.includes('Show less')) {
-      return; // Already expanded
-    }
-    await this.clickTutorialExpandButton();
-  }
-
-  async collapseTutorialCards() {
-    const buttonText = await (await this.getTutorialExpandButton()).innerText();
-    if (buttonText.includes('Show more')) {
-      return; // Already collapsed
-    }
-    await this.clickTutorialExpandButton();
-  }
-
-  async getTutorialExpandButton() {
-    return this.page.testSubj.locator('searchGettingStartedConsoleTutorialsGroupExpandButton');
-  }
-
   async getLanguageSelector() {
     return this.page.testSubj.locator('codeExampleLanguageSelect');
   }

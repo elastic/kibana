@@ -10,6 +10,8 @@ export const vectorDatabaseTutorialCommands: string = `
 # 🚀 Elasticsearch Vector Database Tutorial
 # ===============================================
 
+# Vector databases are the storage and retrieval layer behind AI applications like chatbots, RAG pipelines, and recommendation engines. They also enable semantic search, which matches on meaning rather than exact words. The core idea: convert text into numerical vectors (embeddings) that capture semantic meaning, then find the closest matches.
+
 # Elasticsearch is a high performance, efficient vector database that lets you generate emeddings automatically via Elastic Inference Service (EIS).
 # We natively provide state of the art Jina embedding and reranking models via EIS, unlocking multilingual model supporting 30+ languages with no external API key or infrastructure. You index plain text and Elasticsearch handles the rest.
 # Alternatively, bring your own embeddings (from OpenAI, Cohere, etc.).

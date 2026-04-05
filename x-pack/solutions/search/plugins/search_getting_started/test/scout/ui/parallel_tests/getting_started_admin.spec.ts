@@ -39,19 +39,9 @@ test.describe(
         await expect(viewConnectionDetailsLink).toBeVisible();
       });
 
-      await test.step('expands tutorial cards properly', async () => {
-        // Expect only 3 visible cards initially
-        expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
-        await pageObjects.gettingStarted.expandTutorialCards();
-        // Check for more than 3 cards after expansion (flexible to new tutorials being added)
-        const expandedCards = await pageObjects.gettingStarted.getTutorialCards();
-        expect(expandedCards.length).toBeGreaterThan(3);
-        await pageObjects.gettingStarted.collapseTutorialCards();
-        expect(await pageObjects.gettingStarted.getTutorialCards()).toHaveLength(3);
-      });
-
       await test.step('renders all tutorial cards', async () => {
-        await pageObjects.gettingStarted.expandTutorialCards();
+        const allCards = await pageObjects.gettingStarted.getTutorialCards();
+        expect(allCards.length).toBeGreaterThanOrEqual(6);
 
         const searchBasicsCard = await pageObjects.gettingStarted.getTutorialCard('search_basics');
         await expect(searchBasicsCard).toBeVisible();
@@ -135,8 +125,6 @@ test.describe(
     });
 
     test('Tutorial cards open embedded console', async ({ pageObjects }) => {
-      await pageObjects.gettingStarted.expandTutorialCards();
-
       await test.step('search basics card opens console', async () => {
         await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('search_basics');
 
