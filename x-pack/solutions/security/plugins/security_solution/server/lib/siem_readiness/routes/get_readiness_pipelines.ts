@@ -17,6 +17,8 @@ export interface PipelineStats {
   indices: string[];
   docsCount: number;
   failedDocsCount: number;
+  /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
+  statsAvailable: boolean;
 }
 
 export type PipelinesResponse = PipelineStats[];
@@ -85,6 +87,7 @@ export const getReadinessPipelinesRoute = (
               indices: Array.from(pipelineToIndices[name] || []),
               docsCount: 0,
               failedDocsCount: 0,
+              statsAvailable: false,
             }));
 
             logger.info(`Retrieved ${pipelines.length} ingest pipelines (serverless mode)`);
@@ -124,6 +127,7 @@ export const getReadinessPipelinesRoute = (
               indices: Array.from(pipelineToIndices[name] || []),
               docsCount: pipelineStatsMap[name].count,
               failedDocsCount: pipelineStatsMap[name].failed,
+              statsAvailable: true,
             }));
 
           logger.info(`Retrieved ${pipelines.length} active ingest pipelines`);
