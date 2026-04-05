@@ -7,9 +7,8 @@
 
 import { randomUUID } from 'crypto';
 import { spawn } from 'child_process';
-import { existsSync, mkdirSync, statSync, symlinkSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, statSync, symlinkSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { readFileSync, writeFileSync } from '@kbn/fs';
 import type { Logger } from '@kbn/logging';
 
 export interface ServerInfo {
@@ -260,11 +259,9 @@ export class SuiteRunner {
 
       if (child.stdout) {
         child.stdout.on('data', appendOutput);
-        child.stdout.unref();
       }
       if (child.stderr) {
         child.stderr.on('data', appendOutput);
-        child.stderr.unref();
       }
 
       // Timeout safety net
