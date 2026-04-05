@@ -74,7 +74,10 @@
     "@kbn/lens-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/kql",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/object-utils",
+    "@kbn/alerting-v2-constants",
+    "@kbn/utility-types"
   ],
   "exclude": ["target/**/*"]
 }

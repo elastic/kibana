@@ -100,7 +100,8 @@ export const createVisualizationGraph = (
   logger: Logger,
   events: ToolEventEmitter,
   esClient: IScopedClusterClient,
-  { includeTimeRange = true }: { includeTimeRange?: boolean } = {}
+  includeTimeRange = true,
+  additionalChartConfigInstructions?: string
 ) => {
   // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {
@@ -192,22 +193,17 @@ export const createVisualizationGraph = (
       .filter(Boolean)
       .join('\n');
 
-    const additionalInstructions = `IMPORTANT RULES:
-1. The 'dataset' field must contain: { type: "esql", query: "${esqlQuery}" }
-2. Always use { operation: 'value', column: '<esql column name>', ...other options } for operations
-3. All field names must match those available in the ES|QL query result
-4. Follow the schema definition strictly`;
-
     const additionalContext = previousActionContext
       ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
       : undefined;
 
     const prompt = createGenerateConfigPrompt({
       nlQuery: state.nlQuery,
+      esqlQuery,
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
-      additionalInstructions,
+      additionalChartConfigInstructions,
       additionalContext,
     });
 

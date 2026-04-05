@@ -19,6 +19,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -32,6 +33,7 @@ import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
+import { InitializationProvider } from '../common/components/initialization';
 import { AssistantProvider } from '../assistant/provider';
 import { TrialCompanion } from '../trial_companion/trial_companion';
 
@@ -63,18 +65,20 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                   <ManageUserInfo>
                     <NavigationProvider core={services}>
                       <ReactQueryClientProvider>
-                        <CellActionsProvider
-                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                        >
-                          <UpsellingProvider upsellingService={upselling}>
-                            <DiscoverInTimelineContextProvider>
-                              <PageRouter history={history}>
-                                <AssistantProvider>{children}</AssistantProvider>
-                                <TrialCompanion />
-                              </PageRouter>
-                            </DiscoverInTimelineContextProvider>
-                          </UpsellingProvider>
-                        </CellActionsProvider>
+                        <InitializationProvider>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                          >
+                            <UpsellingProvider upsellingService={upselling}>
+                              <DiscoverInTimelineContextProvider>
+                                <PageRouter history={history}>
+                                  <AssistantProvider>{children}</AssistantProvider>
+                                  <TrialCompanion />
+                                </PageRouter>
+                              </DiscoverInTimelineContextProvider>
+                            </UpsellingProvider>
+                          </CellActionsProvider>
+                        </InitializationProvider>
                       </ReactQueryClientProvider>
                     </NavigationProvider>
                   </ManageUserInfo>
@@ -114,9 +118,14 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   // Set conversation flyout active config on mount, clear on unmount
   useEffect(() => {
     if (services.agentBuilder?.setChatConfig) {
+      const skillsEnabled = services.uiSettings.get<boolean>(
+        AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        false
+      );
+
       services.agentBuilder.setChatConfig({
         sessionTag: 'security',
-        agentId: THREAT_HUNTING_AGENT_ID,
+        ...(skillsEnabled ? {} : { agentId: THREAT_HUNTING_AGENT_ID }),
         newConversation: false,
       });
     }
@@ -126,7 +135,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
         services.agentBuilder.clearChatConfig();
       }
     };
-  }, [services.agentBuilder]);
+  }, [services.agentBuilder, services.uiSettings]);
 
   return (
     <KibanaContextProvider

@@ -167,6 +167,8 @@ export const useDashboardMenuItems = ({
     dashboardTitle,
   });
 
+  const hasExportMenuItems = exportItems.length > 0;
+
   /**
    * Show the Dashboard app's share menu
    */
@@ -245,6 +247,29 @@ export const useDashboardMenuItems = ({
    */
 
   const menuItems = useMemo(() => {
+    const exportMenuItem: AppMenuItemType =
+      exportItems.length === 1
+        ? {
+            order: 3,
+            label: topNavStrings.export.label,
+            id: 'export',
+            iconType: 'exportAction',
+            testId: 'exportTopNavButton',
+            disableButton: disableTopNav,
+            run: (params) => exportItems[0].run?.(params),
+          }
+        : {
+            order: 3,
+            label: topNavStrings.export.label,
+            id: 'export',
+            iconType: 'exportAction',
+            testId: 'exportTopNavButton',
+            disableButton: disableTopNav,
+            items: exportItems,
+            popoverWidth: 160,
+            popoverTestId: 'exportPopoverPanel',
+          };
+
     return {
       // Regular menu items
       fullScreen: {
@@ -303,17 +328,7 @@ export const useDashboardMenuItems = ({
         run: () => showShare(),
       } as AppMenuItemType,
 
-      export: {
-        order: 3,
-        label: topNavStrings.export.label,
-        id: 'export',
-        iconType: 'exportAction',
-        testId: 'exportTopNavButton',
-        disableButton: disableTopNav,
-        items: exportItems,
-        popoverWidth: 160,
-        popoverTestId: 'exportPopoverPanel',
-      } as AppMenuItemType,
+      export: exportMenuItem,
 
       settings: {
         order: 5,
@@ -424,11 +439,6 @@ export const useDashboardMenuItems = ({
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
 
-  const hasExportIntegration = useMemo(() => {
-    if (!shareService) return false;
-    return shareService.availableIntegrations('dashboard', 'export').length > 0;
-  }, []);
-
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
@@ -438,13 +448,12 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.duplicate);
     }
 
-    // Only show the export button if the current user meets the requirements for at least one registered export integration
-    if (shareService && hasExportIntegration) {
-      items.push(menuItems.export);
-    }
-
     if (shareService) {
       items.push(menuItems.share);
+      if (hasExportMenuItems) {
+        // only render the export button if we have integrations
+        items.push(menuItems.export);
+      }
     }
 
     if (showResetChange) {
@@ -477,10 +486,10 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.labs,
     resetChangesMenuItem,
-    hasExportIntegration,
     dashboardApi.isManaged,
     showResetChange,
     isLabsEnabled,
+    hasExportMenuItems,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -488,13 +497,12 @@ export const useDashboardMenuItems = ({
 
     const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
 
-    // Only show the export button if the current user meets the requirements for at least one registered export integration
-    if (shareService && hasExportIntegration) {
-      items.push(menuItems.export);
-    }
-
     if (shareService) {
       items.push(menuItems.share);
+      if (hasExportMenuItems) {
+        // only render the export button if we have integrations
+        items.push(menuItems.export);
+      }
     }
 
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
@@ -521,7 +529,7 @@ export const useDashboardMenuItems = ({
     menuItems.add,
     menuItems.save,
     menuItems.labs,
-    hasExportIntegration,
+    hasExportMenuItems,
     isLabsEnabled,
   ]);
 

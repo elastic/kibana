@@ -44,7 +44,8 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
   }
 
   doc = getDocument(doc);
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
     const value = getFieldValue(doc, identityField.singleField);
@@ -57,11 +58,11 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return `${entityType}:${value}`;
   }
 
-  if (identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
     applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
   }
@@ -147,7 +148,7 @@ function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string
       return attr.sep;
     });
 
-    if (composedFieldValues.every((value) => value !== undefined)) {
+    if (composedFieldValues.every((value): value is string => value !== undefined)) {
       return composedFieldValues;
     }
   }

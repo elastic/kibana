@@ -150,6 +150,7 @@ describe('Discover main content component', () => {
     it('should include PanelsToggle when chart is not available', async () => {
       const component = await mountComponent({ isChartAvailable: false });
       expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(true);
+      expect(component.find(PanelsToggle).prop('omitTableButton')).toBe(true);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });

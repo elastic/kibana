@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-export const ALERTING_V2_BASE_PATH = '/app/management/insightsAndAlerting/alerting_v2';
-export const ALERTING_V2_APP_ID = 'alerting_v2';
-export const ALERTING_V2_APP_ROUTE = '/alerting_v2';
-export const ALERTING_V2_MANAGEMENT_PATH = 'insightsAndAlerting/alerting_v2';
+export const ALERTING_V2_SECTION_ID = 'alertingV2';
+export const ALERTING_V2_RULES_APP_ID = 'rules';
+export const ALERTING_V2_NOTIFICATION_POLICIES_APP_ID = 'notification_policies';
+
+export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export const ALERTING_V2_NOTIFICATION_POLICIES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_NOTIFICATION_POLICIES_APP_ID}`;
+
+export const ALERTING_V2_RULES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export const ALERTING_V2_NOTIFICATION_POLICIES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_NOTIFICATION_POLICIES_APP_ID}`;
+
 export const MANAGEMENT_APP_ID = 'management';
-export const ALERTING_V2_NOTIFICATION_POLICIES_PATH = `${ALERTING_V2_BASE_PATH}/notification_policies`;
-export const INTERNAL_ALERTING_V2_RULE_API_PATH = '/internal/alerting/v2/rule' as const;
-export const INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH =
-  '/internal/alerting/v2/notification_policies' as const;
+export {
+  ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
+} from '@kbn/alerting-v2-constants';
 
 export const paths = {
-  ruleCreate: `${ALERTING_V2_BASE_PATH}/create`,
-  ruleEdit: (id: string) => `${ALERTING_V2_BASE_PATH}/edit/${encodeURIComponent(id)}`,
-  ruleDetails: (id: string) => `${ALERTING_V2_BASE_PATH}/${encodeURIComponent(id)}`,
-  ruleList: ALERTING_V2_BASE_PATH,
-  notificationPolicyCreate: `${ALERTING_V2_NOTIFICATION_POLICIES_PATH}/create`,
+  ruleCreate: `${ALERTING_V2_RULES_BASE_PATH}/create`,
+  ruleEdit: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
+  ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
+  ruleList: ALERTING_V2_RULES_BASE_PATH,
+  notificationPolicyCreate: `${ALERTING_V2_NOTIFICATION_POLICIES_BASE_PATH}/create`,
   notificationPolicyEdit: (id: string) =>
-    `${ALERTING_V2_NOTIFICATION_POLICIES_PATH}/edit/${encodeURIComponent(id)}`,
-  notificationPolicyList: ALERTING_V2_NOTIFICATION_POLICIES_PATH,
+    `${ALERTING_V2_NOTIFICATION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
+  notificationPolicyList: ALERTING_V2_NOTIFICATION_POLICIES_BASE_PATH,
 };
