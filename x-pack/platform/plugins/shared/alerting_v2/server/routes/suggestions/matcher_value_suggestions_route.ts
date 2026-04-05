@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { inject, injectable } from 'inversify';
-import { Request, Response } from '@kbn/core-di-server';
+import { Request } from '@kbn/core-di-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 
 const suggestionsBodySchema = schema.object({
@@ -26,7 +27,7 @@ const suggestionsBodySchema = schema.object({
 type SuggestionsBody = TypeOf<typeof suggestionsBodySchema>;
 
 @injectable()
-export class MatcherValueSuggestionsRoute {
+export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static method = 'post' as const;
   static path = INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH;
   static security: RouteSecurity = {
@@ -37,33 +38,28 @@ export class MatcherValueSuggestionsRoute {
       ],
     },
   };
-  static options = { access: 'internal' } as const;
+  static routeOptions = { access: 'internal' as const };
   static validate = {
     request: {
       body: suggestionsBodySchema,
     },
   } as const;
 
+  protected readonly routeName = 'matcher value suggestions';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, SuggestionsBody>,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(MatcherSuggestionsService)
     private readonly suggestionsService: MatcherSuggestionsService
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
+  protected async execute() {
     const { field, query } = this.request.body;
-
-    try {
-      const values = await this.suggestionsService.getSuggestions(field, query);
-      return this.response.ok({ body: values });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    const values = await this.suggestionsService.getSuggestions(field, query);
+    return this.ctx.response.ok({ body: values });
   }
 }
