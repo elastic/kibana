@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { withRetry, RetryConfig } from '../retry_logic';
+import type { RetryConfig } from '../retry_logic';
+import { withRetry } from '../retry_logic';
 import {
   AESOPError,
   WorkflowExecutionError,

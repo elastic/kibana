@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ExplorationStateService, ExplorationState } from './exploration_state';
+import type { ExplorationState } from './exploration_state';
+import { ExplorationStateService } from './exploration_state';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 

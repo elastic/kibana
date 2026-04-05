@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ChangeDetector, summarizeChanges, ChangeDetectionResult } from './detect_changes';
+import type { ChangeDetectionResult } from './detect_changes';
+import { ChangeDetector, summarizeChanges } from './detect_changes';
 import type { ExplorationState } from './exploration_state';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';

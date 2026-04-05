@@ -16,8 +16,9 @@
  * 5. Verify improved quality in next cycle
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { FeedbackLoaderService, RejectionFeedback } from '../../../lib/aesop/learning';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { RejectionFeedback } from '../../../lib/aesop/learning';
+import { FeedbackLoaderService } from '../../../lib/aesop/learning';
 
 describe('AESOP Feedback Learning Integration', () => {
   let esClient: ElasticsearchClient;

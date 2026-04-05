@@ -11,7 +11,7 @@
  * Tests retry logic, circuit breaker, and workflow error recovery.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { WorkflowRetryHandler, MaxRetriesExceededError } from '../../lib/aesop/workflows/retry_handler';
 import { CircuitBreaker, CircuitState } from '../../lib/aesop/workflows/circuit_breaker';
 import { WorkflowExecutorWithRecovery } from '../../lib/aesop/workflows/workflow_executor_with_recovery';
