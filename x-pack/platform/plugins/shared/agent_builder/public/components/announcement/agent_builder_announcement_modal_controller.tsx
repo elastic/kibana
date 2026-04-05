@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import type { AnalyticsServiceStart, ApplicationStart } from '@kbn/core/public';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useGlobalUiSetting, useKibana } from '@kbn/kibana-react-plugin/public';
 import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import {
   AgentBuilderAnnouncementModal,
@@ -27,7 +27,7 @@ export function AgentBuilderAnnouncementModalController() {
     analytics: AnalyticsServiceStart;
     application: ApplicationStart;
   }>();
-  const hideAnnouncements = useUiSetting<boolean>(HIDE_ANNOUNCEMENTS_ID);
+  const hideAnnouncements = useGlobalUiSetting<boolean>(HIDE_ANNOUNCEMENTS_ID);
   const spacesService = services.spaces;
   const activeSpace$ = useMemo(() => spacesService?.getActiveSpace$() ?? EMPTY, [spacesService]);
   const space = useObservable(activeSpace$);
