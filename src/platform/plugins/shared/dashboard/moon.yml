@@ -117,7 +117,11 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
+  - '@kbn/code-editor-mock'
+  - '@kbn/monaco'
+  - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

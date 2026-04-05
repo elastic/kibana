@@ -39,6 +39,7 @@ import {
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
@@ -56,6 +57,7 @@ import {
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
   NO_STREAMS_MESSAGE,
   DATA_QUALITY_COLUMN_HEADER,
+  CPS_DOCUMENTS_WARNING,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
@@ -83,6 +85,9 @@ export function StreamsTreeTable({
   openFlyout?: () => void;
 }) {
   const router = useStreamsAppRouter();
+  const { dependencies } = useKibana();
+  const cpsHasLinkedProjects =
+    (dependencies.start.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1;
   const { rangeFrom, rangeTo } = useTimeRange();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
@@ -439,7 +444,15 @@ export function StreamsTreeTable({
         {
           field: 'documentsCount',
           name: (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              {cpsHasLinkedProjects && (
+                <EuiIconTip
+                  content={CPS_DOCUMENTS_WARNING}
+                  type="info"
+                  size="s"
+                  data-test-subj="cpsDocumentsWarningTip"
+                />
+              )}
               {DOCUMENTS_COLUMN_HEADER}
               {!canReadFailureStore && (
                 <EuiIconTip

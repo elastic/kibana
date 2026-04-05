@@ -16,17 +16,28 @@ export const useGetGapsSummaryByRuleIds = (
   {
     gapRange,
     ruleIds,
+    excludedReasons,
+    schedulerId,
   }: {
     gapRange: GapRangeValue;
     ruleIds: string[];
+    excludedReasons?: string[];
+    schedulerId?: string;
   },
   options?: UseQueryOptions<GetGapsSummaryByRuleIdsResponseBody>
 ) => {
   return useQuery<GetGapsSummaryByRuleIdsResponseBody>(
-    [...GET_GAPS_SUMMARY_BY_RULE_IDS, ...ruleIds, gapRange],
+    [...GET_GAPS_SUMMARY_BY_RULE_IDS, ...ruleIds, gapRange, excludedReasons, schedulerId],
     async ({ signal }) => {
       const { start, end } = getGapRange(gapRange);
-      const response = await getGapsSummaryByRuleIds({ signal, start, end, ruleIds });
+      const response = await getGapsSummaryByRuleIds({
+        signal,
+        start,
+        end,
+        ruleIds,
+        excludedReasons,
+        schedulerId,
+      });
 
       return response;
     },

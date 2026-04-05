@@ -14,7 +14,7 @@ import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { Status } from './status';
 import { Assignees } from './assignees';
-import { Notes } from './notes';
+import { Notes } from '../../../flyout_v2/shared/components/notes';
 import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
@@ -23,6 +23,8 @@ import {
   HEADER_TITLE_TEST_ID,
 } from '../constants/test_ids';
 import { useHeaderData } from '../hooks/use_header_data';
+import { useAttackDetailsContext } from '../context';
+import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -41,6 +43,8 @@ const ATTACK_HEADER_BADGE = i18n.translate(
  */
 export const HeaderTitle = memo(() => {
   const { title, timestamp, alertsCount } = useHeaderData();
+  const { attackId } = useAttackDetailsContext();
+  const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
 
   return (
     <>
@@ -96,7 +100,7 @@ export const HeaderTitle = memo(() => {
               </AlertHeaderBlock>
             </EuiFlexItem>
             <EuiFlexItem>
-              <Notes />
+              <Notes documentId={attackId} onShowNotes={openNotesTab} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
