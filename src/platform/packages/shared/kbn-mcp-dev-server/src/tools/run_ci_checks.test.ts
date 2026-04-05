@@ -8,8 +8,18 @@
  */
 
 import { runCiChecksTool } from './run_ci_checks';
+import execa from 'execa';
+import { parseToolResultJsonContent } from './test_utils';
+
+jest.mock('execa');
+jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
+
+const mockedExeca = execa as jest.Mocked<typeof execa>;
 
 describe('runCiChecksTool', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should have the correct name', () => {
     expect(runCiChecksTool.name).toBe('run_ci_checks');
   });
