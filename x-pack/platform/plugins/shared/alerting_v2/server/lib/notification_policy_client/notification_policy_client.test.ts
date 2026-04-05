@@ -28,7 +28,7 @@ describe('NotificationPolicyClient', () => {
   let notificationPolicySavedObjectService: NotificationPolicySavedObjectService;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let userService: UserService;
-  let userProfile: jest.Mocked<UserProfileServiceStart>;
+  let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
   let mockEsoClient: ReturnType<ReturnType<typeof createMockEncryptedSavedObjects>['getClient']>;
@@ -42,7 +42,7 @@ describe('NotificationPolicyClient', () => {
 
     ({ notificationPolicySavedObjectService, mockSavedObjectsClient } =
       createNotificationPolicySavedObjectService());
-    ({ userService, userProfile } = createUserService());
+    ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
       if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
@@ -62,7 +62,7 @@ describe('NotificationPolicyClient', () => {
       'default'
     );
 
-    userProfile.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
+    userProfileService.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
 
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'policy-id-default',

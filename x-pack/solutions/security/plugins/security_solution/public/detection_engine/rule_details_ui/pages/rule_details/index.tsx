@@ -157,6 +157,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -600,6 +601,12 @@ export const RuleDetailsPage = connector(
       confirmRuleDuplication,
     } = useBulkDuplicateExceptionsConfirmation();
 
+    const deprecationCallout = useDeprecatedRuleDetailsCallout({
+      rule,
+      confirmDeletion,
+      showBulkDuplicateExceptionsConfirmation: showBulkDuplicateConfirmation,
+    });
+
     const {
       isManualRuleRunConfirmationVisible,
       showManualRuleRunConfirmation,
@@ -650,6 +657,7 @@ export const RuleDetailsPage = connector(
         <MissingDetectionsPrivilegesCallOut />
         {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
+        {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
             onCancel={cancelRuleDuplication}
