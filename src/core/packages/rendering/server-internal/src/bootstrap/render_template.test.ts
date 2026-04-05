@@ -37,4 +37,22 @@ describe('renderTemplate', () => {
     });
     expect(content).toMatchSnapshot();
   });
+
+  test('uses IIFE instead of window.onload when useRspack is true', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useRspack: true,
+    });
+    expect(content).not.toContain('window.onload = function');
+    expect(content).toContain('(function () {');
+    expect(content).toContain('})();');
+    expect(content).toMatchSnapshot();
+  });
+
+  test('uses window.onload when useRspack is false (default)', async () => {
+    const content = await renderTemplate(mockParams());
+    expect(content).toContain('window.onload = function');
+    expect(content).not.toContain('(function () {');
+    expect(content).not.toContain('})();');
+  });
 });

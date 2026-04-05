@@ -14,6 +14,7 @@ import type { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
+  optimizeFontLoading?: boolean;
 }
 
 interface FontFace {
@@ -219,7 +220,7 @@ const getRoboto = (url: string): FontFace => {
   };
 };
 
-export const Fonts: FunctionComponent<Props> = ({ url }) => {
+export const Fonts: FunctionComponent<Props> = ({ url, optimizeFontLoading }) => {
   const sansFont = getInter(url);
   const codeFont = getRoboto(url);
 
@@ -245,6 +246,11 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
           font-style: ${style};
           font-weight: ${weight};
           src: ${src};${
+                optimizeFontLoading
+                  ? `
+          font-display: swap;`
+                  : ''
+              }${
                 unicodeRange
                   ? `
           unicode-range: ${unicodeRange};`

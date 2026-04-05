@@ -166,6 +166,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         jsDependencyPaths: rspackPaths,
         publicPathMap,
         useHMR,
+        useRspack: true,
       });
     } else {
       // Legacy mode - use __kbnBundles__ with DLLs

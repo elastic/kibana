@@ -27,6 +27,9 @@ export const Template: FunctionComponent<Props> = ({
     darkMode,
     stylesheetPaths,
     scriptPaths,
+    preloadScripts,
+    preloadFonts,
+    optimizeFontLoading,
     injectedMetadata,
     bootstrapScriptUrl,
     hardenPrototypes,
@@ -50,7 +53,24 @@ export const Template: FunctionComponent<Props> = ({
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
         <title>{title}</title>
-        <Fonts url={uiPublicUrl} />
+        {/* Preload hints placed before <Fonts> so the browser's preload scanner
+            discovers them as early as possible during HTML parsing. These let
+            the browser start downloading critical scripts and fonts in parallel
+            with CSS, instead of waiting until bootstrap.js runs. (rspack only) */}
+        {preloadScripts?.map((href) => (
+          <link key={href} rel="preload" as="script" href={href} />
+        ))}
+        {preloadFonts?.map((href) => (
+          <link
+            key={href}
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+            href={href}
+          />
+        ))}
+        <Fonts url={uiPublicUrl} optimizeFontLoading={optimizeFontLoading} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={favIconPng} />
         <link rel="icon" type="image/svg+xml" href={favIcon} />

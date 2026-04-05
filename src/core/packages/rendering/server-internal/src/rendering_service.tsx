@@ -27,6 +27,8 @@ import {
   type UserProvidedValues,
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { Template } from './views';
 import type {
   IRenderOptions,
@@ -37,9 +39,10 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
+import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
 import {
   getSettingValue,
+  getBundlesHref,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
   getScriptPaths,
@@ -283,16 +286,46 @@ export class RenderingService {
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
+
+    const useRspack = isRspackModeEnabled();
+    const bundlesHref = getBundlesHref(staticAssetsHrefBase);
+    const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
+
+    // RSPack page-load optimizations: preload the 3 critical scripts (dll, src,
+    // bundle) and the 3 most-used Inter font weights so the browser starts
+    // downloading them during HTML parsing instead of after bootstrap.js runs.
+    // URLs must match the ones bootstrap.js loads -- both derive from the same
+    // staticAssetsHrefBase, so they're guaranteed to match across all deployment
+    // topologies (self-hosted, Cloud, CDN, reverse proxy).
+    const preloadScripts = useRspack
+      ? [
+          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
+          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
+          `${bundlesHref}/kibana.bundle.js`,
+        ]
+      : undefined;
+
+    const preloadFonts = useRspack
+      ? [
+          `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
+        ]
+      : undefined;
+
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       hardenPrototypes: http.prototypeHardening,
-      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
+      uiPublicUrl,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       locale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
+      preloadScripts,
+      preloadFonts,
+      optimizeFontLoading: useRspack || undefined,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
