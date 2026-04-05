@@ -139,7 +139,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
           const loopIndex = loopStepRunIdsIndex.get(workflowRunId) ?? 0;
           loopStepRunIdsIndex.set(workflowRunId, loopIndex - 1); // decrement the index for the next loop iteration (time descending order)
           append.push(
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem key={`${id}-loop-indicator`} grow={false}>
               <EuiIconTip
                 type="refresh"
                 aria-hidden={true}
@@ -150,7 +150,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         }
         if (isTestRun) {
           append.push(
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem key={`${id}-test-run`} grow={false}>
               <EuiIconTip type="flask" aria-hidden={true} content={translations.testRun} />
             </EuiFlexItem>
           );
