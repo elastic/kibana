@@ -30,6 +30,7 @@ export enum WidgetType {
   Select = 'select',
   FormFieldset = 'formFieldset',
   KeyValue = 'keyValue',
+  FileUpload = 'fileUpload',
 }
 
 export interface BaseMetadata {
@@ -145,5 +146,16 @@ export const UISchemas = {
     z.url().meta({
       widget: 'text',
       placeholder: placeholder ?? 'https://',
+    }),
+
+  /**
+   * File upload field - reads file as text and stores contents
+   * USED BY: GCP Service Account (JSON key), SSL certificates (PEM/CRT/PFX)
+   * @example serviceAccountJson: UISchemas.fileUpload({ accept: '.json' }).describe("Service Account JSON key")
+   */
+  fileUpload: (options?: { accept?: string }) =>
+    z.string().meta({
+      widget: 'fileUpload',
+      widgetOptions: options,
     }),
 };
