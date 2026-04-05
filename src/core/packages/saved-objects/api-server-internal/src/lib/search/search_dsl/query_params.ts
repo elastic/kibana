@@ -378,13 +378,18 @@ const getMatchPhrasePrefixFields = ({
   return output;
 };
 
+/**
+ * Walks up the mapping hierarchy from the direct parent of the field toward the root
+ * to find the nearest ancestor mapped as `nested`. The traversal depth is naturally
+ * bounded by ES's `index.mapping.depth.limit` (default 20), so no explicit cap is needed.
+ */
 const findNestedAncestor = (
   mappings: IndexMapping,
   absoluteFieldPath: string
 ): string | undefined => {
   const segments = absoluteFieldPath.split('.');
-  for (let i = segments.length - 1; i > 0; i--) {
-    const ancestorPath = segments.slice(0, i).join('.');
+  for (let depth = segments.length - 1; depth > 0; depth--) {
+    const ancestorPath = segments.slice(0, depth).join('.');
     if (getProperty(mappings, ancestorPath)?.type === 'nested') {
       return ancestorPath;
     }
