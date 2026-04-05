@@ -7,8 +7,9 @@
 
 import { randomUUID } from 'crypto';
 import { spawn } from 'child_process';
-import { existsSync, mkdirSync, readFileSync, statSync, symlinkSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, statSync, symlinkSync } from 'fs';
 import { resolve } from 'path';
+import { readFileSync, writeFileSync } from '@kbn/fs';
 import type { Logger } from '@kbn/logging';
 
 export interface ServerInfo {
@@ -65,7 +66,7 @@ const resolveMainRepoRoot = (worktreeRoot: string): string | undefined => {
   const gitPath = resolve(worktreeRoot, '.git');
   if (!existsSync(gitPath) || !statSync(gitPath).isFile()) return undefined;
 
-  const content = readFileSync(gitPath, 'utf-8').trim();
+  const content = (readFileSync(gitPath, 'utf-8') as string).trim();
   // In a worktree, .git is a file: "gitdir: /main/repo/.git/worktrees/<name>"
   const match = content.match(/^gitdir:\s+(.+)$/);
   if (!match) return undefined;
@@ -121,7 +122,7 @@ export class SuiteRunner {
 
     try {
       if (existsSync(configPath)) {
-        const existing = JSON.parse(readFileSync(configPath, 'utf-8'));
+        const existing = JSON.parse(readFileSync(configPath, 'utf-8') as string);
         const currentKibana = existing?.hosts?.kibana;
         const currentEs = existing?.hosts?.elasticsearch;
 
