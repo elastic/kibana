@@ -15,13 +15,13 @@ export const MigrationsCallout = memo(() => {
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const href = useMemo(
-    () => getSecuritySolutionUrl({ deepLinkId: SecurityPageName.siemMigrationsCreate }),
+    () => getSecuritySolutionUrl({ deepLinkId: SecurityPageName.siemMigrationsManage }),
     [getSecuritySolutionUrl]
   );
   const onClick = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
-      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsCreate });
+      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsManage });
     },
     [navigateTo]
   );

@@ -16,7 +16,7 @@ import { useExpandedCard } from './hooks/use_expanded_card';
 import { useCompletedCards } from './hooks/use_completed_cards';
 import type { IsCardAvailable } from '../../types';
 
-export const OnboardingBody = React.memo<{ topicId: OnboardingTopicId }>(({ topicId }) => {
+export const OnboardingBody = React.memo<{ topicId?: OnboardingTopicId }>(({ topicId }) => {
   const bodyConfig = useBodyConfig(topicId);
   const { expandedCardId, setExpandedCardId } = useExpandedCard();
   const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =

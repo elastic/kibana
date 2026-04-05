@@ -15,7 +15,7 @@ import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
-  SIEM_MIGRATIONS_CREATE_PATH,
+  SIEM_MIGRATIONS_MANAGE_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
@@ -25,15 +25,15 @@ import { IconAgent } from '../common/icons/agent';
 
 const subLinks: LinkItem[] = [
   {
-    id: SecurityPageName.siemMigrationsCreate,
+    id: SecurityPageName.siemMigrationsManage,
     title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
-      defaultMessage: 'Automatic migrations',
+      defaultMessage: 'Manage Automatic Migrations',
     }),
     description: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.description', {
-      defaultMessage: 'Migrate your SIEM to Elastic using AI powered Automatic migration.',
+      defaultMessage: 'Manage your AI powered Automatic Migrations to Elastic.',
     }),
     landingIcon: IconAgent,
-    path: SIEM_MIGRATIONS_CREATE_PATH,
+    path: SIEM_MIGRATIONS_MANAGE_PATH,
     capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
@@ -108,7 +108,7 @@ export const links: LinkItem = {
         defaultMessage: 'Automatic migrations',
       }),
       linkIds: [
-        SecurityPageName.siemMigrationsCreate,
+        SecurityPageName.siemMigrationsManage,
         SecurityPageName.siemMigrationsRules,
         SecurityPageName.siemMigrationsDashboards,
       ],

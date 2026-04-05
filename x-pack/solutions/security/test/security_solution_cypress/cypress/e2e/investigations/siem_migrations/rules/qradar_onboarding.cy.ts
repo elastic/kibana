@@ -38,6 +38,7 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     before(() => {
+      cleanMigrationData();
       role.setup();
     });
 
@@ -46,7 +47,7 @@ describe(
       createBedrockConnector();
       role.login();
       cy.log('Creating Bedrock connector');
-      visit(GET_STARTED_URL);
+      visit(`${GET_STARTED_URL}/siem_migrations`);
       selectMigrationConnector();
       openUploadRulesFlyout();
       selectQRadarMigrationSource();

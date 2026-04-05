@@ -17,13 +17,13 @@ import { OnboardingContextProvider } from '../onboarding/components/onboarding_c
 import { HeaderPage } from '../common/components/header_page';
 
 const SIEM_MIGRATIONS_PAGE_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.create.pageTitle',
+  'xpack.securitySolution.siemMigrations.manage.pageTitle',
   {
-    defaultMessage: 'Automatic Migrations',
+    defaultMessage: 'Manage Automatic Migrations',
   }
 );
 
-export const SiemMigrationsCreatePage = () => {
+export const SiemMigrationsManagePage = () => {
   const spaceId = useSpaceId();
 
   if (!spaceId) {
