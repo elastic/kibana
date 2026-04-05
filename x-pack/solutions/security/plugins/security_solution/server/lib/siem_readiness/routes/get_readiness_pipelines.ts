@@ -23,7 +23,8 @@ export type PipelinesResponse = PipelineStats[];
 
 export const getReadinessPipelinesRoute = (
   router: SiemReadinessRoutesDeps['router'],
-  logger: SiemReadinessRoutesDeps['logger']
+  logger: SiemReadinessRoutesDeps['logger'],
+  isServerless: boolean
 ) => {
   router.versioned
     .get({
@@ -48,33 +49,8 @@ export const getReadinessPipelinesRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          // Step 1: Get pipeline stats from all nodes
-          const nodesStatsRequest: NodesStatsRequest = {
-            metric: 'ingest',
-            filter_path: ['nodes.*.ingest.pipelines.*.count', 'nodes.*.ingest.pipelines.*.failed'],
-            timeout: '30s',
-          };
-
-          const nodesStatsResponse = await esClient.nodes.stats(nodesStatsRequest);
-
-          // Aggregate pipeline stats across all nodes
-          const pipelineStatsMap: Record<string, { count: number; failed: number }> = {};
-
-          const nodes = Object.values(nodesStatsResponse.nodes || {});
-          nodes.forEach((node) => {
-            const pipelines = node.ingest?.pipelines || {};
-            const pipelineNames = Object.keys(pipelines);
-            pipelineNames.forEach((pipelineName) => {
-              const pipelineData = pipelines[pipelineName];
-              if (!pipelineStatsMap[pipelineName]) {
-                pipelineStatsMap[pipelineName] = { count: 0, failed: 0 };
-              }
-              pipelineStatsMap[pipelineName].count += pipelineData.count || 0;
-              pipelineStatsMap[pipelineName].failed += pipelineData.failed || 0;
-            });
-          });
-
-          // Step 2: Get index settings to find which indices use which pipelines
+          // Step 1: Get index settings to find which indices use which pipelines.
+          // This works in both serverless and non-serverless modes.
           const settingsResponse = await esClient.indices.getSettings({
             index: ['logs-*', 'metrics-*', '.ds-logs-*', '.ds-metrics-*'],
             filter_path: ['*.settings.index.default_pipeline', '*.settings.index.final_pipeline'],
@@ -93,31 +69,62 @@ export const getReadinessPipelinesRoute = (
             pipelineToIndices[pipeline].add(indexName);
           };
 
-          const indexNames = Object.keys(settingsResponse);
-          indexNames.forEach((indexName) => {
+          Object.keys(settingsResponse).forEach((indexName) => {
             const indexData = settingsResponse[indexName];
-            const defaultPipeline = indexData.settings?.index?.default_pipeline;
-            const finalPipeline = indexData.settings?.index?.final_pipeline;
-            addPipelineIndex(defaultPipeline, indexName);
-            addPipelineIndex(finalPipeline, indexName);
+            addPipelineIndex(indexData.settings?.index?.default_pipeline, indexName);
+            addPipelineIndex(indexData.settings?.index?.final_pipeline, indexName);
           });
 
-          // Step 3: Combine stats with indices mapping
-          const pipelines: PipelinesResponse = [];
-          // Filter out pipelines with 0 docs processed
-          const activePipelineNames = Object.keys(pipelineStatsMap).filter(
-            (name) => pipelineStatsMap[name].count > 0
-          );
-
-          activePipelineNames.forEach((name) => {
-            const activePipelineStats = pipelineStatsMap[name];
-            pipelines.push({
+          // nodes.stats ingest API is not available in serverless mode.
+          // Fall back to ingest.getPipeline() and return pipelines with their indices
+          // but without stats (docsCount/failedDocsCount) since those are unavailable.
+          if (isServerless) {
+            const pipelinesResponse = await esClient.ingest.getPipeline();
+            const pipelines: PipelinesResponse = Object.keys(pipelinesResponse).map((name) => ({
               name,
               indices: Array.from(pipelineToIndices[name] || []),
-              docsCount: activePipelineStats.count,
-              failedDocsCount: activePipelineStats.failed,
+              docsCount: 0,
+              failedDocsCount: 0,
+            }));
+
+            logger.info(`Retrieved ${pipelines.length} ingest pipelines (serverless mode)`);
+            return response.ok({ body: pipelines });
+          }
+
+          // Step 2: Get pipeline stats from all nodes (non-serverless only)
+          const nodesStatsRequest: NodesStatsRequest = {
+            metric: 'ingest',
+            filter_path: ['nodes.*.ingest.pipelines.*.count', 'nodes.*.ingest.pipelines.*.failed'],
+            timeout: '30s',
+          };
+
+          const nodesStatsResponse = await esClient.nodes.stats(nodesStatsRequest);
+
+          // Aggregate pipeline stats across all nodes
+          const pipelineStatsMap: Record<string, { count: number; failed: number }> = {};
+
+          const nodes = Object.values(nodesStatsResponse.nodes || {});
+          nodes.forEach((node) => {
+            const nodePipelines = node.ingest?.pipelines || {};
+            Object.keys(nodePipelines).forEach((pipelineName) => {
+              const pipelineData = nodePipelines[pipelineName];
+              if (!pipelineStatsMap[pipelineName]) {
+                pipelineStatsMap[pipelineName] = { count: 0, failed: 0 };
+              }
+              pipelineStatsMap[pipelineName].count += pipelineData.count || 0;
+              pipelineStatsMap[pipelineName].failed += pipelineData.failed || 0;
             });
           });
+
+          // Step 3: Combine stats with indices mapping, filtering out pipelines with 0 docs processed
+          const pipelines: PipelinesResponse = Object.keys(pipelineStatsMap)
+            .filter((name) => pipelineStatsMap[name].count > 0)
+            .map((name) => ({
+              name,
+              indices: Array.from(pipelineToIndices[name] || []),
+              docsCount: pipelineStatsMap[name].count,
+              failedDocsCount: pipelineStatsMap[name].failed,
+            }));
 
           logger.info(`Retrieved ${pipelines.length} active ingest pipelines`);
 
