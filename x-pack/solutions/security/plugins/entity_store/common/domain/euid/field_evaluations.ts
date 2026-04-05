@@ -64,10 +64,7 @@ function resolveSourceValue(doc: any, source: FieldEvaluationSource): string | u
 }
 
 /** First resolved string from `sources`, in definition order. */
-function readRawValueFromSources(
-  doc: any,
-  sources: FieldEvaluationSource[]
-): string | undefined {
+function readRawValueFromSources(doc: any, sources: FieldEvaluationSource[]): string | undefined {
   for (const source of sources) {
     const candidate = resolveSourceValue(doc, source);
     if (candidate !== undefined) {
@@ -91,10 +88,7 @@ function matchFirstWhenClause(
       ) {
         return { then: clause.then, matchedSourceValues: clause.sourceMatchesAny };
       }
-    } else if (
-      isConditionClause(clause) &&
-      evaluateStreamlangCondition(doc, clause.condition)
-    ) {
+    } else if (isConditionClause(clause) && evaluateStreamlangCondition(doc, clause.condition)) {
       return { then: clause.then, winningCondition: clause.condition };
     }
   }
@@ -116,9 +110,7 @@ function resolveFinalFieldValue(
 /** Builds `SourceMatchSpec` for filter construction without re-evaluating the document. */
 function buildEvaluationSourceMatchSpec(
   rawValueFromSources: string | undefined,
-  whenMatch:
-    | { winningCondition?: Condition; matchedSourceValues?: string[] }
-    | undefined
+  whenMatch: { winningCondition?: Condition; matchedSourceValues?: string[] } | undefined
 ): SourceMatchSpec {
   if (whenMatch?.winningCondition !== undefined) {
     return { type: 'condition', condition: whenMatch.winningCondition };
@@ -141,11 +133,7 @@ function evaluateFieldEvaluation(
   const whenMatch = matchFirstWhenClause(doc, rawValueFromSources, evaluation.whenClauses);
 
   return {
-    value: resolveFinalFieldValue(
-      rawValueFromSources,
-      evaluation.fallbackValue,
-      whenMatch
-    ),
+    value: resolveFinalFieldValue(rawValueFromSources, evaluation.fallbackValue, whenMatch),
     sourceMatchSpec: buildEvaluationSourceMatchSpec(rawValueFromSources, whenMatch),
   };
 }
