@@ -13,7 +13,8 @@
       "searchGettingStarted"
     ],
     "requiredPlugins": [
-      "share"
+      "share",
+      "licensing"
     ],
     "optionalPlugins": [
       "cloud",

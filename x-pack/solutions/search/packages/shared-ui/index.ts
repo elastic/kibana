@@ -7,7 +7,9 @@
 
 export * from './src/connector_icon';
 export * from './src/kibana_version';
+export * from './src/license_badge';
 export * from './src/form_info_field/form_info_field';
 export * from './src/search_empty_prompt';
 export * from './src/constants';
+export * from './src/hooks';
 export type * from './src/types';
