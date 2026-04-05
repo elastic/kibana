@@ -24,7 +24,7 @@ function validateDynamicBracketAccess(
   dynamicAccess: DynamicBracketAccessInfo,
   context: typeof DynamicStepContextSchema
 ): string[] {
-  const { prefixPath, dynamicKey } = dynamicAccess;
+  const { prefixPath, dynamicKeys } = dynamicAccess;
   const errors: string[] = [];
 
   if (prefixPath) {
@@ -34,16 +34,10 @@ function validateDynamicBracketAccess(
     }
   }
 
-  const dynamicKeyParsed = parseVariablePath(dynamicKey);
-  if (!dynamicKeyParsed || dynamicKeyParsed.errors) {
-    const detail = dynamicKeyParsed?.errors?.join(', ') ?? dynamicKey;
-    errors.push(`Invalid dynamic key: ${detail}`);
-  } else if (dynamicKeyParsed.hasDynamicBracketAccess && dynamicKeyParsed.dynamicAccess) {
-    errors.push(...validateDynamicBracketAccess(dynamicKeyParsed.dynamicAccess, context));
-  } else if (dynamicKeyParsed.propertyPath) {
-    const { schema: keySchema } = getSchemaAtPath(context, dynamicKeyParsed.propertyPath);
+  for (const key of dynamicKeys) {
+    const { schema: keySchema } = getSchemaAtPath(context, key);
     if (!keySchema) {
-      errors.push(`Dynamic key ${dynamicKeyParsed.propertyPath} is invalid`);
+      errors.push(`Key ${key} is invalid`);
     }
   }
 

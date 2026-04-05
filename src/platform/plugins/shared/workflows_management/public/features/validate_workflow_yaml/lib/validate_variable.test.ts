@@ -278,22 +278,15 @@ describe('validateVariable', () => {
     const variableItem = createVariableItem({
       key: 'steps.load.output._source[steps.space.output].id',
     });
-    mockParseVariablePath
-      .mockReturnValueOnce({
-        propertyPath: 'steps.load.output._source[steps.space.output].id',
-        filters: [],
-        hasDynamicBracketAccess: true,
-        dynamicAccess: {
-          prefixPath: 'steps.load.output._source',
-          dynamicKey: 'steps.space.output',
-          suffixPath: 'id',
-        },
-      })
-      .mockReturnValueOnce({
-        propertyPath: 'steps.space.output',
-        filters: [],
-        hasDynamicBracketAccess: false,
-      });
+    mockParseVariablePath.mockReturnValueOnce({
+      propertyPath: 'steps.load.output._source[steps.space.output].id',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'steps.load.output._source',
+        dynamicKeys: ['steps.space.output'],
+      },
+    });
     mockGetSchemaAtPath
       .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
@@ -315,25 +308,16 @@ describe('validateVariable', () => {
     const variableItem = createVariableItem({
       key: 'steps.load.output._source[steps.space.output].id',
     });
-    mockParseVariablePath
-      .mockReturnValueOnce({
-        propertyPath: 'steps.load.output._source[steps.space.output].id',
-        filters: [],
-        hasDynamicBracketAccess: true,
-        dynamicAccess: {
-          prefixPath: 'steps.load.output._source',
-          dynamicKey: 'steps.space.output',
-          suffixPath: 'id',
-        },
-      })
-      .mockReturnValueOnce({
-        propertyPath: 'steps.space.output',
-        filters: [],
-        hasDynamicBracketAccess: false,
-      });
-    mockGetSchemaAtPath
-      .mockReturnValueOnce({ schema: null, scopedToPath: null })
-      .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
+    mockParseVariablePath.mockReturnValueOnce({
+      propertyPath: 'steps.load.output._source[steps.space.output].id',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'steps.load.output._source',
+        dynamicKeys: ['steps.space.output'],
+      },
+    });
+    mockGetSchemaAtPath.mockReturnValueOnce({ schema: null, scopedToPath: null });
 
     const result = validateVariable(variableItem, mockContext);
 
@@ -348,22 +332,15 @@ describe('validateVariable', () => {
     const variableItem = createVariableItem({
       key: 'steps.load.output._source[steps.nonexistent.output].id',
     });
-    mockParseVariablePath
-      .mockReturnValueOnce({
-        propertyPath: 'steps.load.output._source[steps.nonexistent.output].id',
-        filters: [],
-        hasDynamicBracketAccess: true,
-        dynamicAccess: {
-          prefixPath: 'steps.load.output._source',
-          dynamicKey: 'steps.nonexistent.output',
-          suffixPath: 'id',
-        },
-      })
-      .mockReturnValueOnce({
-        propertyPath: 'steps.nonexistent.output',
-        filters: [],
-        hasDynamicBracketAccess: false,
-      });
+    mockParseVariablePath.mockReturnValueOnce({
+      propertyPath: 'steps.load.output._source[steps.nonexistent.output].id',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'steps.load.output._source',
+        dynamicKeys: ['steps.nonexistent.output'],
+      },
+    });
     mockGetSchemaAtPath
       .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: null, scopedToPath: null });
@@ -381,34 +358,16 @@ describe('validateVariable', () => {
     const variableItem = createVariableItem({
       key: 'steps.load.output._source[steps.note[steps.comment.output]].id',
     });
-    mockParseVariablePath
-      .mockReturnValueOnce({
-        propertyPath: 'steps.load.output._source[steps.note[steps.comment.output]].id',
-        filters: [],
-        hasDynamicBracketAccess: true,
-        dynamicAccess: {
-          prefixPath: 'steps.load.output._source',
-          dynamicKey: 'steps.note[steps.comment.output]',
-          suffixPath: 'id',
-        },
-      })
-      .mockReturnValueOnce({
-        propertyPath: 'steps.note[steps.comment.output]',
-        filters: [],
-        hasDynamicBracketAccess: true,
-        dynamicAccess: {
-          prefixPath: 'steps.note',
-          dynamicKey: 'steps.comment.output',
-          suffixPath: null,
-        },
-      })
-      .mockReturnValueOnce({
-        propertyPath: 'steps.comment.output',
-        filters: [],
-        hasDynamicBracketAccess: false,
-      });
+    mockParseVariablePath.mockReturnValueOnce({
+      propertyPath: 'steps.load.output._source[steps.note[steps.comment.output]].id',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'steps.load.output._source',
+        dynamicKeys: ['steps.comment.output'],
+      },
+    });
     mockGetSchemaAtPath
-      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
       .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
 
@@ -420,9 +379,68 @@ describe('validateVariable', () => {
       owner: 'variable-validation',
     });
     expect(result.hoverMessage).toContain('Dynamic bracket access');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledTimes(2);
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.load.output._source');
-    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.note');
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'steps.comment.output');
+  });
+
+  it('should validate multiple dynamic keys in a single path', () => {
+    const variableItem = createVariableItem({
+      key: 'a[b].x[c[d]].y',
+    });
+    mockParseVariablePath.mockReturnValueOnce({
+      propertyPath: 'a[b].x[c[d]].y',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'a',
+        dynamicKeys: ['b', 'd'],
+      },
+    });
+    mockGetSchemaAtPath
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.string(), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.string(), scopedToPath: null });
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+    });
+    expect(result.hoverMessage).toContain('Dynamic bracket access');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledTimes(3);
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'a');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'b');
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(mockContext, 'd');
+  });
+
+  it('should return error when one of multiple dynamic keys is invalid', () => {
+    const variableItem = createVariableItem({
+      key: 'a[b].x[c[d]].y',
+    });
+    mockParseVariablePath.mockReturnValueOnce({
+      propertyPath: 'a[b].x[c[d]].y',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'a',
+        dynamicKeys: ['b', 'd'],
+      },
+    });
+    mockGetSchemaAtPath
+      .mockReturnValueOnce({ schema: z.record(z.string(), z.unknown()), scopedToPath: null })
+      .mockReturnValueOnce({ schema: z.string(), scopedToPath: null })
+      .mockReturnValueOnce({ schema: null, scopedToPath: null });
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: expect.stringContaining('Dynamic key d is invalid'),
+      severity: 'error',
+      owner: 'variable-validation',
+    });
   });
 
   it('should handle array input with default value in foreach validation', () => {

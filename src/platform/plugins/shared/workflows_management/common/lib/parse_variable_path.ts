@@ -11,8 +11,7 @@ import { type PropertyAccessToken, type Token, Tokenizer, TokenKind } from 'liqu
 
 export interface DynamicBracketAccessInfo {
   prefixPath: string;
-  dynamicKey: string;
-  suffixPath: string | null;
+  dynamicKeys: string[];
 }
 
 export interface ParsedVariablePath {
@@ -80,7 +79,7 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
     const filters = filtered.filters.map((f) => f.getText().trim());
     const propertyPath = propertyAccessToken.getText();
     const hasDynamicBracketAccess = containsDynamicAccess(props);
-    const dynamicAccess = hasDynamicBracketAccess ? extractFirstDynamicAccess(props) : undefined;
+    const dynamicAccess = hasDynamicBracketAccess ? extractDynamicAccess(props) : undefined;
 
     return {
       propertyPath,
@@ -112,19 +111,33 @@ function containsDynamicAccess(props: Token[]): boolean {
   return props.some((prop) => prop.kind === TokenKind.PropertyAccess);
 }
 
-function extractFirstDynamicAccess(props: Token[]): DynamicBracketAccessInfo | undefined {
-  const dynamicIdx = props.findIndex((p) => p.kind === TokenKind.PropertyAccess);
-  if (dynamicIdx === -1) return undefined;
+function extractDynamicAccess(props: Token[]): DynamicBracketAccessInfo | undefined {
+  const firstDynamicIdx = props.findIndex((p) => p.kind === TokenKind.PropertyAccess);
+  if (firstDynamicIdx === -1) return undefined;
 
-  const prefixProps = props.slice(0, dynamicIdx);
-  const suffixProps = props.slice(dynamicIdx + 1);
-  const dynamicProp = props[dynamicIdx] as PropertyAccessToken;
+  const prefixProps = props.slice(0, firstDynamicIdx);
+  const dynamicKeys = collectDynamicKeys(props);
 
   return {
     prefixPath: propsToPathString(prefixProps),
-    dynamicKey: dynamicProp.getText(),
-    suffixPath: suffixProps.length > 0 ? propsToPathString(suffixProps) : null,
+    dynamicKeys,
   };
+}
+
+function collectDynamicKeys(props: Token[]): string[] {
+  const keys: string[] = [];
+  for (const prop of props) {
+    if (prop.kind === TokenKind.PropertyAccess) {
+      const nested = prop as PropertyAccessToken;
+      const hasNestedDynamic = nested.props.some((p) => p.kind === TokenKind.PropertyAccess);
+      if (hasNestedDynamic) {
+        keys.push(...collectDynamicKeys(nested.props));
+      } else {
+        keys.push(propsToPathString(nested.props));
+      }
+    }
+  }
+  return keys;
 }
 
 function propsToPathString(props: Token[]): string {

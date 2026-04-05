@@ -234,8 +234,7 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'steps.load_comment_sync_state.output._source',
-        dynamicKey: 'steps.note_sync_space_comment.output',
-        suffixPath: 'id',
+        dynamicKeys: ['steps.note_sync_space_comment.output'],
       },
     });
   });
@@ -248,8 +247,7 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'data',
-        dynamicKey: 'fieldName',
-        suffixPath: null,
+        dynamicKeys: ['fieldName'],
       },
     });
   });
@@ -262,8 +260,7 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'obj',
-        dynamicKey: 'steps.a.output',
-        suffixPath: null,
+        dynamicKeys: ['steps.a.output'],
       },
     });
   });
@@ -278,8 +275,7 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'steps.load.output._source',
-        dynamicKey: 'steps.note[steps.note_sync_space_comment]',
-        suffixPath: 'id',
+        dynamicKeys: ['steps.note_sync_space_comment'],
       },
     });
   });
@@ -292,8 +288,20 @@ describe('parseVariablePath', () => {
       hasDynamicBracketAccess: true,
       dynamicAccess: {
         prefixPath: 'a',
-        dynamicKey: 'b[c[d]]',
-        suffixPath: null,
+        dynamicKeys: ['d'],
+      },
+    });
+  });
+
+  it('should collect all dynamic keys from multiple bracket accesses', () => {
+    const result = parseVariablePath('a[b].x[c[d]].y');
+    expect(result).toEqual({
+      propertyPath: 'a[b].x[c[d]].y',
+      filters: [],
+      hasDynamicBracketAccess: true,
+      dynamicAccess: {
+        prefixPath: 'a',
+        dynamicKeys: ['b', 'd'],
       },
     });
   });
