@@ -18,6 +18,6 @@ export const registerSiemReadinessRoutes = ({
 }: SiemReadinessRoutesDeps) => {
   getReadinessCategoriesRoute(router, logger);
   getMitreDataIndicesDocsCountRoute(router, logger);
-  getReadinessRetentionRoute(router, logger);
+  getReadinessRetentionRoute(router, logger, isServerless);
   getReadinessPipelinesRoute(router, logger, isServerless);
 };
