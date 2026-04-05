@@ -444,7 +444,7 @@ export const ProposedSkillsList = () => {
               body={
                 <>
                   <p>
-                    AESOP hasn't discovered any skills yet. Start an exploration to automatically
+                    {'AESOP hasn\'t discovered any skills yet. Start an exploration to automatically'}
                     identify patterns in your data and generate Agent Builder skills.
                   </p>
                   <EuiSpacer size="m" />
@@ -462,7 +462,7 @@ export const ProposedSkillsList = () => {
                         title: 'Trigger exploration',
                         children: (
                           <EuiText size="s" color="subdued">
-                            Set agent role and scoped indices, then click "Start Exploration"
+                            {'Set agent role and scoped indices, then click "Start Exploration"'}
                           </EuiText>
                         ),
                       },

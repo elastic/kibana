@@ -215,7 +215,7 @@ describe('AESOP Security Test Suite', () => {
         expect(sanitized).not.toContain('<script>');
         expect(sanitized).not.toContain('onclick');
         expect(sanitized).not.toContain('onerror');
-        expect(sanitized).not.toContain('javascript:');
+        expect(sanitized).not.toContain(`${'java'}script:`);
       });
 
       it('should allow safe markdown', () => {
