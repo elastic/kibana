@@ -37,7 +37,7 @@ services:
       - "4318:4318"  # OTLP HTTP receiver
       - "4317:4317"  # OTLP gRPC receiver
     volumes:
-      - ./docker/edot-config.yaml:/etc/otel/config.yaml:ro
+      - ./docker/edot_config.yaml:/etc/otel/config.yaml:ro
     networks:
       - aesop-network
     depends_on:
