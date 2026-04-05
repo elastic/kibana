@@ -378,6 +378,20 @@ const getMatchPhrasePrefixFields = ({
   return output;
 };
 
+const findNestedAncestor = (
+  mappings: IndexMapping,
+  absoluteFieldPath: string
+): string | undefined => {
+  const segments = absoluteFieldPath.split('.');
+  for (let i = segments.length - 1; i > 0; i--) {
+    const ancestorPath = segments.slice(0, i).join('.');
+    if (getProperty(mappings, ancestorPath)?.type === 'nested') {
+      return ancestorPath;
+    }
+  }
+  return undefined;
+};
+
 const getFieldsByQueryType = ({
   searchFields,
   types,
@@ -395,15 +409,13 @@ const getFieldsByQueryType = ({
 
   types.forEach((type) => {
     searchFields.forEach((searchField) => {
-      const isFieldDefinedAsNested = searchField.split('.').length > 1;
       const absoluteFieldPath = `${type}.${searchField}`;
-      const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
-      const parentNodeType = getProperty(mappings, parentNode)?.type;
+      const nestedAncestorPath = findNestedAncestor(mappings, absoluteFieldPath);
 
-      if (isFieldDefinedAsNested && parentNodeType === 'nested') {
-        nestedQueryFields.set(parentNode, [
-          ...(nestedQueryFields.get(parentNode) || []),
-          `${type}.${searchField}`,
+      if (nestedAncestorPath) {
+        nestedQueryFields.set(nestedAncestorPath, [
+          ...(nestedQueryFields.get(nestedAncestorPath) || []),
+          absoluteFieldPath,
         ]);
       } else {
         simpleQuerySearchFields.add(searchField);
