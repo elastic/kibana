@@ -660,10 +660,16 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
   public async delete(scriptId: string): Promise<void> {
     const scriptSo = await this.getScriptSavedObject(scriptId);
-    const rulesUsingScript = await this.findRulesUsingScripts(scriptId);
     const filesClient = await this.getFilesClient();
+    const rulesUsingScript: Awaited<ReturnType<typeof this.findRulesUsingScripts>> | undefined =
+      await this.findRulesUsingScripts(scriptId).catch(() => {
+        this.logger.error(
+          `Proceeding with deletion of script [${scriptId}] even though check for script usage in rules failed`
+        );
+        return undefined;
+      });
 
-    if (rulesUsingScript.total > 0) {
+    if (rulesUsingScript && rulesUsingScript.total > 0) {
       throw new ScriptLibraryError(
         `Cannot delete script [${scriptId}]. The following detection rules have 'runscript' configurations that reference it:\n${rulesUsingScript.data
           .map((rule) => `${rule.name} (ID: ${rule.id})`)
