@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { readFileSync } from '@kbn/fs';
 import type { SuiteRouteDependencies } from '.';
 
 interface SuiteDefinition {
@@ -23,7 +23,7 @@ const loadSuites = (repoRoot: string): SuiteDefinition[] => {
     repoRoot,
     'x-pack/platform/packages/shared/kbn-evals/evals.suites.json'
   );
-  const raw = readFileSync(suitesPath, 'utf-8');
+  const raw = readFileSync(suitesPath, 'utf-8') as string;
   const parsed = JSON.parse(raw) as { suites: SuiteDefinition[] };
   return parsed.suites ?? [];
 };
