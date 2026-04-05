@@ -42,6 +42,7 @@ const scenario: Scenario<any> = async ({ logger, scenarioOpts = { numHosts: 2 } 
               'host.ip': '122.122.122.122',
               'resource.attributes.host.name': hostName,
               'resource.attributes.os.type': 'linux',
+              'os.type': 'linux',
               // This is the key: dataset that matches inventory model expectation
               'data_stream.dataset': 'hostmetricsreceiver.otel',
               'data_stream.type': 'metrics',
@@ -125,9 +126,11 @@ const scenario: Scenario<any> = async ({ logger, scenarioOpts = { numHosts: 2 } 
                 direction: 'receive',
                 'system.network.io': Math.floor(Math.random() * 1000000000), // bytes received
               },
-            ].map((net) => ({
+            ].map(({ 'system.network.io': netIo, ...net }) => ({
               ...base,
               ...net,
+              'system.network.io': netIo,
+              'metrics.system.network.io': netIo,
               'metricset.name': 'network',
               'device.keyword': 'eth0',
             }));

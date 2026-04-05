@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiIcon, EuiLink, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { viewDetailsLabel } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
@@ -70,6 +71,9 @@ export const ViewDetailsPopover = (props: Props) => {
   return (
     <EuiPopover
       id="ViewDetailsPopover"
+      aria-label={i18n.translate('searchResponseWarnings.viewDetailsPopoverAriaLabel', {
+        defaultMessage: 'View details',
+      })}
       button={
         props.displayAsLink ? (
           <EuiLink
