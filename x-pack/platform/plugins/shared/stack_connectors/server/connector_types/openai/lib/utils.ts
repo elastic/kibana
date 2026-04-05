@@ -33,7 +33,7 @@ export const sanitizeRequest = (
     case OpenAiProviderType.AzureAi:
       return azureAiSanitizeRequest(url, body, defaultModel);
     case OpenAiProviderType.Other:
-      return otherOpenAiSanitizeRequest(body);
+      return otherOpenAiSanitizeRequest(body, defaultModel);
     default:
       return body;
   }

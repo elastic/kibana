@@ -29,6 +29,7 @@ import {
   VirtualizedCascadeRowList,
   calculateActiveStickyIndex,
   type VirtualizedCascadeListProps,
+  type CascadeRootVirtualizerReturnValue,
 } from '../../lib/core/virtualizer';
 import { useExposePublicApi } from '../../lib/core/api';
 import {
@@ -42,7 +43,7 @@ import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps
  * @description Public Component for configuring the rendering of a data cascade row cell
  */
 export const DataCascadeRowCell = <G extends GroupNode, L extends LeafNode>(
-  props: DataCascadeRowCellProps<G, L>
+  _props: DataCascadeRowCellProps<G, L>
 ) => {
   return null;
 };
@@ -51,7 +52,7 @@ export const DataCascadeRowCell = <G extends GroupNode, L extends LeafNode>(
  * @description Public Component for configuring the rendering of a data cascade row
  */
 export const DataCascadeRow = <G extends GroupNode, L extends LeafNode>(
-  props: DataCascadeRowProps<G, L>
+  _props: DataCascadeRowProps<G, L>
 ) => {
   return null;
 };
@@ -122,7 +123,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             key: props.row.id,
             size,
             // getVirtualizer will not return undefined here as it is set immediately after the first render
-            getVirtualizer: getVirtualizer as () => ReturnType<typeof useCascadeVirtualizer>,
+            getVirtualizer: getVirtualizer as () => CascadeRootVirtualizerReturnValue,
           }}
         />
       );
@@ -192,7 +193,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
           innerRef: virtualizerInstance.current!.measureElement,
           activeStickyRenderSlotRef,
           // getVirtualizer will not return undefined here as it is set immediately after the first render
-          getVirtualizer: getVirtualizer as () => ReturnType<typeof useCascadeVirtualizer>,
+          getVirtualizer: getVirtualizer as () => CascadeRootVirtualizerReturnValue,
           ...rowElement.props,
         }}
       />
@@ -232,7 +233,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               },
             ])}
             style={containerSize}
-            data-test-subj="data-cascade-scroll-container"
+            data-test-subj="dataCascadeScrollContainer"
           >
             {/* Always render the slot so the ref is available immediately.
             Use hidden style when not visible to avoid layout impact. */}

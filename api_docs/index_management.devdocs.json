@@ -51,7 +51,7 @@
           "(filter?: string | undefined, includeHiddenIndices?: boolean | undefined) => string"
         ],
         "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
-        "lineNumber": 43,
+        "lineNumber": 39,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +67,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
-            "lineNumber": 43,
+            "lineNumber": 39,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -84,7 +84,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
-            "lineNumber": 43,
+            "lineNumber": 39,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -105,7 +105,7 @@
           "(name: string, isLegacy?: boolean | undefined) => string"
         ],
         "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
-        "lineNumber": 17,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -121,7 +121,7 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
-            "lineNumber": 17,
+            "lineNumber": 13,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -138,7 +138,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/public/application/services/routing.ts",
-            "lineNumber": 17,
+            "lineNumber": 13,
             "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
@@ -175,7 +175,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 125,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -188,7 +188,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -204,7 +204,7 @@
         "label": "IndexMappingProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 169,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -227,7 +227,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -243,7 +243,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -288,7 +288,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_stream_index_list\"; dataStreamName: string; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"create_template\"; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; })"
+          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_stream_index_list\"; dataStreamName: string; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"create_template\"; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; } | { page: \"index_details\"; indexName: string; tab?: string | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "lineNumber": 36,
@@ -307,7 +307,7 @@
       "label": "IndexManagementPluginSetup",
       "description": [],
       "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-      "lineNumber": 95,
+      "lineNumber": 100,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -329,7 +329,7 @@
             }
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 96,
+          "lineNumber": 101,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -351,7 +351,7 @@
             }
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 97,
+          "lineNumber": 102,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -375,7 +375,7 @@
             ") => Promise<() => void>"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 98,
+          "lineNumber": 103,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -397,7 +397,7 @@
                 }
               ],
               "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-              "lineNumber": 98,
+              "lineNumber": 103,
               "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
@@ -424,7 +424,7 @@
             " | undefined"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 99,
+          "lineNumber": 104,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -448,7 +448,7 @@
             ") => void; }"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 100,
+          "lineNumber": 105,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -465,7 +465,7 @@
       "label": "IndexManagementPluginStart",
       "description": [],
       "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-      "lineNumber": 105,
+      "lineNumber": 110,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -487,7 +487,7 @@
             }
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 106,
+          "lineNumber": 111,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -509,7 +509,7 @@
             }
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 107,
+          "lineNumber": 112,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -535,7 +535,7 @@
             ">"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 108,
+          "lineNumber": 113,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -548,7 +548,7 @@
               "label": "deps",
               "description": [],
               "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-              "lineNumber": 108,
+              "lineNumber": 113,
               "columnNumber": 36,
               "deprecated": false,
               "trackAdoption": false,
@@ -565,7 +565,7 @@
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                  "lineNumber": 109,
+                  "lineNumber": 114,
                   "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
@@ -596,7 +596,7 @@
             ">"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 111,
+          "lineNumber": 116,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -609,7 +609,7 @@
               "label": "deps",
               "description": [],
               "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-              "lineNumber": 111,
+              "lineNumber": 116,
               "columnNumber": 37,
               "deprecated": false,
               "trackAdoption": false,
@@ -626,7 +626,7 @@
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                  "lineNumber": 112,
+                  "lineNumber": 117,
                   "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
@@ -657,7 +657,7 @@
             ">"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 114,
+          "lineNumber": 119,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -670,7 +670,7 @@
               "label": "deps",
               "description": [],
               "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-              "lineNumber": 114,
+              "lineNumber": 119,
               "columnNumber": 47,
               "deprecated": false,
               "trackAdoption": false,
@@ -687,7 +687,7 @@
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                  "lineNumber": 115,
+                  "lineNumber": 120,
                   "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
@@ -718,7 +718,7 @@
             ">"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 117,
+          "lineNumber": 122,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -731,7 +731,7 @@
               "label": "deps",
               "description": [],
               "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-              "lineNumber": 117,
+              "lineNumber": 122,
               "columnNumber": 43,
               "deprecated": false,
               "trackAdoption": false,
@@ -748,7 +748,7 @@
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                  "lineNumber": 118,
+                  "lineNumber": 123,
                   "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
@@ -779,7 +779,7 @@
             ">"
           ],
           "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-          "lineNumber": 120,
+          "lineNumber": 125,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -792,7 +792,7 @@
               "label": "deps",
               "description": [],
               "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-              "lineNumber": 120,
+              "lineNumber": 125,
               "columnNumber": 40,
               "deprecated": false,
               "trackAdoption": false,
@@ -809,7 +809,7 @@
                     "<unknown>"
                   ],
                   "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-                  "lineNumber": 121,
+                  "lineNumber": 126,
                   "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
@@ -935,7 +935,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 125,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -948,7 +948,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2591,7 +2591,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-        "lineNumber": 125,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2604,7 +2604,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
-            "lineNumber": 126,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
