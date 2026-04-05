@@ -348,7 +348,7 @@ describe('validateVariable', () => {
     const result = validateVariable(variableItem, mockContext);
 
     expect(result).toMatchObject({
-      message: expect.stringContaining('Dynamic key steps.nonexistent.output is invalid'),
+      message: expect.stringContaining('Key steps.nonexistent.output is invalid'),
       severity: 'error',
       owner: 'variable-validation',
     });
@@ -437,7 +437,7 @@ describe('validateVariable', () => {
     const result = validateVariable(variableItem, mockContext);
 
     expect(result).toMatchObject({
-      message: expect.stringContaining('Dynamic key d is invalid'),
+      message: expect.stringContaining('Key d is invalid'),
       severity: 'error',
       owner: 'variable-validation',
     });
