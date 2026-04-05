@@ -20,7 +20,7 @@ const ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-endpoint-se
 export const ENDPOINT_SECURITY_EXECUTE_PRIVILEGE = `api:${ENDPOINT_SECURITY_EXECUTE_PRIVILEGE_API_TAG}`;
 export const ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE = `api:actions:execute-endpoint-security-sub-actions`;
 
-export const OAUTH_API_TAG = 'actions:execute-oauth';
+export const OAUTH_API_TAG = 'actions:oauth';
 
 /**
  * The order of appearance in the feature privilege page
