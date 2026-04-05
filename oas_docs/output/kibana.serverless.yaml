@@ -5074,7 +5074,7 @@ paths:
                                         type: object
                                         properties:
                                           store:
-                                            description: A filter can be either specific to an application context or applied globally.
+                                            description: A filter that can be applied to a specific application context or applied globally.
                                             enum:
                                               - appState
                                               - globalState
@@ -5118,16 +5118,16 @@ paths:
                                   type: object
                                   properties:
                                     end:
-                                      description: The end of the time frame in 24-hour notation (`hh:mm`).
+                                      description: The end of the time frame, in 24-hour notation (`hh:mm`).
                                       type: string
                                     start:
-                                      description: The start of the time frame in 24-hour notation (`hh:mm`).
+                                      description: The start of the time frame, in 24-hour notation (`hh:mm`).
                                       type: string
                                   required:
                                     - start
                                     - end
                                 timezone:
-                                  description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                                  description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.
                                   type: string
                               required:
                                 - days
@@ -5141,7 +5141,7 @@ paths:
                           type: object
                           properties:
                             notify_when:
-                              description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                               enum:
                                 - onActionGroupChange
                                 - onActiveAlert
@@ -5151,7 +5151,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when 'notify_when' is set to 'onThrottleInterval'. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                               nullable: true
                               type: string
                           required:
@@ -5216,7 +5216,7 @@ paths:
                         type: object
                         properties:
                           blob:
-                            description: User-created content that describes alert causes and remdiation.
+                            description: User-created content that describes alert causes and remediation.
                             type: string
                         required:
                           - blob
@@ -5231,7 +5231,7 @@ paths:
                     nullable: true
                     type: string
                   enabled:
-                    description: Indicates whether you want to run the rule on an interval basis after it is created.
+                    description: Indicates whether you want the rule to run on an interval basis after it is created.
                     type: boolean
                   execution_status:
                     additionalProperties: false
@@ -5260,10 +5260,10 @@ paths:
                           - reason
                           - message
                       last_duration:
-                        description: Duration of last execution of the rule.
+                        description: Duration of last rule execution.
                         type: number
                       last_execution_date:
-                        description: The date and time when rule was executed last.
+                        description: The date and time of the last rule execution.
                         type: string
                       status:
                         description: Status of rule execution.
@@ -5311,7 +5311,7 @@ paths:
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: The minimum number of times an alert must switch states in the look back window.
+                        description: The minimum number of times an alert must switch states within the defined look back window time.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -5347,7 +5347,7 @@ paths:
                             nullable: true
                             type: number
                       outcome:
-                        description: Outcome of last run of the rule. Value could be succeeded, warning or failed.
+                        description: Outcome of the last rule run. Value can be succeeded, warning, or failed.
                         enum:
                           - succeeded
                           - warning
@@ -5394,11 +5394,11 @@ paths:
                     description: ' The name of the rule.'
                     type: string
                   next_run:
-                    description: Date and time of the next run of the rule.
+                    description: Date and time of the next rule run.
                     nullable: true
                     type: string
                   notify_when:
-                    description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                    description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                     enum:
                       - onActionGroupChange
                       - onActiveAlert
@@ -5438,14 +5438,14 @@ paths:
                     type: array
                   throttle:
                     deprecated: true
-                    description: 'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                    description: Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                     nullable: true
                     type: string
                   updated_at:
-                    description: The date and time that the rule was updated most recently.
+                    description: The date and time of the latest updates to the rule.
                     type: string
                   updated_by:
-                    description: The identifier for the user that updated this rule most recently.
+                    description: The identifier for the user who was the last to update the rule.
                     nullable: true
                     type: string
                 required:
@@ -5699,7 +5699,7 @@ paths:
                                       type: object
                                       properties:
                                         store:
-                                          description: A filter can be either specific to an application context or applied globally.
+                                          description: A filter that can be applied to a specific application context or applied globally.
                                           enum:
                                             - appState
                                             - globalState
@@ -5745,16 +5745,16 @@ paths:
                                 type: object
                                 properties:
                                   end:
-                                    description: The end of the time frame in 24-hour notation (`hh:mm`).
+                                    description: The end of the time frame, in 24-hour notation (`hh:mm`).
                                     type: string
                                   start:
-                                    description: The start of the time frame in 24-hour notation (`hh:mm`).
+                                    description: The start of the time frame, in 24-hour notation (`hh:mm`).
                                     type: string
                                 required:
                                   - start
                                   - end
                               timezone:
-                                description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                                description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.
                                 type: string
                             required:
                               - days
@@ -5765,7 +5765,7 @@ paths:
                         type: object
                         properties:
                           notify_when:
-                            description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                            description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                             enum:
                               - onActionGroupChange
                               - onActiveAlert
@@ -5775,7 +5775,7 @@ paths:
                             description: Indicates whether the action is a summary.
                             type: boolean
                           throttle:
-                            description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                            description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                             nullable: true
                             type: string
                         required:
@@ -5841,7 +5841,7 @@ paths:
                   type: string
                 enabled:
                   default: true
-                  description: Indicates whether you want to run the rule on an interval basis after it is created.
+                  description: Indicates whether you want the rule to run on an interval basis after it is created.
                   type: boolean
                 flapping:
                   additionalProperties: false
@@ -5858,7 +5858,7 @@ paths:
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: The minimum number of times an alert must switch states in the look back window.
+                      description: The minimum number of times an alert must switch states within the defined look back window time.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -5869,7 +5869,7 @@ paths:
                   description: The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
                   type: string
                 notify_when:
-                  description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                  description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                   enum:
                     - onActionGroupChange
                     - onActiveAlert
@@ -5896,7 +5896,7 @@ paths:
                     type: string
                   type: array
                 throttle:
-                  description: 'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                  description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                   nullable: true
                   type: string
                 params:
@@ -6241,7 +6241,7 @@ paths:
                                         type: object
                                         properties:
                                           store:
-                                            description: A filter can be either specific to an application context or applied globally.
+                                            description: A filter that can be applied to a specific application context or applied globally.
                                             enum:
                                               - appState
                                               - globalState
@@ -6285,16 +6285,16 @@ paths:
                                   type: object
                                   properties:
                                     end:
-                                      description: The end of the time frame in 24-hour notation (`hh:mm`).
+                                      description: The end of the time frame, in 24-hour notation (`hh:mm`).
                                       type: string
                                     start:
-                                      description: The start of the time frame in 24-hour notation (`hh:mm`).
+                                      description: The start of the time frame, in 24-hour notation (`hh:mm`).
                                       type: string
                                   required:
                                     - start
                                     - end
                                 timezone:
-                                  description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                                  description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.
                                   type: string
                               required:
                                 - days
@@ -6308,7 +6308,7 @@ paths:
                           type: object
                           properties:
                             notify_when:
-                              description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                               enum:
                                 - onActionGroupChange
                                 - onActiveAlert
@@ -6318,7 +6318,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when 'notify_when' is set to 'onThrottleInterval'. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                               nullable: true
                               type: string
                           required:
@@ -6383,7 +6383,7 @@ paths:
                         type: object
                         properties:
                           blob:
-                            description: User-created content that describes alert causes and remdiation.
+                            description: User-created content that describes alert causes and remediation.
                             type: string
                         required:
                           - blob
@@ -6398,7 +6398,7 @@ paths:
                     nullable: true
                     type: string
                   enabled:
-                    description: Indicates whether you want to run the rule on an interval basis after it is created.
+                    description: Indicates whether you want the rule to run on an interval basis after it is created.
                     type: boolean
                   execution_status:
                     additionalProperties: false
@@ -6427,10 +6427,10 @@ paths:
                           - reason
                           - message
                       last_duration:
-                        description: Duration of last execution of the rule.
+                        description: Duration of last rule execution.
                         type: number
                       last_execution_date:
-                        description: The date and time when rule was executed last.
+                        description: The date and time of the last rule execution.
                         type: string
                       status:
                         description: Status of rule execution.
@@ -6478,7 +6478,7 @@ paths:
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: The minimum number of times an alert must switch states in the look back window.
+                        description: The minimum number of times an alert must switch states within the defined look back window time.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -6514,7 +6514,7 @@ paths:
                             nullable: true
                             type: number
                       outcome:
-                        description: Outcome of last run of the rule. Value could be succeeded, warning or failed.
+                        description: Outcome of the last rule run. Value can be succeeded, warning, or failed.
                         enum:
                           - succeeded
                           - warning
@@ -6561,11 +6561,11 @@ paths:
                     description: ' The name of the rule.'
                     type: string
                   next_run:
-                    description: Date and time of the next run of the rule.
+                    description: Date and time of the next rule run.
                     nullable: true
                     type: string
                   notify_when:
-                    description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                    description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                     enum:
                       - onActionGroupChange
                       - onActiveAlert
@@ -6605,14 +6605,14 @@ paths:
                     type: array
                   throttle:
                     deprecated: true
-                    description: 'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                    description: Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                     nullable: true
                     type: string
                   updated_at:
-                    description: The date and time that the rule was updated most recently.
+                    description: The date and time of the latest updates to the rule.
                     type: string
                   updated_by:
-                    description: The identifier for the user that updated this rule most recently.
+                    description: The identifier for the user who was the last to update the rule.
                     nullable: true
                     type: string
                 required:
@@ -6742,7 +6742,7 @@ paths:
                                       type: object
                                       properties:
                                         store:
-                                          description: A filter can be either specific to an application context or applied globally.
+                                          description: A filter that can be applied to a specific application context or applied globally.
                                           enum:
                                             - appState
                                             - globalState
@@ -6788,16 +6788,16 @@ paths:
                                 type: object
                                 properties:
                                   end:
-                                    description: The end of the time frame in 24-hour notation (`hh:mm`).
+                                    description: The end of the time frame, in 24-hour notation (`hh:mm`).
                                     type: string
                                   start:
-                                    description: The start of the time frame in 24-hour notation (`hh:mm`).
+                                    description: The start of the time frame, in 24-hour notation (`hh:mm`).
                                     type: string
                                 required:
                                   - start
                                   - end
                               timezone:
-                                description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                                description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.
                                 type: string
                             required:
                               - days
@@ -6808,7 +6808,7 @@ paths:
                         type: object
                         properties:
                           notify_when:
-                            description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                            description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                             enum:
                               - onActionGroupChange
                               - onActiveAlert
@@ -6818,7 +6818,7 @@ paths:
                             description: Indicates whether the action is a summary.
                             type: boolean
                           throttle:
-                            description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                            description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                             nullable: true
                             type: string
                         required:
@@ -6894,7 +6894,7 @@ paths:
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: The minimum number of times an alert must switch states in the look back window.
+                      description: The minimum number of times an alert must switch states within the defined look back window time.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -6905,7 +6905,7 @@ paths:
                   description: The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
                   type: string
                 notify_when:
-                  description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                  description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                   enum:
                     - onActionGroupChange
                     - onActiveAlert
@@ -6933,7 +6933,7 @@ paths:
                     type: string
                   type: array
                 throttle:
-                  description: 'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                  description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                   nullable: true
                   type: string
               required:
@@ -7045,7 +7045,7 @@ paths:
                                         type: object
                                         properties:
                                           store:
-                                            description: A filter can be either specific to an application context or applied globally.
+                                            description: A filter that can be applied to a specific application context or applied globally.
                                             enum:
                                               - appState
                                               - globalState
@@ -7089,16 +7089,16 @@ paths:
                                   type: object
                                   properties:
                                     end:
-                                      description: The end of the time frame in 24-hour notation (`hh:mm`).
+                                      description: The end of the time frame, in 24-hour notation (`hh:mm`).
                                       type: string
                                     start:
-                                      description: The start of the time frame in 24-hour notation (`hh:mm`).
+                                      description: The start of the time frame, in 24-hour notation (`hh:mm`).
                                       type: string
                                   required:
                                     - start
                                     - end
                                 timezone:
-                                  description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                                  description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.
                                   type: string
                               required:
                                 - days
@@ -7112,7 +7112,7 @@ paths:
                           type: object
                           properties:
                             notify_when:
-                              description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                               enum:
                                 - onActionGroupChange
                                 - onActiveAlert
@@ -7122,7 +7122,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when 'notify_when' is set to 'onThrottleInterval'. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                               nullable: true
                               type: string
                           required:
@@ -7187,7 +7187,7 @@ paths:
                         type: object
                         properties:
                           blob:
-                            description: User-created content that describes alert causes and remdiation.
+                            description: User-created content that describes alert causes and remediation.
                             type: string
                         required:
                           - blob
@@ -7202,7 +7202,7 @@ paths:
                     nullable: true
                     type: string
                   enabled:
-                    description: Indicates whether you want to run the rule on an interval basis after it is created.
+                    description: Indicates whether you want the rule to run on an interval basis after it is created.
                     type: boolean
                   execution_status:
                     additionalProperties: false
@@ -7231,10 +7231,10 @@ paths:
                           - reason
                           - message
                       last_duration:
-                        description: Duration of last execution of the rule.
+                        description: Duration of last rule execution.
                         type: number
                       last_execution_date:
-                        description: The date and time when rule was executed last.
+                        description: The date and time of the last rule execution.
                         type: string
                       status:
                         description: Status of rule execution.
@@ -7282,7 +7282,7 @@ paths:
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: The minimum number of times an alert must switch states in the look back window.
+                        description: The minimum number of times an alert must switch states within the defined look back window time.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -7318,7 +7318,7 @@ paths:
                             nullable: true
                             type: number
                       outcome:
-                        description: Outcome of last run of the rule. Value could be succeeded, warning or failed.
+                        description: Outcome of the last rule run. Value can be succeeded, warning, or failed.
                         enum:
                           - succeeded
                           - warning
@@ -7365,11 +7365,11 @@ paths:
                     description: ' The name of the rule.'
                     type: string
                   next_run:
-                    description: Date and time of the next run of the rule.
+                    description: Date and time of the next rule run.
                     nullable: true
                     type: string
                   notify_when:
-                    description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                    description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                     enum:
                       - onActionGroupChange
                       - onActiveAlert
@@ -7409,14 +7409,14 @@ paths:
                     type: array
                   throttle:
                     deprecated: true
-                    description: 'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                    description: Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                     nullable: true
                     type: string
                   updated_at:
-                    description: The date and time that the rule was updated most recently.
+                    description: The date and time of the latest updates to the rule.
                     type: string
                   updated_by:
-                    description: The identifier for the user that updated this rule most recently.
+                    description: The identifier for the user who was the last to update the rule.
                     nullable: true
                     type: string
                 required:
@@ -8318,7 +8318,7 @@ paths:
                                               type: object
                                               properties:
                                                 store:
-                                                  description: A filter can be either specific to an application context or applied globally.
+                                                  description: A filter that can be applied to a specific application context or applied globally.
                                                   enum:
                                                     - appState
                                                     - globalState
@@ -8362,16 +8362,16 @@ paths:
                                         type: object
                                         properties:
                                           end:
-                                            description: The end of the time frame in 24-hour notation (`hh:mm`).
+                                            description: The end of the time frame, in 24-hour notation (`hh:mm`).
                                             type: string
                                           start:
-                                            description: The start of the time frame in 24-hour notation (`hh:mm`).
+                                            description: The start of the time frame, in 24-hour notation (`hh:mm`).
                                             type: string
                                         required:
                                           - start
                                           - end
                                       timezone:
-                                        description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                                        description: The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.
                                         type: string
                                     required:
                                       - days
@@ -8385,7 +8385,7 @@ paths:
                                 type: object
                                 properties:
                                   notify_when:
-                                    description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                                    description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                                     enum:
                                       - onActionGroupChange
                                       - onActiveAlert
@@ -8395,7 +8395,7 @@ paths:
                                     description: Indicates whether the action is a summary.
                                     type: boolean
                                   throttle:
-                                    description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                                    description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when 'notify_when' is set to 'onThrottleInterval'. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                                     nullable: true
                                     type: string
                                 required:
@@ -8460,7 +8460,7 @@ paths:
                               type: object
                               properties:
                                 blob:
-                                  description: User-created content that describes alert causes and remdiation.
+                                  description: User-created content that describes alert causes and remediation.
                                   type: string
                               required:
                                 - blob
@@ -8475,7 +8475,7 @@ paths:
                           nullable: true
                           type: string
                         enabled:
-                          description: Indicates whether you want to run the rule on an interval basis after it is created.
+                          description: Indicates whether you want the rule to run on an interval basis after it is created.
                           type: boolean
                         execution_status:
                           additionalProperties: false
@@ -8504,10 +8504,10 @@ paths:
                                 - reason
                                 - message
                             last_duration:
-                              description: Duration of last execution of the rule.
+                              description: Duration of last rule execution.
                               type: number
                             last_execution_date:
-                              description: The date and time when rule was executed last.
+                              description: The date and time of the last rule execution.
                               type: string
                             status:
                               description: Status of rule execution.
@@ -8555,7 +8555,7 @@ paths:
                               minimum: 2
                               type: number
                             status_change_threshold:
-                              description: The minimum number of times an alert must switch states in the look back window.
+                              description: The minimum number of times an alert must switch states within the defined look back window time.
                               maximum: 20
                               minimum: 2
                               type: number
@@ -8591,7 +8591,7 @@ paths:
                                   nullable: true
                                   type: number
                             outcome:
-                              description: Outcome of last run of the rule. Value could be succeeded, warning or failed.
+                              description: Outcome of the last rule run. Value can be succeeded, warning, or failed.
                               enum:
                                 - succeeded
                                 - warning
@@ -8638,11 +8638,11 @@ paths:
                           description: ' The name of the rule.'
                           type: string
                         next_run:
-                          description: Date and time of the next run of the rule.
+                          description: Date and time of the next rule run.
                           nullable: true
                           type: string
                         notify_when:
-                          description: 'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                          description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
                           enum:
                             - onActionGroupChange
                             - onActiveAlert
@@ -8682,14 +8682,14 @@ paths:
                           type: array
                         throttle:
                           deprecated: true
-                          description: 'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                          description: Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                           nullable: true
                           type: string
                         updated_at:
-                          description: The date and time that the rule was updated most recently.
+                          description: The date and time of the latest updates to the rule.
                           type: string
                         updated_by:
-                          description: The identifier for the user that updated this rule most recently.
+                          description: The identifier for the user who was the last to update the rule.
                           nullable: true
                           type: string
                       required:
