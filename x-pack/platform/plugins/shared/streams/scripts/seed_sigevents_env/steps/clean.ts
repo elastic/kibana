@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { SeedContext } from '../types';
@@ -27,56 +28,62 @@ export async function cleanSeedData(
   ctx: SeedContext,
   esClient: Client,
   config: ConnectionConfig,
-  log: ToolingLog,
-  cleanLogs: boolean
+  log: ToolingLog
 ): Promise<void> {
   await deleteByMatchAll(esClient, '.kibana_streams_features-*', log);
   await deleteByMatchAll(esClient, '.alerts-streams.alerts-default', log);
 
   // Queries are Kibana alerting rules — must be deleted via the API to tear down rule state.
   // List all on the stream so we catch leftovers from previous scenario runs.
-  const listPath = `/api/streams/${encodeURIComponent(ctx.streamName)}/queries`;
-  const listRes = await kibanaRequest(config, 'GET', listPath);
+  const listRes = await kibanaRequest(
+    config,
+    'GET',
+    `/api/streams/${encodeURIComponent(ctx.streamName)}/queries`
+  );
   if (listRes.status >= 300) {
     throw new Error(`clean: failed to list queries (HTTP ${listRes.status})`);
   }
-  const allQueries: Array<Record<string, unknown>> =
-    listRes.data &&
-    typeof listRes.data === 'object' &&
-    Array.isArray((listRes.data as { queries?: unknown }).queries)
-      ? ((listRes.data as { queries: unknown[] }).queries.filter(
-          (q): q is Record<string, unknown> => q !== null && typeof q === 'object'
-        ) as Array<Record<string, unknown>>)
-      : [];
+  const allQueries = (listRes.data as { queries?: Array<{ id: string }> })?.queries ?? [];
+  const queryIds = allQueries
+    .map((q) => q.id)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0);
 
-  for (const query of allQueries) {
-    const queryId = query.id;
-    if (typeof queryId !== 'string' || queryId.length === 0) continue;
+  for (const queryId of queryIds) {
     const path = `/api/streams/${encodeURIComponent(ctx.streamName)}/queries/${encodeURIComponent(
       queryId
     )}`;
-    const delRes = await kibanaRequest(config, 'DELETE', path);
-    if (delRes.status >= 300 && delRes.status !== 404) {
+    try {
+      const delRes = await kibanaRequest(config, 'DELETE', path);
+      if (delRes.status >= 300 && delRes.status !== 404) {
+        log.warning(
+          `clean: DELETE query "${queryId}" → HTTP ${delRes.status} ${JSON.stringify(delRes.data)}`
+        );
+      }
+    } catch (err) {
       log.warning(
-        `clean: DELETE query "${queryId}" → HTTP ${delRes.status} ${JSON.stringify(delRes.data)}`
+        `clean: DELETE query "${queryId}" threw: ${
+          err instanceof Error ? err.message : String(err)
+        }`
       );
     }
   }
-  if (allQueries.length > 0) {
-    log.info(`clean: deleted ${allQueries.length} query/queries from stream "${ctx.streamName}"`);
+
+  if (queryIds.length > 0) {
+    log.info(`clean: deleted ${queryIds.length} query/queries from stream "${ctx.streamName}"`);
   }
 
   // Insights — list all then bulk-delete via the Kibana API.
   const insightsRes = await kibanaRequest(config, 'GET', '/internal/streams/_insights');
-  const allInsights: Array<{ id: string }> =
-    insightsRes.status < 300 &&
-    insightsRes.data &&
-    typeof insightsRes.data === 'object' &&
-    Array.isArray((insightsRes.data as { insights?: unknown }).insights)
-      ? ((insightsRes.data as { insights: unknown[] }).insights.filter(
-          (i): i is { id: string } =>
-            i !== null && typeof i === 'object' && typeof (i as { id?: unknown }).id === 'string'
-        ) as Array<{ id: string }>)
+  if (insightsRes.status >= 300) {
+    log.warning(
+      `clean: GET /internal/streams/_insights → HTTP ${insightsRes.status} ${JSON.stringify(
+        insightsRes.data
+      )} — skipping insight cleanup`
+    );
+  }
+  const allInsights =
+    insightsRes.status < 300
+      ? (insightsRes.data as { insights?: Array<{ id: string }> })?.insights ?? []
       : [];
 
   if (allInsights.length > 0) {
@@ -95,9 +102,14 @@ export async function cleanSeedData(
   log.info('clean: deleting seeded task docs');
   await cleanTasks(ctx, esClient, log);
 
-  if (cleanLogs) {
-    log.info(`clean: deleting data stream "${ctx.streamName}"`);
+  log.info(`clean: deleting data stream "${ctx.streamName}"`);
+  try {
     await esClient.indices.deleteDataStream({ name: ctx.streamName });
+  } catch (err) {
+    if (!(err instanceof errors.ResponseError) || err.meta.statusCode !== 404) {
+      throw err;
+    }
+    log.info(`clean: data stream "${ctx.streamName}" not found, skipping`);
   }
 
   log.info('clean: finished');

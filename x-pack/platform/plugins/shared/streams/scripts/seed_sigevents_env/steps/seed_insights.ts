@@ -25,8 +25,6 @@ export function buildInsightPayloads(
   const evidence = seededQueries.map((q) => ({
     stream_name: ctx.streamName,
     query_title: q.title,
-    // event_count is intentionally 0 for seeded insights — actual match counts are not
-    // available at seed time without re-running the ESQL queries here.
     event_count: 0,
   }));
 

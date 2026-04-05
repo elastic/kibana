@@ -14,6 +14,8 @@ import { kibanaRequest } from '../lib/kibana';
 
 // Safely above any realistic number of queries per stream across all seed runs.
 const ASSET_FETCH_SIZE = 1000;
+const PROMOTE_POLL_INTERVAL_MS = 500;
+const PROMOTE_TIMEOUT_MS = 15_000;
 
 export async function seedQueries(
   ctx: SeedContext,
@@ -56,53 +58,68 @@ export async function seedQueries(
     throw new Error(`Query promotion failed (HTTP ${promoteRes.status})`);
   }
 
-  // Promotion schedules async rule creation on the Kibana side. Wait briefly before reading
-  // back the rule_id from .kibana_streams_assets to avoid a race where the asset doc doesn't
-  // exist yet. 2 s is sufficient in practice; if it proves flaky, raise this value.
-  await new Promise((resolve) => setTimeout(resolve, 2_000));
-
-  // The GET /api/streams/.../queries API does not expose rule_id.
-  // Read it directly from .kibana_streams_assets where it is stored after promotion.
-  const assetRes = await esClient.search({
-    index: '.kibana_streams_assets',
-    size: ASSET_FETCH_SIZE,
-    query: { term: { 'stream.name': ctx.streamName } },
-  });
-
-  const totalHits =
-    typeof assetRes.hits.total === 'number' ? assetRes.hits.total : assetRes.hits.total?.value ?? 0;
-  if (totalHits > ASSET_FETCH_SIZE) {
-    log.warning(
-      `seedQueries: .kibana_streams_assets has ${totalHits} docs for "${ctx.streamName}" — only first ${ASSET_FETCH_SIZE} read; some rule_ids may be missing`
-    );
-  }
+  const expectedQueryIds = new Set(prepared.map(({ queryId }) => queryId));
+  const deadline = Date.now() + PROMOTE_TIMEOUT_MS;
 
   const ruleIdByAssetId = new Map<string, string>();
-  for (const hit of assetRes.hits.hits) {
-    const src = hit._source as Record<string, unknown> | undefined;
-    if (!src) continue;
-    const assetId = src['asset.id'];
-    const ruleId = src.rule_id;
-    if (typeof assetId === 'string' && typeof ruleId === 'string' && ruleId.length > 0) {
-      ruleIdByAssetId.set(assetId, ruleId);
-    }
-  }
 
-  return prepared.map(({ q, queryId, esql }) => {
-    const ruleId = ruleIdByAssetId.get(queryId);
-    if (!ruleId) {
-      throw new Error(
-        `resolveRuleId: rule_id absent from asset for query "${queryId}" (${q.title}) after promotion. ` +
-          `Promotion may not have completed, or the API response shape has changed.`
+  const readAssets = async () => {
+    const assetRes = await esClient.search({
+      index: '.kibana_streams_assets',
+      size: ASSET_FETCH_SIZE,
+      query: { term: { 'stream.name': ctx.streamName } },
+    });
+
+    const totalHits =
+      typeof assetRes.hits.total === 'number'
+        ? assetRes.hits.total
+        : assetRes.hits.total?.value ?? 0;
+    if (totalHits > ASSET_FETCH_SIZE) {
+      log.warning(
+        `seedQueries: .kibana_streams_assets has ${totalHits} docs for "${ctx.streamName}" — only first ${ASSET_FETCH_SIZE} read; some rule_ids may be missing`
       );
     }
-    return {
-      queryId,
-      ruleId,
-      title: q.title,
-      esql,
-      severityScore: q.severityScore,
-      description: q.description,
-    };
-  });
+
+    ruleIdByAssetId.clear();
+    for (const hit of assetRes.hits.hits) {
+      const src = hit._source as Record<string, unknown> | undefined;
+      if (!src) continue;
+      const assetId = src['asset.id'];
+      const ruleId = src.rule_id;
+      if (typeof assetId === 'string' && typeof ruleId === 'string' && ruleId.length > 0) {
+        ruleIdByAssetId.set(assetId, ruleId);
+      }
+    }
+  };
+
+  while (true) {
+    try {
+      await readAssets();
+    } catch (err) {
+      // Transient ES errors (network, 5xx) — log and retry rather than aborting the poll.
+      log.debug(
+        `seedQueries: readAssets error (retrying): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+    if ([...expectedQueryIds].every((id) => ruleIdByAssetId.has(id))) break;
+    if (Date.now() >= deadline) {
+      const missing = [...expectedQueryIds].filter((id) => !ruleIdByAssetId.has(id));
+      throw new Error(
+        `seedQueries: timed out after ${PROMOTE_TIMEOUT_MS}ms waiting for rule_ids. ` +
+          `Promotion may not have completed. Missing query IDs: ${missing.join(', ')}`
+      );
+    }
+    await new Promise((resolve) => setTimeout(resolve, PROMOTE_POLL_INTERVAL_MS));
+  }
+
+  return prepared.map(({ q, queryId, esql }) => ({
+    queryId,
+    ruleId: ruleIdByAssetId.get(queryId) as string,
+    title: q.title,
+    esql,
+    severityScore: q.severityScore,
+    description: q.description,
+  }));
 }

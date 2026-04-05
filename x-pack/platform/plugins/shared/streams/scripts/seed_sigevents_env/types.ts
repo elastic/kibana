@@ -63,7 +63,8 @@ export interface SeedContext {
   streamName: string;
   scenarioName: string;
   seed: number;
-  baselineMinutes: number;
+  /** Kibana space where seeded assets land. Defaults to 'default'. */
+  space: string;
   /** ISO timestamp computed once at run start; threaded to all steps that store generated_at. */
   generatedAt: string;
 }

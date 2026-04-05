@@ -12,7 +12,6 @@ import type { SeedContext, SeedScenario, SeededQuery } from '../types';
 import { buildFeaturePayloads } from './seed_features';
 import { buildInsightPayloads } from './seed_insights';
 
-// Task type / id constants — must stay in sync with the server-side task definitions.
 const FEATURES_TASK_TYPE = 'streams_features_identification';
 const QUERIES_TASK_TYPE = 'streams_significant_events_queries_generation';
 const ONBOARDING_TASK_TYPE = 'streams_onboarding';
@@ -38,7 +37,8 @@ const TEMP_SEED_PASSWORD = 'seed_sigevents_tasks_tmp_pass!';
  * the user in a finally block.
  *
  * Crash safety: if the process dies between putUser and deleteUser, the temp account leaks.
- * Run with --clean to delete it on the next invocation.
+ * The pre-flight delete below handles stale users from previous crashed runs. If you need
+ * to clean up manually: DELETE /_security/user/seed_sigevents_tasks_tmp
  */
 async function withTempSuperuser<T>(
   esClient: Client,
@@ -47,6 +47,18 @@ async function withTempSuperuser<T>(
   fn: (sysClient: Client) => Promise<T>
 ): Promise<T> {
   const { Client: EsClient } = await import('@elastic/elasticsearch');
+
+  // Pre-flight: remove any stale user left by a previous crashed run.
+  try {
+    await esClient.security.deleteUser({ username: TEMP_SEED_USER });
+    log.debug(`withTempSuperuser: removed stale temp user "${TEMP_SEED_USER}" from previous run`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!msg.includes('not_found') && !msg.includes('404')) {
+      log.debug(`withTempSuperuser: pre-flight deleteUser failed: ${msg}`);
+    }
+  }
+
   try {
     await esClient.security.putUser({
       username: TEMP_SEED_USER,
@@ -183,18 +195,22 @@ export async function cleanTasks(
   log: ToolingLog
 ): Promise<void> {
   await withTempSuperuser(esClient, ctx, log, async (sysClient) => {
-    for (const id of taskDocIds(ctx.streamName)) {
-      try {
-        await sysClient.delete({
-          index: '.kibana_streams_tasks',
-          id,
-          refresh: 'wait_for',
-        } as Parameters<Client['delete']>[0]);
-        log.info(`cleanTasks: deleted task doc "${id}"`);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (!msg.includes('not_found') && !msg.includes('index_not_found')) throw err;
-      }
-    }
+    await Promise.all(
+      taskDocIds(ctx.streamName).map(async (id) => {
+        try {
+          await sysClient.delete({
+            index: '.kibana_streams_tasks',
+            id,
+            refresh: 'wait_for',
+          } as Parameters<Client['delete']>[0]);
+          log.info(`cleanTasks: deleted task doc "${id}"`);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          if (!msg.includes('not_found') && !msg.includes('index_not_found')) {
+            throw err;
+          }
+        }
+      })
+    );
   });
 }

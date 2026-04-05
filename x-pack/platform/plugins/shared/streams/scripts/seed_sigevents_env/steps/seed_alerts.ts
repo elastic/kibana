@@ -37,9 +37,6 @@ function ensureMetadataInFrom(esql: string): string {
   return trimmed.replace(match[0], `${match[0]} METADATA _id, _source`);
 }
 
-/** Kibana space used when building deterministic alert _ids. Must match the target space. */
-const KIBANA_SPACE = 'default';
-
 function esqlRowsToObjects(
   columns: Array<{ name: string }> | undefined,
   values: unknown[][] | undefined
@@ -90,9 +87,11 @@ export async function seedAlerts(
     const rows = esqlRowsToObjects(esqlResult.columns, esqlResult.values);
 
     if (rows.length === 0) {
-      throw new Error(
-        `ESQL returned no results for query '${seededQuery.title}' — possible causes: log template drift, time range mismatch, or refresh timing`
+      log.warning(
+        `seedAlerts: "${seededQuery.title}" matched 0 rows in failure window — skipping alert generation for this query. ` +
+          `Possible causes: log template drift, time range mismatch, or refresh timing.`
       );
+      continue;
     }
 
     log.info(
@@ -108,7 +107,7 @@ export async function seedAlerts(
       }
       indexedForQuery += 1;
 
-      const alertDocId = deterministicId(logDocId, seededQuery.ruleId, KIBANA_SPACE);
+      const alertDocId = deterministicId(logDocId, seededQuery.ruleId, ctx.space);
       const ts = row['@timestamp'];
       const timestamp =
         typeof ts === 'string'
@@ -137,14 +136,14 @@ export async function seedAlerts(
         'kibana.alert.start': new Date(failureStartMs).toISOString(),
         'kibana.alert.flapping': false,
         'kibana.alert.flapping_history': [],
-        'kibana.space_ids': [KIBANA_SPACE],
+        'kibana.space_ids': [ctx.space],
         'event.kind': 'signal',
         'event.action': 'active',
         original_source: originalSource,
       };
 
       bulkOps.push({
-        create: {
+        index: {
           _index: '.alerts-streams.alerts-default',
           _id: alertDocId,
         },
@@ -160,20 +159,15 @@ export async function seedAlerts(
   }
 
   if (bulkOps.length === 0) {
-    throw new Error('seedAlerts: no alert documents were produced (unexpected empty bulk)');
+    log.warning('seedAlerts: no alert documents were produced — all queries matched zero rows');
+    return;
   }
 
-  const res = await esClient.bulk({ operations: bulkOps as never, refresh: 'wait_for' });
+  const res = await esClient.bulk({ operations: bulkOps, refresh: 'wait_for' });
   if (res.errors) {
-    const failed = res.items?.find(
-      (item) =>
-        (item as { index?: { error?: unknown }; create?: { error?: unknown } }).create?.error ||
-        (item as { index?: { error?: unknown } }).index?.error
-    );
-    log.error(
-      `Alert bulk indexing reported errors: ${JSON.stringify(failed ?? res.items?.slice(0, 3))}`
-    );
-    throw new Error('Elasticsearch bulk indexing failed while seeding alerts');
+    const failedItems = res.items.filter((item) => item.index?.error).slice(0, 5);
+    const reasons = failedItems.map((item) => JSON.stringify(item.index?.error)).join('; ');
+    throw new Error(`Alert bulk indexing failed (${failedItems.length} item(s)): ${reasons}`);
   }
 
   log.info(

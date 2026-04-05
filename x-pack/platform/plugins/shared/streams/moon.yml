@@ -88,6 +88,7 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/synthtrace'
   - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
 tags:
   - plugin
   - prod

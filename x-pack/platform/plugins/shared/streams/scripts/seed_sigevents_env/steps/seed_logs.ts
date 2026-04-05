@@ -15,6 +15,8 @@ import type { SeedContext } from '../types';
 
 const TICK_MS = 60_000;
 const BULK_FLUSH_DOCS = 500;
+/** Baseline window before the failure injection phase, in minutes. */
+const BASELINE_MINUTES = 30;
 
 export async function seedLogs(
   ctx: SeedContext,
@@ -30,7 +32,7 @@ export async function seedLogs(
     );
   }
 
-  const baselineMs = ctx.baselineMinutes * 60_000;
+  const baselineMs = BASELINE_MINUTES * 60_000;
   const cycleDurationMs = (scenario.cycleDurationMinutes ?? 10) * 60_000;
   const to = Date.now();
   const from = to - baselineMs - cycleDurationMs;
