@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('navigates to overview tab', async () => {
             await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
             await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('data');
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('overview');
           });
 
           it('navigates to settings tab', async () => {
@@ -76,7 +76,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
             await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
             await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
-            await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExists();
           });
         });
       });

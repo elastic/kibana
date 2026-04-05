@@ -257,6 +257,7 @@ function validateProcessorFailureRates(simulationResult: ProcessingSimulationRes
   }
 
   for (const [processorId, metrics] of Object.entries(simulationResult.processors_metrics)) {
+    if (!metrics) continue;
     if (metrics.failed_rate > maxFailureRate) {
       const failurePercentage = (metrics.failed_rate * 100).toFixed(2);
       errors.push(
