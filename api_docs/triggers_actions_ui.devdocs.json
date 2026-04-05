@@ -179,7 +179,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 498,
+            "lineNumber": 499,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -195,7 +195,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 498,
+                "lineNumber": 499,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -212,7 +212,7 @@
                   "PluginsStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-                "lineNumber": 498,
+                "lineNumber": 499,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -232,7 +232,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
-            "lineNumber": 630,
+            "lineNumber": 631,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -311,6 +311,77 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/add_message_variables_optional.tsx",
             "lineNumber": 29,
             "columnNumber": 77,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.convertFieldSpecToFieldOption",
+        "type": "Function",
+        "tags": [],
+        "label": "convertFieldSpecToFieldOption",
+        "description": [],
+        "signature": [
+          "(fieldSpec: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[], onlyMappedOrRuntime?: boolean) => ",
+          "FieldOption",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.convertFieldSpecToFieldOption.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldSpec",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.convertFieldSpecToFieldOption.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "onlyMappedOrRuntime",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -554,7 +625,7 @@
           "[]>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-        "lineNumber": 70,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -570,7 +641,7 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-            "lineNumber": 70,
+            "lineNumber": 105,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -587,7 +658,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-            "lineNumber": 70,
+            "lineNumber": 105,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -607,12 +678,12 @@
         "signature": [
           "(http: ",
           "HttpSetup",
-          ", pattern: string) => Promise<",
+          ", pattern: string, projectRouting?: string | undefined) => Promise<",
           "IOption",
           "[]>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-        "lineNumber": 18,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -628,8 +699,8 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-            "lineNumber": 18,
-            "columnNumber": 39,
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -645,11 +716,28 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-            "lineNumber": 18,
-            "columnNumber": 56,
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getIndexOptions.$3",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -7998,7 +8086,7 @@
         "label": "firstFieldOption",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-        "lineNumber": 74,
+        "lineNumber": 109,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8011,7 +8099,7 @@
             "label": "text",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-            "lineNumber": 75,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8024,7 +8112,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/index_controls/index.ts",
-            "lineNumber": 81,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9162,7 +9250,7 @@
         "label": "TIME_SERIES_BUCKET_SELECTOR_FIELD",
         "description": [],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/lib/time_series_query.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
