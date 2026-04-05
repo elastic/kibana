@@ -19,7 +19,7 @@ export interface ParsedVariablePath {
   errors?: string[];
   propertyPath: string | null;
   filters: string[];
-  hasDynamicBracketAccess?: boolean;
+  hasDynamicBracketAccess: boolean;
   dynamicAccess?: DynamicBracketAccessInfo;
 }
 
@@ -62,6 +62,7 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
         errors: [`Invalid property path: ${trimmedPath}`],
         propertyPath: null,
         filters: [],
+        hasDynamicBracketAccess: false,
       };
     }
 
@@ -71,6 +72,7 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
         errors: [`Invalid property path: ${trimmedPath}`],
         propertyPath: null,
         filters: [],
+        hasDynamicBracketAccess: false,
       };
     }
 
@@ -91,6 +93,7 @@ export function parseVariablePath(path: string): ParsedVariablePath | null {
       errors: [`Invalid property path: ${trimmedPath}`],
       propertyPath: null,
       filters: [],
+      hasDynamicBracketAccess: false,
     };
   }
 }
