@@ -8,7 +8,7 @@
 import { has, filter, unset } from 'lodash';
 import { produce } from 'immer';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getInternalSavedObjectsClient } from '../utils';
 import type { DeletePacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -52,10 +52,21 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-        const currentPackSO = await savedObjectsClient.get<{ name: string }>(
-          packSavedObjectType,
-          request.params.id
-        );
+        let currentPackSO;
+        try {
+          currentPackSO = await savedObjectsClient.get<{ name: string }>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         await savedObjectsClient.delete(packSavedObjectType, request.params.id, {
           refresh: 'wait_for',

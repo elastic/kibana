@@ -13,13 +13,13 @@ import { setTimeout } from 'timers/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
+import { runKibanaServer } from '@kbn/test-kibana-server';
 
 import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
-import { runKibanaServer } from '../lib/run_kibana_server';
 import { RunTestsOptions } from './flags';
 
 /**

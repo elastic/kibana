@@ -8,12 +8,12 @@
  */
 
 import { runStartServer } from './start_server';
-import { initLogsDir } from '@kbn/test';
-import { FlagsReader } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import { initLogsDir } from './init_logs_dir';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { startServers, parseServerFlags } from '../servers';
 
-jest.mock('@kbn/test', () => ({
+jest.mock('./init_logs_dir', () => ({
   initLogsDir: jest.fn(),
 }));
 
