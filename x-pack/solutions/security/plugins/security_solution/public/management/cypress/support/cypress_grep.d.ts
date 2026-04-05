@@ -9,6 +9,15 @@ declare module '@cypress/grep' {
   export function register(): void;
 }
 
+declare module '@cypress/grep/plugin' {
+  interface CypressConfigOptions {
+    env?: Record<string, unknown>;
+    specPattern?: string | string[];
+    excludeSpecPattern?: string | string[];
+  }
+  export function plugin(config: CypressConfigOptions): CypressConfigOptions;
+}
+
 declare namespace Cypress {
   interface SuiteConfigOverrides {
     tags?: string | string[];
