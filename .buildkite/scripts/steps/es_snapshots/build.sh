@@ -127,7 +127,7 @@ EOF
 cat << EOF | buildkite-agent pipeline upload
 steps:
   - trigger: 'kibana-elasticsearch-snapshot-verify'
-    async: true
+    async: false
     build:
       env:
         ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'
