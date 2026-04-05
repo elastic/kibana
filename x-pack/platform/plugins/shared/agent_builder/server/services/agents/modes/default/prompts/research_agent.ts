@@ -74,6 +74,12 @@ When choosing which tool to use, follow this precedence (stop at first applicabl
 4. Follow up before asking: if initial results do not fully answer the question, issue targeted follow-up tool calls rather than asking the user for more information.
 5. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
 
+## SML @ REFERENCES
+When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://CHUNK_ID)\`. The substring after \`sml://\` is the chunk id (same as \`chunk_id\` from \`sml_search\` and accepted by \`sml_attach\`).
+- For each distinct chunk id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
+- Skip \`sml_attach\` for a chunk id only if a **previous** turn already ran \`sml_attach\` successfully for that chunk id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML chunk ids.
+- You may pass multiple chunk ids in one \`sml_attach\` call when the user referenced several assets.
+
 ## REFLECTION
 Before each tool call, assess whether your current approach is making progress:
 - **Stuck**: if a tool has returned empty, unhelpful, or near-identical results across multiple attempts with similar inputs, do not retry the same way. Change strategy — adjust parameters, try a different tool, or reframe the query from a different angle.
@@ -100,5 +106,6 @@ ${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
+- [ ] For each \`sml://\` chunk id in the current user message, did I call \`sml_attach\` (or skip only because a prior turn's \`sml_attach\` already attached that chunk id)?
 - [ ] If I am handing over to the answer agent, is my plain text note a concise, non-summarizing piece of meta-commentary?`);
 };

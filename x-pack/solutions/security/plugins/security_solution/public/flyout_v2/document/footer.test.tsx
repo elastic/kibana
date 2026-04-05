@@ -15,6 +15,11 @@ jest.mock('./components/footer_ai_actions', () => ({
     <div data-test-subj="footerAiActions" data-hit-id={hit.id} />
   ),
 }));
+jest.mock('./components/take_action', () => ({
+  TakeAction: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="takeAction" data-hit-id={hit.id} />
+  ),
+}));
 
 const createMockHit = (): DataTableRecord =>
   ({
@@ -30,6 +35,16 @@ describe('<Footer />', () => {
     const { getByTestId } = render(<Footer hit={hit} />);
 
     const aiActions = getByTestId('footerAiActions');
+    expect(aiActions).toBeInTheDocument();
+    expect(aiActions).toHaveAttribute('data-hit-id', 'test-id');
+  });
+
+  it('renders TakeAction with the provided hit', () => {
+    const hit = createMockHit();
+
+    const { getByTestId } = render(<Footer hit={hit} />);
+
+    const aiActions = getByTestId('takeAction');
     expect(aiActions).toBeInTheDocument();
     expect(aiActions).toHaveAttribute('data-hit-id', 'test-id');
   });

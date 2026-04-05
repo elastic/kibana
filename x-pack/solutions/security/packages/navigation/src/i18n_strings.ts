@@ -159,6 +159,11 @@ export const i18nStrings = {
       ),
     },
   },
+  modelManagement: {
+    title: i18n.translate('securitySolutionPackages.navLinks.modelManagement', {
+      defaultMessage: 'Model Management',
+    }),
+  },
   entityRiskScore: i18n.translate('securitySolutionPackages.navLinks.entityRiskScore', {
     defaultMessage: 'Entity risk score',
   }),

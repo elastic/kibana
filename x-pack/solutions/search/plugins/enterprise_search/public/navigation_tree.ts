@@ -280,15 +280,6 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:trained_models' },
-                    {
-                      link: 'management:inference_endpoints',
-                    },
-                    {
-                      link: 'management:model_settings',
-                    },
-                    {
-                      link: 'management:elastic_inference_service',
-                    },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
@@ -296,6 +287,25 @@ export const getNavigationTreeDefinition = ({
                     'xpack.enterpriseSearch.searchNav.management.machineLearning',
                     {
                       defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                },
+                {
+                  children: [
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
+                    {
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
+                    },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.modelManagement',
+                    {
+                      defaultMessage: 'Model Management',
                     }
                   ),
                 },
