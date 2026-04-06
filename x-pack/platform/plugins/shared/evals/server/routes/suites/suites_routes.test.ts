@@ -526,6 +526,51 @@ describe('suite routes', () => {
       expect(response.payload.run_id).toBe('run-recent');
       expect(response.payload.status).toBe('completed');
     });
+
+    it('exposes eval_run_id in the status response when set', async () => {
+      const suiteRunner = createMockSuiteRunner();
+      const runStatus = buildSuiteRunStatus({
+        status: 'completed',
+        completedAt: '2026-01-01T01:00:00.000Z',
+        exitCode: 0,
+        evalRunId: '5ede1fceaacc7a6e',
+      });
+      suiteRunner.listRuns.mockReturnValueOnce([runStatus]);
+
+      const { handler } = setup(suiteRunner);
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: SUITE_STATUS_URL.replace('{suiteId}', 'attack-discovery'),
+        params: { suiteId: 'attack-discovery' },
+      });
+
+      const response = await handler({} as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(response.payload.eval_run_id).toBe('5ede1fceaacc7a6e');
+    });
+
+    it('omits eval_run_id when the kbn-evals run_id has not been observed yet', async () => {
+      const suiteRunner = createMockSuiteRunner();
+      // Early in the run (before the first experiment finishes), evalRunId
+      // is undefined — the API should forward that rather than returning ''.
+      const runStatus = buildSuiteRunStatus({ status: 'running' });
+      suiteRunner.listRuns.mockReturnValueOnce([runStatus]);
+
+      const { handler } = setup(suiteRunner);
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: SUITE_STATUS_URL.replace('{suiteId}', 'attack-discovery'),
+        params: { suiteId: 'attack-discovery' },
+      });
+
+      const response = await handler({} as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(response.payload.eval_run_id).toBeUndefined();
+    });
   });
 
   describe('GET /internal/evals/suites/{suiteId}/runs', () => {
@@ -611,6 +656,7 @@ describe('suite routes', () => {
         status: 'completed',
         completedAt: '2026-01-01T01:00:00.000Z',
         exitCode: 0,
+        evalRunId: '5ede1fceaacc7a6e',
         output: ['3 passed'],
       });
       suiteRunner.listRuns.mockReturnValueOnce([runStatus]);
@@ -629,6 +675,7 @@ describe('suite routes', () => {
       expect(response.payload.runs).toHaveLength(1);
       expect(response.payload.runs[0]).toEqual({
         run_id: runStatus.runId,
+        eval_run_id: '5ede1fceaacc7a6e',
         suite_id: runStatus.suiteId,
         status: 'completed',
         started_at: runStatus.startedAt,

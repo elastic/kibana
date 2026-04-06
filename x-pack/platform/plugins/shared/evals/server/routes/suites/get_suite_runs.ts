@@ -39,6 +39,7 @@ export function registerGetSuiteRunsRoute({ router, suiteRunner }: SuiteRouteDep
           .filter((r) => r.suiteId === suiteId)
           .map((r) => ({
             run_id: r.runId,
+            eval_run_id: r.evalRunId,
             suite_id: r.suiteId,
             status: r.status,
             started_at: r.startedAt,

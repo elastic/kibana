@@ -288,6 +288,61 @@ describe('SuiteRunner', () => {
         expect(status?.error).toContain('exited with code 1');
       });
     });
+
+    describe('evalRunId extraction', () => {
+      const scoreExportLine = (runId: string) =>
+        `info [scout-worker] You can query the data using: environment.hostname:"test-host" AND task.model.id:"gemini-2.5-pro" AND run_id:"${runId}"`;
+
+      it('parses eval run_id from scout-worker score-export log line', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(Buffer.from(scoreExportLine('5ede1fceaacc7a6e')));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.evalRunId).toBe('5ede1fceaacc7a6e');
+      });
+
+      it('first-match-wins: keeps the initial eval run_id even if later lines mention another', () => {
+        // All experiments in a multi-project run share the same eval run_id,
+        // so if we see a different one it's almost certainly noise — we keep
+        // the first one observed to guarantee deterministic linking.
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(Buffer.from(scoreExportLine('aaaaaaaaaaaaaaaa')));
+        child.stdout.write(Buffer.from(scoreExportLine('bbbbbbbbbbbbbbbb')));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.evalRunId).toBe('aaaaaaaaaaaaaaaa');
+      });
+
+      it('leaves evalRunId undefined when no export line is emitted', () => {
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(Buffer.from('ran 3 tests, all passed\n'));
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.evalRunId).toBeUndefined();
+      });
+
+      it('captures evalRunId when the export line is interleaved with result tables', () => {
+        // Realistic multi-experiment output: result table, then export line.
+        const { runId } = runner.startRun(baseConfig);
+        const child = getSpawnedChild();
+        child.stdout.write(
+          Buffer.from(
+            ['║ Overall │ 3 │ mean: 0.5 ║', scoreExportLine('d16e276a103b47a3')].join('\n')
+          )
+        );
+        child.emit('exit', 0);
+
+        const status = runner.getStatus(runId);
+        expect(status?.evalRunId).toBe('d16e276a103b47a3');
+        expect(status?.status).toBe('completed');
+      });
+    });
   });
 
   describe('spawn arguments', () => {

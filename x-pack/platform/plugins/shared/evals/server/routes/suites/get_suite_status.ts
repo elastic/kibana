@@ -46,6 +46,7 @@ export function registerGetSuiteStatusRoute({ router, suiteRunner }: SuiteRouteD
           body: {
             suite_id: suiteId,
             run_id: latest.runId,
+            eval_run_id: latest.evalRunId,
             status: latest.status,
             started_at: latest.startedAt,
             completed_at: latest.completedAt,

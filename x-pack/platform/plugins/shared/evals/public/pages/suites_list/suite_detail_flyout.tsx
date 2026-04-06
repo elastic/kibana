@@ -20,6 +20,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -31,6 +32,7 @@ import {
   type EuiTimelineItemProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useHistory } from 'react-router-dom';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -129,6 +131,13 @@ const ansiToElements = (line: string, lineIdx: number): React.ReactNode => {
 
 interface SuiteRun {
   run_id: string;
+  /**
+   * The kbn-evals `run_id` produced by the Playwright/Scout process and
+   * exported to Elasticsearch. Present once the first experiment finishes
+   * and logs its score-export message. Use this to cross-link to
+   * /runs/{eval_run_id} where per-example scores and traces live.
+   */
+  eval_run_id?: string;
   suite_id: string;
   status: 'running' | 'completed' | 'failed';
   started_at: string;
@@ -240,6 +249,7 @@ const AnsiOutput: React.FC<{ lines: string[]; maxHeight?: string }> = ({
 
 export const SuiteDetailFlyout: React.FC<SuiteDetailFlyoutProps> = ({ suite, onClose, onRun }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const history = useHistory();
   const { data, isLoading } = useSuiteRuns(suite.id);
   const runs = data?.runs ?? [];
   const currentRun = runs.find((r) => r.status === 'running');
@@ -269,6 +279,18 @@ export const SuiteDetailFlyout: React.FC<SuiteDetailFlyoutProps> = ({ suite, onC
               {formatRelativeTime(run.started_at)}
             </EuiText>
           </EuiFlexItem>
+          {run.eval_run_id && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                onClick={() => history.push(`/runs/${run.eval_run_id}`)}
+                data-test-subj="suiteRunHistoryViewResultsLink"
+              >
+                {i18n.translate('xpack.evals.suites.flyout.viewResultsShort', {
+                  defaultMessage: 'Results →',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         {run.error && (
           <EuiText size="xs" color="danger">
@@ -467,6 +489,20 @@ export const SuiteDetailFlyout: React.FC<SuiteDetailFlyoutProps> = ({ suite, onC
                         })}
                       </strong>
                       : {latestRun.exit_code}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                {latestRun.eval_run_id && (
+                  <EuiFlexItem>
+                    <EuiText size="xs">
+                      <EuiLink
+                        onClick={() => history.push(`/runs/${latestRun.eval_run_id}`)}
+                        data-test-subj="suiteRunViewResultsLink"
+                      >
+                        {i18n.translate('xpack.evals.suites.flyout.viewResults', {
+                          defaultMessage: 'View results →',
+                        })}
+                      </EuiLink>
                     </EuiText>
                   </EuiFlexItem>
                 )}

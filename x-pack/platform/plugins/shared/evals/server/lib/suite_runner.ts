@@ -40,6 +40,18 @@ export interface SuiteRunStatus {
   exitCode?: number;
   error?: string;
   output: string[];
+  /**
+   * The kbn-evals `run_id` that the Playwright/Scout process produced and
+   * exported to Elasticsearch under `kibana-evaluations*`. Parsed from the
+   * scout-worker log line that every experiment emits. Shared across all
+   * projects in a multi-project suite run (one eval run_id per SuiteRun),
+   * so the first match is authoritative. Undefined until the first
+   * experiment finishes and logs its score export message.
+   *
+   * Used by the UI to cross-link into /runs/{evalRunId} for score details
+   * and trace correlation.
+   */
+  evalRunId?: string;
 }
 
 const MAX_RUNS_HISTORY = 10;
@@ -55,6 +67,15 @@ const PROCESS_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
  * robust to ANSI color stripping and box style variants.
  */
 const OVERALL_MEAN_REGEX = /Overall\s*[│|]\s*\d+\s*[│|]\s*mean:\s*([\d.]+)/;
+
+/**
+ * Matches the "run_id" segment of the kbn-evals score-export log line:
+ *   You can query the data using: environment.hostname:"..." AND
+ *   task.model.id:"..." AND run_id:"5ede1fceaacc7a6e"
+ * Source: report_model_score.ts in @kbn/evals. The format is
+ * deterministic so a tight regex is safe.
+ */
+const EVAL_RUN_ID_REGEX = /\brun_id:"([^"]+)"/;
 
 /** Patterns that indicate startup noise rather than meaningful test output */
 const NOISE_PATTERNS = [
@@ -300,12 +321,25 @@ export class SuiteRunner {
 
         if (internal) {
           for (const line of lines) {
-            const match = line.match(OVERALL_MEAN_REGEX);
-            if (!match) continue;
-            const mean = parseFloat(match[1]);
-            if (Number.isNaN(mean)) continue;
-            internal.sawOverallTable = true;
-            if (mean > 0) internal.sawPositiveOverallMean = true;
+            // Track eval scores from the Overall results row.
+            const meanMatch = line.match(OVERALL_MEAN_REGEX);
+            if (meanMatch) {
+              const mean = parseFloat(meanMatch[1]);
+              if (!Number.isNaN(mean)) {
+                internal.sawOverallTable = true;
+                if (mean > 0) internal.sawPositiveOverallMean = true;
+              }
+            }
+
+            // Capture the kbn-evals run_id the first time it's logged.
+            // All experiments in a multi-project run share the same id,
+            // so first-match-wins is correct.
+            if (!run.evalRunId) {
+              const idMatch = line.match(EVAL_RUN_ID_REGEX);
+              if (idMatch) {
+                run.evalRunId = idMatch[1];
+              }
+            }
           }
         }
 
