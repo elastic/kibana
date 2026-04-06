@@ -10,6 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Agent } from 'supertest';
 import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { ENTITY_STORE_ROUTES, API_VERSIONS } from '@kbn/entity-store/common';
 
 export interface EntityStoreHelpersDeps {
   es: Client;
@@ -298,9 +299,9 @@ export const installCloudAssetInventoryPackage = async ({
 
 // --- Entity Store V2 helpers ---
 
-const V2_HEADERS = {
+const PUBLIC_HEADERS = {
   'kbn-xsrf': 'true',
-  'elastic-api-version': '2',
+  'elastic-api-version': API_VERSIONS.public.v1,
   'x-elastic-internal-origin': 'kibana',
 };
 
@@ -317,8 +318,8 @@ export const installEntityStoreV2 = async ({
   logger.debug(`Installing Entity Store V2 for space: ${spaceLabel}`);
 
   const response = await supertest
-    .post(`${spacePath}/internal/security/entity_store/install?apiVersion=2`)
-    .set(V2_HEADERS)
+    .post(`${spacePath}${ENTITY_STORE_ROUTES.public.INSTALL}`)
+    .set(PUBLIC_HEADERS)
     .send({});
 
   if (response.status !== 200 && response.status !== 201) {
@@ -345,8 +346,8 @@ export const uninstallEntityStoreV2 = async ({
 
   try {
     await supertest
-      .post(`${spacePath}/internal/security/entity_store/uninstall?apiVersion=2`)
-      .set(V2_HEADERS)
+      .post(`${spacePath}${ENTITY_STORE_ROUTES.public.UNINSTALL}`)
+      .set(PUBLIC_HEADERS)
       .send({})
       .expect(200);
     logger.debug(`Entity Store V2 uninstalled for space: ${spaceLabel}`);
@@ -376,8 +377,8 @@ export const waitForEntityStoreV2Running = async ({
 
   await retry.waitForWithTimeout('Entity Store V2 to be running', 60000, async () => {
     const response = await supertest
-      .get(`${spacePath}/internal/security/entity_store/status?apiVersion=2`)
-      .set(V2_HEADERS);
+      .get(`${spacePath}${ENTITY_STORE_ROUTES.public.STATUS}`)
+      .set(PUBLIC_HEADERS);
 
     if (response.status !== 200) {
       logger.debug(`Entity Store V2 status check failed with status: ${response.status}`);
