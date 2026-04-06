@@ -73,7 +73,7 @@ interface QueryBehavior {
   queriesPerDay: number;
 }
 
-const PERSONAS: Persona[] = [
+const _PERSONAS: Persona[] = [
   {
     id: 'alice_soc_l3',
     name: 'Alice (SOC L3 Analyst)',
@@ -235,7 +235,6 @@ async function loadEpisodeData(esClient: Client) {
     console.log(`  Loading ${episodeName}: ${lines.length} documents`);
 
     // Determine target index from data
-    const firstDoc = JSON.parse(lines[0]);
     const isAlert = file.includes('alerts');
     // Use write alias for alerts (managed by Kibana), direct index for logs
     const index = isAlert
