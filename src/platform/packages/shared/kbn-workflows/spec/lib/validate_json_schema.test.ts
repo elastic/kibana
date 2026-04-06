@@ -9,9 +9,8 @@
 
 import { isValidJsonSchema } from './validate_json_schema';
 
-// Unit tests for isValidJsonSchema (JsonModelShapeSchema + explicit unsupported-keyword checks).
-// Integration: schema.test.ts (JsonModelSchema). Full Monaco JSON Schema from getWorkflowJsonSchema
-// is intentionally not asserted here — it includes OpenAPI/Zod keywords outside this model.
+// Unit tests for isValidJsonSchema (JsonModelShapeSchema + entry-keyword guard).
+// Integration: schema.test.ts (JsonModelSchema); workflow_inputs_yaml_lsp.test.ts (YAML LSP vs getWorkflowJsonSchema).
 describe('isValidJsonSchema', () => {
   it('should validate a simple string schema', () => {
     const schema = { type: 'string' };
