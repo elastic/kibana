@@ -32,6 +32,7 @@ interface WatchlistConfigClientDeps {
 
 type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
+type WatchlistObjectWithId = WatchlistObject & { id: string };
 
 const omitWatchlistMeta = (
   watchlist: Partial<WatchlistObject>
@@ -117,16 +118,15 @@ export class WatchlistConfigClient {
     return this.get(id);
   }
 
-  async list(): Promise<WatchlistObject[]> {
+  async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
     return this.deps.soClient
       .find<WatchlistObject>({
         type: watchlistConfigTypeName,
         namespaces: [this.deps.namespace],
-        perPage: MAX_PER_PAGE,
+        perPage: limit,
       })
-
       .then((response) => {
-        return response.saved_objects.map((so) => toWatchlistObject(so));
+        return response.saved_objects.map((so) => toWatchlistObject(so) as WatchlistObjectWithId);
       });
   }
 
