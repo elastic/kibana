@@ -74,7 +74,7 @@
           "<G, L>> | undefined; }) => React.ReactElement<any>"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
-        "lineNumber": 37,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -117,7 +117,7 @@
               "<G, L>> | undefined; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
-            "lineNumber": 29,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -143,7 +143,7 @@
             "section": "def-common.GroupNode",
             "text": "GroupNode"
           },
-          ", L extends DocWithId>(props: ",
+          ", L extends DocWithId>(_props: ",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -154,7 +154,7 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-        "lineNumber": 53,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -164,7 +164,7 @@
             "id": "def-common.DataCascadeRow.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "props",
+            "label": "_props",
             "description": [],
             "signature": [
               {
@@ -177,7 +177,7 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -205,7 +205,7 @@
             "section": "def-common.GroupNode",
             "text": "GroupNode"
           },
-          ", L extends DocWithId>(props: ",
+          ", L extends DocWithId>(_props: ",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -216,7 +216,7 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -226,7 +226,7 @@
             "id": "def-common.DataCascadeRowCell.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "_props",
             "description": [],
             "signature": [
               {
@@ -239,7 +239,7 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -595,51 +595,34 @@
         "label": "useCascadeVirtualizer",
         "description": [],
         "signature": [
-          "<G extends ",
-          {
-            "pluginId": "@kbn/shared-ux-document-data-cascade",
-            "scope": "common",
-            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-            "section": "def-common.GroupNode",
-            "text": "GroupNode"
-          },
-          ">({ overscan, enableStickyGroupHeader, estimatedRowHeight, rows, getScrollElement, onStateChange, initialOffset, initialRect, scrollMargin, initialAnchorItemIndex, isRoot, observeElementOffset, observeElementRect, initialPersistedAnchors, }: ",
-          "CascadeVirtualizerProps",
-          "<G>) => ",
-          {
-            "pluginId": "@kbn/shared-ux-document-data-cascade",
-            "scope": "common",
-            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-            "section": "def-common.CascadeVirtualizerReturnValue",
-            "text": "CascadeVirtualizerReturnValue"
-          }
+          "UseCascadeVirtualizer"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-        "lineNumber": 353,
+        "lineNumber": 371,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-document-data-cascade",
             "id": "def-common.useCascadeVirtualizer.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  overscan,\n  enableStickyGroupHeader,\n  estimatedRowHeight = 0,\n  rows,\n  getScrollElement,\n  onStateChange,\n  initialOffset,\n  initialRect,\n  scrollMargin,\n  initialAnchorItemIndex,\n  isRoot = true,\n  observeElementOffset,\n  observeElementRect,\n  initialPersistedAnchors,\n}",
+            "label": "props",
             "description": [],
             "signature": [
+              "Omit<",
               "CascadeVirtualizerProps",
-              "<G>"
+              "<G>, \"isRoot\"> & { isRoot: true; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
-            "lineNumber": 353,
-            "columnNumber": 60,
+            "lineNumber": 185,
+            "columnNumber": 5,
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -805,86 +788,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-        "id": "def-common.CascadeGroupNodeUIInteraction",
-        "type": "Interface",
-        "tags": [],
-        "label": "CascadeGroupNodeUIInteraction",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-document-data-cascade",
-            "scope": "common",
-            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-            "section": "def-common.CascadeGroupNodeUIInteraction",
-            "text": "CascadeGroupNodeUIInteraction"
-          },
-          "<G>"
-        ],
-        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 25,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-            "id": "def-common.CascadeGroupNodeUIInteraction.row",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "row",
-            "description": [
-              "\nThe row instance that was interacted with in the group by hierarchy."
-            ],
-            "signature": [
-              "G"
-            ],
-            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-            "lineNumber": 26,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-            "id": "def-common.CascadeGroupNodeUIInteraction.nodePath",
-            "type": "Array",
-            "tags": [],
-            "label": "nodePath",
-            "description": [
-              "\nThe path of the row that was interacted with in the group by hierarchy.\n"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-            "lineNumber": 30,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
-            "id": "def-common.CascadeGroupNodeUIInteraction.nodePathMap",
-            "type": "Object",
-            "tags": [],
-            "label": "nodePathMap",
-            "description": [
-              "\nKV record of the path values for the row node.\n"
-            ],
-            "signature": [
-              "{ [x: string]: string; }"
-            ],
-            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-            "lineNumber": 39,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/shared-ux-document-data-cascade",
         "id": "def-common.CascadeVirtualizerReturnValue",
@@ -2029,7 +1932,7 @@
                 "section": "def-common.ConnectedChildState",
                 "text": "ConnectedChildState"
               },
-              ", \"cellId\" | \"scrollAnchorItemIndex\"> & { isConnected: boolean; }> | undefined"
+              ", \"scrollAnchorItemIndex\" | \"cellId\"> & { isConnected: boolean; }> | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
             "lineNumber": 111,
@@ -2446,6 +2349,41 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.CascadeRootVirtualizerReturnValue",
+        "type": "Type",
+        "tags": [],
+        "label": "CascadeRootVirtualizerReturnValue",
+        "description": [
+          "\nNarrowed return type for {@link useCascadeVirtualizer} when `isRoot` is `true`.\nGuarantees that `childController` is always defined."
+        ],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.CascadeVirtualizerReturnValue",
+            "text": "CascadeVirtualizerReturnValue"
+          },
+          ", \"childController\"> & { childController: ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.ChildVirtualizerController",
+            "text": "ChildVirtualizerController"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/virtualizer/index.tsx",
+        "lineNumber": 172,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
         "id": "def-common.DataCascadeImplProps",
         "type": "Type",
         "tags": [],
@@ -2455,7 +2393,7 @@
           "DataCascadeImplBaseProps<G, L> & ({ customTableHeader: (props: { availableColumns: string[]; currentSelectedColumns: string[]; onGroupSelection: (groupByColumn: string[]) => void; selectedRows: string[]; }) => React.ReactNode; tableTitleSlot?: undefined; } | { customTableHeader?: undefined; tableTitleSlot: React.FC<{}>; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 264,
+        "lineNumber": 267,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2474,7 +2412,7 @@
           "<G, L>) => React.ReactNode; onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>; onCascadeLeafNodeCollapsed?: ((args: OnCascadeLeafNodeCollapsedArgs<G>) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 198,
+        "lineNumber": 201,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2501,7 +2439,7 @@
           "<G, L>, string | React.JSXElementConstructor<any>>; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 203,
+        "lineNumber": 206,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
