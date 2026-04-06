@@ -16,5 +16,5 @@ By default, spaces is enabled in {{kib}}. To secure spaces, [enable security](/r
 :   The maximum number of spaces that you can use with the {{kib}} instance. Some {{kib}} operations return all spaces using a single `_search` from {{es}}, so you must configure this setting lower than the `index.max_result_window` in {{es}}. The default is `1000`.
 
 `xpack.spaces.defaultSolution` {applies_to}`stack: ga 9.1`
-:   Sets the solution view for your default space. If you don't configure this setting, your solution view will be Classic.
+:   Set `es`, `oblt`, or `security` as the solution view for your default space. Without configuring this setting, your solution view will be Classic.
 
