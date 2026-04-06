@@ -116,8 +116,6 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const { dataView, status } = useDataView(PageScope.explore);
   const { dataViewSpec } = useDataViewSpec(PageScope.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
-  const watchlistFilterFlag = useIsExperimentalFeatureEnabled('entityAnalyticsNewHomePageEnabled');
-
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
     [newDataViewPickerEnabled, oldIsSourcererLoading, status]
