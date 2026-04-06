@@ -505,7 +505,7 @@ describe('getDefaultAwsCredentialsConfig', () => {
           inputs: [{ vars: [] }],
         },
       ],
-    } as PackageInfo;
+    } as unknown as PackageInfo;
     const result = getDefaultAwsCredentialConfig({
       packageInfo,
       templateName: TEMPLATE_NAME,
@@ -638,7 +638,7 @@ describe('getDefaultAzureCredentialsConfig', () => {
           inputs: [{ vars: [] }],
         },
       ],
-    } as PackageInfo;
+    } as unknown as PackageInfo;
 
     const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, true, true);
 
