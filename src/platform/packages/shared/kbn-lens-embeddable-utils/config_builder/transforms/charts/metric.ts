@@ -60,6 +60,7 @@ import {
   getMetricAccessor,
   getDatasourceLayers,
   getLensStateLayer,
+  getReversibleMappings,
   stripUndefined,
 } from './utils';
 import {
@@ -80,6 +81,28 @@ const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT: KbnPaletteId = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
+
+type MetricIconName = NonNullable<NonNullable<MetricStyling['primary']>['icon']>['name'];
+
+const iconCompat = getReversibleMappings<MetricIconName, string>([
+  ['alert', 'alert'],
+  ['asterisk', 'asterisk'],
+  ['bell', 'bell'],
+  ['bolt', 'bolt'],
+  ['bug', 'bug'],
+  ['compute', 'compute'],
+  ['editor_comment', 'editorComment'],
+  ['flag', 'flag'],
+  ['globe', 'globe'],
+  ['heart', 'heart'],
+  ['map_marker', 'mapMarker'],
+  ['pin', 'pin'],
+  ['sort_down', 'sortDown'],
+  ['sort_up', 'sortUp'],
+  ['star_empty', 'starEmpty'],
+  ['tag', 'tag'],
+  ['temperature', 'temperature'],
+]);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -147,7 +170,7 @@ function convertStylingToStateFormat(
     primaryAlign: primaryStyling?.value?.alignment,
     primaryPosition: primaryStyling?.position,
     titleWeight: primaryStyling?.title_weight,
-    icon: primaryStyling?.icon?.name,
+    icon: iconCompat.toState(primaryStyling?.icon?.name),
     iconAlign: primaryStyling?.icon?.alignment,
     ...(hasSecondary
       ? stripUndefined({
@@ -179,7 +202,7 @@ function convertStylingToAPIFormat(
       },
       icon: visualization.icon
         ? {
-            name: visualization.icon,
+            name: iconCompat.toAPI(visualization.icon),
             alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
           }
         : undefined,

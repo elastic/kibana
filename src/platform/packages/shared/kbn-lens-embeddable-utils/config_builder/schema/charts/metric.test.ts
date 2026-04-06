@@ -66,7 +66,7 @@ describe('Metric Schema', () => {
         styling: {
           primary: {
             icon: {
-              name: 'starEmpty',
+              name: 'star_empty',
               alignment: 'left',
             },
             labels: { alignment: 'left' },
@@ -483,6 +483,32 @@ describe('Metric Schema', () => {
 
       expect(() => metricStateSchema.validate(input)).toThrow();
     });
+
+    it('throws if the icon name is invalid', () => {
+      const input = {
+        ...baseMetricConfig,
+
+        styling: {
+          primary: {
+            icon: {
+              // @ts-expect-error - camelCase icon name
+              name: 'starEmpty',
+              alignment: 'right',
+            },
+          },
+        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'sum',
+            field: 'test_field',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+      } satisfies MetricInput;
+
+      expect(() => metricStateSchema.validate(input)).toThrow();
+    });
   });
 
   describe('complex configurations', () => {
@@ -532,7 +558,7 @@ describe('Metric Schema', () => {
           primary: {
             labels: { alignment: 'left' },
             value: { fit: false, alignment: 'right' },
-            icon: { name: 'starEmpty', alignment: 'right' },
+            icon: { name: 'star_empty', alignment: 'right' },
           },
           secondary: {
             label: { visible: true, placement: 'before' },
