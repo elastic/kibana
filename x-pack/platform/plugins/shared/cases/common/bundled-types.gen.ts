@@ -387,6 +387,62 @@ export const CaseResponseClosedByProperties = z
   })
   .nullable();
 
+export type CaseResponseCreatedByProperties = z.infer<typeof CaseResponseCreatedByProperties>;
+export const CaseResponseCreatedByProperties = z.object({
+  email: z.string().nullable(),
+  full_name: z.string().nullable(),
+  username: z.string().nullable(),
+  profile_uid: z.string().optional(),
+});
+
+export type CaseResponsePushedByProperties = z.infer<typeof CaseResponsePushedByProperties>;
+export const CaseResponsePushedByProperties = z
+  .object({
+    email: z.string().nullable(),
+    full_name: z.string().nullable(),
+    username: z.string().nullable(),
+    profile_uid: z.string().optional(),
+  })
+  .nullable();
+
+export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
+export const CaseResponseUpdatedByProperties = z
+  .object({
+    email: z.string().nullable(),
+    full_name: z.string().nullable(),
+    username: z.string().nullable(),
+    profile_uid: z.string().optional(),
+  })
+  .nullable();
+
+export type ActionsCommentResponseProperties = z.infer<typeof ActionsCommentResponseProperties>;
+export const ActionsCommentResponseProperties = z.object({
+  actions: z
+    .object({
+      targets: z
+        .array(
+          z.object({
+            endpointId: z.string().optional(),
+            hostname: z.string().optional(),
+          })
+        )
+        .optional(),
+      type: z.string().optional(),
+    })
+    .optional(),
+  comment: z.string().optional(),
+  created_at: z.string().datetime().optional(),
+  created_by: CaseResponseCreatedByProperties.optional(),
+  id: z.string().optional(),
+  owner: Owner.optional(),
+  pushed_at: z.string().datetime().nullable().optional(),
+  pushed_by: CaseResponsePushedByProperties.optional(),
+  type: z.literal('actions'),
+  updated_at: z.string().datetime().nullable().optional(),
+  updated_by: CaseResponseUpdatedByProperties.optional(),
+  version: z.string().optional(),
+});
+
 export type AlertCommentResponseProperties = z.infer<typeof AlertCommentResponseProperties>;
 export const AlertCommentResponseProperties = z.object({
   alertId: z.array(z.string()).optional(),
@@ -417,11 +473,11 @@ export const AlertCommentResponseProperties = z.object({
       /**
        * The rule identifier.
        */
-      id: z.string().optional(),
+      id: z.string().nullable().optional(),
       /**
        * The rule name.
        */
-      name: z.string().optional(),
+      name: z.string().nullable().optional(),
     })
     .optional(),
   type: z.literal('alert'),
@@ -438,33 +494,21 @@ export const AlertCommentResponseProperties = z.object({
   version: z.string().optional(),
 });
 
-export type CaseResponseCreatedByProperties = z.infer<typeof CaseResponseCreatedByProperties>;
-export const CaseResponseCreatedByProperties = z.object({
-  email: z.string().nullable(),
-  full_name: z.string().nullable(),
-  username: z.string().nullable(),
-  profile_uid: z.string().optional(),
+export type EventCommentResponseProperties = z.infer<typeof EventCommentResponseProperties>;
+export const EventCommentResponseProperties = z.object({
+  created_at: z.string().datetime().optional(),
+  created_by: CaseResponseCreatedByProperties.optional(),
+  eventId: z.array(z.string()).optional(),
+  id: z.string().optional(),
+  index: z.array(z.string()).optional(),
+  owner: Owner.optional(),
+  pushed_at: z.string().datetime().nullable().optional(),
+  pushed_by: CaseResponsePushedByProperties.optional(),
+  type: z.literal('event'),
+  updated_at: z.string().datetime().nullable().optional(),
+  updated_by: CaseResponseUpdatedByProperties.optional(),
+  version: z.string().optional(),
 });
-
-export type CaseResponsePushedByProperties = z.infer<typeof CaseResponsePushedByProperties>;
-export const CaseResponsePushedByProperties = z
-  .object({
-    email: z.string().nullable(),
-    full_name: z.string().nullable(),
-    username: z.string().nullable(),
-    profile_uid: z.string().optional(),
-  })
-  .nullable();
-
-export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdatedByProperties>;
-export const CaseResponseUpdatedByProperties = z
-  .object({
-    email: z.string().nullable(),
-    full_name: z.string().nullable(),
-    username: z.string().nullable(),
-    profile_uid: z.string().optional(),
-  })
-  .nullable();
 
 export type UserCommentResponseProperties = z.infer<typeof UserCommentResponseProperties>;
 export const UserCommentResponseProperties = z.object({
@@ -524,7 +568,12 @@ export const CaseResponseProperties = z.object({
    */
   comments: z
     .array(
-      z.discriminatedUnion('type', [AlertCommentResponseProperties, UserCommentResponseProperties])
+      z.discriminatedUnion('type', [
+        ActionsCommentResponseProperties,
+        AlertCommentResponseProperties,
+        EventCommentResponseProperties,
+        UserCommentResponseProperties,
+      ])
     )
     .max(10000),
   connector: z.discriminatedUnion('type', [
@@ -578,6 +627,10 @@ export const CaseResponseProperties = z.object({
   title: z.string(),
   totalAlerts: z.number().int(),
   totalComment: z.number().int(),
+  /**
+   * The number of events attached to the case.
+   */
+  totalEvents: z.number().int().optional(),
   updated_at: z.string().datetime().nullable(),
   updated_by: CaseResponseUpdatedByProperties,
   version: z.string(),
@@ -589,6 +642,23 @@ export const Response4Xx = z.object({
   message: z.string().optional(),
   statusCode: z.number().int().optional(),
 });
+
+/**
+  * The close reason to sync to attached alerts when closing the case. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user.
+
+  */
+export type CaseCloseSyncReason = z.infer<typeof CaseCloseSyncReason>;
+export const CaseCloseSyncReason = z.union([
+  z.enum([
+    'false_positive',
+    'duplicate',
+    'true_positive',
+    'benign_positive',
+    'automated_closure',
+    'other',
+  ]),
+  z.string(),
+]);
 
 /**
  * The update case API request body varies depending on the type of connector.
@@ -650,6 +720,7 @@ export const UpdateCaseRequest = z.object({
         status: CaseStatus.optional(),
         tags: CaseTags.optional(),
         title: CaseTitle.optional(),
+        closeReason: CaseCloseSyncReason.optional(),
         /**
       * The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
 
@@ -980,6 +1051,10 @@ export const CaseResponseGetCase = z.object({
    * The number of user comments on the case. Use the find case comments API to retrieve comment content.
    */
   totalComment: z.number().int(),
+  /**
+   * The number of events attached to the case.
+   */
+  totalEvents: z.number().int().optional(),
   updated_at: z.string().datetime().nullable(),
   updated_by: CaseResponseUpdatedByProperties,
   version: z.string(),
@@ -1167,11 +1242,11 @@ export const PayloadAlertComment = z.object({
           /**
            * The rule identifier.
            */
-          id: z.string().optional(),
+          id: z.string().nullable().optional(),
           /**
            * The rule name.
            */
-          name: z.string().optional(),
+          name: z.string().nullable().optional(),
         })
         .optional(),
       type: z.literal('alert').optional(),

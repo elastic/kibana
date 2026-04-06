@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import _ from 'lodash';
+import moment from 'moment';
 import type {
   MonitoringEntitySourceAttributes,
   MonitoringEntitySource,
@@ -132,7 +133,7 @@ export class WatchlistEntitySourceClient {
   private getQueryFilters(query?: ListWatchlistEntitySourcesRequestQuery, ids?: string[]): string {
     const queryParts = _.pick(query ?? {}, ['type', 'managed', 'name']);
     const filters = Object.entries(queryParts).map(
-      ([key, value]) => `${watchlistEntitySourceTypeName}.attributes.${key}: ${value}`
+      ([key, value]) => `${watchlistEntitySourceTypeName}.attributes.${key}: "${value}"`
     );
 
     if (ids?.length) {
@@ -164,6 +165,9 @@ export class WatchlistEntitySourceClient {
     source: MonitoringEntitySource,
     lastProcessedMarker: string
   ): Promise<void> {
+    if (!moment(lastProcessedMarker).isValid()) {
+      throw new Error(`Invalid timestamp: ${lastProcessedMarker}`);
+    }
     await this.update({
       ...source,
       integrations: {
@@ -186,6 +190,9 @@ export class WatchlistEntitySourceClient {
     source: MonitoringEntitySource,
     lastFullSyncMarker: string
   ): Promise<void> {
+    if (!moment(lastFullSyncMarker).isValid()) {
+      throw new Error(`Invalid timestamp: ${lastFullSyncMarker}`);
+    }
     await this.update({
       ...source,
       integrations: {

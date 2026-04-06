@@ -16,6 +16,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import {
   deleteAllRules,
@@ -40,9 +41,12 @@ import {
   fetchRule,
   waitForAlertToComplete,
   refreshIndex,
+  rulesAllPreviewIndexRole,
+  createExceptionListItem,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -403,8 +407,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual({
             error: 'Bad Request',
-            message:
-              '[request body]: Invalid input: expected string, received array, Too big: expected array to have <=5 items',
+            message: '[request body]: threshold.field: Too big: expected array to have <=5 items',
             statusCode: 400,
           });
         });
@@ -747,6 +750,84 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.message).toEqual(
           'User is not authorized to create/update kill-process response action'
         );
+      });
+    });
+
+    describe('@skipInServerless as a user with only the Rules feature', () => {
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+        await utils.createSuperTestWithCustomRole(rulesAllPreviewIndexRole);
+      });
+
+      afterEach(async () => {
+        await utils.cleanUpCustomRoles();
+        await deleteAllRules(supertest, log);
+        await deleteAllExceptions(supertest, log);
+      });
+
+      it('creates and previews a rule that references the endpoint exception list', async () => {
+        // ensure the endpoint list exists
+        await supertest.post(ENDPOINT_LIST_URL).set('kbn-xsrf', 'true').send().expect(200);
+        // add 1 item to the existing endpoint exception list, which will be queried by the rule
+        await createExceptionListItem(supertest, log, {
+          description: 'item description',
+          entries: [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'match',
+              value: 'something',
+            },
+          ],
+          list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+          name: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+          os_types: [],
+          type: 'simple',
+          namespace_type: 'agnostic',
+        });
+
+        const ruleParams = getCustomQueryRuleParams({
+          rule_id: 'rule-with-endpoint-exception-list',
+          exceptions_list: [
+            {
+              id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              namespace_type: 'agnostic',
+              type: 'endpoint',
+            },
+          ],
+        });
+
+        const restrictedApis = detectionsApi.withUser({
+          username: rulesAllPreviewIndexRole.name,
+          password: 'changeme',
+        });
+
+        const { body: createdRule } = await restrictedApis
+          .createRule({ body: ruleParams })
+          .expect(200);
+
+        expect(createdRule.exceptions_list).toHaveLength(1);
+        expect(createdRule.exceptions_list?.[0]).toMatchObject({
+          list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+          type: 'endpoint',
+        });
+
+        const { body: previewBody } = await restrictedApis
+          .rulePreview({
+            query: {},
+            body: {
+              ...ruleParams,
+              invocationCount: 1,
+              timeframeEnd: new Date().toISOString(),
+            },
+          })
+          .expect(200);
+
+        expect(previewBody.previewId).toBeDefined();
+        expect(previewBody.logs.length).toBeGreaterThan(0);
+        expect(previewBody.logs[0].duration).toBeGreaterThan(0);
+        expect(previewBody.logs[0].errors).toHaveLength(0);
       });
     });
   });

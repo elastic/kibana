@@ -30,6 +30,7 @@ export const getDiscoverSession = async (
       columns: tab.attributes.columns,
       grid: tab.attributes.grid,
       hideChart: tab.attributes.hideChart,
+      hideTable: tab.attributes.hideTable,
       isTextBasedQuery: tab.attributes.isTextBasedQuery,
       usesAdHocDataView: tab.attributes.usesAdHocDataView,
       serializedSearchSource: injectReferences(

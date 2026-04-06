@@ -273,7 +273,8 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins } = startServices;
+    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
+      startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -321,6 +322,15 @@ export class AgentBuilderPlugin
       },
       runtime: {
         createModelProvider: modelProviderFactory,
+      },
+      conversations: {
+        getScopedClient: async ({ request }) => {
+          const client = await conversations.getScopedClient({ request });
+          return {
+            get: client.get.bind(client),
+            list: client.list.bind(client),
+          };
+        },
       },
       sml: {
         indexAttachment: async (params) => {

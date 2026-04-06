@@ -23,6 +23,10 @@ exports.EcsCustomPropertyMappings = {
           id: {
             type: 'keyword',
           },
+          type: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           scheduled: {
             type: 'date',
           },
@@ -238,6 +242,9 @@ exports.EcsCustomPropertyMappings = {
                             ignore_above: 1024,
                           },
                         },
+                      },
+                      matched_indices_count: {
+                        type: 'long',
                       },
                       frozen_indices_queried_count: {
                         type: 'long',

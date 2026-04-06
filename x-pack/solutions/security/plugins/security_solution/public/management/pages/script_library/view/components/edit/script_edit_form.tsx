@@ -385,7 +385,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     );
 
     const onChangeDescription = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const description = e.target.value.trim();
         toggleHasEmptyDescription(!description);
         setHasFormChanged(true);
@@ -598,8 +598,9 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           }
           data-test-subj={getTestId('description-row')}
         >
-          <EuiFieldText
+          <EuiTextArea
             defaultValue={draftScript.description}
+            rows={3}
             onChange={onChangeDescription}
             data-test-subj={getTestId('description-input')}
           />

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCaseConfigure } from '../containers/configure/api';
 import { createCaseFromTemplateStepCommonDefinition } from '../../common/workflows/steps/create_case_from_template';
 import * as i18n from '../../common/workflows/translations';
+import { createPublicCaseStepDefinition } from './shared';
 
 const WORKFLOW_CASE_OWNER = 'securitySolution';
 
@@ -22,13 +21,8 @@ const getTemplatesForWorkflowOwner = async () => {
 };
 
 export const createCreateCaseFromTemplateStepDefinition = () =>
-  createPublicStepDefinition({
+  createPublicCaseStepDefinition({
     ...createCaseFromTemplateStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
     editorHandlers: {
       input: {
         case_template_id: {

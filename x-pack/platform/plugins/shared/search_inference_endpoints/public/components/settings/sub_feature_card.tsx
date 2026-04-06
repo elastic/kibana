@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiDragDropContext,
@@ -58,6 +59,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
   const listRef = useRef<HTMLDivElement>(null);
+  const { isTechPreview, isBeta } = feature;
 
   useEffect(() => {
     const el = listRef.current;
@@ -148,9 +150,33 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             min-inline-size: min(20rem, 50%);
           `}
         >
-          <EuiTitle size="s">
-            <h4>{feature.featureName}</h4>
-          </EuiTitle>
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h4>{feature.featureName}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isTechPreview || isBeta ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadgeGroup>
+                  {isTechPreview && (
+                    <EuiBadge>
+                      {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
+                        defaultMessage: 'Technical Preview',
+                      })}
+                    </EuiBadge>
+                  )}
+                  {isBeta && (
+                    <EuiBadge>
+                      {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
+                        defaultMessage: 'Beta',
+                      })}
+                    </EuiBadge>
+                  )}
+                </EuiBadgeGroup>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>{feature.featureDescription}</p>
