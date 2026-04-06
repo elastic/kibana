@@ -3990,6 +3990,196 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/sml/rule:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/sml/rule</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve all registered SML rules.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-sml-rule
+      parameters: []
+      responses: {}
+      summary: List all SML rules
+      tags:
+        - agent builder
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/sml/rule/{ruleId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/sml/rule/{ruleId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an SML rule by its unique identifier. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: delete-agent-builder-sml-rule-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the SML rule.
+          in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Delete an SML rule
+      tags:
+        - agent builder
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/sml/rule/{ruleId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a specific SML rule by its unique identifier.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-sml-rule-ruleid
+      parameters:
+        - description: The unique identifier of the SML rule.
+          in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Get an SML rule by ID
+      tags:
+        - agent builder
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/sml/rule/{ruleId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new SML rule or update an existing one. Rules define how Elasticsearch indices should be summarized by an LLM.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: post-agent-builder-sml-rule-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the SML rule.
+          in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                index_pattern:
+                  description: Elasticsearch index pattern this rule applies to.
+                  minLength: 1
+                  type: string
+                inference_id:
+                  description: ID of the configured chat completion inference endpoint.
+                  minLength: 1
+                  type: string
+                name:
+                  description: Display name for the rule.
+                  minLength: 1
+                  type: string
+                prompt:
+                  description: Prompt template. Use ${variables.<name>} syntax to reference defined variables.
+                  minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - index
+                  type: string
+                variables:
+                  additionalProperties:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          input:
+                            description: 'The index metadata endpoint to fetch. Supported values: _mapping, _settings, _field_caps.'
+                            enum:
+                              - _mapping
+                              - _settings
+                              - _field_caps
+                            type: string
+                          params:
+                            additionalProperties:
+                              type: string
+                            description: Optional parameters for the index metadata request.
+                            type: object
+                          type:
+                            enum:
+                              - index
+                            type: string
+                        required:
+                          - type
+                          - input
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          input:
+                            description: The ES|QL query to execute.
+                            minLength: 1
+                            type: string
+                          params:
+                            additionalProperties:
+                              type: string
+                            description: Optional parameters for the ES|QL query.
+                            type: object
+                          type:
+                            enum:
+                              - esql
+                            type: string
+                        required:
+                          - type
+                          - input
+                  description: Map of named variable definitions. Each variable has a type and input, and is referenced in the prompt via ${variables.<name>}.
+                  type: object
+              required:
+                - name
+                - type
+                - index_pattern
+                - inference_id
+                - prompt
+                - variables
+      responses: {}
+      summary: Create or update an SML rule
+      tags:
+        - agent builder
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/tools:
     get:
       description: |-
