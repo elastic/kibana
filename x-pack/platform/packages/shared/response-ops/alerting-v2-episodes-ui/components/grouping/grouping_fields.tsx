@@ -11,30 +11,20 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 export interface AlertEpisodeGroupingFieldsProps {
   /** Field names from the rule's grouping configuration */
   fields: string[];
-  data?: {
-    extracted_data?: Record<string, unknown>;
-  };
   'data-test-subj'?: string;
 }
 
 export function AlertEpisodeGroupingFields({
   fields,
-  data,
   'data-test-subj': dataTestSubj,
 }: AlertEpisodeGroupingFieldsProps) {
   return (
     <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj={dataTestSubj}>
-      {fields.map((field) => {
-        const fieldValue = data?.extracted_data?.[field];
-        return (
-          <EuiFlexItem grow={false} key={field}>
-            <EuiBadge color="hollow">
-              {field}
-              {fieldValue ? `:${fieldValue}` : ''}
-            </EuiBadge>
-          </EuiFlexItem>
-        );
-      })}
+      {fields.map((field) => (
+        <EuiFlexItem grow={false} key={field}>
+          <EuiBadge color="hollow">{field}</EuiBadge>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 }

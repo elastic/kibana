@@ -6,12 +6,12 @@
  */
 
 import { esql } from '@elastic/esql';
-import { buildActionsBaseQuery } from './actions_query';
+import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 
 export const buildGroupActionsQuery = (groupHashes: string[]) => {
   const groupHashLiterals = groupHashes.map((h) => esql.str(h));
   // prettier-ignore
-  return buildActionsBaseQuery()
+  return esql.from(ALERT_ACTIONS_DATA_STREAM)
     .where`group_hash IN (${groupHashLiterals})`
     .where`action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag")`
     .pipe`STATS

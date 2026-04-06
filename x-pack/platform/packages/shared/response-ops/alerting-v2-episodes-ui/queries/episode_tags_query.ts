@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TIME_FIELD } from '../constants';
-import { buildActionsBaseQuery } from './actions_query';
+import { esql } from '@elastic/esql';
+import { ALERT_ACTIONS_DATA_STREAM, TIME_FIELD } from '../constants';
 
 /**
  * ES|QL query returning the latest `.alert-actions` document for an episode (for tags).
  */
 export const buildEpisodeTagsEsqlQuery = (episodeId: string) => {
   // prettier-ignore
-  return buildActionsBaseQuery()
+  return esql.from(ALERT_ACTIONS_DATA_STREAM)
     .where`episode_id == ${episodeId}`
     .sort([TIME_FIELD, 'DESC'])
     .limit(1);

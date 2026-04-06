@@ -10,27 +10,19 @@ import { render, screen } from '@testing-library/react';
 import { AlertEpisodeGroupingFields } from './grouping_fields';
 
 describe('AlertEpisodeGroupingFields', () => {
-  it('renders hollow badges for each grouping field', () => {
-    render(<AlertEpisodeGroupingFields fields={['host.name', 'service.name']} />);
-    const host = screen.getByText('host.name');
-    const service = screen.getByText('service.name');
-    expect(host).toHaveAttribute('class', expect.stringContaining('euiBadge'));
-    expect(service).toHaveAttribute('class', expect.stringContaining('euiBadge'));
+  it('renders no badges when there are no fields', () => {
+    render(<AlertEpisodeGroupingFields fields={[]} />);
+    expect(screen.queryByText(/.+/)).not.toBeInTheDocument();
   });
 
-  it('renders no badges when there are no fields', () => {
-    const { container } = render(<AlertEpisodeGroupingFields fields={[]} />);
-    expect(container.querySelector('.euiFlexGroup')).toBeInTheDocument();
-    expect(container.querySelector('.euiBadge')).not.toBeInTheDocument();
+  it('renders field names as badges', () => {
+    render(<AlertEpisodeGroupingFields fields={['host.name', 'service.name']} />);
+    expect(screen.getByText('host.name')).toBeInTheDocument();
+    expect(screen.getByText('service.name')).toBeInTheDocument();
   });
 
   it('forwards data-test-subj to the badges row', () => {
     render(<AlertEpisodeGroupingFields fields={['a']} data-test-subj="groupingFieldsTest" />);
     expect(screen.getByTestId('groupingFieldsTest')).toBeInTheDocument();
-  });
-
-  it('forwards data-test-subj to the empty wrapper', () => {
-    render(<AlertEpisodeGroupingFields fields={[]} data-test-subj="groupingEmptyTest" />);
-    expect(screen.getByTestId('groupingEmptyTest')).toBeInTheDocument();
   });
 });

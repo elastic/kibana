@@ -6,13 +6,13 @@
  */
 
 import { esql } from '@elastic/esql';
-import { buildActionsBaseQuery } from './actions_query';
+import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 
 export const buildEpisodeActionsQuery = (episodeIds: string[]) => {
   const episodeIdLiterals = episodeIds.map((id) => esql.str(id));
 
   // prettier-ignore
-  return buildActionsBaseQuery()
+  return esql.from(ALERT_ACTIONS_DATA_STREAM)
     .where`episode_id IN (${episodeIdLiterals})`
     .where`action_type IN ("ack", "unack")`
     .pipe`STATS
