@@ -12,6 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { EventKind } from '../constants/event_kinds';
 import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
 import { useRuleDetails } from '../../../flyout/rule_details/hooks/use_rule_details';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
@@ -51,7 +52,7 @@ export const EditHighlightedFieldsButton: FC<EditHighlightedFieldsButtonProps> =
 }) => {
   const ruleId = useMemo(
     () =>
-      (getFieldValue(hit, EVENT_KIND) as string) === 'signal'
+      (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
         ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
         : (getFieldValue(hit, 'signal.rule.id') as string),
     [hit]

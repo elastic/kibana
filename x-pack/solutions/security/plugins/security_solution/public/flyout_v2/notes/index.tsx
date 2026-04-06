@@ -8,8 +8,12 @@
 import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiPanel } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { useTimelineConfig } from './hooks/use_timeline_config';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { State } from '../../common/store';
+import { timelineSelectors } from '../../timelines/store';
+import { TimelineId } from '../../../common/types';
 import {
   FETCH_NOTES_ERROR,
   NO_NOTES,
@@ -24,20 +28,20 @@ export interface NotesDetailsProps {
    * Document record used to fetch and associate notes and to derive the document type.
    */
   hit: DataTableRecord;
-  /**
-   * Whether the component is rendered inside the Timeline flyout.
-   * Controls whether the "attach to timeline" UI is shown.
-   */
-  isTimelineFlyout: boolean;
 }
 
 /**
  * List all the notes for a document id and allows to create new notes associated with that document.
  * Displayed in the document details expandable flyout left section.
  */
-export const NotesDetails = memo(({ hit, isTimelineFlyout }: NotesDetailsProps) => {
+export const NotesDetails = memo(({ hit }: NotesDetailsProps) => {
   const eventId = hit.raw._id ?? '';
-  const timelineConfig = useTimelineConfig(eventId, isTimelineFlyout);
+
+  const isTimelineOpen = useSelector(
+    (state: State) => timelineSelectors.selectTimelineById(state, TimelineId.active)?.show ?? false
+  );
+  const timelineConfig = useTimelineConfig(eventId, isTimelineOpen);
+
   const isInSecurityApp = useIsInSecurityApp();
 
   return (
