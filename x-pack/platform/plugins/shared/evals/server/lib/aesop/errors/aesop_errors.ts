@@ -395,15 +395,12 @@ export function withRetry<T>(fn: () => Promise<T>, options: WithRetryOptions): P
     if (operationTimeout !== undefined) {
       operationPromise = Promise.race([
         operationPromise,
-        new Promise<T>(
-          (_, reject) =>
-            setTimeout(
-              () =>
-                reject(
-                  new Error(`Operation '${operation}' timed out after ${operationTimeout}ms`)
-                ),
-              operationTimeout
-            )
+        new Promise<T>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(new Error(`Operation '${operation}' timed out after ${operationTimeout}ms`)),
+            operationTimeout
+          )
         ),
       ]);
     }

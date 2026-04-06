@@ -252,11 +252,7 @@ export const ProposedSkillsList = () => {
       name: 'Actions',
       width: '15%',
       render: (skill: ProposedSkill) => (
-        <EuiButton
-          size="s"
-          onClick={() => setSelectedSkill(skill)}
-          aria-label="Review"
-        >
+        <EuiButton size="s" onClick={() => setSelectedSkill(skill)} aria-label="Review">
           Review
         </EuiButton>
       ),

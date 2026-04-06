@@ -309,8 +309,7 @@ describe('ConversationAnalyzer', () => {
                       },
                     ],
                     response: {
-                      message:
-                        '```esql\nFROM logs-* | STATS count = COUNT(*) BY host.name\n```',
+                      message: '```esql\nFROM logs-* | STATS count = COUNT(*) BY host.name\n```',
                     },
                   },
                 ],

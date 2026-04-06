@@ -239,11 +239,7 @@ describe('POST /internal/aesop/exploration/run', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(mockInferAnalystRole).toHaveBeenCalledWith(
-        expect.anything(),
-        mockLogger,
-        'anonymous'
-      );
+      expect(mockInferAnalystRole).toHaveBeenCalledWith(expect.anything(), mockLogger, 'anonymous');
     });
 
     it('should pass discovered indices to calibrateSamplingStrategy', async () => {

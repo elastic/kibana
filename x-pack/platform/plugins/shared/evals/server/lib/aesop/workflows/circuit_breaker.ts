@@ -179,10 +179,13 @@ export class CircuitBreaker {
     this.updateCircuitState(circuit);
 
     if (circuit.state === CircuitState.OPEN) {
-      this.logger.warn(`[CircuitBreaker] Circuit breaker rejected execution for agent: ${agentName}`, {
-        agent: agentName,
-        state: circuit.state,
-      });
+      this.logger.warn(
+        `[CircuitBreaker] Circuit breaker rejected execution for agent: ${agentName}`,
+        {
+          agent: agentName,
+          state: circuit.state,
+        }
+      );
       const err = new Error('Circuit breaker is OPEN');
       (err as any).circuitOpen = true;
       throw err;
@@ -450,9 +453,7 @@ export class CircuitBreaker {
       agent: circuit.agentId,
       failures: circuit.consecutiveFailures,
       failureThreshold: this.options.failureThreshold,
-      recentErrors: circuit.failureHistory
-        .slice(-3)
-        .map((f) => f.error),
+      recentErrors: circuit.failureHistory.slice(-3).map((f) => f.error),
     });
   }
 

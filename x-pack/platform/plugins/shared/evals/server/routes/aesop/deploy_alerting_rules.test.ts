@@ -230,10 +230,7 @@ describe('Deploy Alerting Rules Route', () => {
 
       const request = httpServerMock.createKibanaRequest({
         body: {
-          rule_ids: [
-            'aesop.exploration.failure_rate_high',
-            'aesop.exploration.duration_excessive',
-          ],
+          rule_ids: ['aesop.exploration.failure_rate_high', 'aesop.exploration.duration_excessive'],
         },
       });
 

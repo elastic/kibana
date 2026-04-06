@@ -255,9 +255,7 @@ describe('APMInstrumentationService', () => {
         })
       );
 
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Metrics index created')
-      );
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Metrics index created'));
     });
 
     it('should skip creation if index already exists', async () => {

@@ -41,9 +41,7 @@ export function sanitizeIndexPattern(pattern: string): string {
 
   // Reject path traversal attempts
   if (/\.\.\//.test(pattern)) {
-    throw new Error(
-      `Invalid index pattern: "${pattern}" contains path traversal sequence.`
-    );
+    throw new Error(`Invalid index pattern: "${pattern}" contains path traversal sequence.`);
   }
 
   // Validate format (alphanumeric, dots, hyphens, asterisks, underscores only)

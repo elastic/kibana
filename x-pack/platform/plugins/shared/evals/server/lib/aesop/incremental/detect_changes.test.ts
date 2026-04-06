@@ -336,9 +336,7 @@ describe('ChangeDetector', () => {
 
       await detector.detectRemovedIndices(['logs-*'], previousState);
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('removed indices')
-      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('removed indices'));
     });
 
     it('should return empty array when no previous state', async () => {

@@ -316,11 +316,7 @@ export const ExplorationDashboard = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel>
-              <EuiStat
-                title={`${successRate}%`}
-                description="Success Rate"
-                titleColor="success"
-              />
+              <EuiStat title={`${successRate}%`} description="Success Rate" titleColor="success" />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -448,12 +444,16 @@ export const ExplorationDashboard = () => {
               {triggerExploration.isSuccess && (
                 <>
                   <EuiSpacer size="m" />
-                  <EuiCallOut title="Exploration started successfully" color="success" iconType="check">
+                  <EuiCallOut
+                    title="Exploration started successfully"
+                    color="success"
+                    iconType="check"
+                  >
                     <p>
                       Execution ID: {(triggerExploration.data as any).execution_id}
                       <br />
-                      The agent is autonomously discovering indices, inferring roles, and calibrating
-                      sampling. Monitor progress below.
+                      The agent is autonomously discovering indices, inferring roles, and
+                      calibrating sampling. Monitor progress below.
                     </p>
                   </EuiCallOut>
                 </>

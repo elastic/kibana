@@ -390,7 +390,9 @@ describe('WorkflowStateTracker', () => {
       await tracker.updateProgress('nonexistent', 1, 'step', 1, 10);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('[WorkflowStateTracker] Execution not found, cannot update progress')
+        expect.stringContaining(
+          '[WorkflowStateTracker] Execution not found, cannot update progress'
+        )
       );
       expect(mockEsClient.update).not.toHaveBeenCalled();
     });
