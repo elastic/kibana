@@ -145,7 +145,6 @@ describe('Gauge Schema', () => {
         query: 'FROM my-index | LIMIT 100',
       },
       metric: {
-        operation: 'value',
         column: 'score',
         sub_title: 'Performance',
       },
@@ -164,7 +163,6 @@ describe('Gauge Schema', () => {
       },
       title: 'Performance Gauge',
       metric: {
-        operation: 'value',
         column: 'score',
         title: { text: 'Score' },
         sub_title: 'with 80% target',
@@ -178,15 +176,12 @@ describe('Gauge Schema', () => {
         },
         ticks: { mode: 'bands' as const },
         min: {
-          operation: 'value',
           column: 'min',
         },
         max: {
-          operation: 'value',
           column: 'max',
         },
         goal: {
-          operation: 'value',
           column: 'goal',
         },
       },
@@ -209,10 +204,9 @@ describe('Gauge Schema', () => {
       },
       title: 'Performance Gauge',
       metric: {
-        operation: 'value',
         column: 'score',
+        // @ts-expect-error
         min: {
-          // @ts-expect-error
           operation: 'static',
           value: 5,
         },

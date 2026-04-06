@@ -14,6 +14,7 @@ export interface UsageStats {
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
   'securitySolution:alertTags': string;
+  'securitySolution:excludedGapReasons': string[];
   'securitySolution:detectionsCloseReasons': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
@@ -54,7 +55,7 @@ export interface UsageStats {
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
-  'agentBuilder:connectorsEnabled': boolean;
+
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:aiAgent:enabled': boolean;
@@ -197,5 +198,6 @@ export interface UsageStats {
   'observability:streamsEnableOverviewPage': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'securitySolution:entityStoreEnableV2': boolean;
+  'query_activity:minRunningTime': number;
   'elasticConsole:enabled': boolean;
 }
