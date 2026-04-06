@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertEpisodeStatus, AlertEvent } from '../../../resources/alert_events';
+import type { AlertEpisodeStatus, AlertEvent } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import type { LatestAlertEventState } from '../queries';
 

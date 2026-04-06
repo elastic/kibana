@@ -23,6 +23,7 @@ import {
 import { evaluate } from '../../src/evaluate';
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation/evaluators';
 import { createScenarioCriteriaLlmEvaluator } from '../../src/evaluators/scenario_criteria/evaluators';
+import { createCorrectnessEvaluators } from '../../src/evaluators/correctness/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -145,12 +146,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const query = extractionScenario?.input.log_query_filter ?? { match_all: {} };
-
+          const query = extractionScenario?.input.log_query_filter ?? [{ match_all: {} }];
           const searchResult = await esClient.search<Record<string, unknown>>({
             index: MANAGED_STREAM_SEARCH_PATTERN,
             size: SAMPLE_DOCS_SIZE,
-            query,
+            query: { bool: { filter: query } },
             sort: [{ '@timestamp': { order: 'desc' } }],
           });
 
@@ -190,11 +190,15 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             evaluators,
             esClient,
             inferenceClient,
+            evaluationConnector,
             logger,
             apiServices,
             traceEsClient,
             log,
           }) => {
+            const evaluatorInferenceClient = inferenceClient.bindTo({
+              connectorId: evaluationConnector.id,
+            });
             await executorClient.runExperiment(
               {
                 dataset: {
@@ -254,7 +258,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `[DEBUG] Tool usage: get_stream_features calls=${toolUsage.get_stream_features.calls}, failures=${toolUsage.get_stream_features.failures}; add_queries calls=${toolUsage.add_queries.calls}, failures=${toolUsage.add_queries.failures}; generated_queries=${queries.length}`
                   );
 
-                  return { queries, traceId: getCurrentTraceId() };
+                  return { queries, toolUsage, traceId: getCurrentTraceId() };
                 },
               },
               [
@@ -266,9 +270,38 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   },
                   logger
                 ),
+                ...createCorrectnessEvaluators({
+                  inferenceClient: evaluatorInferenceClient,
+                  log,
+                  extractContext: (input) => {
+                    const { stream_name: streamName, stream_description: streamDescription } =
+                      input as Record<string, unknown>;
+                    return `Generate significant event queries for stream "${streamName}": ${streamDescription}`;
+                  },
+                  extractResponse: (output) => {
+                    const queries = (output as Record<string, unknown>)?.queries as Array<{
+                      esql: string;
+                      title: string;
+                      category: string;
+                      severity_score: number;
+                    }>;
+                    if (!queries?.length) return '';
+                    return queries
+                      .map(
+                        (q) =>
+                          `[${q.category}] ${q.title} (severity: ${q.severity_score})\nES|QL: ${q.esql}`
+                      )
+                      .join('\n\n');
+                  },
+                  extractGroundTruth: (expected) => {
+                    const value = (expected as Record<string, unknown>)?.expected;
+                    return typeof value === 'string' ? value : '';
+                  },
+                }),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
+                evaluators.traceBasedEvaluators.toolCalls,
                 createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
               ]
             );

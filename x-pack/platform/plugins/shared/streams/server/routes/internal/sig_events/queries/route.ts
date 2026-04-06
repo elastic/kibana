@@ -13,10 +13,11 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { searchModeSchema } from '../../../utils/search_mode';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
-const requestParamsSchema = z.object({
+const baseRequestParamsSchema = z.object({
   from: dateFromString.describe('Start of the time range'),
   to: dateFromString.describe('End of the time range'),
   bucketSize: z.string().describe('Size of time buckets for aggregation'),
@@ -25,6 +26,10 @@ const requestParamsSchema = z.object({
     .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
     .optional()
     .describe('Stream names to filter significant events'),
+});
+
+const requestParamsSchema = baseRequestParamsSchema.extend({
+  searchMode: searchModeSchema,
 });
 
 export const getUnbackedQueriesCountRoute = createServerRoute({
@@ -123,6 +128,74 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
   },
 });
 
+export const demoteBackedQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_demote',
+  options: {
+    access: 'internal',
+    summary: 'Demote backed queries',
+    description:
+      'Removes Kibana rules for the provided stored significant-events queries and marks them as unbacked.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      queryIds: z.array(z.string()).min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ demoted: number }> => {
+    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const toDemote = await queryClient.getQueryLinks([], {
+      ruleUnbacked: 'exclude',
+      queryIds: params.body.queryIds,
+    });
+
+    const byStream = toDemote.reduce<Record<string, string[]>>((acc, link) => {
+      const stream = link.stream_name;
+
+      if (!acc[stream]) {
+        acc[stream] = [];
+      }
+
+      acc[stream].push(link.query.id);
+      return acc;
+    }, {});
+
+    const streamDefinitions = await streamsClient.listStreams();
+    const streamDefinitionsByName = new Map(
+      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    );
+
+    let demoted = 0;
+
+    for (const [streamName, queryIds] of Object.entries(byStream)) {
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping demotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await queryClient.demoteQueries(definition, queryIds);
+      demoted += result.demoted;
+    }
+
+    return { demoted };
+  },
+});
+
 const getDiscoveryQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
   params: z.object({
@@ -165,6 +238,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       page = 1,
       perPage = 10,
       status,
+      searchMode,
     } = params.query;
 
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
@@ -175,6 +249,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         query,
         streamNames,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
+        searchMode,
       },
       { queryClient, scopedClusterClient }
     );
@@ -188,10 +263,13 @@ const getDiscoveryQueriesRoute = createServerRoute({
   },
 });
 
+// Uses baseRequestParamsSchema (no searchMode) intentionally: the histogram
+// is an aggregate summary, not a list of individual queries. It always uses
+// the default search mode so occurrences reflect the best-available ranking.
 const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries/_occurrences',
   params: z.object({
-    query: requestParamsSchema,
+    query: baseRequestParamsSchema,
   }),
   options: {
     access: 'internal',
@@ -248,6 +326,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
+  ...demoteBackedQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
 };
