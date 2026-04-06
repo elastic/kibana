@@ -21,8 +21,6 @@ export const queryKeys = {
     timeRange?: { from: string; to: string } | null
   ) => [...queryKeys.all, 'list', pageSize, filterState, sortState, timeRange] as const,
   episodeEvents: (episodeId: string) => [...queryKeys.all, 'episode-events', episodeId] as const,
-  episodeTags: (episodeId: string) => [...queryKeys.all, 'episode-tags', episodeId] as const,
-  rule: (ruleId: string) => [...queryKeys.all, 'rule', ruleId] as const,
   relatedEpisodes: (ruleId: string, excludeEpisodeId: string, pageSize: number) =>
     [...queryKeys.all, 'related-episodes', ruleId, excludeEpisodeId, pageSize] as const,
 };
