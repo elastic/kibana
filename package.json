@@ -901,6 +901,7 @@
     "@kbn/profiling-plugin": "link:x-pack/solutions/observability/plugins/profiling",
     "@kbn/profiling-utils": "link:src/platform/packages/shared/kbn-profiling-utils",
     "@kbn/projects-solutions-groups": "link:src/platform/packages/private/kbn-projects-solutions-groups",
+    "@kbn/query-activity-plugin": "link:x-pack/platform/plugins/shared/query_activity",
     "@kbn/random-sampling": "link:x-pack/platform/packages/private/kbn-random-sampling",
     "@kbn/react-env": "link:src/platform/packages/shared/react/env",
     "@kbn/react-field": "link:src/platform/packages/shared/kbn-react-field",

@@ -8167,6 +8167,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/query-activity-plugin@link:x-pack/platform/plugins/shared/query_activity":
+  version "0.0.0"
+  uid ""
+
 "@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
   version "0.0.0"
   uid ""

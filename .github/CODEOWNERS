@@ -1155,6 +1155,7 @@ x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/osquery/cypress @elastic/security-defend-workflows
+x-pack/platform/plugins/shared/query_activity @elastic/kibana-management
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/actionable-obs-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-kibana
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
