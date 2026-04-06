@@ -15,6 +15,7 @@ export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
   name: 'dashboard-management',
   basePath: 'skills/platform/dashboard',
+  experimental: true,
   description:
     'Compose and update in-memory Kibana dashboards using ordered operations, visualization attachments, and inline visualization editing.',
   content: `## When to Use This Skill
@@ -59,7 +60,8 @@ For an existing dashboard:
 - Reuse \`data.dashboardAttachment.id\` from the latest dashboard tool result as \`dashboardAttachmentId\`.
 - Use \`remove_panels\` to remove existing panels by \`uid\`.
 - Use \`create_visualization_panels\` to add new Lens visualization panels inline.
-- Use \`edit_visualization_panels\` to change existing Lens visualization panels in place by \`panelId\`.
+- Use \`edit_visualization_panels\` only to change existing ES|QL-backed Lens visualization panels in place by \`panelId\`.
+- If a requested change targets a DSL, form-based, or other non-ES|QL panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
 - Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
 - Use \`add_panels_from_attachments\` to add existing standalone visualization attachments.
 - Use \`add_section\` or \`remove_section\` for section changes.
@@ -71,7 +73,7 @@ Supported operations:
 - \`add_panels_from_attachments\`: add panels from visualization attachments, each with explicit \`grid\` coordinates and an optional \`sectionId\`.
 - \`create_visualization_panels\`: create Lens visualization panels inline from natural language, with optional \`chartType\`, \`index\`, and \`esql\`.
 - Batch multiple panel creations into the same \`create_visualization_panels\` operation whenever they can be planned together, even when they target different \`sectionId\` values.
-- \`edit_visualization_panels\`: update existing Lens visualization panels by \`panelId\`, preserving their current placement.
+- \`edit_visualization_panels\`: update existing ES|QL-backed Lens visualization panels by \`panelId\`, preserving their current placement.
 - \`update_panel_layouts\`: resize, reposition, or move existing panels by \`panelId\` by updating \`grid\` and optionally changing \`sectionId\`.
 - \`add_section\`: create a new section with its own \`grid.y\`, and optionally create that section's initial inline Lens visualization panels with \`panels\`. Those nested panel grids are section-relative and do not need a \`sectionId\`.
 - \`remove_section\`: remove a section by \`uid\` with \`panelAction: "promote" | "delete"\`.
@@ -102,7 +104,10 @@ ${gridLayoutPrompt}
 - If a visualization attachment is missing or cannot be resolved, do not invent a replacement attachment ID. Call the tool only with valid attachment IDs and report unresolved attachments clearly.
 - If the user asks to update a dashboard but the latest \`dashboardAttachmentId\` is not available in conversation context, ask which dashboard they mean or offer to create a new one.
 - Use \`update_panel_layouts\` when the user wants to resize, reposition, or move panels without changing panel content.
-- If a user wants to change a dashboard panel's visualization semantics, prefer \`edit_visualization_panels\` over removing and re-adding the panel.
+- If a user wants to change a dashboard panel's visualization semantics, prefer \`edit_visualization_panels\` over removing and re-adding the panel, but only for ES|QL-backed Lens panels.
+- Attached dashboards can include DSL-based, form-based, or other non-ES|QL panels. Do not attempt to edit those panels directly.
+- If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
+- Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before calling \`remove_panels\`, \`create_visualization_panels\`, or any other replacement operations.
 - If the tool returns partial failures, explain which attachments failed and include the reported error for each one.
 `,
   getInlineTools: () => [manageDashboardTool()],
