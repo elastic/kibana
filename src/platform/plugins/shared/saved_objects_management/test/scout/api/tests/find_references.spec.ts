@@ -21,7 +21,7 @@ apiTest.describe(
     let adminCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-      adminCredentials = await requestAuth.getAdminApiKey();
+      adminCredentials = await requestAuth.getApiKey('admin');
       await kbnClient.savedObjects.cleanStandardList();
       await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
       await kbnClient.importExport.load(KBN_ARCHIVES.REFERENCES);

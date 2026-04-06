@@ -21,7 +21,7 @@ apiTest.describe('_bulk_delete', { tag: tags.deploymentAgnostic }, () => {
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    adminCredentials = await requestAuth.getAdminApiKey();
+    adminCredentials = await requestAuth.getApiKey('admin');
   });
 
   apiTest.beforeEach(async ({ kbnClient }) => {

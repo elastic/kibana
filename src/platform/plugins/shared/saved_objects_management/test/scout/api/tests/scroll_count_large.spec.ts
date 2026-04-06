@@ -38,7 +38,7 @@ apiTest.describe('scroll_count - more than 10k objects', { tag: tags.deploymentA
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
-    adminCredentials = await requestAuth.getAdminApiKey();
+    adminCredentials = await requestAuth.getApiKey('admin');
     await kbnClient.savedObjects.cleanStandardList();
 
     for (const [start, end] of [

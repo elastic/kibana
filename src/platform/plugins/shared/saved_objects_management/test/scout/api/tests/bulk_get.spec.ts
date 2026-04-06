@@ -21,7 +21,7 @@ apiTest.describe('_bulk_get', { tag: tags.deploymentAgnostic }, () => {
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    adminCredentials = await requestAuth.getAdminApiKey();
+    adminCredentials = await requestAuth.getApiKey('admin');
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 

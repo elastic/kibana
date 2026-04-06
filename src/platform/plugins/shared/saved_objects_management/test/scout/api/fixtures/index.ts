@@ -7,44 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestAuthFixture, RoleApiCredentials } from '@kbn/scout';
-import { apiTest as base } from '@kbn/scout';
-
-export interface SomRequestAuthFixture extends RequestAuthFixture {
-  getAdminApiKey: () => Promise<RoleApiCredentials>;
-}
-
-export interface SomApiFixtures {
-  requestAuth: SomRequestAuthFixture;
-}
-
-export const apiTest = base.extend<SomApiFixtures>({
-  requestAuth: async ({ requestAuth }, use) => {
-    const getAdminApiKey = async (): Promise<RoleApiCredentials> => {
-      return await requestAuth.getApiKeyForCustomRole({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-        },
-        kibana: [
-          {
-            base: [],
-            feature: {
-              savedObjectsManagement: ['all'],
-            },
-            spaces: ['*'],
-          },
-        ],
-      });
-    };
-
-    const extendedRequestAuth: SomRequestAuthFixture = {
-      ...requestAuth,
-      getAdminApiKey,
-    };
-
-    await use(extendedRequestAuth);
-  },
-});
-
+export { apiTest } from '@kbn/scout';
 export * as testData from './constants';
