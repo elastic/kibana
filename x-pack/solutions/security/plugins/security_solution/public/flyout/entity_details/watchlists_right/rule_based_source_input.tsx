@@ -35,10 +35,6 @@ import {
   WATCHLIST_INDEX_PATTERN_PLACEHOLDER,
 } from './translations';
 
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
-
 const DEBOUNCE_OPTIONS = { wait: 300 };
 
 interface FilterQueryRowProps {

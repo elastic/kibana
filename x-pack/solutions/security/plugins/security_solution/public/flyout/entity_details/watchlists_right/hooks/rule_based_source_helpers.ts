@@ -9,10 +9,6 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 /** A single entity source entry from the entitySources array. */
 export type EntitySourceInput = NonNullable<
   CreateWatchlistRequestBodyInput['entitySources']
@@ -36,10 +32,6 @@ export interface InitialByType {
   index: EntitySourceInput | undefined;
 }
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 export const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
 
 /** Real ES field names used as the identifier field for index-type sources. */
@@ -50,10 +42,6 @@ export const ENTITY_FIELD_OPTIONS = [
   { value: 'host.id', inputDisplay: 'host.id' },
   { value: 'user.email', inputDisplay: 'user.email' },
 ];
-
-// ---------------------------------------------------------------------------
-// Pure helpers
-// ---------------------------------------------------------------------------
 
 export const toggleToType = (id: ToggleId): SourceType =>
   id === 'entityStore' ? 'store' : 'index';
@@ -75,8 +63,6 @@ export const stateFromSource = (s?: EntitySourceInput): PerTypeState => ({
   entityField: s?.identifierField ?? '',
   dirty: Boolean(s),
 });
-
-// --- Source builders (form state → API payload) ---
 
 export const buildStoreSource = (
   state: PerTypeState,
@@ -104,8 +90,6 @@ export const buildIndexSource = (state: PerTypeState, watchlistName: string): En
 
 const buildSource = (type: SourceType, state: PerTypeState, name: string): EntitySourceInput =>
   type === 'store' ? buildStoreSource(state, name) : buildIndexSource(state, name);
-
-// --- Composite helpers used by the hook ---
 
 /**
  * Split an initial entity-sources array into { store, index } by type.
@@ -159,8 +143,6 @@ export const buildEntitySources = (
   }
   return sources.length > 0 ? sources : undefined;
 };
-
-// --- Toggle button config ---
 
 export const getToggleButtons = (
   isEditMode: boolean,

@@ -92,7 +92,7 @@ export const useRuleBasedSourceState = ({
     [byType, activeToggle, isManaged, watchlistName, onFieldChange]
   );
 
-  // --- Public handlers ---
+
 
   const onToggleChange = useCallback(
     (id: string) => {
