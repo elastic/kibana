@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID, LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
 import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
