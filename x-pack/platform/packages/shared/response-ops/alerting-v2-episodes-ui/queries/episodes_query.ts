@@ -7,8 +7,7 @@
 
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
-import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
-import { buildAlertEventsBaseQuery } from './alert_events_query';
+import { ALERT_EVENTS_DATA_STREAM, PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 
 export interface EpisodesFilterState {
   /** Single episode status (inactive | pending | active | recovering) or null for All */
@@ -54,7 +53,7 @@ const addQueryStringFilter = (query: ComposerQuery, search: string) => {
  * the alerting-events data stream.
  */
 export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
-  const query = buildAlertEventsBaseQuery();
+  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`;
 
   if (search) {
     // The query string must be applied before EVALs and aggregations

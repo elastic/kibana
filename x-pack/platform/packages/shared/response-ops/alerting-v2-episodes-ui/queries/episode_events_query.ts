@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TIME_FIELD } from '../constants';
-import { buildAlertEventsBaseQuery } from './alert_events_query';
+import { esql } from '@elastic/esql';
+import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
 
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
 export const buildEpisodeEventsEsqlQuery = (episodeId: string) => {
   // prettier-ignore
-  return buildAlertEventsBaseQuery()
+  return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
     .where`episode.id == ${episodeId}`
     .sort([TIME_FIELD, 'ASC']);
 };

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { TIME_FIELD } from '../constants';
+import { esql } from '@elastic/esql';
+import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
 import { addEpisodeAggregation } from './episodes_query';
-import { buildAlertEventsBaseQuery } from './alert_events_query';
 
 /**
  * ES|QL query listing alert episodes for a rule, excluding one episode id.
  * Temporarily limited to 5 episodes.
  */
 export const buildRelatedAlertEpisodesEsqlQuery = (ruleId: string, excludeEpisodeId: string) => {
-  const query = buildAlertEventsBaseQuery()
+  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
     .where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
 
   addEpisodeAggregation(query);
